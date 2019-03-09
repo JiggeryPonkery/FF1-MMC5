@@ -1,0 +1,31 @@
+#VAR(dialogue, TABLE) 
+#ADDTBL("table_dte.tbl", dialogue) 
+#ACTIVETBL(dialogue)
+
+// 24 across for dialogue boxes and 7-8 lines down
+// 28 long for menu blurbs
+
+//#FIXEDLENGTH(C2, 0) 
+#JMP($0000)
+
+// use [END] to end a string
+// use [ENTER] for next line
+
+//The world is veiled in darkness.[ENTER]
+//The wind stops, the sea is wild,[ENTER]
+//  and the earth begins to rot.[ENTER]
+//       The people wait, [ENTER]
+// their only hope, a prophecy...[ENTER]
+//[ENTER]
+//"When the world is in darkness[ENTER]
+//Four Warriors will come...'[ENTER]
+//[ENTER]
+//After a long journey, four[ENTER]
+//  young warriors arrive.[ENTER]
+//   each holding an ORB.[END]
+
+// Lines after this will be sent to SCRIPT.BIN
+
+Battle Item[END]
+
+
