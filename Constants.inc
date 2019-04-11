@@ -24,6 +24,9 @@ CHAN_SQ3          = CHAN_START + (3 * CHAN_BYTES)
 CHAN_SQ4          = CHAN_START + (4 * CHAN_BYTES)
 CHAN_STOP         = CHAN_START + (5 * CHAN_BYTES)
 
+
+
+
 ;;;;;;;;;;;;;;;;;;
 ;; ch_stat locations in save games
 
@@ -89,26 +92,6 @@ MAGDATA_UNUSED       = $07
 ;;  banks to swap to for different things
 ;;
 
-BANK_TALKTOOBJ    = $10
-BANK_MENUS        = $0E
-BANK_TITLE        = $0F ;0E
-BANK_INTRO        = $0F ;0E
-BANK_PARTYGEN     = $0E
-BANK_MUSIC        = $0D
-BANK_EQUIPSTATS   = $0C
-BANK_BTLPALETTES  = $0C
-BANK_BATTLE       = $0B
-BANK_BTLDATA      = $0B
-BANK_DOMAINS      = $0B
-BANK_ENEMYNAMES   = $0B
-BANK_BTLMESSAGES  = $0A ;0B 
-BANK_MINIMAP      = $09
-BANK_MENUCHR      = $09
-BANK_BATTLECHR    = $07
-BANK_STANDARDMAPS = $04   ; used with ORA, so low 2 bits of bank number must be clear
-BANK_TILESETCHR   = $03
-BANK_MAPCHR       = $02
-BANK_OWMAP        = $01
 BANK_OBJINFO      = $00
 BANK_MAPMANPAL    = $00
 BANK_OWINFO       = $00
@@ -117,24 +100,52 @@ BANK_TREASURE     = $00
 BANK_TELEPORTINFO = $00
 BANK_STARTUPINFO  = $00
 BANK_STARTINGSTATS= $00
-
-BANK_ORBCHR       = $0D
-BANK_BTLCHR       = $09
 BANK_BACKDROPPAL  = $00
 
-BANK_ITEMPRICES   = $0A ; JIGS - originally $0D
-BANK_MINIGAME     = $0D
-BANK_BRIDGESCENE  = $0D
-BANK_ENDINGSCENE  = $0D
-BANK_INTROTEXT    = $0D
+BANK_OWMAP        = $01
 
+BANK_MAPCHR       = $02
+
+BANK_TILESETCHR   = $03
+
+BANK_STANDARDMAPS = $04   ; used with ORA, so low 2 bits of bank number must be clear
+
+BANK_BATTLECHR    = $07
+
+BANK_MINIMAP      = $09
+BANK_MENUCHR      = $09
+BANK_BTLCHR       = $09
+
+BANK_BTLMESSAGES  = $0A
+BANK_ITEMS        = $0A 
+BANK_ITEMPRICES   = $0A 
+
+BANK_BATTLE       = $0B
+BANK_BTLDATA      = $0B
+BANK_DOMAINS      = $0B
+BANK_ENEMYNAMES   = $0B
 BANK_BRIDGEGFX    = $0B
 BANK_EPILOGUEGFX  = $0B
 
-BANK_DIALOGUE     = $10 ; JIGS - originally $0A
-BANK_ITEMS        = $0A ; JIGS - originally (why must it be shared?) BANK_DIALOGUE  ; must be shared
+BANK_BTLPALETTES  = $0C
 
+BANK_MUSIC        = $0D
+BANK_ORBCHR       = $0D
+BANK_MINIGAME     = $0D
+BANK_BRIDGESCENE  = $0D
+BANK_ENDINGSCENE  = $0D
+
+BANK_MENUS        = $0E
+BANK_PARTYGEN     = $0E
+
+BANK_TITLE        = $0F
+BANK_INTRO        = $0F
 BANK_Z            = $0F
+
+BANK_TALKTOOBJ    = $10
+BANK_DIALOGUE     = $10 
+
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Special Standard Map tile IDs
@@ -162,58 +173,6 @@ BTL_GARLAND        = $7F
 
 ;;;;;;;;;;;;;;;;;;
 ;;  battle message IDs  (1-based)
-
-;BTLMSG_HPUP             = $01
-;BTLMSG_ASLEEP           = $04
-
-;BTLMSG_SIGHTRECOVERED   = $06   ; is this ever used?
-;BTLMSG_SILENCED         = $07
-
-;BTLMSG_DARKNESS         = $09
-
-;BTLMSG_NEUTRALIZED      = $0E
-
-;BTLMSG_BREAKSILENCE     = $11   ; is this ever used??
-
-;BTLMSG_CONFUSED         = $13
-;BTLMSG_POISONED         = $14
-
-;BTLMSG_PARALYZED_A      = $17
-
-;BTLMSG_BROKENTOPIECES   = $1A
-
-;BTLMSG_SLAIN            = $20
-;BTLMSG_INEFFECTIVE      = $21
-;BTLMSG_STRIKEFIRST      = $22
-;BTLMSG_SURPRISED        = $23
-;BTLMSG_CANTRUN          = $24
-;BTLMSG_RUNAWAY          = $25
-;BTLMSG_CLOSECALL        = $26
-;BTLMSG_WOKEUP           = $27
-;BTLMSG_SLEEPING         = $28
-;BTLMSG_CURED            = $29
-;BTLMSG_PARALYZED_B      = $2A
-;BTLMSG_HITS             = $2B
-;BTLMSG_CRITICALHIT      = $2C
-
-;BTLMSG_DMG              = $2E
-;BTLMSG_STOPPED          = $2F
-
-;BTLMSG_STR              = $33
-;BTLMSG_AGI              = $34
-;BTLMSG_INT              = $35
-;BTLMSG_VIT              = $36
-;BTLMSG_LUCK             = $37
-;BTLMSG_UP               = $38
-
-;BTLMSG_TERMINATED       = $3F
-;BTLMSG_MISSED           = $40
-
-;BTLMSG_INEFFECTIVENOW   = $4A
-
-;BTLMSG_NOTHINGHAPPENS   = $4E
-
-;; JIGS - this list was unfinished. The full range of options are:
 
 BTLMSG_HPUP             = $01 ; HP up!
 BTLMSG_ARMORUP          = $02 ; Armor up
@@ -271,8 +230,8 @@ BTLMSG_INT              = $35 ; Int.
 BTLMSG_VIT              = $36 ; Vit.
 BTLMSG_LUCK             = $37 ; Luck
 BTLMSG_UP               = $38 ;  up
-BTLMSG_BLANK1           = $39 ; 
-BTLMSG_BLANK2           = $3A ; 
+BTLMSG_ETHER            = $39 ; MP restored! - JIGS added
+BTLMSG_ELIXIR           = $3A ; HP and MP restored! - JIGS added
 BTLMSG_DOWN             = $3B ; down
 BTLMSG_PERISHED         = $3C ; perished
 BTLMSG_MONSTERS         = $3D ; Monsters_
@@ -294,9 +253,14 @@ BTLMSG_GOMAD            = $4C ; Go mad
 BTLMSG_POISONSMOKE      = $4D ; Poison smoke
 BTLMSG_NOTHINGHAPPENS   = $4E ; Nothing happens
 ; JIGS - adding these:
-BTLMSG_BLANK3           = $4F ; 
+BTLMSG_LIFE             = $4F ; Revived from the brink!
 BTLMSG_REGEN            = $50 ; Regenerated HP ;; JIGS - added this
 BTLMSG_STOLEGOLD        = $51 ; Stole gold! ;; JIGS - added this
+BTLMSG_HIDING           = $52 ; Slipped into hiding... 
+BTLMSG_CANTHIDE         = $53 ; Can't see to hide!
+BTLMSG_ALREADYHIDING    = $54 ; Already hidden!
+BTLMSG_EYEDROPS         = $55 ; Sight restored!
+BTLMSG_WAKEUPBELL       = $56 ; The bell rings loudly...
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
@@ -477,12 +441,289 @@ CLS_WW  = $0A
 CLS_BW  = $0B
 
 
+;;;;;;;;;;;;;;;;;
+;; Item offsets
+
+ITEM_KEYITEMSTART = $10
+ITEM_MAGICSTART   = $30
+CHESTGOLDSTART    = $70
+ITEM_CLASSSTART   = $C0
+
+WEAPONSTART       = $0
+ARMORSTART        = $40
+
+
+;;;;;;;;;;;;;;;;;;
+;;  Items
+
+HEAL           = $01
+X_HEAL         = $02
+ETHER          = $03
+ELIXIR         = $04
+PURE           = $05
+SOFT           = $06
+PHOENIXDOWN    = $07
+TENT           = $08
+CABIN          = $09
+HOUSE          = $0A
+EYEDROPS       = $0B
+SMOKEBOMB      = $0C
+WAKEUPBELL     = $0D
+
+SMOKEBOMB_EFFECT  = $32 ; 50 steps
+BTL_HEAL_POTENCY  = $10 ; 16
+BTL_XHEAL_POTENCY = $60 ; 96
+HEAL_POTENCY      = $1E ; 30
+XHEAL_POTENCY     = $B4 ; 180
+
+LUTE           = $10
+CROWN          = $11
+CRYSTAL        = $12
+HERB           = $13
+KEY            = $14
+TNT            = $15
+ADAMANT        = $16
+SLAB           = $17
+RUBY           = $18
+ROD            = $19
+FLOATER        = $1A
+CHIME          = $1B
+TAIL           = $1C
+CUBE           = $1D
+BOTTLE         = $1E
+OXYALE         = $1F
+CANOE          = $20
+
+FIREORB        = $2C
+WATERORB       = $2D
+AIRORB         = $2E
+EARTHORB       = $2F
+
+
+;;;;;;;;;;;;;;;;;;
+;;  weapons and armor
+
+WEP1 = $00   ; Wooden Nunchuck
+WEP2 = $01   ; Small Knife
+WEP3 = $02   ; Wooden Staff
+WEP4 = $03   ; Rapier
+WEP5 = $04   ; Iron Hammer
+WEP6 = $05   ; Short Sword
+WEP7 = $06   ; Hand Axe
+WEP8 = $07   ; Scimitar
+WEP9 = $08   ; Iron Nunchucks
+WEP10 = $09  ; Large Knife
+WEP11 = $0A  ; Iron Staff
+WEP12 = $0B  ; Sabre
+WEP13 = $0C  ; Long Sword
+WEP14 = $0D  ; Great Axe
+WEP15 = $0E  ; Falchion
+WEP16 = $0F  ; Silver Knife
+WEP17 = $10  ; Silver Sword
+WEP18 = $11  ; Silver Hammer
+WEP19 = $12  ; Silver Axe
+WEP20 = $13  ; Flame Sword
+WEP21 = $14  ; Ice Sword
+WEP22 = $15  ; Dragon Sword
+WEP23 = $16  ; Giant Sword
+WEP24 = $17  ; Sun Sword
+WEP25 = $18  ; Coral Sword
+WEP26 = $19  ; Were Sword
+WEP27 = $1A  ; Rune Sword
+WEP28 = $1B  ; Power Staff
+WEP29 = $1C  ; Light Axe
+WEP30 = $1D  ; Heal Staff
+WEP31 = $1E  ; Mage Staff
+WEP32 = $1F  ; Defense Sword
+WEP33 = $20  ; Wizard Staff
+WEP34 = $21  ; Vorpal Sword
+WEP35 = $22  ; CatClaw
+WEP36 = $23  ; Thor Hammer
+WEP37 = $24  ; Bane Sword
+WEP38 = $25  ; Katana
+WEP39 = $26  ; Excalibur
+WEP40 = $27  ; Masamune
+WEP41 = $28
+WEP42 = $29
+WEP43 = $2A
+WEP44 = $2B
+WEP45 = $2C
+WEP46 = $2D
+WEP47 = $2E
+WEP48 = $2F
+WEP49 = $30
+WEP50 = $31
+WEP51 = $32
+WEP52 = $33
+WEP53 = $34
+WEP54 = $35
+WEP55 = $36
+WEP56 = $37
+WEP57 = $38
+WEP58 = $39
+WEP59 = $3A
+WEP60 = $3B
+WEP61 = $3C
+WEP62 = $3D
+WEP63 = $3E
+WEP64 = $3F
+
+ARM1 = $40   ; Cloth T
+ARM2 = $41   ; Wooden Armor
+ARM3 = $42   ; Chain Armor
+ARM4 = $43   ; Iron Armor
+ARM5 = $44   ; Steel Armor
+ARM6 = $45   ; Silver Armor
+ARM7 = $46   ; Flame Armor
+ARM8 = $47   ; Ice Armor
+ARM9 = $48   ; Opal Armor
+ARM10 = $49  ; Dragon Armor
+ARM11 = $4A  ; Copper Q
+ARM12 = $4B  ; Silver Q
+ARM13 = $4C  ; Gold Q
+ARM14 = $4D  ; Opal Q
+ARM15 = $4E  ; White T
+ARM16 = $4F  ; Black T
+ARM17 = $50  ; Wooden Shield
+ARM18 = $51  ; Iron Shield
+ARM19 = $52  ; Silver Shield
+ARM20 = $53  ; Flame Shield
+ARM21 = $54  ; Ice Shield
+ARM22 = $55  ; Opal Shield
+ARM23 = $56  ; Aegis Shield
+ARM24 = $57  ; Buckler
+ARM25 = $58  ; Protect Cape
+ARM26 = $59  ; Cap
+ARM27 = $5A  ; Wooden Helm
+ARM28 = $5B  ; Iron Helm
+ARM29 = $5C  ; Silver Helm
+ARM30 = $5D  ; Opal Helm
+ARM31 = $5E  ; Heal Helm
+ARM32 = $5F  ; Ribbon
+ARM33 = $60  ; Gloves
+ARM34 = $61  ; Copper Gauntlet
+ARM35 = $62  ; Iron Gauntlet
+ARM36 = $63  ; Silver Gauntlet
+ARM37 = $64  ; Zeus Gauntlet
+ARM38 = $65  ; Power Gauntlet
+ARM39 = $66  ; Opal Gauntlet
+ARM40 = $67  ; Protect Ring
+ARM41 = $68  
+ARM42 = $69  
+ARM43 = $6A  
+ARM44 = $6B  
+ARM45 = $6C  
+ARM46 = $6D  
+ARM47 = $6E  
+ARM48 = $6F  
+ARM49 = $70  
+ARM50 = $71  
+ARM51 = $72  
+ARM52 = $73  
+ARM53 = $74  
+ARM54 = $75  
+ARM55 = $76  
+ARM56 = $77  
+ARM57 = $78  
+ARM58 = $79  
+ARM59 = $7A  
+ARM60 = $7B  
+ARM61 = $7C  
+ARM62 = $7D  
+ARM63 = $7E  
+ARM64 = $7F  
+
+
+;;;;;;;;;;;;;;;;;;
+;; gold in chests
+
+GOLD1  = $70
+GOLD2  = $71
+GOLD3  = $72
+GOLD4  = $73
+GOLD5  = $74
+GOLD6  = $75
+GOLD7  = $76
+GOLD8  = $77
+GOLD9  = $78
+GOLD10 = $79
+GOLD11 = $7A
+GOLD12 = $7B
+GOLD13 = $7C
+GOLD14 = $7D
+GOLD15 = $7E
+GOLD16 = $7F
+GOLD17 = $80
+GOLD18 = $81
+GOLD19 = $82
+GOLD20 = $83
+GOLD21 = $84
+GOLD22 = $85
+GOLD23 = $86
+GOLD24 = $87
+GOLD25 = $88
+GOLD26 = $89
+GOLD27 = $8A
+GOLD28 = $8B
+GOLD29 = $8C
+GOLD30 = $8D
+GOLD31 = $8E
+GOLD32 = $8F
+GOLD33 = $90
+GOLD34 = $91
+GOLD35 = $92
+GOLD36 = $93
+GOLD37 = $94
+GOLD38 = $95
+GOLD39 = $96
+GOLD40 = $97
+GOLD41 = $98
+GOLD42 = $99
+GOLD43 = $9A
+GOLD44 = $9B
+GOLD45 = $9C
+GOLD46 = $9D
+GOLD47 = $9E
+GOLD48 = $9F
+GOLD49 = $A0
+GOLD50 = $A1
+GOLD51 = $A2
+GOLD52 = $A3
+GOLD53 = $A4
+GOLD54 = $A5
+GOLD55 = $A6
+GOLD56 = $A7
+GOLD57 = $A8
+GOLD58 = $A9
+GOLD59 = $AA
+GOLD60 = $AB
+GOLD61 = $AC
+GOLD62 = $AD
+GOLD63 = $AE
+GOLD64 = $AF
+GOLD65 = $B0
+GOLD66 = $B1
+GOLD67 = $B2
+GOLD68 = $B3
+GOLD69 = $B4
+GOLD70 = $B5
+GOLD71 = $B6
+GOLD72 = $B7
+GOLD73 = $B8
+GOLD74 = $B9
+GOLD75 = $BA
+GOLD76 = $BB
+GOLD77 = $BC
+GOLD78 = $BD
+GOLD79 = $BE
+GOLD80 = $BF
+
 
 
 ;;;;;;;;;;;;;;;;;;
 ;;  magic spells
 
-MG_START = $B0
+MG_START = $30
   MG_CURE = MG_START + $00
   MG_HARM = MG_START + $01
   MG_FOG  = MG_START + $02
@@ -551,58 +792,14 @@ MG_START = $B0
 
 ;; labels that couldn't be inserted in data
 
-lut_MapObjects     = $B400   ; BANK_OBJINFO -- must be on page
-lut_MapObjGfx      = $AE00   ; BANK_OBJINFO
+
 lut_MapObjCHR      = $A200   ; BANK_MAPCHR
 
-lut_MapmanPalettes = $83A0   ; BANK_MAPMANPAL
 lut_OWPtrTbl       = $8000   ; BANK_OWMAP
 lut_SMPtrTbl       = $8000   ; BANK_STANDARDMAPS
-lut_EnemyAttack    = $8000   ; original $B600   ; BANK_ITEMS
-lut_ItemNamePtrTbl = $8100   ; original $B700   ; BANK_ITEMS
-;; JIGS - Moved dialogue out of the start of this bank to its own bank.
-
 lut_Domains        = $8000   ; BANK_DOMAINS -- MUST be on page boundary
-
-;lut_ShopCHR        = $8000   ; BANK_MENUCHR
-;; JIGS - this is defined in Bank 09
-
-lut_BtlBackdrops   = $B300   ; BANK_OWINFO
-
-;lut_OrbCHR         = $B600   ; BANK_ORBCHR
-;; JIGS - this is defined in Bank D
 lut_BatSprCHR      = $9000   ; BANK_BTLCHR -- page
 lut_BatObjCHR      = $A800   ; BANK_BTLCHR -- page
-
-lut_BackdropPal    = $B200   ; BANK_BACKDROPPAL
-
-;lut_ItemPrices     = $BC00   ; BANK_ITEMPRICES - page -- ;; JIGS in Bank 0A now
-
-lut_Weapons        = $8000   ; BANK_EQUIPSTATS - page
-lut_Armor          = $8140   ; BANK_EQUIPSTATS
-lut_OWTileset      = $8000   ; BANK_OWINFO - page
-
 lut_DialoguePtrTbl = $8000   ; BANK_DIALOGUE
 
-lut_SMTilesetAttr  = $8400   ; BANK_SMINFO - must be on $400 byte bound
-lut_SMTilesetProp  = $8800   ; BANK_SMINFO - page
-lut_SMTilesetTSA   = $9000   ; BANK_SMINFO - page
-lut_SMPalettes     = $A000   ; BANK_SMINFO - $1000 byte bound
 
-lut_Treasure       = $B100   ; BANK_TREASURE
-
-lut_Tilesets       = $ACC0   ; BANK_TELEPORTINFO
-lut_NormTele_X     = $AD00   ; BANK_TELEPORTINFO
-lut_NormTele_Y     = $AD40   ; BANK_TELEPORTINFO
-lut_NormTele_Map   = $AD80   ; BANK_TELEPORTINFO
-lut_ExitTele_X     = $AC60   ; BANK_TELEPORTINFO
-lut_ExitTele_Y     = $AC70   ; BANK_TELEPORTINFO
-lut_EntrTele_X     = $AC00   ; BANK_TELEPORTINFO
-lut_EntrTele_Y     = $AC20   ; BANK_TELEPORTINFO
-lut_EntrTele_Map   = $AC40   ; BANK_TELEPORTINFO
-
-lut_InitGameFlags       = $AF00 ; BANK_STARTUPINFO
-lut_InitUnsramFirstPage = $B000 ; BANK_STARTUPINFO
-
-
-lut_ClassStartingStats  = $B040 ; BANK_STARTINGSTATS

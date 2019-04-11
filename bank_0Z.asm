@@ -213,7 +213,6 @@ data_EnemyStats:
 
 ;; I just stole all this again from the FFbytes docs by Dienyddiwr Da - http://www.romhacking.net/documents/81/ ! 
 
-
 ;     Experience - ENROMSTAT_EXP       
 ;     |       Gold Pieces - ENROMSTAT_GP
 ;     |       |       Hit Points - ENROMSTAT_HPMAX
@@ -234,20 +233,6 @@ data_EnemyStats:
 ;     2   1   2   1   2   1   |   |   |   |   |   |   |   |   |   |   |   |   |   |   Item to Steal - ENROMSTAT_ITEM   
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   
 ;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ ; Name   
-
-;     $00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0D,$0E,$0F,$10,$11,$12,$13,$14
-
-
-
-
-
-;      18  00  06  00  14  00  69  FF  24  00  01  05  08  01  00  00  00  1C  00  00  00  00  00  01  00  14  00  02  
-;      18  00  06  00  14  00  69  FF  24  00  01  05  08  01  00  00  00  1C  00  00  00  00  00  01  00  14  00  02 
-;      18  00  06  00  14  00  69  FF  24  00  01  05  08  01  00  00  00  1C  00  00  00  00  00  01  00  14  00  02  
-;      18  00  06  00  14  00  69  FF  24  00  01  05  08  01  00  00  00  1C  00  00  00  00  00  01  00  14  00  02  
-;      18  00  06  00  14  00  69  FF  24  00  01  05  08  01  00  00  00  1C  00  00  00  00  00  01  00  14  00  02  
-;      18  00  06  00  14  00  69  FF  24  00  01  05  08  01  00  00  00  1C  00  00  00  00  00  01  00  02  00  02  
-;      5D  00  16  00  48  00  6C  FF  36  00  01  12  0E  01  00  00  00  2E  00  00  00  00  00  01  00  48  00  03  
 
 .byte $06,$00,$06,$00,$08,$00,$6A,$FF,$06,$04,$01,$02,$04,$01,$00,$00,$04,$10,$00,$00,$02 ; IMP	
 .byte $12,$00,$12,$00,$10,$00,$78,$FF,$09,$06,$01,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00 ; GrIMP	
@@ -423,8 +408,7 @@ JigsIntro:
 ;;   JIGS - this saves having to have the lut_ShopCHR copy-pasted in this bank.
     
     
-    LDA #5                ; reset the respond rate to zero ;; JIGS - setting it to a nice frisky 6
-    STA respondrate       ;
+
     
     LDA #0
     STA joy_a              ; clear A, B, Start button catchers
@@ -961,65 +945,7 @@ DrawTitleWords:
   
   
   
-  
-  
-  
-  
-  
-  
-  OptionsMenu:
-    LDA #1
-    STA box_x
-    LDA #7
-    STA box_y
-    LDA #30
-    STA box_wd
-    LDA #15
-    STA box_ht
-    JSR DrawBox             ; then draw the box and return
-        
-    LDA #0
-    JSR DrawCharMenuString
-    JSR TurnMenuScreenOn_ClearOAM
-    
-    LDA #0
-    STA cursor                      ; flush cursor, joypad, and prev joy directions
-    STA joy
-    STA joy_prevdir
-
-    LDA #6                          ; set cursor max to 6
-    STA cursor_max
-
-OptionsLoop:
-  JSR ClearOAM
-  JSR DrawOptionsCursor        ; draw the cursor
-  JSR DrawOptions
-  JSR OptionsMenuFrame                 ; Do a frame
-  
-  LDA joy_a                     ; check to see if A has been pressed
-  BNE @A_Pressed
-  LDA joy_b                     ; then see if B has been pressed
-  BNE @B_Pressed
-  JSR OptionsCursorUpDown
-  JMP OptionsLoop               ;  rinse, repeat
-    
-  @B_Pressed:
-   LDA #0
-   STA OptionToggle
-   STA OptionMax
-   RTS  
-   
-  @A_Pressed: 
-  JSR OptionRight
-  JMP OptionsLoop
-  
-    
-
-          
-  DrawOptions:
-  LDA #1
-  STA menustall         ; enable to write while PPU is on
-  
+DrawOptions:
   LDA #24
   STA dest_x
   LDA #9
@@ -1056,50 +982,85 @@ OptionsLoop:
   LDX MuteSFXOption
   LDA lut_OnOff, X
   JSR DrawCharMenuString
-    
-  LDA #0
-  STA menustall         ; enable to write while PPU is on
-  RTS
   
-  
-  DrawOptionRespondRate:
+  LDA $2002          ; PPU toggle... needed or not?
   LDA #>$21F8        ; Respond rate is drawn at address $22D6
   STA $2006
   LDA #<$21F8
   STA $2006
+  LDA BattleTextSpeed ; get the current respond rate (which is zero based)
+  CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
+  ADC #$80+1          ;  for the desired digit to print, and +1 to convert it from zero
+  STA $2007           ;  based to 1 based (so it's printed as 1-8 instead of 0-7)  
+  LDA #$00            ; reset scroll to 0 (very important!)
+  STA $2005
+  STA $2005
+  RTS
+  
+  
+OptionsMenu:
+    LDA #0
+    STA $2001
+    STA joy
+    STA joy_prevdir
+    STA cursor                  ; turn off screen and clear some button stuff
+    STA menustall
+  
+    LDA #1
+    STA box_x
+    LDA #7
+    STA box_y
+    LDA #30
+    STA box_wd
+    LDA #15
+    STA box_ht
+    JSR DrawBox                 ; draws the options box
+    
+    LDA #6            
+    STA cursor_max    
+    LDA #0
+    JSR DrawCharMenuString      ; draws the static list of changable things
+    
+    JSR TurnMenuScreenOn_ClearOAM    
+    
+ReenterOptionsMenu:      
+    LDA #1
+    STA menustall              ; turn menustall back on
+    JSR DrawOptions            ; and draw the option variables (off, on, high, low, etc)
 
-  LDA respondrate    ; get the current respond rate (which is zero based)
-  CLC                ;  add $80+1 to it.  $80 to convert it to the coresponding tile
-  ADC #$80+1         ;  for the desired digit to print, and +1 to convert it from zero
-  STA $2007          ;  based to 1 based (so it's printed as 1-8 instead of 0-7)
+OptionsLoop:
+  JSR ClearOAM
+  JSR DrawOptionsCursor        ; draw the cursor
+  JSR OptionsMenuFrame         ; Do a frame
   
-    Return:
-    RTS
-   
-  DrawOptionsCursor:
-    LDY cursor                   ; get current cursor selection
-    LDA lut_OptionsCursor_Y, Y   ;  use cursor as an index to get the desired Y coord
-    STA spr_y                    ;  write the Y coord
-    LDA #$B0                      ; X coord for options menu cursor is always 22
-    STA spr_x
-    JMP DrawCursor               ; draw it!  and exit
+  LDA joy_a                     ; check to see if A has been pressed
+  BNE @A_Pressed
+  LDA joy_b                     ; then see if B has been pressed
+  BNE @B_Pressed
+  JSR @OptionDirections
+  JMP OptionsLoop               
     
-  lut_OptionsCursor_Y:         ; Y coord only... X coord is hardcoded
-   .BYTE  $48,$58,$68,$78,$88,$98        
+  @B_Pressed:
+   RTS  
    
+  @A_Pressed: 
+    LDA #0                  ; enter ChangeOption with A = 0, as if right was pressed
+    JSR ChangeOption
+    ;PLA
+    ;PLA
+    JMP ReenterOptionsMenu
   
-    
-  OptionsCursorUpDown: 
-    LDA joy                 ; otherwise mask out the directional buttons from the joy data
+  @OptionDirections: 
+    LDA joy                 ; mask out the directional buttons from the joy data
     AND #$0F 
     CMP joy_prevdir         ; see if the state of any directional buttons changed
-    BEQ Return               ; if not, keep looping
+    BEQ @Return             ; if not, keep looping
 
     STA joy_prevdir         ; otherwise, record changes to direction
-    CMP #0                  ;  see if the change was buttons being pressed or lifted
-    BEQ Return               ;  if buttons were being lifted, do nothing (keep looping)
+    CMP #0                  ; see if the change was buttons being pressed or lifted
+    BEQ @Return             ; if buttons were being lifted, do nothing (keep looping)
 
-    CMP #$03               ; see if they pressed up/down or left/right
+    CMP #$03                ; see if they pressed up/down or left/right
     BCC @LeftRight
 
   @UpDown:
@@ -1107,7 +1068,7 @@ OptionsLoop:
     BNE @Up
       
    @Down:              ; moving down...
-    LDA cursor        ;  get cursor, and increment by 1
+    LDA cursor         ;  get cursor, and increment by 1
     CLC
     ADC #$01
     CMP cursor_max    ;  if it's < cursor_max, it's still in range, so
@@ -1115,7 +1076,7 @@ OptionsLoop:
     LDA #0            ;  otherwise, it needs to be wrapped to zero
     BEQ @Move         ;   (always branches)
 
-   @Up:                ; up is the same deal...
+   @Up:               ; up is the same deal...
     LDA cursor        ;  get cursor, decrement by 1
     SEC
     SBC #$01
@@ -1128,153 +1089,161 @@ OptionsLoop:
     STA cursor            ; set cursor to changed value
     JMP PlaySFX_MenuMove  ; then play that hideous sound effect and exit
   
-  @LeftRight:
-    CMP #RIGHT              ; did they press Right?
-    BNE OptionLeft               ;  if not, they must've pressed Left
-        
-    OptionRight:
-    LDA #1
-    STA OptionToggle
-    JMP GetOptionsMenuOption
-    
-    OptionLeft:
-    LDA #0
-    STA OptionToggle
-    ;JMP GetOptionsMenuOption
-   
-    
-  GetOptionsMenuOption:
-  LDA cursor                  ; get the cursor
-  BNE @NotExpGain             ; if zero.... 
+   @Return:
+    RTS
   
-    @ExpGain:
-    LDA #2
-    STA OptionMax
-    LDA ExpGainOption
-    STA MMC5_tmp
-    LDX #0
-    LDA OptionToggle
+   @LeftRight:
+    CMP #RIGHT
     BEQ :+
-         JSR @OptionToggleRight ; if 1, do right. If 0, do left.
-         STA ExpGainOption
-         RTS
-       : JSR @OptionToggleLeft
-         STA ExpGainOption
-         RTS
+      LDA #1              ; enter ChangeOption with A = 1 if left was pressed
+      JMP :++
     
-  @NotExpGain:
-   CMP #$01
-   BNE @NotMoneyGain
+  : LDA #0                ; enter ChangeOption with A = 0 if right was pressed
+  : JSR ChangeOption
+    PLA
+    PLA
+    JMP ReenterOptionsMenu
+   
+ChangeOption: 
+    PHA                   ; backup direction
+    JSR PlaySFX_MenuSel  
+    LDA cursor
+    BEQ @ExpGain
+    CMP #1
+    BEQ @MoneyGain
+    CMP #2
+    BEQ @EncounterRate
+    CMP #3
+    BEQ @BattleTextSpeed
+    CMP #4
+    BEQ @AutoTargetJump
+    PLA                   ; pull direction and toss it
+  
+   @MenuSFX:
+    LDA MuteSFXOption     ; whether left or right is pressed, all you can do is switch it on/off
+    BEQ :+
+      DEC MuteSFXOption
+      RTS
+    
+  : INC MuteSFXOption
+    RTS
+    
+   @BattleTextSpeed:
+    PLA                     ; pull direction and branch 
+    BEQ @IncreaseBattleTextSpeed 
+        
+       DEC BattleTextSpeed
+       LDA BattleTextSpeed
+       BPL @Return         ; if the result didn't wrap (still positive), return
+       LDA #7
+       STA BattleTextSpeed
+       RTS
+    
+   @IncreaseBattleTextSpeed:
+    LDA BattleTextSpeed
+    CMP #7
+    BNE :+                  ; if its not over the limit, increase it
+       LDA #0 
+       STA BattleTextSpeed
+       RTS
+    
+  : INC BattleTextSpeed
+   @Return:  
+    RTS
+    
+   @AutoTargetJump:
+    JMP @AutoTarget       
+    
+   @ExpGain:
+   PLA 
+   BEQ @IncreaseExpGain 
+        
+       DEC ExpGainOption
+       LDA ExpGainOption
+       BPL @Return         ; if the result didn't wrap (still positive), return
+       LDA #2
+       STA ExpGainOption
+       RTS
+    
+   @IncreaseExpGain:
+    LDA ExpGainOption
+    CMP #2
+    BNE :+                  ; if its not over the limit, increase it
+       LDA #0 
+       STA ExpGainOption
+       RTS
+    
+  : INC ExpGainOption
+    RTS 
     
     @MoneyGain:
-    LDA #2
-    STA OptionMax
-    LDA MoneyGainOption
-    STA MMC5_tmp
-    LDX #01
-    LDA OptionToggle
-    BEQ :+
-         JSR @OptionToggleRight ; if 1, do right. If 0, do left.
-         STA MoneyGainOption
-         RTS
-       : JSR @OptionToggleLeft
-         STA MoneyGainOption
-         RTS
-      
-   @NotMoneyGain:
-   CMP #$02
-   BNE @NotEncounterRate
-   
-    @EncounterRate:
-    LDA #2
-    STA OptionMax
-    LDA EncRateOption
-    STA MMC5_tmp
-    LDX #02
-    LDA OptionToggle
-    BEQ :+
-         JSR @OptionToggleRight ; if 1, do right. If 0, do left.
-         STA EncRateOption
-         RTS
-       : JSR @OptionToggleLeft
-         STA EncRateOption
-         RTS
-    
-  @NotEncounterRate:
-   CMP #$03
-   BNE @NotBtlMsgSpeed
-    
-    @BtlMsgSpeed:
-    LDA #7
-    STA OptionMax
-    LDA respondrate
-    STA MMC5_tmp
-    LDX #03
-    LDA OptionToggle
-    BEQ :+
-         JSR @OptionToggleRight ; if 1, do right. If 0, do left.
-         STA respondrate
-         RTS
-       : JSR @OptionToggleLeft
-         STA respondrate
-         RTS
-
-   @NotBtlMsgSpeed:
-     CMP #$04
-     BNE @MuteMenuSFX
-       
-     LDA #1
-     STA OptionMax
-     LDA AutoTargetOption
-     STA MMC5_tmp
-     LDX #04
-     LDA OptionToggle
-     BEQ :+
-         JSR @OptionToggleRight ; if 1, do right. If 0, do left.
-         STA AutoTargetOption
-         RTS
-       : JSR @OptionToggleLeft
-         STA AutoTargetOption
-         RTS
-       
-  @MuteMenuSFX:
-    LDA #1
-    STA OptionMax
-    LDA MuteSFXOption
-    STA MMC5_tmp
-    LDX #05
-    LDA OptionToggle
-    BEQ :+
-        JSR @OptionToggleRight ; if 1, do right. If 0, do left.
-        STA MuteSFXOption
-        RTS
-      : JSR @OptionToggleLeft
-        STA MuteSFXOption
-        RTS
-            
-    @OptionToggleLeft:
-    LDA MMC5_tmp
-    BEQ @OptionWrapLeft
-    DEC MMC5_tmp
-    JMP PlaySFX_MenuSel
-    
-    @OptionToggleRight:
-    LDA MMC5_tmp
-    CMP OptionMax
-    BEQ @OptionWrapRight
-    INC MMC5_tmp
-    JMP PlaySFX_MenuSel
-    
-    @OptionWrapLeft:
-    LDA OptionMax
-    STA MMC5_tmp
-    JMP PlaySFX_MenuSel
-    
-    @OptionWrapRight:
-    LDA #0
-    STA MMC5_tmp
-    JMP PlaySFX_MenuSel
+    PLA 
+    BEQ @IncreaseMoneyGain
         
+       DEC MoneyGainOption
+       LDA MoneyGainOption
+       BPL @Return         ; if the result didn't wrap (still positive), return
+       LDA #2
+       STA MoneyGainOption
+       RTS
+    
+   @IncreaseMoneyGain:
+    LDA MoneyGainOption
+    CMP #2
+    BNE :+                  ; if its not over the limit, increase it
+       LDA #0 
+       STA MoneyGainOption
+       RTS
+      
+  : INC MoneyGainOption
+    RTS 
+   
+   @EncounterRate:
+    PLA 
+    BEQ @IncreaseEncounterRate
+        
+       DEC EncRateOption
+       LDA EncRateOption
+       BPL @Return         ; if the result didn't wrap (still positive), return
+       LDA #2
+       STA EncRateOption
+       RTS
+    
+   @IncreaseEncounterRate:
+    LDA EncRateOption
+    CMP #2
+    BNE :+                  ; if its not over the limit, increase it
+       LDA #0 
+       STA EncRateOption
+       RTS
+      
+  : INC EncRateOption
+    RTS 
+    
+   @AutoTarget:
+    PLA                      ; pull direction and toss it
+    LDA AutoTargetOption     ; whether left or right is pressed, all you can do is switch it on/off
+    BEQ :+
+      DEC AutoTargetOption
+      RTS
+    
+  : INC AutoTargetOption
+    RTS 
+    
+    
+    
+   
+DrawOptionsCursor:
+    LDY cursor                   ; get current cursor selection
+    LDA lut_OptionsCursor_Y, Y   ;  use cursor as an index to get the desired Y coord
+    STA spr_y                    ;  write the Y coord
+    LDA #$B0                     ; X coord for options menu cursor is always 22
+    STA spr_x
+    JMP DrawCursor               ; draw it!  and exit
+    
+  lut_OptionsCursor_Y:          
+   .BYTE  $48,$58,$68,$78,$88,$98        
+
 OptionsMenuFrame:
     LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
     BEQ :+                    
@@ -1283,8 +1252,6 @@ OptionsMenuFrame:
  :  JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
-   
-    JSR DrawOptionRespondRate
     
     LDA soft2000           ; reset scroll and PPU data
     STA $2000
@@ -1294,7 +1261,7 @@ OptionsMenuFrame:
 
     LDA music_track        ; if no music track is playing...
     BPL :+
-     LDA dlgmusic_backup  ;; JIGS - START MAP MUSIC;  start music track $51  (menu music)
+     LDA dlgmusic_backup   ; restore from backup
      STA music_track
 
 :   LDA #BANK_THIS         ; record this bank as the return bank
@@ -1809,7 +1776,7 @@ UnadjustEquipStats:
       STA tmp             ; this is the low byte of our source pointer
       LDA #0
       TAY
-      ADC #>lut_Weapons   ; include carry into high byte of source pointer
+      ADC #>lut_WeaponData ; include carry into high byte of source pointer
       STA tmp+1           ; (tmp) is now a pointer to stats for this weapon
 
      ; LDX tmp+7           ; load char index into X
@@ -1856,11 +1823,11 @@ UnadjustEquipStats:
       ASL A
       ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
       CLC                 ; (A= armor_id*8)
-      ADC #<lut_Armor     ; add A to desired pointer
+      ADC #<lut_ArmorData ; add A to desired pointer
       STA tmp             ;  and store pointer to (tmp)
       LDA #0
       TAY
-      ADC #>lut_Armor
+      ADC #>lut_ArmorData
       STA tmp+1           ; (tmp) is now a pointer to stats for this armor
 
       ;LDX tmp+7           ; get char index in X
@@ -1971,7 +1938,7 @@ ReadjustEquipStats:
     STA tmp                ; put in tmp as low byte of our pointer
     LDA #0
     TAY
-    ADC #>lut_Weapons      ; add high byte of our pointer (including any appropriate carry)
+    ADC #>lut_WeaponData   ; add high byte of our pointer (including any appropriate carry)
     STA tmp+1              ; fill tmp+1 to complete our pointer
 
     LDA ch_hitrate, X      ; get char's hit rate
@@ -2012,11 +1979,11 @@ ReadjustEquipStats:
     ASL A
     ASL A                  ; multiply by 4 (this drops the high bit -- no need to mask it out)
     CLC
-    ADC #<lut_Armor        ; add low byte of pointer to our A
+    ADC #<lut_ArmorData    ; add low byte of pointer to our A
     STA tmp                ; and store it in tmp
     LDA #0
     TAY
-    ADC #>lut_Armor        ; then get high byte of pointer (ADC to catch appropriate carry)
+    ADC #>lut_ArmorData    ; then get high byte of pointer (ADC to catch appropriate carry)
     STA tmp+1              ; (tmp) is now a pointer to this armor's stats
 
     LDA ch_evasion, X      ; get char's evade
@@ -3160,7 +3127,7 @@ ChecksumFail:
 BattleConfirmation:
   LDA #21
   STA dest_y
-  LDA #18
+  LDA #03
   STA dest_x
   LDA #01
   STA menustall
@@ -3778,10 +3745,11 @@ Deleted:
 .byte $C1,$C1,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$C1,$C1,$C1,$00
 
 BattleYesNo:
-.byte $A2,$8E,$9C,$FF,$FF,$FF,$FF,$97,$98,$FF,$FF,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01
-.byte $FF,$FF,$9B,$8E,$8A,$8D,$A2,$C5,$01
-.byte $FF,$FF,$FF,$FF,$FF,$00
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05
+.byte $FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$05
+.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01
+.byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$FF,$FF,$01
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
 
 
 

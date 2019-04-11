@@ -18,12 +18,12 @@
 .import ClearBattleMessageBuffer_L
 .import ClericCheck
 .import CritCheck
-.import DrawBattleItemBox_L
+.import DrawBattleEquipmentBox_L
 .import DrawBattleMagicBox_L
 .import DrawCombatBox_L
 .import DrawCommandBox_L
 .import DrawComplexString
-.import DrawDrinkBox_L
+.import DrawItemBox_L
 .import DrawRosterBox_L
 .import EnemyAttackPlayer_PhysicalZ
 .import FormatBattleString_L
@@ -40,6 +40,11 @@
 .import SwapBtlTmpBytes_L
 .import UndrawNBattleBlocks_L
 .import WaitForVBlank_L
+.import PlayDoorSFX
+.import DrawManaBox
+.import DrawManaString_ForBattle
+.import DrawPlayerBox
+.import ShiftLeft6
 
 
 BANK_THIS = $0C
@@ -299,10 +304,10 @@ lut_MagicData:
 .byte $30,$10,$04,$01,$03,$E8,$20,$00 ; STOP           
 .byte $20,$01,$04,$01,$03,$D8,$2B,$00 ; BANISH         
 .byte $00,$01,$08,$02,$12,$D8,$28,$00 ; DOOM         
-  
-.byte $00,$10,$00,$10,$07,$00,$00,$00 ; Heal Potion
-.byte $00,$04,$00,$10,$08,$00,$00,$00 ; Pure Potion
 
+;; removed heal and pure data
+
+;; Enemy attacks
 .byte $20,$18,$20,$01,$01,$00,$00,$00 ; FROST      
 .byte $20,$0C,$10,$01,$01,$00,$00,$00 ; HEAT       
 .byte $05,$02,$02,$02,$03,$00,$00,$00 ; GLANCE     
@@ -382,7 +387,7 @@ lut_MagicBattleMessages:
   .BYTE $4D ; BANE          ; Poison smoke
   .BYTE $4A ; WARP          ; Ineffective now
   .BYTE $0B ; SLOW 2        ; Lost intelligence
-  .BYTE $4A ; SOFT          ; Ineffective now
+  .BYTE $29 ; SOFT          ; Cured!
   .BYTE $4A ; EXIT          ; Ineffective now
   .BYTE $02 ; SHIELD2       ; Armor up
   .BYTE $03 ; INVIS 2       ; Easy to dodge
@@ -406,10 +411,6 @@ lut_MagicBattleMessages:
   .BYTE $1E ; STOP          ; Time stopped
   .BYTE $1F ; BANISH        ; Exile to 4th dimension
   .BYTE $15 ; DOOM          ; Erased
-  
-  ; potions
-  .BYTE $00
-  .BYTE $00      
   
   ; enemy attacks
   .BYTE $00 ; FROST     ; 
@@ -438,10 +439,10 @@ lut_MagicBattleMessages:
   .BYTE $00 ; DAZZLE    ; 
   .BYTE $00 ; SWIRL     ; 
   .BYTE $00 ; TORNADO   ; 
-
-  ; unused padding:
-  .BYTE $00, $00, $00, $00
-  
+  .BYTE $00 ; unused
+  .BYTE $00 ; unused
+  .BYTE $00 ; unused
+  .BYTE $00 ; unused
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -478,9 +479,101 @@ lut_BattlePalettes:
 ;;  bytes $B-$E = special attacks (0 based), or 'FF' to mark end of attacks
 
 lut_EnemyAi:
-  .INCBIN "bin/0C_9020_aidata.bin"
+  ;.INCBIN "bin/0C_9020_aidata.bin"
   
-  ;; JIGS - see Bank A
+  ;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ; 00 ; Frost Wolf
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ; 01 ; Agama
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ; 02 ; Sauria
+.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ; 03 ; OddEYE
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ; 04 ; BigEYE
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ; 05 ; Cerberus
+.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 06 ; WzOgre
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ; 07 ; Sand Worm
+.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ; 08 ; EYE
+.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ; 09 ; PHANTOM
+.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 0A ; Mancat
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ; 0B ; Vampire
+.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ; 0C ; WzVamp
+.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 0D ; Red Gargoyle
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ; 0E ; Frost Dragon
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ; 0F ; Red Dragon
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ; 10 ; Perelist
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ; 11 ; Red Hydra
+.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ; 12 ; Naga
+.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ; 13 ; Grey Naga
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ; 14 ; Chimera
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ; 15 ; Jimera
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ; 16 ; Sorcerer
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ; 17 ; Gas Dragon
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ; 18 ; Blue Dragon
+.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 19 ; Mug Golem
+.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ; 1A ; Rock Golem
+.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ; 1B ; Iron Golem
+.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 1C ; Badman
+.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ; 1D ; Mage
+.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ; 1E ; Fighter
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ; 1F ; Nitemare
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ; 20 ; WarMech
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ; 21 ; Manticor
+.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 22 ; Lich
+.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ; 23 ; Lich Reprise
+.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ; 24 ; Kary
+.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ; 25 ; Kary Reprise
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ; 26 ; Kraken
+.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ; 27 ; Kraken Reprise
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ; 28 ; Tiamat
+.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ; 29 ; Tiamat Reprise
+.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ; 2A ; Chaos
+.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 2B ; Astos
+
+;; From the FF Bytes documents 
+;  ##   Strat.   (Magics and Magic Cycle : Attack and Attack Cycle)
+;  00 = FrWOLF 	(: FROST)
+;  01 = AGAMA 	(: HEAT)
+;  02 = SAURIA 	(: GLANCE)
+;  03 = OddEYE 	(: GAZE)
+;  04 = BigEYE 	(: GAZE, FLASH)
+;  05 = CERBERUS	(: SCORCH)
+;  06 = WzOGRE	(RUSE, DARK, SLEP, HOLD, ICE2)
+;  07 = Sand W	(: CRACK)
+;  08 = EYE	(XXXX, BRAK, RUB, LIT2, HOLD, MUTE, SLOW, SLEP : GLANCE, SQUINT, GAZE, STARE)
+;  09 = PHANTOM	(STOP, ZAP!, XFER, BRAK, RUB, HOLD, MUTE, SLOW : GLARE)
+;  0A = MANCAT	(FIR2, SLOW, DARK, SLEP, FIRE, LIT, CURE, SLEP)
+;  0B = VAMPIRE	(: DAZZLE)
+;  0C = WzVAMP	(AFIR, MUTE, ICE2[*2], LIT2[*2], FIR2[*2] : DAZZLE)
+;  0D = R`GOYLE	(FIR2, HOLD, FIRE[*2])
+;  0E = Frost D	(: BLIZZARD)
+;  0F = Red D	(: BLAZE)
+;  10 = PERELISK	(: SQUINT)
+;  11 = R`HYDRA	(: CREMATE)
+;  12 = NAGA	(LIT2, LOCK, SLEP, LIT, LIT2, HOLD, SLOW, DARK)
+;  13 = GrNAGA	(RUSE, MUTE, SLOW, DARK, SLEP, FIRE, LIT, HEAL)
+;  14 = CHIMERA	(: CREMATE)
+;  15 = JIMERA	(: CREMATE, POISON(pos))
+;  16 = SORCERER	(: TRANCE)
+;  17 = Gas D	(: POISON(dmg))
+;  18 = Blue D	(: THUNDER)
+;  19 = MudGOL	(FAST)
+;  1A = RockGOL	(SLOW)
+;  1B = IronGOL	(: TOXIC)
+;  1C = BADMAN	(XFER, NUKE, XFER, XXXX, BLND)
+;  1D = MAGE	(RUB, LIT3 ,FIR3 ,BANE, SLO2, FIR3, STUN, LIT3)
+;  1E = FIGHTER	(WALL, XFER, HEL3, FOG2, INV2, CUR4 ,HEL2, CUR3)
+;  1F = NITEMARE (: SNORTING)
+;  20 = WarMECH	(: NUCLEAR)
+;  21 = MANTICOR	(: STINGER) 
+;  22 = LICH	(ICE2, SLP2, FAST, LIT2, HOLD, FIR2, SLOW, SLEP)
+;  23 = LICH 2	(NUKE, STOP, ZAP!, XXXX)
+;  24 = KARY	(FIR2, DARK, FIR2, DARK, FIR2, HOLD, FIR2, HOLD)
+;  25 = KARY 2	(FIR3, RUB)
+;  26 = KRAKEN	(: INK)
+;  27 = KRAKEN 2 (LIT2 : INK)
+;  28 = TIAMAT	(: THUNDER, POISON(dmg), BLIZZARD, BLAZE)
+;  29 = TIAMAT 2 (BANE, ICE2, LIT2, FIR2 : THUNDER, POISON(dmg), BLIZZARD, BLAZE)
+;  2A = CHAOS	(ICE3, LIT3, SLO2, CUR4, FIR3, ICE2, FAST, NUKE : CRACK, INFERNO, SWIRL, TORNADO)
+;  2B = ASTOS	(RUB, SLO2, FAST, FIR2, LIT2, SLOW, DARK, SLEP)
+;  FF = None  
 
 .align $100  
   
@@ -554,6 +647,7 @@ FinishBattlePrepAndFadeIn:
     LDA #1
     STA BattleTurn    
     JSR DrawCharacterStatus
+    JSR DrawPlayerBox
     
     JMP Battle_AfterFadeIn
     
@@ -660,6 +754,8 @@ SetCharacterBattleCommand:
     STA btl_charcmdbuf+2, Y     ; [2] = Y
     PLA
     STA btl_charcmdbuf, Y       ; [0] = A
+    LDA tmp
+    STA btl_charcmdbuf+3, Y     ; only used for ethers (so far)
     
     LDA btlcmd_curchar
     
@@ -678,8 +774,8 @@ SetCharacterBattleCommand:
 ;;  pressed B in the battle menu to move back to a previous character.
 ;;  This routine is really only significant for 2 things:
 ;;
-;;  1) The DRINK command will dec a potion counter.  If the player moves back to undo
-;;     that drink, the potion counter needs to be incremented back.
+;;  1) The Item command will dec a potion counter.  If the player moves back to undo
+;;     that Item, the potion counter needs to be incremented back.
 ;;
 ;;  2) We might not necessarily want to go back to the previous character, since the
 ;;     previous character might be sleeping/stunned/dead/stone.  Therefore this
@@ -693,7 +789,7 @@ SetCharacterBattleCommand:
     
 UndoCharacterBattleCommand:
     LDA btlcmd_curchar                  ; if we're on character 0, we can't back up any more
-    BEQ @UndoPrevCharDrink              ;   so skip ahead
+    BEQ @UndoPrevCharItem              ;   so skip ahead
     
     ; Otherwise, try to back up more...
     SEC                                 ; get the prev char's stats
@@ -703,22 +799,22 @@ UndoCharacterBattleCommand:
     
     LDA (CharStatsPointer), Y        ; see if they have ailments that would stop them from doing anything
     AND #AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP
-    BEQ @UndoPrevCharDrink              ; if they are able to input a command
+    BEQ @UndoPrevCharItem              ; if they are able to input a command
     
     DEC btlcmd_curchar                  ; if they can't, dec curchar to go to the prev character
     JMP UndoCharacterBattleCommand      ;  and try again
     
-  @UndoPrevCharDrink:
+  @UndoPrevCharItem:
     LDY btlcmd_curchar                  ; get the current char
     BEQ :+                              ; if nonzero, DEC it to move back to the prev char
       DEY
       
-    ; Then see if this char originally wanted to drink a potion.  If they did, we DEC'd a potion QTY counter
+    ; Then see if this char originally wanted to Item a potion.  If they did, we DEC'd a potion QTY counter
     ;   which we need to INC now to undo that.
   : LDA btl_charcmdconsumetype, Y
-    CMP #$02                ; will be 02 for DRINK commands
+    CMP #$02                ; will be 02 for Item commands
     BEQ :+
-      BNE @Done             ; if they didn't DRINK, just exit
+      BNE @Done             ; if they didn't Item, just exit
       
   : LDX btl_charcmdconsumeid, Y     ; if they did, get the index of the potion they drank
     INC btl_potion_heal, X          ; INC the potion counter
@@ -740,10 +836,10 @@ UndoCharacterBattleCommand:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_AfterFadeIn:
-    LDA item_heal           ; prep potion counts
-    STA btl_potion_heal
-    LDA item_pure
-    STA btl_potion_pure
+  ;  LDA item_heal           ; prep potion counts
+  ;  STA btl_potion_heal
+  ;  LDA item_pure
+  ;  STA btl_potion_pure
     
     LDY #$1C
     LDA #$00
@@ -896,9 +992,10 @@ BattleLogicLoop:
     JMP BattleLogicLoop
     
     RedrawCommandList:
-    LDA #$01                   ; undraw the Battle menu 
+    LDA #$01                   ; undraw the Battle menu to wipe out the "ready?" message
     JSR UndrawNBattleBlocks_L
-    JSR DrawCommandBox_L       ; put the commands back
+    JSR DrawCommandBox_L       ; then re-draw it
+    JSR DrawPlayerBox
     JMP __GetCharacterBattleCommand_Backtrack_3
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -935,6 +1032,7 @@ BacktrackBattleCommand:
 ;;
 ;;  GetCharacterBattleCommand  [$9477 :: 0x31487]
 ;;
+;;  input:   A = the character whose commands to get
 ;;  input:   A = the character whose commands to get
 ;;  output:  btl_charcmdbuf is filled appropriately
 ;;
@@ -1085,14 +1183,14 @@ Battle_MainMenu_APressed:
 ;;
 ;;  lut_BattleSubMenu  [$94DE :: 0x314EE]
 ;;
-;;    Jump table for battle submenus.  Called when the player selects one of the FIGHT/MAGIC/DRINK/ITEM
+;;    Jump table for battle submenus.  Called when the player selects one of the FIGHT/MAGIC/Item/ITEM
 ;;  options on the main battle screen.
 
 lut_BattleSubMenu:
   .WORD BattleSubMenu_Fight
   .WORD BattleSubMenu_Magic
-  .WORD BattleSubMenu_Drink
   .WORD BattleSubMenu_Item
+  .WORD BattleSubMenu_Equipment
   
   ;;JIGS - adding things
   
@@ -1120,11 +1218,9 @@ BattleSubMenu_Hide:
   LDA (CharStatsPointer), Y
   AND #AIL_DARK                 ; see if character is blind
   BEQ @DoHide
-    LDA #$04                      
-    LDX #<CannotHideText
-    LDY #>CannotHideText
-    @PrintStuff:
-    JSR DrawCombatBox_L
+    
+   @PrintStuff:
+    LDA #$53
    @InputLoop:                   ; Wait for the player to provide
       JSR DoFrame_WithInput     ;   ANY input
     BEQ @InputLoop
@@ -1355,89 +1451,148 @@ BattleSubMenu_Magic:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  BattleSubMenu_Drink  [$95F5 :: 0x31605]
+;;  BattleSubMenu_Item  [$95F5 :: 0x31605]
 ;;
-;;  Called when the player selects 'DRINK'
+;;  Called when the player selects 'Item'
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BattleSubMenu_Drink:
-    LDA btl_potion_heal         ; see if there are any Heal/Pure potions remaining
-    ORA btl_potion_pure
+BattleSubMenu_Item:
+    LDA item_heal         ; see if there are any consumables
+    ORA item_x_heal
+    ORA item_ether
+    ORA item_elixir
+    ORA item_down
+    ORA item_pure
+    ORA item_eyedrops
+    ORA item_bell
+    ORA item_soft
+    ORA item_smokebomb
     BNE :+                      ; if there are no potions...
       JSR DoNothingMessageBox   ; show the 'Nothing' box
       JMP CancelBattleAction    ; then cancel
     
-  : JSR DrawDrinkBox_L          ; otherwise (have at least 1 potion), draw the drink box
+  : JSR DrawItemBox_L          ; otherwise (have at least 1 potion), draw the Item box
   
-    JSR MenuSelection_Drink     ; get menu selection from the player  
+    JSR MenuSelection_Item     ; get menu selection from the player  
     PHA                         ; backup the A/B button press
     LDA #$01
-    JSR UndrawNBattleBlocks_L   ; undraw the drink menu
+    JSR UndrawNBattleBlocks_L   ; undraw the Item menu
     PLA
     CMP #$02
-    BNE :+                      ; was B pressed to get out of the drink menu?
+    BNE :+                      ; was B pressed to get out of the Item menu?
       JMP CancelBattleAction    ;   if yes, cancel the action
       
-  : LDA btlcurs_y               ; see if they selected Heal or Pure potion
-    AND #$01
-    STA btlcmd_spellindex                   ; stick it in temp mem (0=Heal, 1=Pure)
-    BNE @PureSelected           ; see which they selected?  If heal....
-      LDA btl_potion_heal       ;   ... make sure they have at least 1 heal potion
-      BNE @HealOK               ; if they don't
-      JSR DoNothingMessageBox   ;   show the "nothing" box and cancel
-      JMP CancelBattleAction
+  : LDX battle_item             ; see if they selected Heal or Pure potion
+    LDA item_box, X             ; item_box was filled with $FF before being filled with 
+    CMP #$FF                    ; item IDs. If battle_item points to an $FF, do nothing
+    BNE @ItemOK
+       JSR DoNothingMessageBox
+       JMP CancelBattleAction
     
-  @PureSelected:                ; if pure selected, make sure they have a Pure potion
-    LDA btl_potion_pure
-    BNE :+                      ; if none, show "nothing" and cancel
-      JSR DoNothingMessageBox
-      JMP CancelBattleAction
-      
-  : LDA #$01
-    STA math_hitchance                   ; store menu selection for pure potion in temp mem $6856
-    JMP @GetTarget              ;  (this means both 6856 AND 6B7D both contain the item being used -- why both?)
-  @HealOK:
-    LDA #$00                    ; for heal potion
-    STA math_hitchance
-
+    @ItemOK:
+    STA btlcmd_spellindex       ; now holds item ID
+    CMP #SMOKEBOMB
+    BEQ @NoTarget
+    CMP #WAKEUPBELL             ; it doesn't matter what gets saved as the target 
+    BNE @GetTarget              ; since it will never be used by these items
+    
+       @NoTarget:
+        PHA                     ; since there's a pull up ahead for the player target 
+        JMP @SkipTarget         ; just push this, since it won't be used anyway
+   
   @GetTarget:
     LDA btlcmd_curchar          ; get input for SelectPlayerTarget
     JSR SelectPlayerTarget      ; and call it!
     CMP #$02
     BNE :+                      ; if they pressed B...
-      JMP BattleSubMenu_Drink   ; ... return to the Drink sub menu
-      
-  : LDY btlcmd_curchar
+      JMP BattleSubMenu_Item    ; ... return to the Item sub menu
+  
+  : LDA btlcurs_y           ; get target
+    AND #$03
+    STA submenu_targ        ; save for Ether stuff, not used otherwise
+    ORA #$80                ; OR with 80 to indicate it's a player target
+    PHA                     ; backup for a bit later
+  
+    LDA btlcmd_spellindex
+    CMP #ETHER                  ; if its an ether, gotta do another menu selection...
+    BNE @SkipTarget
+    
+    @EtherManaMenu:
+    JSR DrawManaBox
+    JSR LongCall
+    .word DrawManaString_ForBattle
+    .byte $0E
+    JSR EtherManaSelection      ; pressing A will set tmp 
+    PHA                         ; backup the A/B button press
+    LDA #$01
+    JSR UndrawNBattleBlocks_L   ; undraw the Item menu
+    PLA
+    CMP #$02
+    BNE :+                      ; if they pressed B...
+      PLA                       ; pull previous target from stack
+      JMP @GetTarget            ; ... return to the target selection
+    
+  : LDA btlcurs_x
+    ASL A
+    ASL A                       ; x = 0 or 1, times 4
+    ADC btlcurs_y               ;   + 0, 1, 2, or 3
+    STA tmp                     ; = spell level chosen
+    JSR Ether_IsThereMP               ; check that character for mana
+    BNE @SkipTarget             ; if they have a high byte, do it
+        JSR DoNothingMessageBox ; otherwise, print "Nothing" and jump back
+        JMP @EtherManaMenu
+    
+    @SkipTarget:
+    LDY btlcmd_curchar
     LDA #$02
-    STA btl_charcmdconsumetype, Y   ; store 02 as the consumable type (to indicate DRINK)
-    LDA math_hitchance
+    STA btl_charcmdconsumetype, Y   ; store 02 as the consumable type (to indicate Item)
+    LDA btlcmd_spellindex
     STA btl_charcmdconsumeid, Y     ; store menu selection as consumed ID -- to indicate which potion  (00/01 for Heal/Pure potion)
     
-    LDX math_hitchance               ; get menu selection
-    DEC btl_potion_heal, X  ; remove the item from the qty
-    
-    LDA btlcurs_y           ; get target
-    AND #$03
-    ORA #$80                ; OR with 80 to indicate it's a player target
+    PLA                     ; get last character selection
     TAY                     ; put in Y (for SetCharacterBattleCommand)
-    
-    LDA btlcmd_spellindex               ; get the menu selection
-    CLC
-    ADC #$40                ; + $40.
-    TAX                     ; X=40 for heal / 41 for pure
+    LDX btlcmd_spellindex   ; get the item ID 
     LDA #$08
     JMP SetCharacterBattleCommand
+    
+    ;; SetCharacterBattleCommand saves the following:
+    ;STA btl_charcmdbuf+1, Y     ; [1] = X <- Item ID, add $40 for item message
+    ;STA btl_charcmdbuf+2, Y     ; [2] = Y <- target
+    ;STA btl_charcmdbuf, Y       ; [0] = A <- %00001000 ($08) this bit is set to indicate item use
+    ;STA btl_charcmdbuf+4, Y     ; [4] = tmp <- spell level for ether
+    
+EtherManaSelection:
+    LDY #$10
+    : LDA lut_EtherCursorPos-1, Y   ; copy over the cursor positions for
+      STA btlcurs_positions-1, Y    ;  the Item menu
+      DEY
+      BNE :-
+    JMp MenuSelection_2x4           ; and do the logic
+    
+Ether_IsThereMP:
+    LDA submenu_targ
+    JSR ShiftLeft6
+    CLC
+    ADC #ch_mp - ch_stats
+    ADC tmp
+    TAX
+    LDA ch_stats, X
+    AND #$0F
+    RTS   
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  BattleSubMenu_Item  [$9679 :: 0x31689]
+;;  BattleSubMenu_Equipment  [$9679 :: 0x31689]
 ;;
 ;;  Called when the player selects 'ITEM'
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BattleSubMenu_Item:
+BattleSubMenu_Equipment:
 ;;
 ;; WeaponPointer variable is used as tmp space until the end of this, where it finally is used as a pointer.
 ;;
@@ -1460,8 +1615,8 @@ BattleSubMenu_Item:
       JSR DoNothingMessageBox       ; Show the "nothing" box
       JMP CancelBattleAction        ; And cancel this battle action
       
-  : JSR DrawBattleItemBox_L         ; Draw the item box
-    JSR MenuSelection_Item          ; and run the logic for selecting an item
+  : JSR DrawBattleEquipmentBox_L         ; Draw the item box
+    JSR MenuSelection_Equipment          ; and run the logic for selecting an item
     
     PHA                             ; backup A/B state
     LDA #$01
@@ -1519,8 +1674,8 @@ BattleSubMenu_Item:
     
     LDA WeaponPointer+1         ; otherwise weapon selected, get the index
     LDY btlcmd_curchar
-    CLC
-    ADC #TCITYPE_WEPSTART       ; convert from weapon index to item index
+    ;CLC
+    ;ADC #TCITYPE_WEPSTART       ; convert from weapon index to item index
     STA btl_charcmditem, Y      ; record it in command buffer as item being used
     
     LDX WeaponPointer+1
@@ -1533,7 +1688,7 @@ BattleSubMenu_Item:
     LDA WeaponPointer+1         ; armor index
     LDY btlcmd_curchar
     CLC
-    ADC #TCITYPE_ARMSTART       ; convert to item index
+    ADC #ARMORSTART             ; convert to item index
     STA btl_charcmditem, Y      ; record as item being used
     
     LDX WeaponPointer+1
@@ -1652,19 +1807,22 @@ EnterBattlePrepareSprites:
     
     ;; JIGS - since battle screen shifted, shifting positions! 
     
-    LDA #$A0
+    LDA #$C4
     STA btl_chardraw_x + $0     ; put all characters in the $B0 column
+    LDA #$C8
     STA btl_chardraw_x + $4
+    LDA #$CC
     STA btl_chardraw_x + $8
+    LDA #$D0
     STA btl_chardraw_x + $C
     
     LDA #$30                    ; set Y coords, starting at $30, and increasing by $18
     STA btl_chardraw_y + $0
-    LDA #$48
+    LDA #$49
     STA btl_chardraw_y + $4
-    LDA #$60
+    LDA #$62
     STA btl_chardraw_y + $8
-    LDA #$78
+    LDA #$7B
     STA btl_chardraw_y + $C
     
     LDA #$00                    ; graphics sets are pretty much fixed -- it's effectively just ID<<5
@@ -1887,7 +2045,7 @@ UpdateSprites_BattleFrame:
     SetSleepDrawFlag: ;; JIGS trying a thing 
     LDA #$00
     STA btl_drawflags_tmp1     ; to hold new sleepy bits
-        TAX
+    TAX
     
   @ExtractSleepyBits:    ; loop 4 times, starting with character 3 down to character 0
       TXA                   ; subtract $40 to go to the prev character index
@@ -1895,26 +2053,19 @@ UpdateSprites_BattleFrame:
       SBC #$40
       TAX
       
-      LDA ch_ailments, X    ; get the ailments
-      AND #$20              ; zero them if they're not Sleep
-      BNE @ChangeSleepBit   ; if Sleep ailment, go to the ChangeSleepBit to set the 1 to the end
-        
-        @FinishSleepLoop:            
-        LSR A               ; shift the 1 (or 0) into the carry
-        ROL btl_drawflags_tmp2  ; and from carry into the thing
-
-      TXA                   ; Loop until we do character 0
+      LDA ch_ailments, X      ; get the ailments
+      AND #$20                ; zero them if they're not Sleep
+      BEQ @NextSleepy
+        LDA #01               ; if they're asleep, put a 1 ready to be put into carry
+      
+      @NextSleepy:
+      LSR A                   ; shift the 1 (or 0) into the carry
+      ROL btl_drawflags_tmp2  ; and from carry into the thing
+      
+      TXA                     ; Loop until we do character 0
       BNE @ExtractSleepyBits
-      JMP @SetSleepFlags
-      
-      @ChangeSleepBit:
-      LDA #01
-      JMP @FinishSleepLoop
-      
-    @SetSleepFlags:
-    LDA Asleep  ; move new sleepy bits into Asleep flag
-    AND #$F0
-    ORA btl_drawflags_tmp1
+
+    LDA btl_drawflags_tmp2    ; reset Asleep flag every time...?
     STA Asleep
     
     ;; JIGS - v returning to original code now v
@@ -2085,8 +2236,8 @@ DrawCharacter:
     
     INX                     ; X is the char ID.  INX for purposes of below loop.
     LDA #$01                ; This will effectively set temp ram to be 1<<X
-    STA DrawCharTmp              ; This seems incredibly stupid though, as this could more easily be accomplished
-    : ASL DrawCharTmp             ; with a LUT of:  01,02,04,08
+    STA DrawCharTmp         ; This seems incredibly stupid though, as this could more easily be accomplished
+    : ASL DrawCharTmp       ; with a LUT of:  01,02,04,08
       DEX
       BNE :-
     LSR DrawCharTmp               ; <- at this point, $68B6 = 1<<characterID
@@ -2096,7 +2247,7 @@ DrawCharacter:
                
     @CheckAsleep:
     LDA Asleep              ; JIGS - drawing sleep as death
-    AND #$0F
+   ; AND #$0F
     AND DrawCharTmp
     BEQ @CheckDeath
         JMP @DrawDead
@@ -2106,7 +2257,7 @@ DrawCharacter:
     
     LDA btl_drawflagsA      ; See if the character is dead
     AND #$0F                ;   Not sure what 6AD1 actually holds, but low 4 bits seem to be a flag to indicate which
-    AND DrawCharTmp               ;   characters should be drawn lying on the ground
+    AND DrawCharTmp         ;   characters should be drawn lying on the ground
     BEQ @DrawNotDead
 
     @DrawDead:     
@@ -2119,9 +2270,13 @@ DrawCharacter:
     ADC btl_chardraw_gfxset, Y
     STA btl8x8spr_t             ; Tile is $1A + gfxset
     
+    LDA btl_chardraw_x, Y       ;; JIGS - a better way to change positions
+    SEC
+    SBC #$10
+    
     ;LDA #$A8                    ; force them to X=A8   (1 tile left of normal drawing pos)
-    LDA #$98
-    ;; JIGS - battle screen changes mean changing positions
+    ;LDA #$98
+    
     STA btl8x8spr_x             ; this is because the graphic changes from 16x24 to 24x16
     STA btl8x8spr_x+1           ;   so we have to move left a bit to accomidate
     
@@ -2392,6 +2547,10 @@ SelectPlayerTarget:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SelectEnemyTarget:  
+    LDA #01
+    JSR UndrawNBattleBlocks_L    ; undraw the command menu    
+    ;JSR DrawRosterBox_L         ; and show enemy names instead
+
     LDA btl_drawflagsA          ; set the flag to indicate we want the cursor drawn
     ORA #$10                    ; note that this is unnecessary here, since EnemyTargetMenu
     STA btl_drawflagsA          ; (called below) also does this.
@@ -2407,7 +2566,15 @@ SelectEnemyTarget:
     STA $88
     LDA lut_EnemyTargetMenuJumpTbl+1, Y
     STA $89
+    JSR @ReDrawAfterSelection
+    PHA ; backup A/B state 
+    JSR DrawCommandBox_L
+    PLA
+    RTS
+    
+    @ReDrawAfterSelection:
     JMP ($0088)                 ; jump to appropriate target menu code
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2581,8 +2748,8 @@ EnemyTargetMenu:
     BNE :+                          ; if no change in input...
       JSR UpdateInputDelayCounter
       BEQ @MainLoop                 ; ... update input delay, and loop if input delay still in effect
-      LDA #$03                      ; otherwise, reset input delay (pointless, since UpdateInputDelayCounter does this)
-      STA inputdelaycounter
+     ; LDA #$03                      ; otherwise, reset input delay (pointless, since UpdateInputDelayCounter does this)
+     ; STA inputdelaycounter
       JMP @CheckInput               ; and process input
       
   : LDA #$05                        ; there was a change in input, so reset the input delay counter
@@ -2672,15 +2839,15 @@ BattleTarget_Up:
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  MenuSelection_Item  [$9BF8 :: 0x31C08]
+;;  MenuSelection_Equipment  [$9BF8 :: 0x31C08]
 ;;
-;;    Just calls MenuSelection_2x4 with the Item menu cursor positions.
+;;    Just calls MenuSelection_2x4 with the Equipment menu cursor positions.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-MenuSelection_Item:
+MenuSelection_Equipment:
     LDY #$10
-    : LDA lut_ItemCursorPos-1, Y
+    : LDA lut_EquipmentCursorPos-1, Y
       STA btlcurs_positions-1, Y
       DEY
       BNE :-
@@ -2688,19 +2855,167 @@ MenuSelection_Item:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  MenuSelection_Drink  [$9C06 :: 0x31C16]
+;;  MenuSelection_Item  [$9C06 :: 0x31C16]
 ;;
-;;    Just calls MenuSelection_2x4 with the Drink menu cursor positions.
+;;    Just calls MenuSelection_2x4 with the Item menu cursor positions.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-MenuSelection_Drink:
+MenuSelection_Item:
     LDY #$10
-    : LDA lut_DrinkCursorPos-1, Y   ; copy over the cursor positions for
-      STA btlcurs_positions-1, Y    ;  the drink menu
+    : LDA lut_ItemCursorPos-1, Y   ; copy over the cursor positions for
+      STA btlcurs_positions-1, Y    ;  the Item menu
       DEY
       BNE :-
-    JMP MenuSelection_2x4           ; and do the logic
+    ;JMP MenuSelection_2x4           ; and do the logic
+    
+    LDA #0
+    STA item_pageswap
+    STA tmp
+    STA btlcurs_x
+    STA btlcurs_y
+    STA battle_item
+    
+   @RedrawList:  
+    LDA item_pageswap
+    LDX #12
+    JSR MultiplyXA       
+    STA tmp
+    TAX                  
+
+    LDA #01
+    STA menustall
+    STA bigstr_buf+11, X
+    STA bigstr_buf+23, X
+    STA bigstr_buf+35, X ; Items are spaced 13 bytes apart, so put the line break on the first three 
+    LDA #0 
+    STA bigstr_buf+47, X ; and the null terminator on the fourth, every time the list is moved
+
+    LDA #<(bigstr_buf)
+    CLC
+    ADC tmp             ; add the list offset
+    STA text_ptr
+    LDA #>(bigstr_buf)
+    ADC #0
+    STA text_ptr+1
+    
+    LDA #03
+    STA dest_x
+    LDA #21
+    STA dest_y
+    
+    ;LDA #BANK_THIS
+    ;STA ret_bank
+    
+    ;JSR WaitForVBlank_L    
+    JSR DrawComplexString 
+    
+  @MainLoop:
+    LDA btl_drawflagsA      ; flip on the flag to draw the cursor
+    ORA #$10
+    STA btl_drawflagsA
+    
+    LDA btlcurs_y           ; Get the cursor X,Y pixel position
+    AND #$03                ; Main combat menu has 4 rows.  So take low 2 bits
+    ASL A                   ;   *2  (2 bytes per entry in btlcurs_positions)
+    STA btl_various_tmp+1               ; store in tmp mem
+    LDA btlcurs_x
+    AND #$01                ; only 2 columns (Fight/Run), so mask low bit
+    ASL A                   ;   *8
+    ASL A
+    ASL A
+    CLC
+    ADC btl_various_tmp+1               ; add with tmp mem
+    
+    TAY                     ; use as index for position lut to get the sprite position
+    LDA btlcurs_positions, Y
+    STA btlcursspr_x
+    LDA btlcurs_positions+1, Y
+    STA btlcursspr_y
+    
+    JSR UpdateSprites_BattleFrame   ; Update sprites & do a frame
+    JSR DoFrame_WithInput           ; Do *ANOTHER* frame and get input in A
+    CMP btlinput_prevstate
+    BNE :+                          ; If there was no change in input...
+      JSR UpdateInputDelayCounter   ; update delay counter
+      BEQ @MainLoop                 ; not accepting input, repeat from main loop
+      ;LDA #$03
+      ;STA inputdelaycounter         ; otherwise reset delay counter (pointless, since UpdateInputDelayCounter
+      JMP @CheckButtons             ;   already does this), then check buttons
+      
+  : LDA #$05                        ; if there was a change of input, reset the delay counter (make it a little
+    STA inputdelaycounter           ;   longer than normal), and then check buttons
+    
+  @CheckButtons:
+    LDA btl_input                   ; record current input as previous input
+    STA btlinput_prevstate
+    
+    LDA btl_input
+    AND #$03
+    BEQ :+                          ; see if A or B are pressed.  If they are...
+      PHA                           ; push A/B state
+      JSR BattleClearVariableSprite ; erase the cursor sprite (in shadow oam)
+      JSR BattleFrame               ; redraw the screen (to erase it in the PPU)
+      PLA
+      RTS                           ; exit!
+    
+  : JSR @MoveCursor                 ; if A/B are not pressed, then check arrow buttons to move the cursor
+    JMP @MainLoop                   ; and repeat
+    
+  @MoveCursor:
+    LDA btl_input
+    AND #$F0                        ; isolate arrow buttons
+    CMP #$20
+    BEQ @Cursor_Down
+    CMP #$10
+    BEQ @Cursor_Up
+    RTS
+  
+  @Cursor_Down:    
+    LDA battle_item          ; check the item position
+    CMP #9                   ; if its over 9, do not increase it any further
+    BCS :+
+      INC battle_item
+
+  : LDA btlcurs_y            ; if cursor_y is over 3, stop increasing it, so it stays at the bottom of the list
+    CMP #3
+    BCC :+
+        LDA item_pageswap    ; check item_pageswap, and if its over 6, stop increasing it
+        CMP #6               ; each increase shifts the bigstr_buf draw position
+        BCS @Return
+        INC item_pageswap
+        PLA
+        PLA
+        JMP @RedrawList      ; re-draw the whole thing
+        
+  : INC btlcurs_y    
+    RTS
+  @Cursor_Up:
+    LDA battle_item
+    BEQ :+
+    
+      DEC battle_item
+  
+  : LDA btlcurs_y
+    BNE :+
+        LDA item_pageswap
+        BEQ @Return
+        DEC item_pageswap
+        PLA
+        PLA
+        JMP @RedrawList
+    
+  : DEC btlcurs_y
+  @Return:  
+    RTS  
+  
+  
+    
+    
+    
+    
+    
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2857,7 +3172,7 @@ MenuSelection_Magic:
 ;;
 ;;    The the menu logic for selecting items on a 2x4 menu.  This is used by the
 ;;  main combat menu (FIGHT/RUN/MAGIC/etc), but also for other menus (like the
-;;  DRINK menu).
+;;  Item menu).
 ;;
 ;;    Menus can use fewer than 2x4 items as long as the cursor entries exist
 ;;  (for smaller menus some entries will be mirrored).
@@ -2905,8 +3220,8 @@ MenuSelection_2x4:
     BNE :+                          ; If there was no change in input...
       JSR UpdateInputDelayCounter   ; update delay counter
       BEQ @MainLoop                 ; not accepting input, repeat from main loop
-      LDA #$03
-      STA inputdelaycounter         ; otherwise reset delay counter (pointless, since UpdateInputDelayCounter
+      ;LDA #$03
+      ;STA inputdelaycounter         ; otherwise reset delay counter (pointless, since UpdateInputDelayCounter
       JMP @CheckButtons             ;   already does this), then check buttons
       
   : LDA #$05                        ; if there was a change of input, reset the delay counter (make it a little
@@ -3001,10 +3316,17 @@ SetNaturalPose:
     ;; JIGS - since previous code changes Asleep ailment to lying down... 
     
     BEQ @CheckHP                ; if they are... then they are crouching
+    
   @DoCrouching:
     LDA #CHARPOSE_CROUCH                
     STA btl_chardraw_pose, X
     RTS
+
+;@CheckSleep:    
+;    LDA ch_ailments, Y
+;    AND #AIL_SLEEP
+;    BEQ @CheckHP
+;    RTS
     
 @CheckHP:                       ; if they don't have poison/stun/sleep, we need to check their HP
     LDA ch_maxhp, Y     ; move max HP to $68B3,4
@@ -3170,6 +3492,9 @@ PlayFanfareAndCheer:
     ;; but this seems to do the trick?
 
     JSR UnhideAllCharacters
+    
+    LDA #$01
+    JSR UndrawNBattleBlocks_L     ; undraw the player name and HP box
 
     LDA #$53                    ; play fanfare music
     STA a:music_track
@@ -3217,7 +3542,7 @@ WalkForwardAndStrike:
     JSR UnhideCharacter
     LDA #0
     STA Hidden
-    ;STA Woosh ;; JIGS - ... it does a magic thing! there's no room for it though
+    STA Woosh ;; JIGS - ... it does a magic thing!
     
     LDA #-2
     STA btl_walkdirection                  ; walk the character to the left
@@ -3236,12 +3561,12 @@ WalkForwardAndStrike:
     AND #$02                            ; every other frame...
     BEQ @BFrame
         JSR PrepAttackSprite_AFrame     ; alternate between AFrame of animation
-       ; JSR WeeMagic ;; JIGS - heehee, it goes woosh!
+        JSR WeeMagic ;; JIGS - heehee, it goes woosh!
         ; otherwise, flow into magic processing
         JMP :+
     @BFrame:
         JSR PrepAttackSprite_BFrame     ; ... and BFrame of animation
-        ;JSR WeeMagic ;; wooooosh
+        JSR WeeMagic ;; wooooosh
     : JSR UpdateSprites_TwoFrames       ; redraw sprites on screen, do 2 frames.
     
       DEC btl_walkloopctr
@@ -3285,22 +3610,22 @@ UpdateSprites_TwoFrames:
 
     
 ;;JIGS - Here's the WeeMagic bit:
-;    WeeMagic:
-;    LDA btlattackspr_wepmag                 ; see if this is a weapon or a magic graphic
-;    BEQ :+                                 ; if weapon, RTS
+    WeeMagic:
+    LDA btlattackspr_wepmag                 ; see if this is a weapon or a magic graphic
+    BEQ :+                                 ; if weapon, RTS
     
-;    LDA btlattackspr_x  ; load the X spot
-;    SEC                 ; set carry
-;    SBC Woosh           ; subtract Woosh variable
-;    STA btlattackspr_x  ; save X spot
+    LDA btlattackspr_x  ; load the X spot
+    SEC                 ; set carry
+    SBC Woosh           ; subtract Woosh variable
+    STA btlattackspr_x  ; save X spot
     
-;    LDA Woosh           ; Load Woosh variable
-;    CLC                 ; 
-;    ADC #01             ; Add 2
-;    STA Woosh           ; and save... so every 2 frames, the magic moves 2 pixels to the left! 
+    LDA Woosh           ; Load Woosh variable
+    CLC                 ; 
+    ADC #02             ; Add 2
+    STA Woosh           ; and save... so every 2 frames, the magic moves 2 pixels to the left! 
 ;; unfortunately, the size of the battle screen means it would clip into an enemy's sprite...
 ;   
-;  : RTS
+  : RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3473,32 +3798,32 @@ lut_MainCombatBoxCursorPos:
 ;         X    Y
 ;  .BYTE $60, $9E    ; FIGHT
 ;  .BYTE $60, $AE    ; MAGIC
-;  .BYTE $60, $BE    ; DRINK
+;  .BYTE $60, $BE    ; Item
 ;  .BYTE $60, $CE    ; ITEM
 ;  .BYTE $90, $9E    ; RUN (repeated 4 times to pad to 2x4 menu)
 ;  .BYTE $90, $9E
 ;  .BYTE $90, $9E
 ;  .BYTE $90, $9E
 
-  .BYTE $80, $A6 ;9E    ; FIGHT
-  .BYTE $80, $B6 ;AE    ; MAGIC
-  .BYTE $80, $C6 ;BE    ; DRINK
-  .BYTE $80, $D6 ;CE    ; ITEM
-  .BYTE $B8, $A6 ;9E    ;; HIDE 
-  .BYTE $B8, $B6 ;AE    ;; FLEE 
-  .BYTE $B8, $A6 ;9E
-  .BYTE $B8, $B6 ;AE
+  .BYTE $08, $A6 ;9E    ; FIGHT
+  .BYTE $08, $B6 ;AE    ; MAGIC
+  .BYTE $08, $C6 ;BE    ; Item
+  .BYTE $08, $D6 ;CE    ; ITEM
+  .BYTE $40, $A6 ;9E    ;; HIDE 
+  .BYTE $40, $B6 ;AE    ;; FLEE 
+  .BYTE $40, $A6 ;9E
+  .BYTE $40, $B6 ;AE
   
   
 lut_ReadyCursorPos:
-  .BYTE $80, $A6 
-  .BYTE $80, $B6 
-  .BYTE $80, $A6 
-  .BYTE $80, $B6 
-  .BYTE $B8, $A6
-  .BYTE $B8, $A6
-  .BYTE $B8, $A6 
-  .BYTE $B8, $A6 
+  .BYTE $08, $C6 
+  .BYTE $08, $C6 
+  .BYTE $08, $C6 
+  .BYTE $08, $C6 
+  .BYTE $40, $C6
+  .BYTE $40, $C6
+  .BYTE $40, $C6 
+  .BYTE $40, $C6 
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3517,17 +3842,27 @@ lut_PlayerTargetCursorPos:
 ;  .BYTE $A0, $4C
 ;  .BYTE $A0, $64
 ;  .BYTE $A0, $7C
+;; originals
 
-  .BYTE $90, $34    ; char 0
-  .BYTE $90, $4C    ; char 1
-  .BYTE $90, $64    ; char 2
-  .BYTE $90, $7C    ; char 3
-  .BYTE $90, $34    ; mirrors
-  .BYTE $90, $4C
-  .BYTE $90, $64
-  .BYTE $90, $7C
+;; new backup
+;  .BYTE $B0, $34    ; char 0
+;  .BYTE $B0, $4C    ; char 1
+;  .BYTE $B0, $64    ; char 2
+;  .BYTE $B0, $7C    ; char 3
+;  .BYTE $B0, $34    ; mirrors
+;  .BYTE $B0, $4C
+;  .BYTE $B0, $64
+;  .BYTE $B0, $7C
+  
 
-  ;;JIGS - move left to make room for longer names and stuff!
+  .BYTE $B2, $34    ; char 0
+  .BYTE $B6, $4D    ; char 1
+  .BYTE $BA, $66    ; char 2
+  .BYTE $BE, $7F    ; char 3
+  .BYTE $B2, $34    ; mirrors
+  .BYTE $B6, $4D
+  .BYTE $BA, $66
+  .BYTE $BE, $7F
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3590,18 +3925,18 @@ lut_TargetMixCursorPos:
  ; .BYTE $70, $D6
  
  lut_MagicCursorPos:
-  .BYTE $18, $A6
-  .BYTE $18, $B6
-  .BYTE $18, $C6
-  .BYTE $18, $D6
-  .BYTE $58, $A6
-  .BYTE $58, $B6
-  .BYTE $58, $C6
-  .BYTE $58, $D6
-  .BYTE $98, $A6
-  .BYTE $98, $B6
-  .BYTE $98, $C6
-  .BYTE $98, $D6
+  .BYTE $10, $A6
+  .BYTE $10, $B6
+  .BYTE $10, $C6
+  .BYTE $10, $D6
+  .BYTE $50, $A6
+  .BYTE $50, $B6
+  .BYTE $50, $C6
+  .BYTE $50, $D6
+  .BYTE $90, $A6
+  .BYTE $90, $B6
+  .BYTE $90, $C6
+  .BYTE $90, $D6
   
   ;; JIGS - longer magic names
 ; lut_CombatItemMagicBox in Bank F tells the size of the box.
@@ -3616,37 +3951,49 @@ lut_TargetMixCursorPos:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  lut_ItemCursorPos  [$9FD7 :: 0x31FE7]
+;;  lut_EquipmentCursorPos 
 ;;
-;;    Pixel positions for the DRINK submenu.  It uses the 2x4 menu and
+;;    Pixel positions for the EQUIP submenu.  It uses the 2x4 menu and
 ;;  actually uses all 8 slots!
-lut_ItemCursorPos:
-  .BYTE $18, $A6
-  .BYTE $18, $B6
-  .BYTE $18, $C6
-  .BYTE $18, $D6
-  .BYTE $70, $A6
-  .BYTE $70, $B6
-  .BYTE $70, $C6
-  .BYTE $70, $D6
+
+lut_EquipmentCursorPos:
+  .BYTE $08, $A6
+  .BYTE $08, $B6
+  .BYTE $08, $C6
+  .BYTE $08, $D6
+  .BYTE $60, $A6
+  .BYTE $60, $B6
+  .BYTE $60, $C6
+  .BYTE $60, $D6
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  lut_DrinkCursorPos  [$9FE7 :: 0x31FF7]
+;;  lut_ItemCursorPos  [$9FE7 :: 0x31FF7]
 ;;
-;;    Pixel positions for the DRINK submenu.  It uses the 2x4 menu but only
+;;    Pixel positions for the Item submenu.  It uses the 2x4 menu but only
 ;;  has 2 entries (Heal and Pure potions), so those 2 entries are mirrored
 ;;  several times
 
-lut_DrinkCursorPos:
-  .BYTE $18, $A6        ; Heal
-  .BYTE $18, $B6        ; Hi-Heal
-  .BYTE $18, $A6        ; Ether
-  .BYTE $18, $B6        ; Pure
-  .BYTE $18, $A6        ; Eyedrop
-  .BYTE $18, $B6        ; Soft
-  .BYTE $18, $A6        ; Horn
-  .BYTE $18, $B6        ; SmokeBomb
+lut_ItemCursorPos:
+  .BYTE $08, $A6        ;
+  .BYTE $08, $B6        ;
+  .BYTE $08, $C6        ;
+  .BYTE $08, $D6        ;
+  .BYTE $08, $A6        ;
+  .BYTE $08, $B6        ;
+  .BYTE $08, $C6        ;
+  .BYTE $08, $D6        ;
+  
+  
+lut_EtherCursorPos:
+  .BYTE $18, $A6        ;
+  .BYTE $18, $B6        ;
+  .BYTE $18, $C6        ;
+  .BYTE $18, $D6        ;
+  .BYTE $58, $A6        ;
+  .BYTE $58, $B6        ;
+  .BYTE $58, $C6        ;
+  .BYTE $58, $D6        ;  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3831,7 +4178,7 @@ DrawBattleMessageCombatBox:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepareAndDrawSimpleCombatBox:
-    STY btl_weird_tmp                  ; backup Y (control code)
+    STY btl_weird_tmp           ; backup Y (control code)
     PHA                         ; backup A
     
     ASL A                       ; get pointer to this combat box's unformatted buffer
@@ -3842,7 +4189,7 @@ PrepareAndDrawSimpleCombatBox:
     STA $89                     ; put in $88,89
     
     LDY #$00
-    LDA btl_weird_tmp                   ; get the control code
+    LDA btl_weird_tmp           ; get the control code
     STA ($88), Y                ; write it to pos 0
     INY
     TXA
@@ -4816,29 +5163,29 @@ Battle_DoPlayerTurn:
       LDA @playerid                     ; A = attacker
       JMP PlayerAttackEnemy_Physical    ; Do the attack!
       
-  : LSR A                       ; shift out bit 3 ('drink' bit)
-    BCC :+                      ; if set... drink a potion!
-      TYA
-      PHA                           ; push command index
+  : LSR A                       ; shift out bit 3 ('Item' bit)
+    BCC :+                      ; if set... Item a potion!
+      ;TYA
+      ;PHA                           ; push command index
       
-      LDY @playerid
-      LDX btl_charcmdconsumeid, Y   ; get the potion they're using in X (0=heal, 1=pure)
-      DEC item_heal, X              ; actually remove the potion from their inventory
+      ;LDY @playerid
+      ;LDX btl_charcmdconsumeid, Y   ; get the potion they're using in X (0=heal, 1=pure)
+      ;DEC item_heal, X              ; actually remove the potion from their inventory
       
-      PLA
-      TAY                           ; restore command index
+      ;PLA
+      ;TAY                           ; restore command index
       
       LDA btl_charcmdbuf+1, Y       ; get the effect ID in A ($40 for heal, $41 for pure)
       LDX btl_charcmdbuf+2, Y       ; get the target in X
       LDY @playerid                 ; get the actor in Y
-      JMP Player_DoDrink
+      JMP Player_DoItem
       
-  : LSR A                       ; shift out bit 4 ('item' bit)
-    BCC :+                      ; if set... use item!
+  : LSR A                       ; shift out bit 4 ('equipment' bit)
+    BCC :+                      ; if set... use gear!
       LDA btl_charcmdbuf+1, Y       ; A = effect ID
       LDX btl_charcmdbuf+2, Y       ; X = target
       LDY @playerid                 ; Y = attacker
-      JMP Player_DoItem
+      JMP Player_DoEquipment
       
   : LSR A                       ; shift out bit 5 ('run' bit)
     BCC :+
@@ -4933,8 +5280,7 @@ Player_Hide:
   AND #AIL_DARK
   BEQ @CheckHide
     PLA
-    LDX #<CannotHideText
-    LDY #>CannotHideText
+    LDA #$53 ; Can't see to hide
     JMP @PrintStuff   
    
   @CheckHide: 
@@ -4943,8 +5289,7 @@ Player_Hide:
   LDA (CharStatsPointer), Y
   AND #$F0
   BEQ @Hide
-    LDX #<AlreadyHidden
-    LDY #>AlreadyHidden
+    LDA #$54 ; Already hidden!
     JMP @PrintStuff     
    
   @Hide:
@@ -4953,14 +5298,10 @@ Player_Hide:
   STA (CharStatsPointer), Y
   
   ; Draw the "Slipped into hiding" combat box
-  LDX #<HiddenText
-  LDY #>HiddenText
+  LDA #$52
   
   @PrintStuff:
-  LDA #$04                      
-  JSR DrawCombatBox_L
-  LDA #$02
-  STA btl_combatboxcount
+  JSR DrawBattleMessageCombatBox
   JMP RespondDelay_ClearCombatBoxes 
 
     
@@ -5039,7 +5380,7 @@ Battle_PlayerTryRun:
     ;; JIGS - Woah. Trying to do this instead:
     
     LDY #ch_battlestate - ch_stats  ; Get Battlestate (hiding)
-    LDA (CharStatsPointer), Y    ; JIGS - if hidden, level doesn't factor into it
+    LDA (CharStatsPointer), Y       ; JIGS - if hidden, level doesn't factor into it
     AND #$F0                        ; so the running should be easier to achieve
     BEQ :+
     LDX #15
@@ -5967,7 +6308,7 @@ DoPhysicalAttack:
     STA Hidden                   ; though depending on the logic, this may not be necessary... better safe than buggy though
   
   @OutputDamageBox:
-    LDA #$03                            ; output either damage or "Missed!"
+    LDA #$05                            ; output either damage or "Missed!"
     LDX #<(btl_unfmtcbtbox_buffer + $30);  to the #3 combat box
     LDY #>(btl_unfmtcbtbox_buffer + $30)
     JSR DrawCombatBox_L
@@ -6412,15 +6753,19 @@ DrawCharacterStatus:
     JSR SetAllNaturalPose
     JSR UpdateSprites_BattleFrame
 
-    LDA #22
+    ;;LDA #23
+    ;;STA dest_x       
+    ;;LDA #5
+    ;;STA dest_y
+    
+    LDA #29
     STA dest_x       
-    LDA #1
+    LDA #2
     STA dest_y
     
- @DrawString:
-    LDA #<@CharNamesandStatsString      ; load up the pointer from our pointer table
-    STA text_ptr                      ; put it in text_ptr
-    LDA #>@CharNamesandStatsString
+    LDA #<@CharacterAilmentsBattlestates   ; load up the pointer from our pointer table
+    STA text_ptr                           ; put it in text_ptr
+    LDA #>@CharacterAilmentsBattlestates
     STA text_ptr+1
     
     LDA #BANK_THIS
@@ -6429,33 +6774,34 @@ DrawCharacterStatus:
     JSR WaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
     LDA $2002                   ; clear toggle
     LDA #1
-    STA menustall         ; enable to write while PPU is on, I guess
-    JSR DrawComplexString ;  Draw Complex String, then exit!
+    STA menustall         ; enable to write while PPU is on
+    JMP DrawComplexString ;  Draw Complex String, then exit!
     
-    JSR BattleUpdatePPU                 ; reset scroll
-    JSR BattleUpdateAudio               ; update audio for the frame we just waited for
-    RTS
+    ;(these don't seem to have any effect on being taken out)
+    ;JSR BattleUpdatePPU                 ; reset scroll 
+    ;JSR BattleUpdateAudio               ; update audio for the frame we just waited for
+    ;RTS
 
-     ;; Name
-     ;; Ailment _ 3-digitHP
- @CharNamesandStatsString:
-  .BYTE $C8,$05
-  .byte $FB, $FF, $9B, $98, $9E, $97, $8D, $05  ; _ROUND
-  .byte $FB, $FF, $FF, $FF, $06, $05            ; ___Battle turn #  
-  .byte $F3, $FD, $FD, $FD, $FD, $FD, $FD, $FD, $F4, $05 ; box lines all over everywhere else!
-  .byte $FB, $05
-  .byte $FB,$10,$00,$05                         ; Character name, line break
-  .byte $FB,$10,$0D,$FF,$10,$02,$FF,$10,$05,$05 ; Hidden icon _ Ailment icon _ HP, line break
-  .byte $FB, $05                                ; line break
-  .byte $FB,$11,$00,$05
-  .byte $FB,$11,$0D,$FF,$11,$02,$FF,$11,$05,$05
-  .byte $FB, $05
-  .byte $FB,$12,$00,$05
-  .byte $FB,$12,$0D,$FF,$12,$02,$FF,$12,$05,$05
-  .byte $FB, $05
-  .byte $FB,$13,$00,$05
-  .byte $FB,$13,$0D,$FF,$13,$02,$FF,$13,$05,$05
-  .byte $FB, $00
+; @CharNamesandStatsString:
+;  .byte $FF,$10,$00,$05                         ; Character name, line break
+;  .byte $FF,$10,$0D,$FF,$10,$02,$FF,$10,$05,$01 ; Hidden icon _ Ailment icon _ HP, double line break
+;  .byte $FF,$11,$00,$05
+;  .byte $FF,$11,$0D,$FF,$11,$02,$FF,$11,$05,$01
+;  .byte $FF,$12,$00,$05
+;  .byte $FF,$12,$0D,$FF,$12,$02,$FF,$12,$05,$01
+;  .byte $FF,$13,$00,$05
+;  .byte $FF,$13,$0D,$FF,$13,$02,$FF,$13,$05,$01
+;  .byte $FF,$9D,$B8,$B5,$B1,$FF,$06,$00         ; Turn _ Battle turn #  
+
+@CharacterAilmentsBattlestates:
+  .byte $06,$01,$01,$05
+  .byte $10,$0D,$10,$02,$01,$05 ; Hidden icon _ Ailment icon
+  .byte $11,$0D,$11,$02,$01,$05
+  .byte $12,$0D,$12,$02,$01,$05
+  .byte $13,$0D,$13,$02,$00
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7816,31 +8162,31 @@ DrawCombatBox_Attack:
     
     ; source = magic
     LDA btl_attackid        ; see if the attack type is magic or a special attack
-    CMP #$42
-    BCS :+                  ; if it's magic...
+    CMP #$40
+    BCS :+                  ; if its an enemy attack, skip changing the ID
       CLC
       ADC #MG_START         ; add MG_START to the index to convert from a magic index to an item index.
-  : JMP @Print   
-    
-  @NotMagic:
-    CMP #$01                ; if source=1, it's a DRINK
-    BNE :+                          ; for drinks....
-      LDA btl_attackid              ; ... get the item ID for heal/pure potions
-      SEC                           ; subtract $40 because drink effects start at $40 -- get 0 for heal, 1 for pure
-      SBC #$40 - (item_heal - items); but then add item_heal-items to convert to the item ID for the heal potion/pure potion
-      BNE @Print                    ; (always branch)
+      JMP :+
       
-    ; Reach here if the source=item
-  : LDA btl_attacker
+  @NotMagic:
+    CMP #$01                ; if source=1, it's a Item
+    BNE @Equipment                  ; for Items....
+      LDA btl_attackid              ; ... get the item ID for heal/pure potions
+    : STA btl_attackbox_itemid+1    ; write item ID
+      LDA #$0E                      ; preface it with 0E, the command to draw an attack (item) name
+      JMP @Print                    ; (always branch)
+      
+  ; Reach here if the source=equipment
+  @Equipment:
+    LDA btl_attacker
     AND #$03
     TAX
     LDA btl_charcmditem, X          ; get the item ID from the cmd buffer
-    
+    STA btl_attackbox_itemid+1      ; write item ID
+    LDA #$0D                        ; use control code for weapon/armor names
     
   @Print:
-    STA btl_attackbox_itemid+1                       ; write item ID
-    LDA #$0E
-    STA btl_attackbox_itemid                       ; preface it with 0E, the command to draw an attack (item) name
+    STA btl_attackbox_itemid                       
     LDX #<btl_attackbox_itemid
     LDY #>btl_attackbox_itemid                    ; get pointer to that string in YX
     
@@ -7910,7 +8256,7 @@ DrawDamageCombatBox:
     LDX #<btltmp_damageblockbuffer                     ; YX is a a pointer to our text buffer in RAM
     LDY #>btltmp_damageblockbuffer
     INC btl_combatboxcount_alt      ; increment combat box counter
-    LDA #$03                        ; combat box ID 3
+    LDA #$05                        ; combat box ID 3
     JMP DrawCombatBox_RestoreAXY    ; Draw the combat box and exit
     
     @Data:                          ; data for "###DMG"
@@ -8018,8 +8364,8 @@ BtlMag_PrintMagicMessage:
       JSR Battle_ShowIneffective    ; if not, just show the 'Ineffective' message and exit
       JMP @Exit
       
-  : LDA btl_attackid               ; otherwise, get the attack type
-    CMP #$42                        ; if >= $42, it indicates an enemy attack
+  : LDX btl_attackid               ; otherwise, get the attack type
+    CPX #$40                        ; if >= $42, it indicates an enemy attack
     ;BCC :+                          ;   These messages are printed elsewhere, so just delay and exit
     ;  JSR RespondDelay              ;   Note that instead of BCC and these calls, it could just "BCS @DelayAndExit"
     ;  JMP @Exit                     ;   and save 6 bytes.  Whatev.
@@ -8028,14 +8374,14 @@ BtlMag_PrintMagicMessage:
     
     ;; JIGS - ^ good plan
       
-  : LDX btl_attackid               ; attack type in X
-    CPX #$40                        ; if >= $40, it is either a heal potion ($40), or a pure potion ($41)
-    BCC :+
-      CPX #$40                      ; if pure potion, just delay and exit (message already printed)
-      BNE @DelayAndExit             ;   note that this could be removed if the CMP #$42 above changed to CMP #$41
-      
-      LDA #BTLMSG_HPUP              ; if heal potion, print the "HP up" message
-      BNE @PrintMessage
+ ; : LDX btl_attackid               ; attack type in X
+ ;   CPX #$40                        ; if >= $40, it is either a heal potion ($40), or a pure potion ($41)
+ ;   BCC :+
+ ;     CPX #$40                      ; if pure potion, just delay and exit (message already printed)
+ ;     BNE @DelayAndExit             ;   note that this could be removed if the CMP #$42 above changed to CMP #$41
+ ;     
+ ;     LDA #BTLMSG_HPUP              ; if heal potion, print the "HP up" message
+ ;     BNE @PrintMessage
       
     ; reaches here if it's a legit spell ($00-$3F) -- value in X
   : LDA lut_MagicBattleMessages, X  ; Get the desired message to print
@@ -8339,7 +8685,7 @@ Enemy_DoAi:
       JMP ChooseAndAttackPlayer ; no AI -- just attack a random player
       
     ; use enemy AI
-    LDX #$10                ; get a pointer to this enemy's AI data
+  : LDX #$10                ; get a pointer to this enemy's AI data
     JSR MultiplyXA          ; $10 bytes per AI entry
     CLC                     ;   end result, of this math:  @aiptr points to this enemy's AI data
     ADC #<lut_EnemyAi
@@ -8349,7 +8695,7 @@ Enemy_DoAi:
     STA EnemyAIPointer+1   ; pointer to AI data
     
     LDY #$00
-    LDA (EnemyAIPointer), Y                 ; Get byte 0 (magic rate)
+    LDA (EnemyAIPointer), Y         ; Get byte 0 (magic rate)
     JSR EnemyAi_ShouldPerformAction ; See if we should do a magic attack
     BCS @CheckSpecialAttack         ; if not, jump ahead to check for special attacks
     
@@ -8389,7 +8735,7 @@ Enemy_DoAi:
     ; otherwise, do a special attack
   @DoSpecialAttack:
     LDY #en_aiatkpos            ; This block is the same as @DoMagicAttack -- the only difference
-    LDA (EnemyRAMPointer), Y             ;   is it cycles through the 4 enemy attack slots instead of the
+    LDA (EnemyRAMPointer), Y    ;   is it cycles through the 4 enemy attack slots instead of the
     AND #$03                    ;   8 magic slots.
     JSR @IncrementAiPos
     ADC #$0B
@@ -8402,7 +8748,7 @@ Enemy_DoAi:
       STA (EnemyRAMPointer), Y
       JMP @DoSpecialAttack
   : CLC
-    ADC #$42                    ; add $42 to the special attack ID to indicate it's a special attack (0-3F are magic, and 40,41 are heal/pure potions)
+    ADC #$40                    ; add $40 to the special attack ID to indicate it's a special attack (0-3F are magic)
     JMP Enemy_DoMagicEffect     ; and perform the special attack
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8530,7 +8876,7 @@ Battle_PrepareMagic:
     STX MagicPointer+1
     
     LDY #MAGDATA_EFFECT             ; get the effect byte
-    LDA (MagicPointer), Y         ; if it's nonzero (valid effect), jump ahead to @SpellOk
+    LDA (MagicPointer), Y           ; if it's nonzero (valid effect), jump ahead to @SpellOk
     BNE @SpellOk                    
     
         ; otherwise (spell with no IB effect, like EXIT), fall through to @Ineffective
@@ -8554,7 +8900,7 @@ Battle_PrepareMagic:
           BNE :+
           LDA #ALTBTLMSG_NOTHINGHAPPENS ; source=02 (item)
           BNE :++
-        : LDA #ALTBTLMSG_INEFFECTIVENOW ; source=00 or 01 (magic or drink)
+        : LDA #ALTBTLMSG_INEFFECTIVENOW ; source=00 or 01 (magic or Item)
       : JSR ShowAltBattleMessage_ClearAllBoxes  ; Show the battle message, then clear all boxes
    
         DEC HiddenMagic                 ; JIGS - set to 0 again, since its not going to happen anywhere else...
@@ -8586,25 +8932,325 @@ Battle_PrepareMagic:
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  Player_DoItem [$B3B5 :: 0x333C5]
+;;  Player_DoEquipment [$B3B5 :: 0x333C5]
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Player_DoItem:
+Player_DoEquipment:
     STA btl_attackid        ; record the attack ID
     LDA #$02                ; source = item
     JMP Player_DoMagicEffect
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  Player_DoDrink [$B3BD :: 0x333CD]
+;;  Player_DoItem [$B3BD :: 0x333CD]
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Player_DoDrink:
+Player_DoItem:
     STA btl_attackid        ; record the attack ID
-    LDA #$01                ; source = drink
-    JMP Player_DoMagicEffect
+    LDA #$01                ; source = Item
+    STA btlmag_magicsource      ; record the source
+    
+    TYA                         ; Y = attacker, put attacker in A
+    AND #$03
+    ORA #$80
+    STA btl_attacker            ; make sure high bit is set, and record them as an attacker
+    STX btl_defender            ; X contains the defender, record them as well
+    
+    LDA #$00
+    STA btlmag_playerhitsfx     ; player->player magic plays the 'heal' sound effect (ID 0)
+    
+    JSR ClearAltMessageBuffer   ; Clear alt message buffer
+    JSR DrawCombatBox_Attacker  ; Draw the attacker name box
+    JSR DrawCombatBox_Attack    ; Draw the spell name box
+    
+    INC HiddenMagic
+    
+    LDA btl_attacker
+    AND #$7F
+    LDX btlmag_magicsource
+    JSR WalkForwardAndCastMagic
+    
+    LDA btl_attackid
+    CMP #01
+    BEQ JumpHeal
+    CMP #02
+    BEQ JumpXHeal
+    CMP #03
+    BEQ JumpEther
+    CMP #04
+    BEQ JumpElixir
+    CMP #05
+    BEQ JumpPure
+    CMP #06
+    BEQ JumpSoft
+    CMP #07
+    BEQ JumpPhoenixDown
+    CMP #$0B
+    BEQ JumpEyedrops
+    CMP #$0C
+    BEQ JumpSmokebomb
+        
+    LDA #0 
+UseItem_WakeupBell:     ; if its not any of those it must be this
+    TAX
+    LDA ch_ailments, X
+    AND #$DF            ; clear out all ailments that aren't sleep
+    STA ch_ailments, X
+    TXA
+    CLC
+    ADC #$40
+    BNE UseItem_WakeupBell
+
+    LDX #WAKEUPBELL
+    DEC items, X           ; remove wakeup bell from inventory        
+    LDA #0
+    JSR PlayBattleSFX      ; play magic SFX
+    LDA #BTLMSG_WAKEUPBELL ; print "The bell rings loudly.."
+    JMP UseItem_End
+    
+    JumpHeal:        JMP UseItem_Heal
+    JumpXHeal:       JMP UseItem_XHeal
+    JumpEther:       JMP UseItem_Ether
+    JumpElixir:      JMP UseItem_Elixir
+    JumpPure:        JMP UseItem_Pure
+    JumpSoft:        JMP UseItem_Soft
+    JumpPhoenixDown: JMP UseItem_PhoenixDown
+    JumpEyedrops:    JMP UseItem_Eyedrops
+    JumpSmokebomb:   JMP UseItem_Smokebomb       
+
+UseItem_Heal:  
+    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR Battle_PlMag_IsPlayerValid
+    BNE UseItem_Ineffective
+    
+    LDA #BTL_HEAL_POTENCY
+    STA btlmag_effectivity
+    JSR BtlMag_Effect_RecoverHP
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX    
+    JSR BtlMag_SavePlayerDefenderStats ; save the healed HP
+
+    LDX #X_HEAL
+    LDA #BTLMSG_HPUP
+    JMP UseItem_End_RemoveItem
+    
+UseItem_XHeal:  
+    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR Battle_PlMag_IsPlayerValid
+    BNE UseItem_Ineffective
+    
+    LDA #BTL_XHEAL_POTENCY
+    STA btlmag_effectivity
+    JSR BtlMag_Effect_RecoverHP
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX     
+    JSR BtlMag_SavePlayerDefenderStats ; save the healed HP
+    
+    LDA #BTLMSG_HPUP                   ; print "HP up!"
+    LDX #HEAL
+    JMP UseItem_End_RemoveItem
+    
+UseItem_Elixir:
+   JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+   JSR Battle_PlMag_IsPlayerValid
+   BNE UseItem_Ineffective
+   
+   JSR BtlMag_SetHPToMax
+   
+    LDA btl_defender
+    AND #$03
+    JSR ShiftLeft6
+    CLC
+    ADC #ch_mp - ch_stats    ; $0, $40, $80, or $C0 + $30
+    TAX        
+
+    LDY #0 
+   @InnerLoop:
+    LDA ch_stats, X ; X is pointer to level 1 MP 
+    AND #$0F        ; clear current mp entirely, leaving only max mp
+    STA tmp+1       ; back it up
+    ASL A           ; shift by 4
+    ASL A
+    ASL A
+    ASL A           ; to put max mp into high bits--current mp
+    ORA tmp+1       ; add max mp back in
+    STA ch_stats, X ; and save it
+    INY
+    TXA          
+    CLC
+    ADC #1          ; +1 for each spell level
+    TAX
+    CPY #08
+    BNE @InnerLoop
+
+   LDA btlmag_playerhitsfx
+   JSR PlayBattleSFX     
+   JSR BtlMag_SavePlayerDefenderStats ; save the healed HP
+   LDA #BTLMSG_ELIXIR
+   LDX #ELIXIR
+   JMP UseItem_End_RemoveItem
+
+UseItem_Ineffective:            ; put here so it can be BCC'd to easily
+    LDA #ALTBTLMSG_INEFFECTIVENOW 
+    JSR ShowAltBattleMessage_ClearAllBoxes  
+    DEC HiddenMagic    
+    RTS         
+    
+UseItem_Pure:
+    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    LDA #AIL_POISON
+    STA btlmag_effectivity
+    
+    JSR BtlMag_Effect_CureAilment
+    BCC UseItem_Ineffective
+    
+    LDX #PURE
+    JMP UseItem_AilmentCured
+    
+UseItem_Soft:
+    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    LDA #AIL_STONE
+    STA btlmag_effectivity
+    
+    JSR BtlMag_Effect_CureAilment
+    BCC UseItem_Ineffective
+    
+    LDA btlmag_defender_hp+1    ; check high byte of HP
+    BNE :+                      ; if its over 0, they have enough HP
+        LDA btlmag_defender_hp  ; if its 0, check low byte
+        BNE :+                  ; if low byte is above 0, do nothing
+        LDA #25                 ; otherwise, give them 25 HP
+        STA btlmag_defender_hp
+    
+  : LDX #SOFT
+UseItem_AilmentCured:
+    DEC items, X                       ; remove item from inventory
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX  
+    JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
+    LDA #$29                           ; print "Cured!"
+    JMP UseItem_End
+  
+UseItem_PhoenixDown:
+    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    LDA #AIL_DEAD
+    STA btlmag_effectivity
+    
+    JSR BtlMag_Effect_CureAilment
+    BCC UseItem_Ineffective
+    
+    LDA #25                            ; give them 25 HP
+    STA btlmag_defender_hp
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX  
+    JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
+    LDA #BTLMSG_LIFE
+    LDX #PHOENIXDOWN    
+    JMP UseItem_End_RemoveItem
+  
+UseItem_Smokebomb:            ; adds $10 to all battlestate ch_stats to make the party hidden
+    
+    LDA #0 
+   @Loop: 
+    TAX
+    LDA ch_ailments, X
+    AND #(AIL_DEAD | AIL_STONE)
+    BNE @Next                  ; if character is dead or stoned, skip
+    
+    LDA ch_battlestate, X      
+    ORA #$10
+    STA ch_battlestate, X
+    
+    @Next:
+    TXA
+    CLC
+    ADC #$40
+    BNE @Loop
+    
+    JSR PlayDoorSFX      ; do the smokebomb explosion/door SFX
+    LDX #SMOKEBOMB
+    LDA #BTLMSG_HIDING    
+    JMP UseItem_End_RemoveItem
+    
+UseItem_Ether:
+    LDA btl_attacker
+    AND #$03
+    ASL A
+    ASL A
+    TAY
+    LDA btl_charcmdbuf+3, Y ; all this to get the magic level to use the ether on!
+    STA tmp
+    
+    LDA btl_defender
+    AND #$03
+    JSR ShiftLeft6
+    TAX 
+
+    LDA ch_ailments, X
+    AND #(AIL_DEAD | AIL_STONE)
+    BNE Eyedrops_Ineffective ; if character is dead or stoned, ineffective
+    
+    TXA
+    CLC
+    ADC #ch_mp - ch_stats
+    ADC tmp
+    TAX
+    
+    LDA ch_stats, X ; X is pointer to level MP 
+    AND #$0F        ; clear current mp entirely, leaving only max mp
+    STA tmp+1       ; back it up
+    ASL A           ; shift by 4
+    ASL A
+    ASL A
+    ASL A           ; to put max mp into high bits--current mp
+    ORA tmp+1       ; add max mp back in
+    STA ch_stats, X ; and save it
+    
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX     
+    LDA btl_defender
+    AND #$03
+    JSR FlashCharacterSprite
+    LDA #BTLMSG_ETHER
+    LDX #ETHER
+    JMP UseItem_End_RemoveItem
+    
+UseItem_Eyedrops:
+    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    LDA #AIL_DARK
+    STA btlmag_effectivity
+        
+    JSR BtlMag_Effect_CureAilment
+    BCS :+
+
+Eyedrops_Ineffective: ; (the other one is too far away...)
+    LDA #ALTBTLMSG_INEFFECTIVENOW 
+    JSR ShowAltBattleMessage_ClearAllBoxes  
+    DEC HiddenMagic    
+    RTS         
+    
+  : LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX  
+    JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX  
+    LDX #EYEDROPS
+    LDA #BTLMSG_EYEDROPS
+    
+UseItem_End_RemoveItem:
+    DEC items, X
+
+UseItem_End:
+    JSR DrawBtlMsg_ClearCombatBoxes ; does not seem to clear boxes properly
+    JSR ClearAllCombatBoxes
+    DEC HiddenMagic
+    RTS
+
+    
+    
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8622,7 +9268,7 @@ Player_DoMagic:             ; Player Magic
 ;;  Player_DoMagicEffect [$B3CA :: 0x333DA]
 ;;
 ;;    Does EVERYTHING for when a player is taking their turn and is doing
-;;  a MAGIC/DRINK/ITEM action.
+;;  a MAGIC/Item/ITEM action.
 ;;
 ;;  input:
 ;;    btl_attackid = the ID of the magic effect to perform
@@ -8662,7 +9308,7 @@ Player_DoMagicEffect:
     ;; back to original code
         
     LDY #ch_ailments - ch_stats  ; check their ailments to see if they're muted.  This is weird, as it's done for
-    LDA (CharStatsPointer), Y    ; Magic (makes sense), items (weird), and DRINK (no sense at all)
+    LDA (CharStatsPointer), Y    ; Magic (makes sense), items (weird), and Item (no sense at all)
     AND #AIL_MUTE                ; You could argue this is BUGGED
     BEQ :+
       LDA #ALTBTLMSG_SILENCED_1                 ; if muted, just print "Silenced" message
@@ -9129,6 +9775,7 @@ BtlMag_LoadPlayerDefenderStats:
     LDA btlmag_playerhitsfx
     JSR PlayBattleSFX               ; play the appropriate sound effect for this spell
    
+BtlMag_LoadPlayerDefenderStats_NoSFX:
     LDA btl_defender
     JSR PrepCharStatPointers        ; prep entityptr's
  
@@ -9272,8 +9919,8 @@ PreparePlayerMagAttack:
       LDA btl_attacker              ;  would make more sense to do this in WalkForwardAndCastMagic
       AND #$7F
       
-  : LDX btlmag_magicsource          ; X=0 for magic (indicating we should do magic casting animation)
-   JMP WalkForwardAndCastMagic
+   LDX btlmag_magicsource          ; X=0 for magic (indicating we should do magic casting animation)
+ : JMP WalkForwardAndCastMagic
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10017,10 +10664,13 @@ BtlMag_Effect_CureAilment:
     STA btlmag_defender_ailments
     JSR BtlMag_MarkSpellConnected   ; and mark the spell as connected
   ; RTS                             ; <- flow into
+    SEC
+    RTS   ; C set if it worked
   
     
 ;; Common RTS that is branched to by various surrounding code
 BtlMag_Effect_CureAil_RTS:
+    CLC                      ; C cleared if it didn't work
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10947,8 +11597,6 @@ DrawEnemyEffect_4Large:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawEnemyEffect_Mix:
-    PLA  ;; JIGS - shouldn't it be doing this first...?
-    
     ;PHA                             ; push slot AGAIN (it's already pushed -- this is pointless)
     CMP #$02                        ; if slot is < 2
     BCS :+
@@ -10957,7 +11605,7 @@ DrawEnemyEffect_Mix:
                                     ;   are large and are placed in the same spot as the 4large formation
     
     ; Jumps here if slot >= 2 (one of the small enemies)
-  : ;PLA                         ; undo our pointless push
+  : PLA                         ; undo our pointless push ; JIGS - this one is not pointless somehow.
     SEC
     SBC #$02                    ; subtract 2 to make the index [0-5], which indexes the small enemy slots
     ASL A
@@ -11468,20 +12116,6 @@ data_BattleSoundEffects:
   .BYTE $00, $00, $00, $00, $01,     $2F, $07, $04
   .BYTE $00, $00, $00, $00, $01,     $00, $00, $01
   
-  
-
-HiddenText:
-.BYTE $9C, $AF, $AC, $B3, $B3, $A8, $A7, $C1, $AC, $B1, $B7, $B2, $C1, $AB, $AC, $A7, $AC, $B1, $AA, $C3, $C0, $00
-  ; Slipped into hiding...
-  
-CannotHideText:
-.byte $8C, $A4, $B1, $BE, $B7, $C1, $B6, $A8, $A8, $C1, $B7, $B2, $C1, $B6, $A8, $A8, $C4, $00
-  ; Can't see to hide!
-
-AlreadyHidden:
-.byte $8A, $AF, $B5, $A8, $A4, $A7, $BC, $C1, $AB, $AC, $A7, $A7, $A8, $B1, $C4, $00
- ; Already hidden!
-
 
  
   

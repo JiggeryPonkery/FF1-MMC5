@@ -1174,7 +1174,7 @@ LoadBattleSpritesLUT_1:
 
     
     
-    
+.byte "End of Bank 9"    
     
     
     

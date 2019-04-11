@@ -5,6 +5,11 @@
 
 .export data_BattleMessages
 .export lut_ItemPrices
+.export lut_ItemNamePtrTbl
+.export lut_WeaponArmorNamePtrTbl
+.export WeaponArmorPrices
+.export lut_EnemyAttack
+
 .import MultiplyXA
 
 BANK_THIS = $0A
@@ -14,6 +19,7 @@ BANK_THIS = $0A
 ; I'm not going to switch everything back to 6 letter spells now!
 
 ;; First, monster attacks:
+lut_EnemyAttack:
 
 .word EnemyAttack1
 .word EnemyAttack2
@@ -105,647 +111,428 @@ EnemyAttack26:
 ; I sorted all this out so you can rename items and *re-organize* them easier, which FFHackster lacks the ability to do. 
 ; And there was just so much wasted space. So much. Now you can fill it with 8-letter item names. 
 
-  .ALIGN  $100
+;  .ALIGN  $100
+
+lut_ItemNamePtrTbl:
+.word BLANK             ; 00 
+.word NAME_HEAL         ; 01 
+.word NAME_X_HEAL       ; 02
+.word NAME_ETHER        ; 03
+.word NAME_ELIXIR       ; 04
+.word NAME_PURE         ; 05
+.word NAME_SOFT         ; 06
+.word NAME_P_DOWN       ; 07
+.word NAME_TENT         ; 08 
+.word NAME_CABIN        ; 09 
+.word NAME_HOUSE        ; 0A 
+.word NAME_EYEDROPS     ; 0B
+.word NAME_SMOKEBOMB    ; 0C
+.word NAME_HORN         ; 0D
+.word BLANK             ; 0E
+.word BLANK             ; 0F
+
+;; Key Items
+.word NAME_LUTE         ; 10 
+.word NAME_CROWN        ; 11 
+.word NAME_CRYSTAL      ; 12 
+.word NAME_HERB         ; 13 
+.word NAME_KEY          ; 14 
+.word NAME_TNT          ; 15 
+.word NAME_ADAMANT      ; 16 
+.word NAME_SLAB         ; 17 
+.word NAME_RUBY         ; 18 
+.word NAME_ROD          ; 19
+.word NAME_FLOATER      ; 1A
+.word NAME_CHIME        ; 1B
+.word NAME_TAIL         ; 1C
+.word NAME_CUBE         ; 1D
+.word NAME_BOTTLE       ; 1E
+.word NAME_OXYALE       ; 1F
+.word NAME_CANOE        ; 20
+.word BLANK             ; 21
+.word BLANK             ; 22
+.word BLANK             ; 23
+.word BLANK             ; 24
+.word BLANK             ; 25
+.word BLANK             ; 26
+.word BLANK             ; 27
+.word BLANK             ; 28
+.word BLANK             ; 29
+.word BLANK             ; 2A
+.word BLANK             ; 2B
+.word ORB1              ; 2C
+.word ORB2              ; 2D
+.word ORB3              ; 2E
+.word ORB4              ; 2F
+
+.word SPELL1       ; 30
+.word SPELL2       ; 31
+.word SPELL3       ; 32
+.word SPELL4       ; 33
+.word SPELL5       ; 34
+.word SPELL6       ; 35
+.word SPELL7       ; 36
+.word SPELL8       ; 37
+.word SPELL9       ; 38
+.word SPELL10      ; 39
+.word SPELL11      ; 3A
+.word SPELL12      ; 3B
+.word SPELL13      ; 3C
+.word SPELL14      ; 3D
+.word SPELL15      ; 3E
+.word SPELL16      ; 3F
+.word SPELL17      ; 40
+.word SPELL18      ; 41
+.word SPELL19      ; 42
+.word SPELL20      ; 43
+.word SPELL21      ; 44
+.word SPELL22      ; 45
+.word SPELL23      ; 46
+.word SPELL24      ; 47
+.word SPELL25      ; 48
+.word SPELL26      ; 49
+.word SPELL27      ; 4A
+.word SPELL28      ; 4B
+.word SPELL29      ; 4C
+.word SPELL30      ; 4D
+.word SPELL31      ; 4E
+.word SPELL32      ; 4F
+.word SPELL33      ; 50
+.word SPELL34      ; 51
+.word SPELL35      ; 52
+.word SPELL36      ; 53
+.word SPELL37      ; 54
+.word SPELL38      ; 55
+.word SPELL39      ; 56
+.word SPELL40      ; 57
+.word SPELL41      ; 58
+.word SPELL42      ; 59
+.word SPELL43      ; 5A
+.word SPELL44      ; 5B
+.word SPELL45      ; 5C
+.word SPELL46      ; 5D
+.word SPELL47      ; 5E
+.word SPELL48      ; 5F
+.word SPELL49      ; 60
+.word SPELL50      ; 61
+.word SPELL51      ; 62
+.word SPELL52      ; 63
+.word SPELL53      ; 64
+.word SPELL54      ; 65
+.word SPELL55      ; 66
+.word SPELL56      ; 67
+.word SPELL57      ; 68
+.word SPELL58      ; 69
+.word SPELL59      ; 6A
+.word SPELL60      ; 6B
+.word SPELL61      ; 6C
+.word SPELL62      ; 6D
+.word SPELL63      ; 6E
+.word SPELL64      ; 6F
+
+.word MoneyChest1  ; 70
+.word MoneyChest2  ; 71
+.word MoneyChest3  ; 72
+.word MoneyChest4  ; 73
+.word MoneyChest5  ; 74
+.word MoneyChest6  ; 75
+.word MoneyChest7  ; 76
+.word MoneyChest8  ; 77
+.word MoneyChest9  ; 78
+.word MoneyChest10 ; 79
+.word MoneyChest11 ; 7A
+.word MoneyChest12 ; 7B
+.word MoneyChest13 ; 7C
+.word MoneyChest14 ; 7D
+.word MoneyChest15 ; 7E
+.word MoneyChest16 ; 7F
+.word MoneyChest17 ; 80
+.word MoneyChest18 ; 81
+.word MoneyChest19 ; 82
+.word MoneyChest20 ; 83
+.word MoneyChest21 ; 84
+.word MoneyChest22 ; 85
+.word MoneyChest23 ; 86
+.word MoneyChest24 ; 87
+.word MoneyChest25 ; 88
+.word MoneyChest26 ; 89
+.word MoneyChest27 ; 8A
+.word MoneyChest28 ; 8B
+.word MoneyChest29 ; 8C
+.word MoneyChest30 ; 8D
+.word MoneyChest31 ; 8E
+.word MoneyChest32 ; 8F
+.word MoneyChest33 ; 90
+.word MoneyChest34 ; 91
+.word MoneyChest35 ; 92
+.word MoneyChest36 ; 93
+.word MoneyChest37 ; 94
+.word MoneyChest38 ; 95
+.word MoneyChest39 ; 96
+.word MoneyChest40 ; 97
+.word MoneyChest41 ; 98
+.word MoneyChest42 ; 99
+.word MoneyChest43 ; 9A
+.word MoneyChest44 ; 9B
+.word MoneyChest45 ; 9C
+.word MoneyChest46 ; 9D
+.word MoneyChest47 ; 9E
+.word MoneyChest48 ; 9F
+.word MoneyChest49 ; A0
+.word MoneyChest50 ; A1
+.word MoneyChest51 ; A2
+.word MoneyChest52 ; A3
+.word MoneyChest53 ; A4
+.word MoneyChest54 ; A5
+.word MoneyChest55 ; A6
+.word MoneyChest56 ; A7
+.word MoneyChest57 ; A8
+.word MoneyChest58 ; A9
+.word MoneyChest59 ; AA
+.word MoneyChest60 ; AB
+.word MoneyChest61 ; AC
+.word MoneyChest62 ; AD
+.word MoneyChest63 ; AE
+.word MoneyChest64 ; AF
+.word MoneyChest65 ; B0
+.word MoneyChest66 ; B1
+.word MoneyChest67 ; B2
+.word MoneyChest68 ; B3
+.word MoneyChest69 ; B4
+.word MoneyChest70 ; B5
+.word MoneyChest71 ; B6
+.word MoneyChest72 ; B7
+.word MoneyChest73 ; B8
+.word MoneyChest74 ; B9
+.word MoneyChest75 ; BA
+.word MoneyChest76 ; BB
+.word MoneyChest77 ; BC
+.word MoneyChest78 ; BD
+.word MoneyChest79 ; BE
+.word MoneyChest80 ; BF
+
+.word CLASS1       ; C0
+.word CLASS2       ; C1
+.word CLASS3       ; C2
+.word CLASS4       ; C3
+.word CLASS5       ; C4
+.word CLASS6       ; C5
+.word CLASS7       ; C6
+.word CLASS8       ; C7
+.word CLASS9       ; C8
+.word CLASS10      ; C9
+.word CLASS11      ; CA
+.word CLASS12      ; CB
 
 
-.word START        ; 00 
-.word HEAL         ; 01 
-.word PURE         ; 02 
-.word SOFT         ; 03 
-.word TENT         ; 04 
-.word CABIN        ; 05 
-.word HOUSE        ; 06 
-.word LUTE         ; 07 
-.word CROWN        ; 08 
-.word CRYSTAL      ; 09 
-.word HERB         ; 0A 
-.word KEY          ; 0B 
-.word TNT          ; 0C 
-.word ADAMANT      ; 0D 
-.word SLAB         ; 0E 
-.word RUBY         ; 0F 
-.word ROD          ; 10
-.word FLOATER      ; 11
-.word CHIME        ; 12
-.word TAIL         ; 13
-.word CUBE         ; 14
-.word BOTTLE       ; 15
-.word OXYALE       ; 16
-.word CANOE        ; 17
-.word ORB1         ; 18
-.word ORB2         ; 19
-.word ORB3         ; 1A
-.word ORB4         ; 1B
-.word Weapon1      ; 1C
-.word Weapon2      ; 1D small knife
-.word Weapon3      ; 1E wooden staff
-.word Weapon4      ; 1F
-.word Weapon5      ; 20
-.word Weapon6      ; 21
-.word Weapon7      ; 22
-.word Weapon8      ; 23
-.word Weapon9      ; 24
-.word Weapon10     ; 25
-.word Weapon11     ; 26
-.word Weapon12     ; 27
-.word Weapon13     ; 28
-.word Weapon14     ; 29
-.word Weapon15     ; 2A
-.word Weapon16     ; 2B
-.word Weapon17     ; 2C
-.word Weapon18     ; 2D
-.word Weapon19     ; 2E
-.word Weapon20     ; 2F
-.word Weapon21     ; 30
-.word Weapon22     ; 31
-.word Weapon23     ; 32
-.word Weapon24     ; 33
-.word Weapon25     ; 34
-.word Weapon26     ; 35
-.word Weapon27     ; 36
-.word Weapon28     ; 37
-.word Weapon29     ; 38
-.word Weapon30     ; 39
-.word Weapon31     ; 3A
-.word Weapon32     ; 3B
-.word Weapon33     ; 3C
-.word Weapon34     ; 3D
-.word Weapon35     ; 3E
-.word Weapon36     ; 3F
-.word Weapon37     ; 40
-.word Weapon38     ; 41
-.word Weapon39     ; 42
-.word Weapon40     ; 43
-.word Armor1       ; 44
-.word Armor2       ; 45
-.word Armor3       ; 46
-.word Armor4       ; 47
-.word Armor5       ; 48
-.word Armor6       ; 49
-.word Armor7       ; 4A
-.word Armor8       ; 4B
-.word Armor9       ; 4C
-.word Armor10      ; 4D
-.word Armor11      ; 4E
-.word Armor12      ; 4F
-.word Armor13      ; 50
-.word Armor14      ; 51
-.word Armor15      ; 52
-.word Armor16      ; 53
-.word Armor17      ; 54
-.word Armor18      ; 55
-.word Armor19      ; 56
-.word Armor20      ; 57
-.word Armor21      ; 58
-.word Armor22      ; 59
-.word Armor23      ; 5A
-.word Armor24      ; 5B
-.word Armor25      ; 5C
-.word Armor26      ; 5D
-.word Armor27      ; 5E
-.word Armor28      ; 5F
-.word Armor29      ; 60
-.word Armor30      ; 61
-.word Armor31      ; 62
-.word Armor32      ; 63
-.word Armor33      ; 64
-.word Armor34      ; 65
-.word Armor35      ; 66
-.word Armor36      ; 67
-.word Armor37      ; 68
-.word Armor38      ; 69
-.word Armor39      ; 6A
-.word Armor40      ; 6B
-.word MoneyChest1  ; 6C
-.word MoneyChest2  ; 6D
-.word MoneyChest3  ; 6E
-.word MoneyChest4  ; 6F
-.word MoneyChest5  ; 70
-.word MoneyChest6  ; 71
-.word MoneyChest7  ; 72
-.word MoneyChest8  ; 73
-.word MoneyChest9  ; 74
-.word MoneyChest10 ; 75
-.word MoneyChest11 ; 76
-.word MoneyChest12 ; 77
-.word MoneyChest13 ; 78
-.word MoneyChest14 ; 79
-.word MoneyChest15 ; 7A
-.word MoneyChest16 ; 7B
-.word MoneyChest17 ; 7C
-.word MoneyChest18 ; 7D
-.word MoneyChest19 ; 7E
-.word MoneyChest20 ; 7F
-.word MoneyChest21 ; 80
-.word MoneyChest22 ; 81
-.word MoneyChest23 ; 82
-.word MoneyChest24 ; 83
-.word MoneyChest25 ; 84
-.word MoneyChest26 ; 85
-.word MoneyChest27 ; 86
-.word MoneyChest28 ; 87
-.word MoneyChest29 ; 88
-.word MoneyChest30 ; 89
-.word MoneyChest31 ; 8A
-.word MoneyChest32 ; 8B
-.word MoneyChest33 ; 8C
-.word MoneyChest34 ; 8D
-.word MoneyChest35 ; 8E
-.word MoneyChest36 ; 8F
-.word MoneyChest37 ; 90
-.word MoneyChest38 ; 91
-.word MoneyChest39 ; 92
-.word MoneyChest40 ; 93
-.word MoneyChest41 ; 94
-.word MoneyChest42 ; 95
-.word MoneyChest43 ; 96
-.word MoneyChest44 ; 97
-.word MoneyChest45 ; 98
-.word MoneyChest46 ; 99
-.word MoneyChest47 ; 9A
-.word MoneyChest48 ; 9B
-.word MoneyChest49 ; 9C
-.word MoneyChest50 ; 9D
-.word MoneyChest51 ; 9E
-.word MoneyChest52 ; 9F
-.word MoneyChest53 ; A0
-.word MoneyChest54 ; A1
-.word MoneyChest55 ; A2
-.word MoneyChest56 ; A3
-.word MoneyChest57 ; A4
-.word MoneyChest58 ; A5
-.word MoneyChest59 ; A6
-.word MoneyChest60 ; A7
-.word MoneyChest61 ; A8
-.word MoneyChest62 ; A9
-.word MoneyChest63 ; AA
-.word MoneyChest64 ; AB
-.word MoneyChest65 ; AC
-.word MoneyChest66 ; AD
-.word MoneyChest67 ; AE
-.word MoneyChest68 ; AF
-.word SPELL1       ; B0
-.word SPELL2       ; B1
-.word SPELL3       ; B2
-.word SPELL4       ; B3
-.word SPELL5       ; B4
-.word SPELL6       ; B5
-.word SPELL7       ; B6
-.word SPELL8       ; B7
-.word SPELL9       ; B8
-.word SPELL10      ; B9
-.word SPELL11      ; BA
-.word SPELL12      ; BB
-.word SPELL13      ; BC
-.word SPELL14      ; BD
-.word SPELL15      ; BE
-.word SPELL16      ; BF
-.word SPELL17      ; C0
-.word SPELL18      ; C1
-.word SPELL19      ; C2
-.word SPELL20      ; C3
-.word SPELL21      ; C4
-.word SPELL22      ; C5
-.word SPELL23      ; C6
-.word SPELL24      ; C7
-.word SPELL25      ; C8
-.word SPELL26      ; C9
-.word SPELL27      ; CA
-.word SPELL28      ; CB
-.word SPELL29      ; CC
-.word SPELL30      ; CD
-.word SPELL31      ; CE
-.word SPELL32      ; CF
-.word SPELL33      ; D0
-.word SPELL34      ; D1
-.word SPELL35      ; D2
-.word SPELL36      ; D3
-.word SPELL37      ; D4
-.word SPELL38      ; D5
-.word SPELL39      ; D6
-.word SPELL40      ; D7
-.word SPELL41      ; D8
-.word SPELL42      ; D9
-.word SPELL43      ; DA
-.word SPELL44      ; DB
-.word SPELL45      ; DC
-.word SPELL46      ; DD
-.word SPELL47      ; DE
-.word SPELL48      ; DF
-.word SPELL49      ; E0
-.word SPELL50      ; E1
-.word SPELL51      ; E2
-.word SPELL52      ; E3
-.word SPELL53      ; E4
-.word SPELL54      ; E5
-.word SPELL55      ; E6
-.word SPELL56      ; E7
-.word SPELL57      ; E8
-.word SPELL58      ; E9
-.word SPELL59      ; EA
-.word SPELL60      ; EB
-.word SPELL61      ; EC
-.word SPELL62      ; ED
-.word SPELL63      ; EE
-.word SPELL64      ; EF
-.word CLASS1       ; F0
-.word CLASS2       ; F1
-.word CLASS3       ; F2
-.word CLASS4       ; F3
-.word CLASS5       ; F4
-.word CLASS6       ; F5
-.word CLASS7       ; F6
-.word CLASS8       ; F7
-.word CLASS9       ; F8
-.word CLASS10      ; F9
-.word CLASS11      ; FA
-.word CLASS12      ; FB
+lut_WeaponArmorNamePtrTbl:
+.word Weapon1      ; 0  ; Wooden Nunchuck
+.word Weapon2      ; 1  ; Small Knife
+.word Weapon3      ; 2  ; Wooden Staff
+.word Weapon4      ; 3  ; Rapier
+.word Weapon5      ; 4  ; Iron Hammer
+.word Weapon6      ; 5  ; Short Sword
+.word Weapon7      ; 6  ; Hand Axe
+.word Weapon8      ; 7  ; Scimitar
+.word Weapon9      ; 8  ; Iron Nunchucks
+.word Weapon10     ; 9  ; Large Knife
+.word Weapon11     ; A  ; Iron Staff
+.word Weapon12     ; B  ; Sabre
+.word Weapon13     ; C  ; Long Sword
+.word Weapon14     ; D  ; Great Axe
+.word Weapon15     ; E  ; Falchion
+.word Weapon16     ; F  ; Silver Knife
+.word Weapon17     ; 10 ; Silver Sword
+.word Weapon18     ; 11 ; Silver Hammer
+.word Weapon19     ; 12 ; Silver Axe
+.word Weapon20     ; 13 ; Flame Sword
+.word Weapon21     ; 14 ; Ice Sword
+.word Weapon22     ; 15 ; Dragon Sword
+.word Weapon23     ; 16 ; Giant Sword
+.word Weapon24     ; 17 ; Sun Sword
+.word Weapon25     ; 18 ; Coral Sword
+.word Weapon26     ; 19 ; Were Sword
+.word Weapon27     ; 1A ; Rune Sword
+.word Weapon28     ; 1B ; Power Staff
+.word Weapon29     ; 1C ; Light Axe
+.word Weapon30     ; 1D ; Heal Staff
+.word Weapon31     ; 1E ; Mage Staff
+.word Weapon32     ; 1F ; Defense Sword
+.word Weapon33     ; 20 ; Wizard Staff
+.word Weapon34     ; 21 ; Vorpal Sword
+.word Weapon35     ; 22 ; CatClaw
+.word Weapon36     ; 23 ; Thor Hammer
+.word Weapon37     ; 24 ; Bane Sword
+.word Weapon38     ; 25 ; Katana
+.word Weapon39     ; 26 ; Excalibur
+.word Weapon40     ; 27 ; Masamune
+.word Weapon41     ; 28
+.word Weapon42     ; 29
+.word Weapon43     ; 2A
+.word Weapon44     ; 2B
+.word Weapon45     ; 2C
+.word Weapon46     ; 2D
+.word Weapon47     ; 2E
+.word Weapon48     ; 2F
+.word Weapon49     ; 30
+.word Weapon50     ; 31
+.word Weapon51     ; 32
+.word Weapon52     ; 33
+.word Weapon53     ; 34
+.word Weapon54     ; 35
+.word Weapon55     ; 36
+.word Weapon56     ; 37
+.word Weapon57     ; 38
+.word Weapon58     ; 39
+.word Weapon59     ; 3A
+.word Weapon60     ; 3B
+.word Weapon61     ; 3C
+.word Weapon62     ; 3D
+.word Weapon63     ; 3E
+.word Weapon64     ; 3F
+.word Armor1       ; 40  ; Cloth T
+.word Armor2       ; 41  ; Wooden Armor
+.word Armor3       ; 42  ; Chain Armor
+.word Armor4       ; 43  ; Iron Armor
+.word Armor5       ; 44  ; Steel Armor
+.word Armor6       ; 45  ; Silver Armor
+.word Armor7       ; 46  ; Flame Armor
+.word Armor8       ; 47  ; Ice Armor
+.word Armor9       ; 48  ; Opal Armor
+.word Armor10      ; 49  ; Dragon Armor
+.word Armor11      ; 4A  ; Copper Q
+.word Armor12      ; 4B  ; Silver Q
+.word Armor13      ; 4C  ; Gold Q
+.word Armor14      ; 4D  ; Opal Q
+.word Armor15      ; 4E  ; White T
+.word Armor16      ; 4F  ; Black T
+.word Armor17      ; 50  ; Wooden Shield
+.word Armor18      ; 51  ; Iron Shield
+.word Armor19      ; 52  ; Silver Shield
+.word Armor20      ; 53  ; Flame Shield
+.word Armor21      ; 54  ; Ice Shield
+.word Armor22      ; 55  ; Opal Shield
+.word Armor23      ; 56  ; Aegis Shield
+.word Armor24      ; 57  ; Buckler
+.word Armor25      ; 58  ; Protect Cape
+.word Armor26      ; 59  ; Cap
+.word Armor27      ; 5A  ; Wooden Helm
+.word Armor28      ; 5B  ; Iron Helm
+.word Armor29      ; 5C  ; Silver Helm
+.word Armor30      ; 5D  ; Opal Helm
+.word Armor31      ; 5E  ; Heal Helm
+.word Armor32      ; 5F  ; Ribbon
+.word Armor33      ; 60  ; Gloves
+.word Armor34      ; 61  ; Copper Gauntlet
+.word Armor35      ; 62  ; Iron Gauntlet
+.word Armor36      ; 63  ; Silver Gauntlet
+.word Armor37      ; 64  ; Zeus Gauntlet
+.word Armor38      ; 65  ; Power Gauntlet
+.word Armor39      ; 66  ; Opal Gauntlet
+.word Armor40      ; 67  ; Protect Ring
+.word Armor41      ; 68
+.word Armor42      ; 69
+.word Armor43      ; 6A
+.word Armor44      ; 6B
+.word Armor45      ; 6C
+.word Armor46      ; 6D
+.word Armor47      ; 6E
+.word Armor48      ; 6F
+.word Armor49      ; 70
+.word Armor50      ; 71
+.word Armor51      ; 72
+.word Armor52      ; 73
+.word Armor53      ; 74
+.word Armor54      ; 75
+.word Armor55      ; 76
+.word Armor56      ; 77
+.word Armor57      ; 78
+.word Armor58      ; 79
+.word Armor59      ; 7A
+.word Armor60      ; 7B
+.word Armor61      ; 7C
+.word Armor62      ; 7D
+.word Armor63      ; 7E
+.word Armor64      ; 7F
 
-
-;; JIGS - Original item data started like this...
-;; Some of the items have spaces, some don't. Turns out you don't need all those spaces anyway!
-;; Can't remember if that's an edit I did or if the original code worked and they were dumb about it.
-
-;.byte $00
-;.byte $9D,$8E,$97,$9D,$FF,$FF,$FF,$00 ; TENT___ 
-;.byte $8C,$8A,$8B,$92,$97,$FF,$FF,$00 ; CABIN__
-;.byte $91,$98,$9E,$9C,$8E,$FF,$FF,$00 ; HOUSE__
-;.byte $91,$8E,$8A,$95,$E1,$00 ; HEAL&
-;.byte $99,$9E,$9B,$8E,$E1,$00 ; PURE&
-;.byte $9C,$98,$8F,$9D,$E1,$FF,$FF,$00 ; SOFT&
-;.byte $A0,$B2,$B2 ; X22 ? 
 
 ;; ITEM NAMES
 ;; For items with a quantity, make spaces so they're 6 letters long.
 
-START:
-.byte $00
-HEAL:
-.BYTE $91,$8E,$8A,$95,$E1,$FF,$00 ; HEAL&_ (E1 is the potion icon)
-PURE:
-.BYTE $99,$9E,$9B,$8E,$E1,$FF,$00 ; PURE&_
-SOFT:
-.BYTE $9C,$98,$8F,$9D,$E1,$FF,$00 ; SOFT&_
-TENT:
-.byte $9D,$8E,$97,$9D,$FF,$FF,$00 ; TENT__
-CABIN: 
-.BYTE $8C,$8A,$8B,$92,$97,$FF,$00 ; CABIN_
-HOUSE:
-.byte $91,$98,$9E,$9C,$8E,$FF,$00 ; HOUSE_
+NAME_HEAL:
+.byte $91,$A8,$A4,$AF,$FF,$FF,$FF,$E1,$00 ; Heal___& (E1 is the potion icon)
+NAME_X_HEAL:
+.byte $A1,$C2,$91,$A8,$A4,$AF,$FF,$E1,$00 ; X-Heal_&
+NAME_ETHER:
+.byte $8E,$B7,$AB,$A8,$B5,$FF,$FF,$E1,$00 ; Ether__&
+NAME_ELIXIR:
+.byte $8E,$AF,$AC,$BB,$AC,$B5,$FF,$E1,$00 ; Elixir_&
+NAME_PURE:
+.byte $99,$B8,$B5,$A8,$FF,$FF,$FF,$E1,$00 ; Pure___&
+NAME_SOFT:
+.byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
+NAME_P_DOWN:
+.byte $99,$AB,$B2,$A8,$B1,$AC,$BB,$EC,$00 ; PhoenixF
+NAME_TENT:
+.byte $9D,$A8,$B1,$B7,$FF,$FF,$FF,$FF,$00 ; Tent____
+NAME_CABIN: 
+.byte $8C,$A4,$A5,$AC,$B1,$FF,$FF,$FF,$00 ; Cabin___
+NAME_HOUSE:    
+.byte $91,$B2,$B8,$B6,$A8,$FF,$FF,$FF,$00 ; House___
+NAME_EYEDROPS:
+.byte $8E,$BC,$A8,$A7,$B5,$B2,$B3,$B6,$00 ; Eyedrops
+NAME_SMOKEBOMB:
+.byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$EB,$00 ; Smoke_Q_
+NAME_HORN:
+.byte $A0,$A4,$AE,$A8,$B8,$B3,$FF,$ED,$00 ; Wakeup_^
 
 
-;; These do not need to be null-terminated if they're 7 letters long?
-LUTE: 
-.BYTE $95,$9E,$9D,$8E,$00; $FF,$FF,$FF,$00 ; LUTE
-CROWN:
-.BYTE $8C,$9B,$98,$A0,$97,$00; $FF,$FF,$00 ; CROWN
-CRYSTAL:
-.byte $8C,$9B,$A2,$9C,$9D,$8A,$95          ; CRYSTAL
-HERB:
-.BYTE $91,$8E,$9B,$8B,$00; $FF,$FF,$FF,$00 ; HERB
-KEY:
-.byte $94,$8E,$A2,$00; $FF,$FF,$FF,$FF,$00 ; KEY
-TNT:
-.BYTE $9D,$97,$9D,$00; $FF,$FF,$FF,$FF,$00 ; TNT
-ADAMANT:
-.byte $8A,$8D,$8A,$96,$8A,$97,$9D          ; ADAMANT
-SLAB:
-.BYTE $9C,$95,$8A,$8B,$00; $FF,$FF,$FF,$00 ; SLAB
-RUBY:
-.byte $9B,$9E,$8B,$A2,$00; $FF,$FF,$FF,$00 ; RUBY
-ROD:
-.BYTE $9B,$98,$8D,$00; $FF,$FF,$FF,$FF,$00 ; ROD
-FLOATER:
-.byte $8F,$95,$98,$8A,$9D,$8E,$9B          ; FLOATER
-CHIME:
-.BYTE $8C,$91,$92,$96,$8E,$00; $FF,$FF,$00 ; CHIME
-TAIL:
-.byte $9D,$8A,$92,$95,$00; $FF,$FF,$FF,$00 ; TAIL
-CUBE:
-.BYTE $8C,$9E,$8B,$8E,$00; $FF,$FF,$FF,$00 ; CUBE
-BOTTLE:
-.byte $8B,$98,$9D,$9D,$95,$8E,$00; $FF,$00 ; BOTTLE
-OXYALE:
-.BYTE $98,$A1,$A2,$8A,$95,$8E,$00; $FF,$00 ; OXYALE
-CANOE:
-.byte $8C,$8A,$97,$98,$8E,$00; $FF,$FF,$00 ; CANOE
 ORB1: ; orbs
 ORB2: ; Orbs are not listed on the item screen... but they could be? Maybe?
 ORB3:
 ORB4:
-.BYTE $FF,$00
+.BYTE $FF
+BLANK:
+.byte $00
 
 
-;; WEAPONS AND ARMORS
-;; Note that the names I wrote by the bytes are not exactly what the bytes say
-;; as I've tried to do in the other lists. Since I didn't edit anything that I can remember... it should all be vanilla.
-;; so the names are fancy! 
-
-Weapon1:
-.BYTE $A0,$B2,$B2,$A7,$A8,$B1,$D9,$00 ; Wooden Nunchucks
-Weapon2:
-.byte $9C,$B0,$A4,$AF,$AF,$FF,$D6,$00 ; Small Knife
-Weapon3:
-.byte $A0,$B2,$B2,$A7,$A8,$B1,$D8,$00 ; Wooden Staff
-Weapon4:
-.byte $9B,$A4,$B3,$AC,$A8,$B5,$FF,$00 ; Rapier
-Weapon5:
-.byte $92,$B5,$B2,$B1,$FF,$FF,$D5,$00 ; Iron Hammer
-Weapon6:
-.byte $9C,$AB,$B2,$B5,$B7,$FF,$D4,$00 ; Short Sword
-Weapon7:
-.byte $91,$A4,$B1,$A7,$FF,$FF,$D7,$00 ; Hand Axe
-Weapon8:
-.byte $9C,$A6,$AC,$B0,$B7,$A4,$B5,$00 ; Scimitar
-Weapon9: 
-.byte $92,$B5,$B2,$B1,$FF,$FF,$D9,$00 ; Iron Nunchucks
-Weapon10:
-.byte $95,$A4,$B5,$AA,$A8,$FF,$D6,$00 ; Large Knife
-Weapon11:
-.byte $92,$B5,$B2,$B1,$FF,$FF,$D8,$00 ; Iron Staff
-Weapon12:
-.byte $9C,$A4,$A5,$B5,$A8,$FF,$FF,$00 ; Sabre
-Weapon13:
-.byte $95,$B2,$B1,$AA,$FF,$FF,$D4,$00 ; Long Sword
-Weapon14:
-.byte $90,$B5,$A8,$A4,$B7,$FF,$D7,$00 ; Great Axe
-Weapon15:
-.byte $8F,$A4,$AF,$A6,$AB,$B2,$B1,$00 ; Falchion
-Weapon16:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$D6,$00 ; Silver Knife
-Weapon17:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$D4,$00 ; Silver Sword
-Weapon18:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$D5,$00 ; Silver Hammer
-Weapon19:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$D7,$00 ; Silver Axe
-Weapon20:
-.byte $8F,$AF,$A4,$B0,$A8,$FF,$D4,$00 ; Flame Sword
-Weapon21:
-.byte $92,$A6,$A8,$FF,$FF,$FF,$D4,$00 ; Ice Sword
-Weapon22:
-.byte $8D,$B5,$A4,$AA,$B2,$B1,$D4,$00 ; Dragon Sword
-Weapon23:
-.byte $90,$AC,$A4,$B1,$B7,$FF,$D4,$00 ; Giant Sword
-Weapon24:
-.byte $9C,$B8,$B1,$FF,$FF,$FF,$D4,$00 ; Sun Sword
-Weapon25: 
-.byte $8C,$B2,$B5,$A4,$AF,$FF,$D4,$00 ; Coral Sword
-Weapon26:
-.byte $A0,$A8,$B5,$A8,$FF,$FF,$D4,$00 ; Were Sword
-Weapon27:
-.byte $9B,$B8,$B1,$A8,$FF,$FF,$D4,$00 ; Rune Sword
-Weapon28:
-.byte $99,$B2,$BA,$A8,$B5,$FF,$D8,$00 ; Power Staff
-Weapon29:
-.byte $95,$AC,$AA,$AB,$B7,$FF,$D7,$00 ; Light Axe
-Weapon30:
-.byte $91,$A8,$A4,$AF,$FF,$FF,$D8,$00 ; Heal Staff
-Weapon31:
-.byte $96,$A4,$AA,$A8,$FF,$FF,$D8,$00 ; Mage Staff
-Weapon32:
-.byte $8D,$A8,$A9,$A8,$B1,$B6,$A8,$00 ; Defense Sword
-Weapon33:
-.byte $A0,$AC,$BD,$A4,$B5,$A7,$D8,$00 ; Wizard Staff
-Weapon34:
-.byte $9F,$B2,$B5,$B3,$A4,$AF,$FF,$00 ; Vorpal Sword
-Weapon35:
-.byte $8C,$A4,$B7,$8C,$AF,$A4,$BA,$00 ; CatClaw
-Weapon36:
-.byte $9D,$AB,$B2,$B5,$FF,$FF,$D5,$00 ; Thor Hammer
-Weapon37:
-.byte $8B,$A4,$B1,$A8,$FF,$FF,$D4,$00 ; Bane Sword
-Weapon38:
-.byte $94,$A4,$B7,$A4,$B1,$A4,$FF,$00 ; Katana
-Weapon39:
-.byte $A1,$A6,$A4,$AF,$A5,$A8,$B5,$00 ; Excalibur
-Weapon40:
-.byte $96,$A4,$B6,$B0,$B8,$B1,$A8,$00 ; Masamune
+;; KEY ITEMS
+NAME_LUTE: 
+.byte $95,$B8,$B7,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; LUTE
+NAME_CROWN:
+.byte $8C,$B5,$B2,$BA,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CROWN
+NAME_CRYSTAL:
+.byte $8C,$B5,$BC,$B6,$B7,$A4,$AF,$FF,$8E,$BC,$A8,$FF,$00 ; CRYSTAL
+NAME_HERB:
+.byte $91,$A8,$B5,$A5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; HERB
+NAME_KEY:
+.byte $96,$BC,$B6,$B7,$AC,$A6,$FF,$94,$A8,$BC,$FF,$FF,$00 ; KEY
+NAME_TNT:
+.byte $9D,$97,$9D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; TNT
+NAME_ADAMANT:
+.byte $8A,$A7,$A4,$B0,$A4,$B1,$B7,$AC,$B1,$A8,$FF,$FF,$00 ; ADAMANT
+NAME_SLAB:
+.byte $9B,$B2,$B6,$A8,$B7,$B7,$A4,$FF,$9C,$AF,$A4,$A5,$00 ; SLAB
+NAME_RUBY:
+.byte $9C,$B7,$A4,$B5,$FF,$9B,$B8,$A5,$BC,$FF,$FF,$FF,$00 ; RUBY
+NAME_ROD:
+.byte $8E,$A4,$B5,$B7,$AB,$FF,$9B,$B2,$A7,$FF,$FF,$FF,$00 ; ROD
+NAME_FLOATER:
+.byte $95,$A8,$B9,$AC,$B6,$B7,$B2,$B1,$A8,$FF,$FF,$FF,$00 ; FLOATER
+NAME_CHIME:
+.byte $8C,$AB,$AC,$B0,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CHIME
+NAME_TAIL:
+.byte $9B,$A4,$B7,$BE,$B6,$FF,$9D,$A4,$AC,$AF,$FF,$FF,$00 ; TAIL
+NAME_CUBE:
+.byte $A0,$A4,$B5,$B3,$FF,$8C,$B8,$A5,$A8,$FF,$FF,$FF,$00 ; CUBE
+NAME_BOTTLE:
+.byte $8B,$B2,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; BOTTLE
+NAME_OXYALE:
+.byte $98,$BB,$BC,$A4,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; OXYALE
+NAME_CANOE:
+.byte $8C,$A4,$B1,$B2,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CANOE
 
 
-Armor1: 
-.byte $8C,$AF,$B2,$B7,$AB,$FF,$FF,$00 ; Cloth T
-Armor2:
-.byte $A0,$B2,$B2,$A7,$A8,$B1,$DA,$00 ; Wooden Armor
-Armor3:
-.byte $8C,$AB,$A4,$AC,$B1,$FF,$DA,$00 ; Chain Armor
-Armor4:
-.byte $92,$B5,$B2,$B1,$FF,$FF,$DA,$00 ; Iron Armor
-Armor5:
-.byte $9C,$B7,$A8,$A8,$AF,$FF,$DA,$00 ; Steel Armor
-Armor6:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$DA,$00 ; Silver Armor
-Armor7:
-.byte $8F,$AF,$A4,$B0,$A8,$FF,$DA,$00 ; Flame Armor
-Armor8:
-.byte $92,$A6,$A8,$FF,$FF,$FF,$DA,$00 ; Ice Armor
-Armor9: 
-.byte $98,$B3,$A4,$AF,$FF,$FF,$DA,$00 ; Opal Armor
-Armor10:
-.byte $8D,$B5,$A4,$AA,$B2,$B1,$DA,$00 ; Dragon Armor
-Armor11:
-.byte $8C,$B2,$B3,$B3,$A8,$B5,$DE,$00 ; Copper Q
-Armor12:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$DE,$00 ; Silver Q
-Armor13:
-.byte $90,$B2,$AF,$A7,$FF,$FF,$DE,$00 ; Gold Q
-Armor14:
-.byte $98,$B3,$A4,$AF,$FF,$FF,$DE,$00 ; Opal Q
-Armor15:
-.byte $A0,$AB,$AC,$B7,$A8,$FF,$DF,$00 ; White T
-Armor16:
-.byte $8B,$AF,$A4,$A6,$AE,$FF,$DF,$00 ; Black T
-Armor17:
-.byte $A0,$B2,$B2,$A7,$A8,$B1,$DB,$00 ; Wooden Shield
-Armor18:
-.byte $92,$B5,$B2,$B1,$FF,$FF,$DB,$00 ; Iron Shield
-Armor19:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$DB,$00 ; Silver Shield
-Armor20:
-.byte $8F,$AF,$A4,$B0,$A8,$FF,$DB,$00 ; Flame Shield
-Armor21:
-.byte $92,$A6,$A8,$FF,$FF,$FF,$DB,$00 ; Ice Shield
-Armor22:
-.byte $98,$B3,$A4,$AF,$FF,$FF,$DB,$00 ; Opal Shield
-Armor23:
-.byte $8A,$A8,$AA,$AC,$B6,$FF,$DB,$00 ; Aegis Shield
-Armor24:
-.byte $8B,$B8,$A6,$AE,$AF,$A8,$B5,$00 ; Buckler
-Armor25:
-.byte $99,$B5,$B2,$8C,$A4,$B3,$A8,$00 ; Protect Cape
-Armor26:
-.byte $8C,$A4,$B3,$FF,$FF,$FF,$FF,$00 ; Cap
-Armor27:
-.byte $A0,$B2,$B2,$A7,$A8,$B1,$DC,$00 ; Wooden Helm
-Armor28:
-.byte $92,$B5,$B2,$B1,$FF,$FF,$DC,$00 ; Iron Helm
-Armor29:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$DC,$00 ; Silver Helm
-Armor30:
-.byte $98,$B3,$A4,$AF,$FF,$FF,$DC,$00 ; Opal Helm
-Armor31:
-.byte $91,$A8,$A4,$AF,$FF,$FF,$DC,$00 ; Heal Helm
-Armor32:
-.byte $9B,$AC,$A5,$A5,$B2,$B1,$FF,$00 ; Ribbon
-Armor33:
-.byte $90,$AF,$B2,$B9,$A8,$B6,$FF,$00 ; Gloves
-Armor34:
-.byte $8C,$B2,$B3,$B3,$A8,$B5,$DD,$00 ; Copper Gauntlet
-Armor35:
-.byte $92,$B5,$B2,$B1,$FF,$FF,$DD,$00 ; Iron Gauntlet
-Armor36:
-.byte $9C,$AC,$AF,$B9,$A8,$B5,$DD,$00 ; Silver Gauntlet
-Armor37:
-.byte $A3,$A8,$B8,$B6,$FF,$FF,$DD,$00 ; Zeus Gauntlet
-Armor38:
-.byte $99,$B2,$BA,$A8,$B5,$FF,$DD,$00 ; Power Gauntlet
-Armor39:
-.byte $98,$B3,$A4,$AF,$FF,$FF,$DD,$00 ; Opal Gauntlet
-Armor40:  
-.byte $99,$B5,$B2,$9B,$AC,$B1,$AA,$00 ; Protect Ring
-
-;gold in chests
-;; Note this is only the text data. Actual amount given is in the price list at the start of Bank 9
-MoneyChest1:
-.byte $81,$80,$FF,$99,$00 ; 10 
-MoneyChest2:
-.byte $82,$80,$FF,$99,$00 ; 20 
-MoneyChest3:
-.byte $82,$85,$FF,$99,$00 ; 25
-MoneyChest4:
-.byte $83,$80,$FF,$90,$00 ; 30
-MoneyChest5:
-.byte $85,$85,$FF,$99,$00 ; 55
-MoneyChest6:
-.byte $87,$80,$FF,$99,$00 ; 70
-MoneyChest7:
-.byte $88,$85,$FF,$99,$00 ; 85
-MoneyChest8:
-.byte $81,$81,$80,$FF,$99,$00 ; 110
-MoneyChest9:
-.byte $81,$83,$85,$FF,$99,$00 ; 135
-MoneyChest10:
-.byte $81,$85,$85,$FF,$99,$00 ; 155
-MoneyChest11:
-.byte $81,$86,$80,$FF,$99,$00 ; 160
-MoneyChest12:
-.byte $81,$88,$80,$FF,$99,$00 ; 180
-MoneyChest13:
-.byte $82,$84,$80,$FF,$99,$00 ; 240
-MoneyChest14:
-.byte $82,$85,$85,$FF,$99,$00 ; 255
-MoneyChest15:
-.byte $82,$86,$80,$FF,$99,$00 ; 260
-MoneyChest16:
-.byte $82,$89,$85,$FF,$99,$00 ; 295
-MoneyChest17:
-.byte $83,$80,$80,$FF,$99,$00 ; 300
-MoneyChest18:
-.byte $83,$81,$85,$FF,$99,$00 ; 315
-MoneyChest19:
-.byte $83,$83,$80,$FF,$99,$00 ; 330
-MoneyChest20:
-.byte $83,$85,$80,$FF,$99,$00 ; 350
-MoneyChest21:
-.byte $83,$88,$85,$FF,$99,$00 ; 385
-MoneyChest22:
-.byte $84,$80,$80,$FF,$99,$00 ; 400
-MoneyChest23:
-.byte $84,$85,$80,$FF,$99,$00 ; 450
-MoneyChest24:
-.byte $85,$80,$80,$FF,$99,$00 ; 500
-MoneyChest25:
-.byte $85,$83,$80,$FF,$99,$00 ; 530
-MoneyChest26:
-.byte $85,$87,$85,$FF,$99,$00 ; 575
-MoneyChest27:
-.byte $86,$82,$80,$FF,$99,$00 ; 620
-MoneyChest28:
-.byte $86,$88,$80,$FF,$99,$00 ; 680
-MoneyChest29:
-.byte $87,$85,$80,$FF,$99,$00 ; 750
-MoneyChest30:
-.byte $87,$89,$85,$FF,$99,$00 ; 795
-MoneyChest31:
-.byte $88,$88,$80,$FF,$99,$00 ; 880
-MoneyChest32:
-.byte $81,$80,$82,$80,$FF,$99,$00 ; 1020
-MoneyChest33:
-.byte $81,$82,$85,$80,$FF,$99,$00 ; 1250
-MoneyChest34:
-.byte $81,$84,$85,$85,$FF,$99,$00 ; 1455
-MoneyChest35:
-.byte $81,$85,$82,$80,$FF,$99,$00 ; 1520
-MoneyChest36:
-.byte $81,$87,$86,$80,$FF,$99,$00 ; 1760
-MoneyChest37:
-.byte $81,$89,$87,$85,$FF,$99,$00 ; 1975
-MoneyChest38:
-.byte $82,$80,$80,$80,$FF,$90,$00 ; 2000
-MoneyChest39:
-.byte $82,$87,$85,$80,$FF,$99,$00 ; 2750
-MoneyChest40:
-.byte $83,$84,$80,$80,$FF,$99,$00 ; 3400
-MoneyChest41:
-.byte $84,$81,$85,$80,$FF,$99,$00 ; 4150
-MoneyChest42:
-.byte $85,$80,$80,$80,$FF,$99,$00 ; 5000
-MoneyChest43:
-.byte $85,$84,$85,$80,$FF,$99,$00 ; 5450
-MoneyChest44:
-.byte $86,$84,$80,$80,$FF,$99,$00 ; 6400
-MoneyChest45:
-.byte $86,$87,$82,$80,$FF,$99,$00 ; 6720
-MoneyChest46:
-.byte $87,$83,$84,$80,$FF,$99,$00 ; 7340
-MoneyChest47:
-.byte $87,$86,$89,$80,$FF,$99,$00 ; 7690
-MoneyChest48:
-.byte $87,$89,$80,$80,$FF,$99,$00 ; 7900
-MoneyChest49:
-.byte $88,$81,$83,$85,$FF,$99,$00 ; 8135
-MoneyChest50:
-.byte $89,$80,$80,$80,$FF,$99,$00 ; 9000
-MoneyChest51:
-.byte $89,$83,$80,$80,$FF,$99,$00 ; 9300
-MoneyChest52:
-.byte $89,$85,$80,$80,$FF,$99,$00 ; 9500
-MoneyChest53:
-.byte $89,$89,$80,$80,$FF,$99,$00 ; 9900
-MoneyChest54:
-.byte $81,$80,$80,$80,$80,$FF,$99,$00 ; 10000
-MoneyChest55:
-.byte $81,$82,$83,$85,$80,$FF,$99,$00 ; 12350
-MoneyChest56:
-.byte $81,$83,$80,$80,$80,$FF,$99,$00 ; 13000
-MoneyChest57:
-.byte $81,$83,$84,$85,$80,$FF,$99,$00 ; 13450
-MoneyChest58:
-.byte $81,$84,$80,$85,$80,$FF,$99,$00 ; 14050
-MoneyChest59:
-.byte $81,$84,$87,$82,$80,$FF,$99,$00 ; 14720
-MoneyChest60:
-.byte $81,$85,$80,$80,$80,$FF,$99,$00 ; 15000
-MoneyChest61:
-.byte $81,$87,$84,$89,$80,$FF,$99,$00 ; 17490
-MoneyChest62:
-.byte $81,$88,$80,$81,$80,$FF,$99,$00 ; 18010
-MoneyChest63:
-.byte $81,$89,$89,$89,$80,$FF,$99,$00 ; 19990
-MoneyChest64:
-.byte $82,$80,$80,$80,$80,$FF,$99,$00 ; 20000
-MoneyChest65:
-.byte $82,$80,$80,$81,$80,$FF,$99,$00 ; 20010
-MoneyChest66:
-.byte $82,$86,$80,$80,$80,$FF,$99,$00 ; 26000
-MoneyChest67:
-.byte $84,$85,$80,$80,$80,$FF,$99,$00 ; 45000
-MoneyChest68:
-.byte $86,$85,$80,$80,$80,$FF,$99,$00 ; 65000
-
-
-
- 
 ;;Magic spell names
 ;;
 ;; Updated for 7 letter spells!
@@ -951,11 +738,179 @@ SPELL64:
 
 
 
-;CLASSNAMES:
+;gold in chests
+;; Note this is only the text data. Actual amount given is in the price list at the start of Bank 9
+MoneyChest1:
+.byte $81,$80,$FF,$90,$00 ; 10 
+MoneyChest2:
+.byte $82,$80,$FF,$90,$00 ; 20 
+MoneyChest3:
+.byte $82,$85,$FF,$90,$00 ; 25
+MoneyChest4:
+.byte $83,$80,$FF,$90,$00 ; 30
+MoneyChest5:
+.byte $85,$85,$FF,$90,$00 ; 55
+MoneyChest6:
+.byte $87,$80,$FF,$90,$00 ; 70
+MoneyChest7:
+.byte $88,$85,$FF,$90,$00 ; 85
+MoneyChest8:
+.byte $81,$81,$80,$FF,$90,$00 ; 110
+MoneyChest9:
+.byte $81,$83,$85,$FF,$90,$00 ; 135
+MoneyChest10:
+.byte $81,$85,$85,$FF,$90,$00 ; 155
+MoneyChest11:
+.byte $81,$86,$80,$FF,$90,$00 ; 160
+MoneyChest12:
+.byte $81,$88,$80,$FF,$90,$00 ; 180
+MoneyChest13:
+.byte $82,$84,$80,$FF,$90,$00 ; 240
+MoneyChest14:
+.byte $82,$85,$85,$FF,$90,$00 ; 255
+MoneyChest15:
+.byte $82,$86,$80,$FF,$90,$00 ; 260
+MoneyChest16:
+.byte $82,$89,$85,$FF,$90,$00 ; 295
+MoneyChest17:
+.byte $83,$80,$80,$FF,$90,$00 ; 300
+MoneyChest18:
+.byte $83,$81,$85,$FF,$90,$00 ; 315
+MoneyChest19:
+.byte $83,$83,$80,$FF,$90,$00 ; 330
+MoneyChest20:
+.byte $83,$85,$80,$FF,$90,$00 ; 350
+MoneyChest21:
+.byte $83,$88,$85,$FF,$90,$00 ; 385
+MoneyChest22:
+.byte $84,$80,$80,$FF,$90,$00 ; 400
+MoneyChest23:
+.byte $84,$85,$80,$FF,$90,$00 ; 450
+MoneyChest24:
+.byte $85,$80,$80,$FF,$90,$00 ; 500
+MoneyChest25:
+.byte $85,$83,$80,$FF,$90,$00 ; 530
+MoneyChest26:
+.byte $85,$87,$85,$FF,$90,$00 ; 575
+MoneyChest27:
+.byte $86,$82,$80,$FF,$90,$00 ; 620
+MoneyChest28:
+.byte $86,$88,$80,$FF,$90,$00 ; 680
+MoneyChest29:
+.byte $87,$85,$80,$FF,$90,$00 ; 750
+MoneyChest30:
+.byte $87,$89,$85,$FF,$90,$00 ; 795
+MoneyChest31:
+.byte $88,$88,$80,$FF,$90,$00 ; 880
+MoneyChest32:
+.byte $81,$80,$82,$80,$FF,$90,$00 ; 1020
+MoneyChest33:
+.byte $81,$82,$85,$80,$FF,$90,$00 ; 1250
+MoneyChest34:
+.byte $81,$84,$85,$85,$FF,$90,$00 ; 1455
+MoneyChest35:
+.byte $81,$85,$82,$80,$FF,$90,$00 ; 1520
+MoneyChest36:
+.byte $81,$87,$86,$80,$FF,$90,$00 ; 1760
+MoneyChest37:
+.byte $81,$89,$87,$85,$FF,$90,$00 ; 1975
+MoneyChest38:
+.byte $82,$80,$80,$80,$FF,$90,$00 ; 2000
+MoneyChest39:
+.byte $82,$87,$85,$80,$FF,$90,$00 ; 2750
+MoneyChest40:
+.byte $83,$84,$80,$80,$FF,$90,$00 ; 3400
+MoneyChest41:
+.byte $84,$81,$85,$80,$FF,$90,$00 ; 4150
+MoneyChest42:
+.byte $85,$80,$80,$80,$FF,$90,$00 ; 5000
+MoneyChest43:
+.byte $85,$84,$85,$80,$FF,$90,$00 ; 5450
+MoneyChest44:
+.byte $86,$84,$80,$80,$FF,$90,$00 ; 6400
+MoneyChest45:
+.byte $86,$87,$82,$80,$FF,$90,$00 ; 6720
+MoneyChest46:
+.byte $87,$83,$84,$80,$FF,$90,$00 ; 7340
+MoneyChest47:
+.byte $87,$86,$89,$80,$FF,$90,$00 ; 7690
+MoneyChest48:
+.byte $87,$89,$80,$80,$FF,$90,$00 ; 7900
+MoneyChest49:
+.byte $88,$81,$83,$85,$FF,$90,$00 ; 8135
+MoneyChest50:
+.byte $89,$80,$80,$80,$FF,$90,$00 ; 9000
+MoneyChest51:
+.byte $89,$83,$80,$80,$FF,$90,$00 ; 9300
+MoneyChest52:
+.byte $89,$85,$80,$80,$FF,$90,$00 ; 9500
+MoneyChest53:
+.byte $89,$89,$80,$80,$FF,$90,$00 ; 9900
+MoneyChest54:
+.byte $81,$80,$80,$80,$80,$FF,$90,$00 ; 10000
+MoneyChest55:
+.byte $81,$82,$83,$85,$80,$FF,$90,$00 ; 12350
+MoneyChest56:
+.byte $81,$83,$80,$80,$80,$FF,$90,$00 ; 13000
+MoneyChest57:
+.byte $81,$83,$84,$85,$80,$FF,$90,$00 ; 13450
+MoneyChest58:
+.byte $81,$84,$80,$85,$80,$FF,$90,$00 ; 14050
+MoneyChest59:
+.byte $81,$84,$87,$82,$80,$FF,$90,$00 ; 14720
+MoneyChest60:
+.byte $81,$85,$80,$80,$80,$FF,$90,$00 ; 15000
+MoneyChest61:
+.byte $81,$87,$84,$89,$80,$FF,$90,$00 ; 17490
+MoneyChest62:
+.byte $81,$88,$80,$81,$80,$FF,$90,$00 ; 18010
+MoneyChest63:
+.byte $81,$89,$89,$89,$80,$FF,$90,$00 ; 19990
+MoneyChest64:
+.byte $82,$80,$80,$80,$80,$FF,$90,$00 ; 20000
+MoneyChest65:
+.byte $82,$80,$80,$81,$80,$FF,$90,$00 ; 20010
+MoneyChest66:
+.byte $82,$86,$80,$80,$80,$FF,$90,$00 ; 26000
+MoneyChest67:
+.byte $84,$85,$80,$80,$80,$FF,$90,$00 ; 45000
+MoneyChest68:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest69:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest70:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest71:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest72:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest73:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest74:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest75:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest76:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest77:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest78:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest79:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+MoneyChest80:
+.byte $86,$85,$80,$80,$80,$FF,$90,$00 ; 65000
+
+
+
+
+
+;;CLASS NAMES
+
 CLASS1:
 .byte $8F,$92,$90,$91,$9D,$8E,$9B,$00 ; FIGHTER
 CLASS2:
-.byte $9D,$91,$92,$8E,$8F,$FF,$FF,$00 ; _THIEF_ ; JIGS - moved a space to the start to center it
+.byte $9D,$91,$92,$8E,$8F,$FF,$FF,$00 ; THIEF__ 
 CLASS3:
 .byte $8B,$AF,$C0,$8B,$8E,$95,$9D,$00 ; Bl.BELT
 CLASS4:
@@ -967,7 +922,7 @@ CLASS6:
 CLASS7:
 .byte $94,$97,$92,$90,$91,$9D,$FF,$00 ; KNIGHT_
 CLASS8:
-.byte $97,$92,$97,$93,$8A,$FF,$FF,$00 ; _NINJA_ ; JIGS - moved a space to the start to center it
+.byte $97,$92,$97,$93,$8A,$FF,$FF,$00 ; NINJA__ 
 CLASS9:
 .byte $96,$8A,$9C,$9D,$8E,$9B,$FF,$00 ; MASTER_
 CLASS10:
@@ -977,20 +932,232 @@ CLASS11:
 CLASS12:
 .byte $8B,$AF,$C0,$A0,$AC,$BD,$FF,$00 ; Bl.Wiz_
 
-;; This stuff is no longer needed.
-;; Battle things, HP, Stone, Poison?
-;; Basically, I sorted all the ailments into single tile icons and re-wrote the code that displays them all.
-;; This made room for some more tiles in the font graphics, and there's some blanks in there too!
 
-;.byte $91,$99,$FF,$00,$FF,$FF,$FF,$00 ; HP_ ; ___
-;.byte $9C,$9D,$FF,$00,$99,$98,$FF,$00 ; ST_ ; PO_
-;.byte $99,$98,$FF,$00,$97,$8E,$8D,$00 ; PO_ ; NED
-;.byte $99,$98,$92,$9C,$98,$97,$00     ; POISON
 
-;.byte $1A,$1B,$1C,$1D,$1E,$1F,$20,$21,$22,$23,$24,$25,$26,$27
-;.byte $28,$29,$2A,$2B,$2C,$2D,$2E,$2F,$30,$31,$32,$33,$34,$35,$36,$37
-;.byte $38,$39,$3A,$3B,$3C,$3D,$3E,$3F,$40,$41,$42,$43,$44,$45,$46,$47
-;.byte $48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$14,$55,$56,$57
+
+
+
+;; WEAPONS AND ARMORS
+;; Note that the names I wrote by the bytes are not exactly what the bytes say
+;; as I've tried to do in the other lists. Since I didn't edit anything that I can remember... it should all be vanilla.
+;; so the names are fancy! 
+
+Weapon1: ; 00
+.BYTE $A0,$B2,$B2,$A7,$A8,$B1,$D9,$FF,$00 ; Wooden Nunchucks
+Weapon2: ; 01
+.byte $9C,$B0,$A4,$AF,$AF,$FF,$D6,$FF,$00 ; Small Knife
+Weapon3: ; 02
+.byte $A0,$B2,$B2,$A7,$A8,$B1,$D8,$FF,$00 ; Wooden Staff
+Weapon4: ; 03
+.byte $9B,$A4,$B3,$AC,$A8,$B5,$FF,$FF,$00 ; Rapier
+Weapon5: ; 04
+.byte $92,$B5,$B2,$B1,$FF,$FF,$D5,$FF,$00 ; Iron Hammer
+Weapon6: ; 05
+.byte $9C,$AB,$B2,$B5,$B7,$FF,$D4,$FF,$00 ; Short Sword
+Weapon7: ; 06
+.byte $91,$A4,$B1,$A7,$FF,$FF,$D7,$FF,$00 ; Hand Axe
+Weapon8: ; 07
+.byte $9C,$A6,$AC,$B0,$B7,$A4,$B5,$FF,$00 ; Scimitar
+Weapon9: ; 08
+.byte $92,$B5,$B2,$B1,$FF,$FF,$D9,$FF,$00 ; Iron Nunchucks
+Weapon10: ; 09
+.byte $95,$A4,$B5,$AA,$A8,$FF,$D6,$FF,$00 ; Large Knife
+Weapon11: ; 0A
+.byte $92,$B5,$B2,$B1,$FF,$FF,$D8,$FF,$00 ; Iron Staff
+Weapon12: ; 0B
+.byte $9C,$A4,$A5,$B5,$A8,$FF,$FF,$FF,$00 ; Sabre
+Weapon13: ; 0C
+.byte $95,$B2,$B1,$AA,$FF,$FF,$D4,$FF,$00 ; Long Sword
+Weapon14: ; 0D
+.byte $90,$B5,$A8,$A4,$B7,$FF,$D7,$FF,$00 ; Great Axe
+Weapon15: ; 0E
+.byte $8F,$A4,$AF,$A6,$AB,$B2,$B1,$FF,$00 ; Falchion
+Weapon16: ; 0F
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$D6,$FF,$00 ; Silver Knife
+Weapon17: ; 10
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$D4,$FF,$00 ; Silver Sword
+Weapon18: ; 11
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$D5,$FF,$00 ; Silver Hammer
+Weapon19: ; 12
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$D7,$FF,$00 ; Silver Axe
+Weapon20: ; 13
+.byte $8F,$AF,$A4,$B0,$A8,$FF,$D4,$FF,$00 ; Flame Sword
+Weapon21: ; 14
+.byte $92,$A6,$A8,$FF,$FF,$FF,$D4,$FF,$00 ; Ice Sword
+Weapon22: ; 15
+.byte $8D,$B5,$A4,$AA,$B2,$B1,$D4,$FF,$00 ; Dragon Sword
+Weapon23: ; 16
+.byte $90,$AC,$A4,$B1,$B7,$FF,$D4,$FF,$00 ; Giant Sword
+Weapon24: ; 17
+.byte $9C,$B8,$B1,$FF,$FF,$FF,$D4,$FF,$00 ; Sun Sword
+Weapon25: ; 18
+.byte $8C,$B2,$B5,$A4,$AF,$FF,$D4,$FF,$00 ; Coral Sword
+Weapon26: ; 19
+.byte $A0,$A8,$B5,$A8,$FF,$FF,$D4,$FF,$00 ; Were Sword
+Weapon27: ; 1A
+.byte $9B,$B8,$B1,$A8,$FF,$FF,$D4,$FF,$00 ; Rune Sword
+Weapon28: ; 1B
+.byte $99,$B2,$BA,$A8,$B5,$FF,$D8,$FF,$00 ; Power Staff
+Weapon29: ; 1C
+.byte $95,$AC,$AA,$AB,$B7,$FF,$D7,$FF,$00 ; Light Axe
+Weapon30: ; 1D
+.byte $91,$A8,$A4,$AF,$FF,$FF,$D8,$FF,$00 ; Heal Staff
+Weapon31: ; 1E
+.byte $96,$A4,$AA,$A8,$FF,$FF,$D8,$FF,$00 ; Mage Staff
+Weapon32: ; 1F
+.byte $8D,$A8,$A9,$A8,$B1,$B6,$A8,$FF,$00 ; Defense Sword
+Weapon33: ; 20
+.byte $A0,$AC,$BD,$A4,$B5,$A7,$D8,$FF,$00 ; Wizard Staff
+Weapon34: ; 21
+.byte $9F,$B2,$B5,$B3,$A4,$AF,$FF,$FF,$00 ; Vorpal Sword
+Weapon35: ; 22
+.byte $8C,$A4,$B7,$8C,$AF,$A4,$BA,$FF,$00 ; CatClaw
+Weapon36: ; 23
+.byte $9D,$AB,$B2,$B5,$FF,$FF,$D5,$FF,$00 ; Thor Hammer
+Weapon37: ; 24
+.byte $8B,$A4,$B1,$A8,$FF,$FF,$D4,$FF,$00 ; Bane Sword
+Weapon38: ; 25
+.byte $94,$A4,$B7,$A4,$B1,$A4,$FF,$FF,$00 ; Katana
+Weapon39: ; 26
+.byte $A1,$A6,$A4,$AF,$A5,$A8,$B5,$FF,$00 ; Excalibur
+Weapon40: ; 27
+.byte $96,$A4,$B6,$B0,$B8,$B1,$A8,$FF,$00 ; Masamune
+Weapon41: ; 28
+Weapon42: ; 29
+Weapon43: ; 2A
+Weapon44: ; 2B
+Weapon45: ; 2C
+Weapon46: ; 2D
+Weapon47: ; 2E
+Weapon48: ; 2F
+Weapon49: ; 30
+Weapon50: ; 31
+Weapon51: ; 32
+Weapon52: ; 33
+Weapon53: ; 34
+Weapon54: ; 35
+Weapon55: ; 36
+Weapon56: ; 37
+Weapon57: ; 38
+Weapon58: ; 39
+Weapon59: ; 3A
+Weapon60: ; 3B
+Weapon61: ; 3C
+Weapon62: ; 3D
+Weapon63: ; 3E
+Weapon64: ; 3F
+
+Armor1: ; 40
+.byte $8C,$AF,$B2,$B7,$AB,$FF,$FF,$FF,$00 ; Cloth T
+Armor2: ; 41
+.byte $A0,$B2,$B2,$A7,$A8,$B1,$DA,$FF,$00 ; Wooden Armor
+Armor3: ; 42
+.byte $8C,$AB,$A4,$AC,$B1,$FF,$DA,$FF,$00 ; Chain Armor
+Armor4: ; 43
+.byte $92,$B5,$B2,$B1,$FF,$FF,$DA,$FF,$00 ; Iron Armor
+Armor5: ; 44
+.byte $9C,$B7,$A8,$A8,$AF,$FF,$DA,$FF,$00 ; Steel Armor
+Armor6: ; 45
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$DA,$FF,$00 ; Silver Armor
+Armor7: ; 46
+.byte $8F,$AF,$A4,$B0,$A8,$FF,$DA,$FF,$00 ; Flame Armor
+Armor8: ; 47
+.byte $92,$A6,$A8,$FF,$FF,$FF,$DA,$FF,$00 ; Ice Armor
+Armor9: ; 48
+.byte $98,$B3,$A4,$AF,$FF,$FF,$DA,$FF,$00 ; Opal Armor
+Armor10: ; 49
+.byte $8D,$B5,$A4,$AA,$B2,$B1,$DA,$FF,$00 ; Dragon Armor
+Armor11: ; 4A
+.byte $8C,$B2,$B3,$B3,$A8,$B5,$DE,$FF,$00 ; Copper Q
+Armor12: ; 4B
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$DE,$FF,$00 ; Silver Q
+Armor13: ; 4C
+.byte $90,$B2,$AF,$A7,$FF,$FF,$DE,$FF,$00 ; Gold Q
+Armor14: ; 4D
+.byte $98,$B3,$A4,$AF,$FF,$FF,$DE,$FF,$00 ; Opal Q
+Armor15: ; 4E
+.byte $A0,$AB,$AC,$B7,$A8,$FF,$DF,$FF,$00 ; White T
+Armor16: ; 4F
+.byte $8B,$AF,$A4,$A6,$AE,$FF,$DF,$FF,$00 ; Black T
+Armor17: ; 50
+.byte $A0,$B2,$B2,$A7,$A8,$B1,$DB,$FF,$00 ; Wooden Shield
+Armor18: ; 51
+.byte $92,$B5,$B2,$B1,$FF,$FF,$DB,$FF,$00 ; Iron Shield
+Armor19: ; 52
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$DB,$FF,$00 ; Silver Shield
+Armor20: ; 53
+.byte $8F,$AF,$A4,$B0,$A8,$FF,$DB,$FF,$00 ; Flame Shield
+Armor21: ; 54
+.byte $92,$A6,$A8,$FF,$FF,$FF,$DB,$FF,$00 ; Ice Shield
+Armor22: ; 55
+.byte $98,$B3,$A4,$AF,$FF,$FF,$DB,$FF,$00 ; Opal Shield
+Armor23: ; 56
+.byte $8A,$A8,$AA,$AC,$B6,$FF,$DB,$FF,$00 ; Aegis Shield
+Armor24: ; 57
+.byte $8B,$B8,$A6,$AE,$AF,$A8,$B5,$FF,$00 ; Buckler
+Armor25: ; 58
+.byte $99,$B5,$B2,$8C,$A4,$B3,$A8,$FF,$00 ; Protect Cape
+Armor26: ; 59
+.byte $8C,$A4,$B3,$FF,$FF,$FF,$FF,$FF,$00 ; Cap
+Armor27: ; 5A
+.byte $A0,$B2,$B2,$A7,$A8,$B1,$DC,$FF,$00 ; Wooden Helm
+Armor28: ; 5B
+.byte $92,$B5,$B2,$B1,$FF,$FF,$DC,$FF,$00 ; Iron Helm
+Armor29: ; 5C
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$DC,$FF,$00 ; Silver Helm
+Armor30: ; 5D
+.byte $98,$B3,$A4,$AF,$FF,$FF,$DC,$FF,$00 ; Opal Helm
+Armor31: ; 5E
+.byte $91,$A8,$A4,$AF,$FF,$FF,$DC,$FF,$00 ; Heal Helm
+Armor32: ; 5F
+.byte $9B,$AC,$A5,$A5,$B2,$B1,$FF,$FF,$00 ; Ribbon
+Armor33: ; 60
+.byte $90,$AF,$B2,$B9,$A8,$B6,$FF,$FF,$00 ; Gloves
+Armor34: ; 61
+.byte $8C,$B2,$B3,$B3,$A8,$B5,$DD,$FF,$00 ; Copper Gauntlet
+Armor35: ; 62
+.byte $92,$B5,$B2,$B1,$FF,$FF,$DD,$FF,$00 ; Iron Gauntlet
+Armor36: ; 63
+.byte $9C,$AC,$AF,$B9,$A8,$B5,$DD,$FF,$00 ; Silver Gauntlet
+Armor37: ; 64
+.byte $A3,$A8,$B8,$B6,$FF,$FF,$DD,$FF,$00 ; Zeus Gauntlet
+Armor38: ; 65
+.byte $99,$B2,$BA,$A8,$B5,$FF,$DD,$FF,$00 ; Power Gauntlet
+Armor39: ; 66
+.byte $98,$B3,$A4,$AF,$FF,$FF,$DD,$FF,$00 ; Opal Gauntlet
+Armor40: ; 67
+.byte $99,$B5,$B2,$9B,$AC,$B1,$AA,$FF,$00 ; Protect Ring
+Armor41: ; 68  
+Armor42: ; 69  
+Armor43: ; 6A  
+Armor44: ; 6B  
+Armor45: ; 6C  
+Armor46: ; 6D  
+Armor47: ; 6E  
+Armor48: ; 6F  
+Armor49: ; 70  
+Armor50: ; 71  
+Armor51: ; 72  
+Armor52: ; 73  
+Armor53: ; 74  
+Armor54: ; 75  
+Armor55: ; 76  
+Armor56: ; 77  
+Armor57: ; 78  
+Armor58: ; 79  
+Armor59: ; 7A  
+Armor60: ; 7B  
+Armor61: ; 7C  
+Armor62: ; 7D  
+Armor63: ; 7E  
+Armor64: ; 7F  
+
+
+
+
+ 
+
+
 
 ;; JIGS - moved from Bank B.
 data_BattleMessages:
@@ -1072,10 +1239,15 @@ data_BattleMessages:
 .word BTL_MESSAGE75
 .word BTL_MESSAGE76
 .word BTL_MESSAGE77
-.word BTL_MESSAGE78 ; there are only this many Battle Messages in Constants.inc
-.word BTL_MESSAGE79 ; So these last 3 are all blank. As is 57 and 58 ($39 and $3A), and yet another is just 4 blank spaces...?
-.word BTL_MESSAGE80 ; You have a few to work with before needing to make more! 
-.word BTL_MESSAGE81 ; however, I'm hijacking < this one for a Thief gold stealing message, because I can't print custom ones from Bank Z without crashing the game...
+.word BTL_MESSAGE78 
+.word BTL_MESSAGE79 
+.word BTL_MESSAGE80 
+.word BTL_MESSAGE81 
+.word BTL_MESSAGE82
+.word BTL_MESSAGE83
+.word BTL_MESSAGE84
+.word BTL_MESSAGE85
+.word BTL_MESSAGE86
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1168,7 +1340,7 @@ BTL_MESSAGE44:
 BTL_MESSAGE45:
 .byte $96,$A4,$AA,$AC,$A6,$FF,$A5,$AF,$B2,$A6,$AE,$A8,$A7,$00 ; Magic blocked
 BTL_MESSAGE46:
-.byte $8D,$96,$90,$00 ; DMG
+.byte $FF,$8D,$96,$90,$00 ; _DMG
 BTL_MESSAGE47:
 .byte $9C,$B7,$B2,$B3,$B3,$A8,$A7,$00 ; Stopped
 BTL_MESSAGE48:
@@ -1190,9 +1362,9 @@ BTL_MESSAGE55:
 BTL_MESSAGE56:
 .byte $FF,$B8,$B3,$00 ;  up
 BTL_MESSAGE57:
-.byte $00 ; 
+.byte $96,$99,$FF,$23,$37,$35,$40,$C4,$00  ; MP restored!
 BTL_MESSAGE58:
-.byte $00 ; 
+.byte $91,$99,$20,$3B,$FF,$96,$99,$FF,$23,$37,$35,$40,$C4,$00 ; HP and MP restored!
 BTL_MESSAGE59:
 .byte $FF,$A7,$B2,$BA,$B1,$00 ; down
 BTL_MESSAGE60:
@@ -1234,289 +1406,84 @@ BTL_MESSAGE77:
 BTL_MESSAGE78:
 .BYTE $97,$B2,$B7,$AB,$AC,$B1,$AA,$FF,$AB,$A4,$B3,$B3,$A8,$B1,$B6,$00  ; Nothing happens
 BTL_MESSAGE79:
-.byte $00 ; 
+.byte $9B,$A8,$B9,$AC,$32,$27,$A9,$4D,$B0,$1B,$1D,$31,$5C,$B1,$AE,$C4,$00 ; Revived from the brink!
 BTL_MESSAGE80:
 .byte $9B,$A8,$AA,$A8,$B1,$A8,$B5,$A4,$B7,$A8,$A7,$FF,$91,$99,$00 ; Regenerated HP ; JIGS - added this
 BTL_MESSAGE81:
 .byte $9C,$B7,$B2,$AF,$A8,$C1,$AA,$B2,$AF,$A7,$C4,$00  ; Stole gold! ; JIGS - added this
-
-;; original pointers here. What a mess.
-;.byte $40,$8C,$47,$8C,$50,$8C,$5E,$8C,$65,$8C,$71,$8C,$81,$8C,$8A,$8C
-;.byte $9B,$8C,$A4,$8C,$B5,$8C,$C7,$8C,$D3,$8C,$E1,$8C,$ED,$8C,$FE,$8C
-;.byte $0A,$8D,$1C,$8D,$27,$8D,$30,$8D,$39,$8D,$40,$8D,$50,$8D,$5A,$8D
-;.byte $62,$8D,$6F,$8D,$82,$8D,$9A,$8D,$A5,$8D,$B1,$8D,$BE,$8D,$D5,$8D
-;.byte $DC,$8D,$E8,$8D,$FF,$8D,$15,$8E,$1F,$8E,$28,$8E,$35,$8E,$3D,$8E
-;.byte $46,$8E,$4D,$8E,$57,$8E,$60,$8E,$6F,$8E,$7D,$8E,$81,$8E,$89,$8E
-;.byte $92,$8E,$99,$8E,$9E,$8E,$A3,$8E,$A8,$8E,$AD,$8E,$B2,$8E,$B7,$8E
-;.byte $BB,$8E,$BC,$8E,$BD,$8E,$C3,$8E,$CC,$8E,$D6,$8E,$DE,$8E,$E9,$8E
-;.byte $F1,$8E,$F6,$8E,$FB,$8E,$00,$8F,$05,$8F,$0A,$8F,$0F,$8F,$14,$8F
-;.byte $19,$8F,$20,$8F,$30,$8F,$38,$8F,$3F,$8F,$EC,$8F
-    
-        ; pointer table
-   ;    data_BattleMessages = data_BattleMessages_Raw + $310
-   ;; JIGS - putting the pointers at the top...
-
-;; $8FEC - unused space ;; JIGS - not true... this is "Nothing happens" for some reason.
-
-  ;.BYTE $97, $B2, $B7, $AB,   $AC, $B1, $AA, $FF,   $AB, $A4, $B3, $B3,   $A8, $B1, $B6, $00,   $00, $00, $00, $00
+BTL_MESSAGE82:
+.BYTE $9C,$AF,$AC,$B3,$B3,$A8,$A7,$C1,$AC,$B1,$B7,$B2,$C1,$AB,$AC,$A7,$AC,$B1,$AA,$C3,$C0,$00 ; Slipped into hiding...
+BTL_MESSAGE83:
+.byte $8C,$A4,$B1,$BE,$B7,$C1,$B6,$A8,$A8,$C1,$B7,$B2,$C1,$B6,$A8,$A8,$C4,$00 ; Can't see to hide!
+BTL_MESSAGE84:
+.byte $8A,$AF,$B5,$A8,$A4,$A7,$BC,$C1,$AB,$AC,$A7,$A7,$A8,$B1,$C4,$00 ; Already hidden!
+BTL_MESSAGE85:
+.byte $9C,$AC,$AA,$AB,$21,$23,$37,$35,$40,$C4,$00 ; Sight restored!
+BTL_MESSAGE86:
+.byte $9D,$1D,$31,$A8,$4E,$FF,$5C,$2A,$1E,$AF,$26,$A7,$AF,$BC,$69,$00 ; The bell rings loudly..
 
 
 
 
 
-
- ;; JIGS - Item prices moved here. 
  ;; You can use normal numbers to set the price if you use .word, as exampled by Heal and Pure below
  ;; Just don't go over 65535! 
 ;                      297000 - the cost of 99 houses... for reference...
 .ALIGN  $100
 
 lut_ItemPrices:
-.byte $00,$00 ; START
-.WORD 0060    ; HEAL
-.WORD 0075    ; PURE
-.byte $20,$03 ; SOFT
-.byte $4B,$00 ; TENT
-.byte $FA,$00 ; CABIN
-.byte $B8,$0B ; HOUSE
-.byte $00,$00 ; LUTE
-.byte $00,$00 ; CROWN
-.byte $00,$00 ; CRYSTAL
-.byte $00,$00 ; HERB
-.byte $00,$00 ; KEY
-.byte $00,$00 ; TNT
-.byte $00,$00 ; ADAMANT
-.byte $00,$00 ; SLAB
-.byte $00,$00 ; RUBY 
-.byte $00,$00 ; ROD
-.byte $00,$00 ; FLOATER
-.byte $00,$00 ; CHIME
-.byte $00,$00 ; TAIL
-.byte $00,$00 ; CUBE
-.byte $50,$C3 ; BOTTLE
-.byte $00,$00 ; OXYALE
-.byte $00,$00 ; CANOE
-.byte $00,$00 ; ORB 1
-.byte $00,$00 ; ORB 2
-.byte $00,$00 ; ORB 3
-.byte $00,$00 ; ORB 4
-.byte $0A,$00 ; Weapon 1 
-.byte $05,$00 ; Weapon 2
-.byte $05,$00 ; Weapon 3
-.byte $0A,$00 ; Weapon 4
-.byte $0A,$00 ; Weapon 5
-.byte $26,$02 ; Weapon 6
-.byte $26,$02 ; Weapon 7
-.byte $C8,$00 ; Weapon 8
-.byte $C8,$00 ; Weapon 9
-.byte $AF,$00 ; Weapon 10
-.byte $C8,$00 ; Weapon 11
-.byte $C2,$01 ; Weapon 12
-.byte $DC,$05 ; Weapon 13
-.byte $D0,$07 ; Weapon 14
-.byte $C2,$01 ; Weapon 15
-.byte $20,$03 ; Weapon 16
-.byte $A0,$0F ; Weapon 17
-.byte $C4,$09 ; Weapon 18
-.byte $94,$11 ; Weapon 19
-.byte $10,$27 ; Weapon 20
-.byte $98,$3A ; Weapon 21
-.byte $40,$1F ; Weapon 22
-.byte $40,$1F ; Weapon 23
-.byte $20,$4E ; Weapon 24
-.byte $40,$1F ; Weapon 25
-.byte $70,$17 ; Weapon 26
-.byte $88,$13 ; Weapon 27
-.byte $39,$30 ; Weapon 28
-.byte $10,$27 ; Weapon 29
-.byte $A8,$61 ; Weapon 30
-.byte $A8,$61 ; Weapon 31
-.byte $40,$9C ; Weapon 32
-.byte $50,$C3 ; Weapon 33
-.byte $30,$75 ; Weapon 34
-.byte $E8,$FD ; Weapon 35
-.byte $40,$9C ; Weapon 36
-.byte $60,$EA ; Weapon 37
-.byte $60,$EA ; Weapon 38
-.byte $60,$EA ; Weapon 39
-.byte $60,$EA ; Weapon 40
-.byte $0A,$00 ; Armor 1
-.byte $32,$00 ; Armor 2
-.byte $50,$00 ; Armor 3
-.byte $20,$03 ; Armor 4
-.byte $C8,$AF ; Armor 5
-.byte $4C,$1D ; Armor 6
-.byte $30,$75 ; Armor 7
-.byte $30,$75 ; Armor 8
-.byte $60,$EA ; Armor 9
-.byte $60,$EA ; Armor 10
-.byte $E8,$03 ; Armor 11
-.byte $88,$13 ; Armor 12
-.byte $50,$C3 ; Armor 13
-.byte $E8,$FD ; Armor 14
-.byte $02,$00 ; Armor 15
-.byte $02,$00 ; Armor 16
-.byte $0F,$00 ; Armor 17
-.byte $64,$00 ; Armor 18
-.byte $C4,$09 ; Armor 19
-.byte $10,$27 ; Armor 20
-.byte $10,$27 ; Armor 21
-.byte $98,$3A ; Armor 22
-.byte $40,$9C ; Armor 23
-.byte $C4,$09 ; Armor 24
-.byte $20,$4E ; Armor 25
-.byte $50,$00 ; Armor 26
-.byte $64,$00 ; Armor 27
-.byte $C2,$01 ; Armor 28
-.byte $C4,$09 ; Armor 29
-.byte $10,$27 ; Armor 30
-.byte $20,$4E ; Armor 31
-.byte $02,$00 ; Armor 32
-.byte $3C,$00 ; Armor 33
-.byte $C8,$00 ; Armor 34
-.byte $EE,$02 ; Armor 35
-.byte $C4,$09 ; Armor 36
-.byte $98,$3A ; Armor 37
-.byte $10,$27 ; Armor 38
-.byte $20,$4E ; Armor 39
-.byte $20,$4E ; Armor 40
-;.byte $0A,$00 ; gold in chests
-;.byte $14,$00
-;.byte $19,$00
-;.byte $1E,$00
-;.byte $37,$00
-;.byte $46,$00
-;.byte $55,$00
-;.byte $6E,$00
-;.byte $87,$00
-;.byte $9B,$00
-;.byte $A0,$00
-;.byte $B4,$00
-;.byte $F0,$00
-;.byte $FF,$00
-;.byte $04,$01
-;.byte $27,$01
-;.byte $2C,$01
-;.byte $3B,$01
-;.byte $4A,$01
-;.byte $5E,$01
-;.byte $81,$01
-;.byte $90,$01
-;.byte $C2,$01
-;.byte $F4,$01
-;.byte $12,$02
-;.byte $3F,$02
-;.byte $6C,$02
-;.byte $A8,$02
-;.byte $EE,$02
-;.byte $1B,$03
-;.byte $70,$03
-;.byte $FC,$03
-;.byte $E2,$04
-;.byte $AF,$05
-;.byte $F0,$05
-;.byte $E0,$06
-;.byte $B7,$07
-;.byte $D0,$07
-;.byte $BE,$0A
-;.byte $48,$0D
-;.byte $36,$10
-;.byte $88,$13
-;.byte $4A,$15
-;.byte $00,$19
-;.byte $40,$1A
-;.byte $AC,$1C
-;.byte $0A,$1E
-;.byte $DC,$1E
-;.byte $C7,$1F
-;.byte $28,$23
-;.byte $54,$24
-;.byte $1C,$25
-;.byte $AC,$26
-;.byte $10,$27
-;.byte $3E,$30
-;.byte $C8,$32
-;.byte $8A,$34
-;.byte $E2,$36
-;.byte $80,$39
-;.byte $98,$3A
-;.byte $52,$44
-;.byte $5A,$46
-;.byte $16,$4E
-;.byte $20,$4E
-;.byte $2A,$4E
-;.byte $90,$65
-;.byte $C8,$AF
-;.byte $E8,$FD
-;; Commenting out, but leaving the original hex bytes in for reference/backup.
-.word  0010 ; 1 Gold in chests
-.word  0020 ; 2
-.word  0025 ; 3
-.word  0030 ; 4
-.word  0055 ; 5
-.word  0070 ; 6
-.word  0085 ; 7
-.word  0110 ; 8
-.word  0135 ; 9
-.word  0155 ; 10
-.word  0160 ; 11
-.word  0180 ; 12
-.word  0240 ; 13
-.word  0255 ; 14
-.word  0260 ; 15
-.word  0295 ; 16
-.word  0300 ; 17
-.word  0315 ; 18
-.word  0330 ; 19
-.word  0350 ; 20
-.word  0385 ; 21
-.word  0400 ; 22
-.word  0450 ; 23
-.word  0500 ; 
-.word  0530 ; 
-.word  0575 ; 
-.word  0620 ; 
-.word  0680 ; 
-.word  0750 ; 
-.word  0795 ; 
-.word  0880 ; 
-.word  1020 ;
-.word  1250 ;
-.word  1455 ;
-.word  1520 ;
-.word  1760 ;
-.word  1975 ;
-.word  2000 ;
-.word  2750 ;
-.word  3400 ;
-.word  4150 ;
-.word  5000 ;
-.word  5450 ;
-.word  6400 ;
-.word  6720 ;
-.word  7340 ;
-.word  7690 ;
-.word  7900 ;
-.word  8135 ;
-.word  9000 ;
-.word  9300 ;
-.word  9500 ;
-.word  9900 ;
-.word  10000 ;
-.word  12350 ;
-.word  13000 ;
-.word  13450 ;
-.word  14050 ;
-.word  14720 ;
-.word  15000 ;
-.word  17490 ;
-.word  18010 ;
-.word  19990 ;
-.word  20000 ;
-.word  20010 ;
-.word  26000 ;
-.word  45000 ;
-.word  65000 ;
+.word 0000    ; 00 START
+.word 0060    ; 01 HEAL
+.word 2000    ; 02 X-HEAL
+.word 5000    ; 03 ETHER
+.word 0000    ; 04 ELIXIR
+.word 0075    ; 05 PURE
+.word 0800    ; 06 SOFT
+.word 2500    ; 07 PHOENIX DOWN
+.word 0075    ; 08 TENT
+.word 0250    ; 09 CABIN
+.word 3000    ; 0A HOUSE
+.word 0200    ; 0B EYEDROP
+.word 2000    ; 0C SMOKEBOMB
+.word 0750    ; 0D PARTY HORN
+.word 0000    ; 0F nothing
+.word 0000    ; 0F nothing 
+
+;; key items
+.word 0000    ; 10 LUTE
+.word 0000    ; 11 CROWN
+.word 0000    ; 12 CRYSTAL
+.word 0000    ; 13 HERB
+.word 0000    ; 14 KEY
+.word 0000    ; 15 TNT
+.word 0000    ; 16 ADAMANT
+.word 0000    ; 17 SLAB
+.word 0000    ; 18 RUBY 
+.word 0000    ; 19 ROD
+.word 0000    ; 1A FLOATER
+.word 0000    ; 1B CHIME
+.word 0000    ; 1C TAIL
+.word 0000    ; 1D CUBE
+.word 50000   ; 1E BOTTLE
+.word 0000    ; 1F OXYALE
+.word 0000    ; 20 CANOE
+.word 0000    ; 21 nothing
+.word 0000    ; 22 nothing 
+.word 0000    ; 23 nothing
+.word 0000    ; 24 nothing 
+.word 0000    ; 25 nothing
+.word 0000    ; 26 nothing 
+.word 0000    ; 27 nothing
+.word 0000    ; 28 nothing 
+.word 0000    ; 29 nothing
+.word 0000    ; 2A nothing 
+.word 0000    ; 2B nothing 
+.word 0000    ; 2C ORB 1
+.word 0000    ; 2D ORB 2
+.word 0000    ; 2E ORB 3
+.word 0000    ; 2F ORB 4
+
+;; magic
 .byte $64,$00 ; Level 1 Magic
 .byte $64,$00
 .byte $64,$00
@@ -1581,128 +1548,226 @@ lut_ItemPrices:
 .byte $60,$EA
 .byte $60,$EA
 .byte $60,$EA
- 
 
+;; gold in chests
+;              chest number
+;              |    item ID (not price ID)
+.word  0010  ; 1  ; 70
+.word  0020  ; 2  ; 71
+.word  0025  ; 3  ; 72
+.word  0030  ; 4  ; 73
+.word  0055  ; 5  ; 74
+.word  0070  ; 6  ; 75
+.word  0085  ; 7  ; 76
+.word  0110  ; 8  ; 77
+.word  0135  ; 9  ; 78
+.word  0155  ; 10 ; 79
+.word  0160  ; 11 ; 7A
+.word  0180  ; 12 ; 7B
+.word  0240  ; 13 ; 7C
+.word  0255  ; 14 ; 7D
+.word  0260  ; 15 ; 7E
+.word  0295  ; 16 ; 7F
+.word  0300  ; 17 ; 80
+.word  0315  ; 18 ; 81
+.word  0330  ; 19 ; 82
+.word  0350  ; 20 ; 83
+.word  0385  ; 21 ; 84
+.word  0400  ; 22 ; 85
+.word  0450  ; 23 ; 86
+.word  0500  ; 24 ; 87
+.word  0530  ; 25 ; 88
+.word  0575  ; 26 ; 89
+.word  0620  ; 27 ; 8A
+.word  0680  ; 28 ; 8B
+.word  0750  ; 29 ; 8C
+.word  0795  ; 30 ; 8D
+.word  0880  ; 31 ; 8E
+.word  1020  ; 32 ; 8F
+.word  1250  ; 33 ; 90
+.word  1455  ; 34 ; 91
+.word  1520  ; 35 ; 92
+.word  1760  ; 36 ; 93
+.word  1975  ; 37 ; 94
+.word  2000  ; 38 ; 95
+.word  2750  ; 39 ; 96
+.word  3400  ; 40 ; 97
+.word  4150  ; 41 ; 98
+.word  5000  ; 42 ; 99
+.word  5450  ; 43 ; 9A
+.word  6400  ; 44 ; 9B
+.word  6720  ; 45 ; 9C
+.word  7340  ; 46 ; 9D
+.word  7690  ; 47 ; 9E
+.word  7900  ; 48 ; 9F
+.word  8135  ; 49 ; A0
+.word  9000  ; 50 ; A1
+.word  9300  ; 51 ; A2
+.word  9500  ; 52 ; A3
+.word  9900  ; 53 ; A4
+.word  10000 ; 54 ; A5
+.word  12350 ; 55 ; A6
+.word  13000 ; 56 ; A7
+.word  13450 ; 57 ; A8
+.word  14050 ; 58 ; A9
+.word  14720 ; 59 ; AA
+.word  15000 ; 60 ; AB
+.word  17490 ; 61 ; AC
+.word  18010 ; 62 ; AD
+.word  19990 ; 63 ; AE
+.word  20000 ; 64 ; AF
+.word  20010 ; 65 ; B0
+.word  26000 ; 66 ; B1
+.word  45000 ; 67 ; B2
+.word  65000 ; 68 ; B3
+.word  65000 ; 69 ; B4
+.word  65000 ; 70 ; B5
+.word  65000 ; 71 ; B6
+.word  65000 ; 72 ; B7
+.word  65000 ; 73 ; B8
+.word  65000 ; 74 ; B9
+.word  65000 ; 75 ; BA
+.word  65000 ; 76 ; BB
+.word  65000 ; 77 ; BC
+.word  65000 ; 78 ; BD
+.word  65000 ; 79 ; BE
+.word  65000 ; 80 ; BF
 
+.ALIGN  $100
 
+WeaponArmorPrices:
+.byte $0A,$00 ; Weapon 1 
+.byte $05,$00 ; Weapon 2
+.byte $05,$00 ; Weapon 3
+.byte $0A,$00 ; Weapon 4
+.byte $0A,$00 ; Weapon 5
+.byte $26,$02 ; Weapon 6
+.byte $26,$02 ; Weapon 7
+.byte $C8,$00 ; Weapon 8
+.byte $C8,$00 ; Weapon 9
+.byte $AF,$00 ; Weapon 10
+.byte $C8,$00 ; Weapon 11
+.byte $C2,$01 ; Weapon 12
+.byte $DC,$05 ; Weapon 13
+.byte $D0,$07 ; Weapon 14
+.byte $C2,$01 ; Weapon 15
+.byte $20,$03 ; Weapon 16
+.byte $A0,$0F ; Weapon 17
+.byte $C4,$09 ; Weapon 18
+.byte $94,$11 ; Weapon 19
+.byte $10,$27 ; Weapon 20
+.byte $98,$3A ; Weapon 21
+.byte $40,$1F ; Weapon 22
+.byte $40,$1F ; Weapon 23
+.byte $20,$4E ; Weapon 24
+.byte $40,$1F ; Weapon 25
+.byte $70,$17 ; Weapon 26
+.byte $88,$13 ; Weapon 27
+.byte $39,$30 ; Weapon 28
+.byte $10,$27 ; Weapon 29
+.byte $A8,$61 ; Weapon 30
+.byte $A8,$61 ; Weapon 31
+.byte $40,$9C ; Weapon 32
+.byte $50,$C3 ; Weapon 33
+.byte $30,$75 ; Weapon 34
+.byte $E8,$FD ; Weapon 35
+.byte $40,$9C ; Weapon 36
+.byte $60,$EA ; Weapon 37
+.byte $60,$EA ; Weapon 38
+.byte $60,$EA ; Weapon 39
+.byte $60,$EA ; Weapon 40
+.byte $00,$00 ; Weapon 41
+.byte $00,$00 ; Weapon 42
+.byte $00,$00 ; Weapon 43
+.byte $00,$00 ; Weapon 44
+.byte $00,$00 ; Weapon 45
+.byte $00,$00 ; Weapon 46
+.byte $00,$00 ; Weapon 47
+.byte $00,$00 ; Weapon 48
+.byte $00,$00 ; Weapon 49
+.byte $00,$00 ; Weapon 50
+.byte $00,$00 ; Weapon 51
+.byte $00,$00 ; Weapon 52
+.byte $00,$00 ; Weapon 53
+.byte $00,$00 ; Weapon 54
+.byte $00,$00 ; Weapon 55
+.byte $00,$00 ; Weapon 56
+.byte $00,$00 ; Weapon 57
+.byte $00,$00 ; Weapon 58
+.byte $00,$00 ; Weapon 59
+.byte $00,$00 ; Weapon 60
+.byte $00,$00 ; Weapon 61
+.byte $00,$00 ; Weapon 62
+.byte $00,$00 ; Weapon 63
+.byte $00,$00 ; Weapon 64
 
-
-
+.byte $0A,$00 ; Armor 1
+.byte $32,$00 ; Armor 2
+.byte $50,$00 ; Armor 3
+.byte $20,$03 ; Armor 4
+.byte $C8,$AF ; Armor 5
+.byte $4C,$1D ; Armor 6
+.byte $30,$75 ; Armor 7
+.byte $30,$75 ; Armor 8
+.byte $60,$EA ; Armor 9
+.byte $60,$EA ; Armor 10
+.byte $E8,$03 ; Armor 11
+.byte $88,$13 ; Armor 12
+.byte $50,$C3 ; Armor 13
+.byte $E8,$FD ; Armor 14
+.byte $02,$00 ; Armor 15
+.byte $02,$00 ; Armor 16
+.byte $0F,$00 ; Armor 17
+.byte $64,$00 ; Armor 18
+.byte $C4,$09 ; Armor 19
+.byte $10,$27 ; Armor 20
+.byte $10,$27 ; Armor 21
+.byte $98,$3A ; Armor 22
+.byte $40,$9C ; Armor 23
+.byte $C4,$09 ; Armor 24
+.byte $20,$4E ; Armor 25
+.byte $50,$00 ; Armor 26
+.byte $64,$00 ; Armor 27
+.byte $C2,$01 ; Armor 28
+.byte $C4,$09 ; Armor 29
+.byte $10,$27 ; Armor 30
+.byte $20,$4E ; Armor 31
+.byte $02,$00 ; Armor 32
+.byte $3C,$00 ; Armor 33
+.byte $C8,$00 ; Armor 34
+.byte $EE,$02 ; Armor 35
+.byte $C4,$09 ; Armor 36
+.byte $98,$3A ; Armor 37
+.byte $10,$27 ; Armor 38
+.byte $20,$4E ; Armor 39
+.byte $20,$4E ; Armor 40
+.byte $00,$00 ; Armor 41
+.byte $00,$00 ; Armor 42
+.byte $00,$00 ; Armor 43
+.byte $00,$00 ; Armor 44
+.byte $00,$00 ; Armor 45
+.byte $00,$00 ; Armor 46
+.byte $00,$00 ; Armor 47
+.byte $00,$00 ; Armor 48
+.byte $00,$00 ; Armor 49
+.byte $00,$00 ; Armor 50
+.byte $00,$00 ; Armor 51
+.byte $00,$00 ; Armor 52
+.byte $00,$00 ; Armor 53
+.byte $00,$00 ; Armor 54
+.byte $00,$00 ; Armor 55
+.byte $00,$00 ; Armor 56
+.byte $00,$00 ; Armor 57
+.byte $00,$00 ; Armor 58
+.byte $00,$00 ; Armor 59
+.byte $00,$00 ; Armor 60
+.byte $00,$00 ; Armor 61
+.byte $00,$00 ; Armor 62
+.byte $00,$00 ; Armor 63
+.byte $00,$00 ; Armor 64
 
   
-  
-  
- ;; JIGS - here's Enemy AI data. Since Bank A is so spacey without dialogue and Bank C is pretty tight...
- 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for Enemy AI [$9020 :: 0x31030]
-;;
-;;    $10 bytes per AI
-;;
-;;  byte      0 = chance to cast spell         ($00-80)
-;;  byte      1 = chance to use special attack ($00-80)
-;;  bytes   2-9 = magic spells available.  Each entry 0-based.  Or 'FF' to mark end of spells
-;;  bytes $B-$E = special attacks (0 based), or 'FF' to mark end of attacks
- 
- lut_EnemyAi:
-  ;.INCBIN "bin/0C_9020_aidata.bin"
-  
-;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ; 00 ; Frost Wolf
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ; 01 ; Agama
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ; 02 ; Sauria
-.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ; 03 ; OddEYE
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ; 04 ; BigEYE
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ; 05 ; Cerberus
-.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 06 ; WzOgre
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ; 07 ; Sand Worm
-.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ; 08 ; EYE
-.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ; 09 ; PHANTOM
-.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 0A ; Mancat
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ; 0B ; Vampire
-.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ; 0C ; WzVamp
-.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 0D ; Red Gargoyle
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ; 0E ; Frost Dragon
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ; 0F ; Red Dragon
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ; 10 ; Perelist
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ; 11 ; Red Hydra
-.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ; 12 ; Naga
-.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ; 13 ; Grey Naga
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ; 14 ; Chimera
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ; 15 ; Jimera
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ; 16 ; Sorcerer
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ; 17 ; Gas Dragon
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ; 18 ; Blue Dragon
-.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 19 ; Mug Golem
-.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ; 1A ; Rock Golem
-.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ; 1B ; Iron Golem
-.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 1C ; Badman
-.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ; 1D ; Mage
-.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ; 1E ; Fighter
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ; 1F ; Nitemare
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ; 20 ; WarMech
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ; 21 ; Manticor
-.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 22 ; Lich
-.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ; 23 ; Lich Reprise
-.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ; 24 ; Kary
-.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ; 25 ; Kary Reprise
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ; 26 ; Kraken
-.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ; 27 ; Kraken Reprise
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ; 28 ; Tiamat
-.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ; 29 ; Tiamat Reprise
-.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ; 2A ; Chaos
-.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 2B ; Astos
 
-;; From the FF Bytes documents 
-;  ##   Strat.   (Magics and Magic Cycle : Attack and Attack Cycle)
-;  00 = FrWOLF 	(: FROST)
-;  01 = AGAMA 	(: HEAT)
-;  02 = SAURIA 	(: GLANCE)
-;  03 = OddEYE 	(: GAZE)
-;  04 = BigEYE 	(: GAZE, FLASH)
-;  05 = CERBERUS	(: SCORCH)
-;  06 = WzOGRE	(RUSE, DARK, SLEP, HOLD, ICE2)
-;  07 = Sand W	(: CRACK)
-;  08 = EYE	(XXXX, BRAK, RUB, LIT2, HOLD, MUTE, SLOW, SLEP : GLANCE, SQUINT, GAZE, STARE)
-;  09 = PHANTOM	(STOP, ZAP!, XFER, BRAK, RUB, HOLD, MUTE, SLOW : GLARE)
-;  0A = MANCAT	(FIR2, SLOW, DARK, SLEP, FIRE, LIT, CURE, SLEP)
-;  0B = VAMPIRE	(: DAZZLE)
-;  0C = WzVAMP	(AFIR, MUTE, ICE2[*2], LIT2[*2], FIR2[*2] : DAZZLE)
-;  0D = R`GOYLE	(FIR2, HOLD, FIRE[*2])
-;  0E = Frost D	(: BLIZZARD)
-;  0F = Red D	(: BLAZE)
-;  10 = PERELISK	(: SQUINT)
-;  11 = R`HYDRA	(: CREMATE)
-;  12 = NAGA	(LIT2, LOCK, SLEP, LIT, LIT2, HOLD, SLOW, DARK)
-;  13 = GrNAGA	(RUSE, MUTE, SLOW, DARK, SLEP, FIRE, LIT, HEAL)
-;  14 = CHIMERA	(: CREMATE)
-;  15 = JIMERA	(: CREMATE, POISON(pos))
-;  16 = SORCERER	(: TRANCE)
-;  17 = Gas D	(: POISON(dmg))
-;  18 = Blue D	(: THUNDER)
-;  19 = MudGOL	(FAST)
-;  1A = RockGOL	(SLOW)
-;  1B = IronGOL	(: TOXIC)
-;  1C = BADMAN	(XFER, NUKE, XFER, XXXX, BLND)
-;  1D = MAGE	(RUB, LIT3 ,FIR3 ,BANE, SLO2, FIR3, STUN, LIT3)
-;  1E = FIGHTER	(WALL, XFER, HEL3, FOG2, INV2, CUR4 ,HEL2, CUR3)
-;  1F = NITEMARE (: SNORTING)
-;  20 = WarMECH	(: NUCLEAR)
-;  21 = MANTICOR	(: STINGER) 
-;  22 = LICH	(ICE2, SLP2, FAST, LIT2, HOLD, FIR2, SLOW, SLEP)
-;  23 = LICH 2	(NUKE, STOP, ZAP!, XXXX)
-;  24 = KARY	(FIR2, DARK, FIR2, DARK, FIR2, HOLD, FIR2, HOLD)
-;  25 = KARY 2	(FIR3, RUB)
-;  26 = KRAKEN	(: INK)
-;  27 = KRAKEN 2 (LIT2 : INK)
-;  28 = TIAMAT	(: THUNDER, POISON(dmg), BLIZZARD, BLAZE)
-;  29 = TIAMAT 2 (BANE, ICE2, LIT2, FIR2 : THUNDER, POISON(dmg), BLIZZARD, BLAZE)
-;  2A = CHAOS	(ICE3, LIT3, SLO2, CUR4, FIR3, ICE2, FAST, NUKE : CRACK, INFERNO, SWIRL, TORNADO)
-;  2B = ASTOS	(RUB, SLO2, FAST, FIR2, LIT2, SLOW, DARK, SLEP)
-;  FF = None  
-  
- 
   
 
 .byte "END OF BANK A"

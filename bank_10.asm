@@ -1620,11 +1620,8 @@ Talk_Smith:
       RTS
 
   @HaveAdamant:             ; otherwise, make the sword!
-    JSR FindEmptyWeaponSlot ; find an empty slot
-    BCS @WontFit            ; if no empty slot, sword won't fit
-
-     LDA #WPNID_XCALBUR     ; put the XCalbur in the previously found slot
-     STA ch_stats, X
+     LDX #WPNID_XCALBUR     ; put the XCalbur in the previously found slot
+     INC inv_weapon, X      ; JIGS - tiny bit of changes here
      LDY #OBJID_SMITH       ; set Smith's event flag to mark that we made the sword
      JSR SetGameEventFlag
      DEC item_adamant       ; take the Adamant away from the party
@@ -1632,9 +1629,9 @@ Talk_Smith:
      LDA tmp+2              ; and print [2]
      RTS
 
-  @WontFit:                 ; if XCalbur won't fit in the inventory...
-    LDA #DLGID_DONTBEGREEDY ; print "Don't be Greedy" text (note:  hardcoded)
-    RTS
+;  @WontFit:                 ; if XCalbur won't fit in the inventory...
+;    LDA #DLGID_DONTBEGREEDY ; print "Don't be Greedy" text (note:  hardcoded)
+;    RTS
 
   ;; Matoya (witch with the herb) [$9398 :: 0x393A8]
   ;;  [1] if prince is asleep and you don't have the crystal
@@ -1840,11 +1837,11 @@ Talk_Titan:
   ;;  [2] if you have the canoe or if Earth Orb hasn't been lit yet
 
 Talk_CanoeSage:
-    LDA has_canoe         ; see if party has canoe
+    LDA item_canoe         ; see if party has canoe
     BNE @Default          ; if they do, show default text
       LDA orb_earth       ; if they have the canoe, check to see if they've recovered the Earth Orb
       BEQ @Default        ; if not, show default
-        INC has_canoe     ; otherwise, give them the canoe
+        INC item_canoe     ; otherwise, give them the canoe
         INC dlgsfx        ; play fanfare
         LDA tmp+1         ; and print [1]
         RTS
@@ -2011,7 +2008,7 @@ Talk_4Orb:
  ;;  [2] if you don't
 
 Talk_ifcanoe:
-    LDA has_canoe       ; see if the player has the canoe
+    LDA item_canoe       ; see if the player has the canoe
     BEQ @NoCanoe        ; if they do...
       LDA tmp+1         ; print [1]
       RTS

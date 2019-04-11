@@ -40,9 +40,7 @@ TriangleHush    = $5CF2 ; Slowly raises and lowers a DMC thing to quiet the tria
 MenuHush        = $5CF3 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
 soundtest       = $5CF4 ; Something to do with the sound test screen
 InItemShop      = $5CF4 ; Helps buy lots of items at once.
-OptionToggle    = $5CF4 ; For the options screen!
 BlankItem       = $5CF5 ; Necessary for shops to display correctly
-OptionMax       = $5CF5 ; For the options screen!
 Hidden          = $5CF5 ; for hiding in battle 
 HiddenMagic     = $5CF6 ; for hiding in battle 
 Asleep          = $5CF7 ; for sleeping! ...in battle. And save game music things.
@@ -74,64 +72,91 @@ sram3_assert_AA  = sram3 + $FF
 ship_vis        = unsram + $00
 ship_x          = unsram + $01
 ship_y          = unsram + $02
-;nothing        = unsram + $03
-airship_vis     = unsram + $04
-airship_x       = unsram + $05
-airship_y       = unsram + $06
-;nothing        = unsram + $07
-bridge_vis      = unsram + $08
-bridge_x        = unsram + $09
-bridge_y        = unsram + $0A
-;nothing        = unsram + $0B
-canal_vis       = unsram + $0C
-canal_x         = unsram + $0D
-canal_y         = unsram + $0E
-;nothing        = unsram + $0F
-unsram_ow_scroll_x   = unsram + $10
-unsram_ow_scroll_y   = unsram + $11
-has_canoe            = unsram + $12 ; (not to be confused with item_canoe)
-;nothing         = unsram + $13
-unsram_vehicle   = unsram + $14
-;nothing         = unsram + $15
-bridgescene      = unsram + $16 ; 00 = hasnt happened yet. 01 = happens when move is complete, 80=  already has happened
-ExpGainOption    = unsram + $17
-MoneyGainOption  = unsram + $18
-EncRateOption    = unsram + $19
-MuteSFXOption    = unsram + $1A
-AutoTargetOption = unsram + $1B
-gold             = unsram + $1C ; 1D ; 1E - 3 bytes
-items            = unsram + $20
+airship_vis     = unsram + $03
+airship_x       = unsram + $04
+airship_y       = unsram + $05
+bridge_vis      = unsram + $06
+bridge_x        = unsram + $07
+bridge_y        = unsram + $08
+canal_vis       = unsram + $09
+canal_x         = unsram + $0A
+canal_y         = unsram + $0B
+bridgescene     = unsram + $0C ; 00 = hasnt happened yet. 01 = happens when move is complete, 80=  already has happened
+unsram_ow_scroll_x = unsram + $0D
+unsram_ow_scroll_y = unsram + $0E
+unsram_vehicle     = unsram + $0F
 
+ExpGainOption    = unsram + $10
+MoneyGainOption  = unsram + $11
+EncRateOption    = unsram + $12
+MuteSFXOption    = unsram + $13
+AutoTargetOption = unsram + $14
+BattleTextSpeed  = unsram + $15
+;unused          = unsram + $16
+smokebomb_steps  = unsram + $17
+; unused         = unsram + $18
+; unused         = unsram + $19
+; unused         = unsram + $1A
+; unused         = unsram + $1B
+; unused         = unsram + $1C
+gold             = unsram + $1D ; 1E ; 1F - 3 bytes
+
+items           = unsram + $20
+item_pageswap   = items + $00
 item_heal       = items + $01
-item_pure       = items + $02
-item_soft       = items + $03
-item_tent       = items + $04
-item_cabin      = items + $05
-item_house      = items + $06
-item_qty_stop   = items + $07
-item_lute       = items + $07
-item_crown      = items + $08
-item_crystal    = items + $09
-item_herb       = items + $0A
-item_mystickey  = items + $0B
-item_tnt        = items + $0C
-item_adamant    = items + $0D
-item_slab       = items + $0E
-item_ruby       = items + $0F
-item_rod        = items + $10
-item_floater    = items + $11
-item_chime      = items + $12
-item_tail       = items + $13
-item_cube       = items + $14
-item_bottle     = items + $15
-item_oxyale     = items + $16
-item_canoe      = items + $17
-item_orb_start  = items + $18
-  orb_fire      = item_orb_start + 0 ; $19
-  orb_water     = item_orb_start + 1 ; $1A
-  orb_air       = item_orb_start + 2 ; $1B
-  orb_earth     = item_orb_start + 3 ; $1C
-item_stop       = item_orb_start + 4 ; $1D
+item_x_heal     = items + $02
+item_ether      = items + $03
+item_elixir     = items + $04
+item_pure       = items + $05
+item_soft       = items + $06
+item_down       = items + $07
+item_tent       = items + $08
+item_cabin      = items + $09
+item_house      = items + $0A
+item_eyedrops   = items + $0B
+item_smokebomb  = items + $0C
+item_bell       = items + $0D
+item_unknown1   = items + $0E
+item_unknown2   = items + $0F
+item_qty_stop   = items + $10
+
+keyitems        = items + $10
+item_lute       = keyitems + $00
+item_crown      = keyitems + $01
+item_crystal    = keyitems + $02
+item_herb       = keyitems + $03
+item_mystickey  = keyitems + $04
+item_tnt        = keyitems + $05
+item_adamant    = keyitems + $06
+item_slab       = keyitems + $07
+item_ruby       = keyitems + $08
+item_rod        = keyitems + $09
+item_floater    = keyitems + $0A
+item_chime      = keyitems + $0B
+item_tail       = keyitems + $0C
+item_cube       = keyitems + $0D
+item_bottle     = keyitems + $0E
+item_oxyale     = keyitems + $0F
+item_canoe      = keyitems + $10
+item_nothing1   = keyitems + $11
+item_nothing2   = keyitems + $12
+item_nothing3   = keyitems + $13
+item_nothing4   = keyitems + $14
+item_nothing5   = keyitems + $15
+item_nothing6   = keyitems + $16
+item_nothing7   = keyitems + $17
+item_nothing8   = keyitems + $18
+item_nothing9   = keyitems + $19
+item_nothing10  = keyitems + $1A
+item_nothing11  = keyitems + $1B
+item_orb_start  = keyitems + $1C
+  orb_fire      = item_orb_start + 0 ; $1C
+  orb_water     = item_orb_start + 1 ; $1D
+  orb_air       = item_orb_start + 2 ; $1E
+  orb_earth     = item_orb_start + 3 ; $1F
+item_stop       = item_orb_start + 4 ; $20
+
+inv_magic       = unsram + $50 ; 64 bytes, 1 per spell
 
 LevelUp_Pointer     = $82
 LevelUp_LoopCounter = $5C97
@@ -200,11 +225,6 @@ inv_equip          = unsram + $200
 inv_weapon         = inv_equip ; 64 bytes
 inv_armor          = inv_equip + $40 ; 64 bytes
 inv_trash          = inv_equip + $80 ; 16 bytes to backup thrown away items?
-inv_trashcounter   = inv_trash + $10 
-inv_trashswitch    = inv_trash + $11 
-inv_canequipinshop = inv_trash + $12
-SellingEquipment   = inv_trash + $13
-item_box_offset    = inv_trash + $14
 
 game_flags      = unsram + $0300  ; must be on page bound
 
@@ -239,7 +259,10 @@ shop_spell      = $6021
 shop_curitem    = $6022
 
 btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
+battle_item         = $600F
 btl_turnorderBackup = $6010 ; 13 bytes
+
+
 
 btl_attacker                 = $6020
 btl_attacker_damage          = btl_attacker + $01
@@ -509,7 +532,6 @@ mg_slidespr     = $64  ; shared, 3 bytes
 
 namecurs_x      = $64
 shopcurs_x      = $64  ; shared
-eq_modecurs     = $64  ; shared
 hp_recovery     = $64
 mp_required     = $65
 namecurs_y      = $65
@@ -521,8 +543,6 @@ minimap_ptr     = $64  ; shared, 2 bytes
 submenu_targ    = $66  ; shared with shop_type
 shop_type       = $66
 story_page      = $66  ; shared
-;equipoffset     = shop_type  ; MUST be shared with shop_type
-
 
 story_timer     = $67  ; shared
 draweq_stradd   = $67  ; shared
@@ -538,7 +558,18 @@ enCHRpage       = $6B
 
 altareffect     = $6C  ; flag to indicate altar effect is to occur (screen shaking, monochrome diagonal window thing)
 
-equipoffset     = $70 ; shop_type  ; MUST be shared with shop_type
+shop_cursor_ptr = $6E ; +$6F
+
+equipoffset     = $70 ; menus
+Woosh           = $71 ; battle
+
+SellingEquipment    = $71 ; shops
+treasure_offset     = $72 ; maps
+item_box_offset     = $72 ; shops
+item_box_offset_old = $73 ; shops
+backup_cursor       = $73 ; shops, menus
+inv_canequipinshop  = $74 ; shops
+
 
 dlgmusic_backup = $7C  ; backup music track for restoring music after the dialogue box changes it
 dlgsfx          = $7D  ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
@@ -612,7 +643,7 @@ battlecounter   = $F7
 battlerate      = $F8  ; X/256 chance of a random encounter occuring (SM only apparently)
 
 startintrocheck = $F9
-respondrate     = $FA
+;respondrate     = $FA
 
 NTsoft2000      = $FD  ; same as soft2000, but used to track coarse NT scroll
 unk_FE          = $FE
@@ -628,9 +659,11 @@ oam_t           = oam+1
 oam_a           = oam+2
 oam_x           = oam+3
 
-puzzle          = $0300  ; shared
-str_buf         = $0300  ; $39 bytes at least -- buffer must not cross page
-item_box        = $0300  ; $20? bytes -- shares space with str_buf
+puzzle           = $0300  ; used 
+str_buf          = $0300  ; $39 bytes at least -- buffer must not cross page
+item_box         = $0300  ; used in shops
+btl_screenbackup = $0300  ; used in battle
+cursor_change    = item_box+$97 
 
 cur_pal         = $03C0       ; 32 bytes
 inroom_pal      = cur_pal+$20 ; 16 bytes
@@ -668,9 +701,20 @@ draw_buf_at_msk = draw_buf + $70
 
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
 
-btl_enemyIDs =    $0490  ; 9 entries of enemy IDs
+;; $0300 is used by the Item option
 
-    
+btl_enemyIDs    = $0310  ; 9 entries of enemy IDs
+btl_enemyroster = $031A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
+btl_enemyamount = $031E  ; JIGS - tmp byte for number of enemies, for battle printing
+btl_msgbuffer   = $0400  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
+                         ; this buffer contains on-screen tiles to be drawn to ppu$2240
+                         ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
+
+btl_unfmtcbtbox_buffer = $05C0 ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
+                                ; houses the unformatted text for each combat box.
+                                ; Additional bytes are used for other areas
+
+                        
 eob_gp_reward               = $6876
 eob_exp_reward              = $6878
 eobtext_print_level = $687A
@@ -712,7 +756,7 @@ btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 ;
 ;  btl_charcmdbuf contains 3 bytes (padded to 4) per character:
 ;    byte 0 = command
-;    byte 1 = spell effect ID  (used for DRINK/MAGIC/ITEM).  FF if no effect
+;    byte 1 = spell effect ID  (used for Item/MAGIC/ITEM).  FF if no effect
 ;    byte 2 = target.  8x are player targets 0x are enemy targets.  FF=target all enemies, FE=target all players.
 ;
 ;  Commands can be the following:
@@ -720,7 +764,7 @@ btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 ;    01 = no command -- if dead
 ;    02 = no command -- if stone
 ;    04 = attack
-;    08 = drink potion
+;    08 = Item potion
 ;    10 = use item
 ;    20 = run   ('target' would be the actual character running)
 ;    40 = magic
@@ -729,11 +773,11 @@ btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 ;  btl_charcmditem contains 1 byte per character:  the ID of the item they're using.
 ;    This is only used when the command is '10'
 ;
-;  btl_charcmdconsumetype contains 1 byte per character.  It will be 01 for magic and 02 for DRINK.
+;  btl_charcmdconsumetype contains 1 byte per character.  It will be 01 for magic and 02 for Item.
 ;       unused for other commands.
 ;
 ;  btl_charcmdconsumeid contains 1 byte per character.  If will be the potion index
-;       for drink, or the spell level for magic
+;       for Item, or the spell level for magic
 
 btl_charcmdbuf          = $688F
 btl_charcmditem         = btl_charcmdbuf+$10        ; $689F
@@ -794,9 +838,7 @@ btlbox_blockdata    = $68BA
                     ; $68CF   ???
                     
 
-btl_msgbuffer = $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
-                        ; this buffer contains on-screen tiles to be drawn to ppu$2240
-                        ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
+
 
 btl_msgdraw_hdr     = $6A9E
 btl_msgdraw_x       = $6A9F
@@ -872,9 +914,7 @@ btl_combatboxcount  = $6AF8     ; the number of combat boxes that have been draw
 
 btl_targetbacketup  = $6AF9     ; the number of combat boxes that have been drawn
 
-btl_unfmtcbtbox_buffer = $0400 ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
-                                ; houses the unformatted text for each combat box.
-                                ; Additional bytes are used for other areas
+
                                 
 btlcmd_curchar      = $6B7A     ; the current character inputting battle commands (0-3)
 btlcmd_target       = $6B7B     ; the current enemy slot that is being targetted
@@ -918,7 +958,6 @@ btl_enemyeffect = $6BB6     ; 0 to draw expolosion graphics as the effect
 
 btl_enemygfxplt = $6BC0  ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
 
-btl_enemyroster = $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
 
 ;btl_attacker_alt    = $6BCD ; An EXTREMELY redundant and stupid copy of btl_attacker
 
@@ -939,11 +978,11 @@ btl_tmppltassign = $6C88    ; temporary value to assign palette to enemies in a 
 ;btl_attacker            = $6C89
 ;btl_defender            = $6C8A
 btl_combatboxcount_alt  = $6C8B ; ANOTHER combatbox counter... this is totally redundant
-btl_attackid            = $6C8C ; >= $42 for enemy attacks
+btl_attackid            = $6C8C ; >= $40 for enemy attacks
 
 
 
-btlmag_magicsource      = $6C8F ; 0=magic, 1=drink, 2=item
+btlmag_magicsource      = $6C8F ; 0=magic, 1=Item, 2=item
 btlmag_ailment_orig     = $6C90 ; A backup of 
 
 btl_drawformationindex = $6C91
