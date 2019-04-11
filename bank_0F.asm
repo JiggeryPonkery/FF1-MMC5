@@ -13433,7 +13433,7 @@ lut_BattleCommandBoxInfo:
 ;       hdr,  X    Y    ptr
   .BYTE $01, $03, $00, <@txt0, >@txt0   ; text
   .BYTE $01, $03, $02, <@txt1, >@txt1
-  .BYTE $01, $03, $03, <@txt2, >@txt2
+  .BYTE $01, $03, $04, <@txt2, >@txt2
   .BYTE $01, $03, $06, <@txt3, >@txt3
   .BYTE $01, $0A, $00, <@txt4, >@txt4
   .BYTE $01, $0A, $02, <@txt5, >@txt5 
