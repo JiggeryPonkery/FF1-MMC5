@@ -12107,6 +12107,7 @@ Battle_DrawMessageRow:
       ;; WHAT A PAIN; this tells the game to stop drawing boxes so they don't cover up the character names...
       ;; instead of just having the programmers not make boxes that are so big they cover up the names...
       ;; which they do anyway... so. Now, it looks for the edge of the screen and stops there.   
+      ;; JIGS - actually not sure if what I said is true anymore...
       
       BNE @Loop
     RTS
@@ -13391,7 +13392,7 @@ lut_CombatBoxes:
 ;             BOX                      TEXT
 ;       hdr    X    Y   wd   ht     hdr    X    Y
   .BYTE $00, $00, $00, $0A, $03,    $01, $01, $00       ; attacker name
-  .BYTE $00, $0A, $00, $0C, $03,    $01, $0B, $00       ; their attack ("FROST", "2Hits!" etc)
+  .BYTE $00, $0A, $00, $0D, $03,    $01, $0B, $00       ; their attack ("FROST", "2Hits!" etc)
   .BYTE $00, $00, $03, $0A, $03,    $01, $01, $03       ; defender name
   .BYTE $00, $0A, $03, $0C, $03,    $01, $0B, $03       ; damage/EOB box
   .BYTE $00, $00, $06, $18, $03,    $01, $01, $06       ; bottom message ("Terminated", "Critical Hit", etc)

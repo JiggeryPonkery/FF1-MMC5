@@ -910,7 +910,8 @@ Battle_AfterFadeIn:
     STA btl_strikingfirst               ; JIGS - if party surprised, this is 2
     LDA #BTLMSG_SURPRISED
     JSR DrawBtlMsg_ClearCombatBoxes
-    JMP BattleLogicLoop_DoCombat        ; skip over first round of player input, and just do combat
+    ;JMP BattleLogicLoop_DoCombat        ; skip over first round of player input, and just do combat
+    ;; JIGS - flows into it
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -930,10 +931,23 @@ Battle_AfterFadeIn:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+BattleLogicLoop_DoCombat_Surprised:     ; alternative entry point for when the party is surprised
+    JSR DoBattleRound
+    JSR CheckForEndOfBattle
+
 BattleLogicLoop:
     JSR RebuildEnemyRoster          ; Rebuild the roster in case some enemies died
     JSR DrawRosterBox_L             ; Draw the roster box
-    JSR DrawCommandBox_L            ; and the command box
+    
+    @InputLoop:                     ; Wait for the player to provide
+      JSR DoFrame_WithInput         ; ANY input
+    BEQ @InputLoop
+    
+    LDA #01
+    JSR UndrawNBattleBlocks_L       ; undraw roster box
+    
+BattleLogicLoop_ReEntry:    
+    JSR DrawCommandBox_L            ; draw the command box
     JSR UpdateSprites_BattleFrame   ; then do a frame with updated battle sprites
     
     LDY #$1C
@@ -982,20 +996,21 @@ BattleLogicLoop:
     ;; ----
     ;;  Once all commands are input
     
-    LDA #$02                    ; undraw the Roster and Battle menu battle blocks.
+    LDA #$01                    ; undraw the Roster and Battle menu battle blocks.
     JSR UndrawNBattleBlocks_L
     
     ; And then do the actual combat!
   BattleLogicLoop_DoCombat:     ; alternative entry point for when the party is surprised
     JSR DoBattleRound
     JSR CheckForEndOfBattle
-    JMP BattleLogicLoop
+    JSR RebuildEnemyRoster
+    JMP BattleLogicLoop_ReEntry ; JIGS - do this to skip pressing a button again before selecting a command
     
     RedrawCommandList:
     LDA #$01                   ; undraw the Battle menu to wipe out the "ready?" message
     JSR UndrawNBattleBlocks_L
     JSR DrawCommandBox_L       ; then re-draw it
-    JSR DrawPlayerBox
+    ;JSR DrawPlayerBox
     JMP __GetCharacterBattleCommand_Backtrack_3
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1245,6 +1260,8 @@ BattleSubMenu_Hide:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleSubMenu_Fight:
+    LDA #01
+    JSR UndrawNBattleBlocks_L       ; undraw the command menu
     JSR SelectEnemyTarget           ; Pick a target
     CMP #$02
     BNE :+                          ; If they pressed B....
@@ -1261,10 +1278,13 @@ BattleSubMenu_Fight:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleSubMenu_Magic:
+    LDA #01
+    JSR UndrawNBattleBlocks_L   ; undraw the command box
+
+BattleSubMenu_Magic_NoUndraw:
     LDA btlcmd_curchar              ; <- This is never used
     JSR Magic_ConvertBitsToBytes    ; JIGS is using it!
-    
-        
+
     JSR MenuSelection_Magic
     
     PHA                             ; backup A/B button press
@@ -1274,6 +1294,7 @@ BattleSubMenu_Magic:
     
     CMP #$02
     BNE :+                          ; if they pressed B to exit the menu box
+      JSR DrawCommandBox_L          ;   re-draw the command box
       JMP CancelBattleAction        ;   then cancel this action
       
   : ;LDA btlcmd_curchar
@@ -1341,7 +1362,7 @@ BattleSubMenu_Magic:
     
   @NothingBox:
       JSR DoNothingMessageBox       ; Show the nothing box
-      JMP BattleSubMenu_Magic       ; and redo the magic selection submenu from the beginning
+      JMP BattleSubMenu_Magic_NoUndraw  ; and redo the magic selection submenu from the beginning
       
   : STA btlcmd_spellindex                       ; store spell in 6B7D
     ;LDA btlcurs_y                   ; get Y selection (effectively the spell level)
@@ -1412,7 +1433,7 @@ BattleSubMenu_Magic:
       JSR SelectEnemyTarget         ; puts target in Y
       CMP #$02
       BNE :+                        ; if they pressed B to exit
-        JMP BattleSubMenu_Magic     ; redo magic submenu from the beginnning
+        JMP BattleSubMenu_Magic_NoUndraw     ; redo magic submenu from the beginnning
     : LDA #$40
       LDX btlcmd_spellindex
       JMP SetCharacterBattleCommand ; command = 40 xx TT  (xx = spell, TT = enemy target)
@@ -1440,7 +1461,7 @@ BattleSubMenu_Magic:
     JSR SelectPlayerTarget          ; get a player target?
     CMP #$02                        ; did they press B to exit
     BNE :+
-      JMP BattleSubMenu_Magic       ; if yes, jump back to magic submenu
+      JMP BattleSubMenu_Magic_NoUndraw       ; if yes, jump back to magic submenu
   : LDA btlcurs_y
     AND #$03
     ORA #$80                        ; otherwise, put the player target in Y
@@ -1733,6 +1754,7 @@ DoNothingMessageBox:
     
     LDA #$01                    ; then undraw the "Nothing" box and exit
     JMP UndrawNBattleBlocks_L
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2547,9 +2569,7 @@ SelectPlayerTarget:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SelectEnemyTarget:  
-    LDA #01
-    JSR UndrawNBattleBlocks_L    ; undraw the command menu    
-    ;JSR DrawRosterBox_L         ; and show enemy names instead
+    JSR DrawRosterBox_L         ; and show enemy names instead
 
     LDA btl_drawflagsA          ; set the flag to indicate we want the cursor drawn
     ORA #$10                    ; note that this is unnecessary here, since EnemyTargetMenu
@@ -2568,8 +2588,14 @@ SelectEnemyTarget:
     STA $89
     JSR @ReDrawAfterSelection
     PHA ; backup A/B state 
-    JSR DrawCommandBox_L
-    PLA
+;    PHA ; twice
+    LDA #01
+    JSR UndrawNBattleBlocks_L 
+;    PLA
+;    CMP #02 ; if B was pressed while selecting a target
+;    BNE :+
+    JSR DrawCommandBox_L ; re-draw the command box
+  : PLA
     RTS
     
     @ReDrawAfterSelection:
@@ -2780,6 +2806,11 @@ EnemyTargetMenu:
     CMP #$10
     BEQ BattleTarget_Up     ; see if Up pressed
     RTS
+    
+   
+    
+    
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3032,10 +3063,10 @@ MenuSelection_Magic:
     ;STA $6AF9                   ; ??? This is never used
     
     LDA #$00
-    STA DrawBattleMagicBox_toporbottom                   ; set page number to 0 (draw top page of magic box)
+    STA DrawBattleMagicBox_toporbottom     ; set page number to 0 (draw top page of magic box)
     
     JSR DrawBattleMagicBox_L    ; draw it!
-    ;JMP @MenuSelection          ; pointless jump, as this code immediately follws
+    ;JMP @MenuSelection         ; pointless jump, as this code immediately follws
     
 @MenuSelection:
     LDA #$00
@@ -4532,19 +4563,22 @@ DoBattleRound:
   
   : JSR Battle_DoTurn                       ; do their turn
     JSR DrawCharacterStatus                 ; update character on-screen stats
+    JSR DrawPlayerBox                       ; draw the player box overtop the current player box
+    LDA #$01                                ; then undraw it; effectively updates HP
+    JSR UndrawNBattleBlocks_L               ; 
     JSR BattleTurnEnd_CheckForBattleEnd     ; wrap up / see if battle is over (will double-RTS if battle is over)
   @NextTurn:
     INC btl_curturn
     LDA btl_curturn
     CMP #9+4                        ; 9 enemy slots + 4 player slots
     BNE @PerformBattleTurnLoop      ; keep looping until all entities have had a turn
-    
-    
+        
     ;; once all entities have had their turn, the round is over.
     LDA #$00
     STA btl_strikingfirst       ; clear striking first flag so enemies can now act.
     
-    JSR ApplyEndOfRoundEffects
+    JSR ApplyEndOfRoundEffects  ; these should update character HP automatically, if a character is poisoned
+
   DoBattleRound_RTS:
     RTS
 
@@ -9454,7 +9488,7 @@ Battle_PlMag_TargetOneEnemy:
     BNE @SkipAutoTarget
     
     JSR DoesEnemyXExist
-    BNE @SkipAutoTarget ; they do exist, so cast on the intended target
+    BNE :+ ;@SkipAutoTarget ; they do exist, so cast on the intended target
     JMP Battle_CastMagicOnRandEnemy ; they don't exist, so pick a random one.
     
     @SkipAutoTarget:

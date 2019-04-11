@@ -6321,7 +6321,8 @@ MagicMenu_Loop:
     BNE :+
       JMP UseMagic_EXIT
 
-:   LDA #64                 ; gets here if no match found.
+:   PLA
+    LDA #64                 ; gets here if no match found.
     JSR DrawItemDescBox     ; print description text ("can't cast that here")
     JMP MagicMenu_Loop      ; and return to magic loop
 
