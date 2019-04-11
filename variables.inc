@@ -702,17 +702,20 @@ draw_buf_at_msk = draw_buf + $70
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
 
 ;; $0300 is used by the Item option
+btl_stringoutputbuf_anchor = $0300  ; JIGS - only needs to be $20 before btl_stringoutputbuf? 
+btl_enemyIDs               = $0310  ; 9 entries of enemy IDs
+btl_enemyroster            = $031A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
+btl_enemyamount            = $031E  ; JIGS - tmp byte for number of enemies, for battle printing
+btl_stringoutputbuf        = $0320  ; output buffer where decoded strings are printed
+btl_unfmtcbtbox_buffer     = $0340  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
+                                    ; houses the unformatted text for each combat box.
+                                    ; Additional bytes are used for other areas
 
-btl_enemyIDs    = $0310  ; 9 entries of enemy IDs
-btl_enemyroster = $031A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
-btl_enemyamount = $031E  ; JIGS - tmp byte for number of enemies, for battle printing
+
 btl_msgbuffer   = $0400  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
                          ; this buffer contains on-screen tiles to be drawn to ppu$2240
                          ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
 
-btl_unfmtcbtbox_buffer = $05C0 ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
-                                ; houses the unformatted text for each combat box.
-                                ; Additional bytes are used for other areas
 
                         
 eob_gp_reward               = $6876
@@ -990,8 +993,6 @@ btl_drawformationindex = $6C91
 btl_battletype  = $6C92     ; 0=9 small, 1=4 large, 2=mix, 3=fiend, 4=chaos
 btl_enemycount  = $6C93     ; count of the number of enemies being generated for a battle
 btltmp_attr     = $6C94     ; $40 bytes of attribute data for the battle setup
-
-btl_stringoutputbuf = $6CD4 ; output buffer where decoded strings are printed
 
 explode_min_x   = $6D14
 explode_min_y   = $6D15

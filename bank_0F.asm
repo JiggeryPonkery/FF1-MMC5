@@ -14202,8 +14202,6 @@ DrawEnemyNumber:
     TAX
   @Loop:  
     LDA btl_enemyIDs, Y     ; get enemy slot
-    CMP #$FF                ; if it matches FF, no more enemies to check of this type
-    BEQ @NoMoreEnemies
     CMP btl_enemyroster, X  ; if it matches the name on the roster, increase enemy counter
     BNE @NextEnemy
     
@@ -14211,7 +14209,8 @@ DrawEnemyNumber:
     
     @NextEnemy:
     INY
-    JMP @Loop
+    CPY #9
+    BNE @Loop
     
     @NoMoreEnemies:
     LDA btl_enemyamount
@@ -14219,8 +14218,8 @@ DrawEnemyNumber:
     BCS :+
         RTS  ; just exit if there's less than 2 enemies    
     
-  : LDA btldraw_dst              ; see if the destination is at $6CDD yet
-    CMP #$DD                      ; if it is, print the number
+  : LDA btldraw_dst               ; see if the destination is 10 tiles from the start of the string
+    CMP #btl_stringoutputbuf+10 - btl_stringoutputbuf_anchor ; if it is, print the number
     BEQ :+                        ; if its not, print spaces until it reaches it
     LDA #$FF
     JSR DrawBattleString_DrawChar
