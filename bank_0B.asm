@@ -161,7 +161,7 @@ BANK_THIS = $0B
 lut_BattleFormations:
 ;  .INCBIN "bin/0B_8400_battleformations.bin"
 
-.byte $00,$00,$00,$01,$00,$00,$35,$00,$00,$00,$00,$01,$04,$40,$36,$04
+.byte $00,$00,$00,$01,$00,$00,$99,$00,$00,$00,$00,$01,$04,$40,$36,$04
 .byte $02,$08,$15,$18,$00,$00,$24,$00,$00,$00,$0C,$0C,$04,$00,$35,$02
 .byte $00,$28,$01,$02,$03,$00,$13,$02,$02,$02,$00,$01,$04,$A0,$13,$00
 .byte $00,$0A,$02,$03,$00,$00,$12,$00,$00,$00,$00,$01,$04,$40,$46,$01
@@ -3350,8 +3350,7 @@ PrepareEnemyFormation_SmallLarge:
     JSR UnrollThing
     
     AND #$03
-    CLC
-    ROR A
+    LSR A
     ROR A
     ROR A                       ; isolate $03 graphic bits, move to $C0
     LDY #$02
@@ -4060,9 +4059,9 @@ DrawFormation_9Small:
     JMP WriteAttributes_ClearUnusedEnStats
     
 @lut_NTAddress:
-  .WORD $2142, $20C2, $21C2     ; Left column of enemies
-  .WORD $2146, $20C6, $21C6     ; Center column
-  .WORD $214A, $20CA, $21CA     ; right column
+  .WORD $2163, $20C4, $2202     ; Left column of enemies
+  .WORD $2168, $20C9, $2207     ; Center column
+  .WORD $216D, $20CE, $220C     ; right column
   
 @lut_AttributeOffset:
   .BYTE $10, $08, $18           ; Left column

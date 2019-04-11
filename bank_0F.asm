@@ -12039,9 +12039,9 @@ BattleWaitForVBlank:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleDrawMessageBuffer:
-    LDA #<$2260     ; set target PPU address to $2240
+    LDA #<$2280     ; set target PPU address to $2240
     STA $8A         ; This has the start of the bottom row of the bounding box for 
-    LDA #>$2260     ;  enemies
+    LDA #>$2280     ;  enemies
     STA $8B
     
     LDA #<btl_msgbuffer     ; set source pointer to point to message data buffer
@@ -12128,9 +12128,9 @@ BattleDrawMessageBuffer_Reverse:
     LDA #>$23A0
     STA $8B
     
-    LDA #<(btl_msgbuffer + $A*$20)  ; start with the last row of source data
+    LDA #<(btl_msgbuffer + $9*$20)  ; start with the last row of source data
     STA $88
-    LDA #>(btl_msgbuffer + $A*$20)
+    LDA #>(btl_msgbuffer + $9*$20)
     STA $89
     
     LDA #$05                ; loop down counter.  6 iterations, 2 rows per iterations
@@ -12274,7 +12274,7 @@ DrawBattleBox_Row:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-DrawBattleBox:
+DrawBattleBox:   ;F200
     LDX btl_msgdraw_x           ; get X,Y coords of box
     LDY btl_msgdraw_y
     JSR GetBattleMessagePtr
@@ -13390,12 +13390,12 @@ DrawBattleString:
 lut_CombatBoxes:
 ;             BOX                      TEXT
 ;       hdr    X    Y   wd   ht     hdr    X    Y
-  .BYTE $00, $00, $01, $0A, $03,    $01, $01, $01       ; attacker name
-  .BYTE $00, $0A, $01, $0C, $03,    $01, $0B, $01       ; their attack ("FROST", "2Hits!" etc)
-  .BYTE $00, $00, $04, $0A, $03,    $01, $01, $04       ; defender name
-  .BYTE $00, $0A, $04, $0C, $03,    $01, $0B, $04       ; damage/EOB box
-  .BYTE $00, $00, $07, $18, $03,    $01, $01, $07       ; bottom message ("Terminated", "Critical Hit", etc)
-  .BYTE $00, $0A, $04, $09, $03,    $01, $0B, $04       ; damage
+  .BYTE $00, $00, $00, $0A, $03,    $01, $01, $00       ; attacker name
+  .BYTE $00, $0A, $00, $0C, $03,    $01, $0B, $00       ; their attack ("FROST", "2Hits!" etc)
+  .BYTE $00, $00, $03, $0A, $03,    $01, $01, $03       ; defender name
+  .BYTE $00, $0A, $03, $0C, $03,    $01, $0B, $03       ; damage/EOB box
+  .BYTE $00, $00, $06, $18, $03,    $01, $01, $06       ; bottom message ("Terminated", "Critical Hit", etc)
+  .BYTE $00, $0A, $03, $09, $03,    $01, $0B, $03       ; damage
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13405,21 +13405,21 @@ lut_CombatBoxes:
 
 lut_CombatItemMagicBox:
 ;       hdr    X    Y   wd   ht 
-  .BYTE $00, $00, $01, $20, $09 ; magic
+  .BYTE $00, $00, $00, $20, $09 ; magic
   
   lut_CombatEtherBox:
 ;       hdr    X    Y   wd   ht 
-  .BYTE $00, $00, $01, $11, $09 ; MP list
+  .BYTE $00, $00, $00, $11, $09 ; MP list
   
 lut_CombatEquipmentBox:
-  .BYTE $00, $00, $01, $17, $09 ; weapons / armor
+  .BYTE $00, $00, $00, $17, $09 ; weapons / armor
 
 lut_CombatItemBox:
-  .BYTE $00, $00, $01, $0F, $09 ; potions and items
+  .BYTE $00, $00, $00, $0F, $09 ; potions and items
 
 lut_EnemyRosterBox:
 ;       hdr   X    Y  width  height
-;  .BYTE $00, $00, $01, $0A, $09
+;  .BYTE $00, $00, $00, $0A, $09
 ;; same size as command box, so why not use it
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13428,14 +13428,14 @@ lut_EnemyRosterBox:
 
 lut_BattleCommandBoxInfo:
 ;       hdr   X    Y  width  height
-  .BYTE $00, $00, $01, $0F, $09         ; box 
+  .BYTE $00, $00, $00, $0F, $09         ; box 
 ;       hdr,  X    Y    ptr
-  .BYTE $01, $03, $01, <@txt0, >@txt0   ; text
-  .BYTE $01, $03, $03, <@txt1, >@txt1
-  .BYTE $01, $03, $05, <@txt2, >@txt2
-  .BYTE $01, $03, $07, <@txt3, >@txt3
-  .BYTE $01, $0A, $01, <@txt4, >@txt4
-  .BYTE $01, $0A, $03, <@txt5, >@txt5 
+  .BYTE $01, $03, $00, <@txt0, >@txt0   ; text
+  .BYTE $01, $03, $02, <@txt1, >@txt1
+  .BYTE $01, $03, $04, <@txt2, >@txt2
+  .BYTE $01, $03, $06, <@txt3, >@txt3
+  .BYTE $01, $0A, $00, <@txt4, >@txt4
+  .BYTE $01, $0A, $02, <@txt5, >@txt5 
   
   @txt0:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
   @txt1:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
@@ -13446,12 +13446,12 @@ lut_BattleCommandBoxInfo:
   
 
 lut_PlayerBoxInfo:
-  .BYTE $00, $0F, $01, $11, $09         ; box 
+  .BYTE $00, $0F, $00, $11, $09         ; box 
 ;       hdr,  X    Y    ptr
-  .BYTE $01, $10, $01, <@txt0, >@txt0   ; text
-  .BYTE $01, $10, $03, <@txt1, >@txt1
-  .BYTE $01, $10, $05, <@txt2, >@txt2
-  .BYTE $01, $10, $07, <@txt3, >@txt3  
+  .BYTE $01, $10, $00, <@txt0, >@txt0   ; text
+  .BYTE $01, $10, $02, <@txt1, >@txt1
+  .BYTE $01, $10, $04, <@txt2, >@txt2
+  .BYTE $01, $10, $06, <@txt3, >@txt3  
   
   @txt0:  .BYTE $04, $FF, $12, $00, $05, $7A, $12, $00, $06, $00
   @txt1:  .BYTE $05, $FF, $12, $40, $05, $7A, $12, $40, $06, $00
