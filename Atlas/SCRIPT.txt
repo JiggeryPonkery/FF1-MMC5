@@ -1,4 +1,5 @@
 #VAR(dialogue, TABLE) 
+//#ADDTBL("table_standard.tbl", dialogue) 
 #ADDTBL("table_dte.tbl", dialogue) 
 #ACTIVETBL(dialogue)
 
@@ -10,6 +11,13 @@
 
 // use [END] to end a string
 // use [ENTER] for next line
+
+MP restored![END]
+HP and MP restored![END]
+Revived from the brink![END]
+The bell rings loudly..[END]
+Sight restored![END]
+
 
 //The world is veiled in darkness.[ENTER]
 //The wind stops, the sea is wild,[ENTER]
@@ -23,9 +31,4 @@
 //After a long journey, four[ENTER]
 //  young warriors arrive.[ENTER]
 //   each holding an ORB.[END]
-
-// Lines after this will be sent to SCRIPT.BIN
-
-Battle Item[END]
-
 

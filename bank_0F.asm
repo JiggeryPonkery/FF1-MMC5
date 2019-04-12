@@ -12421,7 +12421,7 @@ ClearBattleMessageBuffer:
     LDY #$00
     LDA #$00
     : STA btl_msgbuffer, Y      ; clear the message buffer
-      STA btl_msgbuffer+$10, Y  ;   (write $180 bytes)
+      STA btl_msgbuffer+$30, Y  ;   (write $180 bytes)
       INY
       BNE :-
     
