@@ -968,15 +968,19 @@ BattleLogicLoop_ReEntry:
                                 __GetCharacterBattleCommand_Backtrack_0:
     LDA #$00
     JSR GetCharacterBattleCommand
+    JSR DrawCharacterStatus
                                 __GetCharacterBattleCommand_Backtrack_1:
     LDA #$01
     JSR GetCharacterBattleCommand
+    JSR DrawCharacterStatus
                                 __GetCharacterBattleCommand_Backtrack_2:
     LDA #$02
     JSR GetCharacterBattleCommand
+    JSR DrawCharacterStatus
                                 __GetCharacterBattleCommand_Backtrack_3:
     LDA #$03
     JSR GetCharacterBattleCommand
+    JSR DrawCharacterStatus
     
     JSR LongCall             ; swap to Bank Z to draw this
     .word BattleConfirmation
@@ -1068,6 +1072,12 @@ GetCharacterBattleCommand:
     STA btlcmd_curchar              ; record the character
     ;LDA btlcmd_curchar             ; <- (pointless)
     JSR PrepCharStatPointers        ; Prep the stat pointers (this persists through all the sub menus)
+    
+    LDY # ch_battlestate - ch_stats ; 
+    LDA (CharStatsPointer), Y       ; in case they guarded then chose to re-select their command
+    AND #$1F                        ; undo the guard state
+    STA (CharStatsPointer), Y
+    JSR DrawCharacterStatus
     
     LDY # ch_ailments - ch_stats    ; See if this character has any ailment that would prevent them from inputting
     LDA (CharStatsPointer), Y    ;   any commands
@@ -1436,6 +1446,7 @@ BattleSubMenu_Magic_NoUndraw:
   @CheckTarget_01:
     LSR A                           ; shift out low bit
     BCC @CheckTarget_02             ; if set (target=01 -- target all enemies)...
+      JSR DrawCommandBox_L
       LDY #$FF
       LDA #$40                      ;  command = 40 xx FF  (where xx = spell index)
       LDX btlcmd_spellindex
@@ -1455,6 +1466,7 @@ BattleSubMenu_Magic_NoUndraw:
   @CheckTarget_04:                  ; target 04 = target self
     LSR A
     BCC @CheckTarget_08     
+      JSR DrawCommandBox_L
       LDA btlcmd_curchar            ; use cur char
       ORA #$80                      ; OR with 80 to indicate targetting a player character
       TAY
@@ -1465,6 +1477,7 @@ BattleSubMenu_Magic_NoUndraw:
   @CheckTarget_08:                  ; target 08 = target whole party
     LSR A
     BCC @Target_10
+      JSR DrawCommandBox_L
       LDA #$40
       LDY #$FE                      ; 'FE' targets party
       LDX btlcmd_spellindex
@@ -5084,7 +5097,7 @@ ApplyPoisonToPlayer:
     JSR BattleScreenShake_L
     JSR RespondDelay  
     JSR ClearAllCombatBoxes
-	JSR DrawCharacterStatus     ; redraw character stats to reflect post-poison HP
+	;JSR DrawCharacterStatus     ; redraw character stats to reflect post-poison HP
     
     @Exit:
         
@@ -9488,7 +9501,7 @@ Battle_PlMag_TargetAllPlayers:
   
   @Next:
     JSR RespondDelay_UndrawAllBut2Boxes ; undraw all but the Attacker/Attack boxes
-    JSR DrawCharacterStatus             ; update player status' (redraw their HP and stuff)
+    ;JSR DrawCharacterStatus             ; update player status' (redraw their HP and stuff)
     
     INC btl_targetall_tmp                           ; loop through all 4 players.
     LDA btl_targetall_tmp
@@ -9813,7 +9826,7 @@ Battle_CastMagicOnAllPlayers:
       JSR BtlMag_LoadPlayerDefenderStats    ; load their stats, play sound effect, and flash player graphic
       JSR Battle_CastMagicOnPlayer_NoLoad   ; the cast the magic on the player (NoLoad because we already loaded them above)
       JSR RespondDelay_UndrawAllBut2Boxes   ; undraw all but the attacker and attack boxes
-      JSR DrawCharacterStatus               ; And redraw character stats to show updated HP
+      ;JSR DrawCharacterStatus               ; And redraw character stats to show updated HP
       
   : INC btl_targetall_tmp                 ; inc loop counter
     LDA btl_targetall_tmp
