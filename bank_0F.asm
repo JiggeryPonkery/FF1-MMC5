@@ -7927,9 +7927,15 @@ DrawComplexString:
    
    LDX char_index
    LDA ch_battlestate, X
-   AND #$F0 ; knock off low bits (regen state) to get hidden state
+   AND #$10 ; clear everything but the hidden state bit
    BEQ :+
    LDA #$E5
+   JMP @DrawIcon_SetPPUAddress
+ 
+ : LDA ch_battlestate, X
+   AND #$80 ; clear everything but the guard state bit
+   BEQ :+
+   LDA #$DB
    JMP @DrawIcon_SetPPUAddress
  
  : LDA #$FF
@@ -12049,7 +12055,7 @@ BattleDrawMessageBuffer:
     LDA #>btl_msgbuffer
     STA $89
     
-    LDA #$0A
+    LDA #$09
     STA btl_msgbuffer_loopctr               ; loop down-counter ($0C rows)
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
@@ -12183,7 +12189,7 @@ BattleDrawMessageBuffer_Reverse:
 GetBattleMessagePtr:
     LDA #$00
     STA $89     ; zero high byte of temp memory
-    
+   
     TYA         ; multiply Y coord by $20
     ASL A
     ROL $89
@@ -12415,7 +12421,7 @@ ClearBattleMessageBuffer:
     LDY #$00
     LDA #$00
     : STA btl_msgbuffer, Y      ; clear the message buffer
-      STA btl_msgbuffer+$A0, Y  ;   (write $180 bytes)
+      STA btl_msgbuffer+$10, Y  ;   (write $180 bytes)
       INY
       BNE :-
     
@@ -12659,18 +12665,19 @@ DrawCommandBox:
     LDY #$00
     LDX #$00
   @Loop:
-      LDA lut_BattleCommandBoxInfo, Y           ; copy 6*5 bytes (6 blocks)
-      STA btl_msgdraw_hdr, X
-      INX
-      CPX #$05
-      BNE :+                                    ; every 5 bytes, add the block to the
-        JSR BattleDraw_AddBlockToBuffer         ;  output buffer
-        LDX #$00
-    : INY
-      CPY #7*5
-      BNE @Loop
-      
+    LDA lut_BattleCommandBoxInfo, Y           ; copy 6*5 bytes (6 blocks)
+    STA btl_msgdraw_hdr, X
+    INX
+    CPX #$05
+    BNE :+                                    ; every 5 bytes, add the block to the
+      JSR BattleDraw_AddBlockToBuffer         ;  output buffer
+      LDX #$00
+  : INY
+    CPY #9*5
+    BNE @Loop
     JMP DrawBlockBuffer            ; then finally draw it
+    
+    
 
 
 DrawPlayerBox:
@@ -13279,55 +13286,6 @@ DrawManaBox:
     JSR BattleDraw_AddBlockToBuffer     ; add the box to the block buffer
     JMP DrawBlockBuffer     
     
-
-
-    
-    
-    
-;    LDA item_heal
-;    BEQ :+                              ; if there are any heal potions
-;      STA btl_unfmtcbtbox_buffer + 5    ; set buffer to:   FF 0E 01 FF 11 xx xx 00  noting:
-;      LDA #$11                          ;   FF       = space
-;      STA btl_unfmtcbtbox_buffer + 4    ;   0E 19    = 0E prints an item name, 01 indicates the Heal Potion item
-;      LDA #$01                          ;   11 xx xx = 11 prints a number, xx xx is the qty (which in this case is 
-;      STA btl_unfmtcbtbox_buffer + 2    ;                  the number of potions
-;      LDA #$0E
-;      STA btl_unfmtcbtbox_buffer + 1
-      
-;  : LDA #$00
-;    STA btl_unfmtcbtbox_buffer + 6      ; The high byte of the qty
-;    STA btl_unfmtcbtbox_buffer + 7      ; The null terminator
-    
-;    LDA #<btl_unfmtcbtbox_buffer        ; set the block pointer to the data
-;    STA btl_msgdraw_srcptr
-;    LDA #>btl_unfmtcbtbox_buffer
-;    STA btl_msgdraw_srcptr+1
-;    JSR BattleDraw_AddBlockToBuffer     ; and add the block (drawing the Heal Potions)
-    
-    
-;    INC btl_msgdraw_y                   ; move down 2 rows for Pure portions
-;    INC btl_msgdraw_y
-;    LDA btl_potion_pure
-;    BEQ :+
-;      STA btl_unfmtcbtbox_buffer + $25  ; Exact same deal as above, only it works for the Pure Potion
-;      LDA #$11
-;      STA btl_unfmtcbtbox_buffer + $24
-;      LDA #$02
-;      STA btl_unfmtcbtbox_buffer + $22
-;      LDA #$0E
-;      STA btl_unfmtcbtbox_buffer + $21
-
-;  : LDA #$00
-;    STA btl_unfmtcbtbox_buffer + $26
-;    STA btl_unfmtcbtbox_buffer + $27
-    
-;    LDA #<(btl_unfmtcbtbox_buffer + $20)
-;    STA btl_msgdraw_srcptr
-;    LDA #>(btl_unfmtcbtbox_buffer + $20)
-;    STA btl_msgdraw_srcptr+1
-;    JSR BattleDraw_AddBlockToBuffer     ; add the block for the Pure potions
-    
-;    JMP DrawBlockBuffer                 ; then draw the actual blocks and exit
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13345,8 +13303,8 @@ DrawBattleString:
     LDX btl_msgdraw_x
     LDY btl_msgdraw_y
     JSR GetBattleMessagePtr
-    STX $8A                 ; store target pointer in temp ram
-    STY $8B
+    STX BattleBoxString      ; store target pointer in temp ram
+    STY BattleBoxString+1
     
     LDX btl_msgdraw_srcptr
     LDY btl_msgdraw_srcptr+1
@@ -13368,12 +13326,10 @@ DrawBattleString:
     LDX #$00
   @BottomLoop:
       LDA btl_stringoutputbuf+1, X
-      ;LDA btl_stringoutputbuf, X
       BEQ @Exit
-      STA ($8A), Y
+      STA (BattleBoxString), Y
       INY
       INX
-      ;INX
       JMP @BottomLoop
     
   @Exit:
@@ -13420,8 +13376,7 @@ lut_CombatItemBox:
 
 lut_EnemyRosterBox:
 ;       hdr   X    Y  width  height
-;  .BYTE $00, $00, $01, $0A, $09
-;; same size as command box, so why not use it
+  .BYTE $00, $00, $00, $0F, $09
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13429,7 +13384,7 @@ lut_EnemyRosterBox:
 
 lut_BattleCommandBoxInfo:
 ;       hdr   X    Y  width  height
-  .BYTE $00, $00, $00, $0F, $09         ; box 
+  .BYTE $00, $00, $00, $10, $09         ; box 
 ;       hdr,  X    Y    ptr
   .BYTE $01, $03, $00, <@txt0, >@txt0   ; text
   .BYTE $01, $03, $02, <@txt1, >@txt1
@@ -13437,13 +13392,22 @@ lut_BattleCommandBoxInfo:
   .BYTE $01, $03, $06, <@txt3, >@txt3
   .BYTE $01, $0A, $00, <@txt4, >@txt4
   .BYTE $01, $0A, $02, <@txt5, >@txt5 
+  .BYTE $01, $0A, $04, <@txt6, >@txt6 
+  .BYTE $01, $0A, $06, <@txt7, >@txt7 
+  .BYTE $01, $0F, $07, <@connectorbottom, >@connectorbottom
+  .BYTE $01, $0F, $00, <@connectortop,    >@connectortop
+  
   
   @txt0:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
   @txt1:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
-  @txt2:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
+  @txt2:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
   @txt3:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
-  @txt4:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
-  @txt5:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
+  @txt4:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
+  @txt5:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
+  @txt6:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
+  @txt7:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
+  @connectorbottom: .byte $C9, $00
+  @connectortop:    .byte $C8, $00
   
 
 lut_PlayerBoxInfo:
@@ -13462,93 +13426,6 @@ lut_PlayerBoxInfo:
   
   
 
-  
-;; JIGS - this was some code I wrote to try and display names and HP at the bottom of the battle screen  
-  
-;BattleCharacterBox_InitialDraw:
-;    LDA #<@CharacterNamesHPString    
-;    STA text_ptr                     
-;    LDA #>@CharacterNamesHPString
-;    STA text_ptr+1
-    
-;    LDA #14
-;    STA dest_x       
-;    LDA #20
-;    STA dest_y
-;    JSR DrawComplexString
-    
-    ;; then copy the tiles to RAM to draw them faster next time
-;    LDY #0
-;    STY tmp
-;    STY tmp+1
-;    STY tmp+2
-;  @PrepLine:
-;    LDY tmp
-;    LDA @PPU_Dest_A, Y ; get the low byte from LUT
-;    LDY tmp+1
-;    LDX @PPU_Dest_X, Y ; get the high byte from LUT
-;    JSR SetPPUAddr_XA ; set the address to read from
-;    JSR @ReadLine     ; read and backup tiels at $0300
-    
-;    INC tmp           
-;    LDA tmp
-;    CMP #2            ; when the low byte hits 2 increments, update the high byte
-;    BEQ @IncTmp
-;    CMP #4            ; when the low byte hits 4 increments, its done
-;    BNE @PrepLine     ; until then, loop
-;    LDA #0
-;    STA btl_screenbackup, Y ; null terminate the string    
-;    RTS             
-    
-;  @IncTmp:
-;    INC tmp+1
-;    JMP @PrepLine
-  
-;  @ReadLine:
-;    LDX #0
-;    LDY tmp+2
-;    LDA $2007         ; read twice to get the correct byte
-;  @ReadLoop:
-;    LDA $2007  
-;    STA btl_screenbackup, Y
-;    LDA #$FF
-;    STA btl_screenbackup+$10, Y ; fill the line after with blanks
-;    INY
-;    INX 
-;    CPX #15           ; read 15 tiles per line
-;    BNE @ReadLoop
-    
-;    LDA #05           ; put a single line break at the end of each line
-;    STA btl_screenbackup, Y
-;    STA btl_screenbackup+$10, Y
-;    TYA
-;    CLC
-;    ADC #$11           ; add +1 on top of skipping the next $10
-;    STA tmp+2
-;    RTS
-  
-;  @PPU_Dest_X:
-;  .byte $22, $23
-  
-;  @PPU_Dest_A:
-;  .byte $8E, $CE, $0E, $4E
-    
-;  @CharacterNamesHPString:
-;  .byte $10,$00,$FF,$10,$05,$7A,$10,$06,$01 ; character name _ current HP / max HP
-;  .byte $11,$00,$FF,$11,$05,$7A,$11,$06,$01 ; is #15 tiles long once printed
-;  .byte $12,$00,$FF,$12,$05,$7A,$12,$06,$01 ; 
-;  .byte $13,$00,$FF,$13,$05,$7A,$13,$06,$00  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13639,7 +13516,6 @@ FormatBattleString:
   @Done:
     LDA #$00
     LDY #$00
-    ;STA (btldraw_dst), Y            ; add null terminator
     INY
     STA (btldraw_dst), Y
     JMP SwapBtlTmpBytes     ; swap back the original btltmp bytes, then exit
@@ -13679,26 +13555,17 @@ DrawBattleString_ExpandChar:
     TAX              ;(now the DTE index)
     PHA              ;(save our index, we'll need it again)
     LDA lut_DTE1, X  ;(load from DTE table 1)
-    JSR @DrawLetter  ;(draw the letter)
+    JSR DrawBattleString_DrawChar  ;(draw the letter)
     PLA              ;(our DTE index again)
     TAX
     LDA lut_DTE2, X  ;(load from DTE table 2)
-:   JSR @DrawLetter  ;(draw the letter)
+:   JSR DrawBattleString_DrawChar  ;(draw the letter)
     PLA
     TAY
     PLA
     TAX
     PLA
     RTS
-    
-   @DrawLetter:
-    ;LDX #$FF        ; if the character is >= $7A (normal character), no decoration
-    ;BNE @Output     ;   use $FF (blank space) as decoration
-    
-   @Output:
-    JSR DrawBattleString_DrawChar
-    RTS
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13860,15 +13727,8 @@ DrawBattle_Number:
     BEQ @FindFirstDigit ;  if it's zero, don't print anything, and move to next digit
     
   @PrintDigits:
-    ;LDY #$01                ; Y=1 to print the bottom part first
     LDA $9A-1, X            ; get the digit
     ORA #$80                ; OR with #$80 to get the tile
-    ;STA (btldraw_dst), Y    ; print the numerical tile
-    ;LDA #$FF
-    ;DEY
-    ;STA (btldraw_dst), Y    ; print the empty space for the top part
-    
-    ;JSR DrawBattleString_IncDstPtr
     JSR DrawBattleString_DrawChar
     INX
     CPX #$05
@@ -13877,7 +13737,6 @@ DrawBattle_Number:
   @OnesDigit:
     LDA btltmp+6                    ; fetch the 1s digit
     ORA #$80
-    ;LDX #$FF
     JMP DrawBattleString_DrawChar   ; and print it
     
 ;;  DrawBattleString_Code11_Short  [$FB93 :: 0x3FBA3]
@@ -14057,8 +13916,6 @@ DrawString_SpaceRun:
     LDA #$FF                    ; blank space tile
     : LDY #$01
       STA (btldraw_dst), Y      ; print top/bottom portions as empty space
-      ;INY
-      ;STA (btldraw_dst), Y
       JSR DrawBattleString_IncDstPtr
       DEX
       BNE :-

@@ -1066,7 +1066,7 @@ BacktrackBattleCommand:
 
 GetCharacterBattleCommand:
     STA btlcmd_curchar              ; record the character
-    ;LDA btlcmd_curchar              ; <- (pointless)
+    ;LDA btlcmd_curchar             ; <- (pointless)
     JSR PrepCharStatPointers        ; Prep the stat pointers (this persists through all the sub menus)
     
     LDY # ch_ailments - ch_stats    ; See if this character has any ailment that would prevent them from inputting
@@ -1204,14 +1204,14 @@ Battle_MainMenu_APressed:
 lut_BattleSubMenu:
   .WORD BattleSubMenu_Fight
   .WORD BattleSubMenu_Magic
-  .WORD BattleSubMenu_Item
+  .WORD BattleSubMenu_Magic
   .WORD BattleSubMenu_Equipment
   
   ;;JIGS - adding things
   
 lut_BattleSubMenu2:
-  .WORD BattleSubMenu_Hide
-  .WORD BattleSubMenu_Run
+  .WORD BattleSubMenu_Item
+  .WORD BattleSubMenu_Guard
   .WORD BattleSubMenu_Hide
   .WORD BattleSubMenu_Run
   
@@ -1222,7 +1222,21 @@ BattleSubMenu_Run:
   TAY
   LDA #$20
   JMP SetCharacterBattleCommand     ; command '20 ?? TT' for running, where 'TT' is character running and ?? is unused.  
-  
+ 
+
+BattleSubMenu_Guard:
+  LDA btlcmd_curchar
+  PHA
+  JSR PrepCharStatPointers
+  LDY #ch_battlestate - ch_stats
+  LDA (CharStatsPointer), Y
+  ORA #$80                  ; add the Guard status
+  STA (CharStatsPointer), Y
+  PLA
+  ORA #$80                  ; get character index, put in Y
+  TAY
+  LDA #$FF
+  JMP SetCharacterBattleCommand
 
   ;; JIGS - this is new!  
 BattleSubMenu_Hide:
@@ -1457,11 +1471,12 @@ BattleSubMenu_Magic_NoUndraw:
       JMP SetCharacterBattleCommand ; 40 xx FE
 
   @Target_10:                       ; target 10 = target one player
+    JSR DrawCommandBox_L
     LDA btlcmd_curchar
     JSR SelectPlayerTarget          ; get a player target?
     CMP #$02                        ; did they press B to exit
     BNE :+
-      JMP BattleSubMenu_Magic_NoUndraw       ; if yes, jump back to magic submenu
+      JMP BattleSubMenu_Magic       ; if yes, jump back to magic submenu
   : LDA btlcurs_y
     AND #$03
     ORA #$80                        ; otherwise, put the player target in Y
@@ -1504,7 +1519,7 @@ BattleSubMenu_Item:
     BNE :+                      ; was B pressed to get out of the Item menu?
       JMP CancelBattleAction    ;   if yes, cancel the action
       
-  : LDX battle_item             ; see if they selected Heal or Pure potion
+  : LDX battle_item             ; get the item they chose
     LDA item_box, X             ; item_box was filled with $FF before being filled with 
     CMP #$FF                    ; item IDs. If battle_item points to an $FF, do nothing
     BNE @ItemOK
@@ -1787,23 +1802,23 @@ GetPointerToMagicData:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 UnhideAllCharacters:        ;; JIGS - used by the end of battle cheering and to initalize to 0 at battle start.
-   ; LDA Character1Hidden
+   ; LDA Character1BattleState
    ; AND #$0F
-   ; STA Character1Hidden
-   ; LDA Character2Hidden
+   ; STA Character1BattleState
+   ; LDA Character2BattleState
    ; AND #$0F
-   ; STA Character2Hidden
-   ; LDA Character3Hidden
+   ; STA Character2BattleState
+   ; LDA Character3BattleState
    ; AND #$0F
-   ; STA Character3Hidden
-   ; LDA Character4Hidden
+   ; STA Character3BattleState
+   ; LDA Character4BattleState
    ; AND #$0F
-   ; STA Character4Hidden
+   ; STA Character4BattleState
     LDA #0
-    STA Character1Hidden ;; - this also clears out regenerative spells
-    STA Character2Hidden
-    STA Character3Hidden
-    STA Character4Hidden
+    STA Character1BattleState ;; - this also clears out regenerative spells and the guarding state
+    STA Character2BattleState
+    STA Character3BattleState
+    STA Character4BattleState
     STA Hidden
     RTS
 
@@ -2212,7 +2227,7 @@ DrawCharacter:
     JSR PrepCharStatPointers   
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y   
-    AND #$F0
+    AND #$10
     BEQ @DrawThem          ; then just draw as normal
       
       TXA ; restore Character ID
@@ -3422,10 +3437,10 @@ UnhideCharacter:
     JSR PrepCharStatPointers
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
-    AND #$F0
+    AND #$10                        ; check only for Hidden state
     BEQ :+                 
         LDA (CharStatsPointer), Y
-        AND #$0F
+        AND #$EF                    ; keep Guard state if it exists
         STA (CharStatsPointer), Y
         LDA #01
         STA Hidden
@@ -3829,7 +3844,7 @@ lut_MainCombatBoxCursorPos:
 ;         X    Y
 ;  .BYTE $60, $9E    ; FIGHT
 ;  .BYTE $60, $AE    ; MAGIC
-;  .BYTE $60, $BE    ; Item
+;  .BYTE $60, $BE    ; DRINK
 ;  .BYTE $60, $CE    ; ITEM
 ;  .BYTE $90, $9E    ; RUN (repeated 4 times to pad to 2x4 menu)
 ;  .BYTE $90, $9E
@@ -3838,12 +3853,12 @@ lut_MainCombatBoxCursorPos:
 
   .BYTE $08, $A6 ;9E    ; FIGHT
   .BYTE $08, $B6 ;AE    ; MAGIC
-  .BYTE $08, $C6 ;BE    ; Item
-  .BYTE $08, $D6 ;CE    ; ITEM
-  .BYTE $40, $A6 ;9E    ;; HIDE 
-  .BYTE $40, $B6 ;AE    ;; FLEE 
-  .BYTE $40, $A6 ;9E
-  .BYTE $40, $B6 ;AE
+  .BYTE $08, $C6 ;BE    ; SKILL
+  .BYTE $08, $D6 ;CE    ; GEAR
+  .BYTE $40, $A6 ;9E    ; ITEMS
+  .BYTE $40, $B6 ;AE    ; GUARD
+  .BYTE $40, $C6 ;9E    ; HIDE
+  .BYTE $40, $D6 ;AE    ; FLEE
   
   
 lut_ReadyCursorPos:
@@ -4904,6 +4919,20 @@ ApplyEndOfRoundEffects:
     
     ;; JIGS - Updates the Battle Turn text and character sprites at the same time
     INC BattleTurn
+    
+    LDA Character1BattleState 
+    AND #$1F
+    STA Character1BattleState
+    LDA Character2BattleState 
+    AND #$1F
+    STA Character2BattleState
+    LDA Character3BattleState 
+    AND #$1F
+    STA Character3BattleState
+    LDA Character4BattleState 
+    AND #$1F
+    STA Character4BattleState   ; clear Guard state for everyone
+    
     JSR DrawCharacterStatus     
     
     JMP CheckForBattleEnd       ; poison may have killed the party -- check for battle end.
@@ -5188,6 +5217,9 @@ Battle_DoPlayerTurn:
     TAY                         ; id*4 in Y (command index)
     
     LDA btl_charcmdbuf, Y       ; get command byte
+    CMP #$FF
+    BEQ @Return                 ; if $FF, player is guarding, do nothing
+    
     LSR A                       ; shift out bit 0 ('dead' bit)      and throw away
     LSR A                       ; shift out bit 1 ('stone' bit)     and throw away
       
@@ -5297,6 +5329,7 @@ Battle_DoPlayerTurn:
 ;    CMP #07
 ;    BEQ Player_Hide
     
+    @Return:
   : RTS
 
   
@@ -5321,14 +5354,14 @@ Player_Hide:
   PLA
   LDY #ch_battlestate - ch_stats
   LDA (CharStatsPointer), Y
-  AND #$F0
+  AND #$10
   BEQ @Hide
     LDA #$54 ; Already hidden!
     JMP @PrintStuff     
    
   @Hide:
-  LDA #$10
-  ORA (CharStatsPointer), Y
+  LDA (CharStatsPointer), Y
+  ORA #$10
   STA (CharStatsPointer), Y
   
   ; Draw the "Slipped into hiding" combat box
@@ -5415,7 +5448,7 @@ Battle_PlayerTryRun:
     
     LDY #ch_battlestate - ch_stats  ; Get Battlestate (hiding)
     LDA (CharStatsPointer), Y       ; JIGS - if hidden, level doesn't factor into it
-    AND #$F0                        ; so the running should be easier to achieve
+    AND #$10                        ; so the running should be easier to achieve
     BEQ :+
     LDX #15
     
@@ -8857,7 +8890,7 @@ GetRandomPlayerTarget:
      JSR PrepCharStatPointers
      LDY #ch_battlestate - ch_stats
      LDA (CharStatsPointer), Y   ; check if hidden
-     AND #$F0
+     AND #$10
      BEQ :+
         ; if nonzero, do another compare to give hidden characters another chance to stay hidden?
         LDA #01
@@ -9815,7 +9848,7 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
  
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
-    AND #$F0
+    AND #$10
     BEQ @NotHidden              ; if they're not hidden, skip all this 
     
     LDA (CharStatsPointer), Y ; reload to preserve low bits
