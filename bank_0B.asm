@@ -161,7 +161,7 @@ BANK_THIS = $0B
 lut_BattleFormations:
 ;  .INCBIN "bin/0B_8400_battleformations.bin"
 
-.byte $00,$00,$00,$01,$00,$00,$99,$00,$00,$00,$00,$01,$04,$40,$36,$04
+.byte $00,$00,$00,$01,$00,$00,$88,$11,$00,$00,$00,$01,$04,$40,$36,$04
 .byte $02,$08,$15,$18,$00,$00,$24,$00,$00,$00,$0C,$0C,$04,$00,$35,$02
 .byte $00,$28,$01,$02,$03,$00,$13,$02,$02,$02,$00,$01,$04,$A0,$13,$00
 .byte $00,$0A,$02,$03,$00,$00,$12,$00,$00,$00,$00,$01,$04,$40,$46,$01
@@ -3915,15 +3915,20 @@ PrepareEnemyFormation_Mix:
 
 lut_FormationAttributes_9Small_tops:            ; "tops" are the odd rows of attributes, "bottoms" are even
     .BYTE $00,$00,$00,$00,$00,$00,$00,$00       ;  it's easier to work this way, sadly
-    .BYTE $00,$55,$22,$28,$80,$00,$00,$00
-    .BYTE $04,$44,$11,$77,$70,$00,$00,$00
-    .BYTE $06,$63,$33,$99,$00,$00,$00,$00
+    .BYTE $00,$22,$55,$58,$80,$00,$00,$00
+    .BYTE $01,$11,$44,$77,$70,$00,$00,$00
+    .BYTE $03,$36,$66,$99,$00,$00,$00,$00
     
 lut_FormationAttributes_9Small_bottoms:
-    .BYTE $00,$55,$22,$28,$80,$00,$00,$00
-    .BYTE $04,$44,$11,$77,$70,$00,$00,$00
-    .BYTE $04,$44,$11,$77,$70,$00,$00,$00
-    .BYTE $06,$63,$33,$99,$00,$00,$00,$00
+    .BYTE $00,$22,$55,$58,$80,$00,$00,$00
+    .BYTE $01,$11,$44,$77,$70,$00,$00,$00
+    .BYTE $01,$11,$44,$77,$70,$00,$00,$00
+    .BYTE $03,$36,$66,$99,$00,$00,$00,$00
+    
+lut_FormationPlacement_9Small:
+  .WORD $2163, $20C4, $2202     ; Left column of enemies
+  .WORD $2168, $20C9, $2207     ; Center column
+  .WORD $216D, $20CE, $220C     ; right column
     
 BattleFormation_GetAttributeByte:
     ; in:   Y = index of attribute byte to get
