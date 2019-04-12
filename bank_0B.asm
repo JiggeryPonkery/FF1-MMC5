@@ -3907,6 +3907,94 @@ PrepareEnemyFormation_Mix:
   @SmallExit:
     RTS
 
+;;;;;;;;;;;;;;;
+;;  Formation attributes need to fill 32 bytes, each byte has 4 regions where the attribute is determined
+;;   by a particular enemy.  Each digit/nybble here indicates which enemy determines the palette for each
+;;   16x16 attribute block.  IE, a value of 1 means the first enemy (enemy 0's) palette is used.  A value
+;;   of 0 means the block is used by background instead and not by any enemy
+
+lut_FormationAttributes_9Small_tops:            ; "tops" are the odd rows of attributes, "bottoms" are even
+    .BYTE $00,$00,$00,$00,$00,$00,$00,$00       ;  it's easier to work this way, sadly
+    .BYTE $00,$55,$22,$28,$80,$00,$00,$00
+    .BYTE $04,$44,$11,$77,$70,$00,$00,$00
+    .BYTE $06,$63,$33,$99,$00,$00,$00,$00
+    
+lut_FormationAttributes_9Small_bottoms:
+    .BYTE $00,$55,$22,$28,$80,$00,$00,$00
+    .BYTE $04,$44,$11,$77,$70,$00,$00,$00
+    .BYTE $04,$44,$11,$77,$70,$00,$00,$00
+    .BYTE $06,$63,$33,$99,$00,$00,$00,$00
+    
+BattleFormation_GetAttributeByte:
+    ; in:   Y = index of attribute byte to get
+    ; out:  A = attribute byte
+    @dst = btltmp+1
+    LDA lut_FormationAttributes_9Small_bottoms,Y
+    JSR BattleFormation_GetAttributeNybble
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    STA @dst
+    LDA lut_FormationAttributes_9Small_tops,Y
+    JSR BattleFormation_GetAttributeNybble
+    ORA @dst
+    RTS
+    
+BattleFormation_GetAttributeNybble:
+    ; in:   A = formation lut byte
+    ; out:  A = nybble
+    ;   (trashes btltmp+0 and X)
+    @dst = btltmp+0
+   
+    PHA         ; back up src byte
+    
+    AND #$0F    ; get the low nybble (right / high nybble of output)
+    BEQ @next   ; if it's zero, it's not an enemy.  Leave it with attribute 0
+        ; otherwise, it's an enemy index (plus one), so get the palette assignment
+        TAX
+        LDA btl_enemygfxplt-1, X
+        AND #1      ; 0 actually uses palette 1, 1 actually uses palette 2
+        CLC
+        ADC #1
+        ASL A
+        ASL A
+        
+  @next:
+    STA @dst    ; store high half-nybble of dst byte
+    PLA         ; get high nybble of src byte
+    LSR A       
+    LSR A
+    LSR A
+    LSR A
+    BEQ @done   ; if it's zero, there's no enemy
+        TAX
+        LDA btl_enemygfxplt-1, X
+        AND #1      ; 0 actually uses palette 1, 1 actually uses palette 2
+        CLC
+        ADC #1
+        ORA @dst
+        STA @dst
+    
+  @done:
+    LDA @dst
+    RTS
+    
+BattleFormation_DrawAttributes:
+    JSR ReadAttributesFromPPU
+    LDY #(8*4)-1
+    @loop:
+        TYA
+        AND #7              ; skip the 2 right-most attribute columns.
+        CMP #5              ;   this is kind of hacky, but whatever
+        BCS @continue
+            JSR BattleFormation_GetAttributeByte
+            STA btltmp_attr+8, Y
+      @continue:
+        DEY
+        BPL @loop
+    RTS
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3939,95 +4027,7 @@ DrawFormation_NonFiend:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 DrawFormation_9Small:
-    JSR ReadAttributesFromPPU       ; Read the attribute table into btltmp_attr
-    LDA btl_enemycount
-    STA btltmp+6                    ; put the number of enemies in btltmp+6, used as a loop counter
-    
-    LDX #$00
-    LDY #$00
-    STY btl_drawformationtmp           ; temporary counter:  how many enemies we have drawn
-                        ;   which is confusing, because this is also stored in X for this routine
-                        ;   This value and X are always in sync.
-                        ; Best I can figure is X is the src counter, and $6BCF is the dest counter
-                        ;  Though it is completely unnecessary to have both.
-    
-    
-    ; Begin Loop to draw attributes for each enemy
-    ; Since small enemies are 32x32 pixels, and each byte of the attribute table is 32x32 pixels, you'd think this
-    ;   would be simple 1 byte = 1 enemy.  HOWEVER, this is complicated because the way the battlefield is set up,
-    ;   enemies to not land on the 32x32 pixel boundary.  Rather, they land exactly between them both in the X and Y
-    ;   direction
-    ;
-    ;   For example, ideally it'd work like this:
-    ;
-    ; AA|BB|CC     (each alphabetic character represents a 16x16 pixel block)
-    ; AA|BB|CC     (A-F represent enemies)
-    ; --+--+--     (lines are attribute byte boundaries)
-    ; DD|EE|FF
-    ; DD|EE|FF
-    ;
-    ;   But in actuality, it works like this:
-    ;
-    ; A|AB|BC|C
-    ; -+--+--+-
-    ; A|AB|BC|C
-    ; D|DE|EF|F
-    ; -+--+--+-
-    ; D|DE|EF|F
-    ;
-    ;  This has the interesting effect of effectively reversing which 'sector' of the attribute byte the enemy
-    ;   occupies.  Example:  the upper-left portion of the enemy occupies the lower-right portion of the attribute
-    ;   byte (and vice versa)
-    ;  It also means the enemies span 4 bytes of attributes rather than just 1 byte
-    
-@AttributeLoop:
-    ;LDA $6BCF           ; pointless, not used
-    
-    TXA                 ; back up src enemy counter
-    PHA
-    
-    LDX btl_drawformationtmp           ; get dst en counter
-    LDA @lut_AttributeOffset, X
-    TAY                 ; put offset to attribute data in Y
-    
-    PLA
-    TAX                 ; retore src enemy counter
-    LDA btl_enemygfxplt, X  ; get palette assignment for this enemy
-    AND #$01
-    BEQ :+
-      LDA #$80              ; if low bit set, A=80
-      JMP @PlotAttributes
-    
-    : LDA #$40              ; if low bit clear, A=40
-    
-    ; Now, A=80 or 40, which is the desired BG palette to use for this enemy
-    ;  shifted into the high 2 bits -- which is the 'lower-right' attribute portion.
-    ;  Which, as explained above, coresponds to the 'upper-left' enemy graphic position
-  @PlotAttributes:
-    JSR @ApplyAtAndShift        ; Write upper-left enemy graphic attributes
-    INY                         ; Inc attritube index by 1 (next attribute byte)
-    JSR @ApplyAtAndShift        ; Write upper-right
-    JSR IncYBy7                 ; Iny by 7 (next row)
-    JSR @ApplyAtAndShift        ; Write lower-left
-    INY
-    JSR @ApplyAtAndShift        ; Write lower-right
-    
-    INX                         ; increment src counter
-    INC btl_drawformationtmp                   ; increment dest counter
-    DEC btltmp+6                ; count down the number of enemies we have left to draw
-    BNE @AttributeLoop          ; Loop until there are no more remaining
-    
-    JMP @DrawNT                 ; Jump ahead to draw nametable bytes
-    
-    ;;  Support subroutine used by @PlotAttributes to actually update the attribute table
-    @ApplyAtAndShift:
-        PHA                 ; backup attribute bits
-        ORA btltmp_attr, Y  ; merge with existing attribute table
-        STA btltmp_attr, Y
-        PLA                 ; restore backup
-        LSR A               ; and shift down two places
-        LSR A               ; shifting down results in changing which sector of the attribute
-        RTS                 ;   table we'll write to next
+    JSR BattleFormation_DrawAttributes
     
 @DrawNT:
     LDA btl_enemycount
@@ -4080,7 +4080,7 @@ DrawFormation_9Small:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawFormation_4Large:
-    JSR ReadAttributesFromPPU
+;    JSR ReadAttributesFromPPU
     
     ; Begin an unrolled loop to apply the attributes for each of the 4 enemies.
     ; Large enemies are layed out like so in the attribute tables:
@@ -4097,31 +4097,31 @@ DrawFormation_4Large:
     ;
     ; So each enemy occupies 1 full attrubute bytes, and part of 3 other bytes
     
-    LDA btl_enemygfxplt+0   ; get enemy 0's assigned palette
-    AND #$01
-    STA btl_tmppltassign    ; put it in tmppltassign
-    LDY #$08                ; its attribute position starts at $08
-    JSR @ApplyAtTop         ; apply it as top-row enemy
+;    LDA btl_enemygfxplt+0   ; get enemy 0's assigned palette
+;    AND #$01
+;    STA btl_tmppltassign    ; put it in tmppltassign
+;    LDY #$08                ; its attribute position starts at $08
+;    JSR @ApplyAtTop         ; apply it as top-row enemy
     
-    LDA btl_enemygfxplt+1   ; do same for enemy 1
-    AND #$01
-    STA btl_tmppltassign
-    LDY #$18                ; start at $18
-    JSR @ApplyAtBottom      ; bottom row
+;    LDA btl_enemygfxplt+1   ; do same for enemy 1
+;    AND #$01
+;    STA btl_tmppltassign
+;    LDY #$18                ; start at $18
+;    JSR @ApplyAtBottom      ; bottom row
     
-    LDA btl_enemygfxplt+2   ; repeat for enemies 2,3
-    AND #$01
-    STA btl_tmppltassign
-    LDY #$0A
-    JSR @ApplyAtTop
+;    LDA btl_enemygfxplt+2   ; repeat for enemies 2,3
+;    AND #$01
+;    STA btl_tmppltassign
+;    LDY #$0A
+;    JSR @ApplyAtTop
     
-    LDA btl_enemygfxplt+3
-    AND #$01
-    STA btl_tmppltassign
-    LDY #$1A
-    JSR @ApplyAtBottom 
+;    LDA btl_enemygfxplt+3
+;    AND #$01
+;    STA btl_tmppltassign
+;    LDY #$1A
+ ;   JSR @ApplyAtBottom 
     
-    JMP @DrawNT
+;    JMP @DrawNT
     
     
     ; applies all attributes for one large enemy in the Top Row
@@ -4135,18 +4135,18 @@ DrawFormation_4Large:
     ;   .A|AA
     ;   .A|AA
     
-  @ApplyAtTop:
-    LDA #%01000000      ; lower-right sector only ; 40
-    JSR @ApplyAtByte
-    INY
-    LDA #%01010000      ; lower sectors ; 50 
-    JSR @ApplyAtByte
-    JSR IncYBy7         ; (inc by 7 to go to next row)
-    LDA #%01000100      ; right sectors only ; 44
-    JSR @ApplyAtByte
-    INY
-    LDA #%01010101      ; all sectors ; 55
-    JMP @ApplyAtByte
+;  @ApplyAtTop:
+;    LDA #%01000000      ; lower-right sector only ; 40
+;    JSR @ApplyAtByte
+;    INY
+;    LDA #%01010000      ; lower sectors ; 50 
+;    JSR @ApplyAtByte
+;    JSR IncYBy7         ; (inc by 7 to go to next row)
+;    LDA #%01000100      ; right sectors only ; 44
+;    JSR @ApplyAtByte
+;    INY
+;    LDA #%01010101      ; all sectors ; 55
+;    JMP @ApplyAtByte
     
     ; applies all attributes for one large enemy in the Bottom Row
     ;                Y = position of attribute byte
@@ -4159,62 +4159,62 @@ DrawFormation_4Large:
     ;   .A|AA
     ;   ..|..
     
-  @ApplyAtBottom:
-    LDA #%01000100      ; right sectors ; 44
-    JSR @ApplyAtByte
-    INY
-    LDA #%01010101      ; all sectors   ; 55
-    JSR @ApplyAtByte
-    JSR IncYBy7         ; (inc by 7 to go to next row)
-    LDA #%00000100      ; upper-right sector ; 04
-    JSR @ApplyAtByte
-    INY
-    LDA #%00000101      ; upper sectors ; 05
-    JMP @ApplyAtByte
+;  @ApplyAtBottom:
+;    LDA #%01000100      ; right sectors ; 44
+;    JSR @ApplyAtByte
+;    INY
+;    LDA #%01010101      ; all sectors   ; 55
+;    JSR @ApplyAtByte
+;    JSR IncYBy7         ; (inc by 7 to go to next row)
+;    LDA #%00000100      ; upper-right sector ; 04
+;    JSR @ApplyAtByte
+;    INY
+;    LDA #%00000101      ; upper sectors ; 05
+;    JMP @ApplyAtByte
     
     ; applies attributes to the desired sector of the desired byte.
     ;                A = low bit set in each attribute sector to update
     ;                Y = position of attribute byte
     ; btl_tmppltassign = zero if enemy is to use palette 1, nonzero if to use palette 2
-  @ApplyAtByte:
-    LDX btl_tmppltassign    ; if set to use palette 2...
-    BEQ :+
-      ASL A                 ; then shift A so it is the high-bit in each sector instead of low bit
-  : ORA btltmp_attr, Y      ; then OR with attribute byte at given position
-    STA btltmp_attr, Y
-    RTS
+;  @ApplyAtByte:
+;    LDX btl_tmppltassign    ; if set to use palette 2...
+;    BEQ :+
+;      ASL A                 ; then shift A so it is the high-bit in each sector instead of low bit
+;  : ORA btltmp_attr, Y      ; then OR with attribute byte at given position
+;    STA btltmp_attr, Y
+;    RTS
     
     
-@DrawNT:
-    LDA btl_enemycount
-    STA btltmp+6            ; use this as a loop down-counter
-    LDX #$00                ; X= 2* enemy index
-    LDY #$00                ; Y= 1* enemy index
+;@DrawNT:
+;    LDA btl_enemycount
+;    STA btltmp+6            ; use this as a loop down-counter
+;    LDX #$00                ; X= 2* enemy index
+;    LDY #$00                ; Y= 1* enemy index
     
-  @NTLoop:
-      LDA @lut_NTAddress, X ; put target PPU address in btltmp+0
-      STA btltmp+0
-      INX
-      LDA @lut_NTAddress, X
-      STA btltmp+1
-      INX
+;  @NTLoop:
+;      LDA @lut_NTAddress, X ; put target PPU address in btltmp+0
+;      STA btltmp+0
+;      INX
+;      LDA @lut_NTAddress, X
+;      STA btltmp+1
+;      INX
       
-      LDA #$00              ; put desired image (0 or 1) in btltmp+2
-      STA btltmp+2
-      LDA btl_enemygfxplt, Y
-      BPL :+
-        INC btltmp+2        ; bit 7 of the enemygraphic set indicates we should use image 1
+ ;     LDA #$00              ; put desired image (0 or 1) in btltmp+2
+ ;     STA btltmp+2
+ ;     LDA btl_enemygfxplt, Y
+ ;     BPL :+
+ ;       INC btltmp+2        ; bit 7 of the enemygraphic set indicates we should use image 1
         
-    : JSR DrawLargeEnemy    ; draw the enemy
-      INY
-      DEC btltmp+6
-      BNE @NTLoop           ; loop until no more enemies to draw
+ ;   : JSR DrawLargeEnemy    ; draw the enemy
+ ;     INY
+ ;     DEC btltmp+6
+ ;     BNE @NTLoop           ; loop until no more enemies to draw
       
-    JMP WriteAttributes_ClearUnusedEnStats
+ ;   JMP WriteAttributes_ClearUnusedEnStats
     
-@lut_NTAddress:
-  .WORD $20C2, $2182
-  .WORD $20CA, $218A
+;@lut_NTAddress:
+;  .WORD $20C2, $2182
+ ; .WORD $20CA, $218A
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4230,63 +4230,63 @@ DrawFormation_4Large:
 
     
 DrawFormation_Mix:
-    JSR ReadAttributesFromPPU
-    LDA btl_enemyIDs+0
-    CMP #$FF
-    BEQ @SmallEnemyAttr     ; if there are no large enemies, skip ahead to small enemies
+;    JSR ReadAttributesFromPPU
+;    LDA btl_enemyIDs+0
+;    CMP #$FF
+;    BEQ @SmallEnemyAttr     ; if there are no large enemies, skip ahead to small enemies
     
-    LDY #$00                ; Y=0 or 4 depending on which palette to use
-    LDA btl_enemygfxplt+0
-    AND #$01
-    BEQ :+
-      JSR IncYBy4
+;    LDY #$00                ; Y=0 or 4 depending on which palette to use
+;    LDA btl_enemygfxplt+0
+;    AND #$01
+;    BEQ :+
+;      JSR IncYBy4
       
-  : LDA @lut_LargeEn0_Attributes, Y
-    STA btltmp_attr + $08   ; do a straight copy of the large enemy attributes from
-    INY                     ; a lookup table.
-    LDA @lut_LargeEn0_Attributes, Y
-    STA btltmp_attr + $09
-    INY
-    LDA @lut_LargeEn0_Attributes, Y
-    STA btltmp_attr + $10
-    INY
-    LDA @lut_LargeEn0_Attributes, Y
-    STA btltmp_attr + $11
-    INY
+;  : LDA @lut_LargeEn0_Attributes, Y
+;    STA btltmp_attr + $08   ; do a straight copy of the large enemy attributes from
+;    INY                     ; a lookup table.
+;    LDA @lut_LargeEn0_Attributes, Y
+;    STA btltmp_attr + $09
+;    INY
+;    LDA @lut_LargeEn0_Attributes, Y
+;    STA btltmp_attr + $10
+;    INY
+;    LDA @lut_LargeEn0_Attributes, Y
+;    STA btltmp_attr + $11
+;    INY
     
     ; Do the same for enemy 1
-    LDA btl_enemyIDs+1
-    CMP #$FF
-    BEQ @SmallEnemyAttr     ; if there are no more large enemies, skip ahead to small
+;    LDA btl_enemyIDs+1
+;    CMP #$FF
+;    BEQ @SmallEnemyAttr     ; if there are no more large enemies, skip ahead to small
     
-    LDY #$00                ; Y=0 or 4 depending on which palette to use
-    LDA btl_enemygfxplt+1
-    AND #$01
-    BEQ :+
-      JSR IncYBy4
+;    LDY #$00                ; Y=0 or 4 depending on which palette to use
+;    LDA btl_enemygfxplt+1
+;    AND #$01
+;    BEQ :+
+;      JSR IncYBy4
       
-  : LDA @lut_LargeEn1_Attributes, Y
-    STA btltmp_attr + $18   ; straight copy from lut
-    INY
-    LDA @lut_LargeEn1_Attributes, Y
-    STA btltmp_attr + $19
-    INY
-    LDA @lut_LargeEn1_Attributes, Y
-    STA btltmp_attr + $20
-    INY
-    LDA @lut_LargeEn1_Attributes, Y
-    STA btltmp_attr + $21
+;  : LDA @lut_LargeEn1_Attributes, Y
+;    STA btltmp_attr + $18   ; straight copy from lut
+;    INY
+;    LDA @lut_LargeEn1_Attributes, Y
+;    STA btltmp_attr + $19
+;    INY
+;    LDA @lut_LargeEn1_Attributes, Y
+;    STA btltmp_attr + $20
+;    INY
+;    LDA @lut_LargeEn1_Attributes, Y
+;    STA btltmp_attr + $21
     
-  @SmallEnemyAttr:
-    LDA #$00
-    STA btl_drawformationtmp           ; The small enemy index (0-5)
-    LDA #$02
-    STA btl_drawformationindex           ; The actual enemy index (2-7 for small enemies)
-  @SmallEnemyAttrLoop:
-      LDX btl_drawformationindex
-      LDA btl_enemyIDs, X
-      CMP #$FF
-      BEQ @NextSmallEnemy   ; if this enemy doesn't exist, skip it
+;  @SmallEnemyAttr:
+;    LDA #$00
+;    STA btl_drawformationtmp           ; The small enemy index (0-5)
+;    LDA #$02
+;    STA btl_drawformationindex           ; The actual enemy index (2-7 for small enemies)
+;  @SmallEnemyAttrLoop:
+;      LDX btl_drawformationindex
+;      LDA btl_enemyIDs, X
+;      CMP #$FF
+;      BEQ @NextSmallEnemy   ; if this enemy doesn't exist, skip it
     
     ; Small enemies only take up 2 attribute bytes now, because the large enemies pushed them over 16
     ;   pixels, so they now land cleanly on an attribute byte for the X axis, but still not the Y axis:
@@ -4298,121 +4298,121 @@ DrawFormation_Mix:
     ; --+--
     ; CC|DD  
       
-    ;; A=50 if using palette 1, A=A0 if using palette 2
-      LDA btl_enemygfxplt, X
-      AND #$01
-      BEQ :+
-        LDA #$A0
-        BNE :++ ;(always jump)
-    :   LDA #$50
+;    ;; A=50 if using palette 1, A=A0 if using palette 2
+;      LDA btl_enemygfxplt, X
+;      AND #$01
+;      BEQ :+
+;        LDA #$A0
+;        BNE :++ ;(always jump)
+;    :   LDA #$50
+;    
+;    ;; apply attributes for top half of enemy
+;    : LDX btl_drawformationtmp
+;      PHA
+;      LDA @lut_SmallEn_AtOffset, X
+;      TAX                   ; attribute offset in X
+;      PLA                   ; attribute bits in A
+;      ORA btltmp_attr, X
+;      STA btltmp_attr, X
+;      
+;    ;; Do all the same for bottom half of enemy
+;    ;;  A=05 if using palette 1, A=0A if using palette 2
+;      LDX btl_drawformationindex
+;      LDA btl_enemygfxplt, X
+;      AND #$01
+;      BEQ :+
+;        LDA #$0A
+;        BNE :++
+;      : LDA #$05
+;      
+;    ;; apply attributes for bottom half of enemy
+;    : LDX btl_drawformationtmp
+;      PHA
+;      LDA @lut_SmallEn_AtOffset, X
+;      TAX
+;      PLA
+;      ORA btltmp_attr+8, X
+;      STA btltmp_attr+8, X
+;    
+;  @NextSmallEnemy:
+;      INC btl_drawformationindex       ; increment actual index
+;      INC btl_drawformationtmp       ; and small enemy index
+;      LDA btl_drawformationindex
+;      CMP #$09        ; keep looping until we do all ?9? enemies (it should only be 8, since the 9th enemy will always be blank)
+;      BNE @SmallEnemyAttrLoop
+;    
+;    
+;    ;; Draw large enemy #0
+;    LDA btl_enemyIDs
+;    CMP #$FF
+;    BEQ @DrawSmallEnemies       ; if large enemy 0 doesn't exist, skip to small enemies
+;    
+;    LDA #<$20C2             ; set target ppu addr to $20C2
+;    STA btltmp+0
+;    LDA #>$20C2
+;    STA btltmp+1
+;    LDA btl_enemygfxplt+0   ; move bit 7 of the gfx assignment to bit 0 of btltmp+2 to indicate which image to draw
+;    AND #$80
+;    CLC
+;    ROL A
+;    ROL A
+;    STA btltmp+2
+;    JSR DrawLargeEnemy      ; then actually draw it
     
-    ;; apply attributes for top half of enemy
-    : LDX btl_drawformationtmp
-      PHA
-      LDA @lut_SmallEn_AtOffset, X
-      TAX                   ; attribute offset in X
-      PLA                   ; attribute bits in A
-      ORA btltmp_attr, X
-      STA btltmp_attr, X
-      
-    ;; Do all the same for bottom half of enemy
-    ;;  A=05 if using palette 1, A=0A if using palette 2
-      LDX btl_drawformationindex
-      LDA btl_enemygfxplt, X
-      AND #$01
-      BEQ :+
-        LDA #$0A
-        BNE :++
-      : LDA #$05
-      
-    ;; apply attributes for bottom half of enemy
-    : LDX btl_drawformationtmp
-      PHA
-      LDA @lut_SmallEn_AtOffset, X
-      TAX
-      PLA
-      ORA btltmp_attr+8, X
-      STA btltmp_attr+8, X
-    
-  @NextSmallEnemy:
-      INC btl_drawformationindex       ; increment actual index
-      INC btl_drawformationtmp       ; and small enemy index
-      LDA btl_drawformationindex
-      CMP #$09        ; keep looping until we do all ?9? enemies (it should only be 8, since the 9th enemy will always be blank)
-      BNE @SmallEnemyAttrLoop
+;    ;; All the same, but for large enemy #1
+;    LDA btl_enemyIDs+1
+;    CMP #$FF
+;    BEQ @DrawSmallEnemies
+;    
+;    LDA #<$2182             ; target ppu address = $2182
+;    STA btltmp+0
+;    LDA #>$2182
+;    STA btltmp+1
+;    LDA btl_enemygfxplt+1
+;    AND #$80
+;    CLC
+;    ROL A
+;    ROL A
+;    STA btltmp+2
+;    JSR DrawLargeEnemy
     
     
-    ;; Draw large enemy #0
-    LDA btl_enemyIDs
-    CMP #$FF
-    BEQ @DrawSmallEnemies       ; if large enemy 0 doesn't exist, skip to small enemies
-    
-    LDA #<$20C2             ; set target ppu addr to $20C2
-    STA btltmp+0
-    LDA #>$20C2
-    STA btltmp+1
-    LDA btl_enemygfxplt+0   ; move bit 7 of the gfx assignment to bit 0 of btltmp+2 to indicate which image to draw
-    AND #$80
-    CLC
-    ROL A
-    ROL A
-    STA btltmp+2
-    JSR DrawLargeEnemy      ; then actually draw it
-    
-    ;; All the same, but for large enemy #1
-    LDA btl_enemyIDs+1
-    CMP #$FF
-    BEQ @DrawSmallEnemies
-    
-    LDA #<$2182             ; target ppu address = $2182
-    STA btltmp+0
-    LDA #>$2182
-    STA btltmp+1
-    LDA btl_enemygfxplt+1
-    AND #$80
-    CLC
-    ROL A
-    ROL A
-    STA btltmp+2
-    JSR DrawLargeEnemy
-    
-    
-  @DrawSmallEnemies:
-    ; Same idea as the attributes here
-    LDA #$02
-    STA btl_drawformationindex       ; 6C91 is the 'actual' index  (0-7)
-    LDA #$00
-    STA btl_drawformationtmp       ; 6BCF is 2* the 'small' index (0,2,4,6,8,A) - used to index  @lut_SmallEn_DrawPos
-  @DrawSmallLoop:
-      LDX btl_drawformationindex
-      LDA btl_enemyIDs, X           ; see if this enemy exists
-      CMP #$FF
-      BNE :+
-        JMP @DrawNextSmallEnemy     ; if not, skip it  (note that is actually could/should jump to WriteAttribute_ClearUnusedEnState to exit the routine
+;  @DrawSmallEnemies:
+;    ; Same idea as the attributes here
+;    LDA #$02
+;    STA btl_drawformationindex       ; 6C91 is the 'actual' index  (0-7)
+;    LDA #$00
+;    STA btl_drawformationtmp       ; 6BCF is 2* the 'small' index (0,2,4,6,8,A) - used to index  @lut_SmallEn_DrawPos
+;  @DrawSmallLoop:
+;      LDX btl_drawformationindex
+;      LDA btl_enemyIDs, X           ; see if this enemy exists
+;      CMP #$FF
+;      BNE :+
+;        JMP @DrawNextSmallEnemy     ; if not, skip it  (note that is actually could/should jump to WriteAttribute_ClearUnusedEnState to exit the routine
                                     ; since there will never be any more enemies to draw after this.  But whatever.
         
-    : LDA #$00                  ; move bit 7 of this enemy's graphic to bit 0 of btltmp+2
-      STA btltmp+2
-      LDA btl_enemygfxplt, X
-      BPL :+
-        INC btltmp+2
+;    : LDA #$00                  ; move bit 7 of this enemy's graphic to bit 0 of btltmp+2
+;      STA btltmp+2
+;      LDA btl_enemygfxplt, X
+;      BPL :+
+;        INC btltmp+2
         
-    : LDX btl_drawformationtmp                     ; get 'small' index
-      LDA @lut_SmallEn_DrawPos, X   ; put the target PPU address in btltmp+0
-      STA btltmp+0
-      LDA @lut_SmallEn_DrawPos+1, X
-      STA btltmp+1
-      INC btl_drawformationtmp
-      INC btl_drawformationtmp                     ; increment small index
+;    : LDX btl_drawformationtmp                     ; get 'small' index
+;      LDA @lut_SmallEn_DrawPos, X   ; put the target PPU address in btltmp+0
+;      STA btltmp+0
+;      LDA @lut_SmallEn_DrawPos+1, X
+;      STA btltmp+1
+;      INC btl_drawformationtmp
+;      INC btl_drawformationtmp                     ; increment small index
       
-      JSR DrawSmallEnemy
-  @DrawNextSmallEnemy:
-      INC btl_drawformationindex             ; inc actual index and loop until all small enemies drawn
-      LDA btl_drawformationindex
-      CMP #$09
-      BNE @DrawSmallLoop
-      
-    JMP WriteAttributes_ClearUnusedEnStats
+;      JSR DrawSmallEnemy
+;  @DrawNextSmallEnemy:
+;      INC btl_drawformationindex             ; inc actual index and loop until all small enemies drawn
+;      LDA btl_drawformationindex
+;      CMP #$09
+;      BNE @DrawSmallLoop
+;      
+;    JMP WriteAttributes_ClearUnusedEnStats
     
     
     ; These two attribute LUTs are used for the large enemies in this formation.
@@ -4422,34 +4422,34 @@ DrawFormation_Mix:
     ;    of the battle backdrop.
     ;
     ; As such, these tables need to include the attribute settings for those areas as well.
-  @lut_LargeEn0_Attributes:       ; placed at positions $08, $09, $10, $11   in the attribute table
-    ; if using palette 0
-    .BYTE $73, $50
-    .BYTE $77, $55
-  
-    ; if using palette 1
-    .BYTE $B3, $A0
-    .BYTE $BB, $AA
-  
-  @lut_LargeEn1_Attributes:       ; placed at positions $18, $19, $20, $21   in the attribute table
-    ; if using palette 0
-    .BYTE $77, $55
-    .BYTE $F7, $F5
-  
-    ; if using palette 1
-    .BYTE $BB, $AA
-    .BYTE $FB, $FA
-  
-  ; LUT to indicate the PPU address at which to draw each small enemy
-  @lut_SmallEn_DrawPos:
-  .WORD $2148, $20C8, $21C8
-  .WORD $214C, $20CC, $21CC
+;  @lut_LargeEn0_Attributes:       ; placed at positions $08, $09, $10, $11   in the attribute table
+;    ; if using palette 0
+;    .BYTE $73, $50
+;    .BYTE $77, $55
+;  
+;    ; if using palette 1
+;    .BYTE $B3, $A0
+;    .BYTE $BB, $AA
+;  
+;  @lut_LargeEn1_Attributes:       ; placed at positions $18, $19, $20, $21   in the attribute table
+;    ; if using palette 0
+;    .BYTE $77, $55
+;    .BYTE $F7, $F5
+;  
+;    ; if using palette 1
+;    .BYTE $BB, $AA
+;    .BYTE $FB, $FA
+;  
+;  ; LUT to indicate the PPU address at which to draw each small enemy
+;  @lut_SmallEn_DrawPos:
+;  .WORD $2148, $20C8, $21C8
+;  .WORD $214C, $20CC, $21CC
   
   
   ; LUT to indicate the offset of the first attribute byte impacted by each small enemy
-  @lut_SmallEn_AtOffset:
-    .BYTE $12, $0A, $1A     ; first column of small enemies
-    .BYTE $13, $0B, $1B     ; second column of small enemies
+;  @lut_SmallEn_AtOffset:
+;    .BYTE $12, $0A, $1A     ; first column of small enemies
+;    .BYTE $13, $0B, $1B     ; second column of small enemies
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
