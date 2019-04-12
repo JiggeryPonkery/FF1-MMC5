@@ -2660,6 +2660,10 @@ EnterShop:
     STA $5015              ; and silence the MMC5 APU. (JIGS)
     STA joy_b              ; erase joypad A and B buttons
     STA joy_a
+    STA shop_curprice
+    STA shop_curprice+1
+    STA shop_curprice+2
+    STA shop_curprice+4    
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
     STA item_box_offset
     STA inv_canequipinshop
