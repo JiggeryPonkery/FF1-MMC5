@@ -355,7 +355,7 @@ lut_MagicBattleMessages:
   .BYTE $00 ; SLEEP  
   .BYTE $05 ; LOCK          ; Easy to hit
   .BYTE $00 ; BOLT   
-  .BYTE $00 ; LAMP   
+  .BYTE $00 ; LAMP          ; Cures ailment, so will print Cured! even if this is $00
   .BYTE $00 ; MUTE   
   .BYTE $08 ; BOLT (Shield) ; Defend lightning
   .BYTE $03 ; INVISBL       ; Easy to dodge
@@ -371,10 +371,10 @@ lut_MagicBattleMessages:
   .BYTE $0D ; HOLD          ; Attack halted
   .BYTE $00 ; BOLT 2 
   .BYTE $05 ; LOCK 2        ; Easy to hit
-  .BYTE $00 ; PURE   
+  .BYTE $00 ; PURE          ; Cures ailment, so will print Cured! even if this is $00 
   .BYTE $0F ; FEAR          ; Became terrified
   .BYTE $10 ; ICE (shield)  ; Defend cold
-  .BYTE $00 ; VOICE  
+  .BYTE $00 ; VOICE         ; Cures ailment, so will print Cured! even if this is $00 
   .BYTE $00 ; SLEEP 2
   .BYTE $12 ; FAST          ; Quick shot
   .BYTE $00 ; CONFUSE
@@ -5165,7 +5165,10 @@ ApplyPoisonToPlayer:
     JSR PlayBattleSFX   
     JSR BattleScreenShake_L
     JSR RespondDelay  
-    JSR ClearAllCombatBoxes
+    
+    LDA #03
+    JSR UndrawNBattleBlocks_L
+    ;JSR ClearAllCombatBoxes
 	;JSR DrawCharacterStatus     ; redraw character stats to reflect post-poison HP
     
     @Exit:
@@ -9186,7 +9189,7 @@ UseItem_Heal:
     JSR PlayBattleSFX    
     JSR BtlMag_SavePlayerDefenderStats ; save the healed HP
 
-    LDX #X_HEAL
+    LDX #HEAL
     LDA #BTLMSG_HPUP
     JMP UseItem_End_RemoveItem
     
@@ -9203,7 +9206,7 @@ UseItem_XHeal:
     JSR BtlMag_SavePlayerDefenderStats ; save the healed HP
     
     LDA #BTLMSG_HPUP                   ; print "HP up!"
-    LDX #HEAL
+    LDX #X_HEAL
     JMP UseItem_End_RemoveItem
     
 UseItem_Elixir:
@@ -11149,6 +11152,12 @@ BtlMag_Effect_InflictAilment2:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_HandleAilmentChanges:
+    LDA btlmag_effect
+    CMP #06
+    BEQ @CheckPlayerState
+    CMP #13
+    BCS @CheckPlayerState ; if the magic spell that was cast was Life, Life 2, or Soft, skip all this
+
     LDX #$08                            ; loop 8 times -- once for each ailment
     LDA btlmag_defender_ailments
     STA btltmp+7                        ; store their new ailments in btltmp+7
