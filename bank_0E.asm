@@ -1906,16 +1906,6 @@ DoNameInput:
     ;; JIGS - its nicer this way with the box inside background being black
     JSR DrawNameInputScreen
     
-    LDX char_index          ; wipe this character's name
-    LDA #$FF
-    STA ptygen_name, X
-    STA ptygen_name+1, X
-    STA ptygen_name+2, X
-    STA ptygen_name+3, X
-    STA ptygen_name+4, X
-    STA ptygen_name+5, X
-    STA ptygen_name+6, X
-    
     JSR TurnMenuScreenOn_ClearOAM   ; now that everything is drawn, turn the screen on
     
     LDA #$01                ; Set menustall, as future drawing will
@@ -1928,17 +1918,19 @@ DoNameInput:
     RTS      
       
   @Start_Pressed:
-    LDA char_index
-    CLC
-    ADC #7
-    TAX
-  : DEX
-    LDA ptygen_name, X     
+    JSR PlaySFX_MenuSel
+    LDY #0
+    STY joy_start
+   @Start_Pressed_Loop:
+    LDX char_index
+    LDA ptygen_name, X  ; get byte of name
+    BEQ :+              ; if its 0, keep checking
     CMP #$FF
-    BNE @StartDone
-    CPX #$0
-    BNE :-
-    STX joy_start
+    BNE @StartDone      ; if its NOT $FF, then name is ok
+  : INX                 ; inc X to check next letter of name?
+    INY
+    CPY #7              ; check 7 bytes
+    BNE @Start_Pressed_Loop
     
   @MainLoop:
     JSR CharName_Frame      ; Do a frame & get input
