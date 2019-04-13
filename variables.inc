@@ -708,7 +708,7 @@ btl_stringoutputbuf_anchor = $0300  ; JIGS - only needs to be $20 before btl_str
 btl_enemyIDs               = $0310  ; 9 entries of enemy IDs
 btl_enemyroster            = $031A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
 btl_enemyamount            = $031E  ; JIGS - tmp byte for number of enemies, for battle printing
-btl_stringoutputbuf        = $0320  ; output buffer where decoded strings are printed
+btl_stringoutputbuf        = $031F  ; output buffer where decoded strings are printed
 btl_unfmtcbtbox_buffer     = $0340  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
                                     ; houses the unformatted text for each combat box.
                                     ; Additional bytes are used for other areas
