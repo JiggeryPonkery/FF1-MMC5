@@ -161,7 +161,9 @@ BANK_THIS = $0B
 lut_BattleFormations:
 ;  .INCBIN "bin/0B_8400_battleformations.bin"
 
-.byte $00,$00,$00,$01,$00,$00,$88,$11,$00,$00,$00,$01,$04,$40,$36,$04
+.byte $00,$00,$00,$01,$00,$00,$35,$11,$00,$00,$00,$01,$04,$40,$36,$04
+
+;.byte $00,$00,$00,$01,$00,$00,$35,$00,$00,$00,$00,$01,$04,$40,$36,$04
 .byte $02,$08,$15,$18,$00,$00,$24,$00,$00,$00,$0C,$0C,$04,$00,$35,$02
 .byte $00,$28,$01,$02,$03,$00,$13,$02,$02,$02,$00,$01,$04,$A0,$13,$00
 .byte $00,$0A,$02,$03,$00,$00,$12,$00,$00,$00,$00,$01,$04,$40,$46,$01
@@ -3913,15 +3915,14 @@ PrepareEnemyFormation_Mix:
 ;;   16x16 attribute block.  IE, a value of 1 means the first enemy (enemy 0's) palette is used.  A value
 ;;   of 0 means the block is used by background instead and not by any enemy
 
-lut_FormationAttributes_9Small_tops:            ; "tops" are the odd rows of attributes, "bottoms" are even
+lut_FormationAttributes_9Small:                 ; "tops" are the odd rows of attributes, "bottoms" are even
     .BYTE $00,$00,$00,$00,$00,$00,$00,$00       ;  it's easier to work this way, sadly
     .BYTE $00,$22,$55,$58,$80,$00,$00,$00
     .BYTE $01,$11,$44,$77,$70,$00,$00,$00
     .BYTE $03,$36,$66,$99,$00,$00,$00,$00
-    
-lut_FormationAttributes_9Small_bottoms:
-    .BYTE $00,$22,$55,$58,$80,$00,$00,$00
-    .BYTE $01,$11,$44,$77,$70,$00,$00,$00
+;lut_FormationAttributes_9Small_bottoms:        ; These are the "bottoms"
+    .BYTE $00,$22,$55,$58,$80,$00,$00,$00       ;  If you were to interleave these so that they were ordered top1, bottom1, top2, bottom2, top3, bottom3, etc
+    .BYTE $01,$11,$44,$77,$70,$00,$00,$00       ;  it would make a lot more sense.  They're structured this way only for ease of indexing.
     .BYTE $01,$11,$44,$77,$70,$00,$00,$00
     .BYTE $03,$36,$66,$99,$00,$00,$00,$00
     
@@ -3929,19 +3930,36 @@ lut_FormationPlacement_9Small:
   .WORD $2163, $20C4, $2202     ; Left column of enemies
   .WORD $2168, $20C9, $2207     ; Center column
   .WORD $216D, $20CE, $220C     ; right column
+  .WORD 0                       ; terminator
+  
+  ; A26E
+BattleFormation_PrepAttributeLutsToXA:
+    ; in:   XA = pointer to FormationAttributesTable (ie:  FormationAttributes_9Small)
+    ; out:  btltmp+2 through btltmp+5 set appropriately for BattleFormation_GetAttributeByte
+    STA btltmp+2
+    STX btltmp+3
+    CLC
+    ADC #8*4
+    STA btltmp+4
+    TXA
+    ADC #0
+    STA btltmp+5
+    RTS
     
 BattleFormation_GetAttributeByte:
     ; in:   Y = index of attribute byte to get
+    ;       btltmp+2, btltmp+3 = should point to "tops" FormationAttributes table
+    ;       btltmp+4, btltmp+5 = should point to "bottoms" FormationaAttributes table
     ; out:  A = attribute byte
     @dst = btltmp+1
-    LDA lut_FormationAttributes_9Small_bottoms,Y
+    LDA (btltmp+4),Y        ; load the "bottoms"
     JSR BattleFormation_GetAttributeNybble
     ASL A
     ASL A
     ASL A
     ASL A
     STA @dst
-    LDA lut_FormationAttributes_9Small_tops,Y
+    LDA (btltmp+2),Y        ; load the "tops"
     JSR BattleFormation_GetAttributeNybble
     ORA @dst
     RTS
@@ -3986,7 +4004,15 @@ BattleFormation_GetAttributeNybble:
     RTS
     
 BattleFormation_DrawAttributes:
+    ; in:  XA should point to the formation attributes lut (see BattleFormation_PrepAttributeLutsToXA)
+    PHA
+    TXA
+    PHA
     JSR ReadAttributesFromPPU
+    PLA
+    TAX
+    PLA
+    JSR BattleFormation_PrepAttributeLutsToXA
     LDY #(8*4)-1
     @loop:
         TYA
@@ -3998,6 +4024,64 @@ BattleFormation_DrawAttributes:
       @continue:
         DEY
         BPL @loop
+    RTS
+    
+    
+BattleFormation_DrawEnemies:        ; A2D2
+    ; in:  XA should point to the FormationPlacement lut
+    @nt_lut  = btltmp+4
+    @index   = btltmp+6
+    @drawdst = btltmp+0     ; must be this -- this is what DrawSmallEnemy and DrawLargeEnemy require
+    @drawpic = btltmp+2     ; ditto
+    
+    STA @nt_lut+0
+    STX @nt_lut+1
+    LDX #0
+    STX @index
+    
+    @Loop:
+        LDA @index
+        TAX                 ; 1x index in X
+        ASL A
+        TAY                 ; 2x index in Y
+        
+        LDA (@nt_lut),Y     ; get the PPU address where this enemy should be drawn
+        STA @drawdst+0
+        INY
+        LDA (@nt_lut),Y     ; if high byte is zero, that's the terminator, nothing left to draw
+        BEQ @Exit           ;  This is where we escape the loop
+        PHP                 ; back up N flag here (used to determine small/large enemy)
+        AND #$7F            ; kill N flag bit
+        STA @drawdst+1
+        
+        ; Does this enemy even exist?
+        LDA btl_enemyIDs, X
+        CMP #$FF
+        BNE :+              ; If not, don't draw him.  Continue looping
+            PLA             ; drop backed up status
+            BNE @Next       ; will always branch (PHP never pushes zero)
+        :
+        
+        ; which graphic to draw?  0 or 1?
+        LDY #0
+        LDA btl_enemygfxplt, X
+        BPL :+
+            INY
+        :
+        STY @drawpic
+        
+        ; small or large enemy?
+        PLP                 ; restore backed up N flag
+        BPL :+
+            JSR DrawLargeEnemy
+            JMP @Next
+        :
+            JSR DrawSmallEnemy
+            
+      @Next:
+        INC @index
+        JMP @Loop
+  @Exit:
     RTS
     
 
@@ -4032,46 +4116,50 @@ DrawFormation_NonFiend:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 DrawFormation_9Small:
+    LDX #>lut_FormationAttributes_9Small
+    LDA #<lut_FormationAttributes_9Small
     JSR BattleFormation_DrawAttributes
     
-@DrawNT:
-    LDA btl_enemycount
-    STA btltmp+6            ; put enemy counter in btltmp+6 - used as a loop counter
-    LDX #$00                ; X= 2* current enemy index
-    LDY #$00                ; Y= 1* current enemy index
+    LDX #>lut_FormationPlacement_9Small
+    LDA #<lut_FormationPlacement_9Small
+    JSR BattleFormation_DrawEnemies
     
-@NTLoop:
-    LDA @lut_NTAddress, X   ; Get desired NT address for where to draw this enemy
-    STA btltmp+0            ;  put it in btltmp+0
-    INX
-    LDA @lut_NTAddress, X
-    STA btltmp+1
-    INX
+    JMP WriteAttributes_ClearUnusedEnStats
     
-    LDA #$00
-    STA btltmp+2            ; default to use graphic 0
-    LDA btl_enemygfxplt, Y            ; but check the high byte of the assigned graphic for this enemy
-    BPL :+                  ; if set...
-      INC btltmp+2          ;    use graphic 1 instead
+;@DrawNT:
+;    LDA btl_enemycount
+;    STA btltmp+6            ; put enemy counter in btltmp+6 - used as a loop counter
+;    LDX #$00                ; X= 2* current enemy index
+;    LDY #$00                ; Y= 1* current enemy index
+    
+;@NTLoop:
+;    LDA @lut_NTAddress, X   ; Get desired NT address for where to draw this enemy
+;    STA btltmp+0            ;  put it in btltmp+0
+;    INX
+;    LDA @lut_NTAddress, X
+;    STA btltmp+1
+;    INX
+    
+;    LDA #$00
+;    STA btltmp+2            ; default to use graphic 0
+;    LDA btl_enemygfxplt, Y            ; but check the high byte of the assigned graphic for this enemy
+;    BPL :+                  ; if set...
+;      INC btltmp+2          ;    use graphic 1 instead
       
-  : JSR DrawSmallEnemy      ; draw the enemy at the given coords
-    INY
+;  : JSR DrawSmallEnemy      ; draw the enemy at the given coords
+;    INY
     
-    DEC btltmp+6
-    BNE @NTLoop             ; Loop until there are no enemies left to draw
+;    DEC btltmp+6
+;    BNE @NTLoop             ; Loop until there are no enemies left to draw
     
     ; Finally, clear unused enemy stats, update attributes, then exit
-    JMP WriteAttributes_ClearUnusedEnStats
+;    JMP WriteAttributes_ClearUnusedEnStats
     
 @lut_NTAddress:
   .WORD $2163, $20C4, $2202     ; Left column of enemies
   .WORD $2168, $20C9, $2207     ; Center column
   .WORD $216D, $20CE, $220C     ; right column
   
-@lut_AttributeOffset:
-  .BYTE $10, $08, $18           ; Left column
-  .BYTE $11, $09, $19           ; Center column
-  .BYTE $12, $0A, $1A           ; Right column
   
   
   
