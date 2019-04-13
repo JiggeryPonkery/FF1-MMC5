@@ -2660,6 +2660,10 @@ EnterShop:
     STA $5015              ; and silence the MMC5 APU. (JIGS)
     STA joy_b              ; erase joypad A and B buttons
     STA joy_a
+    STA shop_curprice
+    STA shop_curprice+1
+    STA shop_curprice+2
+    STA shop_curprice+4    
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
     STA item_box_offset
     STA inv_canequipinshop
@@ -7709,6 +7713,8 @@ UseItem_Ether:
     ORA tmp                    ; combine back with max MP bits
     STA ch_stats, X            ; and save! MP for this level is now filled!
     
+    JSR PlayHealSFX
+    
     DEC item_ether             ; if we could... remove one from the inventory
     JSR DrawMPTargetMenu       ; redraw the target menu to reflect the changes
     @EndLoop:                  ; this is basically MenuWaitForBtn_SFX but it draws sprites...
@@ -7763,6 +7769,8 @@ UseItem_Elixir:
     LDA ch_maxhp, X       
     STA ch_curhp, X       
     
+    JSR PlayHealSFX
+    
     DEC item_elixir            ; if we could... remove one from the inventory
     JSR DrawItemTargetMenu_Elixir  ; redraw the target menu to reflect the changes
     JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button (sprite version!)
@@ -7794,6 +7802,8 @@ UseItem_Pure:
     STA tmp                    ;   in tmp as our ailment to cure
     JSR CureOBAilment          ; then try to cure it
     BCS @CantUse               ; if we couldn't... can't use this item
+    
+    JSR PlayHealSFX
 
     DEC item_pure              ; if we could... remove one from the inventory
     JSR DrawItemTargetMenu     ; redraw the target menu to reflect the changes
@@ -7824,6 +7834,8 @@ UseItem_Soft:
     STA tmp
     JSR CureOBAilment
     BCS @CantUse
+    
+    JSR PlayHealSFX
 
     DEC item_soft              ; remove soft from inventory
     JSR DrawItemTargetMenu
@@ -7857,6 +7869,8 @@ UseItem_PhoenixDown:
     
     LDA #1                  ; otherwise it worked.  Give them 1 HP now that they're alive
     STA ch_curhp, X
+    
+    JSR PlayHealSFX
 
     DEC item_down              ; remove phoenix down from inventory
     JSR DrawItemTargetMenu

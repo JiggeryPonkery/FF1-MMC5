@@ -168,10 +168,10 @@ LevelUp_StatBuffer  = $5C9B ; C, D, E, F - 5 bytes
 
 ShopTempList        = $5CA8 ; 8 bytes
 
-Character1Hidden         = $5D10 ; these will match up to ch_battlestate in ch_stats
-Character2Hidden         = $5D50 ; 
-Character3Hidden         = $5D90 ; 
-Character4Hidden         = $5DD0
+Character1BattleState         = $5D10 ; these will match up to ch_battlestate in ch_stats
+Character2BattleState         = $5D50 ; 
+Character3BattleState         = $5D90 ; 
+Character4BattleState         = $5DD0
 CharacterStatPointer     = $4E ; $4F ; far as I can tell these are unused by the game...?
 
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
@@ -259,7 +259,8 @@ shop_spell      = $6021
 shop_curitem    = $6022
 
 btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
-battle_item         = $600F
+GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
+battle_item         = $600F ; handles item box scrolling and item use
 btl_turnorderBackup = $6010 ; 13 bytes
 
 
@@ -599,6 +600,7 @@ BattleMenuPointer      = $88
 WeaponPointer          = $88  ; 2 byte pointer to weapon data
 MagicPointer           = $8A  ; MagicPointer
 EnemyAIPointer         = $8A
+BattleBoxString        = $8A
 
 ;btl_entityptr_ibram     = $90
 ;btl_entityptr_obrom     = $92
@@ -716,8 +718,19 @@ btl_msgbuffer   = $0400  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
                          ; this buffer contains on-screen tiles to be drawn to ppu$2240
                          ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
 
+btl_msgdraw_hdr     = $0540
+btl_msgdraw_x       = $0541
+btl_msgdraw_y       = $0542
+btl_msgdraw_width   = $0543
+btl_msgdraw_height  = $0544
+btl_msgdraw_srcptr  = $0543  ; shared -- needs to match btl_msgdraw_width
+                    ; $0544    above +1
+btl_msgdraw_blockcount = $0545      ; the number of blocks drawn
+btl_msgdraw_blockcount_backup = $0546
 
-                        
+
+
+
 eob_gp_reward               = $6876
 eob_exp_reward              = $6878
 eobtext_print_level = $687A
@@ -843,17 +856,7 @@ btlbox_blockdata    = $68BA
 
 
 
-btl_msgdraw_hdr     = $6A9E
-btl_msgdraw_x       = $6A9F
-btl_msgdraw_y       = $6AA0
-btl_msgdraw_width   = $6AA1
-btl_msgdraw_height  = $6AA2
-btl_msgdraw_srcptr  = $6AA1  ; shared
-                    ; $6AA2    above +1
 
-btl_msgdraw_blockcount = $6AA3      ; the number of blocks drawn
-
-btl_msgdraw_blockcount_backup = $6AA4
 
 UndrawNBattleBlocks_loopctr = $6AA5
 

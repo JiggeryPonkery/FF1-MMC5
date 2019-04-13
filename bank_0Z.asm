@@ -2115,7 +2115,7 @@ ReadjustBBEquipStats:
  
    @CheckHiddenPlayer:
     LDA #ch_battlestate - ch_stats   ; if defender is hidden, subtract another 40 from the attacker's hit chance
-    AND #$F0 ; knock off regen bits
+    AND #$10 ; knock off non-hiding bits
     BNE :+
       LDA math_hitchance
       SEC
@@ -2253,7 +2253,7 @@ ReadjustBBEquipStats:
     ThiefHiddenCheck:
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
-    AND #$F0 ; clear regen bits
+    AND #$10 ; clear all but hiding bits
     BEQ @Return    
     
     LDA btl_attacker_hitrate ; regardless of class, double their hit rate
@@ -3417,13 +3417,26 @@ PlayerAttackEnemy_PhysicalZ:
     LDA #$00
     STA btl_defender_category
     STA btl_defender_elementweakness
+    STA GuardDefense
     
     LDY #(ch_evasion - ch_stats)
     LDA (CharStatsPointer), Y
     STA btl_defender_evasion
     
-    LDY #(ch_defense - ch_stats)
+    LDY #(ch_battlestate - ch_stats)
+    LDA (CharStatsPointer), Y     ; check battlestate for Guarding
+    AND #$80                      ; if not guarding, resume as normal
+    BEQ :+                        ; otherwise, do a bit of math...
+    
+    LDY #(ch_level - ch_stats)
+    LDA (CharStatsPointer), Y     ; guard defense is level * 2
+    ASL A
+    STA GuardDefense
+    
+  : LDY #(ch_defense - ch_stats)
     LDA (CharStatsPointer), Y
+    CLC
+    ADC GuardDefense
     STA btl_defender_defense
     
     LDY #(ch_magicdefense - ch_stats)
@@ -3745,11 +3758,11 @@ Deleted:
 .byte $C1,$C1,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$C1,$C1,$C1,$00
 
 BattleYesNo:
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05
-.byte $FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$05
-.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01
-.byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$FF,$FF,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05
+.byte $FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$FF,$05
+.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01
+.byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$FF,$FF,$FF,$01
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
 
 
 
