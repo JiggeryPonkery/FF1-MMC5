@@ -3905,15 +3905,15 @@ lut_PlayerTargetCursorPos:
 ;;  formation types)
 
 lut_Target9SmallCursorPos:
-  .BYTE $00, $30
-  .BYTE $00, $50
-  .BYTE $00, $70
-  .BYTE $20, $30
-  .BYTE $20, $50
-  .BYTE $20, $70
-  .BYTE $40, $30
-  .BYTE $40, $50
-  .BYTE $40, $70
+  .BYTE $10, $30
+  .BYTE $08, $58
+  .BYTE $00, $80
+  .BYTE $38, $30
+  .BYTE $30, $58
+  .BYTE $28, $80
+  .BYTE $60, $30
+  .BYTE $58, $58
+  .BYTE $50, $80  
   
 lut_Target4LargeCursorPos:
   .BYTE $00, $30
@@ -11546,16 +11546,16 @@ MoveDown1Row_UpdateAudio:
 ;;
 ;;  The sprite coords to draw explosions for enemies in the 9 small formation
 
-lut_ExplosionCoords_9Small:
-  .BYTE $10, $50
-  .BYTE $10, $30
-  .BYTE $10, $70
-  .BYTE $30, $50
-  .BYTE $30, $30
-  .BYTE $30, $70
-  .BYTE $50, $50
-  .BYTE $50, $30
-  .BYTE $50, $70
+lut_ExplosionCoords_9Small:  
+  .BYTE $18, $58
+  .BYTE $20, $30
+  .BYTE $10, $80
+  .BYTE $40, $58
+  .BYTE $48, $30
+  .BYTE $38, $80
+  .BYTE $68, $58
+  .BYTE $70, $30
+  .BYTE $60, $80
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11868,9 +11868,9 @@ IncYBy4_WriteToOam:
 ;;     PPU addresses used to erase enemies in the 9 small formation type
 
 lut_EraseEnemyPPUAddress_9Small:
-  .WORD $2142, $20C2, $21C2
-  .WORD $2146, $20C6, $21C6
-  .WORD $214A, $20CA, $21CA
+  .WORD $2163, $20C4, $2202     ; Left column of enemies
+  .WORD $2168, $20C9, $2207     ; Center column
+  .WORD $216D, $20CE, $220C     ; right column
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
