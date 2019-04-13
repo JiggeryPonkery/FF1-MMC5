@@ -4013,10 +4013,10 @@ lut_Target9SmallCursorPos:
   .BYTE $50, $80  
   
 lut_Target4LargeCursorPos:
-  .BYTE $00, $30
-  .BYTE $00, $60
+  .BYTE $08, $30
+  .BYTE $00, $68
   .BYTE $40, $30
-  .BYTE $40, $60
+  .BYTE $38, $68
 
 lut_TargetMixCursorPos:
   .BYTE $00, $30
@@ -11757,10 +11757,10 @@ DrawEnemyEffect_4Large:
 
   ; [$BD7A :: 0x33D8A]
   lut_ExplosionCoords_4Large:
-    .BYTE $10, $30
-    .BYTE $10, $60
+    .BYTE $18, $30
+    .BYTE $10, $68
     .BYTE $50, $30
-    .BYTE $50, $60
+    .BYTE $48, $68
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12020,8 +12020,8 @@ lut_EraseEnemyPPUAddress_9Small:
 ;;     PPU addresses used to erase enemies in the 4 large formation type
 
 lut_EraseEnemyPPUAddress_4Large:
-  .WORD $20C2, $2182
-  .WORD $20CA, $218A
+  .WORD $20C3, $21A2
+  .WORD $20CA, $21A9
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
