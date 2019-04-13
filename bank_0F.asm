@@ -13372,7 +13372,7 @@ lut_CombatEquipmentBox:
   .BYTE $00, $00, $00, $17, $09 ; weapons / armor
 
 lut_CombatItemBox:
-  .BYTE $00, $00, $00, $0F, $09 ; potions and items
+  .BYTE $00, $00, $00, $10, $09 ; potions and items
 
 lut_EnemyRosterBox:
 ;       hdr   X    Y  width  height
