@@ -340,20 +340,20 @@ btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $68
     MATHBUF_TOTALDAMAGE         = $0A ;$16
     
 btl_mathbuf = $6040 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
-    math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $60B0 ; 6856
-    math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $60B2 ; 6858
-    math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $60B4 ; 685A
-    math_magrandhit     = btl_mathbuf + (MATHBUF_MAGRANDHIT*2)      ; $60B4 ; 685A
-    math_category       = btl_mathbuf + (MATHBUF_CATEGORY*2)        ; $60B6 ; 685C not really math... but whatever
-    math_element        = btl_mathbuf + (MATHBUF_ELEMENT*2)         ; $60B8 ; 685E not really math... but whatever
-    math_randhit        = btl_mathbuf + (MATHBUF_RANDHIT*2)         ; $60B8 ; 685E
-    math_dmgcalc        = btl_mathbuf + (MATHBUF_DMGCALC*2)         ; $60BA ; 6860
-    math_critchance     = btl_mathbuf + (MATHBUF_CRITCHANCE*2)      ; $60BC ; 6862
-    math_ailmentchance  = btl_mathbuf + (MATHBUF_AILMENTCHANCE*2)   ; $60BE ; 6864
-;btlmag_defender_hp     = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)   ; $60C0 ; $687A
-;btl_defender_hp        = btl_mathbuf + (MATHBUF_DEFENDERHP*2)      ; $60C0 ; $687C -- treated as part of math buffer by some code
-;btlmag_defender_hpmax  = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2); $60C2 ; $6880
-    battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $60C4 ; $6882 -- treated as part of math buffer by some code
+    math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6040 ; 6856
+    math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $6042 ; 6858
+    math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $6044 ; 685A
+    math_magrandhit     = btl_mathbuf + (MATHBUF_MAGRANDHIT*2)      ; $6044 ; 685A
+    math_category       = btl_mathbuf + (MATHBUF_CATEGORY*2)        ; $6046 ; 685C not really math... but whatever
+    math_element        = btl_mathbuf + (MATHBUF_ELEMENT*2)         ; $6048 ; 685E not really math... but whatever
+    math_randhit        = btl_mathbuf + (MATHBUF_RANDHIT*2)         ; $6048 ; 685E
+    math_dmgcalc        = btl_mathbuf + (MATHBUF_DMGCALC*2)         ; $604A ; 6860
+    math_critchance     = btl_mathbuf + (MATHBUF_CRITCHANCE*2)      ; $604C ; 6862
+    math_ailmentchance  = btl_mathbuf + (MATHBUF_AILMENTCHANCE*2)   ; $604E ; 6864
+;btlmag_defender_hp     = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)   ; $6050 ; $687A
+;btl_defender_hp        = btl_mathbuf + (MATHBUF_DEFENDERHP*2)      ; $6050 ; $687C -- treated as part of math buffer by some code
+;btlmag_defender_hpmax  = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2); $6052 ; $6880
+    battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6054 ; $6882 -- treated as part of math buffer by some code
 
 ;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
 ch_backupstats           = $60C0 ;; $10 per character, so fills up to $6140

@@ -6008,18 +6008,19 @@ EnemyAttackPlayer_Physical:
 
 ClearMathBufHighBytes:
     LDA #$00
-    STA btl_mathbuf +  1
-    STA btl_mathbuf +  3
-    STA btl_mathbuf +  5
-    STA btl_mathbuf +  7
-    STA btl_mathbuf +  9
-    STA btl_mathbuf + 11
-    STA btl_mathbuf + 13
-    STA btl_mathbuf + 15
-    STA btl_mathbuf + 17
-    STA btl_mathbuf + 19
-        STA btl_mathbuf + 21 ; JIGS 
+    STA btl_mathbuf +  1        ; math_hitchance        = $6040
+    STA btl_mathbuf +  3        ; math_basedamage       = $6042 
+    STA btl_mathbuf +  5        ; math_numhits          = $6044 
+    STA btl_mathbuf +  7        ; math_category         = $6046 
+    STA btl_mathbuf +  9        ; math_element          = $6048 
+    STA btl_mathbuf + 11        ; math_dmgcalc          = $604A 
+    STA btl_mathbuf + 13        ; math_critchance       = $604C 
+    STA btl_mathbuf + 15        ; math_ailmentchance    = $604E 
+    ;STA btl_mathbuf + 17       ; btl_defender_hp       = $6050 ; NO DON'T ZERO THIS.
+    ;STA btl_mathbuf + 19       ; btlmag_defender_hpmax = $6052 ; NO DON'T ZERO THIS.
+    STA btl_mathbuf + 21        ; battle_totaldamage    = $6054 
     RTS
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6174,8 +6175,8 @@ DoPhysicalAttack:
     ;  LDY math_hitchance
     ;  LDX math_hitchance+1
     ;  JSR ZeroXYIfNegative              ; cap at 0  (not necessary to do here, since
-    ;  STY math_hitchance                ;   MathBuf_Sub already does this. Whatever)
-    ;  STX math_hitchance+1
+      STY math_hitchance                ;   MathBuf_Sub already does this. Whatever)
+      STX math_hitchance+1
     
     ;; JIGS - might as well save a bit more space...?
     

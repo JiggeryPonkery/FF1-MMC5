@@ -14464,7 +14464,7 @@ Dialogue_CoverSprites_VBl:
     LDX #4*4           ; start looking at sprites after the first 4 sprites (first 4 are the player, who is never covered)
   @Loop:
     LDA oam_y, X       ; get the sprite's Y coord
-    CMP tmp+13         ; compare it to our cutoff scanline (result in C)
+    CMP tmp+11         ; compare it to our cutoff scanline (result in C)
     LDA oam_a, X       ; then get the attribute byte for this sprite
 
     BCS @FGPrio        ; if spriteY >= cutoffY, sprite has foreground priority, otherwise, BG priority
