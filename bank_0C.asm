@@ -2625,14 +2625,11 @@ SelectEnemyTarget:
     STA $89
     JSR @ReDrawAfterSelection
     PHA ; backup A/B state 
-;    PHA ; twice
     LDA #01
     JSR UndrawNBattleBlocks_L 
-;    PLA
-;    CMP #02 ; if B was pressed while selecting a target
-;    BNE :+
     JSR DrawCommandBox_L ; re-draw the command box
   : PLA
+    LDY btlcmd_target
     RTS
     
     @ReDrawAfterSelection:
@@ -2828,7 +2825,7 @@ EnemyTargetMenu:
       PHA
       JSR BattleClearVariableSprite ; clear the cursor sprite in shadow OAM
       JSR BattleFrame               ; do a frame to clear it in the PPU
-      LDY btlcmd_target             ; put the target in Y
+      ;LDY btlcmd_target             ; put the target in Y
       PLA                           ; and the A/B button state in A, and exit!
       RTS
     
