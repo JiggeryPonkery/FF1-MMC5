@@ -708,7 +708,7 @@ btl_stringoutputbuf_anchor = $0300  ; JIGS - only needs to be $20 before btl_str
 btl_enemyIDs               = $0310  ; 9 entries of enemy IDs
 btl_enemyroster            = $031A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
 btl_enemyamount            = $031E  ; JIGS - tmp byte for number of enemies, for battle printing
-btl_stringoutputbuf        = $0320  ; output buffer where decoded strings are printed
+btl_stringoutputbuf        = $031F  ; output buffer where decoded strings are printed
 btl_unfmtcbtbox_buffer     = $0340  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
                                     ; houses the unformatted text for each combat box.
                                     ; Additional bytes are used for other areas
@@ -784,8 +784,9 @@ btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 ;    10 = use item
 ;    20 = run   ('target' would be the actual character running)
 ;    40 = magic
-;    
-;
+;    80 = hide
+;    FF = guard
+; 
 ;  btl_charcmditem contains 1 byte per character:  the ID of the item they're using.
 ;    This is only used when the command is '10'
 ;
@@ -951,9 +952,6 @@ btl_weird_loopctr = $6BAD
 
 btl_strikingfirst   = $6BAE ; nonzero if players are striking first.  Zero otherwise
 
-btl_potion_heal     = $6BAF ; battle containers for Heal/Pure potions.  Stored separately because
-btl_potion_pure     = $6BB0 ;  it can fall out of sync with the ACTUAL items (if a character trying
-                            ;  to use one dies, for example)
 
 battle_bank     = $6BB1  ; The bank to jump back to for setting up battles
 btl_smallslots  = $6BB2             ; Number of small enemy slots available
@@ -964,8 +962,6 @@ btl_enemyeffect = $6BB6     ; 0 to draw expolosion graphics as the effect
 
 btl_enemygfxplt = $6BC0  ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
 
-
-;btl_attacker_alt    = $6BCD ; An EXTREMELY redundant and stupid copy of btl_attacker
 
 btl_targetall_tmp = $6BCE
 
@@ -978,11 +974,8 @@ btl_mathbufadd16tmp2 = $6BD0
 
 
 
-;EnemyStatPointerBackupY = $6C87    - was used because multiplying clobbered Y, now it doesn't
 btl_tmppltassign = $6C88    ; temporary value to assign palette to enemies in a formation
 
-;btl_attacker            = $6C89
-;btl_defender            = $6C8A
 btl_combatboxcount_alt  = $6C8B ; ANOTHER combatbox counter... this is totally redundant
 btl_attackid            = $6C8C ; >= $40 for enemy attacks
 

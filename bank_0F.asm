@@ -13948,13 +13948,18 @@ DrawEntityName:
     STA btldraw_subsrc+1
     
     LDY #$00
-    : LDA (btldraw_subsrc), Y           ; draw each character in the character's name
+    @Nameloop:
+      LDA (btldraw_subsrc), Y           ; draw each character in the character's name
+      BEQ :++                           ; if its $00, replace with $FF
       JSR DrawBattleString_ExpandChar
-      INY
-      ;CPY #$04                          ; draw 4 characters
+    : INY
       CPY #$07                          ; JIGS - 7 letter names!
-      BNE :-
-    RTS
+      BNE @Nameloop
+      RTS
+      
+    : LDA #$FF  
+      JSR DrawBattleString_ExpandChar
+      JMP :--
     
   @Enemy:
     LDX #28
