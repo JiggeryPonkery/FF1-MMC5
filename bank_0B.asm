@@ -161,9 +161,7 @@ BANK_THIS = $0B
 lut_BattleFormations:
 ;  .INCBIN "bin/0B_8400_battleformations.bin"
 
-.byte $10,$FF,$00,$01,$00,$00,$33,$11,$00,$00,$00,$01,$04,$40,$36,$04
-
-;.byte $00,$00,$00,$01,$00,$00,$35,$00,$00,$00,$00,$01,$04,$40,$36,$04
+.byte $00,$00,$00,$01,$00,$00,$35,$00,$00,$00,$00,$01,$04,$40,$36,$04
 .byte $02,$08,$15,$18,$00,$00,$24,$00,$00,$00,$0C,$0C,$04,$00,$35,$02
 .byte $00,$28,$01,$02,$03,$00,$13,$02,$02,$02,$00,$01,$04,$A0,$13,$00
 .byte $00,$0A,$02,$03,$00,$00,$12,$00,$00,$00,$00,$01,$04,$40,$46,$01
@@ -3914,7 +3912,6 @@ PrepareEnemyFormation_Mix:
 ;;   by a particular enemy.  Each digit/nybble here indicates which enemy determines the palette for each
 ;;   16x16 attribute block.  IE, a value of 1 means the first enemy (enemy 0's) palette is used.  A value
 ;;   of 0 means the block is used by background instead and not by any enemy
-lut_FormationAttributes_Mix:
 lut_FormationAttributes_9Small:                 ; "tops" are the odd rows of attributes, "bottoms" are even
     .BYTE $00,$00,$00,$00,$00,$00,$00,$00       ;  it's easier to work this way, sadly
     .BYTE $00,$22,$55,$58,$80,$00,$00,$00
@@ -3937,19 +3934,34 @@ lut_FormationAttributes_4Large:
     .BYTE $02,$22,$44,$44,$00,$00,$00,$00
     .BYTE $02,$22,$44,$44,$00,$00,$00,$00
     
+lut_FormationAttributes_Mix:
+    .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+    .BYTE $01,$11,$14,$44,$77,$00,$00,$00
+    .BYTE $02,$22,$03,$36,$66,$00,$00,$00
+    .BYTE $02,$22,$55,$58,$80,$00,$00,$00    
+; bottoms:
+    .BYTE $01,$11,$14,$44,$77,$00,$00,$00
+    .BYTE $01,$11,$13,$36,$66,$00,$00,$00
+    .BYTE $02,$22,$03,$36,$66,$00,$00,$00
+    .BYTE $02,$22,$55,$58,$80,$00,$00,$00
+    
 lut_FormationPlacement_9Small:
   .WORD $2163, $20C4, $2202     ; Left column of enemies
   .WORD $2168, $20C9, $2207     ; Center column
   .WORD $216D, $20CE, $220C     ; right column
   .WORD 0                       ; terminator
   
-lut_FormationPlacement_Mix:
 lut_FormationPlacement_4Large:
   .WORD $A0C3, $A1A2
   .WORD $A0CA, $A1A9
   .WORD 0                       ; terminator
   
-  ; A26E
+lut_FormationPlacement_Mix:
+  .WORD $A0C3, $A1A2
+  .WORD $216A, $20CB, $2209     ; Center column
+  .WORD $216F, $20D0, $220E     ; right column
+  .WORD 0                       ; terminator
+  
 BattleFormation_PrepAttributeLutsToXA:
     ; in:   XA = pointer to FormationAttributesTable (ie:  FormationAttributes_9Small)
     ; out:  btltmp+2 through btltmp+5 set appropriately for BattleFormation_GetAttributeByte
@@ -4044,7 +4056,7 @@ BattleFormation_DrawAttributes:
     RTS
     
     
-BattleFormation_DrawEnemies:        ; A2D2
+BattleFormation_DrawEnemies:
     ; in:  XA should point to the FormationPlacement lut
     @nt_lut  = btltmp+4
     @index   = btltmp+6

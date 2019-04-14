@@ -4019,14 +4019,14 @@ lut_Target4LargeCursorPos:
   .BYTE $38, $68
 
 lut_TargetMixCursorPos:
-  .BYTE $00, $30
-  .BYTE $00, $60
-  .BYTE $30, $30
-  .BYTE $30, $50
-  .BYTE $30, $70
-  .BYTE $50, $30
-  .BYTE $50, $50
-  .BYTE $50, $70
+  .BYTE $08, $30
+  .BYTE $00, $68
+  .BYTE $48, $30
+  .BYTE $40, $58
+  .BYTE $38, $80
+  .BYTE $70, $30
+  .BYTE $68, $58
+  .BYTE $60, $80
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11823,12 +11823,12 @@ DrawEnemyEffect_Mix:
     
     ;; [$BDCC :: 0x33DDC]
   @lut_ExplosionCoords_6Small:
-    .BYTE $40, $50
-    .BYTE $40, $30
-    .BYTE $40, $70
-    .BYTE $60, $50
-    .BYTE $60, $30
-    .BYTE $60, $70
+    .BYTE $50, $58
+    .BYTE $58, $30
+    .BYTE $48, $80
+    .BYTE $78, $58
+    .BYTE $80, $30
+    .BYTE $70, $80
   
 ;SwapBtlTmpBytes_Local:
 ;    JMP SwapBtlTmpBytes_L
@@ -12031,8 +12031,8 @@ lut_EraseEnemyPPUAddress_4Large:
 ;;  Large enemies are omitted -- and the 4Large table is used for them instead.
 
 lut_EraseEnemyPPUAddress_Mix_Small:
-  .WORD $2148, $20C8, $21C8
-  .WORD $214C, $20CC, $21CC
+  .WORD $216A, $20CB, $2209     ; Center column
+  .WORD $216F, $20D0, $220E     ; right column
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
