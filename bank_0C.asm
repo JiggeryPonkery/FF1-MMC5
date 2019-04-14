@@ -6451,7 +6451,7 @@ DoPhysicalAttack:
     LDA battle_defenderisplayer
     BEQ @OutputDamageBox         ; jump ahead if player is attacking enemy
     
-    LDA btl_defender_index    ; get character index
+    LDA btl_defender_index       ; get character index
     JSR UnhideCharacter          ; unhide them
     LDA #0                       ; and set the backup variable to 0 since they're not re-hiding after this
     STA Hidden                   ; though depending on the logic, this may not be necessary... better safe than buggy though
@@ -6482,7 +6482,20 @@ DoPhysicalAttack:
         JSR RespondDelay
         ;; back to original battle code...
         
-  : LDA #MATHBUF_DEFENDERHP
+  : LDA battle_hitsconnected   ;; JIGS - did any hits connect?
+    BEQ :+                     
+    LDA btl_defender_ailments  ;; if so, then if they're asleep, wake 'em up!
+    AND #AIL_SLEEP
+    BEQ :+
+      LDA btl_defender_ailments
+      SEC
+      SBC #AIL_SLEEP
+      STA btl_defender_ailments ; remove sleep ailment
+      LDA #$27
+      JSR DrawBattleMessageCombatBox ; print "Woke up"
+      JSR RespondDelay
+  
+ :  LDA #MATHBUF_DEFENDERHP
     LDX #MATHBUF_DEFENDERHP
     LDY #MATHBUF_TOTALDAMAGE
     JSR MathBuf_Sub16           ; defender_hp -= totaldamage
