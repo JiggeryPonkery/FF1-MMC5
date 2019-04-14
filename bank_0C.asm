@@ -653,6 +653,7 @@ FinishBattlePrepAndFadeIn:
     ;; JIGS - adding battle turn reset:
     LDA #1
     STA BattleTurn    
+    JSR PrintBattleTurnNumber
     JSR DrawCharacterStatus
     JSR DrawPlayerBox
     
@@ -1866,17 +1867,17 @@ EnterBattlePrepareSprites:
     
     ;; JIGS - since battle screen shifted, shifting positions! 
     
-    LDA #$C4
+    LDA #$C4+8
     STA btl_chardraw_x + $0     ; put all characters in the $B0 column
-    LDA #$C8
+    LDA #$C8+8
     STA btl_chardraw_x + $4
-    LDA #$CC
+    LDA #$CC+8
     STA btl_chardraw_x + $8
-    LDA #$D0
+    LDA #$D0+8
     STA btl_chardraw_x + $C
     
     LDA #$30                    ; set Y coords, starting at $30, and increasing by $18
-    STA btl_chardraw_y + $0
+    STA btl_chardraw_y + $0     ; JIGS - and add an extra pixel, so $19
     LDA #$49
     STA btl_chardraw_y + $4
     LDA #$62
@@ -5013,8 +5014,30 @@ ApplyEndOfRoundEffects:
     STA Character4BattleState   ; clear Guard state for everyone
     
     JSR DrawCharacterStatus     
-    
+    JSR PrintBattleTurnNumber
     JMP CheckForBattleEnd       ; poison may have killed the party -- check for battle end.
+    
+    
+    PrintBattleTurnNumber:
+    JSR LongCall
+    .word PrintBattleTurn
+    .byte $0E
+    
+    JSR WaitForVBlank_L
+    
+    LDA #>$205D                  ; set PPU addr
+    STA $2006
+    LDA #<$205D
+    STA $2006
+    
+    LDA format_buf-2 ; tens
+    STA $2007
+    LDA format_buf-1 ; ones 
+    STA $2007
+    
+    JSR BattleUpdatePPU                 ; reset scroll 
+    JMP BattleUpdateAudio               ; update audio for the frame we just waited for
+    
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6798,172 +6821,146 @@ YXDivideA:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; JIGS - i hate this code. so I re-wrote it all!
-
-;DrawCharacterStatus:
-;    JSR SetAllNaturalPose
-;    JSR UpdateSprites_BattleFrame
-    
-;    LDA #$00
-;    STA $685E                           ; temp var for character index/loop counter
-    
-;@CharacterLoop:
-;    LDA $685E
-;    JSR PrepCharStatPointers
-;    LDY #ch_ailments - ch_stats
-;    LDA (CharStatsPointer), Y        ; get OB ailments (why not IB?)
-;    DEY                                 ; Convert the ailment byte to a status string by finding first set bit
-;    : LSR A                         ; find first set bit
-;      BCS :+                        ; once a set bit is found, exit this loop and use the bit number (in Y)
-;      INY                           ;   as the status string index
-;      CPY #$07
-;      BNE :-                        ; stop at Y=7, which will draw "HP" instead of ailment text
-      
-;  : TYA                 ; code reaches here with Y=bitnumber of first ailment (0=death, 1=stone, 2=poison, etc)
-;    CLC                 ; Add $41 to that ailment to convert it to a "battle message" text index (see FormatBattleString)
-;    ADC #$41            
-;    STA $6B60           ; ailment index @ 6B60
-    
-;    LDA $685E           ; get 4+character index, which is the FormatBattleString character code for
-;    CLC                 ; printing the character's name
-;    ADC #$04
-;    STA $6B5E           ; name code @ $6B5E
-    
-;    LDA #$0F            ; $0F is the "print battle message" code
-;    STA $6B5F           ; @ $6B5F, with the actual battle message index (our ailment index) @ 6B60
-    
-;    LDA #$00            ; null terminate
-;    STA $6B61           ; At this point, $6B5E contains a string that will be formatted to "<name><ailment>" -- or "<name>HP" if
-                        ;   the character has no ailments.
-    
-;    LDY #ch_curhp - ch_stats        ; Get OB HP stats (why OB?  Why not IB?  wtf?)
-;    LDA (CharStatsPointer), Y
-;    TAX
-;    INY
-;    LDA (CharStatsPointer), Y
-;    TAY                             ; YX = current HP
-;    JSR FormatHPForText             ; prints HP string to $6856 (interleaved).  This is done here instead of
-                                    ;   below by the actual HP printing so as not to burn valuable VBlank time.
-    
-;    LDX #<$6B5E                 ; YX = pointer to our "<name><ailment>" string to be formatted
-;    LDY #>$6B5E
-;    JSR FormatBattleString_L    ; format it (printed to btl_stringoutputbuf).  Note again that
-                                ;  FormatBattleString creates an interleaved string.
-    
-;    LDA $685E                   ; use a LUT to get the target PPU address at which to draw this
-;    ASL A                       ;   character's status
-;    TAY
-;    LDA lut_CharStatusPPUAddr, Y
-;    STA $88
-;    LDA lut_CharStatusPPUAddr+1, Y
-;    STA $89                     ; put the target PPU address at $88,89
-    
-;    JSR WaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
-;    LDA $2002                   ; clear toggle
-    
-            ; remember at this point, btl_stringoutputbuf contains our "<name><ailment>" string
-;    LDY #$00                    ; draw top row of char's name (all blank spaces)
-;    JSR DrawStatusRow           ;   see DrawStatusRow for more details
-;    LDY #$01
-;    JSR DrawStatusRow           ; draw bottom row of char's name (their actual name)
-;    LDY #$08
-;    JSR DrawStatusRow           ; draw top row of ailment/status (all blank spaces)
-;    LDY #$09
-;    JSR DrawStatusRow           ; draw bottom row of ailment/status
-    
-    ; Interleaved HP string is stored at $6856
-;    LDY #$08
-;    : LDA $6856-1, Y                ; copy 8 bytes of that HP string to
-;      STA btl_stringoutputbuf-1, Y  ; the string output buffer
-;      DEY                           ;  (-1 because Y is 1-based)
-;      BNE :-
-    
-    ; Before we can draw the character's HP, FormatHPForText left leading 0s in the string.  We
-    ;   have to clear those out here.
-;    LDY #$00
-;  @ClearZerosLoop:
-;      LDA btl_stringoutputbuf+2, Y      ; +2 to start at 100's digit, since there is no 1000s digit
-;      CMP #$80
-;      BNE :+                            ; if not the '0' tile, exit
-;      LDA #$FF
-;      STA btl_stringoutputbuf+2, Y      ; otherwise, replace it with a space and continue on
-;      INY
-;      INY
-;      CPY #$04                          ; only check Y=0 (hundreds) and Y=2 (tens)
-;      BNE @ClearZerosLoop               ;   once Y=4, we exit
-      
-;:   LDY #$00
-;    JSR DrawStatusRow                   ; draw the final status row (player's current HP)
-    
-;    JSR BattleUpdatePPU                 ; reset scroll
-;    JSR BattleUpdateAudio               ; update audio for the frame we just waited for
-    
-;    INC $685E                   ; inc char index/loop counter
-;    LDA $685E
-;    CMP #$04
-;    BEQ :+
-;      JMP @CharacterLoop        ; loop for all 4 characters
-;:   RTS
-
-;; JIGS - with that out of the way...
-;; This chunk of code is important to the new battle screen. 
-;; All one inter-connected box instead of many boxes... 
-;; I don't really know anymore, its been over a year. Sorry.
-;; But it works!
-;; 
+;; JIGS - i hate this code. so I re-wrote it all! 
+;; Then I deleted my stuff and put it back because this version is more efficient on the PPU...
+;; But with my own stuff in it too!
 
 DrawCharacterStatus:
     JSR SetAllNaturalPose
     JSR UpdateSprites_BattleFrame
+    
+    LDA #$00
+    TAX
+    STA CharacterIndexBackup   ; temp var for character index/loop counter
+    
+@CharacterLoop:
+    LDA #$F2                        ; start of first string, invisible tile
+    STA btl_unfmtcbtbox_buffer, X
+    STA btl_unfmtcbtbox_buffer+3, X ; start of second string, invisible tile now, but could change
+    LDA CharacterIndexBackup
+    JSR PrepCharStatPointers
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y    
+    PHA                             ; backup ailment to use again
+    AND #$07                        ; only check these v ailments first
+    JSR @FindAilment
+    STA btl_unfmtcbtbox_buffer+1, X ; heavy ailment (dead, stone, poison)
+    LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y    
+    BEQ @NoState                    ; if 0, skip changing it from $F2
+    CMP #$10                        ; Hidden icon has priority over guarding icon
+    BEQ @Hidden
+    ;; JIGS - for now, there can be no other state, so if its not $00 and not $10, it must be $80
+    ;; later, will need to flesh this out!
 
-    ;;LDA #23
-    ;;STA dest_x       
-    ;;LDA #5
-    ;;STA dest_y
+   @Guarding:
+    LDA #$DB
+    JMP :+
     
-    LDA #29
-    STA dest_x       
-    LDA #2
-    STA dest_y
+   @Hidden: 
+    LDA #$E5
+  : STA btl_unfmtcbtbox_buffer+3, X ; start of second string; hidden or guarding
     
-    LDA #<@CharacterAilmentsBattlestates   ; load up the pointer from our pointer table
-    STA text_ptr                           ; put it in text_ptr
-    LDA #>@CharacterAilmentsBattlestates
-    STA text_ptr+1
+   @NoState: 
+    PLA                             ; fetch ailment
+    AND #$78                        ; remove dead, stone, poison, and $80 from ailment
+    JSR @FindAilment
+    STA btl_unfmtcbtbox_buffer+4, X ; light ailment (blind, sleep, stun, mute)
+    LDA #0
+    STA btl_unfmtcbtbox_buffer+2, X
+    STA btl_unfmtcbtbox_buffer+5, X ; null terminate each bit
+    STA btl_unfmtcbtbox_buffer+6, X ; and create a blank third line
     
-    LDA #BANK_THIS
-    STA cur_bank          ; set data bank (string to draw is on this bank -- or is in RAM)
-    STA ret_bank          ; set return bank (we want it to RTS to this bank when complete)
+    TXA
+    CLC
+    ADC #7                          ; add 7 to X to move forward in the buffer
+    TAX
+    
+    LDA CharacterIndexBackup
+    CLC
+    ADC #1                          ; add 1 to character index to process next character
+    STA CharacterIndexBackup
+    CMP #4                          ; when all 4 are done, finish
+    BNE @CharacterLoop
+    
+    ;; btl_unfmtcbtbox_buffer should now be $1C bytes long, with two $00s at the end.
+
+    LDA #<$20DD                     ; position to begin printing
+    STA AilmentPrintingPointer
+    LDA #>$20DD
+    STA AilmentPrintingPointer+1
+    
     JSR WaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
     LDA $2002                   ; clear toggle
-    LDA #1
-    STA menustall         ; enable to write while PPU is on
-    JMP DrawComplexString ;  Draw Complex String, then exit!
     
-    ;(these don't seem to have any effect on being taken out)
-    ;JSR BattleUpdatePPU                 ; reset scroll 
-    ;JSR BattleUpdateAudio               ; update audio for the frame we just waited for
-    ;RTS
+    LDX #0
+    LDY #0
 
-; @CharNamesandStatsString:
-;  .byte $FF,$10,$00,$05                         ; Character name, line break
-;  .byte $FF,$10,$0D,$FF,$10,$02,$FF,$10,$05,$01 ; Hidden icon _ Ailment icon _ HP, double line break
-;  .byte $FF,$11,$00,$05
-;  .byte $FF,$11,$0D,$FF,$11,$02,$FF,$11,$05,$01
-;  .byte $FF,$12,$00,$05
-;  .byte $FF,$12,$0D,$FF,$12,$02,$FF,$12,$05,$01
-;  .byte $FF,$13,$00,$05
-;  .byte $FF,$13,$0D,$FF,$13,$02,$FF,$13,$05,$01
-;  .byte $FF,$9D,$B8,$B5,$B1,$FF,$06,$00         ; Turn _ Battle turn #  
+  @ResetLocation:
+    LDA AilmentPrintingPointer+1     ; set PPU addr
+    STA $2006
+    LDA AilmentPrintingPointer
+    STA $2006
+    
+  @DrawLoop:  
+    LDA btl_unfmtcbtbox_buffer, Y ; (using Y to index)
+    BEQ @NextRow
+    STA $2007
+    INY
+    JMP @DrawLoop
+  
+  @NextRow:  
+    LDA AilmentPrintingPointer     ; then add $20 to dest pointer to move to next row
+    CLC
+    ADC #$20
+    STA AilmentPrintingPointer
+    LDA AilmentPrintingPointer+1
+    ADC #$00
+    STA AilmentPrintingPointer+1
+    INY
+    INX 
+    CPX #11                        ; three lines per character, so count 4*3 $00s
+    BNE @ResetLocation             ; minus 1, because the last one doesn't need to be three lines
+    
+    JSR BattleUpdatePPU                 ; reset scroll 
+    JSR BattleUpdateAudio               ; update audio for the frame we just waited for
+    
+    RTS    
 
-@CharacterAilmentsBattlestates:
-  .byte $06,$01,$01,$05
-  .byte $10,$0D,$10,$02,$01,$05 ; Hidden icon _ Ailment icon
-  .byte $11,$0D,$11,$02,$01,$05
-  .byte $12,$0D,$12,$02,$01,$05
-  .byte $13,$0D,$13,$02,$00
+    
+   @FindAilment:
+    ROR A
+    BCC :+
+      LDA #$E3  ; dead
+      RTS      
+  : ROR A
+    BCC :+    
+      LDA #$E6  ; stone
+      RTS
+  : ROR A
+    BCC :+    
+      LDA #$E4  ; poison
+      RTS
+  : ROR A
+    BCC :+    
+      LDA #$E8  ; blind
+      RTS
+  : ROR A
+    BCC :+    
+      LDA #$E9  ; stun
+      RTS
+  : ROR A
+    BCC :+    
+      LDA #$E7  ; sleep
+      RTS
+  : ROR A
+    BCC :+    
+      LDA #$EA  ; mute
+      RTS
+  : LDA #$F2    ; no ailment found, use invisible character
+    RTS
 
-
+    
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

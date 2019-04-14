@@ -594,6 +594,7 @@ battlereward        = $88  ; 3 bytes.  Note that while this var is 3 bytes, this
 ;; physical and magical attacks
 CharStatsPointer       = $80
 CharBackupStatsPointer = $82
+AilmentPrintingPointer = $82
 EnemyRAMPointer        = $84  ; 2 byte pointer to enemy's adjustable stats
 EnemyROMPointer        = $86  ; 2 byte pointer to enemy's hard stats
 BattleMenuPointer      = $88  
