@@ -19,7 +19,9 @@
 .import DrawComplexString, ClearOAM, DrawPalette, CallMusicPlay, UpdateJoy, DrawSimple2x3Sprite, Draw2x2Sprite, CHRLoad, CHRLoadToA
 .import DrawCursor, WaitForVBlank_L, DrawBox, LoadMenuCHRPal, MenuCondStall, CoordToNTAddr, LoadBorderPalette_Blue
 .import UndrawBattleBlock, ShiftSpriteHightoLow, PlaySFX_Error
-
+.import BattleBackgroundColor_LUT
+.import BattleBGColorDigits
+.import DrawPalette_L
 
 
 
@@ -766,9 +768,12 @@ EnterTitleScreenNew:
     LDA #0
     STA $2001              
     STA menustall           
-    LDA #$01
-    STA cur_pal+1
-    STA cur_pal+13
+    ;LDA #$01
+    ;STA cur_pal+1
+    ;STA cur_pal+13
+    LDX BattleBGColor
+    LDA BattleBackgroundColor_LUT, X
+    STA cur_pal+14
     JSR ClearNT_FillBackground    
     JSR OptionsMenu
     JMP EnterTitleScreenNew
@@ -807,17 +812,6 @@ IntroTitlePrepare_BankZ:
     JSR LongCall
     .word IntroTitlePrepare
     .byte $0E    
-  
-  ;  LDA #$08               ; set soft2000 so that sprites use right pattern
-  ;  STA soft2000           ;   table while BG uses left
-  ;  LDA #0
-  ;  STA $2001              ; turn off the PPU
-
-  ;  JSR LoadMenuCHRPal     ; Load necessary CHR and palettes
-
-  ;;  LDA #$41
-  ;;  STA music_track        ; Start up the crystal theme music
-  ;;; JIGS - stop resetting the damn song!
 
     LDA #0
     STA joy_a              ; clear A, B, Start button catchers
@@ -826,13 +820,10 @@ IntroTitlePrepare_BankZ:
     STA cursor
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
     RTS
-        
- ;   JMP ClearNT            ; then wipe the nametable clean and exit
 
- ;; JIGS - IntroTitlePrepare now calls to draw the bridge scene GFX... so no wiping the NT here.
-
+    
 ClearNT_FillBackground:
-    LDA #$6D ; EF
+    LDA #$F2; 6D ; EF
     STA MMC5_tmp
     JMP ClearNT_Color
     
@@ -950,43 +941,44 @@ DrawOptions:
   STA dest_x
   LDA #9
   STA dest_y
-  
   LDX ExpGainOption
   LDA lut_LowNormalHigh, X
   JSR DrawCharMenuString
   
   LDA #11
   STA dest_y
-  
   LDX MoneyGainOption
   LDA lut_LowNormalHigh, X
   JSR DrawCharMenuString
   
   LDA #13
   STA dest_y
-  
   LDX EncRateOption
   LDA lut_LowNormalHigh, X
   JSR DrawCharMenuString
  
-  LDA #17
+  LDA #15
   STA dest_y
-  
-  LDX AutoTargetOption
-  LDA lut_OnOff, X
+  LDA #13
   JSR DrawCharMenuString
-  
-  LDA #19
-  STA dest_y
-  
-  LDX MuteSFXOption
-  LDA lut_OnOff, X
-  JSR DrawCharMenuString
+ 
+  JSR LongCall
+  .word BattleBGColorDigits
+  .byte $0E
   
   LDA $2002          ; PPU toggle... needed or not?
-  LDA #>$21F8        ; Respond rate is drawn at address $22D6
+  LDA #>$2239        ; Color is drawn here
   STA $2006
-  LDA #<$21F8
+  LDA #<$2239
+  STA $2006
+  LDA format_buf-2
+  STA $2007
+  LDA format_buf-1
+  STA $2007
+  
+  LDA #>$21FA        ; Respond rate is drawn here
+  STA $2006
+  LDA #<$21FA
   STA $2006
   LDA BattleTextSpeed ; get the current respond rate (which is zero based)
   CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
@@ -995,7 +987,27 @@ DrawOptions:
   LDA #$00            ; reset scroll to 0 (very important!)
   STA $2005
   STA $2005
-  RTS
+ 
+  LDA #27
+  STA dest_x
+  LDA #15
+  STA dest_y
+  LDA #14
+  JSR DrawCharMenuString
+  
+  LDA #24
+  STA dest_x
+  LDA #19
+  STA dest_y
+  LDX AutoTargetOption
+  LDA lut_OnOff, X
+  JSR DrawCharMenuString
+  
+  LDA #21
+  STA dest_y
+  LDX MuteSFXOption
+  LDA lut_OnOff, X
+  JMP DrawCharMenuString
   
   
 OptionsMenu:
@@ -1005,6 +1017,10 @@ OptionsMenu:
     STA joy_prevdir
     STA cursor                  ; turn off screen and clear some button stuff
     STA menustall
+    
+    LDX BattleBGColor
+    LDA BattleBackgroundColor_LUT, X
+    STA cur_pal+14
   
     LDA #1
     STA box_x
@@ -1012,11 +1028,11 @@ OptionsMenu:
     STA box_y
     LDA #30
     STA box_wd
-    LDA #15
+    LDA #17
     STA box_ht
     JSR DrawBox                 ; draws the options box
     
-    LDA #6            
+    LDA #7            
     STA cursor_max    
     LDA #0
     JSR DrawCharMenuString      ; draws the static list of changable things
@@ -1110,13 +1126,15 @@ ChangeOption:
     LDA cursor
     BEQ @ExpGain
     CMP #1
-    BEQ @MoneyGain
+    BEQ @JMP_MoneyGain
     CMP #2
-    BEQ @EncounterRate
+    BEQ @JMP_EncounterRate
     CMP #3
     BEQ @BattleTextSpeed
     CMP #4
-    BEQ @AutoTargetJump
+    BEQ @JMP_BattleBackground    
+    CMP #5
+    BEQ @JMP_AutoTarget
     PLA                   ; pull direction and toss it
   
    @MenuSFX:
@@ -1128,6 +1146,15 @@ ChangeOption:
   : INC MuteSFXOption
     RTS
     
+   @JMP_BattleBackground:
+   JMP BattleBackgroundColor
+   
+   @JMP_MoneyGain:
+   JMP @MoneyGain
+   
+   @JMP_EncounterRate:
+   JMP @EncounterRate
+
    @BattleTextSpeed:
     PLA                     ; pull direction and branch 
     BEQ @IncreaseBattleTextSpeed 
@@ -1151,7 +1178,7 @@ ChangeOption:
    @Return:  
     RTS
     
-   @AutoTargetJump:
+   @JMP_AutoTarget:
     JMP @AutoTarget       
     
    @ExpGain:
@@ -1230,8 +1257,37 @@ ChangeOption:
   : INC AutoTargetOption
     RTS 
     
+BattleBackgroundColor:
+    PLA 
+    BEQ @NextColor
     
+    @PreviousColor:
+    DEC BattleBGColor
+    LDA BattleBGColor
+    CMP #$FF
+    BNE @Return
+    LDA #13
+    STA BattleBGColor
+    JMP @Return
     
+    @NextColor:
+    LDA BattleBGColor
+    CMP #13
+    BNE :+
+       LDA #0
+       STA BattleBGColor
+       JMP @Return
+  
+  : INC BattleBGColor
+    
+    @Return:
+    LDA #0
+    STA $2002
+    LDX BattleBGColor
+    LDA BattleBackgroundColor_LUT, X
+    STA cur_pal+14
+    JMP TurnOnScreen
+
    
 DrawOptionsCursor:
     LDY cursor                   ; get current cursor selection
@@ -1242,7 +1298,7 @@ DrawOptionsCursor:
     JMP DrawCursor               ; draw it!  and exit
     
   lut_OptionsCursor_Y:          
-   .BYTE  $48,$58,$68,$78,$88,$98        
+   .BYTE  $48,$58,$68,$78,$88,$98,$A8        
 
 OptionsMenuFrame:
     LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
@@ -3696,19 +3752,21 @@ lut_OnOff:
 .byte $04,$05
 
 lut_ZMenuText:
-.word M_OptionsMenu ; 0
-.word OptLow
-.word OptNormal
-.word OptHigh
-.word OptionOn
-.word OptionOff
-.word M_SaveSlots
-.word M_SaveTitle
-.word M_LoadTitle
-.word Saved
-.word AreYouSure
-.word Deleted
-.word BattleYesNo ; 12
+.word M_OptionsMenu          ; 0
+.word OptLow                 ; 1
+.word OptNormal              ; 2
+.word OptHigh                ; 3
+.word OptionOn               ; 4
+.word OptionOff              ; 5
+.word M_SaveSlots            ; 6
+.word M_SaveTitle            ; 7 
+.word M_LoadTitle            ; 8
+.word Saved                  ; 9
+.word AreYouSure             ; A ; 10
+.word Deleted                ; B ; 11
+.word BattleYesNo            ; C ; 12
+.word OptionsArrows_Left     ; D ; 13
+.word OptionsArrows_Right    ; E ; 14
 
 OptionOn:
 .byte $98,$97,$C1,$00
@@ -3730,6 +3788,7 @@ M_OptionsMenu:   ;3A
 .byte $96,$98,$97,$8E,$A2,$C1,$90,$8A,$92,$97,$01
 .byte $8E,$97,$8C,$98,$9E,$97,$9D,$8E,$9B,$C1,$9B,$8A,$9D,$8E,$01
 .byte $8B,$8A,$9D,$9D,$95,$8E,$C1,$96,$8E,$9C,$9C,$8A,$90,$8E,$C1,$9C,$99,$8E,$8E,$8D,$01
+.byte $8B,$8A,$9D,$9D,$95,$8E,$C1,$96,$8E,$9C,$9C,$8A,$90,$8E,$C1,$8C,$98,$95,$98,$9B,$01
 .byte $8A,$9E,$9D,$98,$C2,$9D,$8A,$9B,$90,$8E,$9D,$01
 .byte $96,$8E,$97,$9E,$C1,$9C,$8F,$A1,$00
     
@@ -3763,6 +3822,12 @@ BattleYesNo:
 .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01
 .byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$FF,$FF,$FF,$01
 .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
+
+OptionsArrows_Left:
+.byte $D3,$01,$D3,$00
+
+OptionsArrows_Right:
+.byte $EE,$01,$EE,$00
 
 
 

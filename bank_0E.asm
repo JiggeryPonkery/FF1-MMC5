@@ -14,6 +14,7 @@
 .export PrintPrice
 .export TurnMenuScreenOn_ClearOAM
 .export DrawManaString_ForBattle
+.export BattleBGColorDigits
 
 .import AddGPToParty
 .import CallMusicPlay
@@ -1060,6 +1061,11 @@ PrintGold:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+BattleBGColorDigits:
+    LDA BattleBGColor
+    STA tmp
+    JMP PrintNumber_2Digit
+
 PrintBattleTurn:
     LDA BattleTurn
     STA tmp
@@ -1763,17 +1769,17 @@ PtyGen_DrawScreen:
     STA joy
     STA joy_prevdir
 
-    JSR TitleScreenBGColour         ; Change the colour of the Title Screen
-    JSR ClearNT_FillBackground      ; Fill the background with colour instead of boxes
+    ;JSR TitleScreenBGColour         ; Change the colour of the Title Screen
+    JSR ClearNT ;_FillBackground      ; Fill the background with colour instead of boxes
     JSR PtyGen_DrawBoxes    
     JSR PtyGen_DrawText     
     JMP TurnMenuScreenOn_ClearOAM
     
-    TitleScreenBGColour:
-    LDA #$01
-    STA cur_pal+1
-    STA cur_pal+13
-    RTS
+    ;TitleScreenBGColour:
+    ;LDA #$01
+    ;STA cur_pal+1
+    ;STA cur_pal+13
+    ;RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6031,6 +6037,8 @@ MainMenuLoop:
     JSR LongCall
     .word OptionsMenu
     .byte $0F
+    LDA #$01
+    STA cur_pal+14
     JMP ResumeMainMenu
         
    @Save:

@@ -170,7 +170,7 @@ lut_InitUnsramFirstPage:
 .byte $00 ; 13 mute SFX option (on)
 .byte $00 ; 14 auto target option (on)
 .byte $04 ; 15 battle text speed (5)
-.byte $00 ; 16 unused
+.byte $01 ; 16 battle text background color (1: blue)
 .byte $00 ; 17 unused
 .byte $00 ; 18 unused
 .byte $00 ; 19 unused

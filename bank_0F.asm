@@ -83,6 +83,7 @@
 .export DrawManaBox
 .export DrawPlayerBox
 .export ShiftLeft6
+.export BattleBackgroundColor_LUT
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -10633,7 +10634,15 @@ LoadBorderPalette_Blue:
     BNE :+         ; always branches
 
 LoadBorderPalette_Black:
-    LDA #$0F
+    ;LDA #$0F
+    TXA
+    PHA
+    LDX BattleBGColor
+    LDA BattleBackgroundColor_LUT, X
+    JSR :+
+    PLA
+    TAX
+    RTS    
 
     :  STA cur_pal+$E   ; Black or Blue goes to color 2
        LDA #$0F
@@ -10751,7 +10760,7 @@ LoadBattleBGPalettes:
     ;; Faux routine -- same as above but gives the menus a blue background instead of black
     ;;   I do not believe this code is ever used by the game
 
-;Faux_LoadBattleBGPalettes:
+;LoadBattleBGPalettes_Blue:
 ;    JSR LoadBattleBackdropPalette
 ;    JMP LoadBorderPalette_Blue
 
@@ -14812,7 +14821,7 @@ ClearMenuOtherNametables:
 ;; Which I think is better to see what your sprites look like than the blue used in menus
     
 LoadPtyGenBGCHRAndPalettes:
-    JSR LoadBorderPalette_Black       ; Load up the blue border palette for menus    
+    JSR LoadBorderPalette_Blue       ; Load up the blue border palette for menus    
     JMP LoadBatSprCHRPalettes_NewGame
 
     
@@ -14953,7 +14962,8 @@ SaveScreenHelper:
     
     
     
-    
+BattleBackgroundColor_LUT:
+.byte $0F,$01,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$2D,$25
     
     
 
