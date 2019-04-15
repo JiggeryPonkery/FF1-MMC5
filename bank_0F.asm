@@ -12674,7 +12674,7 @@ DrawCommandBox:
       JSR BattleDraw_AddBlockToBuffer         ;  output buffer
       LDX #$00
   : INY
-    CPY #9*5
+    CPY #8*5
     BNE @Loop
     JMP DrawBlockBuffer            ; then finally draw it
     
@@ -13395,21 +13395,19 @@ lut_BattleCommandBoxInfo:
   .BYTE $01, $0A, $00, <@txt4, >@txt4
   .BYTE $01, $0A, $02, <@txt5, >@txt5 
   .BYTE $01, $0A, $04, <@txt6, >@txt6 
-  .BYTE $01, $0A, $06, <@txt7, >@txt7 
-  .BYTE $01, $0F, $07, <@connectorbottom, >@connectorbottom
-  .BYTE $01, $0F, $00, <@connectortop,    >@connectortop
+ ; .BYTE $01, $0A, $06, <@txt7, >@txt7 
   
   
   @txt0:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
   @txt1:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
-  @txt2:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
+  @txt2:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
   @txt3:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
-  @txt4:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
-  @txt5:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
-  @txt6:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
-  @txt7:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
-  @connectorbottom: .byte $C9, $00
-  @connectortop:    .byte $C8, $00
+
+  @txt4:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
+  @txt5:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
+  @txt6:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
+  
+ ; @txt2:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
   
 
 lut_PlayerBoxInfo:

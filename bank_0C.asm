@@ -1224,16 +1224,20 @@ Battle_MainMenu_APressed:
 lut_BattleSubMenu:
   .WORD BattleSubMenu_Fight
   .WORD BattleSubMenu_Magic
-  .WORD BattleSubMenu_Magic
+  .WORD BattleSubMenu_Item
   .WORD BattleSubMenu_Equipment
   
   ;;JIGS - adding things
   
 lut_BattleSubMenu2:
-  .WORD BattleSubMenu_Item
   .WORD BattleSubMenu_Guard
   .WORD BattleSubMenu_Hide
   .WORD BattleSubMenu_Run
+  .WORD BattleSubMenu_Blank
+  
+BattleSubMenu_Blank:
+  JMP PrepAndGetBattleMainCommand
+  
   
   ;; JIGS - this is new!
 BattleSubMenu_Run:  
