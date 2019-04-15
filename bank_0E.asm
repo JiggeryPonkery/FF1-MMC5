@@ -124,25 +124,25 @@ lut_ShopStrings:
 ;; note these are NOT the original game's strings. I have edited them to better fit within the new shop screen and add some character to the shops.
 
 ShopWeapon:
-.byte $FF,$FF,$FF,$A0,$2B,$B3,$3C,$C1,$9C,$AB,$B2,$B3,$00 ; ___Weapon Shop
+.byte $FF,$FF,$FF,$A0,$2B,$B3,$3C,$FF,$9C,$AB,$B2,$B3,$00 ; ___Weapon Shop
 ShopArmor:
-.byte $FF,$FF,$FF,$8A,$B5,$B0,$35,$C1,$9C,$AB,$B2,$B3,$00 ; ___Armor Shop
+.byte $FF,$FF,$FF,$8A,$B5,$B0,$35,$FF,$9C,$AB,$B2,$B3,$00 ; ___Armor Shop
 ShopWhiteMagic:
-.byte $FF,$FF,$FF,$A0,$3D,$53,$C1,$96,$A4,$AA,$AC,$A6,$00 ; ___White Magic
+.byte $FF,$FF,$FF,$A0,$3D,$53,$FF,$96,$A4,$AA,$AC,$A6,$00 ; ___White Magic
 ShopBlackMagic:
-.byte $FF,$FF,$FF,$8B,$AF,$5E,$AE,$C1,$96,$A4,$AA,$AC,$A6,$00 ; ___Black Magic
+.byte $FF,$FF,$FF,$8B,$AF,$5E,$AE,$FF,$96,$A4,$AA,$AC,$A6,$00 ; ___Black Magic
 ShopTemple:
 .byte $FF,$9D,$A8,$B0,$B3,$45,$36,$54,$95,$AC,$AA,$AB,$B7,$00 ; _Temple of Light
 ShopInn:
 .byte $FF,$9D,$B5,$A4,$32,$45,$B5,$BE,$1E,$92,$B1,$B1,$00 ; _Traveler's Inn
 ShopItem:
-.byte $FF,$FF,$90,$3A,$25,$5F,$C1,$9C,$28,$23,$00 ; __General Store
+.byte $FF,$FF,$90,$3A,$25,$5F,$FF,$9C,$28,$23,$00 ; __General Store
 ShopOasis: 
-.byte $8C,$AF,$B2,$3E,$C1,$98,$B8,$21,$9C,$5F,$A8,$00 ; Close Out Sale
+.byte $8C,$AF,$B2,$3E,$FF,$98,$B8,$21,$9C,$5F,$A8,$00 ; Close Out Sale
 ShopGold:
 .byte $FF,$90,$00 ; _G
 ShopWelcome:
-.byte $C1,$C1,$A0,$A8,$AF,$A6,$49,$A8,$C4,$C1,$A0,$41,$B7,$01,$C1,$51,$29,$92,$67,$2E,$BC,$A4,$43,$35,$C5,$00 ; Welcome! 
+.byte $FF,$FF,$A0,$A8,$AF,$A6,$49,$A8,$C4,$FF,$A0,$41,$B7,$01,$FF,$51,$29,$92,$67,$2E,$BC,$A4,$43,$35,$C5,$00 ; Welcome! 
 ShopBuySellExit:
 .byte $8B,$B8,$BC,$01,$9C,$A8,$4E,$01,$8E,$BB,$5B,$00 ; Buy / Sell / Exit
 ShopBuyExit:
@@ -150,22 +150,22 @@ ShopBuyExit:
 ShopCannotCarry:
 .byte $A2,$26,$38,$22,$B1,$B2,$21,$51,$B5,$B5,$BC,$05,$22,$4B,$B0,$35,$A8,$C4,$00 ; You cannot carry any more.
 ShopWhatWant:
-.byte $C1,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00
+.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00
 ShopXGoldOK:
-.byte $FF,$9D,$41,$21,$A6,$49,$2C,$1B,$B2,$69,$01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$BF,$C1,$B2,$AE,$A4,$BC,$C5,$00
+.byte $FF,$9D,$41,$21,$A6,$49,$2C,$1B,$B2,$69,$01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$BF,$FF,$B2,$AE,$A4,$BC,$C5,$00
 ShopYesNo:
 .byte $A2,$A8,$B6,$01,$97,$B2,$00 ; Yes / No
 ShopCantAfford:
-.byte $C1,$8A,$A6,$AB,$C4,$C1,$A2,$26,$38,$22,$BE,$B7,$01,$C1,$C1,$A4,$A9,$A9,$35,$27,$1C,$39,$69,$00
+.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$38,$22,$BE,$B7,$01,$FF,$FF,$A4,$A9,$A9,$35,$27,$1C,$39,$69,$00
 ShopWhoWillTake:
-.byte $C1,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00
+.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00
 ShopCharNames:
 .byte $10,$00,$05
 .byte $11,$00,$05
 .byte $12,$00,$05
 .byte $13,$00,$00
 ShopThankYouWhatElse:
-.byte $9D,$41,$B1,$AE,$50,$26,$C1,$AE,$1F,$A7,$AF,$BC,$C4,$01,$C1,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00
+.byte $9D,$41,$B1,$AE,$50,$26,$FF,$AE,$1F,$A7,$AF,$BC,$C4,$01,$FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00
 ShopWhoseItemToSell:
 .byte $A0,$41,$21,$A7,$BE,$56,$64,$41,$32,$05,$A9,$35,$42,$A8,$BF,$1B,$1D,$B1,$C5,$00
 ShopWhichOne:
@@ -182,34 +182,34 @@ ShopOutofStock:
 ShopAlreadyKnow:
 .byte $A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$01,$1C,$39,$24,$B3,$A8,$4E,$BF,$43,$B2,$B2,$AF,$C4,$00 ; You already know that.
 ShopInnWelcome:
-.byte $C1,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01,$B7,$B5,$A4,$32,$45,$63,$C4,$C1,$95,$A8,$21,$B8,$B6,$01,$B7,$A4,$AE,$1A,$51,$23,$36,$54,$56,$B8,$C0,$00 ; Inn welcome
+.byte $FF,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01,$B7,$B5,$A4,$32,$45,$63,$C4,$FF,$95,$A8,$21,$B8,$B6,$01,$B7,$A4,$AE,$1A,$51,$23,$36,$54,$56,$B8,$C0,$00 ; Inn welcome
 ShopDontForget:
 .byte $98,$B1,$AF,$4B,$26,$44,$A9,$1F,$2C,$B7,$05,$4D,$49,$43,$35,$50,$26,$05,$A9,$26,$44,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C4,$05,$9C,$45,$A8,$B3,$33,$A8,$4E,$C4,$00
 ShopHoldReset: 
-.byte $9B,$A8,$34,$B0,$62,$B5,$BF,$1B,$2E,$B6,$A4,$32,$05,$56,$55,$C1,$AA,$A4,$34,$BF,$59,$B2,$AF,$A7,$05,$9B,$8E,$9C,$8E,$9D,$33,$1D,$29,$56,$B8,$05,$B7,$55,$29,$1C,$1A,$B3,$46,$25,$05,$4C,$A9,$C4,$C1,$90,$B2,$B2,$27,$AF,$B8,$A6,$AE,$C4,$00
+.byte $9B,$A8,$34,$B0,$62,$B5,$BF,$1B,$2E,$B6,$A4,$32,$05,$56,$55,$FF,$AA,$A4,$34,$BF,$59,$B2,$AF,$A7,$05,$9B,$8E,$9C,$8E,$9D,$33,$1D,$29,$56,$B8,$05,$B7,$55,$29,$1C,$1A,$B3,$46,$25,$05,$4C,$A9,$C4,$FF,$90,$B2,$B2,$27,$AF,$B8,$A6,$AE,$C4,$00
 ShopNothingToSell:
-.byte $C1,$8A,$A6,$AB,$C4,$C1,$A2,$26,$67,$3C,$BE,$B7,$01,$C1,$41,$32,$20,$B1,$BC,$1C,$1F,$AA,$C4,$00
+.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$67,$3C,$BE,$B7,$01,$FF,$41,$32,$20,$B1,$BC,$1C,$1F,$AA,$C4,$00
 ShopKeepOnTrying:
 .byte $94,$A8,$A8,$B3,$36,$B1,$B7,$B5,$BC,$1F,$AA,$AA,$B8,$BC,$B6,$69,$00
 ShopWhoToRevive:
-.byte $91,$46,$C1,$B8,$B1,$A9,$35,$B7,$B8,$B1,$39,$A8,$69,$01,$A0,$3D,$A6,$AB,$43,$5F,$45,$B1,$05,$A0,$8A,$9B,$9B,$92,$98,$9B,$24,$41,$4E,$C1,$92,$05,$A4,$A7,$B0,$1F,$30,$53,$44,$28,$C5,$00
+.byte $91,$46,$FF,$B8,$B1,$A9,$35,$B7,$B8,$B1,$39,$A8,$69,$01,$A0,$3D,$A6,$AB,$43,$5F,$45,$B1,$05,$A0,$8A,$9B,$9B,$92,$98,$9B,$24,$41,$4E,$FF,$92,$05,$A4,$A7,$B0,$1F,$30,$53,$44,$28,$C5,$00
 ShopReturnToLife:
-.byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$05,$68,$AA,$AB,$B7,$69,$C1,$A0,$8A,$9B,$9B,$92,$98,$9B,$C4,$05,$9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; Warrior return to life!
+.byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$05,$68,$AA,$AB,$B7,$69,$FF,$A0,$8A,$9B,$9B,$92,$98,$9B,$C4,$05,$9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; Warrior return to life!
 ShopMagicWelcome:
 .byte $FF,$8A,$AB,$C0,$FF,$8C,$B8,$37,$49,$25,$B6,$C0,$01
 .byte $FF,$8D,$2E,$56,$64,$3E,$A8,$AE,$1B,$B2,$01
 .byte $AE,$B1,$46,$1B,$1D,$20,$B5,$51,$5A,$C5,$00 ; Ah. Customers. / Do you seek to / know the arcane?
 ShopDontNeedHelp:
-.byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01,$22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01,$C1,$56,$B8,$BF,$C1,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C0,$00 ; No dead people here.
+.byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01,$22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01,$FF,$56,$B8,$BF,$FF,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C0,$00 ; No dead people here.
 ShopLearnExit:
 ShopTooBad:
-.byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01,$C1,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00
+.byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01,$FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00
 ShopHowMany:
-.byte $C1,$C1,$C1,$C1,$91,$B2,$BA,$C1,$B0,$A4,$B1,$BC,$C5,$01,$C1,$C1,$C1,$C1,$BA,$AC,$AF,$AF,$C1,$A6,$B2,$B6,$B7,$C1,$BC,$A4,$C1,$01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00
+.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01,$FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$FF,$01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00
 ShopEquipNow:
-.byte $C1,$8D,$B2,$C1,$BC,$B2,$B8,$C1,$BA,$A4,$B1,$B7,$C1,$B7,$B2,$01,$C1,$C1,$A8,$B4,$B8,$AC,$B3,$C1,$AC,$B7,$C1,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
+.byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01,$FF,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$AC,$B7,$FF,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
 ShopCannotEquip:
-.byte $C1,$C1,$91,$B2,$AF,$A7,$C1,$B2,$B1,$C1,$B1,$B2,$BA,$C3,$C0,$01,$C1,$A2,$B2,$B8,$BE,$B5,$A8,$C1,$B1,$B2,$B7,$C1,$A4,$A5,$AF,$A8,$01,$C1,$C1,$B7,$B2,$C1,$A8,$B4,$B8,$AC,$B3,$C1,$B7,$AB,$A4,$B7,$C4,$00
+.byte $FF,$FF,$91,$B2,$AF,$A7,$FF,$B2,$B1,$FF,$B1,$B2,$BA,$C3,$C0,$01,$FF,$A2,$B2,$B8,$BE,$B5,$A8,$FF,$B1,$B2,$B7,$FF,$A4,$A5,$AF,$A8,$01,$FF,$FF,$B7,$B2,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$B7,$AB,$A4,$B7,$C4,$00
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -511,7 +511,7 @@ M_Options:
 .byte $8E,$9A,$9E,$92,$99,$01 ; EQUIP
 .byte $CA,$CB,$CC,$CD,$CE,$01 ; STATUS
 .byte $CF,$D0,$D1,$D2,$97,$01 ; OPTION
-.byte $9C,$8A,$9F,$8E,$E2,$00 ; SAVE (Heart)
+.byte $9C,$8A,$9F,$8E,$E8,$00 ; SAVE (Heart)
 
 M_ItemTitle: 
 .BYTE $FF,$92,$9D,$8E,$96,$9C,$00 ; ITEMS
@@ -520,16 +520,16 @@ M_QuestItemsTitle:
 .BYTE $FF,$9A,$9E,$8E,$9C,$9D,$00 ; QUEST
 
 M_EquipPage1:  
-.byte $FF,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$81,$FF,$EE,$00
+.byte $FF,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$81,$FF,$C7,$00
 
 M_EquipPage2:   
-.byte $D3,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$82,$FF,$EE,$00
+.byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$82,$FF,$C7,$00
 
 M_EquipPage3:
-.byte $D3,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$83,$FF,$EE,$00
+.byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$83,$FF,$C7,$00
 
 M_EquipPage4:
-.byte $D3,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$84,$00
+.byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$84,$00
 
 M_Char1Name:   
 .byte $10,$00,$00 ; Character 1's name
@@ -547,14 +547,14 @@ M_EquipNameClass:
 .byte $10,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$01,$00 ; name and class
 
 M_EquipmentSlots:
-.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01         ; RIGHT_HAND__ 
-.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01         ; LEFT__HAND__
-.byte $91,$2B,$A7,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01     ; HEAD________
-.byte $8B,$B2,$A7,$BC,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01 ; BODY________
-.byte $91,$22,$A7,$B6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01     ; HANDS_______
-.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$FF,$FF,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01         ; ACCESSORY___
-.byte $8B,$39,$B7,$45,$C1,$92,$53,$B0,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$01             ; BATTLE_ITEM_
-.byte $8B,$39,$B7,$45,$C1,$92,$53,$B0,$FF,$F5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$F6,$00             ; BATTLE_ITEM_
+.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01         ; RIGHT_HAND__ 
+.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01         ; LEFT__HAND__
+.byte $91,$2B,$A7,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01     ; HEAD________
+.byte $8B,$B2,$A7,$BC,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01 ; BODY________
+.byte $91,$22,$A7,$B6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01     ; HANDS_______
+.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01         ; ACCESSORY___
+.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01             ; BATTLE_ITEM_
+.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$00             ; BATTLE_ITEM_
 
 M_EquipStats:
 .byte $8D,$A4,$B0,$A4,$66,$FF,$FF,$FF,$10,$3C,$FF,$FF  ; Damage
@@ -805,19 +805,19 @@ M_MagicForget:
 .byte $8F,$35,$66,$21,$1C,$30,$24,$B3,$A8,$4E,$C5,$00
 
 M_MagicMenuSpellLevel12:
-.byte $FF,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$81,$C2,$82,$FF,$EE,$00
+.byte $FF,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$81,$C2,$82,$FF,$C7,$00
 
 M_MagicMenuSpellLevel34:
-.byte $D3,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$83,$C2,$84,$FF,$EE,$00
+.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$83,$C2,$84,$FF,$C7,$00
 
 M_MagicMenuSpellLevel56:
-.byte $D3,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$85,$C2,$86,$FF,$EE,$00
+.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$85,$C2,$86,$FF,$C7,$00
 
 M_MagicMenuSpellLevel78:
-.byte $D3,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$87,$C2,$88,$00
+.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$87,$C2,$88,$00
 
 M_MagicMenuOrbs:
-.byte $F0,$01,$F0,$01,$F0,$01,$F0,$01,$F1,$01,$F1,$01,$F1,$01,$F1,$00
+.byte $E5,$01,$E5,$01,$E5,$01,$E5,$01,$E6,$01,$E6,$01,$E6,$01,$E6,$00
 
 M_MagicNameLearned:
 .byte $FF,$10,$00,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell!
@@ -2549,7 +2549,7 @@ lut_NameInput:
   ;; JIGS - I think this looks nicer:
   
   .BYTE $05
-  .BYTE $97,$8A,$96,$8E,$C1,$A2,$98,$9E,$9B,$C1,$8C,$91,$8A,$9B,$8A,$8C,$9D,$8E,$9B,$00 
+  .BYTE $97,$8A,$96,$8E,$FF,$A2,$98,$9E,$9B,$FF,$8C,$91,$8A,$9B,$8A,$8C,$9D,$8E,$9B,$00 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4599,10 +4599,10 @@ ShopSelectBuyItem:
     ;; By setting cursor to $3E and $3F, depending on weapon or armor shops, the routine that makes them pose to show they can equip weapons
     ;; Will try to make them equip a 41st item, which in the permissions LUT, is filled with "cannot equip" bits...
         
-    LDA #$C7
+    LDA #$7F
     STA str_buf+$93         ; ! icon on black background
     
-    LDA #$F2
+    LDA #$77
     STA str_buf+$95         ; just an empty, black background 
     
     
@@ -9879,6 +9879,7 @@ DrawMainMenuCharBoxBody:
     
     ;; why stupid? Because the ailment icon won't display after a line break
     ;; unless another tile is drawn first... I don't know why.
+    ;; Update: Actually, fixed that problem, but I am not going to fiddle with this unless I have to.
     
     LDA #$95       ; L 
     STA str_buf+5

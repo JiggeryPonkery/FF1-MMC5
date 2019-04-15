@@ -6834,7 +6834,7 @@ DrawCharacterStatus:
     STA CharacterIndexBackup   ; temp var for character index/loop counter
     
 @CharacterLoop:
-    LDA #$F2                        ; start of first string, invisible tile
+    LDA #$00                        ; start of first string, invisible tile
     STA btl_unfmtcbtbox_buffer, X
     STA btl_unfmtcbtbox_buffer+3, X ; start of second string, invisible tile now, but could change
     LDA CharacterIndexBackup
@@ -6854,11 +6854,11 @@ DrawCharacterStatus:
     ;; later, will need to flesh this out!
 
    @Guarding:
-    LDA #$DB
+    LDA #$EF
     JMP :+
     
    @Hidden: 
-    LDA #$E5
+    LDA #$7E
   : STA btl_unfmtcbtbox_buffer+3, X ; start of second string; hidden or guarding
     
    @NoState: 
@@ -6866,7 +6866,7 @@ DrawCharacterStatus:
     AND #$78                        ; remove dead, stone, poison, and $80 from ailment
     JSR @FindAilment
     STA btl_unfmtcbtbox_buffer+4, X ; light ailment (blind, sleep, stun, mute)
-    LDA #0
+    LDA #$FF
     STA btl_unfmtcbtbox_buffer+2, X
     STA btl_unfmtcbtbox_buffer+5, X ; null terminate each bit
     STA btl_unfmtcbtbox_buffer+6, X ; and create a blank third line
@@ -6904,6 +6904,7 @@ DrawCharacterStatus:
     
   @DrawLoop:  
     LDA btl_unfmtcbtbox_buffer, Y ; (using Y to index)
+    CMP #$FF                      ; use $FF as null terminator for this routine 
     BEQ @NextRow
     STA $2007
     INY
@@ -6927,37 +6928,36 @@ DrawCharacterStatus:
     
     RTS    
 
-    
    @FindAilment:
     ROR A
     BCC :+
-      LDA #$E3  ; dead
+      LDA #$7B  ; dead
       RTS      
   : ROR A
     BCC :+    
-      LDA #$E6  ; stone
+      LDA #$7C  ; stone
       RTS
   : ROR A
     BCC :+    
-      LDA #$E4  ; poison
+      LDA #$7D  ; poison
       RTS
   : ROR A
     BCC :+    
-      LDA #$E8  ; blind
+      LDA #$EC  ; blind
       RTS
   : ROR A
     BCC :+    
-      LDA #$E9  ; stun
+      LDA #$ED  ; stun
       RTS
   : ROR A
     BCC :+    
-      LDA #$E7  ; sleep
+      LDA #$7F  ; sleep
       RTS
   : ROR A
     BCC :+    
-      LDA #$EA  ; mute
+      LDA #$EE  ; mute
       RTS
-  : LDA #$F2    ; no ailment found, use invisible character
+  : LDA #$00    ; no ailment found, use invisible character
     RTS
 
     

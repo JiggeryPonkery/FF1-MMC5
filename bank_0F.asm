@@ -7677,7 +7677,7 @@ AddGPToParty:
 ;;
 ;;  00    = name
 ;;  01    = class
-;;  02    = out of battle ailment blurb
+;;  02    = out of battle stat icon
 ;;  03    = Level
 ;;  04    = Exp
 ;;  05    = Cur HP
@@ -7700,7 +7700,7 @@ AddGPToParty:
 ;;  41    = Mag Def
 ;;  42    = Exp to Next Level
 ;;  43-FF = unused (default to same as $42)
-;;  ;; JIGS - ADDING - $0D = hidden icon
+;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; JIGS - there are a fair few changes in here.
@@ -7810,7 +7810,7 @@ DrawComplexString:
 
 @Code05to19:
     CMP #$14         ; is control code < $14?
-    BCC @Code05to13
+    BCC @Code07to13
 
                      ; codes $14 and up default to single line break
 @SingleLineBreak:    ; reached by control codes $05-0F and $14-19
@@ -7818,18 +7818,8 @@ DrawComplexString:
     JMP @LineBreak   ;  afaik, $05 is the only single line break used by the game.. the other
                      ;  control codes are probably invalid and just line break by default
 
-@Code05to13:
-    ;; JIGS - battle turn code:
-    CMP #$06
-    BNE :+
-        JSR @Save
-        LDA #BANK_MENUS
-        JSR SwapPRG_L
-        JSR PrintBattleTurn
-        JSR @StallAndDraw
-        JMP @Restore
-
-:   CMP #$07   ;; JIGS - weapon/armor name
+@Code07to13:
+    CMP #$07   ;; JIGS - weapon/armor name
     BNE :+  
       JMP @Code_07
 
@@ -7922,26 +7912,7 @@ DrawComplexString:
 
 
 @StatCode_0Cto2B:
-   ;; JIGS - gonna use $0D to print the hidden bush in battle
-   CMP #$0D
-   BNE @StatCode_14to2B  
-   
-   LDX char_index
-   LDA ch_battlestate, X
-   AND #$10 ; clear everything but the hidden state bit
-   BEQ :+
-   LDA #$E5
-   JMP @DrawIcon_SetPPUAddress
- 
- : LDA ch_battlestate, X
-   AND #$80 ; clear everything but the guard state bit
-   BEQ :+
-   LDA #$DB
-   JMP @DrawIcon_SetPPUAddress
- 
- : LDA #$FF
-   JMP @DrawIcon_SetPPUAddress
-
+  
 ;; JIGS - and this v is heavily edited... Original below
 
 @StatCode_14to2B:     ;; Stat Codes $14-2B -- magic
@@ -8026,45 +7997,66 @@ DrawComplexString:
  ; 40 - mute
  ; 80 - confused
  
+ ;; there's really no reason to print them out of battle though, since only 3 can persist
+ 
  @DrawStatIcon:
-   ASL A
+    BEQ @Healthy
+    ROR A
+    BCC :+
+      LDA #$E9  ; dead -- note, different tile than the battle version of this code uses
+      RTS       ; since battles use a black backdrop and menus use a coloured one
+  : ROR A
+    BCC :+    
+      LDA #$EA  ; stone
+      RTS
+  : ROR A
+    BCC @Healthy
+      LDA #$EB  ; poison
+      RTS
+ 
+ @Healthy:
+   LDA #$E8
+   RTS
+ 
+ ;; old version:
+;   ASL A
     ;BCC :+                    ; bit 7 set = confused (players are never confused)
     ; LDA #$E5
     ; RTS
- : ASL A                       ; bit 6 set = mute
-    BCC :+                      
-     LDA #$EA
-     RTS
- : ASL A                       ; bit 5 set = sleep 
-    BCC :+                      
-     LDA #$E7
-     RTS
- : ASL A                       ; bit 4 set = stun 
-    BCC :+                      
-     LDA #$E9
-     RTS
- : ASL A                       ; bit 3 set = dark
-    BCC :+                     
-     LDA #$E8
-     RTS
- : ASL A                       ; bit 2 set = poison
-    BCC :++
-   : LDA #$E4
-     RTS
- : ASL A                       ; bit 1 set = stone
-    BCC :+
-     LDA #$E6       
-     RTS                       
- : ASL A                       ; bit 0 set = dead 
-    BCC :+
-     LDA #$E3
-     RTS
- : LDA MenuHush                ; if in battle, print blank space instead
-   BEQ :+
-   LDA #$E2                    ; no bits set = healthy li'l heart
-   RTS    
- : LDA #$FF                    
-   RTS 
+; : ASL A                       ; bit 6 set = mute
+;    BCC :+                      
+;     LDA #$EA
+;     RTS
+; : ASL A                       ; bit 5 set = sleep 
+;    BCC :+                      
+;     LDA #$E7
+;     RTS
+; : ASL A                       ; bit 4 set = stun 
+;    BCC :+                      
+;     LDA #$E9
+;     RTS
+; : ASL A                       ; bit 3 set = dark
+;    BCC :+                     
+;     LDA #$E8
+;     RTS
+; : ASL A                       ; bit 2 set = poison
+;    BCC :++
+;   : LDA #$E4
+;     RTS
+; : ASL A                       ; bit 1 set = stone
+;    BCC :+
+;     LDA #$E6       
+;     RTS                       
+; : ASL A                       ; bit 0 set = dead 
+;    BCC :+
+;     LDA #$E3
+;     RTS
+; : LDA MenuHush                ; if in battle, print blank space instead
+;   BEQ :+
+;   LDA #$E2                    ; no bits set = healthy li'l heart
+;   RTS    
+; : LDA #$FF                    
+;   RTS 
    
    
   ;; JIGS - used by both normal items/spells and weapon/armours 

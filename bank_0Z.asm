@@ -372,22 +372,22 @@ data_EnemyStats:
   lut_IntroStoryText:
 ;  .INCBIN "bin/0D_BF20_introtext.bin"
 ;; JIGS ^ this uses DTE, which my routine can not... so I did my best to re-make it with some fancy tweaks.
-;; Since every letter is a sprite as well, we can't use control codes. So the routine uses $FF (sprite the same colour as the background)
-;; and reads them as double line breaks. So we have to use $C1 as spaces.
+;; Since every letter is a sprite as well, we can't use control codes. So the routine uses $78 (sprite the same colour as the background)
+;; and reads them as double line breaks. 
 ;; The screen is 32 tiles wide, so...
      ; 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32  
      
-.byte $C1,$C1,$C1,$C1,$9D,$AB,$A8,$C1,$BA,$B2,$B5,$AF,$A7,$C1,$AC,$B6,$C1,$B9,$A8,$AC,$AF,$A8,$A7,$C1,$AC,$B1,$FF
-.byte $C1,$C1,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$C0,$C1,$C1,$9D,$AB,$A8,$C1,$BA,$AC,$B1,$A7,$C1,$B6,$B7,$B2,$B3,$B6,$BF,$FF
-.byte $C1,$C1,$C1,$C1,$C1,$C1,$C1,$B7,$AB,$A8,$C1,$B6,$A8,$A4,$C1,$AC,$B6,$C1,$BA,$AC,$AF,$A7,$BF,$FF
-.byte $C1,$A4,$B1,$A7,$C1,$B7,$AB,$A8,$C1,$A8,$A4,$B5,$B7,$AB,$C1,$A5,$A8,$AA,$AC,$B1,$B6,$C1,$B7,$B2,$C1,$B5,$B2,$B7,$C0,$FF
-.byte $C1,$C1,$C1,$C1,$C1,$C1,$C1,$9D,$AB,$A8,$C1,$B3,$A8,$B2,$B3,$AF,$A8,$C1,$BA,$A4,$AC,$B7,$BF,$C1,$FF
-.byte $B7,$AB,$A8,$AC,$B5,$C1,$B2,$B1,$AF,$BC,$C1,$AB,$B2,$B3,$A8,$BF,$C1,$A4,$C1,$B3,$B5,$B2,$B3,$AB,$A8,$A6,$BC,$C3,$C0,$FF,$FF
-.byte $C6,$A0,$AB,$A8,$B1,$C1,$B7,$AB,$A8,$C1,$BA,$B2,$B5,$AF,$A7,$C1,$AC,$B6,$C1,$AC,$B1,$C1,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$FF
-.byte $C1,$C1,$C1,$8F,$B2,$B8,$B5,$C1,$A0,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$C1,$BA,$AC,$AF,$AF,$C1,$A6,$B2,$B0,$A8,$C3,$79,$FF,$FF
-.byte $C1,$C1,$C1,$C1,$C1,$8A,$A9,$B7,$A8,$B5,$C1,$A4,$C1,$AF,$B2,$B1,$AA,$C1,$AD,$B2,$B8,$B5,$B1,$A8,$BC,$BF,$FF
-.byte $C1,$C1,$A9,$B2,$B8,$B5,$C1,$BC,$B2,$B8,$B1,$AA,$C1,$BA,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$C1,$A4,$B5,$B5,$AC,$B9,$A8,$BF,$FF
-.byte $C1,$C1,$C1,$C1,$C1,$A8,$A4,$A6,$AB,$C1,$AB,$B2,$AF,$A7,$AC,$B1,$AA,$C1,$A4,$B1,$C1,$98,$9B,$8B,$C0,$00 
+.byte $FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$B9,$A8,$AC,$AF,$A8,$A7,$FF,$AC,$B1,$78
+.byte $FF,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$C0,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$AC,$B1,$A7,$FF,$B6,$B7,$B2,$B3,$B6,$BF,$78
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$B7,$AB,$A8,$FF,$B6,$A8,$A4,$FF,$AC,$B6,$FF,$BA,$AC,$AF,$A7,$BF,$78
+.byte $FF,$A4,$B1,$A7,$FF,$B7,$AB,$A8,$FF,$A8,$A4,$B5,$B7,$AB,$FF,$A5,$A8,$AA,$AC,$B1,$B6,$FF,$B7,$B2,$FF,$B5,$B2,$B7,$C0,$78
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$B3,$A8,$B2,$B3,$AF,$A8,$FF,$BA,$A4,$AC,$B7,$BF,$FF,$78
+.byte $B7,$AB,$A8,$AC,$B5,$FF,$B2,$B1,$AF,$BC,$FF,$AB,$B2,$B3,$A8,$BF,$FF,$A4,$FF,$B3,$B5,$B2,$B3,$AB,$A8,$A6,$BC,$C3,$C0,$78,$78
+.byte $C6,$A0,$AB,$A8,$B1,$FF,$B7,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$AC,$B1,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$78
+.byte $FF,$FF,$FF,$8F,$B2,$B8,$B5,$FF,$A0,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B0,$A8,$C3,$79,$78,$78
+.byte $FF,$FF,$FF,$FF,$FF,$8A,$A9,$B7,$A8,$B5,$FF,$A4,$FF,$AF,$B2,$B1,$AA,$FF,$AD,$B2,$B8,$B5,$B1,$A8,$BC,$BF,$78
+.byte $FF,$FF,$A9,$B2,$B8,$B5,$FF,$BC,$B2,$B8,$B1,$AA,$FF,$BA,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$A4,$B5,$B5,$AC,$B9,$A8,$BF,$78
+.byte $FF,$FF,$FF,$FF,$FF,$A8,$A4,$A6,$AB,$FF,$AB,$B2,$AF,$A7,$AC,$B1,$AA,$FF,$A4,$B1,$FF,$98,$9B,$8B,$C0,$00 
 ;; It's the intro text... I'm not gonna spell it out here. :I I just made some edits to spiff it up a bit. Some spaces here, a better ... there, added in a proper ` for the quotation part... 
  
  
@@ -490,11 +490,11 @@ ClearOldLetters:
 NextLetter:
     LDY #0         
     LDA (text_ptr), Y 
-    CMP #$01
-    BNE @DoIt
-      LDA #$FF      ; if control code double line break, print empty sprite
+;    CMP #$01
+;    BNE @DoIt
+;      LDA #$FF      ; if control code double line break, print empty sprite
        
-    @DoIt:    
+;    @DoIt:    
    ; SEC
    ; SBC #4         ;; JIGS - why did I have to add this after it was working forever???
    ;; then it started working again and this was breaking it?!?!
@@ -548,7 +548,7 @@ DrawText:
     BNE :+
       INC text_ptr+1  ;   inc high byte if low byte wrapped
 
-:   CMP #$FF
+:   CMP #$78
     BEQ @ControlCode  ;   if it is, jump ahead
     
     LDX $2002         ; reset PPU toggle
@@ -912,7 +912,7 @@ DrawTitleWords:
    .WORD $20E9
    .BYTE $8C,$98,$97,$9D,$92,$97,$9E,$8E,$00 ; CONTINUE
    .WORD $2129
-   .BYTE $97,$8E,$A0,$C1,$90,$8A,$96,$8E,$00 ; NEW GAME
+   .BYTE $97,$8E,$A0,$FF,$90,$8A,$96,$8E,$00 ; NEW GAME
    .WORD $2169
    .BYTE $98,$99,$9D,$92,$98,$97,$9C,$00     ; OPTIONS
    ;.WORD $2328
@@ -2961,7 +2961,7 @@ LDY #2 ; 0 is class, 1 is ailments, 2 is start of name
 LDA (CharacterStatPointer), Y  ; get name byte
 CMP #0
 BNE :+
-LDA #$C1
+LDA #$FF
 :  
 STA SaveScreenCharBuf, X  ; put in string buffer
 INY
@@ -2979,7 +2979,7 @@ BNE @LoopStart
 
 ;; JIGS - I DON'T CARE, IT WORKS. >:(
 
-LDA #$C1 ; spaces to put between names on the same line, or just to fill blank space
+LDA #$FF ; spaces to put between names on the same line, or just to fill blank space
          ; because every character has 10 letters in this
 STA SaveScreenCharBuf+7   ; character 1 
 STA SaveScreenCharBuf+8
@@ -3769,52 +3769,52 @@ lut_ZMenuText:
 .word OptionsArrows_Right    ; E ; 14
 
 OptionOn:
-.byte $98,$97,$C1,$00
+.byte $98,$97,$FF,$00
 
 OptionOff:
 .byte $98,$8F,$8F,$00
 
 OptLow:
-.byte $95,$98,$A0,$C1,$C1,$C1,$00
+.byte $95,$98,$A0,$FF,$FF,$FF,$00
 
 OptNormal:
 .byte $97,$98,$9B,$52,$95,$00
 
 OptHigh:
-.byte $91,$92,$90,$91,$C1,$C1,$00
+.byte $91,$92,$90,$91,$FF,$FF,$00
 
 M_OptionsMenu:   ;3A
-.byte $8E,$A1,$99,$8E,$9B,$92,$8E,$97,$8C,$8E,$C1,$90,$8A,$92,$97,$01
-.byte $96,$98,$97,$8E,$A2,$C1,$90,$8A,$92,$97,$01
-.byte $8E,$97,$8C,$98,$9E,$97,$9D,$8E,$9B,$C1,$9B,$8A,$9D,$8E,$01
-.byte $8B,$8A,$9D,$9D,$95,$8E,$C1,$96,$8E,$9C,$9C,$8A,$90,$8E,$C1,$9C,$99,$8E,$8E,$8D,$01
-.byte $8B,$8A,$9D,$9D,$95,$8E,$C1,$96,$8E,$9C,$9C,$8A,$90,$8E,$C1,$8C,$98,$95,$98,$9B,$01
+.byte $8E,$A1,$99,$8E,$9B,$92,$8E,$97,$8C,$8E,$FF,$90,$8A,$92,$97,$01
+.byte $96,$98,$97,$8E,$A2,$FF,$90,$8A,$92,$97,$01
+.byte $8E,$97,$8C,$98,$9E,$97,$9D,$8E,$9B,$FF,$9B,$8A,$9D,$8E,$01
+.byte $8B,$8A,$9D,$9D,$95,$8E,$FF,$96,$8E,$9C,$9C,$8A,$90,$8E,$FF,$9C,$99,$8E,$8E,$8D,$01
+.byte $8B,$8A,$9D,$9D,$95,$8E,$FF,$96,$8E,$9C,$9C,$8A,$90,$8E,$FF,$8C,$98,$95,$98,$9B,$01
 .byte $8A,$9E,$9D,$98,$C2,$9D,$8A,$9B,$90,$8E,$9D,$01
-.byte $96,$8E,$97,$9E,$C1,$9C,$8F,$A1,$00
+.byte $96,$8E,$97,$9E,$FF,$9C,$8F,$A1,$00
     
 SoundTestInstructions:
-.byte $8B,$C1,$C2,$C1,$8E,$BB,$AC,$B7,$05,$8A,$C1,$C2,$C1,$9C,$B7,$A4,$B5,$B7,$7A,$9C,$B7,$B2,$B3,$C1,$96,$B8
-.byte $B6,$AC,$A6,$05,$9E,$B3,$7A,$8D,$B2,$BA,$B1,$C1,$C2,$C1,$9C,$A8,$AF,$A8,$A6,$B7,$C1,$9C,$B2
-.byte $B1,$AA,$05,$9C,$B7,$A4,$B5,$B7,$C1,$C2,$C1,$91,$B8,$AA,$C1,$A4,$C1,$BA,$A8,$A4,$B6,$A8,$AF,$C1,$E2,$00
+.byte $8B,$FF,$C2,$FF,$8E,$BB,$AC,$B7,$05,$8A,$FF,$C2,$FF,$9C,$B7,$A4,$B5,$B7,$7A,$9C,$B7,$B2,$B3,$FF,$96,$B8
+.byte $B6,$AC,$A6,$05,$9E,$B3,$7A,$8D,$B2,$BA,$B1,$FF,$C2,$FF,$9C,$A8,$AF,$A8,$A6,$B7,$FF,$9C,$B2
+.byte $B1,$AA,$05,$9C,$B7,$A4,$B5,$B7,$FF,$C2,$FF,$91,$B8,$AA,$FF,$A4,$FF,$BA,$A8,$A4,$B6,$A8,$AF,$FF,$E2,$00
 
 
 M_SaveSlots:
-.byte $8F,$92,$95,$8E,$C1,$81,$01,$01,$01,$01,$8F,$92,$95,$8E,$C1,$82,$01,$01,$01,$01,$8F,$92,$95,$8E,$C1,$83,$00 
+.byte $8F,$92,$95,$8E,$FF,$81,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$82,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$83,$00 
 
 M_SaveTitle:
-.byte $95,$98,$8A,$8D,$C1,$C1,$90,$8A,$96,$8E,$00
+.byte $95,$98,$8A,$8D,$FF,$FF,$90,$8A,$96,$8E,$00
 
 M_LoadTitle:
-.byte $9C,$8A,$9F,$8E,$C1,$C1,$90,$8A,$96,$8E,$00
+.byte $9C,$8A,$9F,$8E,$FF,$FF,$90,$8A,$96,$8E,$00
 
 Saved:
 .byte $9C,$8A,$9F,$8E,$8D,$C4,$00
 
 AreYouSure:
-.byte $7F,$F2,$7F,$F2,$FA,$C1,$8A,$9B,$8E,$C1,$A2,$98,$9E,$C1,$9C,$9E,$9B,$8E,$C5,$FB,$F2,$7F,$F2,$7F,$00
+.byte $7F,$F2,$7F,$F2,$FA,$FF,$8A,$9B,$8E,$FF,$A2,$98,$9E,$FF,$9C,$9E,$9B,$8E,$C5,$FB,$F2,$7F,$F2,$7F,$00
 
 Deleted:
-.byte $C1,$C1,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$C1,$C1,$C1,$00
+.byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00
 
 BattleYesNo:
 .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05
@@ -3824,40 +3824,40 @@ BattleYesNo:
 .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
 
 OptionsArrows_Left:
-.byte $D3,$01,$D3,$00
+.byte $C1,$01,$C1,$00
 
 OptionsArrows_Right:
-.byte $EE,$01,$EE,$00
+.byte $C7,$01,$C7,$00
 
 
 
 lut_SongNamesLong:
 ;.INCBIN "bin/SongNamesLong.bin"
 
-.byte $99,$B5,$A8,$AF,$B8,$A7,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Prelude
-.byte $99,$B5,$B2,$AF,$B2,$AA,$B8,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Prologue
-.byte $8E,$B3,$AC,$AF,$B2,$AA,$B8,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Epilogue
-.byte $98,$B9,$A8,$B5,$BA,$B2,$B5,$AF,$A7,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Overworld
-.byte $9C,$A4,$AC,$AF,$AC,$B1,$AA,$C1,$9C,$AB,$AC,$B3,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Sailing Ship
-.byte $8A,$AC,$B5,$B6,$AB,$AC,$B3,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Airship
-.byte $9D,$B2,$BA,$B1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Town
-.byte $8C,$A4,$B6,$B7,$AF,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Castle
-.byte $8E,$A4,$B5,$B7,$AB,$C1,$8C,$A4,$B9,$A8,$C1,$7A,$C1,$90,$B8,$B5,$AA,$B8,$C1,$C1,$C1,$C1,$C1,$00 ; Earth Cave / Gurgu 
-.byte $96,$A4,$B7,$B2,$BC,$A4,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Matoya
-.byte $96,$A4,$B5,$B6,$AB,$C1,$8C,$A4,$B9,$A8,$C1,$F5,$97,$A8,$BA,$F6,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Marsh Cave (New)
-.byte $9D,$A8,$B0,$B3,$AF,$A8,$C1,$B2,$A9,$C1,$8F,$AC,$A8,$B1,$A7,$B6,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Temple of Fiends
-.byte $9C,$AE,$BC,$C1,$8C,$A4,$B6,$B7,$AF,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Sky Castle
-.byte $9C,$A8,$A4,$C1,$9C,$AB,$B5,$AC,$B1,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Sea Shrine
-.byte $9C,$AB,$B2,$B3,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Shop
-.byte $8B,$A4,$B7,$B7,$AF,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Battle
-.byte $96,$A8,$B1,$B8,$C1,$7A,$C1,$92,$B1,$B1,$C1,$7A,$C1,$96,$A4,$B3,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Menu / Inn / Map
-.byte $9C,$AF,$A4,$AC,$B1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Slain
-.byte $8F,$A4,$B1,$A9,$A4,$B5,$A8,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Fanfare
-.byte $94,$A8,$BC,$C1,$92,$B7,$A8,$B0,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Key Item
-.byte $96,$A4,$B5,$B6,$AB,$C1,$8C,$A4,$B9,$A8,$C1,$F5,$98,$AF,$A7,$F6,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Marsh Cave (Old)
-.byte $9C,$A4,$B9,$AC,$B1,$AA,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Saving
-.byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$C1,$F5,$9E,$B1,$B8,$B6,$A8,$A7,$F6,$C1,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Healing (Unused)
-.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$C1,$F5,$9E,$B1,$B8,$B6,$A8,$A7,$F6,$C1,$C1,$C1,$C1,$C1,$C1,$00 ; Treasure (Unused)
+.byte $99,$B5,$A8,$AF,$B8,$A7,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Prelude
+.byte $99,$B5,$B2,$AF,$B2,$AA,$B8,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Prologue
+.byte $8E,$B3,$AC,$AF,$B2,$AA,$B8,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Epilogue
+.byte $98,$B9,$A8,$B5,$BA,$B2,$B5,$AF,$A7,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Overworld
+.byte $9C,$A4,$AC,$AF,$AC,$B1,$AA,$FF,$9C,$AB,$AC,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sailing Ship
+.byte $8A,$AC,$B5,$B6,$AB,$AC,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Airship
+.byte $9D,$B2,$BA,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Town
+.byte $8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Castle
+.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$FF,$FF,$FF,$FF,$FF,$00 ; Earth Cave / Gurgu 
+.byte $96,$A4,$B7,$B2,$BC,$A4,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Matoya
+.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$F5,$97,$A8,$BA,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (New)
+.byte $9D,$A8,$B0,$B3,$AF,$A8,$FF,$B2,$A9,$FF,$8F,$AC,$A8,$B1,$A7,$B6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Temple of Fiends
+.byte $9C,$AE,$BC,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sky Castle
+.byte $9C,$A8,$A4,$FF,$9C,$AB,$B5,$AC,$B1,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sea Shrine
+.byte $9C,$AB,$B2,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Shop
+.byte $8B,$A4,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Battle
+.byte $96,$A8,$B1,$B8,$FF,$7A,$FF,$92,$B1,$B1,$FF,$7A,$FF,$96,$A4,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Menu / Inn / Map
+.byte $9C,$AF,$A4,$AC,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Slain
+.byte $8F,$A4,$B1,$A9,$A4,$B5,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fanfare
+.byte $94,$A8,$BC,$FF,$92,$B7,$A8,$B0,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Key Item
+.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$F5,$98,$AF,$A7,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (Old)
+.byte $9C,$A4,$B9,$AC,$B1,$AA,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Saving
+.byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$F5,$9E,$B1,$B8,$B6,$A8,$A7,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Healing (Unused)
+.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$F5,$9E,$B1,$B8,$B6,$A8,$A7,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Unused)
 
 
 

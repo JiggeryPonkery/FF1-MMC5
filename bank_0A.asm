@@ -472,7 +472,7 @@ NAME_PURE:
 NAME_SOFT:
 .byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
 NAME_P_DOWN:
-.byte $99,$AB,$B2,$A8,$B1,$AC,$BB,$EC,$00 ; PhoenixF
+.byte $99,$AB,$B2,$A8,$B1,$AC,$BB,$E2,$00 ; PhoenixF
 NAME_TENT:
 .byte $9D,$A8,$B1,$B7,$FF,$FF,$FF,$FF,$00 ; Tent____
 NAME_CABIN: 
@@ -482,9 +482,9 @@ NAME_HOUSE:
 NAME_EYEDROPS:
 .byte $8E,$BC,$A8,$A7,$B5,$B2,$B3,$B6,$00 ; Eyedrops
 NAME_SMOKEBOMB:
-.byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$EB,$00 ; Smoke_Q_
+.byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$E3,$00 ; Smoke_Q_
 NAME_HORN:
-.byte $A0,$A4,$AE,$A8,$B8,$B3,$FF,$ED,$00 ; Wakeup_^
+.byte $A0,$A4,$AE,$A8,$B8,$B3,$FF,$E4,$00 ; Wakeup_^
 
 
 ORB1: ; orbs
@@ -1410,13 +1410,13 @@ BTL_MESSAGE79:
 BTL_MESSAGE80:
 .byte $9B,$A8,$AA,$A8,$B1,$A8,$B5,$A4,$B7,$A8,$A7,$FF,$91,$99,$00 ; Regenerated HP ; JIGS - added this
 BTL_MESSAGE81:
-.byte $9C,$B7,$B2,$AF,$A8,$C1,$AA,$B2,$AF,$A7,$C4,$00  ; Stole gold! ; JIGS - added this
+.byte $9C,$B7,$B2,$AF,$A8,$FF,$AA,$B2,$AF,$A7,$C4,$00  ; Stole gold! ; JIGS - added this
 BTL_MESSAGE82:
-.BYTE $9C,$AF,$AC,$B3,$B3,$A8,$A7,$C1,$AC,$B1,$B7,$B2,$C1,$AB,$AC,$A7,$AC,$B1,$AA,$C3,$C0,$00 ; Slipped into hiding...
+.BYTE $9C,$AF,$AC,$B3,$B3,$A8,$A7,$FF,$AC,$B1,$B7,$B2,$FF,$AB,$AC,$A7,$AC,$B1,$AA,$C3,$C0,$00 ; Slipped into hiding...
 BTL_MESSAGE83:
-.byte $8C,$A4,$B1,$BE,$B7,$C1,$B6,$A8,$A8,$C1,$B7,$B2,$C1,$B6,$A8,$A8,$C4,$00 ; Can't see to hide!
+.byte $8C,$A4,$B1,$BE,$B7,$FF,$B6,$A8,$A8,$FF,$B7,$B2,$FF,$B6,$A8,$A8,$C4,$00 ; Can't see to hide!
 BTL_MESSAGE84:
-.byte $8A,$AF,$B5,$A8,$A4,$A7,$BC,$C1,$AB,$AC,$A7,$A7,$A8,$B1,$C4,$00 ; Already hidden!
+.byte $8A,$AF,$B5,$A8,$A4,$A7,$BC,$FF,$AB,$AC,$A7,$A7,$A8,$B1,$C4,$00 ; Already hidden!
 BTL_MESSAGE85:
 .byte $9C,$AC,$AA,$AB,$21,$23,$37,$35,$40,$C4,$00 ; Sight restored!
 BTL_MESSAGE86:
