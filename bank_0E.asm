@@ -4602,7 +4602,7 @@ ShopSelectBuyItem:
     LDA #$7F
     STA str_buf+$93         ; ! icon on black background
     
-    LDA #$77
+    LDA #$7E
     STA str_buf+$95         ; just an empty, black background 
     
     
