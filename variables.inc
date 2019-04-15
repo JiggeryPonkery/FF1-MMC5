@@ -22,6 +22,7 @@ ch_return        = $5BF1 ; +1
 ch_duty          = $5BF3 
 ch_octave        = $5BF4 
 ch_quiet         = $5BF5
+ch_extraquiet    = $5BF6
 ;; The reason these are in with other important save data is that using the save screen will swap out the rest of RAM 
 ;; At the very least this could mess up the Prelude's melody's loop counter.
 

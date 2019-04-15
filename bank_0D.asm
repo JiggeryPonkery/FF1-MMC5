@@ -53,7 +53,7 @@ BANK_THIS = $0D
 ;;  F3    = Octave Switch - F3 01 to lower, F3 02 to raise.
 ;;  F4    = Silencer. F4 will turn it off and on for the channel. Halves volume byte.
 ;;  F5    = Duty Select - F5 01, 02, 03 - 12.5%, 25%, 50% duty.
-;;  F6    = unused!
+;;  F6    = Silencer. Same as F4, but quarter of the volume.
 ;;  F7    = unused!
 
 ;;  F8    = One byte follows this -- the low 4 bits of which select the envelope speed
@@ -71,115 +71,115 @@ lut_ScoreData:
 .WORD PRELUDE_SQ4
 
 .WORD PROLOGUE_SQ1
-.WORD BLANK        ;; JIGS - swapped Square 2 with MMC5 Square 2 so SFX won't interfere
+.WORD PROLOGUE_SQ4
 .WORD PROLOGUE_TRI
-.WORD BLANK
 .WORD PROLOGUE_SQ2
+.WORD PROLOGUE_SQ3
 
 .WORD EPILOGUE_SQ1
-.WORD BLANK
+.WORD EPILOGUE_SQ4
 .WORD EPILOGUE_TRI
-.WORD BLANK
 .WORD EPILOGUE_SQ2
+.WORD EPILOGUE_SQ3
 
 .WORD OVERWORLD_SQ1
-.WORD BLANK
+.WORD OVERWORLD_SQ4
 .WORD OVERWORLD_TRI
-.WORD BLANK
 .WORD OVERWORLD_SQ2
+.WORD OVERWORLD_SQ3
 
 .WORD SHIP_SQ1
-.WORD BLANK
+.WORD SHIP_SQ4
 .WORD SHIP_TRI
-.WORD BLANK
 .WORD SHIP_SQ2
+.WORD SHIP_SQ3
 
 .WORD AIRSHIP_SQ1
-.WORD BLANK
+.WORD AIRSHIP_SQ4
 .WORD AIRSHIP_TRI
-.WORD BLANK
+.WORD AIRSHIP_SQ3
 .WORD AIRSHIP_SQ2
 
 .WORD TOWN_SQ1
-.WORD BLANK
+.WORD TOWN_SQ4
 .WORD TOWN_TRI
-.WORD BLANK
 .WORD TOWN_SQ2
+.WORD TOWN_SQ3
 
 .WORD CASTLE_SQ1
-.WORD BLANK
+.WORD CASTLE_SQ4
 .WORD CASTLE_TRI
-.WORD BLANK
 .WORD CASTLE_SQ2
+.WORD CASTLE_SQ3
 
 .WORD EARTHCAVE_SQ1
-.WORD BLANK
+.WORD EARTHCAVE_SQ4
 .WORD EARTHCAVE_TRI
-.WORD BLANK
 .WORD EARTHCAVE_SQ2
+.WORD EARTHCAVE_SQ3
 
 .WORD MATOYA_SQ1
-.WORD BLANK
+.WORD MATOYA_SQ4
 .WORD MATOYA_TRI
-.WORD BLANK
 .WORD MATOYA_SQ2
+.WORD MATOYA_SQ3
 
 .WORD MARSHCAVE_SQ1
-.WORD BLANK
+.WORD MARSHCAVE_SQ4
 .WORD MARSHCAVE_TRI
 .WORD MARSHCAVE_SQ3
 .WORD MARSHCAVE_SQ2
 
 .WORD SEASHRINE_SQ1
-.WORD BLANK
+.WORD SEASHRINE_SQ4
 .WORD SEASHRINE_TRI
-.WORD BLANK
 .WORD SEASHRINE_SQ2
+.WORD SEASHRINE_SQ3
 
 .WORD SKYCASTLE_SQ1
-.WORD SKYCASTLE_SQ2
-.WORD SKYCASTLE_TRI
-.WORD SKYCASTLE_SQ3
 .WORD SKYCASTLE_SQ4
+.WORD SKYCASTLE_TRI
+.WORD SKYCASTLE_SQ2
+.WORD SKYCASTLE_SQ3
 
 .WORD FIENDTEMPLE_SQ1
-.WORD BLANK
+.WORD FIENDTEMPLE_SQ4
 .WORD FIENDTEMPLE_TRI
-.WORD BLANK
 .WORD FIENDTEMPLE_SQ2
+.WORD FIENDTEMPLE_SQ3
 
 .WORD SHOP_SQ1
-.WORD BLANK
+.WORD SHOP_SQ4
 .WORD SHOP_TRI
-.WORD BLANK
 .WORD SHOP_SQ2
+.WORD SHOP_SQ3
 
 .WORD BATTLE_SQ1
-.WORD BLANK
+.WORD BATTLE_SQ4
 ;.WORD BATTLE_SQ2 ;; JIGS - Now played by the MMC5 audio so that SFX don't interrupt it.
 .WORD BATTLE_TRI
-.WORD BLANK
 .WORD BATTLE_SQ2
+.WORD BATTLE_SQ3
 
 .WORD MENU_SQ1
-.WORD BLANK
+.WORD MENU_SQ4
 .WORD MENU_TRI
-.WORD BLANK
 .WORD MENU_SQ2
+.WORD MENU_SQ3
 ;; JIGS - the code that plays this has been disabled in menus
 ;; JIGS - BUT it has been moved to the map screen! And is used in inns!
 
 .WORD SLAIN_SQ1
-.WORD BLANK
+.WORD SLAIN_SQ4
 .WORD SLAIN_TRI
-.WORD BLANK
 .WORD SLAIN_SQ2
+.WORD SLAIN_SQ3
 
 .WORD BATTLEWIN_SQ1
-.WORD BLANK
+.WORD BATTLEWIN_SQ4
 .WORD BATTLEWIN_TRI
-.WORD BLANK
 .WORD BATTLEWIN_SQ2
+.WORD BATTLEWIN_SQ3
 
 .WORD SAVE_SQ1
 .WORD BLANK
@@ -194,10 +194,10 @@ lut_ScoreData:
 ;.WORD PRELUDE_SQ4
 
 .WORD MARSHCAVEOLD_SQ1
-.WORD BLANK
+.WORD MARSHCAVEOLD_SQ4
 .WORD MARSHCAVEOLD_TRI
-.WORD BLANK
 .WORD MARSHCAVEOLD_SQ2
+.WORD MARSHCAVEOLD_SQ3
 
 ;; JIGS - a copy of the prelude for some reason? 
 ;; Rename these and you have a new song if you have the space for it.
@@ -365,9 +365,17 @@ PROLOGUE_SQ2:
     .byte $A3,$73,$53,$57,$77,$87,$57,$73,$43
     .byte $D0
     .WORD PRLOOP1 ; ORIGINAL $0C,$83
+    
+PROLOGUE_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word PROLOGUE_SQ1
+   
+PROLOGUE_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word PROLOGUE_SQ2
+    
 
 PROLOGUE_TRI:
-
     .byte $FB
     PRLOOP2:
     PRLOOP2A:
@@ -421,6 +429,14 @@ EPILOGUE_SQ2:
    .byte $63,$21,$01,$21,$01,$20,$01,$33,$03,$63,$21,$53,$23,$FB,$35,$55
    .byte $75,$35,$FC,$24,$04,$D8,$B4,$94,$B2,$92,$70,$FF
 
+EPILOGUE_SQ3:   
+   .byte $F4, $FC, $C5, $D0
+   .word EPILOGUE_SQ1
+   
+EPILOGUE_SQ4:   
+   .byte $F4, $FC, $C5, $D0
+   .word EPILOGUE_SQ2   
+   
 EPILOGUE_TRI:
 
     .byte $FC,$F8,$08,$EE,$C1,$C1,$D9,$71,$71,$71,$71,$71,$71,$71,$DA,$05
@@ -462,6 +478,14 @@ OVERWORLD_SQ2:
    .byte $27,$67,$27,$67
    .byte $D0
    .WORD OLOOP1 ; $8D,$88
+   
+OVERWORLD_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word OVERWORLD_SQ1
+   
+OVERWORLD_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word OVERWORLD_SQ2
 
 OVERWORLD_TRI:
    .byte $FB
@@ -528,7 +552,15 @@ SHIP_SQ2:
    .byte $D0
    .WORD SLOOP1 ; ORIGINAL $70,$8A
 
-
+SHIP_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word SHIP_SQ1
+   
+SHIP_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word SHIP_SQ2
+   
+   
 SHIP_TRI:
    .byte $FB,$F8,$08,$EC,$C3
    SLOOP2:
@@ -586,6 +618,14 @@ AIRSHIP_SQ2:
    .byte $A7,$97,$A7,$77,$77,$47,$77,$C7,$77,$47,$77
    .byte $D0
    .WORD ALOOP1 ; $91,$8C
+   
+AIRSHIP_SQ3:   
+   .byte $F4, $FC, $C5, $D0
+   .word AIRSHIP_SQ1
+   
+AIRSHIP_SQ4:   
+   .byte $F4, $FC, $C5, $D0
+   .word AIRSHIP_SQ2   
 
 AIRSHIP_TRI:
    .byte $FC
@@ -631,6 +671,14 @@ TOWN_SQ2:
    .byte $DA,$41,$63,$23,$D9,$B1,$DA,$05,$D9,$B5,$95,$75,$51,$C1,$70,$53
    .byte $D0
    .WORD TLOOP1 ; ORIGINAL $6E,$8F
+   
+TOWN_SQ3:   
+   .byte $F4, $FC, $C5, $D0
+   .word TOWN_SQ1
+   
+TOWN_SQ4:   
+   .byte $F4, $FC, $C5, $D0
+   .word TOWN_SQ2   
 
 TOWN_TRI:
    .byte $FC
@@ -666,6 +714,14 @@ CASTLE_SQ2:
    .byte $45
    .byte $D0
    .WORD CLOOP1 ; $85,$8D
+   
+CASTLE_SQ3:   
+   .byte $F4, $FD, $C5, $D0
+   .word CASTLE_SQ1
+   
+CASTLE_SQ4:   
+   .byte $F4, $FD, $C5, $D0
+   .word CASTLE_SQ2
 
 CASTLE_TRI:
    .byte $FD
@@ -737,7 +793,15 @@ EARTHCAVE_SQ2:
    .byte $D0
    .WORD D1LOOP1 ; $F5,$91
 
-
+EARTHCAVE_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word EARTHCAVE_SQ1
+   
+EARTHCAVE_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word EARTHCAVE_SQ2
+   
+   
 EARTHCAVE_TRI:
    .byte $FB
    D1LOOP2:
@@ -811,6 +875,14 @@ MATOYA_SQ2:
    .byte $27,$97,$65,$45
    .byte $D0
    .WORD D2LOOP1 ; $1D,$84
+   
+MATOYA_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word MATOYA_SQ1
+   
+MATOYA_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word MATOYA_SQ2   
 
 MATOYA_TRI:
    .byte $FB
@@ -878,7 +950,10 @@ MARSHCAVE_SQ1:
    .BYTE $01,$DB,$3A,$2A,$0A,$DA,$AA,$7A,$5A,$3A,$2A ;16  
    .BYTE $D0
    .WORD DUNGEON3LOOP
-
+   
+MARSHCAVE_SQ4:   
+   .byte $F4, $FE, $C5, $D0
+   .word MARSHCAVE_SQ4
 
 MARSHCAVE_SQ2:
    .BYTE $FE
@@ -1046,6 +1121,14 @@ MARSHCAVEOLD_SQ2:
    .WORD D3LOOP1C ; $57,$86
    .byte $D0
    .WORD D3LOOP1 ; $29,$86
+   
+MARSHCAVEOLD_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word MARSHCAVEOLD_SQ1
+   
+MARSHCAVEOLD_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word MARSHCAVEOLD_SQ2   
 
 MARSHCAVEOLD_TRI:
 
@@ -1106,6 +1189,14 @@ SEASHRINE_SQ2:
    .byte $D0
    .WORD D4LOOP1 ; $41,$93
 
+SEASHRINE_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word SEASHRINE_SQ1
+   
+SEASHRINE_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word SEASHRINE_SQ2   
+   
 SEASHRINE_TRI:
    .byte $FB
    D4LOOP2:
@@ -1167,11 +1258,11 @@ SKYCASTLE_SQ2:
    .WORD D5LOOP1 ; $45,$90
    
 SKYCASTLE_SQ3:   
-   .byte $F4, $C3, $D0
+   .byte $F4, $FD, $C4, $D0
    .word SKYCASTLE_SQ1
    
 SKYCASTLE_SQ4:   
-   .byte $F4, $C3, $D0
+   .byte $F4, $FD, $C4, $D0
    .word SKYCASTLE_SQ2
    
    
@@ -1227,6 +1318,14 @@ FIENDTEMPLE_SQ2:
    .byte $D8,$A7
    .byte $D0
    .WORD D6LOOP1 ; $0E,$87
+   
+FIENDTEMPLE_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word FIENDTEMPLE_SQ1
+   
+FIENDTEMPLE_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word FIENDTEMPLE_SQ2   
 
 FIENDTEMPLE_TRI:
    .byte $FB
@@ -1265,6 +1364,14 @@ SHOP_SQ2:
    .byte $C7,$57,$C7,$77,$C7,$B7,$C7,$C3,$F8,$08,$EA,$22,$02,$D8,$B2,$72
    .byte $D0
    .WORD S1LOOP1 ; $5E,$8E
+   
+SHOP_SQ3:   
+   .byte $F4, $FD, $C5, $D0
+   .word SHOP_SQ1
+   
+SHOP_SQ4:   
+   .byte $F4, $FD, $C5, $D0
+   .word SHOP_SQ2
 
 SHOP_TRI:
    .byte $FD
@@ -1346,6 +1453,14 @@ BATTLE_SQ2:
    .byte $D0
    .WORD BLOOP1 ; $BB,$95
    
+BATTLE_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word BATTLE_SQ1
+   
+BATTLE_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word BATTLE_SQ2   
+   
 BATTLE_TRI:
    .byte $FB,$F8
    .byte $08,$E0,$C3
@@ -1403,6 +1518,14 @@ MENU_SQ2:
    .byte $D9,$75,$95
    .byte $D0
    .WORD MLOOP1 ; $02,$98
+   
+MENU_SQ3:   
+   .byte $F4, $FC, $C5, $D0
+   .word MENU_SQ1
+   
+MENU_SQ4:   
+   .byte $F4, $FC, $C5, $D0
+   .word MENU_SQ2   
 
 MENU_TRI:
    .byte $FC
@@ -1436,6 +1559,14 @@ SLAIN_SQ2:
    .byte $71,$D9,$93,$53,$73,$A3,$73,$43,$53,$03,$53,$93,$73,$43,$51,$C1
    .byte $D0
    .WORD SLAIN_LOOP1 ; $D0,$98
+   
+SLAIN_SQ3:   
+   .byte $F4, $FC, $C5, $D0
+   .word SLAIN_SQ1
+   
+SLAIN_SQ4:   
+   .byte $F4, $FC, $C5, $D0
+   .word SLAIN_SQ2   
    
 SLAIN_TRI:
    .byte $FC,$F8,$08,$EC,$C1
@@ -1474,6 +1605,14 @@ BATTLEWIN_SQ2:
    .byte $D0
    .WORD BATTLEWIN_LOOP1 ; $AA,$99
 
+BATTLEWIN_SQ3:   
+   .byte $F4, $FB, $C5, $D0
+   .word BATTLEWIN_SQ1
+   
+BATTLEWIN_SQ4:   
+   .byte $F4, $FB, $C5, $D0
+   .word BATTLEWIN_SQ2   
+   
 BATTLEWIN_TRI:
    .byte $FB,$F8,$08,$EC,$C3
    .byte $DA,$3C,$CC,$D9,$AC,$CC,$7C,$CC,$35,$65,$85,$3C,$CC,$CC,$CC,$3C
@@ -3052,6 +3191,10 @@ Music_NewSong:
        STA CHAN_SQ2+ch_quiet
        STA CHAN_SQ3+ch_quiet
        STA CHAN_SQ4+ch_quiet
+       STA CHAN_SQ1+ch_extraquiet
+       STA CHAN_SQ2+ch_extraquiet
+       STA CHAN_SQ3+ch_extraquiet
+       STA CHAN_SQ4+ch_extraquiet
       
 
       LDA #$30            ; *then* set channel volumes to zero -- this will properly
@@ -4133,6 +4276,7 @@ lut_NoteLengths:
 ; FD - Prelude, Castle, Shop, Sky Castle, Treasure Fanfare
 ;
 ; FE - Original: none, and the note lengths are messed up/unfinished ; now used for my Marsh Cave replacement
+
 
 ;; With FD, a $_7 is a sixteenth note.
 ;; $_6 = 
