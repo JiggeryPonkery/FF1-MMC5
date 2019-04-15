@@ -3795,7 +3795,7 @@ M_OptionsMenu:   ;3A
 SoundTestInstructions:
 .byte $8B,$FF,$C2,$FF,$8E,$BB,$AC,$B7,$05,$8A,$FF,$C2,$FF,$9C,$B7,$A4,$B5,$B7,$7A,$9C,$B7,$B2,$B3,$FF,$96,$B8
 .byte $B6,$AC,$A6,$05,$9E,$B3,$7A,$8D,$B2,$BA,$B1,$FF,$C2,$FF,$9C,$A8,$AF,$A8,$A6,$B7,$FF,$9C,$B2
-.byte $B1,$AA,$05,$9C,$B7,$A4,$B5,$B7,$FF,$C2,$FF,$91,$B8,$AA,$FF,$A4,$FF,$BA,$A8,$A4,$B6,$A8,$AF,$FF,$E2,$00
+.byte $B1,$AA,$05,$9C,$B7,$A4,$B5,$B7,$FF,$C2,$FF,$91,$B8,$AA,$FF,$A4,$FF,$BA,$A8,$A4,$B6,$A8,$AF,$FF,$E8,$D3,$E8,$00
 
 
 M_SaveSlots:

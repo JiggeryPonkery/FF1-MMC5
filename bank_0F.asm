@@ -13348,12 +13348,13 @@ DrawBattleString:
 lut_CombatBoxes:
 ;             BOX                      TEXT
 ;       hdr    X    Y   wd   ht     hdr    X    Y
-  .BYTE $00, $00, $00, $0A, $03,    $01, $01, $00       ; attacker name
-  .BYTE $00, $0A, $00, $0D, $03,    $01, $0B, $00       ; their attack ("FROST", "2Hits!" etc)
-  .BYTE $00, $00, $03, $0A, $03,    $01, $01, $03       ; defender name
-  .BYTE $00, $0A, $03, $0C, $03,    $01, $0B, $03       ; damage/EOB box
-  .BYTE $00, $00, $06, $18, $03,    $01, $01, $06       ; bottom message ("Terminated", "Critical Hit", etc)
-  .BYTE $00, $0A, $03, $09, $03,    $01, $0B, $03       ; damage
+  .BYTE $00, $00, $00, $0A, $03,    $01, $01, $00       ; 0 attacker name
+  .BYTE $00, $0A, $00, $0C, $03,    $01, $0B, $00       ; 1 old attack/new EOB box
+  .BYTE $00, $00, $03, $0A, $03,    $01, $01, $03       ; 2 defender name
+  .BYTE $00, $0A, $03, $0C, $03,    $01, $0B, $03       ; 3 4old damage/new EOB box
+  .BYTE $00, $00, $06, $19, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
+  .BYTE $00, $0A, $03, $0A, $03,    $01, $0B, $03       ; 5 damage
+  .BYTE $00, $0A, $00, $0A, $03,    $01, $0B, $00       ; 6 their attack ("FROST", "2Hits!" etc)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

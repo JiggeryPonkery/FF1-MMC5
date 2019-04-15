@@ -1334,7 +1334,7 @@ BTL_MESSAGE41:
 BTL_MESSAGE42:
 .byte $99,$A4,$B5,$A4,$AF,$BC,$BD,$A8,$A7,$00 ; Paralyzed
 BTL_MESSAGE43:
-.byte $91,$AC,$B7,$B6,$C4,$FF,$FF,$FF,$00 ; Hits!___ 
+.byte $FF,$91,$AC,$B7,$B6,$C4,$00 ; _Hits!
 BTL_MESSAGE44:
 .byte $8C,$B5,$AC,$B7,$AC,$A6,$A4,$AF,$FF,$AB,$AC,$B7,$C4,$C4,$00 ; Critical hit!!
 BTL_MESSAGE45:

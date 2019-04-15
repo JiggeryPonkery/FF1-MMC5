@@ -5186,9 +5186,9 @@ ApplyPoisonToPlayer:
     JSR BattleScreenShake_L
     JSR RespondDelay  
     
-    LDA #03
-    JSR UndrawNBattleBlocks_L
-    ;JSR ClearAllCombatBoxes
+    ;LDA #03
+    ;JSR UndrawNBattleBlocks_L
+    JSR ClearAllCombatBoxes      ; JIGS - doesn't seem to matter which one is used, undrawing garbles the screen anyway now
 	;JSR DrawCharacterStatus     ; redraw character stats to reflect post-poison HP
     
     @Exit:
@@ -8357,7 +8357,7 @@ DrawCombatBox_Attack:
     
     INC btl_combatboxcount_alt      ; inc the combat box counter
     
-    LDA #$01                        ; draw the attack name in box 1
+    LDA #$06                        ; draw the attack name in box 1
     JMP DrawCombatBox_RestoreAXY
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
