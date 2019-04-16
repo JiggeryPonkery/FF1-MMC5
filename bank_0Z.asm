@@ -490,14 +490,6 @@ ClearOldLetters:
 NextLetter:
     LDY #0         
     LDA (text_ptr), Y 
-;    CMP #$01
-;    BNE @DoIt
-;      LDA #$FF      ; if control code double line break, print empty sprite
-       
-;    @DoIt:    
-   ; SEC
-   ; SBC #4         ;; JIGS - why did I have to add this after it was working forever???
-   ;; then it started working again and this was breaking it?!?!
     STA MMC5_tmp+2
     LDA MMC5_tmp+3
     STA spr_x
@@ -708,8 +700,6 @@ EnterTitleScreenNew:
        
     LDA #>oam          
     STA $4014          
-  ;  JSR DrawPalette
-    
     LDA #0             
     STA $2005
     STA $2005
@@ -768,9 +758,6 @@ EnterTitleScreenNew:
     LDA #0
     STA $2001              
     STA menustall           
-    ;LDA #$01
-    ;STA cur_pal+1
-    ;STA cur_pal+13
     LDX BattleBGColor
     LDA BattleBackgroundColor_LUT, X
     STA cur_pal+14
@@ -3844,7 +3831,7 @@ lut_SongNamesLong:
 .byte $8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Castle
 .byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$FF,$FF,$FF,$FF,$FF,$00 ; Earth Cave / Gurgu 
 .byte $96,$A4,$B7,$B2,$BC,$A4,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Matoya
-.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$F5,$97,$A8,$BA,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (New)
+.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$97,$A8,$BA,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (New)
 .byte $9D,$A8,$B0,$B3,$AF,$A8,$FF,$B2,$A9,$FF,$8F,$AC,$A8,$B1,$A7,$B6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Temple of Fiends
 .byte $9C,$AE,$BC,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sky Castle
 .byte $9C,$A8,$A4,$FF,$9C,$AB,$B5,$AC,$B1,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sea Shrine
@@ -3854,10 +3841,10 @@ lut_SongNamesLong:
 .byte $9C,$AF,$A4,$AC,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Slain
 .byte $8F,$A4,$B1,$A9,$A4,$B5,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fanfare
 .byte $94,$A8,$BC,$FF,$92,$B7,$A8,$B0,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Key Item
-.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$F5,$98,$AF,$A7,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (Old)
+.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$98,$AF,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (Old)
 .byte $9C,$A4,$B9,$AC,$B1,$AA,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Saving
-.byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$F5,$9E,$B1,$B8,$B6,$A8,$A7,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Healing (Unused)
-.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$F5,$9E,$B1,$B8,$B6,$A8,$A7,$F6,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Unused)
+.byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Healing (Unused)
+.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9B,$A8,$B0,$B2,$B9,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Removed)
 
 
 
