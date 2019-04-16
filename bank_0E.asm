@@ -1908,8 +1908,7 @@ DoNameInput:
                 @cursoradd      = $63
                 @selectedtile   = $10
     
-    JSR ClearNT_FillBackground
-    ;; JIGS - its nicer this way with the box inside background being black
+    JSR ClearNT ;_FillBackground
     JSR DrawNameInputScreen
     
     JSR TurnMenuScreenOn_ClearOAM   ; now that everything is drawn, turn the screen on
