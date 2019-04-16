@@ -49,7 +49,7 @@ BattleTurn      = $5CF8 ; Keeps track of battle turns and displays them above th
 soundtesthelper = $5CFA ; Something to do with the sound test screen
 
 ;nothing        = $5CFA ; A, B and C can be used until LongCall_tmp is needed
-;LongCall_tmp    = $5CFB ; These backup tmp, tmp+1, and the A, X, and Y registers
+;LongCall_tmp   = $5CFB ; These backup tmp, tmp+1, and the A, X, and Y registers
 LongCall_A      = $5CFD ; The LongCall routine restores them after it swaps banks
 LongCall_Y      = $5CFE
 LongCall_X      = $5CFF
@@ -159,21 +159,15 @@ item_stop       = item_orb_start + 4 ; $20
 
 inv_magic       = unsram + $50 ; 64 bytes, 1 per spell
 
-LevelUp_Pointer     = $82
-LevelUp_LoopCounter = $5C97
-LevelUp_ClassID     = $5C98
-LevelUp_StatByte    = $5C98
-LevelUp_LevelIndex  = $5C99
-LevelUp_StatIndex   = $5C9A
-LevelUp_StatBuffer  = $5C9B ; C, D, E, F - 5 bytes
 
-ShopTempList        = $5CA8 ; 8 bytes
 
-Character1BattleState         = $5D10 ; these will match up to ch_battlestate in ch_stats
-Character2BattleState         = $5D50 ; 
-Character3BattleState         = $5D90 ; 
-Character4BattleState         = $5DD0
-CharacterStatPointer     = $4E ; $4F ; far as I can tell these are unused by the game...?
+
+
+Character1BattleState = ch_stats + $10 ; these will match up to ch_battlestate in ch_stats
+Character2BattleState = ch_stats + $10 + $40 ; 
+Character3BattleState = ch_stats + $10 + $80 ; 
+Character4BattleState = ch_stats + $10 + $C0 ;
+CharacterStatPointer  = $4E ; $4F ; far as I can tell these are unused by the game...?
 
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00
@@ -182,7 +176,7 @@ ch_name           = ch_stats + $02 ; 03, 04, 05, 06, 07, 08 - 7 bytes
 ch_exp            = ch_stats + $09 ; 0A, 0B - 3 bytes
 ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
 ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
-ch_battlestate    = ch_stats + $10 ; JIGS - for hiding and regeneration
+ch_battlestate    = ch_stats + $10 ; JIGS - for hiding and regeneration and guarding and all that
 ch_level          = ch_stats + $11 ; OB this is 0 based, IB this is 1 based
 ch_strength       = ch_stats + $12
 ch_agility        = ch_stats + $13
@@ -248,16 +242,26 @@ CharStats_TmpSwap1 = $6000 ; temporarily holds 64 bytes of character data while 
 CharStats_TmpSwap2 = $6040 ; temporarily holds 64 bytes of character data while switching order
 
 lutmp_ch_stats  = $6000 ; temporarily holds 64 bytes of each character data while switching in the lineup menu, 256 total
+
+LevelUp_Pointer     = $82
+LevelUp_LoopCounter = $6000
+LevelUp_ClassID     = $6001
+LevelUp_StatByte    = $6002
+LevelUp_LevelIndex  = $6003
+LevelUp_StatIndex   = $6004
+LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
  
-TempSpellList = $6000 ; to 6017 ; 24 bytes
-TempSpellListIndex = $6018
-GetSpellLevelIndex = $6019
+TempSpellList        = $6000 ; to 6017 ; 24 bytes
+TempSpellListIndex   = $6018
+GetSpellLevelIndex   = $6019
 CharacterIndexBackup = $601A
 CharacterEquipBackup = $601B
-shop_curprice   = $601C ; 1D, 1E, 1F - 4 bytes ; will mess up buying things if shared
-shop_charindex  = $6020
-shop_spell      = $6021
-shop_curitem    = $6022
+
+shop_curprice   = $6000 ; 1D, 1E, 1F - 4 bytes ; will mess up buying things if shared
+shop_charindex  = $6001
+shop_spell      = $6002
+shop_curitem    = $6003
+ShopTempList    = $6004 ; 8 bytes
 
 btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
 GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
@@ -729,7 +733,6 @@ btl_msgdraw_srcptr  = $0543  ; shared -- needs to match btl_msgdraw_width
                     ; $0544    above +1
 btl_msgdraw_blockcount = $0545      ; the number of blocks drawn
 btl_msgdraw_blockcount_backup = $0546
-
 
 
 
