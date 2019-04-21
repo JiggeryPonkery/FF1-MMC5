@@ -9,26 +9,27 @@
 //#FIXEDLENGTH(C2, 0) 
 #JMP($0000)
 
-// use [END] to end a string
-// use [ENTER] for next line
-
-MP restored![END]
-HP and MP restored![END]
-Revived from the brink![END]
-The bell rings loudly..[END]
-Sight restored![END]
+// use | to end a string
+// use ^ for line break
+// use * for double line break
 
 
-//The world is veiled in darkness.[ENTER]
-//The wind stops, the sea is wild,[ENTER]
-//  and the earth begins to rot.[ENTER]
-//       The people wait, [ENTER]
-// their only hope, a prophecy...[ENTER]
-//[ENTER]
-//"When the world is in darkness[ENTER]
-//Four Warriors will come...'[ENTER]
-//[ENTER]
-//After a long journey, four[ENTER]
-//  young warriors arrive.[ENTER]
-//   each holding an ORB.[END]
+
+ Well, what d'ya*
+   got for me?|
+
+
+
+//The world is veiled in darkness.*
+//The wind stops, the sea is wild,*
+//  and the earth begins to rot.8
+//       The people wait, *
+// their only hope, a prophecy...*
+//*
+//"When the world is in darkness*
+//Four Warriors will come...'*
+//*
+//After a long journey, four*
+//  young warriors arrive.*
+//   each holding an ORB.|
 
