@@ -142,74 +142,112 @@ ShopOasis:
 ShopGold:
 .byte $FF,$90,$00 ; _G
 ShopWelcome:
-.byte $FF,$FF,$A0,$A8,$AF,$A6,$49,$A8,$C4,$FF,$A0,$41,$B7,$01,$FF,$51,$29,$92,$67,$2E,$BC,$A4,$43,$35,$C5,$00 ; Welcome! 
+.byte $FF,$FF,$A0,$A8,$AF,$A6,$49,$A8,$C4,$FF,$A0,$41,$B7,$01
+.byte $FF,$51,$29,$92,$67,$2E,$BC,$A4,$43,$35,$C5,$00 ; Welcome! What can I do ya for?
 ShopBuySellExit:
 .byte $8B,$B8,$BC,$01,$9C,$A8,$4E,$01,$8E,$BB,$5B,$00 ; Buy / Sell / Exit
 ShopBuyExit:
 .byte $8B,$B8,$BC,$01,$8E,$BB,$5B,$00 ; Buy / Exit
 ShopCannotCarry:
-.byte $A2,$26,$38,$22,$B1,$B2,$21,$51,$B5,$B5,$BC,$05,$22,$4B,$B0,$35,$A8,$C4,$00 ; You cannot carry any more.
+.byte $A2,$26,$38,$22,$BE,$21,$A9,$5B,$20,$B1,$BC,$01
+.byte $B0,$35,$1A,$4C,$1B,$1D,$3E,$2D,$B1,$01
+.byte $50,$26,$44,$1F,$32,$B1,$28,$B5,$BC,$C4,$00 ; You can't fit any more of these in your inventory!
 ShopWhatWant:
-.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00
+.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00 ; What'll it be?
 ShopXGoldOK:
-.byte $FF,$9D,$41,$21,$A6,$49,$2C,$1B,$B2,$69,$01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$BF,$FF,$B2,$AE,$A4,$BC,$C5,$00
+.byte $FF,$9D,$41,$21,$A6,$49,$2C,$1B,$B2,$69,$01
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$BF,$FF,$B2,$AE,$A4,$BC,$C5,$00 ; That comes to... _____ G, okay?
 ShopYesNo:
 .byte $A2,$A8,$B6,$01,$97,$B2,$00 ; Yes / No
 ShopCantAfford:
-.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$38,$22,$BE,$B7,$01,$FF,$FF,$A4,$A9,$A9,$35,$27,$1C,$39,$69,$00
+.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$38,$22,$BE,$B7,$01
+.byte $FF,$FF,$A4,$A9,$A9,$35,$27,$1C,$39,$69,$00 ; Ach! You can't afford that.
 ShopWhoWillTake:
-.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00
+.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00 ; Who is it for?
 ShopCharNames:
 .byte $10,$00,$05
 .byte $11,$00,$05
 .byte $12,$00,$05
 .byte $13,$00,$00
 ShopThankYouWhatElse:
-.byte $9D,$41,$B1,$AE,$50,$26,$FF,$AE,$1F,$A7,$AF,$BC,$C4,$01,$FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00
+.byte $9D,$41,$B1,$AE,$50,$26,$FF,$AE,$1F,$A7,$AF,$BC,$C4,$01
+.byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Thank you kindly! Anything else?
 ShopWhoseItemToSell:
-.byte $A0,$41,$21,$A7,$BE,$56,$64,$41,$32,$05,$A9,$35,$42,$A8,$BF,$1B,$1D,$B1,$C5,$00
+.byte $FF,$A0,$A8,$4E,$BF,$33,$41,$21,$A7,$BE,$BC,$A4,$01
+.byte $FF,$FF,$FF,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
 ShopWhichOne:
-.byte $A0,$AB,$AC,$A6,$AB,$B2,$B1,$A8,$C5,$00
+.byte $A0,$AB,$AC,$A6,$AB,$B2,$B1,$A8,$C5,$00 ; (can't seem to find where this is used anymore)
 ShopThankYou:
-.byte $9D,$AB,$22,$AE,$BC,$B2,$B8,$C4,$00
+;.byte $9D,$AB,$22,$AE,$BC,$B2,$B8,$C4,$00
 ShopWhoWillLearn:
 .byte $FF,$A0,$3D,$A6,$AB,$24,$A6,$4D,$4E,$67,$B2,$01
-.byte $FF,$FF,$FF,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do / you require?
+.byte $FF,$FF,$FF,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
 ShopWhichSpell:
 ShopOutofStock:
 .byte $FF,$FF,$9D,$41,$21,$B6,$B3,$A8,$4E,$2D,$B6,$01
 .byte $FF,$FF,$26,$21,$4C,$24,$28,$A6,$AE,$C4,$00 ; That spell is out of stock.
 ShopAlreadyKnow:
-.byte $A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$01,$1C,$39,$24,$B3,$A8,$4E,$BF,$43,$B2,$B2,$AF,$C4,$00 ; You already know that.
+;.byte $A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$01
+;.byte $1C,$39,$24,$B3,$A8,$4E,$BF,$43,$B2,$B2,$AF,$C4,$00 
 ShopInnWelcome:
-.byte $FF,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01,$B7,$B5,$A4,$32,$45,$63,$C4,$FF,$95,$A8,$21,$B8,$B6,$01,$B7,$A4,$AE,$1A,$51,$23,$36,$54,$56,$B8,$C0,$00 ; Inn welcome
+.byte $FF,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01
+.byte $B7,$B5,$A4,$32,$45,$63,$C4,$FF,$95,$A8,$21,$B8,$B6,$01
+.byte $B7,$A4,$AE,$1A,$51,$23,$36,$54,$56,$B8,$C0,$00 ; Welcome, weary travelers! Let us take care of you.
 ShopDontForget:
-.byte $98,$B1,$AF,$4B,$26,$44,$A9,$1F,$2C,$B7,$05,$4D,$49,$43,$35,$50,$26,$05,$A9,$26,$44,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C4,$05,$9C,$45,$A8,$B3,$33,$A8,$4E,$C4,$00
+.byte $FF,$8D,$3C,$BE,$21,$A9,$35,$66,$21,$28,$01
+.byte $FF,$42,$A4,$AE,$1A,$A4,$65,$B2,$47,$4C,$01
+.byte $FF,$50,$26,$44,$B7,$B5,$A4,$32,$AF,$B6,$C4,$00 ; Don't forget to make a log of your travels!
 ShopHoldReset: 
-.byte $9B,$A8,$34,$B0,$62,$B5,$BF,$1B,$2E,$B6,$A4,$32,$05,$56,$55,$FF,$AA,$A4,$34,$BF,$59,$B2,$AF,$A7,$05,$9B,$8E,$9C,$8E,$9D,$33,$1D,$29,$56,$B8,$05,$B7,$55,$29,$1C,$1A,$B3,$46,$25,$05,$4C,$A9,$C4,$FF,$90,$B2,$B2,$27,$AF,$B8,$A6,$AE,$C4,$00
+.byte $8D,$3C,$BE,$21,$56,$64,$A9,$A8,$A8,$58,$B6,$B2,$01
+.byte $42,$B8,$A6,$AB,$31,$A8,$B7,$53,$44,$B1,$46,$C5,$01
+.byte $C8,$91,$99,$7A,$96,$99,$FF,$9B,$2C,$28,$23,$A7,$C4,$C9,$00 ; Don't you feel so much better now? [HP/MP Restored!]
 ShopNothingToSell:
-.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$67,$3C,$BE,$B7,$01,$FF,$41,$32,$20,$B1,$BC,$1C,$1F,$AA,$C4,$00
+.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$67,$3C,$BE,$B7,$01
+.byte $FF,$41,$32,$20,$B1,$BC,$1C,$1F,$AA,$C4,$00 ; Ach! You don't have anything!
 ShopKeepOnTrying:
-.byte $94,$A8,$A8,$B3,$36,$B1,$B7,$B5,$BC,$1F,$AA,$AA,$B8,$BC,$B6,$69,$00
+;.byte $94,$A8,$A8,$B3,$36,$B1,$B7,$B5,$BC,$1F,$AA,$AA,$B8,$BC,$B6,$69,$00
 ShopWhoToRevive:
-.byte $91,$46,$FF,$B8,$B1,$A9,$35,$B7,$B8,$B1,$39,$A8,$69,$01,$A0,$3D,$A6,$AB,$43,$5F,$45,$B1,$05,$A0,$8A,$9B,$9B,$92,$98,$9B,$24,$41,$4E,$FF,$92,$05,$A4,$A7,$B0,$1F,$30,$53,$44,$28,$C5,$00
+.byte $8F,$35,$20,$1B,$5B,$1D,$FF,$92,$38,$22,$01
+.byte $AA,$B5,$22,$21,$56,$55,$43,$5C,$3A,$A7,$01
+.byte $FF,$42,$4B,$A5,$45,$B6,$B6,$1F,$AA,$B6,$C0,$00 ; For a tithe I can grant your friend my blessings.
 ShopReturnToLife:
-.byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$05,$68,$AA,$AB,$B7,$69,$FF,$A0,$8A,$9B,$9B,$92,$98,$9B,$C4,$05,$9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; Warrior return to life!
+.byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$01
+.byte $68,$AA,$AB,$B7,$69,$FF,$A0,$2F,$5C,$35,$B6,$C4,$01
+.byte $9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; By the grace of light... Warrior! Return to life!
 ShopMagicWelcome:
 .byte $FF,$8A,$AB,$C0,$FF,$8C,$B8,$37,$49,$25,$B6,$C0,$01
 .byte $FF,$8D,$2E,$56,$64,$3E,$A8,$AE,$1B,$B2,$01
-.byte $AE,$B1,$46,$1B,$1D,$20,$B5,$51,$5A,$C5,$00 ; Ah. Customers. / Do you seek to / know the arcane?
+.byte $AE,$B1,$46,$1B,$1D,$20,$B5,$51,$5A,$C5,$00 ; Ah. Customers. Do you seek to know the arcane?
 ShopDontNeedHelp:
-.byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01,$22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01,$FF,$56,$B8,$BF,$FF,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C0,$00 ; No dead people here.
+.byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01
+.byte $22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01
+.byte $FF,$56,$B8,$BF,$FF,$5D,$B5,$5C,$35,$B6,$C0,$00 ; Look to the light and peace be with you, warriors.
 ShopLearnExit:
 ShopTooBad:
-.byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01,$FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00
+.byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01
+.byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Eh, alright then. Anything else?
 ShopHowMany:
-.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01,$FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$FF,$01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00
+.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
+.byte $FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$FF,$01
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00 ; How many? __ will cost ya ________ G
 ShopEquipNow:
-.byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01,$FF,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$AC,$B7,$FF,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
+.byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01
+.byte $FF,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$AC,$B7,$FF,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
 ShopCannotEquip:
-.byte $FF,$FF,$91,$B2,$AF,$A7,$FF,$B2,$B1,$FF,$B1,$B2,$BA,$C3,$C0,$01,$FF,$A2,$B2,$B8,$BE,$B5,$A8,$FF,$B1,$B2,$B7,$FF,$A4,$A5,$AF,$A8,$01,$FF,$FF,$B7,$B2,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$B7,$AB,$A4,$B7,$C4,$00
+.byte $FF,$FF,$91,$B2,$AF,$A7,$FF,$B2,$B1,$FF,$B1,$B2,$BA,$C3,$C0,$01
+.byte $FF,$A2,$B2,$B8,$BE,$B5,$A8,$FF,$B1,$B2,$B7,$FF,$A4,$A5,$AF,$A8,$01
+.byte $FF,$FF,$B7,$B2,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$B7,$AB,$A4,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
+
+
+
+
+
+
+
+
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2606,22 +2644,8 @@ IntroTitlePrepare:
 
     JSR LoadMenuCHRPal     ; Load necessary CHR and palettes
     
-    JMP LoadBridgeSceneGFX_Menu ;; JIGS - ignore below. 
-    ;JMP LoadMenuCHRPal ; -- JIGS: LoadMenuCHRPal eventually comes around to swapping back to Bank E and RTSing out... so it has to start in Bank E.
-        ;          The rest can safely be moved to Bank 10!
+    JMP LoadBridgeSceneGFX_Menu ;
 
-  ;;  LDA #$41
-  ;;  STA music_track        ; Start up the crystal theme music
-  ;;; JIGS - stop resetting the damn song!
-
-;    LDA #0
-;    STA joy_a              ; clear A, B, Start button catchers
-;    STA joy_b
-;    STA joy_start
-;    STA cursor
-;    STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
-
-;    JMP ClearNT            ; then wipe the nametable clean and exit
 
 
 
@@ -2660,7 +2684,7 @@ EnterShop:
     STA shop_curprice
     STA shop_curprice+1
     STA shop_curprice+2
-    STA shop_curprice+4    
+    STA shop_curprice+3    
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
     STA item_box_offset
     STA inv_canequipinshop
@@ -2845,16 +2869,22 @@ CheckAllCharsForSpell:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   EquipShop_Cancel:
+    LDA #0
+    STA inv_canequipinshop 
+    JSR Shop_CharacterStopDancing
     LDA #$25
     JSR DrawShopDialogueBox     ; "Too bad... something else?" dialogue
+    LDA #$02
+    JSR LoadShopBoxDims
+    JSR EraseBox               ; erase shop box #2
     JMP EquipShop_Loop          ; jump ahead to loop
-
+   
 
 EnterShop_Equip:
     LDA #$09
     JSR DrawShopDialogueBox     ; "Welcome" dialogue
     
-  EquipShop_Loop:
+  EquipShop_Loop: 
     LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
     BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
     JSR Shop_CharacterStopDancing ;
@@ -2887,11 +2917,11 @@ EnterShop_Equip:
     JSR DrawShopDialogueBox     ; "what would you like" dialogue
 
     LDA #01
-    STA inv_canequipinshop ; turn on the ability to dance to equipable items!
+    STA inv_canequipinshop      ; turn on the ability to dance to equipable items!
     LDA #0
     STA cursor
     JSR ShopSelectBuyItem       ; have the player select something
-    BCS EquipShop_Loop          ; if they pressed B, return to loop
+    BCS EquipShop_Cancel        ; if they pressed B, return to loop
     
     JSR Shop_CharacterStopDancing ; JIGS - turn off the cheer pose
     JSR DrawShopBuyItemConfirm  ; otherwise.. draw price confirmation text
@@ -2906,7 +2936,7 @@ EnterShop_Equip:
       LDA #$10
       JSR DrawShopDialogueBox   ; "You can't afford it" dialogue
       JSR ClearShopkeeperTextBox
-      JMP EquipShop_Loop        ; keep looping
+      JMP @Buy; EquipShop_Loop        ; keep looping
 
   @CanAfford:
     LDA #$27                    ; "Do you want to equip it now?"
@@ -2929,7 +2959,7 @@ EnterShop_Equip:
     LDA #$11             
     JSR DrawShopDialogueBox      ; "who will you give it to" dialogue"
     JSR ShopLoop_CharNames       ; have the player select a character
-    BCS EquipShop_Loop           ; if they press B, jump back to loop
+    BCS @_Loop                   ; if they press B, jump back to loop
 
     JSR EquipShop_GiveItemToChar ; give the item to the character
     BCC @FinalizePurchase        ; if they had room, finalize the purchase
@@ -2943,7 +2973,7 @@ EnterShop_Equip:
     JSR ShopPayPrice             ; subtract the GP
     LDA #$13
     JSR DrawShopDialogueBox      ; "Thank you, what else?" dialogue
-    JMP EquipShop_Loop           ; jump back to loop
+    JMP @Buy ; EquipShop_Loop           ; jump back to loop
 
   ;; Selling
 
@@ -2970,12 +3000,15 @@ EnterShop_Equip:
       JMP EquipShop_Loop         ; jump back to loop
 
   @ItemsForSale:
+    LDA #$14
+    JSR DrawShopDialogueBox    ; "What do you have for me?"
+  
     LDA #01
     STA inv_canequipinshop       ; turn on the ability to dance to equipable items!
     LDA #0
     STA cursor
     JSR ShopSelectBuyItem        ; have the user select an item to sell
-    BCS @_Loop                   ; if they pressed B, jump back to the loop
+    BCS @_Cancel                   ; if they pressed B, jump back to the loop
     
     LDA cursor
     CLC
@@ -2985,6 +3018,7 @@ EnterShop_Equip:
     STA shop_curitem
     
     DEC SellingEquipment
+    DEC inv_canequipinshop
     JSR DrawShopSellItemConfirm  ; draw the sell confirmation dialogue
     JSR ShopLoop_YesNo           ; give them the yes/no option
     BCS @_Cancel                 ; if they pressed B, canecl
@@ -3007,7 +3041,11 @@ EnterShop_Equip:
 
     JSR AddGPToParty       ; give that money to the party
     JSR DrawShopGoldBox    ; redraw the gold box to reflect changes
-    JMP EquipShop_Loop     ; and jump back to loop
+    ;LDA #$02
+    ;JSR LoadShopBoxDims
+    ;JSR EraseBox               ; erase shop box #2
+    ;JMP EquipShop_Loop     ; and jump back to loop
+    JMP @Sell
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3748,6 +3786,11 @@ EquipShop_GiveItemToChar:
     LDA #$28                   ;
     JSR DrawShopDialogueBox    ; "You can't equip that"
     JSR ClearShopkeeperTextBox
+    LDA #$02
+    JSR LoadShopBoxDims
+    JSR EraseBox               ; erase shop box #2
+    PLA
+    PLA ; undo the JSR to EquipShop_GiveItemToChar
     JMP EquipShop_Loop         ; jump back to loop
     
    CheckArmor: 
@@ -4335,10 +4378,9 @@ DrawShopGoldBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; JIGS - edited this a bit to print blank fire orbs for empty equipment slots. 
 
 EquipMenu_BuildSellBox:
-    LDY #5
+    LDY #63
     LDA #0
    @ClearBox:
     STA item_box, Y
@@ -4401,80 +4443,6 @@ EquipMenu_BuildSellBox:
     LDA item_box
     CMP #01
     RTS
-    
-    
-    
-;EquipMenu_RebuildInventory:
-;    LDX #0              
-;    LDY #0    
-;    STX MMC5_tmp 
-
-;    LDA shop_type      ; check shop type, and fork appropriately
-;    BNE @ArmorLoop
-
-;  @WeaponLoop:
-;    LDA item_box, Y    ; get the item ID in this slot
-;    BEQ @SkipWeapon
-
-;    SEC
-;    SBC #$1C-1         ; subtract to turn back into weapon ID
-;    STA inv_weapon, X  ; put it in the weapon inventory
-;    INX
-    
-;   @ResumeWeapon:
-;    INY
-;    CPY #$40
-;    BNE @WeaponLoop
-    
-;    LDA MMC5_tmp
-;    BEQ @Done
-        
-;    @FillWeaponBlanks:    ; otherwise, fill the blanks
-;    LDA #0
-;    STA inv_weapon, X  
-;    INX
-;    DEC MMC5_tmp ; decrease the amount of blanks left to fill 
-;    LDA MMC5_tmp 
-;    BNE @FillWeaponBlanks  ; when its 0, stop! 
-;  @Done:
-;    RTS     
-    
-;   @SkipWeapon:
-;    INC MMC5_tmp
-;    JMP @ResumeWeapon    
-    
-;  @ArmorLoop:
-;    LDA item_box, Y    ; get the item ID in this slot
-;    BEQ @SkipArmor
-
-;    SEC
-;    SBC #$44-1         ; subtract to turn back into weapon ID
-;    STA inv_armor, X  ; put it in the weapon inventory
-;    INX
-    
-;   @ResumeArmor:
-;    INY
-;    CPY #$40
-;    BNE @ArmorLoop
-    
-;    LDA MMC5_tmp
-;    BEQ @DoneArmor
-        
-;    @FillArmorBlanks:    ; otherwise, fill the blanks
-;    LDA #0
-;    STA inv_armor, X  
-;    INX
-;    DEC MMC5_tmp ; decrease the amount of blanks left to fill 
-;    LDA MMC5_tmp 
-;    BNE @FillArmorBlanks  ; when its 0, stop! 
-;  @DoneArmor:
-;    RTS     
-    
-;   @SkipArmor:
-;    INC MMC5_tmp
-;    JMP @ResumeArmor
-    
-    
     
     
     
@@ -10010,7 +9978,7 @@ EnterEquipMenu:
     JSR ClearOAM              ; clear OAM
     JSR DrawEquipMenuCurs     ; draw the cursor
     JSR EquipMenuSprite
-    JSR EquipMenuFrame        ; then do an Equip Menu Frame
+    JSR MenuFrame        ; then do an Equip Menu Frame
     
     LDA joy_a
     BNE @A_Pressed            ; check to see if A pressed
@@ -10103,7 +10071,7 @@ EnterEquipInventory:
     @Loop:
     JSR ClearOAM
     JSR DrawEquipInventoryCursor
-    JSR EquipMenuFrame
+    JSR MenuFrame ;EquipMenuFrame
     
     LDA joy_a
     BNE @A_Pressed            ; check to see if A pressed
@@ -10536,52 +10504,52 @@ lut_ArmorTypes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-EquipMenuFrame:
-    JSR WaitForVBlank_L     ; wait for VBlank
-    LDA #>oam
-    STA $4014               ; do sprite DMA
+;EquipMenuFrame:
+;    JSR WaitForVBlank_L     ; wait for VBlank
+;    LDA #>oam
+;    STA $4014               ; do sprite DMA
 
-    LDA soft2000          ; reset scroll
-    STA $2000
-    LDA #$00
-    STA $2005
-    STA $2005
+;    LDA soft2000          ; reset scroll
+;    STA $2000
+;    LDA #$00
+;    STA $2005
+;    STA $2005
     
-    LDA #BANK_THIS
-    STA cur_bank          ; set cur_bank to this bank
-    JSR CallMusicPlay     ;   so we can call music play routine
+;    LDA #BANK_THIS
+;    STA cur_bank          ; set cur_bank to this bank
+;    JSR CallMusicPlay     ;   so we can call music play routine
 
-    INC framecounter      ; inc the frame counter to count this frame
+;    INC framecounter      ; inc the frame counter to count this frame
 
-    LDA #0                ; clear joy_a and joy_b markers so button presses
-    STA joy_a             ;  will be recognized
-    STA joy_b
-    STA joy_select
+;    LDA #0                ; clear joy_a and joy_b markers so button presses
+;    STA joy_a             ;  will be recognized
+;    STA joy_b
+;    STA joy_select
 
-    LDA joy               ; get the joy data
-    AND #$0F              ; isolate directional buttons
-    STA tmp+7             ; and store it as the previous joy data
-    JSR UpdateJoy         ; then update joy data
+;    LDA joy               ; get the joy data
+;    AND #$0F              ; isolate directional buttons
+;    STA tmp+7             ; and store it as the previous joy data
+;    JSR UpdateJoy         ; then update joy data
 
-    LDA joy_a
-    ORA joy_b             ; see if either A or B pressed
-    ORa joy_select
-    BEQ @NotPressed       ; if not... jump ahead
-    JMP PlaySFX_MenuSel   ; otherwise, play the selection sound effect and exit
+;    LDA joy_a
+;    ORA joy_b             ; see if either A or B pressed
+;    ORa joy_select
+;    BEQ @NotPressed       ; if not... jump ahead
+;    JMP PlaySFX_MenuSel   ; otherwise, play the selection sound effect and exit
 
 
-  @NotPressed:            ; if neither A nor B have been pressed
-    LDA joy               ; get the joy data
-    AND #$0F              ; isolate directional buttons
-    BEQ @Exit             ; if no directions are pressed, exit
+;  @NotPressed:            ; if neither A nor B have been pressed
+;    LDA joy               ; get the joy data
+;    AND #$0F              ; isolate directional buttons
+;    BEQ @Exit             ; if no directions are pressed, exit
 
-    CMP tmp+7             ; compare current buttons to previous buttons
-    BEQ @Exit             ; if no change, then exit
+;    CMP tmp+7             ; compare current buttons to previous buttons
+;    BEQ @Exit             ; if no change, then exit
 
-    JMP PlaySFX_MenuMove  ; otherwise, a new button has been pressed, so play the menu move sound, then exit
+;    JMP PlaySFX_MenuMove  ; otherwise, a new button has been pressed, so play the menu move sound, then exit
 
-  @Exit:
-    RTS
+;  @Exit:
+;    RTS
 
 
 
@@ -10634,6 +10602,7 @@ MoveEquipMenuCurs:
     STA CharacterEquipBackup
     LDA cursor
     STA equipoffset
+    JSR PlaySFX_MenuMove
     PLA
     PLA
     JMP EnterEquipMenu
@@ -10648,21 +10617,21 @@ MoveEquipMenuCurs:
     INC cursor
     LDA cursor         ; If down, add 1 to the cursor (next row)
     CMP #$08
-    BNE @Exit
+    BNE @Done
     
     LDA #$00
-    STA cursor
-    RTS
+    JMP :+
 
   @Up:
     DEC cursor
     LDA cursor         
     CMP #$FF
-    BNE @Exit
+    BNE @Done
     
     LDA #$07
-    STA cursor
-    RTS
+  : STA cursor
+   @Done:
+    JMP PlaySFX_MenuMove
 
 DrawEquipMenuCurs:
     LDA #$18                   ; all slots are on same X coordinate
