@@ -194,9 +194,6 @@ ch_elementweak    = ch_stats + $1D ; effected by equipment, needs to refresh aft
 ;nothing          = ch_stats + $1E
 ;nothing          = ch_stats + $1F
 
-;ch_weapons = ch_stats + $20
-;ch_armor   = ch_stats + $21
-
 ch_righthand      = ch_stats + $20
 ch_lefthand       = ch_stats + $21
 ch_head           = ch_stats + $22
@@ -257,11 +254,10 @@ GetSpellLevelIndex   = $6019
 CharacterIndexBackup = $601A
 CharacterEquipBackup = $601B
 
-shop_curprice   = $6000 ; 1D, 1E, 1F - 4 bytes ; will mess up buying things if shared
-shop_charindex  = $6001
-shop_spell      = $6002
-shop_curitem    = $6003
-ShopTempList    = $6004 ; 8 bytes
+shop_curprice   = $6020 ; 22, 23, 24 - 4 bytes ; will mess up buying things if shared
+shop_charindex  = $6025
+shop_spell      = $6026
+shop_curitem    = $6027
 
 btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
 GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
