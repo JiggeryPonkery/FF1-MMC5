@@ -61,115 +61,116 @@ lut_ScoreData:
 .WORD PRELUDE_SQ4
 
 .WORD PROLOGUE_SQ1
-.WORD PROLOGUE_SQ4
+.WORD BLANK
 .WORD PROLOGUE_TRI
-.WORD PROLOGUE_SQ2
 .WORD PROLOGUE_SQ3
+.WORD PROLOGUE_SQ2
+
 
 .WORD EPILOGUE_SQ1
-.WORD EPILOGUE_SQ4
+.WORD BLANK
 .WORD EPILOGUE_TRI
-.WORD EPILOGUE_SQ2
 .WORD EPILOGUE_SQ3
+.WORD EPILOGUE_SQ2
 
 .WORD OVERWORLD_SQ1
-.WORD OVERWORLD_SQ4
+.WORD BLANK
 .WORD OVERWORLD_TRI
-.WORD OVERWORLD_SQ2
 .WORD OVERWORLD_SQ3
+.WORD OVERWORLD_SQ2
 
 .WORD SHIP_SQ1
-.WORD SHIP_SQ4
+.WORD BLANK
 .WORD SHIP_TRI
-.WORD SHIP_SQ2
 .WORD SHIP_SQ3
+.WORD SHIP_SQ2
 
 .WORD AIRSHIP_SQ1
-.WORD AIRSHIP_SQ4
+.WORD BLANK
 .WORD AIRSHIP_TRI
 .WORD AIRSHIP_SQ3
 .WORD AIRSHIP_SQ2
 
 .WORD TOWN_SQ1
-.WORD TOWN_SQ4
+.WORD BLANK
 .WORD TOWN_TRI
 .WORD TOWN_SQ2
 .WORD TOWN_SQ3
 
 .WORD CASTLE_SQ1
-.WORD CASTLE_SQ4
+.WORD BLANK
 .WORD CASTLE_TRI
-.WORD CASTLE_SQ2
 .WORD CASTLE_SQ3
+.WORD CASTLE_SQ2
 
 .WORD EARTHCAVE_SQ1
-.WORD EARTHCAVE_SQ4
+.WORD BLANK
 .WORD EARTHCAVE_TRI
-.WORD EARTHCAVE_SQ2
 .WORD EARTHCAVE_SQ3
+.WORD EARTHCAVE_SQ2
 
 .WORD MATOYA_SQ1
-.WORD MATOYA_SQ4
+.WORD BLANK
 .WORD MATOYA_TRI
-.WORD MATOYA_SQ2
 .WORD MATOYA_SQ3
+.WORD MATOYA_SQ2
 
 .WORD MARSHCAVE_SQ1
 .WORD MARSHCAVE_SQ4
 .WORD MARSHCAVE_TRI
-.WORD MARSHCAVE_SQ3
 .WORD MARSHCAVE_SQ2
+.WORD MARSHCAVE_SQ3
 
 .WORD SEASHRINE_SQ1
-.WORD SEASHRINE_SQ4
+.WORD BLANK
 .WORD SEASHRINE_TRI
-.WORD SEASHRINE_SQ2
 .WORD SEASHRINE_SQ3
+.WORD SEASHRINE_SQ2
 
 .WORD SKYCASTLE_SQ1
 .WORD SKYCASTLE_SQ4
 .WORD SKYCASTLE_TRI
-.WORD SKYCASTLE_SQ2
 .WORD SKYCASTLE_SQ3
+.WORD SKYCASTLE_SQ2
 
 .WORD FIENDTEMPLE_SQ1
-.WORD FIENDTEMPLE_SQ4
+.WORD BLANK
 .WORD FIENDTEMPLE_TRI
-.WORD FIENDTEMPLE_SQ2
 .WORD FIENDTEMPLE_SQ3
+.WORD FIENDTEMPLE_SQ2
 
 .WORD SHOP_SQ1
-.WORD SHOP_SQ4
+.WORD BLANK
 .WORD SHOP_TRI
-.WORD SHOP_SQ2
 .WORD SHOP_SQ3
+.WORD SHOP_SQ2
 
 .WORD BATTLE_SQ1
-.WORD BATTLE_SQ4
+.WORD BLANK
 ;.WORD BATTLE_SQ2 ;; JIGS - Now played by the MMC5 audio so that SFX don't interrupt it.
 .WORD BATTLE_TRI
 .WORD BATTLE_SQ2
 .WORD BATTLE_SQ3
 
 .WORD MENU_SQ1
-.WORD MENU_SQ4
+.WORD BLANK
 .WORD MENU_TRI
-.WORD MENU_SQ2
 .WORD MENU_SQ3
+.WORD MENU_SQ2
 ;; JIGS - the code that plays this has been disabled in menus
 ;; JIGS - BUT it has been moved to the map screen! And is used in inns!
 
 .WORD SLAIN_SQ1
 .WORD SLAIN_SQ4
 .WORD SLAIN_TRI
-.WORD SLAIN_SQ2
 .WORD SLAIN_SQ3
+.WORD SLAIN_SQ2
 
 .WORD BATTLEWIN_SQ1
-.WORD BATTLEWIN_SQ4
+.WORD BLANK
 .WORD BATTLEWIN_TRI
-.WORD BATTLEWIN_SQ2
 .WORD BATTLEWIN_SQ3
+.WORD BATTLEWIN_SQ2
 
 .WORD SAVE_SQ1
 .WORD BLANK
@@ -184,10 +185,10 @@ lut_ScoreData:
 ;.WORD PRELUDE_SQ4
 
 .WORD MARSHCAVEOLD_SQ1
-.WORD MARSHCAVEOLD_SQ4
+.WORD BLANK
 .WORD MARSHCAVEOLD_TRI
-.WORD MARSHCAVEOLD_SQ2
 .WORD MARSHCAVEOLD_SQ3
+.WORD MARSHCAVEOLD_SQ2
 
 ;; JIGS - a copy of the prelude for some reason? 
 ;; Rename these and you have a new song if you have the space for it.
@@ -470,7 +471,7 @@ OVERWORLD_SQ2:
    .WORD OLOOP1 ; $8D,$88
    
 OVERWORLD_SQ3:   
-   .byte $F6, $FB, $C4, $D0
+   .byte $F6, $FB, $C5, $D0
    .word OVERWORLD_SQ1
    
 OVERWORLD_SQ4:   
@@ -942,8 +943,8 @@ MARSHCAVE_SQ1:
    .WORD DUNGEON3LOOP
    
 MARSHCAVE_SQ4:   
-   .byte $F6, $FE, $C4, $D0
-   .word MARSHCAVE_SQ4
+   .byte $F6, $FE, $C5, $D0
+   .word MARSHCAVE_SQ1
 
 MARSHCAVE_SQ2:
    .BYTE $FE
@@ -1180,7 +1181,7 @@ SEASHRINE_SQ2:
    .WORD D4LOOP1 ; $41,$93
 
 SEASHRINE_SQ3:   
-   .byte $F6, $FB, $C3, $D0
+   .byte $F6, $FB, $C4, $D0
    .word SEASHRINE_SQ1
    
 SEASHRINE_SQ4:   
@@ -1247,17 +1248,6 @@ SKYCASTLE_SQ2:
    .byte $D0
    .WORD D5LOOP1 ; $45,$90
    
-SKYCASTLE_SQ3:   
-   .byte $F6, $FD, $C4, $D0
-   .word SKYCASTLE_SQ1
-   
-SKYCASTLE_SQ4:   
-   .byte $F6, $FD, $C4, $D0
-   .word SKYCASTLE_SQ2
-   
-   
-   
-
 SKYCASTLE_TRI:
    D5LOOP2:
    .byte $FD,$F8,$08,$EC
@@ -1274,7 +1264,20 @@ SKYCASTLE_TRI:
    .WORD D5LOOP2B ; $D5,$90
    .byte $C1,$C3,$C7,$FC,$C7,$FB,$C7,$FA,$C7
    .byte $D0
-   .WORD D5LOOP2 ; $B8,$90
+   .WORD D5LOOP2 ; $B8,$90   
+   
+SKYCASTLE_SQ3:   
+   .byte $F6, $FD, $C4, $D0
+   .word SKYCASTLE_SQ1
+   
+SKYCASTLE_SQ4:   
+   .byte $F6, $FD, $C4, $D0
+   .word SKYCASTLE_SQ2
+   
+   
+   
+
+
 
 FIENDTEMPLE_SQ1:
 .BYTE $F5,$02 ; JIGS - set duty to 25%, as Marsh Cave will set it different but never swap back to the original game's setting
@@ -1307,15 +1310,7 @@ FIENDTEMPLE_SQ2:
    .byte $03,$EB,$D8,$A7,$D9,$37,$77,$D8,$77,$A7,$D9,$17,$47,$77,$47,$17
    .byte $D8,$A7
    .byte $D0
-   .WORD D6LOOP1 ; $0E,$87
-   
-FIENDTEMPLE_SQ3:   
-   .byte $F6, $FB, $C3, $D0
-   .word FIENDTEMPLE_SQ1
-   
-FIENDTEMPLE_SQ4:   
-   .byte $F6, $FB, $C5, $D0
-   .word FIENDTEMPLE_SQ2   
+   .WORD D6LOOP1 ; $0E,$87   
 
 FIENDTEMPLE_TRI:
    .byte $FB
@@ -1328,7 +1323,16 @@ FIENDTEMPLE_TRI:
    .byte $A9,$C9,$A9,$C9,$C7,$C5,$DA,$67,$A7,$67,$D9,$B9,$C9,$B9,$C9,$C7
    .byte $C5,$DA,$67,$B7,$67,$41,$11,$31,$41
    .byte $D0
-   .WORD D6LOOP2 ; $D6,$87
+   .WORD D6LOOP2 ; $D6,$87   
+   
+FIENDTEMPLE_SQ3:   
+   .byte $F6, $FB, $C4, $D0
+   .word FIENDTEMPLE_SQ1
+   
+FIENDTEMPLE_SQ4:   
+   .byte $F6, $FB, $C5, $D0
+   .word FIENDTEMPLE_SQ2   
+
 
 SHOP_SQ1:
 .BYTE $F5,$02 ; JIGS - set duty to 25%, as Marsh Cave will set it different but never swap back to the original game's setting
@@ -1355,14 +1359,6 @@ SHOP_SQ2:
    .byte $D0
    .WORD S1LOOP1 ; $5E,$8E
    
-SHOP_SQ3:   
-   .byte $F6, $FD, $C4, $D0
-   .word SHOP_SQ1
-   
-SHOP_SQ4:   
-   .byte $F6, $FD, $C5, $D0
-   .word SHOP_SQ2
-
 SHOP_TRI:
    .byte $FD
    S1LOOP2:
@@ -1377,7 +1373,17 @@ SHOP_TRI:
    .byte $C7,$07,$C7,$D9,$07,$C7,$27,$C7,$47,$C7,$77,$C7,$C3,$C2,$C2,$C2
    .byte $D8,$77,$C7,$97,$C7,$B7,$C7
    .byte $D0
-   .WORD S1LOOP2 ; $A4,$8E
+   .WORD S1LOOP2 ; $A4,$8E   
+   
+SHOP_SQ3:   
+   .byte $F6, $FD, $C5, $D0
+   .word SHOP_SQ1
+   
+SHOP_SQ4:   
+   .byte $F6, $FD, $C5, $D0
+   .word SHOP_SQ2
+
+
 
 BATTLE_SQ1:
 .BYTE $F5,$02 ; JIGS - set duty to 25%, as Marsh Cave will set it different but never swap back to the original game's setting
@@ -1444,7 +1450,7 @@ BATTLE_SQ2:
    .WORD BLOOP1 ; $BB,$95
    
 BATTLE_SQ3:   
-   .byte $F6, $FB, $C4, $D0
+   .byte $F6, $FB, $C5, $D0
    .word BATTLE_SQ1
    
 BATTLE_SQ4:   
@@ -1596,7 +1602,7 @@ BATTLEWIN_SQ2:
    .WORD BATTLEWIN_LOOP1 ; $AA,$99
 
 BATTLEWIN_SQ3:   
-   .byte $F6, $FB, $C4, $D0
+   .byte $F6, $FB, $C5, $D0
    .word BATTLEWIN_SQ1
    
 BATTLEWIN_SQ4:   
@@ -1664,15 +1670,15 @@ HEAL_TRI:
    .byte $CC,$DB,$CC,$CC,$CC,$DC,$CC,$CC,$FF
 
 TREASURE_SQ1:
-;.BYTE $F5,$02 ; JIGS - set duty to 25%, as Marsh Cave will set it different but never swap back to the original game's setting
-;   .byte $FC,$F8,$07,$E0,$DA,$79,$B9,$DB,$39,$79,$B9,$FF
+.BYTE $F5,$02 ; JIGS - set duty to 25%, as Marsh Cave will set it different but never swap back to the original game's setting
+   .byte $FC,$F8,$07,$E0,$DA,$79,$B9,$DB,$39,$79,$B9,$FF
 
 TREASURE_SQ2:
-;.BYTE $F5,$01 ; JIGS - set duty to 12.5%, as Marsh Cave will set it different but never swap back to the original game's setting
-;   .byte $FC,$F8,$07,$E1,$D9,$B9,$DA,$39,$79,$B9,$DB,$39,$FF
+.BYTE $F5,$01 ; JIGS - set duty to 12.5%, as Marsh Cave will set it different but never swap back to the original game's setting
+   .byte $FC,$F8,$07,$E1,$D9,$B9,$DA,$39,$79,$B9,$DB,$39,$FF
 
 TREASURE_TRI:
-;   .byte $FC,$F8,$08,$E0,$C9,$C9,$C9,$C9,$C9,$FF
+   .byte $FC,$F8,$08,$E0,$C9,$C9,$C9,$C9,$C9,$FF
 
 BLANK:   ; For songs that need to loop
 ;.BYTE $E8 ; silent envelopt pattern
