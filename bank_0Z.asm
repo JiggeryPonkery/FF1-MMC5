@@ -3844,7 +3844,7 @@ lut_SongNamesLong:
 .byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$98,$AF,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (Old)
 .byte $9C,$A4,$B9,$AC,$B1,$AA,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Saving
 .byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Healing (Unused)
-.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9B,$A8,$B0,$B2,$B9,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Removed)
+.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Unused)
 
 
 
