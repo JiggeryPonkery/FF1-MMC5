@@ -1236,7 +1236,7 @@ lut_BattleSubMenu2:
   .WORD BattleSubMenu_Blank
   
 BattleSubMenu_Blank:
-  JMP PrepAndGetBattleMainCommand
+  JMP InputCharacterBattleCommand2
   
   
   ;; JIGS - this is new!
@@ -3765,21 +3765,22 @@ __PrepAttackSprite_Magic_AFrame:
     SEC                 ; set carry
     SBC Woosh           ; subtract Woosh variable
     STA btlattackspr_x  ; save X spot
-    LDA Woosh           ; Load Woosh variable
-    CLC                 ; 
-    ADC #03             ; Add 3
-    STA Woosh           ; and save... so every 2 frames, the magic moves 3 pixels to the left! 
-    JMP :+
+    JMP @Woosh
     
     @MagicSpriteUp:
+    LDA btl_animatingchar
+    BEQ :+             ; skip moving the sprite up if the caster is in the top slot (no room)
+    
     LDA btlattackspr_y ; load Y spot, to make the magic float upwards
     SEC
     SBC Woosh
     STA btlattackspr_y
+    
+    @Woosh:
     LDA Woosh           ; Load Woosh variable
     CLC                 ; 
     ADC #02             ; Add 2
-    STA Woosh           ; and save... so every 2 frames, the magic moves 2 pixels upwards
+    STA Woosh           ; and save... so every 2 frames, the magic moves 2 pixels up or left
     
   : LDA btl_drawflagsA                      ; turn on the magic drawflag bit, and turn off the weapon
     ORA #$40                                ; drawflag bit.
