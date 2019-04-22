@@ -79,47 +79,53 @@ BANK_THIS = $0E
 ;;  LUT containing stock shop text  [$8000 :: 0x38010]
 
 lut_ShopStrings:
-.word ShopWeapon           ; 00    
-.word ShopArmor            ; 01  
-.word ShopWhiteMagic       ; 02    
-.word ShopBlackMagic       ; 03    
-.word ShopTemple           ; 04    
-.word ShopInn              ; 05    
-.word ShopItem             ; 06    
-.word ShopOasis            ; 07    
-.word ShopGold             ; 08    
-.word ShopWelcome          ; 09    
-.word ShopBuySellExit      ; 0A    
-.word ShopBuyExit          ; 0B    
-.word ShopCannotCarry      ; 0C    
-.word ShopWhatWant         ; 0D    
-.word ShopXGoldOK          ; 0E    
-.word ShopYesNo            ; 0F
-.word ShopCantAfford       ; 10
-.word ShopWhoWillTake      ; 11    
-.word ShopCharNames        ; 12
-.word ShopThankYouWhatElse ; 13    
-.word ShopWhoseItemToSell  ; 14    
-.word ShopWhichOne         ; 15
-.word ShopThankYou         ; 16
-.word ShopWhoWillLearn     ; 17
-.word ShopWhichSpell       ; 18 
-.word ShopOutofStock       ; 19    
-.word ShopAlreadyKnow      ; 1A
-.word ShopInnWelcome       ; 1B
-.word ShopDontForget       ; 1C
-.word ShopHoldReset        ; 1D
-.word ShopNothingToSell    ; 1E
-.word ShopKeepOnTrying     ; 1F
-.word ShopWhoToRevive      ; 20
-.word ShopReturnToLife     ; 21
-.word ShopMagicWelcome     ; 22
-.word ShopDontNeedHelp     ; 23
-.word ShopLearnExit        ; 24
-.word ShopTooBad           ; 25
-.word ShopHowMany          ; 26 
-.word ShopEquipNow         ; 27
-.word ShopCannotEquip      ; 28
+.word ShopWeapon           ;00   
+.word ShopArmor            ;01 
+.word ShopWhiteMagic       ;02   
+.word ShopBlackMagic       ;03   
+.word ShopTemple           ;04   
+.word ShopInn              ;05   
+.word ShopItem             ;06   
+.word ShopOasis            ;07   
+.word ShopGold             ;08   
+.word ShopXGoldOK          ;09
+.word ShopHowMany          ;0A
+.word ShopBuyExit          ;0B   
+.word ShopBuySellExit      ;0C   
+.word ShopYesNo            ;0D
+.word ShopCharNames        ;0E
+
+.word ShopWelcome          ;0F item and equipment welcome    
+.word ShopMagicWelcome     ;10 magic welcome
+
+.word ShopCantAfford       ;11 you don't have enough money 
+.word ShopNothingToSell    ;12 you have no inventory to sell
+.word ShopCannotCarry      ;13 your inventory is too full (items, equip)
+.word ShopOutofStock       ;14 your inventory is too full (magic)
+.word ShopCantSell         ;15 you have too much money 
+.word ShopThankYouWhatElse ;16 confirmed transaction    
+.word ShopTooBadWhatElse   ;17 canceled transaction
+
+.word ShopWhatWant         ;18 what do you want? (item, equip)
+.word ShopWhatScroll       ;19 what do you want? (magic)
+.word ShopWhatToSell       ;1A what do you have to sell? (item, equip)
+.word ShopMagicToSell      ;1B what do you have to sell? (magic)
+
+.word ShopEquipNow         ;1C do you want to equip it
+.word ShopWhoWillTake      ;1D who is it for
+.word ShopCannotEquip      ;1E can't equip it
+.word ShopItemStowed       ;1F inventory full of character's other item, new item put in inventory
+
+.word ShopInnWelcome       ;20 inn welcome
+.word ShopDontForget       ;21 inn exit/before saving
+.word ShopInnSaved         ;22 inn after saving
+
+.word ShopClinicWelcome    ;23 clinic welcome/no one's dead
+.word ShopWhoToRevive      ;24 clinic welcome/someone's dead
+.word ShopReturnToLife     ;25 character revived
+
+
+
 
 ;; note these are NOT the original game's strings. I have edited them to better fit within the new shop screen and add some character to the shops.
 
@@ -141,54 +147,85 @@ ShopOasis:
 .byte $8C,$AF,$B2,$3E,$FF,$98,$B8,$21,$9C,$5F,$A8,$00 ; Close Out Sale
 ShopGold:
 .byte $FF,$90,$00 ; _G
-ShopWelcome:
-.byte $FF,$FF,$A0,$A8,$AF,$A6,$49,$A8,$C4,$FF,$A0,$41,$B7,$01
-.byte $FF,$51,$29,$92,$67,$2E,$BC,$A4,$43,$35,$C5,$00 ; Welcome! What can I do ya for?
-ShopBuySellExit:
-.byte $8B,$B8,$BC,$01,$9C,$A8,$4E,$01,$8E,$BB,$5B,$00 ; Buy / Sell / Exit
-ShopBuyExit:
-.byte $8B,$B8,$BC,$01,$8E,$BB,$5B,$00 ; Buy / Exit
-ShopCannotCarry:
-.byte $A2,$26,$38,$22,$BE,$21,$A9,$5B,$20,$B1,$BC,$01
-.byte $B0,$35,$1A,$4C,$1B,$1D,$3E,$2D,$B1,$01
-.byte $50,$26,$44,$1F,$32,$B1,$28,$B5,$BC,$C4,$00 ; You can't fit any more of these in your inventory!
-ShopWhatWant:
-.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00 ; What'll it be?
 ShopXGoldOK:
 .byte $FF,$9D,$41,$21,$A6,$49,$2C,$1B,$B2,$69,$01
 .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$BF,$FF,$B2,$AE,$A4,$BC,$C5,$00 ; That comes to... _____ G, okay?
+ShopHowMany:
+.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
+.byte $FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$FF,$01
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00 ; How many? __ will cost ya ________ G
+ShopBuyExit:
+.byte $8B,$B8,$BC,$01,$8E,$BB,$5B,$00 ; Buy / Exit
+ShopBuySellExit:
+.byte $8B,$B8,$BC,$01,$9C,$A8,$4E,$01,$8E,$BB,$5B,$00 ; Buy / Sell / Exit
 ShopYesNo:
 .byte $A2,$A8,$B6,$01,$97,$B2,$00 ; Yes / No
-ShopCantAfford:
-.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$38,$22,$BE,$B7,$01
-.byte $FF,$FF,$A4,$A9,$A9,$35,$27,$1C,$39,$69,$00 ; Ach! You can't afford that.
-ShopWhoWillTake:
-.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00 ; Who is it for?
 ShopCharNames:
 .byte $10,$00,$05
 .byte $11,$00,$05
 .byte $12,$00,$05
 .byte $13,$00,$00
-ShopThankYouWhatElse:
-.byte $9D,$41,$B1,$AE,$50,$26,$FF,$AE,$1F,$A7,$AF,$BC,$C4,$01
-.byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Thank you kindly! Anything else?
-ShopWhoseItemToSell:
-.byte $FF,$A0,$A8,$4E,$BF,$33,$41,$21,$A7,$BE,$BC,$A4,$01
-.byte $FF,$FF,$FF,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
-ShopWhichOne:
-.byte $A0,$AB,$AC,$A6,$AB,$B2,$B1,$A8,$C5,$00 ; (can't seem to find where this is used anymore)
-ShopThankYou:
-;.byte $9D,$AB,$22,$AE,$BC,$B2,$B8,$C4,$00
-ShopWhoWillLearn:
-.byte $FF,$A0,$3D,$A6,$AB,$24,$A6,$4D,$4E,$67,$B2,$01
-.byte $FF,$FF,$FF,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
-ShopWhichSpell:
+
+ShopWelcome:
+.byte $FF,$FF,$A0,$A8,$AF,$A6,$49,$A8,$C4,$FF,$A0,$41,$B7,$01
+.byte $FF,$51,$29,$92,$67,$2E,$BC,$A4,$43,$35,$C5,$00 ; Welcome! What can I do ya for?
+ShopMagicWelcome:
+.byte $FF,$8A,$AB,$C0,$FF,$8C,$B8,$37,$49,$25,$B6,$C0,$01
+.byte $FF,$8D,$2E,$56,$64,$3E,$A8,$AE,$1B,$B2,$01
+.byte $AE,$B1,$46,$1B,$1D,$20,$B5,$51,$5A,$C5,$00 ; Ah. Customers. Do you seek to know the arcane?
+
+ShopCantAfford:
+.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$38,$22,$BE,$B7,$01
+.byte $FF,$FF,$A4,$A9,$A9,$35,$27,$1C,$39,$69,$00 ; Ach! You can't afford that.
+ShopNothingToSell:
+.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$67,$3C,$BE,$B7,$01
+.byte $FF,$41,$32,$20,$B1,$BC,$1C,$1F,$AA,$C4,$00 ; Ach! You don't have anything!
+ShopCannotCarry:
+.byte $A2,$26,$38,$22,$BE,$21,$A9,$5B,$20,$B1,$BC,$01
+.byte $B0,$35,$1A,$4C,$1B,$1D,$3E,$2D,$B1,$01
+.byte $50,$26,$44,$1F,$32,$B1,$28,$B5,$BC,$C4,$00 ; You can't fit any more of these in your inventory!
 ShopOutofStock:
 .byte $FF,$FF,$9D,$41,$21,$B6,$B3,$A8,$4E,$2D,$B6,$01
 .byte $FF,$FF,$26,$21,$4C,$24,$28,$A6,$AE,$C4,$00 ; That spell is out of stock.
-ShopAlreadyKnow:
-;.byte $A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$01
-;.byte $1C,$39,$24,$B3,$A8,$4E,$BF,$43,$B2,$B2,$AF,$C4,$00 
+ShopCantSell:
+.byte $FF,$92,$38,$22,$BE,$21,$A4,$A9,$A9,$35,$A7,$01
+.byte $1C,$39,$C4,$FF,$A2,$26,$BE,$23,$1B,$B2,$B2,$01
+.byte $FF,$FF,$5C,$A6,$AB,$20,$AF,$23,$A4,$A7,$BC,$C4,$00 ; I can't afford that! You're too rich already.
+
+ShopThankYouWhatElse:
+.byte $9D,$41,$B1,$AE,$50,$26,$FF,$AE,$1F,$A7,$AF,$BC,$C4,$01
+.byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Thank you kindly! Anything else?
+ShopTooBadWhatElse:
+.byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01
+.byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Eh, alright then. Anything else?
+
+ShopWhatWant:
+.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00 ; What'll it be?
+ShopWhatScroll:
+.byte $FF,$A0,$3D,$A6,$AB,$24,$A6,$4D,$4E,$67,$B2,$01
+.byte $FF,$FF,$FF,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
+ShopWhatToSell:
+.byte $FF,$A0,$A8,$4E,$BF,$33,$41,$21,$A7,$BE,$BC,$A4,$01
+.byte $FF,$FF,$FF,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
+ShopMagicToSell:
+.byte $FF,$FF,$92,$33,$61,$58,$B6,$55,$A8,$AF,$BC,$01
+.byte $FF,$38,$2F,$1A,$A9,$35,$50,$26,$B5,$01
+.byte $FF,$24,$A6,$4D,$4E,$1E,$60,$4E,$C0,$00 ; I will surely care for your scrolls well.
+
+ShopEquipNow:
+.byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01
+.byte $FF,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$AC,$B7,$FF,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
+ShopWhoWillTake:
+.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00 ; Who is it for?
+ShopCannotEquip:
+.byte $FF,$FF,$91,$B2,$AF,$A7,$FF,$B2,$B1,$FF,$B1,$B2,$BA,$C3,$C0,$01
+.byte $FF,$A2,$B2,$B8,$BE,$B5,$A8,$FF,$B1,$B2,$B7,$FF,$A4,$A5,$AF,$A8,$01
+.byte $FF,$FF,$B7,$B2,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$B7,$AB,$A4,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
+ShopItemStowed:
+.byte $FF,$91,$A4,$B9,$1F,$47,$B7,$4D,$B8,$A5,$45,$C5,$01
+.byte $92,$BE,$4E,$FF,$AD,$B8,$37,$4F,$B8,$21,$5B,$01
+.byte $FF,$2D,$29,$56,$55,$31,$A4,$AA,$B6,$C0,$00 ; Having trouble? I'll just put it in your bags.
+
 ShopInnWelcome:
 .byte $FF,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01
 .byte $B7,$B5,$A4,$32,$45,$63,$C4,$FF,$95,$A8,$21,$B8,$B6,$01
@@ -197,15 +234,15 @@ ShopDontForget:
 .byte $FF,$8D,$3C,$BE,$21,$A9,$35,$66,$21,$28,$01
 .byte $FF,$42,$A4,$AE,$1A,$A4,$65,$B2,$47,$4C,$01
 .byte $FF,$50,$26,$44,$B7,$B5,$A4,$32,$AF,$B6,$C4,$00 ; Don't forget to make a log of your travels!
-ShopHoldReset: 
+ShopInnSaved: 
 .byte $8D,$3C,$BE,$21,$56,$64,$A9,$A8,$A8,$58,$B6,$B2,$01
 .byte $42,$B8,$A6,$AB,$31,$A8,$B7,$53,$44,$B1,$46,$C5,$01
 .byte $C8,$91,$99,$7A,$96,$99,$FF,$9B,$2C,$28,$23,$A7,$C4,$C9,$00 ; Don't you feel so much better now? [HP/MP Restored!]
-ShopNothingToSell:
-.byte $FF,$8A,$A6,$AB,$C4,$FF,$A2,$26,$67,$3C,$BE,$B7,$01
-.byte $FF,$41,$32,$20,$B1,$BC,$1C,$1F,$AA,$C4,$00 ; Ach! You don't have anything!
-ShopKeepOnTrying:
-;.byte $94,$A8,$A8,$B3,$36,$B1,$B7,$B5,$BC,$1F,$AA,$AA,$B8,$BC,$B6,$69,$00
+
+ShopClinicWelcome:
+.byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01
+.byte $22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01
+.byte $FF,$56,$B8,$BF,$FF,$5D,$B5,$5C,$35,$B6,$C0,$00 ; Look to the light and peace be with you, warriors.
 ShopWhoToRevive:
 .byte $8F,$35,$20,$1B,$5B,$1D,$FF,$92,$38,$22,$01
 .byte $AA,$B5,$22,$21,$56,$55,$43,$5C,$3A,$A7,$01
@@ -214,29 +251,6 @@ ShopReturnToLife:
 .byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$01
 .byte $68,$AA,$AB,$B7,$69,$FF,$A0,$2F,$5C,$35,$B6,$C4,$01
 .byte $9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; By the grace of light... Warrior! Return to life!
-ShopMagicWelcome:
-.byte $FF,$8A,$AB,$C0,$FF,$8C,$B8,$37,$49,$25,$B6,$C0,$01
-.byte $FF,$8D,$2E,$56,$64,$3E,$A8,$AE,$1B,$B2,$01
-.byte $AE,$B1,$46,$1B,$1D,$20,$B5,$51,$5A,$C5,$00 ; Ah. Customers. Do you seek to know the arcane?
-ShopDontNeedHelp:
-.byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01
-.byte $22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01
-.byte $FF,$56,$B8,$BF,$FF,$5D,$B5,$5C,$35,$B6,$C0,$00 ; Look to the light and peace be with you, warriors.
-ShopLearnExit:
-ShopTooBad:
-.byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01
-.byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Eh, alright then. Anything else?
-ShopHowMany:
-.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
-.byte $FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$FF,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00 ; How many? __ will cost ya ________ G
-ShopEquipNow:
-.byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01
-.byte $FF,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$AC,$B7,$FF,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
-ShopCannotEquip:
-.byte $FF,$FF,$91,$B2,$AF,$A7,$FF,$B2,$B1,$FF,$B1,$B2,$BA,$C3,$C0,$01
-.byte $FF,$A2,$B2,$B8,$BE,$B5,$A8,$FF,$B1,$B2,$B7,$FF,$A4,$A5,$AF,$A8,$01
-.byte $FF,$FF,$B7,$B2,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$B7,$AB,$A4,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
 
 
 
@@ -249,8 +263,7 @@ ShopCannotEquip:
 
 
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  LUT containing shop data  [$8300 :: 0x38310]
 
@@ -2656,15 +2669,15 @@ IntroTitlePrepare:
 ;;    The jump table indicating entry points for various shop
 ;;  types.
 
-lut_ShopEntryJump:
-  .WORD EnterShop_Equip      ; weapon
-  .WORD EnterShop_Equip      ; armor
-  .WORD EnterShop_Magic      ; white magic
-  .WORD EnterShop_Magic      ; black magic
-  .WORD EnterShop_Clinic     ; clinic
-  .WORD EnterShop_Inn        ; inn
-  .WORD EnterShop_Item       ; item
-  .WORD EnterShop_Caravan    ; caravan
+;lut_ShopEntryJump:
+;  .WORD EnterShop_Equip      ; 0 weapon
+;  .WORD EnterShop_Equip      ; 1 armor
+;  .WORD EnterShop_Magic      ; 2 white magic
+;  .WORD EnterShop_Magic      ; 3 black magic
+;  .WORD EnterShop_Clinic     ; 4 clinic
+;  .WORD EnterShop_Inn        ; 5 inn
+;  .WORD EnterShop_Item       ; 6 item
+;  .WORD EnterShop_Caravan    ; 7 caravan
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2684,66 +2697,69 @@ EnterShop:
     STA shop_curprice
     STA shop_curprice+1
     STA shop_curprice+2
-    STA shop_curprice+3    
+    STA shop_curprice+3    ; not really used, but best be safe
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
     STA item_box_offset
     STA inv_canequipinshop
 
-EnterShopFromMenu:    
     JSR LoadShopCHRPal     ; load up the CHR and palettes (and the shop type)
     JSR DrawShop           ; draw the shop
 
     LDA shop_type              ; use the shop type to get the entry point for this shop
-    ASL A                      ; double it (2 bytes per pointer)
-    TAX                        ; put in X
-    LDA lut_ShopEntryJump, X   ; load up the entry point from our jump table
-    STA tmp
-    LDA lut_ShopEntryJump+1, X
-    STA tmp+1
-
-;    LDA #$4F
-;    STA music_track        ; set the music track to $4F (shop music)
-
-;    JMP (tmp)              ; jump to shop's entry point
-
-  ;; JIGS - different music depending on shop type! 
-  ; 0 weapon
-  ; 1 armor
-  ; 2 wmagic
-  ; 3 bmagic
-  ; 4 clinic
-  ; 5 inn
-  ; 6 item
-  ; 7 caravan
-  ;; just disable this code, and re-enable the last 3 lines above to return to normal!
-    
-    LDA dlgmusic_backup    ; JIGS - if the shop music is already playing, skip starting the song
-    CMP #$48
-    BEQ @DoShopJump
-    CMP #$51
-    BEQ @DoShopJump
-    CMP #$4F
-    BEQ @DoShopJump
-    
-    LDA shop_type
     CMP #4
-    BNE :+
+    BEQ @EnterClinic
+    CMP #5
+    BEQ @EnterInn
+    
+   @EnterShop:
+    LDA #$4F
+    STA music_track        ; set the music track to $4F (shop music)
+    STA dlgmusic_backup
+    JMP EnterNormalShop
+    
+   @EnterClinic:
     LDA #$48               ; for clinic (castle music, closest thing to a nice temple song!)
     STA music_track
     STA dlgmusic_backup
-  @DoShopJump:
-    JMP (tmp)
-  : CMP #5    
-    BNE :+
+    JMP EnterClinic
+    
+   @EnterInn:
     LDA #$51               ; for inn (the original menu music)
     STA music_track
     STA dlgmusic_backup    ; to replay inn music after saving
-    JMP (tmp)
-  : LDA #$4F
-    STA music_track        ; set the music track to $4F (shop music)
-    STA dlgmusic_backup
-    JMP (tmp)              ; jump to shop's entry point
-   
+    JMP EnterInn
+    
+    
+lut_ShopWelcome: ; uses shop_type to pick what lut_ShopStrings text to display
+.byte $0F ; weapons
+.byte $0F ; armor
+.byte $10 ; white magic
+.byte $10 ; black magic
+.byte $23 ; clinic (not used; clinics do their own logic)
+.byte $20 ; inn    (not used; inns do their own logic)
+.byte $0F ; item shop
+.byte $0F ; caravan
+
+lut_ShopWhatWant: ; uses shop_type to pick what lut_ShopStrings text to display
+.byte $18 ; weapons
+.byte $18 ; armor
+.byte $19 ; white magic
+.byte $19 ; black magic
+.byte $00 ; clinic (not used; clinics do their own logic)
+.byte $00 ; inn    (not used; inns do their own logic)
+.byte $18 ; item shop
+.byte $18 ; caravan
+
+lut_ShopMaxAmount:
+.byte $10 ; weapons
+.byte $10 ; armor
+.byte $04 ; white magic
+.byte $04 ; black magic
+.byte $00 ; clinic (not used; clinics do their own logic)
+.byte $00 ; inn    (not used; inns do their own logic)
+.byte $63 ; item shop
+.byte $63 ; caravan    
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2763,7 +2779,7 @@ EnterShopFromMenu:
 EnterShop_Magic:
     LDA #$22
     JSR DrawShopDialogueBox      ; "Ah. Customers."
-    JSR ShopLoop_BuyExit         ; give them the option to buy or exit
+  ;  JSR ShopLoop_BuyExit         ; give them the option to buy or exit
     BCS MagicShop_Exit           ; if they press B, exit the shop
     LDA cursor
     BNE MagicShop_Exit           ; otherwise if they selected 'exit', then exit
@@ -2773,7 +2789,7 @@ EnterShop_Magic:
     JSR DrawShopDialogueBox      ; "What spell do you want?"
 
   MagicShop_Loop:
-    JSR ShopSelectBuyMagic       ; now have them select the spell to buy
+  ;  JSR ShopSelectBuyMagic       ; now have them select the spell to buy
     BCS EnterShop_Magic           ; if they press B, continue the loop
 
     LDX cursor                   ; otherwise get the cursor in X
@@ -2784,7 +2800,7 @@ EnterShop_Magic:
     TAX 
     LDA inv_magic, X             ; see how many of this spell they already have
     STA shop_curitem
-    JSR CheckAllCharsForSpell    
+   ; JSR CheckAllCharsForSpell    
     CMP #4
     BCS @OutofStock              ; if 4 or more, print the "out of stock" message
 
@@ -2816,15 +2832,28 @@ EnterShop_Magic:
     
     
     
-CheckAllCharsForSpell:
-  INC shop_spell         ; increment spell ID
+CheckMagicInventory:
+  LDA item_box, X
+  SEC
+  SBC #ITEM_MAGICSTART   ; convert item ID to spell ID
+  STA shop_spell 
+  TAX
+  LSR A
+  LSR A
+  LSR A
+  SEC
+  ADC #$80
+  STA str_buf+$49, Y     ; put this spell's level in the string buffer
+  
+  LDA inv_magic, X       ; get amount in inventory
+  STA shop_amount
   LDA #0
   PHA                    ; push 0 to use as character ID
  @Loop:
   JSR Magic_ConvertBitsToBytes 
   
   LDY #0
-  @SearchMagicLoop:
+ @SearchMagicLoop:
   LDA TempSpellList, Y   ; check the unrolled spell list
   CMP shop_spell         ; see if their spell matches the ID of the spell trying to buy
   BEQ @FoundOne
@@ -2834,10 +2863,10 @@ CheckAllCharsForSpell:
   BEQ @NextChar
   BNE @SearchMagicLoop
     
-  @FoundOne:
-  INC shop_curitem       ; increase the # of spells if found
+ @FoundOne:
+  INC shop_amount        ; increase the # of spells if found
   
-  @NextChar:
+ @NextChar:
   PLA                    ; pull the 0 from the start, add 1
   CLC                    ; next loop: pull the 1, add 1 to make 2
   ADC #1                 ; next loop: pull the 2, add 1 to make 3... 
@@ -2847,15 +2876,49 @@ CheckAllCharsForSpell:
   PHA                    ; push the character ID
   JMP @Loop
   
-  @End:
-  DEC shop_spell         ; restore spell ID for the spell to buy
-  LDA shop_curitem       ; load the final tally for how many of the spell already in inventory
+ @End:
   RTS
   
+
+CheckEquipmentInventory:
+  STX shop_curitem       ; backup item ID
+  DEX                    ; convert item ID to 0-based
+  LDA inv_weapon, X      ; get the amount in inventory
+  STA shop_amount       
   
+  LDA #0
+  PHA                    ; push 0 to use as character ID
+ 
+ @Loop:
+  TAX
+ @SearchEquipmentLoop:
+  LDA ch_righthand, X    
+  CMP shop_curitem
+  BEQ @FoundOne
+  
+  INX
+  TAX
+  AND #$0F               ; chop off high bits to get loop counter (only the INX)
+  CMP #8                 ; loop through all 8 equipment slots
+  BEQ @NextChar
+  BNE @SearchEquipmentLoop
     
+ @FoundOne:
+  INC shop_amount        ; increase the # of spells if found
+  
+ @NextChar:
+  PLA                    ; pull the 0 from the start, add $40
+  CLC                    ; next loop: pull the $40, add $40 to make $80
+  ADC #$40               ; next loop: pull the $80, add $40 to make $C0... 
+  BEQ @End               ; next loop; pull the $C0, add $40 to make $0 again
+  
+  PHA                    ; push the character ID
+  JMP @Loop
+  
+ @End:
+  RTS
     
-    
+
     
     
     
@@ -2892,11 +2955,11 @@ EnterShop_Equip:
   : LDA #0
     STA shop_curprice+2         ; JIGS - make sure these are set to 0
     STA BlankItem       
-    STA SellingEquipment 
+ ;   STA SellingEquipment 
     LDA #1
     STA item_pageswap           ; tells LoadPrice in Bank F to use weapon/armor LUT
     
-    JSR ShopLoop_BuySellExit    ; give player Buy/Sell/Exit option
+  ;  JSR ShopLoop_BuySellExit    ; give player Buy/Sell/Exit option
     BCS @Exit                   ; if they pressed B, exit
     LDA cursor
     BEQ @Buy                    ; cursor=0  means they selected "Buy"
@@ -2920,7 +2983,7 @@ EnterShop_Equip:
     STA inv_canequipinshop      ; turn on the ability to dance to equipable items!
     LDA #0
     STA cursor
-    JSR ShopSelectBuyItem       ; have the player select something
+   ; JSR ShopSelectBuyItem       ; have the player select something
     BCS EquipShop_Cancel        ; if they pressed B, return to loop
     
     JSR Shop_CharacterStopDancing ; JIGS - turn off the cheer pose
@@ -2986,13 +3049,13 @@ EnterShop_Equip:
 
   @Sell:
     LDA #01
-    STA SellingEquipment         ; toggle so moving the cursor around past the max will shift the list
+  ;  STA SellingEquipment         ; toggle so moving the cursor around past the max will shift the list
     ;LDA #$14
     ;JSR DrawShopDialogueBox      ; "Whose item do you want to sell" dialogue
     ;JSR ShopLoop_CharNames       ; have the player select a character
     ;BCS @_Loop                   ; if they pressed B, jump back to loop
 
-    JSR EquipMenu_BuildSellBox   ; fill the item box with this character's equipment
+    ;JSR EquipMenu_BuildSellBox   ; fill the item box with this character's equipment
     BCS @ItemsForSale            ; if there are items for sale... proceed.  otherwise....
 
       LDA #$1E
@@ -3007,7 +3070,7 @@ EnterShop_Equip:
     STA inv_canequipinshop       ; turn on the ability to dance to equipable items!
     LDA #0
     STA cursor
-    JSR ShopSelectBuyItem        ; have the user select an item to sell
+   ; JSR ShopSelectBuyItem        ; have the user select an item to sell
     BCS @_Cancel                   ; if they pressed B, jump back to the loop
     
     LDA cursor
@@ -3017,7 +3080,7 @@ EnterShop_Equip:
     LDA item_box, X
     STA shop_curitem
     
-    DEC SellingEquipment
+    DEC shop_selling
     DEC inv_canequipinshop
     JSR DrawShopSellItemConfirm  ; draw the sell confirmation dialogue
     JSR ShopLoop_YesNo           ; give them the yes/no option
@@ -3058,109 +3121,200 @@ EnterShop_Equip:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-  ItemShop_Exit:
-    LDA #0
-    STA InItemShop                   ;; JIGS - note that we're leaving the item shop
-    RTS
 
-  ItemShop_CancelBuy:           ; jumped to for cancelled purchases
-    LDA #$25
-    JSR DrawShopDialogueBox     ; "too bad, something else?" dialogue
-    JMP ItemShop_Loop           ; return to loop
-
-EnterShop_Caravan:
-
-EnterShop_Item:
-    LDA #$09
+EnterNormalShop:
+    LDX shop_type
+    LDA lut_ShopWelcome, X
     JSR DrawShopDialogueBox     ; draw the "welcome" dialogue
+    JMP MainShopLoop
 
-  ItemShop_Loop:
-    JSR ShopLoop_BuyExit        ; give them the option to buy or exit
-    BCS ItemShop_Exit           ; if they pressed B, exit
-    LDA cursor
-    BNE ItemShop_Exit           ; otherwise if they selected 'exit', then exit
-
-    LDA #$0D
-    JSR DrawShopDialogueBox     ; "what would you like" dialogue
+RestartShopLoop:
+    LDA #$17  
+    JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
+    
+MainShopLoop:
+    LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
+    BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
+    JSR Shop_CharacterStopDancing 
+    
+  : LDA #$03
+    JSR DrawShopBox          ; draw box 3 (command box)
+    LDA #$0C
+    JSR DrawShopString       ; string 0C ("Buy Sell Exit")
+    LDA #$03
+    STA cursor_max           ; 3 options
     LDA #0
     STA cursor
-    JSR ShopSelectBuyItem       ; let them choose an item from the shop inventory
-    BCS ItemShop_Loop           ; if they pressed B, restart the loop
+    JSR CommonShopLoop_Cmd   ; do command loop
 
-    ;; JIGS - adding option to buy more than one...
-    JSR BuyLots
-    BCS ItemShop_CancelBuy
+    BCS ExitShop
+    LDA cursor
+    BEQ ShopBuy
+    CMP #1
+ ;   BEQ ShopSell
+    
+ExitShop:
+    RTS
+
+ShopBuy:
+    JSR LoadShopInventory
+    
+    LDX shop_type
+    LDA lut_ShopMaxAmount       ; gets either #99, #16, or #4 depending on shop type
+    STA shop_amount_max
+    
+    LDA lut_ShopWhatWant, X
+    JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
+    LDA #0
+    STA cursor
+    STA shop_selling
+    
+    JSR ShopSelectItem_Buy      ; let them choose an item from the shop inventory (fills str_buf with item IDs and everything!)
+    BCS RestartShopLoop         ; if they pressed B, restart the loop
+    
+Shop_CheckInventory:
+    LDX cursor
+    LDA item_box, X             ; get chosen item ID
+    STA shop_curitem            ; save it
+    
+    LDA #13
+    JSR MultiplyXA              ; multiply cursor position by each item's str_buf length
+    TAY
+    
+    LDA str_buf+$42, Y          ; item ID
+    STA shop_curitem
+    
+    LDA #0
+    STA shop_amount_high
+    
+    LDA str_buf+$46, Y   
+    CMP #$FF
+    BEQ @SingleDigit
+    
+    SEC
+    SBC #$80                    ; convert from tile ID to byte
+    LDX #10                     ; multiply by $0A to convert to hex tens column
+    JSR MultiplyXA
+    STA shop_amount_high     
+    
+   @SingleDigit:
+    LDA str_buf+$45, Y      
+    SEC
+    SBC #$80                    ; convert from tile ID to byte
+    CLC  
+    ADC shop_amount_high        ; add in 0 or tens column
+    STA shop_amount
+    
+    LDA shop_amount_max         ; get max 
+    STA tmp                     ; store in tmp
+    SEC
+    SBC shop_amount             ; subtract total in inventory/on characters
+    STA shop_amount_max         ; save as new max
+
+    CMP tmp                     ; compare to old max
+    BNE ShopSelectAmount        ; if its not maxed out, go buy more
+    
+    LDA shop_type               ; get shop type again
+    CMP #2
+    BEQ @Scrolls                ; if its 2 or 3, its a magic shop
+    CMP #3
+    BEQ @Scrolls 
+    
+    LDA #$13                     ; load up "you can't carry any more" string ID
+    JMP @DrawDialogue_AndReturn  ; print it and return    
+
+   @Scrolls:
+    LDA #$14                     ; "That spell is out of stock"
+
+   @DrawDialogue_AndReturn:    
+    JSR DrawShopDialogueBox   
+    JSR MenuWaitForBtn
+    JMP ShopBuy
+    
+ShopSelectAmount:
+    JSR SelectAmount_Buy        ; choose how many of an item to buy
+    BCS @ShopBuy_Return         ; if B was pressed, go back to choosing an item
   
-    @Shop_HaveMoney:
     JSR Shop_CanAfford          ; check to ensure they can afford this item
-    BCC @Confirm                ; if they can, jump ahead to complete the purchase.
-      LDA #$10
+    BCC @BuyConfirm             ; if they can, jump ahead to complete the purchase.
+      LDA #$11
       JSR DrawShopDialogueBox   ; if they can't, "you can't afford it" dialogue
-      JMP ItemShop_Loop         ; and return to loop
+      JSR MenuWaitForBtn
+      JMP ShopSelectAmount      ; and return to loop
+      
+   @ShopBuy_Return:
+    JMP ShopBuy
   
-    @Confirm: 
+   @BuyConfirm: 
     JSR DrawShopBuyItemConfirm  ; confirm price dialogue
     JSR ShopLoop_YesNo          ; give them the yes/no option
-    BCS ItemShop_CancelBuy      ; if they pressed B, cancel the purchase
+    BCS ShopSelectAmount        ; if they pressed B, return to selecting the amount
     LDA cursor
-    BNE ItemShop_CancelBuy      ; if they selected "No", cancel the purchase
+    BNE ShopSelectAmount        ; if they selected "No", return to selecting the amount
+    
+    LDA shop_type
+    CMP #2
+    BCS @CompletePurchase
   
-  
-  @CompletePurchase:    
+   @CompletePurchase:    
+    LDA shop_type
+    CMP #2
+    BCC @AddEquipment
+    CMP #4
+    BCC @AddMagic
+    
+   @AddItem:    
     LDX shop_curitem
     LDA items, X                ; load the current amount
     CLC
-    ADC MMC5_tmp                ; add in the amount to buy
+    ADC shop_amount_buy         ; add in the amount to buy
     STA items, X                ; and save
+    JMP @FinishPurchase 
+    
+   @AddEquipment:
+    LDX shop_curitem
+    LDA inv_weapon, X
+    CLC
+    ADC shop_amount_buy
+    STA inv_weapon, X
+    JMP @FinishPurchase 
+    
+   @AddMagic: 
+    LDX shop_curitem
+    LDA inv_magic, X
+    CLC
+    ADC shop_amount_buy
+    STA inv_magic, X   
+    
+   @FinishPurchase: 
     JSR ShopPayPrice            ; subtract the price from your gold amount
-    LDA #$13
+    LDA #$16
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
-    JMP ItemShop_Loop           ; and continue loop
+    JMP MainShopLoop            ; and continue loop
     
     
-    BuyLots:
-    LDA cursor            ; get current item selected
-    LDX #13               ; multiply by 16 (see ShopSelectBuyItem - it must be the same as how much Y is ADC'd by)
-    JSR MultiplyXA
-    TAX                   ; put in X for indexing
-    LDA str_buf+$42, X    ; point to string buffer+17, which is where the first item's ID is; next ID is in 16 bytes
-    STA MMC5_tmp+3
-    TAX
-    STA shop_curitem
-        
-      LDA items, X
-      STA MMC5_tmp+2      ; ammount we have
-      CMP #99
-      BCC :+
-         LDA #$0C
-         JSR DrawShopDialogueBox   ; "you have too many" dialogue
-         JMP ItemShop_Loop         ; return to loop
     
-    : LDA #100         ; then kinda reverse it
-      SEC
-      SBC MMC5_tmp+2  ; subtract the amount we already have from 1 over the limit
-      STA MMC5_tmp+1  ; how many items we can buy
-      LDA #1
-      STA MMC5_tmp     ; start with 1
-      STA InItemShop        ; and note that we're in an item shop goin' real fast
-                 
-    LDA #$26      ; "How many?" ; this makes the caravan guy really evil... how many bottled faeries does he HAVE?!
+SelectAmount_Buy:
+    LDA #$0A                ; "How many?" 
     JSR DrawShopDialogueBox
-    JSR BuyLotsQuantity ; and load the price up for viewing
-    JSR BuyLotsAmountLoop ; do the whole loop thing to pick how many new items to buy...    
-    BCC @End              ; if B is pressed, 
+    LDA #1
+    STA shop_amount_buy    
+    JSR PrintShopAmount     ; fill the spaces in the "how many?" text with numbers
+   
+    JSR @Start_Loop         ; do the whole loop thing to pick how many new items to buy...    
+    BCC @End                ; if B is pressed, 
     PLA
     PLA
-    JMP ItemShop_CancelBuy     ; return to loop
+    JMP ShopBuy             ; return to picking what to buy
+    
     @End:
     RTS
     
-   BuyLotsAmountLoop:
+   @Start_Loop:
     LDA joy              ; get the joy data
     AND #$0C             ; isolate up/down bits
     STA joy_prevdir      ; and store in prev_dir
                          ; then begin the loop...
-
   @Loop:
     JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
@@ -3168,7 +3322,6 @@ EnterShop_Item:
     BNE @B_Pressed       ; check to see if A or B have been pressed
     LDA joy_a
     BNE @A_Pressed
-
                          ; if neither pressed.. see if the cursor has been moved
     LDA joy              ; get joy
     AND #$0F             ; isolate up/down and left/right buttons
@@ -3190,27 +3343,27 @@ EnterShop_Item:
     BEQ @More
 
    @Less:                ; otherwise, it was down
-    DEC MMC5_tmp         ; 
-    LDA MMC5_tmp
+    DEC shop_amount_buy  
+    LDA shop_amount_buy
     CMP #0
     BNE @MoveDone        ; if it hasn't gone below 1, that's all -- continue loop
     
-    LDA MMC5_tmp+1       ; otherwise (below 1), wrap to our item limit
+    LDA shop_amount_max  ; otherwise (below 1), wrap to our item limit
     SEC
     SBC #$01             ; minus one
     JMP @MoveDone        ; desired cursor is in A, jump ahead to @MoveDone to write it back
 
    @More:
-    LDA MMC5_tmp         ; if Up or Right pressed, increase amount 
+    LDA shop_amount_buy  ; if Up or Right pressed, increase amount 
     CLC
     ADC #$01             ; increment it by 1
-    CMP MMC5_tmp+1       ; check to see if we've gone over the amount we can buy
+    CMP shop_amount_max  ; check to see if we've gone over the amount we can buy
     BCC @MoveDone        ; if not, jump ahead to @MoveDone
     LDA #1               ; if yes, wrap limit to 1
 
   @MoveDone:             ; code reaches here when A is to be the new amount to buy
-    STA MMC5_tmp         ; 
-    JSR BuyLotsQuantity  ; prints all the numbers
+    STA shop_amount_buy  ; 
+    JSR PrintShopAmount  ; prints all the numbers
     JMP @Loop            ; and continue loop
 
   @B_Pressed:            ; if B pressed....
@@ -3221,7 +3374,6 @@ EnterShop_Item:
     LDA #0
     STA joy_a            ; zero joy_a and joy_b so further buttons will be detected
     STA joy_b
-    STA joy_select       ; and select... but why?  select isn't used in shops?
     RTS
 
   @A_Pressed:            ; if A pressed...
@@ -3230,98 +3382,98 @@ EnterShop_Item:
     
     
     
-    BuyLotsQuantity:
-    LDA MMC5_tmp
+PrintShopAmount:
+    LDA shop_amount_buy
     STA tmp
     JSR PrintNumber_2Digit
-    LDA format_buf-2        ; copy the printed 2 digit number from the format buffer
-    STA str_buf+$06
+    LDA format_buf-2          ; copy the printed 2 digit number from the format buffer
+    STA str_buf+$B0           
     LDA format_buf-1
-    STA str_buf+$07
+    STA str_buf+$B1
     LDA #0
-    STA str_buf+$08
-    STA str_buf+$0F
+    STA str_buf+$B2
+    STA str_buf+$BF
     
     LDA #22
     STA dest_y
     LDA #03
     STA dest_x
     
-    LDA #<(str_buf+$06)        ; set our text pointer to point to the generated string
+    LDA #<(str_buf+$B0)        ; set our text pointer to point to the generated string
     STA text_ptr
-    LDA #>(str_buf+$07)
+    LDA #>(str_buf+$B0)
     STA text_ptr+1
-    JSR DrawComplexString
+    JSR DrawComplexString    
     
+ShopLoadPrice_Complex:    
     LDA shop_curitem
-    JSR LoadPrice                ; gets the price of the item you're trying to buy
-    JSR BuyLotsQuantityGetPrice     ; multiplies stuff
+    JSR LoadPrice          ; gets the base price of the item you're trying to buy
     
-    LDA tmp
+    CLC
+    LDA shop_amount_buy    ; quantity
+    LDX tmp                ; low byte of price
+    JSR MultiplyXA_Safe
+    STA tmp
     STA shop_curprice
-    LDA tmp+1
+    STX shop_x_price
+    
+    LDA shop_amount_buy
+    LDX tmp+1              ; middle byte of price
+    JSR MultiplyXA_Safe
+    ADC shop_x_price
+    STA tmp+1
     STA shop_curprice+1
-    LDA tmp+2
+    STX shop_x_price
+    
+    LDA shop_amount_buy
+    LDX tmp+2              ; high byte of price
+    JSR MultiplyXA_Safe
+    ADC shop_x_price
+    STA tmp+2
     STA shop_curprice+2
-    LDA tmp+3
+    
+    BCC :+
+       INX
+  : STA tmp+3
     STA shop_curprice+3
-        
+    
+;    LDA tmp
+;    STA shop_curprice
+;    LDA tmp+1
+;    STA shop_curprice+1
+;    LDA tmp+2
+;    STA shop_curprice+2
+;    LDA tmp+3
+;    STA shop_curprice+3
+;; JIGS - before, I had a bug where trying to save both at the same time didn't work.
+;;        if that's still the case, re-enable this
+
     JSR PrintNumber_6Digit
     
     LDA format_buf-6
-    STA str_buf+$09
+    STA str_buf+$B9
     LDA format_buf-5
-    STA str_buf+$0A
+    STA str_buf+$BA
     LDA format_buf-4
-    STA str_buf+$0B
+    STA str_buf+$BB
     LDA format_buf-3
-    STA str_buf+$0C
+    STA str_buf+$BC
     LDA format_buf-2
-    STA str_buf+$0D
+    STA str_buf+$BD
     LDA format_buf-1
-    STA str_buf+$0E
+    STA str_buf+$BE
     
     LDA #24
     STA dest_y
     LDA #06
     STA dest_x
     
-    LDA #<(str_buf+$09)        ; set our text pointer to point to the generated string
+    LDA #<(str_buf+$B9)        ; set our text pointer to point to the generated string
     STA text_ptr
-    LDA #>(str_buf+$09)
+    LDA #>(str_buf+$B9)
     STA text_ptr+1
     JMP DrawComplexString
     
-
- BuyLotsQuantityGetPrice:
-    CLC
-    LDA MMC5_tmp        ; quantity
-    LDX tmp             ; low byte of price
-    JSR MultiplyXA_Safe
-    ;STA shop_curprice   ; low byte of combined price
-    STA tmp
-    STX MMC5_tmp+$10
-    
-    LDA MMC5_tmp        ; quantity
-    LDX tmp+1           ; middle byte of price
-    JSR MultiplyXA_Safe
-    ADC MMC5_tmp+$10
-    ;STA shop_curprice+1
-    STA tmp+1
-    STX MMC5_tmp+$10
-    
-    LDA MMC5_tmp        ; quantity
-    LDX tmp+2           ; high byte of price
-    JSR MultiplyXA_Safe
-    ADC MMC5_tmp+$10
-    ;STA shop_curprice+2
-    STA tmp+2
-        
-    BCC :+
-       INX
-  : ;STX shop_curprice+3  
-    STA tmp+3
-    RTS
 
     
 ; SUPPORT ROUTINE -- code by Disch! 
@@ -3410,15 +3562,12 @@ ShopPayPrice:
     CMP #$07
     BNE @PayUp         ; otherwise, pay up
     
-    @ShopSteal:
-    LDA InItemShop           ; check if we're buying lots of things from an item shop
-    BNE :+              ; if so, need to make an item quantity check
-    
-    LDA MMC5_tmp        ; how many items are being bought?
+   @ShopSteal:
+    LDA shop_amount_buy ; how many items are being bought?
     CMP #03             ; only two hands so...
     BCS @PayUp          ; not getting away with it
     
-  : TXA
+    TXA
     LDX #100           
     JSR RandAX
     CMP #91             ; Player needs to roll 91 or over to do their special thing?
@@ -3426,7 +3575,7 @@ ShopPayPrice:
         JSR PlayHealSFX ; and a little victory vwoop
         RTS
     
-    @PayUp:
+   @PayUp:
     LDA gold
     SEC
     SBC shop_curprice         ; subtract low byte
@@ -3493,8 +3642,8 @@ Shop_CanAfford:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-EnterShop_Inn:
-    LDA #$1B
+EnterInn:
+    LDA #$20
     JSR DrawShopDialogueBox     ; "Welcome.. would you like to stay?" dialogue
 
     JSR ShopLoop_YesNo          ; give them the yes/no option
@@ -3510,38 +3659,20 @@ EnterShop_Inn:
 
     JSR InnClinic_CanAfford     ; assert that they can afford the price, and charge them
 
-   ; LDA #$30                    ; code only reaches here if the price could be afforded
-   ; STA $4004                   ;   silence square 2
-   ; LDA #$7F                    ;   and reset it's F-value to zero.
-   ; STA $4005                   ;  Game seems to do this in a few places... still not sure why
-   ; LDA #$00                    ;  probably prevents unwanted ugly sounds when switching tracks?
-   ; STA $4006                   ;   but it only does it for some tracks?
-   ; STA $4007
-   ;; JIGS - I don't think this is needed since Square 2 is not being used for SFX anymore?
-   
-
     JSR MenuFillPartyHP         ; refill the party's HP
     JSR MenuRecoverPartyMP      ;  and MP
-    ;JSR SaveGame                ;  then save the game (this starts the "you saved your game" jingle)
-    ;; JIGS - moving
     
     LDA #0
     STA joy_a                   ; clear A and B catchers
     STA joy_b
 
-    LDA #$1C
-    JSR DrawShopDialogueBox     ; "Don't forget when you leave your game" dialogue
+    LDA #$21
+    JSR DrawShopDialogueBox     ; "Remember to save" dialogue
 
     LDA #$03
     JSR LoadShopBoxDims         ; erase shop box 3 (command box)
     JSR EraseBox
 
-   ; JSR ClearOAM                ; clear OAM (to remove the cursor)
-   ; JSR DrawShopPartySprites    ; draw the party
-   ; JSR WaitForVBlank_L         ; then wait for VBlank before
-   ; LDA #>oam                   ;   performing sprite DMA
-   ; STA $4014                   ; all of this is to remove the cursor graphic without doing a real frame
-   ;; JIGS ^ why do that when you have this?
     JSR ShopFrameNoCursor 
     JSR FadeOutBatSprPalettes   ; and fade the party out
     JSR MenuWaitForBtn_SFX  
@@ -3550,70 +3681,50 @@ EnterShop_Inn:
     LDA #0
     STA $2001                   ; turn off PPU
     JSR LoadShopCHRPal          ; 
-    @PaletteLoop:    
+   @PaletteLoop:    
     JSR DimBatSprPalettes       ; dim the palettes to black so we can fade back in again; save screen reset it
     BCS @PaletteLoop            ; 
     JSR DrawShop                ; re-draw the shop!
     
   @LoopOne:
     JSR ShopFrameNoCursor       ; do a shop frame (with no visible cursor)
-
-;; JIGS - all this is handled by the new save screen and routines
-;    LDA music_track             ; check the music track
-;    CMP #$81                    ; if $81 (no music currently playing)...
-;    BNE :+
-;      LDA #$51 ; 4F                  ; restart track $4F (shop music)
-               ;; JIGS - menu music now!
-;      STA music_track           ; this happens because music stops after the save jingle
-
-;:   LDA joy_a                   ; check to see if either A or B have been pressed
-;    ORA joy_b
-;    BEQ @LoopOne                ; and keep looping until one of them has
     JSR FadeInBatSprPalettes    ; then fade the party back in
 
-
-
+  @Exit_HealthRestored:
+    LDA music_track             ; check to see if the music has silenced (will happen
+    CMP #$81                    ;  after the save jingle ends)
+    BNE :+
+      LDA #$51 ; 4F             ; restart track $4F (shop music) ;; JIGS - menu music now!
+      STA music_track
+    
+  : LDA #$22
+    JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue
+    JMP @True_Exit
+    
   @Exit:
     LDA #$03
-    JSR LoadShopBoxDims         ; erase shop box 3 (the command box)
-    JSR EraseBox                ; this is redundant if they stayed at the inn, but
-                                ; if the code jumped here because the user wanted to
-                                ; exit the inn, then this has meaning
+    JSR LoadShopBoxDims         ; erase shop box 3 (command box)
+    JSR EraseBox    
 
-    LDA #$1D
-    JSR DrawShopDialogueBox     ; "Hold Reset when turning power off" dialogue
-
+    LDA #$21
+    JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue 
+    
+  @True_Exit:  
     LDA #0
     STA joy_a
     STA joy_b                   ; clear A and B catchers
 
   @LoopTwo:
     JSR ShopFrameNoCursor       ; do a frame
-
-    LDA music_track             ; check to see if the music has silenced (will happen
-    CMP #$81                    ;  after the save jingle ends)
-    BNE :+
-      LDA #$51 ; 4F                  ; restart track $4F (shop music)
-               ;; JIGS - menu music now!
-      STA music_track
-:   LDA joy_a                   ; check to see if A or B have been pressed
+    LDA joy_a                   ; check to see if A or B have been pressed
     ORA joy_b
     BEQ @LoopTwo                ; and keep looping until one of them has
 
+ClinicInn_Exit:
     RTS                         ; then exit
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Enter Shop Clinic  [$A5A1 :: 0x3A5B1]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-ClinicShop_Exit:
-    RTS
-
-
-EnterShop_Clinic:
+EnterClinic:
     LDA #0
     STA joy_a                  ; clear A and B button catchers
     STA joy_b
@@ -3621,19 +3732,19 @@ EnterShop_Clinic:
     JSR ClinicBuildNameString  ; build the name string (also tells us if anyone is dead)
     BCC @NobodysDead           ; if nobody is dead... skip ahead
 
-    LDA #$20
+    LDA #$24
     JSR DrawShopDialogueBox    ; "Who needs to come back to life" dialogue
 
     JSR Clinic_SelectTarget    ; Get a user selection
-    LDA cursor                 ;   grab their selection
-    STA shop_curitem           ;   and put it in cur_item to hold it for later
-    BCS ClinicShop_Exit        ; If they pressed B, exit.
+    LDA cursor                 ; grab their selection
+    STA shop_curitem           ; and put it in cur_item to hold it for later
+    BCS ClinicInn_Exit         ; If they pressed B, exit.
 
     JSR DrawInnClinicConfirm   ; Draw the cost confirmation dialogue
     JSR ShopLoop_YesNo         ; give them the yes/no option
-    BCS EnterShop_Clinic       ; If they pressed B, restart loop
+    BCS EnterClinic            ; If they pressed B, restart loop
     LDA cursor
-    BNE EnterShop_Clinic       ; if they selected "No", restart loop
+    BNE EnterClinic            ; if they selected "No", restart loop
 
     JSR InnClinic_CanAfford    ; otherwise, they selected "Yes".  Make sure they can afford the charge
 
@@ -3658,7 +3769,7 @@ EnterShop_Clinic:
     LDA #$01
     STA ch_curhp, X            ; and give him 1 HP
 
-    LDA #$21
+    LDA #$25
     JSR DrawShopDialogueBox    ; "Warrior!  Return to life!"  dialogue
 
     LDA #$03
@@ -3670,8 +3781,8 @@ EnterShop_Clinic:
     LDA joy_a
     ORA joy_b
     BEQ @ReviveLoop            ; and loop (keep doing frames) until A or B pressed
-    JMP EnterShop_Clinic       ; then restart the clinic loop
-
+    JMP EnterClinic            ; then restart the clinic loop
+ 
   @NobodysDead:
     LDA #$23
     JSR DrawShopDialogueBox    ; if nobody is dead... "You don't need my help" dialogue
@@ -3685,9 +3796,170 @@ EnterShop_Clinic:
     LDA joy_a
     ORA joy_b
     BEQ @ExitLoop              ; and loop (keep doing frames) until either A or B pressed
-
     RTS                        ; then exit
 
+    
+    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Inn / Clinic Can Afford [$A689 :: 0x3A699]
+;;
+;;    Checks the cost of the inn/clinic and sees if the player can afford it.
+;;  if they can't afford it, this displays text telling them so, then EXITS
+;;  the inn/clinic.
+;;
+;;    This routine will only return to the code that called it if the player
+;;  can afford the price
+;;
+;;  IN:  item_box = price to check (inn/clinic prices are stored in the itembox)
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+InnClinic_CanAfford:
+    LDA gold+2         ; if high byte of gold is nonzero (> 65535 GP), they can afford it
+    BNE @CanAfford
+
+    LDA gold+1
+    CMP item_box+1     ; otherwise, compare mid byte of gold to high byte of cost
+    BEQ @CheckLow      ; if equal... need to compare low bytes
+    BCS @CanAfford     ; if greater... can afford
+    BCC @CantAfford    ; if less... can't afford
+
+  @CheckLow:
+    LDA gold           ; compare low bytes
+    CMP item_box
+    BCS @CanAfford     ; if gold >= cost, can afford.  otherwise....
+
+  @CantAfford:
+    LDA #$11
+    JSR DrawShopDialogueBox    ; draw "you can't afford it" dialogue
+
+    LDA #0                     ; clear joy_a and joy_b markers
+    STA joy_a
+    STA joy_b
+   @Loop:
+      JSR ShopFrameNoCursor    ; then just keep looping frames
+      LDA joy_a                ;  until either A or B pressed
+      ORA joy_b
+      BEQ @Loop
+
+    PLA                ; then pull the previous return address, and exit
+    PLA                ;  this is effectively a double-RTS.  Returning not
+    RTS                ;  only from this routine, but the routine that called this routine
+                       ;  IE:  this exits the shop.  Code does not return to the Inn/Clinic routine.
+
+  @CanAfford:
+    LDA gold           ; subtract the cost of the inn/clinic from the player's gold
+    SEC
+    SBC item_box
+    STA gold
+    LDA gold+1
+    SBC item_box+1
+    STA gold+1
+    LDA gold+2
+    SBC #0
+    STA gold+2
+
+    JMP DrawShopGoldBox  ; redraw the gold box to reflect changes, and exit
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Clinic_SelectTarget  [$A6D7 :: 0x3A6E7]
+;;
+;;     Draws the command box, fills it with the names of all the dead
+;;  characters, then waits for the user to select one of them.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Clinic_SelectTarget:
+    LDA #$03
+    JSR DrawShopBox            ; draw shop box #3 (command box)
+
+   LDA #<(str_buf+$10)        ; set our text pointer to point to the generated string
+   STA text_ptr
+   LDA #>(str_buf+$10)
+   STA text_ptr+1
+   JSR DrawShopComplexString  ; and draw it
+   
+    LDA #0
+    STA cursor 
+    JMP CommonShopLoop_Cmd     ; then do the shop loop to get the user's selection
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Clinic Build Name String   [$A6ED :: 0x3A6FD]
+;;
+;;     Builds the string to fill the command box.  The string consists of names
+;;  of characters in the party that are dead.  This tring is placed in str_buf+$10,
+;;  because str_buf shares space with item_box, and item_box still contains the price
+;;  of this clinic.
+;;
+;;     The string is only built here... it is not actually drawn.
+;;
+;;     In addition, cursor_max is filled to the proper number of options
+;;  available (ie:  the number of dead guys in the party).
+;;
+;;  OUT:   cursor_max = number of dead guys
+;;                  C = set if at least 1 dead guy, clear if no dead guys
+;;
+;;     The compiled string is 3 bytes per included character in format:
+;;  "1X 00 01" where 'X' is 0-3 indicating the char ID, and 01 is a double line
+;;  break.  "1X 00" is a control code to draw that character's name.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ClinicBuildNameString:
+    LDY #0                ; Y will be our string index
+    LDX #0                ; X will be our character index
+    STX cursor_max        ; will count how many characters are dead
+
+  @Loop:
+    LDA ch_ailments, X    ; get this char's OB ailments
+    CMP #$01              ; check to see if he's dead
+    BNE @NotDead          ; if not... skip him.  Otherwise...
+
+      TXA                 ; put char index in A
+      ROL A
+      ROL A
+      ROL A
+      AND #$03            ; shift and mask to make it char ID (0-3)
+
+      ADC #$10            ; add 10 to get the "draw stat" string control code ($10-$13).  Carry is impossible here
+      STA str_buf+$10, Y  ; put it in the string buffer
+      LDA #$00
+      STA str_buf+$11, Y  ; draw stat 0 (name)
+      LDA #$01
+      STA str_buf+$12, Y  ; followed by a double line break
+
+      TYA
+      CLC
+      ADC #$03            ; add 3 to the string index (we just put 3 bytes in the buffer)
+      TAY
+
+      INC cursor_max      ; and increment our dead guy counter
+
+  @NotDead:
+    TXA
+    CLC
+    ADC #$40              ; add $40 to our char index (look at next char)
+    TAX
+
+    BNE @Loop             ; and keep looping until it wraps (4 iterations)
+
+    LDA #$00
+    STA str_buf+$10, Y    ; then put a null terminator at the end of the string
+
+    LDA cursor_max        ; set C if we have at least 1 dead guy
+    CMP #$01              ; clear C otherwise
+
+    RTS                   ; and exit!
+
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3992,163 +4264,6 @@ Shop_CharacterCanEquip:
    .byte $0C
    .byte $0F
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Inn / Clinic Can Afford [$A689 :: 0x3A699]
-;;
-;;    Checks the cost of the inn/clinic and sees if the player can afford it.
-;;  if they can't afford it, this displays text telling them so, then EXITS
-;;  the inn/clinic.
-;;
-;;    This routine will only return to the code that called it if the player
-;;  can afford the price
-;;
-;;  IN:  item_box = price to check (inn/clinic prices are stored in the itembox)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-InnClinic_CanAfford:
-    LDA gold+2         ; if high byte of gold is nonzero (> 65535 GP), they can afford it
-    BNE @CanAfford
-
-    LDA gold+1
-    CMP item_box+1     ; otherwise, compare mid byte of gold to high byte of cost
-    BEQ @CheckLow      ; if equal... need to compare low bytes
-    BCS @CanAfford     ; if greater... can afford
-    BCC @CantAfford    ; if less... can't afford
-
-  @CheckLow:
-    LDA gold           ; compare low bytes
-    CMP item_box
-    BCS @CanAfford     ; if gold >= cost, can afford.  otherwise....
-
-  @CantAfford:
-    LDA #$10
-    JSR DrawShopDialogueBox    ; draw "you can't afford it" dialogue
-
-    LDA #0                     ; clear joy_a and joy_b markers
-    STA joy_a
-    STA joy_b
-   @Loop:
-      JSR ShopFrameNoCursor    ; then just keep looping frames
-      LDA joy_a                ;  until either A or B pressed
-      ORA joy_b
-      BEQ @Loop
-
-    PLA                ; then pull the previous return address, and exit
-    PLA                ;  this is effectively a double-RTS.  Returning not
-    RTS                ;  only from this routine, but the routine that called this routine
-                       ;  IE:  this exits the shop.  Code does not return to the Inn/Clinic routine.
-
-  @CanAfford:
-    LDA gold           ; subtract the cost of the inn/clinic from the player's gold
-    SEC
-    SBC item_box
-    STA gold
-    LDA gold+1
-    SBC item_box+1
-    STA gold+1
-    LDA gold+2
-    SBC #0
-    STA gold+2
-
-    JMP DrawShopGoldBox  ; redraw the gold box to reflect changes, and exit
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Clinic_SelectTarget  [$A6D7 :: 0x3A6E7]
-;;
-;;     Draws the command box, fills it with the names of all the dead
-;;  characters, then waits for the user to select one of them.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-Clinic_SelectTarget:
-    LDA #$03
-    JSR DrawShopBox            ; draw shop box #3 (command box)
-
-   LDA #<(str_buf+$10)        ; set our text pointer to point to the generated string
-   STA text_ptr
-   LDA #>(str_buf+$10)
-   STA text_ptr+1
-   JSR DrawShopComplexString  ; and draw it
-   
-    LDA #0
-    STA cursor 
-    JMP CommonShopLoop_Cmd     ; then do the shop loop to get the user's selection
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Clinic Build Name String   [$A6ED :: 0x3A6FD]
-;;
-;;     Builds the string to fill the command box.  The string consists of names
-;;  of characters in the party that are dead.  This tring is placed in str_buf+$10,
-;;  because str_buf shares space with item_box, and item_box still contains the price
-;;  of this clinic.
-;;
-;;     The string is only built here... it is not actually drawn.
-;;
-;;     In addition, cursor_max is filled to the proper number of options
-;;  available (ie:  the number of dead guys in the party).
-;;
-;;  OUT:   cursor_max = number of dead guys
-;;                  C = set if at least 1 dead guy, clear if no dead guys
-;;
-;;     The compiled string is 3 bytes per included character in format:
-;;  "1X 00 01" where 'X' is 0-3 indicating the char ID, and 01 is a double line
-;;  break.  "1X 00" is a control code to draw that character's name.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-ClinicBuildNameString:
-    LDY #0                ; Y will be our string index
-    LDX #0                ; X will be our character index
-    STX cursor_max        ; will count how many characters are dead
-
-  @Loop:
-    LDA ch_ailments, X    ; get this char's OB ailments
-    CMP #$01              ; check to see if he's dead
-    BNE @NotDead          ; if not... skip him.  Otherwise...
-
-      TXA                 ; put char index in A
-      ROL A
-      ROL A
-      ROL A
-      AND #$03            ; shift and mask to make it char ID (0-3)
-
-      ADC #$10            ; add 10 to get the "draw stat" string control code ($10-$13).  Carry is impossible here
-      STA str_buf+$10, Y  ; put it in the string buffer
-      LDA #$00
-      STA str_buf+$11, Y  ; draw stat 0 (name)
-      LDA #$01
-      STA str_buf+$12, Y  ; followed by a double line break
-
-      TYA
-      CLC
-      ADC #$03            ; add 3 to the string index (we just put 3 bytes in the buffer)
-      TAY
-
-      INC cursor_max      ; and increment our dead guy counter
-
-  @NotDead:
-    TXA
-    CLC
-    ADC #$40              ; add $40 to our char index (look at next char)
-    TAX
-
-    BNE @Loop             ; and keep looping until it wraps (4 iterations)
-
-    LDA #$00
-    STA str_buf+$10, Y    ; then put a null terminator at the end of the string
-
-    LDA cursor_max        ; set C if we have at least 1 dead guy
-    CMP #$01              ; clear C otherwise
-
-    RTS                   ; and exit!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4197,7 +4312,6 @@ ShopFrameNoCursor:
     JSR UpdateJoy              ; update joypad data
     LDA joy_a                  ; see if either A or B pressed
     ORA joy_b
-    ;ORA joy_start
     BEQ @CheckMovement         ; if not... check directionals
 
     JMP PlaySFX_MenuSel        ; if either A or B pressed, play the selection sound effect, and exit
@@ -4214,7 +4328,6 @@ ShopFrameNoCursor:
     LDA #0
     STA joy_a
     STA joy_b
-    STA joy_start
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4255,16 +4368,6 @@ DrawShop:
     LDX shop_type                ; get the shop type in X
     LDA lut_ShopkeepAdditive, X  ; use it to fetch the image additive from our LUT
     STA tmp+2                    ; tmp+2 is the image additive (see DrawImageRect)
-
-    ;LDA #$06                     ; the shopkeeper image rectangle
-    ;STA dest_y                   ;  coords:  $0B,$06
-    ;LDA #$0B                     ;    dims:  10x10
-    ;STA dest_x
-    ;LDA #10
-    ;STA dest_wd
-    ;STA dest_ht
-    
-    ;; JIGS - making this smaller
     
     LDA #$08                     
     STA dest_y                   
@@ -4379,7 +4482,7 @@ DrawShopGoldBox:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-EquipMenu_BuildSellBox:
+BuildSellBox:
     LDY #63
     LDA #0
    @ClearBox:
@@ -4390,7 +4493,10 @@ EquipMenu_BuildSellBox:
     LDX #$FF
     INY    
     LDA shop_type        ; check shop type, and fork appropriately
-    BNE @SkipArmor
+    BEQ @SkipWeapon
+    CMP #1    
+    BEQ @SkipArmor
+    BNE @SkipMagic
     
   @SkipWeapon:
     INX  
@@ -4410,7 +4516,6 @@ EquipMenu_BuildSellBox:
     CPX #64
     BNE @WeaponLoop
     JMP @Done
-   
    
    @SkipArmor:
     INX  
@@ -4437,14 +4542,33 @@ EquipMenu_BuildSellBox:
     LDA #0
     STA item_box, X
     INX 
-    CPX #$40
+    CPX #64
     BCC @Done
     
     LDA item_box
     CMP #01
     RTS
     
+  @SkipMagic:
+    INX  
+    CPX #64
+    BEQ @Done
+
+  @MagicLoop:
+    LDA inv_magic, X    ; get the magic ID in this slot
+    BEQ @SkipMagic
     
+    TXA
+    CLC
+    ADC #MG_START+1     ; add magic ID offset+1
+    STA item_box, Y     ; store in item_box
+    
+    INX                  ; convert magic to +1 ID 
+    INY
+   @ResumeMagicLoop: 
+    CPX #64
+    BNE @WeaponLoop
+    JMP @Done    
     
     
     
@@ -4466,24 +4590,7 @@ EquipMenu_BuildSellBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-ShopSelectBuyItem:
-    INC cursor_change ; indicate to change character poses right away
-    LDY #0            ; zero Y... this will be our string building index
-    STY cursor_max    ; up counter
-  @Loop:
-    LDA item_box_offset ; 0 always, except when selling items, then it moves to scroll the list!
-    CLC
-    ADC cursor_max
-    TAX
-    
-    LDA item_box, X      ; use it to get the next shop item
-    BEQ @Done            ; if null terminator, no more shop items.  We're done
-                         ; otherwise... start building the string
-    STA str_buf+$42, Y   ; put item ID
-    STA str_buf+$4C, Y   ; 
-    TAX                  ; save in X 
-    
+ShopSelectItem_Buy_FillString:
     LDA shop_type
     CMP #2
     BCS :+
@@ -4503,24 +4610,55 @@ ShopSelectBuyItem:
     STA str_buf+$48, Y
     STA str_buf+$49, Y
     STA str_buf+$4A, Y
-    LDA #$BB             ; x
+    LDA #$BB              ; x
     STA str_buf+$44, Y
-   
+    RTS
+
+
+ShopSelectItem_Buy:
+    LDY #0            ; zero Y... this will be our string building index
+    STY cursor_max    ; up counter
+  @Loop:
+    LDA item_box_offset ; 0 always, except when selling items, then it moves to scroll the list!
+    CLC
+    ADC cursor_max
+    TAX
+    
+    LDA item_box, X      ; use it to get the next shop item
+    BEQ @Done            ; if null terminator, no more shop items.  We're done
+                         ; otherwise... start building the string
+    STA str_buf+$42, Y   ; put item ID
+    STA str_buf+$4C, Y   ; 
+    TAX                  ; save in X 
+    
+    JSR ShopSelectItem_Buy_FillString ; so the above BEQ @Done will work...
+
     LDA shop_type
     CMP #2
-    BCS @ItemShopQTY
+    BCC @EquipmentQTY
+    CMP #4
+    BCC @MagicQTY
     
-   @EquipmentShopQTY:
-    DEX   
-    LDA inv_weapon, X
-    STA tmp
+   @ItemQTY:
+    LDA items, X
+    JMP :++              ; double ++ so it doesn't load shop_amount
+   
+   @EquipmentQTY:
+    JSR CheckEquipmentInventory ; like CheckMagicInventory, but doesn't use Y
     JMP :+
     
-   @ItemShopQTY: 
-    LDA items, X
-    STA tmp
+   @MagicQTY: 
+    TYA                     
+    PHA
+    JSR CheckMagicInventory ; does everything to check how many of each spell there is, known and in inventory
+    PLA                     ; this also puts spell level in str_buf+$49, Y! 
+    TAY                     ; it does this before Y is re-used for another loop and restored here
+    LDA #$95                ; L
+    STA str_buf+$48, Y      ; overwrite the #$FF in this slot
+  : LDA shop_amount
     
-  : JSR PrintNumber_2Digit ; print quantity
+  : STA tmp
+    JSR PrintNumber_2Digit ; print quantity
     LDA format_buf-1       ; tens   
     STA str_buf+$46, Y    
     LDA format_buf-2       ; ones 
@@ -4534,10 +4672,10 @@ ShopSelectBuyItem:
     @TwoDigit:
     STA str_buf+$45, Y   
     
-    
-;;  02/07 Item ID 05 _  _  [  Inventory QTY ]  05 _  _  _  03 Item ID 01
-;;  41    42      43 44 45 46 47-48         49 4A 4B 4C 4D 4E 4F      50
-
+;;  The item string should now look like this:    
+;;  02/07 Item ID 05 x  Inventory QTY 05 | _  _           | _  03 Item ID 01
+;;  41    42      43 44 45-46         47 | 48 49          | 4A 4B 4C      4D 
+;;                             if magic: | L  Spell Level |
     
     TYA
     CLC                  ; add 16 to our string index so the next item is drawn after this item
@@ -4568,10 +4706,8 @@ ShopSelectBuyItem:
         
     LDA #$7F
     STA str_buf+$93         ; ! icon on black background
-    
     LDA #$7E
     STA str_buf+$95         ; just an empty, black background 
-    
     
     LDA #$02
     JSR DrawShopBox        ; draw shop box #2 (inv list box)
@@ -4584,7 +4720,7 @@ ShopSelectBuyItem:
 
     LDA #$03
     JSR LoadShopBoxDims
-    JSR EraseBox           ; erase shop box #3 (command box)
+    JSR EraseBox             ; erase shop box #3 (command box)
 
     JMP CommonShopLoop_List  ; everything's ready!  Just run the common loop from here, then return
     
@@ -4603,18 +4739,18 @@ ShopSelectBuyItem:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ShopLoop_BuyExit:
-    LDA #$03
-    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
-    LDA #$0B
-    JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
+;ShopLoop_BuyExit:
+;    LDA #$03
+;    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
+;    LDA #$0B
+;    JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
 
-    LDA #2
-    STA cursor_max           ; 2 cursor options
-    LDA #0
-    STA cursor
+;    LDA #2
+;    STA cursor_max           ; 2 cursor options
+;    LDA #0
+;    STA cursor
 
-    JMP CommonShopLoop_Cmd   ; do the common shop loop, and exit
+;    JMP CommonShopLoop_Cmd   ; do the common shop loop, and exit
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4650,18 +4786,18 @@ ShopLoop_YesNo:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ShopLoop_BuySellExit:
-    LDA #$03
-    JSR DrawShopBox          ; draw box 3 (command box)
-    LDA #$0A
-    JSR DrawShopString       ; string 0A ("Buy Sell Exit")
+;ShopLoop_BuySellExit:
+;    LDA #$03
+;    JSR DrawShopBox          ; draw box 3 (command box)
+;    LDA #$0A
+;    JSR DrawShopString       ; string 0A ("Buy Sell Exit")
 
-    LDA #$03
-    STA cursor_max           ; 3 options
-    LDA #0
-    STA cursor
+;    LDA #$03
+;    STA cursor_max           ; 3 options
+;    LDA #0
+;    STA cursor
 
-    JMP CommonShopLoop_Cmd   ; do command loop
+;    JMP CommonShopLoop_Cmd   ; do command loop
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4727,7 +4863,7 @@ ShopLoop_CharNames:
 
 CommonShopLoop_Cmd:
     LDA #<lut_ShopCurs_Cmd     ; get the pointer to the desired cursor position LUT
-    STA shop_cursor_ptr               ;  put the pointer in (text_ptr).  Yes, I know... 
+    STA shop_cursor_ptr        ;  put the pointer in (text_ptr).  Yes, I know... 
     LDA #>lut_ShopCurs_Cmd     ;  it's not really text.
     STA shop_cursor_ptr+1
     JMP _CommonShopLoop_Main   ; then jump ahead to the main entry for these routines
@@ -4758,12 +4894,12 @@ CommonShopLoop_List:
     LDA (shop_cursor_ptr), Y    ; read it
     STA shopcurs_y       ; and record it
 
-    LDA inv_canequipinshop     ; then do the thing to update character poses and ! equipped things
-    BEQ :+
-        LDA cursor_change          ; did the cursor change since the last frame?
-        BEQ :+
-    DEC cursor_change    
-    JSR Shop_CharacterCanEquip ; JIGS - if its weapon or armor shops, check the cursor for the highlighted item
+ ;   LDA inv_canequipinshop     ; then do the thing to update character poses and ! equipped things
+ ;   BEQ :+
+ ;       LDA cursor_change          ; did the cursor change since the last frame?
+ ;       BEQ :+
+ ;   DEC cursor_change    
+ ;   JSR Shop_CharacterCanEquip ; JIGS - if its weapon or armor shops, check the cursor for the highlighted item
                                ; then apply a high bit to ailments that tells the sprite-drawing routine to do them in cheer pose! oof
         
   : JSR ShopFrame        ; now that cursor position has been recorded... do a frame
@@ -4785,7 +4921,7 @@ CommonShopLoop_List:
     CMP #0               ; then check to see if buttons have been pressed or not
     BEQ @Loop            ; if not.. do thing, and continue loop
 
-    INC cursor_change
+  ;  INC cursor_change
     CMP #$08             ; see if the button pressed was up or down
     BNE @Down
 
@@ -4793,7 +4929,7 @@ CommonShopLoop_List:
     DEC cursor           ; if up pressed, decrement the cursor by 1
     BPL @Loop            ; if it hasn't gone below zero, that's all -- continue loop
 
-    LDA SellingEquipment
+    LDA shop_selling
     BNE @ScrollListUp
     
     @UpReturn:
@@ -4809,7 +4945,7 @@ CommonShopLoop_List:
     CMP cursor_max       ; check to see if we've gone over the cursor max
     BCC @MoveDone        ; if not, jump ahead to @MoveDone
 
-    LDA SellingEquipment
+    LDA shop_selling
     BNE @ScrollListDown
     @DownReturn:
     
@@ -4868,7 +5004,7 @@ CommonShopLoop_List:
     STA item_box_offset
     LDA #0
     STA cursor           
-    JMP ShopSelectBuyItem
+    JMP ShopSelectItem_Buy
 
 
 @ScrollListUp:
@@ -4880,7 +5016,7 @@ CommonShopLoop_List:
     STA item_box_offset
     LDA #4
     STA cursor
-    JMP ShopSelectBuyItem
+    JMP ShopSelectItem_Buy
 
 ClearShopkeeperTextBox:
     JSR ShopFrame        ; now that cursor position has been recorded... do a frame
@@ -4956,41 +5092,41 @@ lut_ShopCurs_List:   ; cursor positions for the inventory list box
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ShopSelectBuyMagic:
-    LDA #0
-    STA cursor
-    STA cursor_max     ; zero cursor max... this will count the number of spells for sale.
-    LDY #0             ; Y will be our string index
+;ShopSelectBuyMagic:
+;    LDA #0
+;    STA cursor
+;    STA cursor_max     ; zero cursor max... this will count the number of spells for sale.
+;    LDY #0             ; Y will be our string index
 
-  @Loop:
-    LDX cursor_max
-    LDA item_box, X    ; get next item in shop inventory
-    BEQ @Done          ; if it's zero (the null terminator), break out of the loop
+;  @Loop:
+;    LDX cursor_max
+;    LDA item_box, X    ; get next item in shop inventory
+;    BEQ @Done          ; if it's zero (the null terminator), break out of the loop
    
-    STA str_buf+$42, Y ; store item ID at $11
-    STA str_buf+$48, Y ; and $17
-    LDA #$02
-    STA str_buf+$41, Y ; store $02 ("draw item name" control byte) at $10
-    LDA #$03
-    STA str_buf+$47, Y ; store $03 ("draw item price" control byte) at $16
-    LDA #$01
-    STA str_buf+$43, Y ; store $01 (double line break) at $12 and $18
-    STA str_buf+$49, Y
-    LDA #$95
-    STA str_buf+$44, Y ; JIGS - normal L now
-    LDA #$FF           ; and a space
-    STA str_buf+$46, Y
+;    STA str_buf+$42, Y ; store item ID at $11
+;    STA str_buf+$48, Y ; and $17
+;    LDA #$02
+;    STA str_buf+$41, Y ; store $02 ("draw item name" control byte) at $10
+;    LDA #$03
+;    STA str_buf+$47, Y ; store $03 ("draw item price" control byte) at $16
+;    LDA #$01
+;    STA str_buf+$43, Y ; store $01 (double line break) at $12 and $18
+;    STA str_buf+$49, Y
+;    LDA #$95
+;    STA str_buf+$44, Y ; JIGS - normal L now
+;    LDA #$FF           ; and a space
+;    STA str_buf+$46, Y
 
-    LDA str_buf+$42, Y ; get the item ID
-    SEC
-    SBC #ITEM_MAGICSTART  ; subtract 
-    LSR A
-    LSR A
-    LSR A              ; then divide by 8.  This gives us the spell's level
-    SEC
-    ADC #$80           ; SEC then add $80 (so really... add $81).  This converts the 0-based
+;    LDA str_buf+$42, Y ; get the item ID
+;    SEC
+;    SBC #ITEM_MAGICSTART  ; subtract 
+;    LSR A
+;    LSR A
+;    LSR A              ; then divide by 8.  This gives us the spell's level
+;    SEC
+;    ADC #$80           ; SEC then add $80 (so really... add $81).  This converts the 0-based
                        ;  level, into the 1-based tile to draw.  IE:  level=0 prints the "1" tile.
-    STA str_buf+$45, Y ; put that tile at $14
+;    STA str_buf+$45, Y ; put that tile at $14
 
                  ; string is now:  "02 XX 01 C6 VV 03 XX 01" where XX is the item ID, and VV is the spell level
                  ;  which... after processing all control codes... will draw to:
@@ -4998,36 +5134,36 @@ ShopSelectBuyMagic:
                  ; Name
                  ; LV_Price
 
-    TYA
-    CLC                ; that bit of string is 8 bytes... so add 8 to our
+;    TYA
+;    CLC                ; that bit of string is 8 bytes... so add 8 to our
     ;ADC #$08           ;  string index:  Y
     ;; JIGS - it is 9!
-    ADC #$09
-    TAY
+;    ADC #$09
+;    TAY
 
-    INC cursor_max     ; increment cursor max to count this entry
-    LDA cursor_max
-    CMP #5             ; check to see if we have 5 spells yet (can't sell more than 5)
-    BCC @Loop          ; keep looping if we have less than 5
+;    INC cursor_max     ; increment cursor max to count this entry
+;    LDA cursor_max
+;    CMP #5             ; check to see if we have 5 spells yet (can't sell more than 5)
+;    BCC @Loop          ; keep looping if we have less than 5
 
-  @Done:
-    LDA #$00
-    STA str_buf+$41, Y ; put a null terminator at the end of the string
+;  @Done:
+;    LDA #$00
+;    STA str_buf+$41, Y ; put a null terminator at the end of the string
 
-    LDA #$02
-    JSR DrawShopBox    ; draw shop box 2 (inventory list box)
+;    LDA #$02
+;    JSR DrawShopBox    ; draw shop box 2 (inventory list box)
 
-    LDA #<(str_buf+$41)         ; set the text pointer to our string
-    STA text_ptr
-    LDA #>(str_buf+$41)
-    STA text_ptr+1
-    JSR DrawShopComplexString   ; and draw it
+;    LDA #<(str_buf+$41)         ; set the text pointer to our string
+;    STA text_ptr
+;    LDA #>(str_buf+$41)
+;    STA text_ptr+1
+;    JSR DrawShopComplexString   ; and draw it
 
-    LDA #$03
-    JSR LoadShopBoxDims         ; then erase shop box 3 (command box)
-    JSR EraseBox
+;    LDA #$03
+;    JSR LoadShopBoxDims         ; then erase shop box 3 (command box)
+;    JSR EraseBox
 
-    JMP CommonShopLoop_List     ; and have the user select an option from the shop inventory list
+;    JMP CommonShopLoop_List     ; and have the user select an option from the shop inventory list
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5241,68 +5377,13 @@ DrawShopDialogueBox:
 DrawShopBuyItemConfirm:
     LDA #$0E
     JSR DrawShopDialogueBox  ; draws "Gold  OK?" -- IE:  all the non-price text
-
-    LDA InItemShop             ;; JIGS - and skip loading the price if we're in an item shop
-    BEQ :+ 
     
     LDA #<(str_buf+$09)        ; set our text pointer to point to the generated string
     STA text_ptr
     LDA #>(str_buf+$09)
     STA text_ptr+1
     LDA #03
-    JMP :+++
-    
-    ;; JIGS - that will set it in the right spot, plus the edits at the ++ jump point
-        
-  : LDA shop_type
-    CMP #2
-    BCC @EquipShop
-   
-   @MagicShop:
-    LDA cursor
-    LDX #9
-    JSR MultiplyXA
-    CLC
-    ADC #<(str_buf+$47)   ; the item price control code spot in ShopSelectBuyMagic
-    STA text_ptr    
-    PHA
-    LDA #>(str_buf+$47)
-    STA text_ptr+1
-    JMP :+
-
-   @EquipShop: 
-    LDA cursor            
-    LDX #13               ; this needs to be the same amount that Y is ADC'd by in ShopSelectBuyItem
-    JSR MultiplyXA
-    CLC
-    ADC #<(str_buf+$4B)   ; the item price control code spot in ShopSelectBuyItem
-    STA text_ptr          
-    PHA
-    LDA #>(str_buf+$4B)
-    STA text_ptr+1
-    
-  : PLA
-    CLC                   ; add 2 and put in X.  X will now be
-    ADC #$02              ;  where we need to put the null terminator (2 bytes after
-    TAX                   ;  the start of the string -- all we're drawing is "03 XX")
-
-    LDA #0
-    STA str_buf, X        ; put the null terminator there
-
-    DEX                   ; decrement X...
-    LDA str_buf, X        ;   this gets the item ID from the string
-    STA shop_curitem      ;  store in the current item
-    
-    LDA shop_curitem      ; get the current item
-    JSR LoadPrice         ; load its price (gets put in tmp, tmp+1)
-
-    LDA tmp               ; copy the price to shop_curprice
-    STA shop_curprice
-    LDA tmp+1
-    STA shop_curprice+1
-
-    LDA #04
-  : STA dest_x
+    STA dest_x
     INC dest_y
     INC dest_y
     

@@ -27,8 +27,7 @@ ch_extraquiet    = $5BF6
 ;; At the very least this could mess up the Prelude's melody's loop counter.
 
 MMC5_tmp        = $5CE0 ; 16 bytes, tmp ram not used by the original game
-ItemToUnequip   = $5CEE
-ItemToEquip     = $5CEF ; shared ^ 
+
 RomRamMapping_lut_index    = $5CED
 btl_loadenemystats_counter = $5CEE
 btl_loadenemystats_index = $5CEF
@@ -220,6 +219,22 @@ inv_trash          = inv_equip + $80 ; 16 bytes to backup thrown away items?
 
 game_flags      = unsram + $0300  ; must be on page bound
 
+
+shop_curprice     = $03A0 ; 01, 02, 03 - 4 bytes ; will mess up buying things if shared
+shop_curitem      = $03A4
+shop_amount       = $03A5
+shop_amount_high  = $03A6
+shop_amount_buy   = $03A7
+shop_amount_max   = $03A8
+shop_charindex    = $03A9
+shop_spell        = $03AA
+shop_selling      = $03AB
+shop_cursorchange = $03AC
+ItemToUnequip     = $03AD
+ItemToEquip       = $03AE
+shop_x_price      = $03AF
+
+
 ptygen          = $6000   ; $4C bytes
  ptygen_class   = ptygen
  ptygen_name    = ptygen+1 ; 7 bytes
@@ -253,11 +268,6 @@ TempSpellListIndex   = $6018
 GetSpellLevelIndex   = $6019
 CharacterIndexBackup = $601A
 CharacterEquipBackup = $601B
-
-shop_curprice   = $6020 ; 22, 23, 24 - 4 bytes ; will mess up buying things if shared
-shop_charindex  = $6025
-shop_spell      = $6026
-shop_curitem    = $6027
 
 btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
 GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
@@ -565,7 +575,6 @@ shop_cursor_ptr = $6E ; +$6F
 equipoffset     = $70 ; menus
 Woosh           = $71 ; battle
 
-SellingEquipment    = $71 ; shops
 treasure_offset     = $72 ; maps
 item_box_offset     = $72 ; shops
 item_box_offset_old = $73 ; shops
@@ -667,7 +676,6 @@ puzzle           = $0300  ; used
 str_buf          = $0300  ; $39 bytes at least -- buffer must not cross page
 item_box         = $0300  ; used in shops
 btl_screenbackup = $0300  ; used in battle
-cursor_change    = item_box+$97 
 
 cur_pal         = $03C0       ; 32 bytes
 inroom_pal      = cur_pal+$20 ; 16 bytes
