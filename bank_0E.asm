@@ -2761,75 +2761,6 @@ lut_ShopMaxAmount:
 .byte $63 ; caravan    
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Enter Magic Shop  [$A357 :: 0x3A367]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  MagicShop_Exit:
-    RTS
-
-  MagicShop_CancelPurchase:
-    LDA #$25
-    JSR DrawShopDialogueBox      ; "too bad... something else?" dialogue
-    JMP MagicShop_Loop           ; jump ahead to loop
-
-
-EnterShop_Magic:
-    LDA #$22
-    JSR DrawShopDialogueBox      ; "Ah. Customers."
-  ;  JSR ShopLoop_BuyExit         ; give them the option to buy or exit
-    BCS MagicShop_Exit           ; if they press B, exit the shop
-    LDA cursor
-    BNE MagicShop_Exit           ; otherwise if they selected 'exit', then exit
-  
-  MagicShop_WhichSpell:  
-    LDA #$17
-    JSR DrawShopDialogueBox      ; "What spell do you want?"
-
-  MagicShop_Loop:
-  ;  JSR ShopSelectBuyMagic       ; now have them select the spell to buy
-    BCS EnterShop_Magic           ; if they press B, continue the loop
-
-    LDX cursor                   ; otherwise get the cursor in X
-    LDA item_box, X              ; use it to get the item ID they selected
-    SEC
-    SBC #ITEM_MAGICSTART         ; subtract to turn the item ID into spell ID
-    STA shop_spell               ; record it
-    TAX 
-    LDA inv_magic, X             ; see how many of this spell they already have
-    STA shop_curitem
-   ; JSR CheckAllCharsForSpell    
-    CMP #4
-    BCS @OutofStock              ; if 4 or more, print the "out of stock" message
-
-  ;  JSR DrawShopBuyItemConfirm   ; Draw item price and confirmation dialogue
-    JSR ShopLoop_YesNo           ; Give the player the yes/no option
-
-    BCS MagicShop_CancelPurchase ; cancel purchase if they pressed B
-    LDA cursor
-    BNE MagicShop_CancelPurchase ; or if they selected "No"
-
-    JSR Shop_CanAfford           ; check to make sure they can afford the purchase
-    BCC @FinalizePurchase        ; if yes... finalize the purchase
-
-      LDA #$10                   ; ... otherwise
-      JSR DrawShopDialogueBox    ; "you can't afford it" dialogue
-      JMP MagicShop_Loop         ; keep looping
-
-  @FinalizePurchase:
-    JSR ShopPayPrice             ; subtract the item price from party GP
-    LDX shop_spell               ; get the adjusted spell ID
-    INC inv_magic, X             ; add it to spell inventory
-    JMP MagicShop_WhichSpell
-
-  @OutofStock:
-    LDA #$19                   ; 
-    JSR DrawShopDialogueBox    ; "That spell is out of stock"
-    JMP MagicShop_Loop         ; keep looping
-    
-    
     
     
 CheckMagicInventory:
@@ -2922,134 +2853,13 @@ CheckEquipmentInventory:
   RTS
     
 
-    
-    
-    
-    
-    
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Enter Equip Shop  [$A3AC :: 0x3A3BC]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  EquipShop_Cancel:
-    LDA #0
-    STA inv_canequipinshop 
-    JSR Shop_CharacterStopDancing
-    LDA #$25
-    JSR DrawShopDialogueBox     ; "Too bad... something else?" dialogue
-    LDA #$02
-    JSR LoadShopBoxDims
-    JSR EraseBox               ; erase shop box #2
-    JMP EquipShop_Loop          ; jump ahead to loop
-   
-
-EnterShop_Equip:
-    LDA #$09
-    JSR DrawShopDialogueBox     ; "Welcome" dialogue
-    
-  EquipShop_Loop: 
-    LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
-    BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
-    JSR Shop_CharacterStopDancing ;
-    
-  : LDA #0
-    STA shop_curprice+2         ; JIGS - make sure these are set to 0
-    STA BlankItem       
- ;   STA SellingEquipment 
-    LDA #1
-    STA item_pageswap           ; tells LoadPrice in Bank F to use weapon/armor LUT
-    
-  ;  JSR ShopLoop_BuySellExit    ; give player Buy/Sell/Exit option
-    BCS @Exit                   ; if they pressed B, exit
-    LDA cursor
-    BEQ @Buy                    ; cursor=0  means they selected "Buy"
-    CMP #$01
-    BEQ @Sell                   ; cursor=1  is "Sell"
-    
-  @Exit:                        ; otherwise, "Exit"
-    RTS
-
-  ;; Buying
-
-  @Buy:
-    JSR LoadShopInventory       ; load shop inventory.  Needs to be done here
-                                ;  because item box can be filled with a character's
-                                ;  equipment instead of shop inventory.
-
-    LDA #$0D
-    JSR DrawShopDialogueBox     ; "what would you like" dialogue
-
-    LDA #01
-    STA inv_canequipinshop      ; turn on the ability to dance to equipable items!
-    LDA #0
-    STA cursor
-   ; JSR ShopSelectBuyItem       ; have the player select something
-    BCS EquipShop_Cancel        ; if they pressed B, return to loop
-    
-    JSR Shop_CharacterStopDancing ; JIGS - turn off the cheer pose
-   ; JSR DrawShopBuyItemConfirm  ; otherwise.. draw price confirmation text
-    JSR ShopLoop_YesNo          ; and have them confirm it
-    BCS EquipShop_Cancel        ; if they press B, cancel purchase
-    LDA cursor
-    BNE EquipShop_Cancel        ; if they select "No", cancel purchase
-
-    JSR Shop_CanAfford          ; check to see if they can afford it
-    BCC @CanAfford              ; if they can, jump ahead... otherwise...
-
-      LDA #$10
-      JSR DrawShopDialogueBox   ; "You can't afford it" dialogue
-      JSR ClearShopkeeperTextBox
-      JMP @Buy; EquipShop_Loop        ; keep looping
-
-  @CanAfford:
-    LDA #$27                    ; "Do you want to equip it now?"
-    JSR DrawShopDialogueBox       
-    JSR ShopLoop_YesNo
-    BCS @PutInInventory
-    LDA cursor
-    BEQ @EquipOnCharacter
-        
-       @PutInInventory: 
-       JSR EquipShop_StoreInInventory
-       BCC @FinalizePurchase        ; if they had room, finalize the purchase
-
-        LDA #$0C                   ; otherwise (no room)
-        JSR DrawShopDialogueBox    ; "You don't have room" dialogue
-        JSR ClearShopkeeperTextBox
-        JMP EquipShop_Loop         ; jump back to loop
   
-  @EquipOnCharacter:
-    LDA #$11             
-    JSR DrawShopDialogueBox      ; "who will you give it to" dialogue"
-    JSR ShopLoop_CharNames       ; have the player select a character
-    BCS @_Loop                   ; if they press B, jump back to loop
-
-    JSR EquipShop_GiveItemToChar ; give the item to the character
-    BCC @FinalizePurchase        ; if they had room, finalize the purchase
-
-      LDA #$0C                   ; otherwise (no room)
-      JSR DrawShopDialogueBox    ; "You don't have room" dialogue
-      JSR ClearShopkeeperTextBox
-      JMP EquipShop_Loop         ; jump back to loop
-
-  @FinalizePurchase:
-    JSR ShopPayPrice             ; subtract the GP
-    LDA #$13
-    JSR DrawShopDialogueBox      ; "Thank you, what else?" dialogue
-    JMP @Buy ; EquipShop_Loop           ; jump back to loop
-
-  ;; Selling
-
-  @_Loop:   JMP EquipShop_Loop   ; these two are here so that these labels
-  @_Cancel: JMP EquipShop_Cancel ;  can be branched to.  The main labels
-                                 ;  might be too far for a branch (can only branch
-                                 ;  back 128 bytes).  I'm not sure that's
-                                 ;  necessary though.... don't think the routine
-                                 ;  is that big
-
+  
+  
+  
+  
+  
+Blegh:
   @Sell:
     LDA #01
   ;  STA SellingEquipment         ; toggle so moving the cursor around past the max will shift the list
@@ -3063,7 +2873,7 @@ EnterShop_Equip:
 
       LDA #$1E
       JSR DrawShopDialogueBox    ; "you have nothing to sell" dialogue
-      JMP EquipShop_Loop         ; jump back to loop
+     ; JMP EquipShop_Loop         ; jump back to loop
 
   @ItemsForSale:
     LDA #$14
@@ -3074,7 +2884,7 @@ EnterShop_Equip:
     LDA #0
     STA cursor
    ; JSR ShopSelectBuyItem        ; have the user select an item to sell
-    BCS @_Cancel                   ; if they pressed B, jump back to the loop
+   ; BCS @_Cancel                   ; if they pressed B, jump back to the loop
     
     LDA cursor
     CLC
@@ -3087,9 +2897,9 @@ EnterShop_Equip:
     DEC inv_canequipinshop
     JSR DrawShopSellItemConfirm  ; draw the sell confirmation dialogue
     JSR ShopLoop_YesNo           ; give them the yes/no option
-    BCS @_Cancel                 ; if they pressed B, canecl
+   ; BCS @_Cancel                 ; if they pressed B, canecl
     LDA cursor
-    BNE @_Cancel                 ; if they selected "No", cancel
+   ; BNE @_Cancel                 ; if they selected "No", cancel
 
     LDX shop_curitem
     DEX
@@ -3129,11 +2939,31 @@ EnterNormalShop:
     LDX shop_type
     LDA lut_ShopWelcome, X
     JSR DrawShopDialogueBox     ; draw the "welcome" dialogue
-    JMP MainShopLoop
+    LDA shop_type
+    CMP #8
+    BNE MainShopLoop
+
+EnterCaravan:    
+    LDA #$03
+    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
+    LDA #$0B
+    JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
+    LDA #2
+    STA cursor_max           ; 2 cursor options
+    LDA #0
+    STA cursor
+    JSR CommonShopLoop_Cmd   ; do the common shop loop
+    BCS ExitShop
+    LDA cursor
+    BEQ ShopBuy
+    RTS                      ; no selling to the Caravan, he's trying to retire
 
 RestartShopLoop:
     LDA #$17  
     JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
+    LDA shop_type
+    CMP #8
+    BEQ EnterCaravan
     
 MainShopLoop:
     LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
@@ -3249,7 +3079,11 @@ ShopSelectAmount:
     JMP ShopBuy
   
    @BuyConfirm: 
-    LDA #$09
+    LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
+    BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
+    JSR Shop_CharacterStopDancing 
+    
+  : LDA #$09
     JSR DrawShopDialogueBox    ; draws "Gold  OK?" -- IE:  all the non-price text
     
     LDA #<(str_buf+$B9)        ; get price from here (see PrintShopAmount)
@@ -3264,9 +3098,10 @@ ShopSelectAmount:
     JSR DrawShopComplexString 
     
     JSR ShopLoop_YesNo          ; give them the yes/no option
-    BCS ShopSelectAmount        ; if they pressed B, return to selecting the amount
+    BCS @ShopBuy_Return ; ShopSelectAmount        ; if they pressed B, return to selecting the amount
     LDA cursor
-    BNE ShopSelectAmount        ; if they selected "No", return to selecting the amount
+    BNE @ShopBuy_Return ; ShopSelectAmount        ; if they selected "No", return to selecting the amount
+    ;; JIGS - it backs up further until I can get the cursor pointing back at the item they were trying to buy
 
    @CompletePurchase:    
     LDA shop_type
@@ -3281,16 +3116,20 @@ ShopSelectAmount:
     CLC
     ADC shop_amount_buy         ; add in the amount to buy
     STA items, X                ; and save
-    JMP @FinishPurchase 
+    JMP FinishPurchase 
     
    @AddEquipment:
+    JSR EquipShop_EquipNow
+    ;; ^ checks if you want to give it to a character
+    ;; If you are able to, it will pull the return address and jump to FinishPurchase
+    ;; At this point, its either equip it or store it in inventory, it will not undo the purchase
     LDX shop_curitem
     DEX                         ; convert equipment to 0-based
     LDA inv_weapon, X
     CLC
     ADC shop_amount_buy
     STA inv_weapon, X
-    JMP @FinishPurchase 
+    JMP FinishPurchase 
     
    @AddMagic: 
     LDA shop_curitem
@@ -3302,12 +3141,121 @@ ShopSelectAmount:
     ADC shop_amount_buy
     STA inv_magic, X   
     
-   @FinishPurchase: 
+FinishPurchase: 
     JSR ShopPayPrice            ; subtract the price from your gold amount
     LDA #$16
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
     JMP MainShopLoop            ; and continue loop
     
+EquipShop_EquipNow:
+    LDA #$1C                     ; "Do you want to equip it now?"
+    JSR DrawShopDialogueBox       
+    JSR ShopLoop_YesNo
+    BCS EquipOnCharacter_Exit
+    LDA cursor
+    BNE EquipOnCharacter_Exit
+  
+EquipOnCharacter:
+    LDA #$1D             
+    JSR DrawShopDialogueBox      ; "who is it for?"
+    JSR ShopLoop_CharNames       ; have the player select a character
+    BCS @TroubleExit             ; if they press B, do this
+    
+    JSR EquipShop_GiveItemToChar ; give the item to the character
+    PLA
+    PLA
+    JMP FinishPurchase
+
+   @TroubleExit:
+    LDA #$1F             
+    JSR DrawShopDialogueBox      ; "I'll put it in your bags"
+    JSR MenuWaitForBtn
+  
+EquipOnCharacter_Exit:                        ; store in inventory
+    RTS  
+  
+EquipShop_GiveItemToChar:
+    LDA cursor          ; get the char ID
+    ROR A
+    ROR A
+    ROR A
+    AND #$C0            ; shift and mask to get the char index
+    STA CharacterIndexBackup
+
+    LDX shop_type       ; see if this is weapon or armor, and
+    BEQ @CheckWeapons   ;  fork appropriately
+    
+    JMP CheckArmor
+
+  @CheckWeapons:
+    LDA shop_curitem
+    STA ItemToEquip
+    JSR IsEquipLegal
+    BCS CannotEquip
+    
+    JSR LongCall
+    .word UnadjustEquipStats
+    .byte $0F
+  
+    LDX CharacterIndexBackup
+    LDA ch_righthand, X
+    BEQ @EquipWeapon_NoSwap
+    
+    TAX
+    DEX                         ; convert to 0-based
+    INC inv_weapon, X
+   @EquipWeapon_NoSwap: 
+    LDX CharacterIndexBackup
+    LDA ItemToEquip
+    STA ch_righthand, X
+    JMP ReEquipStats
+    
+CannotEquip:
+    LDA #$28                   
+    JSR DrawShopDialogueBox    ; "You can't equip that"
+    JSR MenuWaitForBtn
+    PLA
+    PLA
+    JMP EquipOnCharacter
+    
+CheckArmor: 
+    LDA shop_curitem
+    SEC
+    SBC #ARMORSTART     
+    STA ItemToEquip
+    JSR IsEquipLegal
+    BCS CannotEquip
+    
+    JSR LongCall
+    .word UnadjustEquipStats
+    .byte $0F
+    
+    LDX ItemToEquip
+    LDA lut_ArmorTypes, X ; check type LUT
+    STA equipoffset   
+    CLC
+    ADC #ch_righthand - ch_stats
+    ADC CharacterIndexBackup
+    STA CharacterIndexBackup
+    TAX                   
+    LDA ch_stats, X 
+    BEQ @EquipArmor_NoSwap
+    
+    TAX
+    DEX
+    INC inv_armor, X
+   @EquipArmor_NoSwap:
+    LDX CharacterIndexBackup
+    LDA ItemToEquip
+    CLC
+    ADC #ARMORSTART
+    STA ch_stats, X
+
+ReEquipStats:
+    JSR LongCall
+    .word ReadjustEquipStats
+    .byte $0F
+    RTS      
     
     
 SelectAmount_Buy:
@@ -3977,160 +3925,6 @@ ClinicBuildNameString:
 
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  EquipShop_GiveItemToChar  [$A61D :: 0x3A62D]
-;;
-;;    Finds whether or not a character has room in his inventory
-;;  for the given weapon/armor.  If he does, the item is placed in
-;;  his inventory.
-;;
-;;  IN:     cursor = char ID (0-3) of target character
-;;       shop_type = 0 for weapon shop, 1 for armor shop
-;;    shop_curitem = item ID of the weapon/armor
-;;
-;;  OUT:         C = clear if character had room
-;;                     set if he didn't
-;;               * = item is placed in char's inventory if he has room
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-EquipShop_StoreInInventory:
-    LDX shop_type
-    BNE @Armor
-
-    LDX shop_curitem
-    DEX 
-    LDA inv_weapon, X
-    CMP #99
-    BCC @StoreWeapon
-    RTS
-    
-    @StoreWeapon:
-    INC inv_weapon, X
-    RTS
-    
-    @Armor:
-    LDX shop_curitem
-    DEX
-    LDA inv_weapon, X   ; it says inv_weapon, but the item ID is +40 so its safe
-    CMP #99
-    BCC @StoreArmor
-    RTS
-    
-    @StoreArmor:
-    INC inv_weapon, X
-    RTS
-    
-
-EquipShop_GiveItemToChar:
-    LDA cursor          ; get the char ID
-    ROR A
-    ROR A
-    ROR A
-    AND #$C0            ; shift and mask to get the char index
-    STA CharacterIndexBackup
-
-    LDX shop_type       ; see if this is weapon or armor, and
-    BEQ @CheckWeapons   ;  fork appropriately
-    
-    JMP CheckArmor
-
-  @CheckWeapons:
-    LDA shop_curitem
-    STA ItemToEquip
-    JSR IsEquipLegal
-    BCS CannotEquip
-    
-    JSR LongCall
-    .word UnadjustEquipStats
-    .byte $0F
-  
-    LDX CharacterIndexBackup
-    LDA ch_righthand, X
-    BEQ @EquipWeapon_NoSwap
-    
-    TAX
-    DEX                         ; convert to 0-based
-   @WeaponLoop:
-    LDA inv_weapon, X
-    CMP #99
-    BCC @StoreWeapon
-        JSR ReEquipStats
-        SEC
-        RTS                 
-    
-   @StoreWeapon:
-    INC inv_weapon, X
-   @EquipWeapon_NoSwap: 
-    LDX CharacterIndexBackup
-    LDA ItemToEquip
-    STA ch_righthand, X
-    JSR ReEquipStats
-    CLC
-    RTS
-    
-   CannotEquip:
-    LDA #$28                   ;
-    JSR DrawShopDialogueBox    ; "You can't equip that"
-    JSR ClearShopkeeperTextBox
-    LDA #$02
-    JSR LoadShopBoxDims
-    JSR EraseBox               ; erase shop box #2
-    PLA
-    PLA ; undo the JSR to EquipShop_GiveItemToChar
-    JMP EquipShop_Loop         ; jump back to loop
-    
-   CheckArmor: 
-    LDA shop_curitem
-    SEC
-    SBC #ARMORSTART     
-    STA ItemToEquip
-    JSR IsEquipLegal
-    BCS CannotEquip
-    
-    JSR LongCall
-    .word UnadjustEquipStats
-    .byte $0F
-    
-    LDX ItemToEquip
-    LDA lut_ArmorTypes, X ; check type LUT
-    STA equipoffset   
-    CLC
-    ADC #ch_righthand - ch_stats
-    ADC CharacterIndexBackup
-    STA CharacterIndexBackup
-    TAX                   
-    LDA ch_stats, X 
-    BEQ @EquipArmor_NoSwap
-    
-    TAX
-    DEX
-    LDA inv_armor, X
-    CMP #99
-    BCC @StoreArmor
-        JSR ReEquipStats
-        SEC
-        RTS                 
-    
-   @StoreArmor:
-    INC inv_armor, X
-   @EquipArmor_NoSwap:
-    LDX CharacterIndexBackup
-    LDA ItemToEquip
-    STA ch_stats, X
-    JSR ReEquipStats
-    CLC
-    RTS
-    
-
-
-ReEquipStats:
-    JSR LongCall
-    .word ReadjustEquipStats
-    .byte $0F
-    RTS
-
 
 
 Shop_CharacterStopDancing:
@@ -4191,7 +3985,7 @@ Shop_CharacterCanEquip:
     STA ch_ailments, X
     JMP @NextCharacter
     
-    @CannotEquip:
+   @CannotEquip:
     LDX CharacterIndexBackup
     LDA ch_ailments, X
     AND #$0F
@@ -4275,10 +4069,10 @@ Shop_CharacterCanEquip:
     RTS
    
    @Equipped_LUT:
-   .byte $06
-   .byte $09
-   .byte $0C
-   .byte $0F
+    .byte $06
+    .byte $09
+    .byte $0C
+    .byte $0F
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4497,8 +4291,7 @@ DrawShopGoldBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-BuildSellBox:
+ShopSelectItem_Sell:
     LDY #63
     LDA #0
    @ClearBox:
@@ -4662,6 +4455,8 @@ ShopSelectItem_Buy:
    
    @EquipmentQTY:
     JSR CheckEquipmentInventory ; like CheckMagicInventory, but doesn't use Y
+    LDA #1
+    STA inv_canequipinshop ; turn on the switch for characters posing    
     JMP :+
     
    @MagicQTY: 
@@ -4744,30 +4539,7 @@ ShopSelectItem_Buy:
     
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  ShopLoop_BuyExit [$A8B1 :: 0x3A8C1]
-;;
-;;    Opens up the shop command box, gives options "Buy" and "Exit"
-;;  and loops until the user selects one.
-;;
-;;  OUT:  cursor = 0 for "Buy", 1 for "Exit"
-;;             C = set if B pressed (exit), clear if A pressed
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ShopLoop_BuyExit:
-    LDA #$03
-    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
-    LDA #$0B
-    JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
-
-    LDA #2
-    STA cursor_max           ; 2 cursor options
-    LDA #0
-    STA cursor
-
-    JMP CommonShopLoop_Cmd   ; do the common shop loop, and exit
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
