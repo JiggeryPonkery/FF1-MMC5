@@ -1434,18 +1434,18 @@ BTL_MESSAGE86:
 lut_ItemPrices:
 .word 0000    ; 00 START
 .word 0060    ; 01 HEAL
-.word 2000    ; 02 X-HEAL
+.word 2500    ; 02 X-HEAL
 .word 5000    ; 03 ETHER
-.word 0000    ; 04 ELIXIR
+.word 50000   ; 04 ELIXIR
 .word 0075    ; 05 PURE
 .word 0800    ; 06 SOFT
-.word 2500    ; 07 PHOENIX DOWN
+.word 20000   ; 07 PHOENIX DOWN
 .word 0075    ; 08 TENT
 .word 0250    ; 09 CABIN
 .word 3000    ; 0A HOUSE
 .word 0200    ; 0B EYEDROP
 .word 2000    ; 0C SMOKEBOMB
-.word 0750    ; 0D PARTY HORN
+.word 0750    ; 0D WAKEUP BELL
 .word 0000    ; 0F nothing
 .word 0000    ; 0F nothing 
 

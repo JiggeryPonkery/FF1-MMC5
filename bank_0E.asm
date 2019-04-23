@@ -381,7 +381,7 @@ ProvokaTemple:
 ProvokaInn:                                   
 .byte $32,$00                                 ;(Provoka) 50g Inn
 ProvokaItem:                                  
-.byte HEAL, PURE, TENT, CABIN, $00            ;(Provoka) Heal, Pure, Tent, Cabin
+.byte HEAL, PURE, EYEDROPS, TENT, CABIN       ;(Provoka) Heal, Pure, Tent, Cabin
 ElflandWeapon:                                
 .byte WEP9+1, WEP10+1, WEP11+1, WEP12+1, WEP17+1;(Elfland) Iron Nunchuku, Large Knife, Iron Staff, Sabre, Silver Sword 
 ElflandArmor:                                
@@ -423,7 +423,7 @@ LakeTemple:
 LakeInn:                                      
 .byte $C8,$00                                 ;(Cresent Lake) 200g Inn
 LakeItem:                                     
-.byte HEAL, PURE, TENT, CABIN, $00            ;(Cresent Lake) Heal, Pure, Tent, Cabin
+.byte HEAL, PURE, TENT, CABIN, WAKEUPBELL     ;(Cresent Lake) Heal, Pure, Tent, Cabin
 GaiaWeapon:                                   
 .byte WEP35+1, $00                            ;(Gaia) CatClaw
 GaiaArmor:                                   
@@ -441,7 +441,7 @@ GaiaTemple:
 GaiaInn:                                      
 .byte $F4,$01,$00                             ;(Gaia) 500g Inn
 GaiaItem:                                     
-.byte CABIN, HOUSE, HEAL, PURE, $00           ;(Gaia) Cabin, House, Heal, Pure
+.byte CABIN, HOUSE, HEAL, PURE, PHOENIXDOWN   ;(Gaia) Cabin, House, Heal, Pure
 OnracWMagic:                                  
 .byte MG_ARUB, MG_HEL3, $00                   ;(Onrac) ARUB, HEL3
 OnracBMagic:                                  
@@ -453,7 +453,7 @@ OnracInn:
 OnracItem:                                    
 .byte TENT, CABIN, HOUSE, PURE, SOFT          ;(Onrac) Tent, Cabin, House, Pure, Soft
 CaravanShop:                                  
-.byte BOTTLE, $00                             ;(Caravan) Bottle
+.byte X_HEAL, ETHER, ELIXIR, SMOKEBOMB, BOTTLE;(Caravan) Bottle
 LeifenWMagic:                                 
 .byte MG_LIF2, $00                            ;(Leifen) LIF2
 LeifenBMagic:                                 
@@ -2804,7 +2804,7 @@ EnterShop_Magic:
     CMP #4
     BCS @OutofStock              ; if 4 or more, print the "out of stock" message
 
-    JSR DrawShopBuyItemConfirm   ; Draw item price and confirmation dialogue
+  ;  JSR DrawShopBuyItemConfirm   ; Draw item price and confirmation dialogue
     JSR ShopLoop_YesNo           ; Give the player the yes/no option
 
     BCS MagicShop_CancelPurchase ; cancel purchase if they pressed B
@@ -2841,12 +2841,14 @@ CheckMagicInventory:
   LSR A
   LSR A
   LSR A
-  SEC
-  ADC #$80
+  CLC
+  ADC #$81
   STA str_buf+$49, Y     ; put this spell's level in the string buffer
   
   LDA inv_magic, X       ; get amount in inventory
   STA shop_amount
+  INC shop_spell         ; increase to 1-based
+  
   LDA #0
   PHA                    ; push 0 to use as character ID
  @Loop:
@@ -2881,6 +2883,7 @@ CheckMagicInventory:
   
 
 CheckEquipmentInventory:
+  LDX str_buf+$42, Y
   STX shop_curitem       ; backup item ID
   DEX                    ; convert item ID to 0-based
   LDA inv_weapon, X      ; get the amount in inventory
@@ -2897,7 +2900,7 @@ CheckEquipmentInventory:
   BEQ @FoundOne
   
   INX
-  TAX
+  TXA
   AND #$0F               ; chop off high bits to get loop counter (only the INX)
   CMP #8                 ; loop through all 8 equipment slots
   BEQ @NextChar
@@ -2987,7 +2990,7 @@ EnterShop_Equip:
     BCS EquipShop_Cancel        ; if they pressed B, return to loop
     
     JSR Shop_CharacterStopDancing ; JIGS - turn off the cheer pose
-    JSR DrawShopBuyItemConfirm  ; otherwise.. draw price confirmation text
+   ; JSR DrawShopBuyItemConfirm  ; otherwise.. draw price confirmation text
     JSR ShopLoop_YesNo          ; and have them confirm it
     BCS EquipShop_Cancel        ; if they press B, cancel purchase
     LDA cursor
@@ -3160,7 +3163,7 @@ ShopBuy:
     JSR LoadShopInventory
     
     LDX shop_type
-    LDA lut_ShopMaxAmount       ; gets either #99, #16, or #4 depending on shop type
+    LDA lut_ShopMaxAmount, X    ; gets either #99, #16, or #4 depending on shop type
     STA shop_amount_max
     
     LDA lut_ShopWhatWant, X
@@ -3184,35 +3187,32 @@ Shop_CheckInventory:
     LDA str_buf+$42, Y          ; item ID
     STA shop_curitem
     
-    LDA #0
-    STA shop_amount_high
-    
     LDA str_buf+$46, Y   
     CMP #$FF
-    BEQ @SingleDigit
-    
-    SEC
-    SBC #$80                    ; convert from tile ID to byte
-    LDX #10                     ; multiply by $0A to convert to hex tens column
-    JSR MultiplyXA
-    STA shop_amount_high     
+    BNE @DoubleDigit
     
    @SingleDigit:
     LDA str_buf+$45, Y      
-    SEC
-    SBC #$80                    ; convert from tile ID to byte
+    AND #$0F                    ; convert from tile ID to byte
+    JMP :+
+
+   @DoubleDigit:    
+    LDA str_buf+$45, Y
+    AND #$0F
+    LDX #10                     ; multiply by $0A to convert to hex tens column
+    JSR MultiplyXA
+    STA shop_amount_high     
+    LDA str_buf+$46, Y
+    AND #$0F                    ; convert from tile ID to byte
     CLC  
     ADC shop_amount_high        ; add in 0 or tens column
-    STA shop_amount
+  : STA shop_amount
     
     LDA shop_amount_max         ; get max 
-    STA tmp                     ; store in tmp
     SEC
     SBC shop_amount             ; subtract total in inventory/on characters
     STA shop_amount_max         ; save as new max
-
-    CMP tmp                     ; compare to old max
-    BNE ShopSelectAmount        ; if its not maxed out, go buy more
+    BNE @ShopSelectAmount_Prep  ; if its not 0, go buy more
     
     LDA shop_type               ; get shop type again
     CMP #2
@@ -3231,7 +3231,10 @@ Shop_CheckInventory:
     JSR MenuWaitForBtn
     JMP ShopBuy
     
-ShopSelectAmount:
+   @ShopSelectAmount_Prep:
+    INC shop_amount_max         ; increase it for SelectAmount_Buy to work right
+    
+ShopSelectAmount:    
     JSR SelectAmount_Buy        ; choose how many of an item to buy
     BCS @ShopBuy_Return         ; if B was pressed, go back to choosing an item
   
@@ -3246,16 +3249,25 @@ ShopSelectAmount:
     JMP ShopBuy
   
    @BuyConfirm: 
-    JSR DrawShopBuyItemConfirm  ; confirm price dialogue
+    LDA #$09
+    JSR DrawShopDialogueBox    ; draws "Gold  OK?" -- IE:  all the non-price text
+    
+    LDA #<(str_buf+$B9)        ; get price from here (see PrintShopAmount)
+    STA text_ptr
+    LDA #>(str_buf+$B9)
+    STA text_ptr+1
+    
+    LDA #03
+    STA dest_x
+    INC dest_y
+    INC dest_y
+    JSR DrawShopComplexString 
+    
     JSR ShopLoop_YesNo          ; give them the yes/no option
     BCS ShopSelectAmount        ; if they pressed B, return to selecting the amount
     LDA cursor
     BNE ShopSelectAmount        ; if they selected "No", return to selecting the amount
-    
-    LDA shop_type
-    CMP #2
-    BCS @CompletePurchase
-  
+
    @CompletePurchase:    
     LDA shop_type
     CMP #2
@@ -3273,6 +3285,7 @@ ShopSelectAmount:
     
    @AddEquipment:
     LDX shop_curitem
+    DEX                         ; convert equipment to 0-based
     LDA inv_weapon, X
     CLC
     ADC shop_amount_buy
@@ -3280,7 +3293,10 @@ ShopSelectAmount:
     JMP @FinishPurchase 
     
    @AddMagic: 
-    LDX shop_curitem
+    LDA shop_curitem
+    SEC
+    SBC #ITEM_MAGICSTART        ; convert magic to 0-based
+    TAX
     LDA inv_magic, X
     CLC
     ADC shop_amount_buy
@@ -4629,7 +4645,7 @@ ShopSelectItem_Buy:
                          ; otherwise... start building the string
     STA str_buf+$42, Y   ; put item ID
     STA str_buf+$4C, Y   ; 
-    TAX                  ; save in X 
+    ;TAX                  ; save in X 
     
     JSR ShopSelectItem_Buy_FillString ; so the above BEQ @Done will work...
 
@@ -4640,7 +4656,8 @@ ShopSelectItem_Buy:
     BCC @MagicQTY
     
    @ItemQTY:
-    LDA items, X
+    LDX str_buf+$42, Y   ; get item ID
+    LDA items, X           
     JMP :++              ; double ++ so it doesn't load shop_amount
    
    @EquipmentQTY:
@@ -4739,18 +4756,18 @@ ShopSelectItem_Buy:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;ShopLoop_BuyExit:
-;    LDA #$03
-;    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
-;    LDA #$0B
-;    JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
+ShopLoop_BuyExit:
+    LDA #$03
+    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
+    LDA #$0B
+    JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
 
-;    LDA #2
-;    STA cursor_max           ; 2 cursor options
-;    LDA #0
-;    STA cursor
+    LDA #2
+    STA cursor_max           ; 2 cursor options
+    LDA #0
+    STA cursor
 
-;    JMP CommonShopLoop_Cmd   ; do the common shop loop, and exit
+    JMP CommonShopLoop_Cmd   ; do the common shop loop, and exit
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4765,7 +4782,7 @@ ShopSelectItem_Buy:
 ShopLoop_YesNo:
     LDA #$03
     JSR DrawShopBox          ; draw shop box ID=3 (the command box)
-    LDA #$0F
+    LDA #$0D
     JSR DrawShopString       ; draw shop string ID=$0F ("Yes"/"No")
 
     LDA #2
@@ -5334,62 +5351,11 @@ LoadShopBoxDims:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawShopDialogueBox:
-    ;STA ShopDialogueBackup
     PHA                  ; back up desired dialogue string by pushing it
     LDA #$00
     JSR DrawShopBox      ; draw shop box ID 0 (the dialogue box)
     PLA                  ; pull our dialogue string
     JMP DrawShopString   ; draw it, then exit
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Shop Buy Item Confirm  [$AA65 :: 0x3AA75]
-;;
-;;    This routine draws the 'are you sure you want to buy this' confirmation
-;;  dialogue text for the shopkeeper after you select an item to buy.  This
-;;  text involves printing the price of the item... and the game does a very weird
-;;  way of getting the text for the item.  Rather than just building a string in
-;;  a temp buffer and calling DrawComplexString... it modifies the existing
-;;  string in str_buf (the string that was used to draw the shop inventory)
-;;
-;;    Each item in str_buf consists of 8 bytes:  "02 XX 01 FF FF 03 XX 01" where
-;;  'XX' is the ID of this item.  (02 is the control code to indicate the item
-;;  name is to be drawn, and 03 is the control code to indicate the price is
-;;  to be drawn, and 01 is a double line break).
-;;
-;;    Rather than repeat '03 XX' in RAM somewhere, the game will calculate the
-;;  position of the 03 XX bytes in that string and point to it!  It will then
-;;  stick a null terminator after the price.
-;;
-;;    The shop inventory string starts at str_buf+$10 rather than str_buf, because
-;;  str_buf is shared with item_box, which is still needed to hold the shop inventory.
-;;  Also, the 03 XX bytes are 5 bytes into the string for the item.... and as said before
-;;  each item has 8 bytes in the string.  So the formula for finding the price in that
-;;  string is:  (cursor * 8) + str_buf+$15
-;;
-;;    This routine also fills shop_curitem and shop_curprice with the selected item
-;;  and its price.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawShopBuyItemConfirm:
-    LDA #$0E
-    JSR DrawShopDialogueBox  ; draws "Gold  OK?" -- IE:  all the non-price text
-    
-    LDA #<(str_buf+$09)        ; set our text pointer to point to the generated string
-    STA text_ptr
-    LDA #>(str_buf+$09)
-    STA text_ptr+1
-    LDA #03
-    STA dest_x
-    INC dest_y
-    INC dest_y
-    
-    ;; JIGS - movin' some numbers on the screen
-    
-    JMP DrawShopComplexString  ; draw our complex string (item price), and exit
 
 
 
@@ -5402,7 +5368,7 @@ DrawShopBuyItemConfirm:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawInnClinicConfirm:
-    LDA #$0E
+    LDA #$09
     JSR DrawShopDialogueBox   ; draw "Gold  OK?" -- all the non-price text
 
     LDA item_box              ; copy the inn price (first two bytes in item_box)
@@ -10097,13 +10063,13 @@ EnterEquipMenu:
     
     LDY cursor
     STY equipoffset         ; backup cursor position for refreshing the screen
-    LDA lut_EquipOffset, Y
-    BEQ @RemoveWeapon
+    ;LDA lut_EquipOffset, Y
+    ;BEQ @RemoveWeapon
     
-    TXA             
-    CLC
-    ADC #ARMORSTART         ; add armor offset to item ID
-    TAX
+    ;TXA             
+    ;CLC
+    ;ADC #ARMORSTART         ; add armor offset to item ID
+    ;TAX
     
     @RemoveWeapon:
     LDA inv_weapon, X       ; if armor offset was added to X, this is the same as LDA inv_armor, X
@@ -10176,8 +10142,15 @@ EnterEquipInventory:
     LDA equipoffset
     CMP #06                  ; if offset is over 5--it is either of the battle items
     BCS @TryEquipWeapon      ; which have no equipping requirements since they don't alter stats
-
-    INC ItemToEquip    
+    ;CMP #0                   ; check if weapon or armor
+    ;BEQ :+ 
+    
+    ;LDA ItemToEquip          ; if its armor, subtract $40
+    ;SEC
+    ;SBC #ARMORSTART    
+    ;STA ItemToEquip
+    
+  : INC ItemToEquip    
     LDA ItemToEquip
     JSR IsEquipLegal         ; This routine subtracts 1 from A
     BCC @DoEquip         
@@ -10211,7 +10184,12 @@ EnterEquipInventory:
     BEQ @Error               ; make sure it exists
     
     DEC inv_armor, X         ; and remove that item from inventory 
-      
+    
+    LDA ItemToEquip
+    CLC
+    ADC #ARMORSTART
+    STA ItemToEquip          ; and add $40 to the item
+    
    @FinishEquip:  
     LDA equipoffset
     CLC 

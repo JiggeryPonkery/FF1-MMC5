@@ -1862,7 +1862,7 @@ UnadjustEquipStats:
       
     @AdjustArmor:  
       SEC
-      SBC #$01            ; subtract 1 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
+      SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
       ASL A
       ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
       CLC                 ; (A= armor_id*8)
@@ -2018,7 +2018,7 @@ ReadjustEquipStats:
 
   @AdjustArmor:            ; A = armor_id * 4
     SEC
-    SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
+    SBC #ARMORSTART+1      ; subtract 41 from the equip ID (equipment is 1 based -- 0 is an empty slot)
     ASL A
     ASL A                  ; multiply by 4 (this drops the high bit -- no need to mask it out)
     CLC

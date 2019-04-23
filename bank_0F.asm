@@ -11018,8 +11018,9 @@ lutCursor2x2SpriteTable:
 LoadPrice:
     STA tmp+2
     
-    LDA item_pageswap
-    BEQ :+
+    LDA shop_type
+    CMP #2
+    BCS :+
     
     DEC tmp+2
     LDA tmp+2
@@ -11119,16 +11120,16 @@ DrawEquipMenuStrings:
       BNE @NotEquipped           ; then skip ahead (always branches)
 
   @LoadName:                     ; if the slot is not empty....
-    LDY MMC5_tmp+1
-    CPY #06
-    BCS :+
-    CPY #0
-    BEQ :+                       ; check offset (another backup of the loop counter, really...)
+   ; LDY MMC5_tmp+1
+   ; CPY #06
+   ; BCS :+
+   ; CPY #0
+   ; BEQ :+                       ; check offset (another backup of the loop counter, really...)
     
    
-    @ArmourOffset:
-    CLC
-    ADC #ARMORSTART
+   ; @ArmourOffset:
+   ; CLC
+   ; ADC #ARMORSTART
     
   : ASL A                        ; double it
     TAX                          ; and stuff it in X to load up the pointer
@@ -11142,18 +11143,18 @@ DrawEquipMenuStrings:
     LDY #$07                     ; copy 8 characters from the item name (doesn't look for null termination)
    @LoadNameLoop:
       LDA (tmp), Y               ; load a character in the string
-      STA str_buf+$40, Y             ; and write it to our string buffer. 
+      STA str_buf+$40, Y         ; and write it to our string buffer. 
       DEY                        ; Then decrement Y
       BPL @LoadNameLoop          ; and loop until it wraps (8 iterations)
     
   @NotEquipped:
     JSR DrawComplexString        ; then draw the complex string
 
-    INC MMC5_tmp+1              ; and INC this so we don't draw a weapon again
+    INC MMC5_tmp+1               ; and INC this so we don't draw a weapon again
     PLA                          ; pull the main loop counter
     CLC
     ADC #$01                     ; increment it by one
-    CMP #8                       ; and loop until it reaches 6 (6 equipment names to draw)
+    CMP #8                       ; and loop until it reaches 8 (8 equipment names to draw)
     BNE @MainLoop ; BCC
 
     LDA #BANK_MENUS              ; once all names are drawn
