@@ -943,7 +943,7 @@ MARSHCAVE_SQ1:
    .WORD DUNGEON3LOOP
    
 MARSHCAVE_SQ4:   
-   .byte $F6, $FE, $C5, $D0
+   .byte $F4, $F6, $FE, $C5, $D0
    .word MARSHCAVE_SQ1
 
 MARSHCAVE_SQ2:
