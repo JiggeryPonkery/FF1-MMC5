@@ -2907,6 +2907,7 @@ EnterCaravan:
     RTS                      ; no selling to the Caravan, he's trying to retire
 
 RestartShopLoop:
+    JSR ResetShopList_Color
     LDA #$17  
     JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
     LDA shop_type
@@ -2939,6 +2940,7 @@ ExitShop:
     RTS
 
 ShopBuy:
+    JSR HideShopCursor
     LDX shop_type
     LDA lut_ShopWhatWant, X
     JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
@@ -3002,6 +3004,11 @@ ShopSelectAmount:
       JMP ShopSelectAmount      ; and return to loop
       
    @ShopBuy_Return:
+    LDA #$A0
+    STA shopcurs_x
+    LDA #$20
+    STA shopcurs_y
+    JSR ShopFrame               ; update cursor position   
     JMP ShopBuy
   
    @BuyConfirm: 
@@ -3063,7 +3070,14 @@ FinishPurchase:
     
 ;;;;;;;;;;;;;;;;;;;;;
 
+HideShopCursor:
+    LDA #$F0
+    STA shopcurs_x
+    STA shopcurs_y
+    JMP ShopFrame               ; update cursor position before drawing things
+
 ShopSell:
+    JSR HideShopCursor
     LDX shop_type
     LDA lut_ShopWhatSell, X
     JSR DrawShopDialogueBox     ; "what do you have to sell?"
@@ -3187,6 +3201,8 @@ ShopCheckInventory:
     RTS
     
 ShopXGoldOkay:
+    JSR ResetShopList_Color
+    
     LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
     BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
     JSR Shop_CharacterStopDancing 
@@ -3319,6 +3335,8 @@ ReEquipStats:
     
     
 SelectAmount:
+    LDA #0
+    STA shop_listactive     ; turn off changing the green bar on the inventory list
     LDA shop_selling        ; if selling...
     BEQ :+
        LDA #$26             ; display selling text
@@ -3329,6 +3347,11 @@ SelectAmount:
     LDA #1
     STA shop_amount_buy    
     JSR PrintShopAmount     ; fill the spaces in the "how many?" text with numbers
+    
+    LDA #$B0
+    STA shopcurs_y
+    LDA #$08
+    STA shopcurs_x          ; move cursor position    
    
     JSR @Start_Loop         ; do the whole loop thing to pick how many new items to buy...    
     BCC @End                ; if B is pressed, 
@@ -4173,6 +4196,72 @@ Shop_CharacterCanEquip:
     .byte $0C
     .byte $0F
 
+    
+ChangeInventoryList_Color:
+    JSR ResetShopListAttributes
+    JSR ShopListGreenBar
+    JMP ResetScroll
+
+ResetShopList_Color:
+    LDA #0
+    STA shop_listactive
+    JSR ResetShopListAttributes    
+
+ResetScroll:        
+    LDA soft2000           ; reset scroll and PPU data
+    STA $2000
+    LDA #0
+    STA $2005
+    STA $2005
+    RTS
+    
+ResetShopListAttributes:    
+    JSR WaitForVBlank_L
+    
+    LDY #0
+   @Loop: 
+    LDA ShopListAttribute_LUT, Y
+    LDX #$23
+    STX $2006
+    STA $2006
+    
+    LDA #$FF              ; draw 3 attribute bytes
+    STA $2007
+    STA $2007
+    STA $2007
+    INY
+    CPY #5
+    BNE @Loop
+    RTS
+
+ShopListGreenBar:    
+    LDY cursor
+    LDA ShopListAttribute_LUT, Y
+    LDX #$23
+    STX $2006
+    STA $2006
+    
+    LDA #$FA              ; draw 3 attribute bytes
+    STA $2007
+    STA $2007
+    STA $2007
+    RTS
+
+ShopListAttribute_LUT:
+    .byte $CD
+    .byte $D5
+    .byte $DD 
+    .byte $E5
+    .byte $ED
+
+
+
+
+
+
+
+
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4504,6 +4593,9 @@ ShopSelectItem:
     LDA #$03
     JSR LoadShopBoxDims
     JSR EraseBox             ; erase shop box #3 (command box)
+    LDA #1
+    STA shop_listactive
+    STA shop_cursorchange  
     JMP CommonShopLoop_List  ; everything's ready!  Just run the common loop from here, then return
 
 FillBlankItem:         
@@ -4598,7 +4690,6 @@ UpdateShopList_Loop:
     JSR CheckEquipmentInventory ; like CheckMagicInventory, but doesn't use Y
     LDA #1
     STA inv_canequipinshop ; turn on the switch for characters posing  
-    STA shop_cursorchange  ; and indicate the cursor changed to get it started
     JMP :+
     
    @MagicQTY: 
@@ -4891,18 +4982,18 @@ ShopLoop_CharNames:
 
 CommonShopLoop_Cmd:
     LDA #<lut_ShopCurs_Cmd     ; get the pointer to the desired cursor position LUT
-    STA shop_cursor_ptr        ;  put the pointer in (text_ptr).  Yes, I know... 
-    LDA #>lut_ShopCurs_Cmd     ;  it's not really text.
+    STA shop_cursor_ptr        ;  
+    LDA #>lut_ShopCurs_Cmd     ;  
     STA shop_cursor_ptr+1
     JMP _CommonShopLoop_Main   ; then jump ahead to the main entry for these routines
 
 CommonShopLoop_List:
     LDA #<lut_ShopCurs_List    ; exactly the same as _Cmd version of the routine
-    STA shop_cursor_ptr               ; only have (text_ptr) point to a different LUT
+    STA shop_cursor_ptr        ; only have (shop_cursor_ptr) point to a different LUT
     LDA #>lut_ShopCurs_List
     STA shop_cursor_ptr+1
 
-      ; both flavors of this routine meet up here, after filling (text_ptr)
+      ; both flavors of this routine meet up here, after filling (shop_cursor_ptr)
       ;   with a pointer to a LUT containing the cursor positions.
 
  _CommonShopLoop_Main:
@@ -4922,14 +5013,17 @@ CommonShopLoop_List:
     LDA (shop_cursor_ptr), Y    ; read it
     STA shopcurs_y       ; and record it
 
-    LDA inv_canequipinshop     ; then do the thing to update character poses and ! equipped things
-    BEQ :+
+    LDA shop_listactive    ; is the inventory list the box the cursor is on?
+    BEQ :+    
         LDA shop_cursorchange  ; did the cursor change since the last frame?
         BEQ :+
-    DEC shop_cursorchange
-    JSR Shop_CharacterCanEquip ; JIGS - if its weapon or armor shops, check the cursor for the highlighted item
-                               ; then apply a high bit to ailments that tells the sprite-drawing routine to do them in cheer pose! oof
         
+        JSR ChangeInventoryList_Color ; change the position of the green highlight
+        DEC shop_cursorchange
+        LDA inv_canequipinshop ; then do the thing to update character poses and ! equipped things
+        BEQ :+
+        JSR Shop_CharacterCanEquip ; JIGS - if its weapon or armor shops, check the cursor for the highlighted item
+                               ; then apply a high bit to ailments that tells the sprite-drawing routine to do them in cheer pose! oof
   : JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
     LDA joy_b

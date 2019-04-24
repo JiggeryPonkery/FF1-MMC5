@@ -11734,10 +11734,10 @@ EnterBattle:
   ;; Clear the '$FF' tile so it's fully transparent instead of
   ;;   fully solid (normally is innards of box body)
 
-    JSR WaitForVBlank_L     ; wait for VBlank again  (why!  PPU is off!)
-    LDX #>$0FF0
-    LDA #<$0FF0             ;  set PPU addr to $0FF0 (CHR for tile $FF)
-    JSR SetPPUAddr_XA
+  ;  JSR WaitForVBlank_L     ; wait for VBlank again  (why!  PPU is off!)
+  ;  LDX #>$0FF0
+  ;  LDA #<$0FF0             ;  set PPU addr to $0FF0 (CHR for tile $FF)
+  ;  JSR SetPPUAddr_XA
 
 ;;    LDA #0
 ;;    LDX #$10

@@ -230,7 +230,7 @@ shop_spell        = $03A6
 shop_selling      = $03A7
 shop_cursorchange = $03A8
 shop_listdrawn    = $03A9
-
+shop_listactive   = $03AA
 ItemToUnequip     = $03AD
 ItemToEquip       = $03AE
 shop_x_price      = $03AF
