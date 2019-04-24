@@ -2794,6 +2794,9 @@ CheckMagicInventory:
   
   LDA inv_magic, X       ; get amount in inventory
   STA shop_amount
+  LDA shop_selling       ; if selling, don't list what is equipped
+  BNE @End
+  
   INC shop_spell         ; increase to 1-based
   
   LDA #0
@@ -2835,6 +2838,8 @@ CheckEquipmentInventory:
   DEX                    ; convert item ID to 0-based
   LDA inv_weapon, X      ; get the amount in inventory
   STA shop_amount       
+  LDA shop_selling       ; if selling, don't list what is equipped
+  BNE @End
   
   LDA #0
   PHA                    ; push 0 to use as character ID
@@ -3077,7 +3082,11 @@ HideShopCursor:
     JMP ShopFrame               ; update cursor position before drawing things
 
 ShopSell:
-    JSR HideShopCursor
+    JSR ConvertInventoryToItemBox
+    BNE :+
+    JMP NothingToSell 
+    
+  : JSR HideShopCursor
     LDX shop_type
     LDA lut_ShopWhatSell, X
     JSR DrawShopDialogueBox     ; "what do you have to sell?"
@@ -3094,7 +3103,6 @@ ShopSell_Loop:
     LDA #1
     STA shop_selling
 
-    JSR ConvertInventoryToItemBox
     JSR ShopSelectItem
     BCC :+
     LDA #0
@@ -3162,7 +3170,20 @@ FinishSale:
     JSR ShopEarnGold            ; add the price to your gold amount
     LDA #$16
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
+    JSR ConvertInventoryToItemBox
+    BEQ :+
     JMP ShopSell_Loop           ; and continue loop    
+    
+NothingToSell:    
+    LDA #$12
+    JSR DrawShopDialogueBox
+    JSR MenuWaitForBtn
+  : LDA #$02
+    JSR LoadShopBoxDims         ; erase shop box 2 (inventory)
+    JSR EraseBox
+    DEC shop_selling
+    DEC shop_listdrawn
+    JMP MainShopLoop    
     
 ;;;;;;;;;;;;;;;;;;;;;
 
@@ -3464,7 +3485,14 @@ ShopLoadPrice_Complex:
     LDA shop_curitem
     JSR LoadPrice          ; gets the base price of the item you're trying to buy
     
-    CLC
+    LDA shop_selling
+    BEQ :+
+    
+    LSR tmp+2              ; if selling, divide the base price by 2
+    ROR tmp+1
+    ROR tmp
+    
+  : CLC
     LDA shop_amount_buy    ; quantity
     LDX tmp                ; low byte of price
     JSR MultiplyXA_Safe
@@ -4604,8 +4632,18 @@ FillBlankItem:
        LDA item_box_offset
        SEC
        SBC #5
+      ; BPL @NothingLeft
        STA item_box_offset ; subtract 5 from this, and re-do from scratch
        JMP ShopSelectItem    
+       
+     ; @NothingLeft:        ; player has cleared out their inventory, so break out of the sell loop
+     ;  PLA
+     ;  PLA
+     ;  LDA #$16
+     ;  JSR DrawShopDialogueBox ; "Thank you, anything else?"
+     ;  JSR ResetShopList_Color
+     ;  JMP MainShopLoop
+       
     
  :  LDA #$09            ; fill 3 rows with 8 blank spaces (09 is control code for print spaces, followed by 08)
     STA str_buf+$41, Y  
@@ -4845,15 +4883,7 @@ ConvertInventoryToItemBox:
 
    @BuildSellString:
     LDA item_box
-    BEQ @NothingToSell
     RTS
-
-   @NothingToSell:
-    LDA #$12
-    JSR DrawShopDialogueBox
-    JSR MenuWaitForBtn
-    JMP MainShopLoop    
-
     
 
 
@@ -5140,20 +5170,20 @@ CommonShopLoop_List:
     STA cursor
     JMP ShopSelectItem
 
-ClearShopkeeperTextBox:
-    JSR ShopFrame        ; now that cursor position has been recorded... do a frame
+;ClearShopkeeperTextBox:
+;    JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
-    LDA joy_b
-    ORA joy_a
-    BEQ ClearShopkeeperTextBox ; just wait for A or B to be pressed
+;    LDA joy_b
+;    ORA joy_a
+;    BEQ ClearShopkeeperTextBox ; just wait for A or B to be pressed
     
-    LDA #0
-    STA joy_b
-    STA joy_a
+;    LDA #0
+;    STA joy_b
+;    STA joy_a
 
-    LDA #$00
-    JSR LoadShopBoxDims
-    JMP EraseBox           ; erase shop box #3 (command box)
+;    LDA #$00
+;    JSR LoadShopBoxDims
+;    JMP EraseBox           ; erase shop box #3 (command box)
 
 
 
@@ -11015,4 +11045,4 @@ JMP DrawCharMenuString
 
 
 
-.byte "END OF BANK E"
+;.byte "END OF BANK E"
