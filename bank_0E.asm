@@ -130,13 +130,13 @@ lut_ShopStrings:
 ;; note these are NOT the original game's strings. I have edited them to better fit within the new shop screen and add some character to the shops.
 
 ShopWeapon:
-.byte $FF,$FF,$FF,$A0,$2B,$B3,$3C,$FF,$9C,$AB,$B2,$B3,$00 ; ___Weapon Shop
+.byte $09,$03,$A0,$2B,$B3,$3C,$FF,$9C,$AB,$B2,$B3,$00 ; ___Weapon Shop
 ShopArmor:
-.byte $FF,$FF,$FF,$8A,$B5,$B0,$35,$FF,$9C,$AB,$B2,$B3,$00 ; ___Armor Shop
+.byte $09,$03,$8A,$B5,$B0,$35,$FF,$9C,$AB,$B2,$B3,$00 ; ___Armor Shop
 ShopWhiteMagic:
-.byte $FF,$FF,$FF,$A0,$3D,$53,$FF,$96,$A4,$AA,$AC,$A6,$00 ; ___White Magic
+.byte $09,$03,$A0,$3D,$53,$FF,$96,$A4,$AA,$AC,$A6,$00 ; ___White Magic
 ShopBlackMagic:
-.byte $FF,$FF,$FF,$8B,$AF,$5E,$AE,$FF,$96,$A4,$AA,$AC,$A6,$00 ; ___Black Magic
+.byte $09,$03,$8B,$AF,$5E,$AE,$FF,$96,$A4,$AA,$AC,$A6,$00 ; ___Black Magic
 ShopTemple:
 .byte $FF,$9D,$A8,$B0,$B3,$45,$36,$54,$95,$AC,$AA,$AB,$B7,$00 ; _Temple of Light
 ShopInn:
@@ -149,11 +149,11 @@ ShopGold:
 .byte $FF,$90,$00 ; _G
 ShopXGoldOK:
 .byte $FF,$9D,$41,$21,$A6,$49,$2C,$1B,$B2,$69,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$BF,$FF,$B2,$AE,$A4,$BC,$C5,$00 ; That comes to... _____ G, okay?
+.byte $09,$08,$90,$BF,$FF,$B2,$AE,$A4,$BC,$C5,$00 ; That comes to... _____ G, okay?
 ShopHowMany:
-.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
-.byte $FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00 ; How many? __ will cost ya ________ G
+.byte $09,$04,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
+.byte $09,$04,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B6,$B7,$FF,$BC,$A4,$01
+.byte $09,$0B,$90,$00 ; How many? __ will cost ya ________ G
 ShopBuyExit:
 .byte $8B,$B8,$BC,$01,$8E,$BB,$5B,$00 ; Buy / Exit
 ShopBuySellExit:
@@ -203,10 +203,10 @@ ShopWhatWant:
 .byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00 ; What'll it be?
 ShopWhatScroll:
 .byte $FF,$A0,$3D,$A6,$AB,$24,$A6,$4D,$4E,$67,$B2,$01
-.byte $FF,$FF,$FF,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
+.byte $09,$03,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
 ShopWhatToSell:
 .byte $FF,$A0,$A8,$4E,$BF,$33,$41,$21,$A7,$BE,$BC,$A4,$01
-.byte $FF,$FF,$FF,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
+.byte $09,$03,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
 ShopMagicToSell:
 .byte $FF,$FF,$92,$33,$61,$58,$B6,$55,$A8,$AF,$BC,$01
 .byte $FF,$38,$2F,$1A,$A9,$35,$50,$26,$B5,$01
@@ -253,9 +253,9 @@ ShopReturnToLife:
 .byte $9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; By the grace of light... Warrior! Return to life!
 
 ShopHowMany_Sell:
-.byte $FF,$FF,$FF,$FF,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
-.byte $FF,$FF,$FF,$FF,$BA,$AC,$AF,$AF,$FF,$AA,$A8,$B7,$FF,$BC,$A4,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$90,$00 ; How many? __ will get ya ________ G
+.byte $09,$04,$91,$B2,$BA,$FF,$B0,$A4,$B1,$BC,$C5,$01
+.byte $09,$04,$BA,$AC,$AF,$AF,$FF,$AA,$A8,$B7,$FF,$BC,$A4,$01
+.byte $09,$0B,$90,$00 ; How many? __ will get ya ________ G
 
 
 
@@ -598,20 +598,20 @@ M_Char4Name:
 .byte $13,$00,$00 ; Character 4's name
 
 M_EquipNameClass:  
-.byte $10,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$01,$00 ; name and class
+.byte $10,$00,$09,$08,$10,$01,$00 ; name and class
 
 M_EquipmentSlots:
-.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01         ; RIGHT_HAND__ 
-.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01         ; LEFT__HAND__
-.byte $91,$2B,$A7,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01     ; HEAD________
-.byte $8B,$B2,$A7,$BC,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01 ; BODY________
-.byte $91,$22,$A7,$B6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01     ; HANDS_______
-.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$FF,$FF,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01         ; ACCESSORY___
-.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$01             ; BATTLE_ITEM_
-.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$C9,$00             ; BATTLE_ITEM_
+.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$01   ; RIGHT_HAND__ 
+.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$01   ; LEFT__HAND__
+.byte $91,$2B,$A7,$09,$08,$C8,$09,$08,$C9,$01                       ; HEAD________
+.byte $8B,$B2,$A7,$BC,$09,$08,$C8,$09,$08,$C9,$01                   ; BODY________
+.byte $91,$22,$A7,$B6,$09,$07,$C8,$09,$08,$C9,$01                   ; HANDS_______
+.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$09,$03,$C8,$09,$08,$C9,$01       ; ACCESSORY___
+.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$01       ; BATTLE_ITEM_
+.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$00       ; BATTLE_ITEM_
 
 M_EquipStats:
-.byte $8D,$A4,$B0,$A4,$66,$FF,$FF,$FF,$10,$3C,$FF,$FF  ; Damage
+.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$FF,$FF  ; Damage
 .byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01          ; Defense
 .byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$FF,$FF          ; Accuracy
 .byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$00          ; Evasion
@@ -656,19 +656,19 @@ M_MagicList:
 M_CharLevelStats: 
 .byte $10,$00,$01                                     ; NAME
 .byte $10,$01,$01                                     ; Class
-.byte $95,$A8,$32,$AF,$FF,$FF,$FF,$FF,$FF,$10,$03,$01 ; Level ##
+.byte $95,$A8,$32,$AF,$09,$05,$10,$03,$01 ; Level ##
 .byte $8E,$BB,$B3,$C0,$FF,$FF,$10,$04,$01             ; Exp.  ## 
-.byte $97,$A8,$BB,$B7,$FF,$FF,$FF,$10,$42,$00         ; Next  ##
+.byte $97,$A8,$BB,$B7,$09,$03,$10,$42,$00         ; Next  ##
 
 M_CharMainStats: 
 .byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$01         ; Strength 
 .byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$01         ; Agility  
 .byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$09,$01         ; Intellect
 .byte $9F,$5B,$5F,$5B,$4B,$FF,$10,$0A,$01             ; Vitality 
-.byte $9C,$B3,$A8,$40,$FF,$FF,$FF,$FF,$FF,$10,$0B,$00 ; Speed    
+.byte $9C,$B3,$A8,$40,$09,$05,$10,$0B,$00             ; Speed    
 
 M_CharSubStats: 
-.byte $8D,$A4,$B0,$A4,$66,$FF,$FF,$FF,$10,$3C,$01     ; Damage
+.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Damage
 .byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Accuracy
 .byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Defense
 .byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Evasion
@@ -840,7 +840,7 @@ M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape...
 .byte $7B,$7C,$7C,$7C,$7C,$7C,$7C,$7D,$00
 
 M_ItemSubmenu:
-.byte $FF,$FF,$9E,$3E,$FF,$FF,$FF,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
+.byte $FF,$FF,$9E,$3E,$09,$03,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
 
 M_MagicSubmenu: 
 .byte $FF,$FF,$8C,$3F,$21,$FF,$95,$2B,$B5,$29,$FF,$8F,$35,$66,$B7,$00 ; Cast __ Learn __ Forget
@@ -3083,6 +3083,8 @@ ShopSell_Loop:
     JSR ConvertInventoryToItemBox
     JSR ShopSelectItem
     BCC :+
+    LDA #0
+    STA shop_selling
     JMP RestartShopLoop
     
   : JSR ShopCheckInventory
@@ -3332,7 +3334,10 @@ SelectAmount:
     BCC @End                ; if B is pressed, 
     PLA
     PLA
-    JMP ShopBuy             ; return to picking what to buy
+    LDA shop_selling
+    BEQ :+
+    JMP ShopSell
+  : JMP ShopBuy             ; return to picking what to buy
     
     @End:
     RTS
@@ -4039,7 +4044,9 @@ ClinicBuildNameString:
 
 
 Shop_CharacterStopDancing:
-    DEC inv_canequipinshop
+    LDA #0
+    STA inv_canequipinshop
+    STA item_box_offset
     LDA cursor
     PHA
     LDA shop_type
@@ -4499,28 +4506,40 @@ ShopSelectItem:
     JSR EraseBox             ; erase shop box #3 (command box)
     JMP CommonShopLoop_List  ; everything's ready!  Just run the common loop from here, then return
 
-FillBlankItem:          ; this is either an incredibly smart or incredibly stupid way to fill 
-    LDA #$09            ; the string buffer without printing anything
-    STA str_buf+$41, Y  ; the 09s are a control code to print spaces
-    STA str_buf+$44, Y  ; followed by 8s to print 8 tiles
-    STA str_buf+$47, Y  ; so that fills 3 lines to clear out old items
-    STA str_buf+$49, Y  ; but there can't be any 0s in the buffer so pad it out
-    STA str_buf+$4B, Y  ; with FIVE 09 control codes!
-    LDA #8              ; and have the last 3 be 3 spaces, 3 spaces, 2 spaces...
-    STA str_buf+$42, Y  ; each line ending with a single line break
-    STA str_buf+$45, Y  ; then the last with a double line break
-    LDA #3
-    STA str_buf+$48, Y  ; ... all so that the shop feels more sleek and doesn't re-draw the box
-    STA str_buf+$4A, Y  ; from scratch every time it updates the inventory...
-    LDA #2
-    STA str_buf+$4C, Y
+FillBlankItem:         
+    LDA cursor_max      ; if cursor_max didn't increase yet, this is the first item...
+    BNE :+              ; if this is the first item, there are no items! 
+       LDA item_box_offset
+       SEC
+       SBC #5
+       STA item_box_offset ; subtract 5 from this, and re-do from scratch
+       JMP ShopSelectItem    
+    
+ :  LDA #$09            ; fill 3 rows with 8 blank spaces (09 is control code for print spaces, followed by 08)
+    STA str_buf+$41, Y  
+    STA str_buf+$44, Y  
+    STA str_buf+$47, Y  
+    LDA #8              
+    STA str_buf+$42, Y  
+    STA str_buf+$45, Y  
+    STA str_buf+$48, Y  
     LDA #$05
-    STA str_buf+$43, Y  ; 41:09 42:08 43:05
-    STA str_buf+$46, Y  ; 44:09 45:08 46:05
-    LDA #$01            ; 47:09 48:03 49:09 4A:03 4B:09 4C:02 4D:01
-    STA str_buf+$4D, Y     
+    STA str_buf+$43, Y  
+    STA str_buf+$46, Y  
+    LDA #$01            
+    STA str_buf+$49, Y     
     INC BlankItem
-    RTS
+    
+    TYA
+    CLC
+    ADC #9
+    TAY
+    
+    INC cursor_max       ; increment cursor_max, our item counter
+    LDA cursor_max
+    CMP #5               ; ensure we don't exceed 5 items (max the shop space will allow)
+    BNE :-               ; if we haven't reached 5 items yet, keep looping
+    JMP UpdateShopList_Done
 
 UpdateShopList:
     LDY #0            ; zero Y... this will be our string building index
@@ -4536,8 +4555,7 @@ UpdateShopList_Loop:
     LDA item_box, X      ; use it to get the next shop item
     BNE @ItemExists
     
-    JSR FillBlankItem
-    JMP @ResumeLoop
+    JMP FillBlankItem
     
    @ItemExists:
     STA str_buf+$42, Y   ; put item ID
@@ -4613,19 +4631,18 @@ UpdateShopList_Loop:
 ;;  41    42      43 44 45-46         47 | 48 49          | 4A 4B 4C      4D 
 ;;                             if magic: | L  Spell Level |
 
-   @ResumeLoop:
     TYA
     CLC                  ; add 13 to our string index so the next item is drawn after this item
     ADC #13              ; JIGS - the box is longer than original game
     TAY
   
-    INC cursor_max       ; increment cursor_max, our item counter
+    INC cursor_max           ; increment cursor_max, our item counter
     LDA cursor_max
-    CMP #5               ; ensure we don't exceed 5 items (max the shop space will allow)
-    BEQ @Done            ; if we haven't reached 5 items yet, keep looping
+    CMP #5                   ; ensure we don't exceed 5 items (max the shop space will allow)
+    BEQ UpdateShopList_Done  ; if we haven't reached 5 items yet, keep looping
     JMP UpdateShopList_Loop
 
-   @Done:
+UpdateShopList_Done:
     SEC
     SBC BlankItem
     STA cursor_max
