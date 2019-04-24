@@ -7588,6 +7588,8 @@ OpenTreasureChest:
 ;;  means that numbers such as 1065535 will not appear to be over the maximum when, in
 ;;  fact, they are.
 ;;
+;;  Update: Disch fixed this!
+;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 AddGPToParty:
@@ -7604,7 +7606,10 @@ AddGPToParty:
 
     CMP #^1000000   ; see if high byte is over maximum
     BCC @Exit       ; if gold_high < max_high, exit
+    BEQ @CheckMid   ; high bytes are equal -- need to compare middle bytes   
+    BCS @Max        ; gold_high > max_high, we're over the max               
 
+  @CheckMid:                                                                 
     LDA gold+1
     CMP #>1000000   ; check middle bytes
     BCC @Exit       ; if gold < max, exit
@@ -7666,7 +7671,8 @@ AddGPToParty:
 ;;  06    = JIGS - Battle turn number
 ;;  07 xx = JIGS - Weapon/Armor item name
 ;;  08    = JIGS - Decrement X
-;;  09-0F = unused (default to single line break)
+;;  09    = JIGS - print spaces
+;;  0A-0F = unused (default to single line break)
 ;;  10 xx = draw stat code 'xx' for character 0
 ;;  11 xx = draw stat code 'xx' for character 1
 ;;  12 xx = draw stat code 'xx' for character 2
@@ -7767,7 +7773,30 @@ DrawComplexString:
     DEC ppu_dest
     JMP @Draw_NoStall
 
-:   CMP #$01           ; is it $01?
+:   CMP #$09
+    BNE @Not_09    
+    LDA (text_ptr), Y
+    INC text_ptr
+    BNE :+
+      INC text_ptr+1
+  : STA spaceruns
+   @PrintSpaces:
+    LDA #$FF
+    LDX $2002
+    LDX ppu_dest+1
+    STX $2006
+    LDX ppu_dest
+    STX $2006
+    STA $2007
+    INC ppu_dest
+    
+    DEC spaceruns
+    LDA spaceruns
+    BNE @PrintSpaces
+    JMP @StallAndDraw
+
+   @Not_09:
+    CMP #$01           ; is it $01?
     BNE @Code_02to19   ; if not, jump ahead
 
     ;;; Control code $01 -- double line break
@@ -13053,21 +13082,21 @@ DrawBattleItemBox:
      LDA #$07                          ; 8 spaces
      JMP @AddToBufferLeft
 
-  : PHA 
-    TXA 
-    AND #$0F
-    BEQ @PrintWeaponLeft
-    CMP #06
-    BEQ @PrintWeaponLeft
+  : ;PHA 
+    ;TXA 
+    ;AND #$0F
+    ;BEQ @PrintWeaponLeft
+    ;CMP #06
+    ;BEQ @PrintWeaponLeft
         
-    @PrintArmorLeft:
-    PLA
-    CLC
-    ADC #ARMORSTART-1
-    JMP @AddToBufferLeft
+    ;@PrintArmorLeft:
+    ;PLA
+    ;CLC
+    ;ADC #ARMORSTART-1
+    ;JMP @AddToBufferLeft
     
-    @PrintWeaponLeft:
-    PLA
+    ;@PrintWeaponLeft:
+    ;PLA
     SEC
     SBC #1
         
@@ -13084,20 +13113,20 @@ DrawBattleItemBox:
     LDA #$01                          ; 1 space
     JMP @AddToBufferRight
     
-  : PHA 
-    TXA 
-    AND #$0F
-    CMP #07
-    BEQ @PrintWeaponRight
+  : ;PHA 
+    ;TXA 
+    ;AND #$0F
+    ;CMP #07
+    ;BEQ @PrintWeaponRight
         
-    @PrintArmorRight:
-    PLA
-    CLC
-    ADC #ARMORSTART-1
-    JMP @AddToBufferRight
+    ;@PrintArmorRight:
+    ;PLA
+    ;CLC
+    ;ADC #ARMORSTART-1
+    ;JMP @AddToBufferRight
     
-    @PrintWeaponRight:
-    PLA
+    ;@PrintWeaponRight:
+    ;PLA
     SEC
     SBC #1
     

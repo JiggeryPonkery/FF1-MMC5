@@ -219,17 +219,18 @@ inv_trash          = inv_equip + $80 ; 16 bytes to backup thrown away items?
 
 game_flags      = unsram + $0300  ; must be on page bound
 
+shop_curprice     = $039C ; 9D, 9E, 9F - 4 bytes ; will mess up buying things if shared
+shop_curitem      = $03A0
+shop_amount       = $03A1
+shop_amount_high  = $03A2
+shop_amount_buy   = $03A3
+shop_amount_max   = $03A4
+shop_charindex    = $03A5
+shop_spell        = $03A6
+shop_selling      = $03A7
+shop_cursorchange = $03A8
+shop_listdrawn    = $03A9
 
-shop_curprice     = $03A0 ; 01, 02, 03 - 4 bytes ; will mess up buying things if shared
-shop_curitem      = $03A4
-shop_amount       = $03A5
-shop_amount_high  = $03A6
-shop_amount_buy   = $03A7
-shop_amount_max   = $03A8
-shop_charindex    = $03A9
-shop_spell        = $03AA
-shop_selling      = $03AB
-shop_cursorchange = $03AC
 ItemToUnequip     = $03AD
 ItemToEquip       = $03AE
 shop_x_price      = $03AF
@@ -580,7 +581,7 @@ item_box_offset     = $72 ; shops
 item_box_offset_old = $73 ; shops
 backup_cursor       = $73 ; shops, menus
 inv_canequipinshop  = $74 ; shops
-
+spaceruns           = $75 ; drawcomplexstring
 
 dlgmusic_backup = $7C  ; backup music track for restoring music after the dialogue box changes it
 dlgsfx          = $7D  ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
