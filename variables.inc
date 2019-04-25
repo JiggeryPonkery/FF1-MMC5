@@ -575,6 +575,7 @@ shop_cursor_ptr = $6E ; +$6F
 
 equipoffset     = $70 ; menus
 Woosh           = $71 ; battle
+cursor_change   = $71 ; magic menu 
 
 treasure_offset     = $72 ; maps
 item_box_offset     = $72 ; shops

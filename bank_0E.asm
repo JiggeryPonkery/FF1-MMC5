@@ -42,9 +42,7 @@
 .import LoadBattleSpritePalettes
 .import LoadBridgeSceneGFX_Menu
 .import LoadMenuCHRPal
-;.import LoadNewGameCHRPal
 .import LoadPrice
-;.import LoadPtyGenBGCHRAndPalettes
 .import LoadShopCHRPal
 .import LoadTitleScreenGFX
 .import LongCall
@@ -553,6 +551,7 @@ lut_MenuText:
 .word M_MagicNameLearned      ; 4D ; 77
 .word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again...
 .word Battle_Ether_MPList     ; 4F ; 79 ; for battle... easier to do it here than copy buncha code over
+.word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
 
 
 M_Gold: 
@@ -642,15 +641,25 @@ M_HP_List:
 .byte $10,$00,$FF,$10,$02,$FF,$10,$05,$7A,$10,$06,$00 ; lists name, ailment, and current HP horizontally
 
 M_MagicList: 
+
+.byte $95,$81,$FF,$FF,$10,$14,$FF,$FF,$10,$15,$FF,$FF,$10,$16,$01
+.byte $95,$82,$FF,$FF,$10,$17,$FF,$FF,$10,$18,$FF,$FF,$10,$19,$01
+.byte $95,$83,$FF,$FF,$10,$1A,$FF,$FF,$10,$1B,$FF,$FF,$10,$1C,$01
+.byte $95,$84,$FF,$FF,$10,$1D,$FF,$FF,$10,$1E,$FF,$FF,$10,$1F,$01
+.byte $95,$85,$FF,$FF,$10,$20,$FF,$FF,$10,$21,$FF,$FF,$10,$22,$01
+.byte $95,$86,$FF,$FF,$10,$23,$FF,$FF,$10,$24,$FF,$FF,$10,$25,$01
+.byte $95,$87,$FF,$FF,$10,$26,$FF,$FF,$10,$27,$FF,$FF,$10,$28,$01
+.byte $95,$88,$FF,$FF,$10,$29,$FF,$FF,$10,$2A,$FF,$FF,$10,$2B,$00
+
 ;     |L  #    __ cc  MP   /  max MP   __  __ spel1 1  __ spell 2  __ spell 3 
-.byte $7E,$81,$FF,$10,$2C,$7A,$10,$34,$FF,$FF,$10,$14,$FF,$10,$15,$FF,$10,$16,$01
-.byte $7E,$82,$FF,$10,$2D,$7A,$10,$35,$FF,$FF,$10,$17,$FF,$10,$18,$FF,$10,$19,$01
-.byte $7E,$83,$FF,$10,$2E,$7A,$10,$36,$FF,$FF,$10,$1A,$FF,$10,$1B,$FF,$10,$1C,$01
-.byte $7E,$84,$FF,$10,$2F,$7A,$10,$37,$FF,$FF,$10,$1D,$FF,$10,$1E,$FF,$10,$1F,$01
-.byte $7E,$85,$FF,$10,$30,$7A,$10,$38,$FF,$FF,$10,$20,$FF,$10,$21,$FF,$10,$22,$01
-.byte $7E,$86,$FF,$10,$31,$7A,$10,$39,$FF,$FF,$10,$23,$FF,$10,$24,$FF,$10,$25,$01
-.byte $7E,$87,$FF,$10,$32,$7A,$10,$3A,$FF,$FF,$10,$26,$FF,$10,$27,$FF,$10,$28,$01
-.byte $7E,$88,$FF,$10,$33,$7A,$10,$3B,$FF,$FF,$10,$29,$FF,$10,$2A,$FF,$10,$2B,$00
+;.byte $7E,$81,$FF,$10,$2C,$7A,$10,$34,$FF,$FF,$10,$14,$FF,$10,$15,$FF,$10,$16,$01
+;.byte $7E,$82,$FF,$10,$2D,$7A,$10,$35,$FF,$FF,$10,$17,$FF,$10,$18,$FF,$10,$19,$01
+;.byte $7E,$83,$FF,$10,$2E,$7A,$10,$36,$FF,$FF,$10,$1A,$FF,$10,$1B,$FF,$10,$1C,$01
+;.byte $7E,$84,$FF,$10,$2F,$7A,$10,$37,$FF,$FF,$10,$1D,$FF,$10,$1E,$FF,$10,$1F,$01
+;.byte $7E,$85,$FF,$10,$30,$7A,$10,$38,$FF,$FF,$10,$20,$FF,$10,$21,$FF,$10,$22,$01
+;.byte $7E,$86,$FF,$10,$31,$7A,$10,$39,$FF,$FF,$10,$23,$FF,$10,$24,$FF,$10,$25,$01
+;.byte $7E,$87,$FF,$10,$32,$7A,$10,$3A,$FF,$FF,$10,$26,$FF,$10,$27,$FF,$10,$28,$01
+;.byte $7E,$88,$FF,$10,$33,$7A,$10,$3B,$FF,$FF,$10,$29,$FF,$10,$2A,$FF,$10,$2B,$00
 
 M_CharLevelStats: 
 .byte $10,$00,$01                                     ; NAME
@@ -881,8 +890,19 @@ Battle_Ether_MPList:
 .byte $95,$83,$FF,$FF,$10,$2E,$7A,$10,$36,$FF,$95,$87,$FF,$FF,$10,$32,$7A,$10,$3A,$01
 .byte $95,$84,$FF,$FF,$10,$2F,$7A,$10,$37,$FF,$95,$88,$FF,$FF,$10,$33,$7A,$10,$3B,$00
 
+M_MagicMenuMPTitle:
+;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
+.byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
 
 
+;.byte $FF,$95,$81,$C2,$10,$2C,$7A,$10,$34
+;.byte $FF,$95,$82,$C2,$10,$2D,$7A,$10,$35
+;.byte $FF,$95,$83,$C2,$10,$2E,$7A,$10,$36
+;.byte $FF,$95,$84,$C2,$10,$2F,$7A,$10,$37,$01
+;.byte $FF,$95,$85,$C2,$10,$30,$7A,$10,$38
+;.byte $FF,$95,$86,$C2,$10,$31,$7A,$10,$39
+;.byte $FF,$95,$87,$C2,$10,$32,$7A,$10,$3A
+;.byte $FF,$95,$88,$C2,$10,$33,$7A,$10,$3B,$00
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5325,10 +5345,15 @@ DrawMagicMenu:
     DEC dest_y
     LDA #7
     JSR DrawCharMenuString         ; draw the character's name
-    
+   
     LDA #$11
     JSR DrawMainItemBox            ; sub menu box
-    DEC dest_y
+
+DrawMagicSubMenuString:
+    LDA #10
+    STA dest_x
+    LDA #02
+    STA dest_y
     LDA #67 
     JMP DrawMenuString             ; "Cast / Learn / Forget"
 
@@ -5352,6 +5377,10 @@ EnterMagicMenu:
 EnterMagicSubMenu:
     LDA #0
     STA cursor
+    
+    LDA #1
+    STA menustall
+    JSR DrawMagicSubMenuString
  
     NoLocal_MagicSubMenuLoop:
   @MagicSubMenuLoop:
@@ -5369,7 +5398,7 @@ EnterMagicSubMenu:
 
   @B_Pressed:
     RTS                       ; if B pressed, just exit
-        
+
   @A_Pressed:
     JSR PlaySFX_MenuSel
     LDA cursor
@@ -5414,10 +5443,13 @@ EnterMagicMenu_Cast:
     LDA #0                    ; otherwise.... (they have magic)
     STA joy                   ; clear joypad
     STA joy_prevdir           ; and previous joy directions
-
+    LDA #1
+    STA cursor_change
+    
 MagicMenu_Loop:
     JSR ClearOAM              ; clear OAM
     JSR DrawMagicMenuCursor   ; draw the cursor
+    JSR UpdateMP    
     JSR MenuFrame             ; and do a frame
 
     LDA joy_a
@@ -5444,7 +5476,7 @@ MagicMenu_Loop:
       AND #$80
       BNE @ForgetSpell        ; if B was pressed, resume loop
       JSR CloseDescBox
-      JMP MagicMenu_Loop
+      JMP EnterMagicMenu_Cast
       
     @ForgetSpell:  
     JSR MagicMenu_ForgetSpell   ; if A was pressed, forget the spell  
@@ -5460,7 +5492,7 @@ MagicMenu_Loop:
 
       LDA #63                   ; otherwise...
       JSR DrawItemDescBox       ;  print "you don't have enough MP" or whatever message (description text ID=$32)
-      JMP MagicMenu_Loop        ;  and return to loop
+      JMP EnterMagicMenu_Cast   ;  and return to loop
 
   @HaveMP:
     LDA submenu_targ
@@ -5847,7 +5879,7 @@ UseMagic_GetRequiredMP:
     ADC CharacterIndexBackup
     ADC #ch_mp - ch_stats
     TAX
-    STA mp_required
+    STX mp_required
     LDA ch_stats, X
     AND #$F0   ; clear low bits to get current mp
     CMP #1
@@ -5971,6 +6003,7 @@ MagicMenu_LearnSpell:
     JSR PlaySFX_Error
     JMP @LearnSpell_MainLoop       ; and keep looping
 
+   
 DrawLearnSpellMenu:    
     LDA #0
     STA $2001                      ; turn off PPU
@@ -5996,27 +6029,33 @@ DrawLearnSpellMenu:
     LDA #11
     STA dest_x
     
-    LDA item_pageswap
-    BEQ @Page1Title
-    CMP #1
-    BEQ @Page2Title
-    CMP #2
-    BEQ @Page3Title
+;    LDA item_pageswap
+;    BEQ @Page1Title
+;    CMP #1
+;    BEQ @Page2Title
+;    CMP #2
+;    BEQ @Page3Title
     
-    @Page4Title:
-    LDA #75
-    JMP :+
+;    @Page4Title:
+;    LDA #75
+;    JMP :+
     
-    @Page3Title:
-    LDA #74
-    JMP :+
+;    @Page3Title:
+;    LDA #74
+;    JMP :+
     
-    @Page2Title:
-    LDA #73
-    JMP :+
+;    @Page2Title:
+;    LDA #73
+;    JMP :+
     
-    @Page1Title:
+;    @Page1Title:
+;    LDA #72
+
+    ;; JIGS -- this is why organizing your text string tables is good!
     LDA #72
+    CLC
+    ADC item_pageswap
+
   : JSR DrawMenuString         ; draw White / Black magic submenu
   
     LDA item_pageswap
@@ -8139,7 +8178,7 @@ MoveMagicLearnMenuCursor:
 
 MoveMagicSubMenuCursor:
     LDA joy                      ; get joypad state
-    AND #$0F                     ; isolate directional buttons
+    AND #$03                     ; isolate left/right directional buttons
     CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
     BEQ MoveMagicMenuCursor_Exit ; if there's no change, just exit
     STA joy_prevdir              ;  otherwise record changes
@@ -8179,6 +8218,8 @@ MoveMagicMenuCursor:
     STA joy_prevdir              ;  otherwise record changes
     CMP #0                       ; see if buttons have been pressed (rather than released)
     BEQ MoveMagicMenuCursor_Exit ; if no buttons pressed, just exit
+    
+    INC cursor_change
 
     CMP #$04               ; now see which button was pressed
     BCS @UpDown            ; check for up/down
@@ -8287,7 +8328,70 @@ MoveMagicMenuCursor:
   @CheckCursor:
     LDX cursor
     LDA TempSpellList, X
+UpdateMP_Exit:    
     RTS              ; then exit.
+    
+UpdateMP:    
+    LDA item_pageswap
+    CMP #2
+    BEQ UpdateMP_Exit         ; don't display MP if forgetting spells  
+    
+    LDA #80
+    ASL A                   ; double A (pointers are 2 bytes)
+    TAX                     ; put in X to index menu string pointer table
+    LDA lut_MenuText, X
+    STA text_ptr
+    LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+    
+    LDY #0
+   @Loop:
+    LDA (text_ptr), Y
+    STA str_buf, Y
+    INY 
+    CPY #$14
+    BNE @Loop
+    
+    LDX cursor             
+    LDA BigSpellLevel_LUT, X  
+    CLC
+    ADC #$81
+    STA str_buf+$6           ; put spell level in the string
+    
+    JSR UseMagic_GetRequiredMP
+    LSR A
+    LSR A
+    LSR A
+    LSR A                     ; shift high bits to low
+    ORA #$80                 
+    STA str_buf+$0E           ; put current MP in the string
+    LDX mp_required
+    LDA ch_stats, X
+    AND #$0F
+    ORA #$80
+    STA str_buf+$10           ; put max MP in the string
+    
+    LDA #<(str_buf)
+    STA text_ptr
+    LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+    
+    LDA #$0C
+    STA dest_x
+    LDA #$02
+    STA dest_y
+    
+    LDA #1
+    STA menustall
+    
+    JMP DrawComplexString
+    
+    
+    
+    
+    
+    
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8315,7 +8419,7 @@ CloseDescBox_Sfx:
     JSR PlaySFX_MenuMove     ; play the menu move sound effect
     LDA descboxopen          ; see if the box is currently open
     BNE CloseDescBox         ;  if it is, close it... otherwise
-      RTS                    ;    just exit
+    RTS                    ;    just exit
 
 CloseDescBox:
     LDA #0
@@ -8500,14 +8604,14 @@ DrawMagicMenuCursor:
 
 
 lut_MagicMenuCursor:
-  .BYTE   $30,$28,   $70,$28,   $B0,$28
-  .BYTE   $30,$38,   $70,$38,   $B0,$38
-  .BYTE   $30,$48,   $70,$48,   $B0,$48
-  .BYTE   $30,$58,   $70,$58,   $B0,$58
-  .BYTE   $30,$68,   $70,$68,   $B0,$68
-  .BYTE   $30,$78,   $70,$78,   $B0,$78
-  .BYTE   $30,$88,   $70,$88,   $B0,$88
-  .BYTE   $30,$98,   $70,$98,   $B0,$98
+  .BYTE   $18,$28,   $60,$28,   $A8,$28
+  .BYTE   $18,$38,   $60,$38,   $A8,$38
+  .BYTE   $18,$48,   $60,$48,   $A8,$48
+  .BYTE   $18,$58,   $60,$58,   $A8,$58
+  .BYTE   $18,$68,   $60,$68,   $A8,$68
+  .BYTE   $18,$78,   $60,$78,   $A8,$78
+  .BYTE   $18,$88,   $60,$88,   $A8,$88
+  .BYTE   $18,$98,   $60,$98,   $A8,$98
 
   
 
@@ -8831,6 +8935,15 @@ DrawMainMenuOptionBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+DrawCharDescBox:
+    PHA                  
+    LDA #1               
+    STA menustall
+    LDA #$08             
+    JSR DrawMainItemBox
+    PLA                  
+    INC descboxopen      
+    JMP DrawCharMenuString    ; JIGS - because it contains HP/MP or other character-related stats
 
 DrawItemDescBox_Fanfare:
     LDX #$54              ; play music track $54 (special event fanfare)
@@ -9131,8 +9244,8 @@ DrawMagicMenuMainBox:
     JSR DrawMainItemBox          ; Draw the box itself from the list of MainItem boxes
     
     LDY #$C0                     ; set char menu string length to $C0
-    DEC dest_x
-    LDA #18                     ; and draw string 2A (entire spell list, along with level names an MP amounts
+   ; DEC dest_x
+    LDA #18                      ; and draw string 2A (entire spell list, along with level names an MP amounts
     JSR DrawCharMenuString_Len   ;   -- ALL the text in one string!)
    
    LDX #0
@@ -9404,7 +9517,9 @@ lut_EquipInventoryCursor_Y:
   .BYTE   $78
   .BYTE   $88
   .BYTE   $98
-  
+
+lut_EquipInventoryPageTitle:
+.byte $04, $05, $06, $4E 
     
 DrawEquipInventory:
     LDA #$09                ; Box List
@@ -9417,56 +9532,20 @@ DrawEquipInventory:
     JSR DrawCharMenuString
   
     LDA #$11
-    JSR DrawMainItemBox            ; sub menu box
+    JSR DrawMainItemBox     ; sub menu box
     DEC dest_y
-    LDA #11
-    STA dest_x
+    INC dest_x
     
-    LDA item_pageswap
-    BEQ @Page1Title
-    CMP #1
-    BEQ @Page2Title
-    CMP #2
-    BEQ @Page3Title
-    
-    @Page4Title:
-    LDA #78
-    JMP :+
-    
-    @Page3Title:
-    LDA #6
-    JMP :+
-    
-    @Page2Title:
-    LDA #5
-    JMP :+
-    
-    @Page1Title:
-    LDA #4
-  : JSR DrawMenuString         ; draw page number and arrows
+    LDX item_pageswap
+    LDA lut_EquipInventoryPageTitle, X
+    JSR DrawMenuString         ; draw page number and arrows
   
     LDA item_pageswap
-    BEQ @Page1
-    CMP #1
-    BEQ @Page2
-    CMP #2
-    BEQ @Page3
-    
-    @Page4:
-    LDX #$30
-    JMP :+
-    
-    @Page3:
-    LDX #$20
-    JMP :+
-    
-    @Page2:
-    LDX #$10
-    JMP :+
-    
-    @Page1:
-    LDX #0
-  : STX MMC5_tmp+2      ; X backup
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    STA MMC5_tmp+2      ; X backup
     LDY #0
     STY MMC5_tmp        ; item counter
     STY MMC5_tmp+1      ; left or right counter
@@ -10088,4 +10167,4 @@ JMP DrawCharMenuString
 
 
 
-;.byte "END OF BANK E"
+.byte "END OF BANK E"
