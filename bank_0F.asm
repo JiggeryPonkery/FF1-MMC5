@@ -53,9 +53,9 @@
 .export LoadBorderPalette_Blue
 .export LoadBridgeSceneGFX_Menu
 .export LoadMenuCHRPal
-.export LoadNewGameCHRPal
+;.export LoadNewGameCHRPal
 .export LoadPrice
-.export LoadPtyGenBGCHRAndPalettes
+;.export LoadPtyGenBGCHRAndPalettes
 .export LoadShopCHRPal
 .export LongCall
 .export Magic_ConvertBitsToBytes
@@ -84,6 +84,7 @@
 .export DrawPlayerBox
 .export ShiftLeft6
 .export BattleBackgroundColor_LUT
+.export LoadMenuCHRPal_Z
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -10053,9 +10054,9 @@ LoadBridgeSceneGFX_Menu: ;; JIGS -- this is for menu loading; don't want to turn
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-LoadNewGameCHRPal:
-    JSR LoadMenuBGCHRAndPalettes
-    JMP LoadBatSprCHRPalettes_NewGame
+;LoadNewGameCHRPal:
+;    JSR LoadMenuBGCHRAndPalettes
+;    JMP LoadBatSprCHRPalettes_NewGame
 
 LoadBattleCHRPal:              ; does not load palettes for enemies
     JSR LoadBattleBGCHRAndPalettes
@@ -10082,6 +10083,13 @@ LoadOWCHR:                     ; overworld map -- does not load any palettes
     JSR LoadOWBGCHR
     JSR LoadPlayerMapmanCHR
     JMP LoadOWObjectCHR
+    
+LoadMenuCHRPal_Z:
+    JSR LoadMenuCHRPal
+    JSR LoadBorderPalette_Blue       ; Load up the blue border palette for menus    
+    JMP LoadBatSprCHRPalettes_NewGame
+;    LDA #BANK_Z
+;    JMP SwapPRG_L
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10555,7 +10563,10 @@ LoadBatSprCHRPalettes_NewGame:
     LDA #>(lut_BatObjCHR + $400)  ; change source pointer to bottom half of cursor and related CHR
     STA tmp+1
     LDX #$04                      ; load 4 rows (bottom half)
-    JMP :+                        ; skip ahead to the part of the next routine that loads cursor CHR
+    JSR CHRLoad_Cont   ; load cursor and other battle related CHR
+    JSR LoadBattleSpritePalettes  ; load palettes for these sprites
+    LDA #BANK_Z
+    JMP SwapPRG_L      ; and swap to bank E on exit
 
 LoadBatSprCHRPalettes:
     JSR LoadBatSprCHR_SetPpuAddrAndSwap
@@ -10604,7 +10615,7 @@ LoadBatSprCHRPalettes:
 
        ; above two routines both merge here
 
-:     JSR CHRLoad_Cont   ; load cursor and other battle related CHR
+      JSR CHRLoad_Cont   ; load cursor and other battle related CHR
       JSR LoadBattleSpritePalettes  ; load palettes for these sprites
       LDA #BANK_MENUS
       JMP SwapPRG_L      ; and swap to bank E on exit
@@ -14836,14 +14847,6 @@ ClearMenuOtherNametables:
       BNE @ClearNT_OuterLoop    ;  clearing $800 bytes total
     RTS
     
-
-    
-;; JIGS - this is (part of?) a thing that makes the party generation screens use the black background
-;; Which I think is better to see what your sprites look like than the blue used in menus
-    
-LoadPtyGenBGCHRAndPalettes:
-    JSR LoadBorderPalette_Blue       ; Load up the blue border palette for menus    
-    JMP LoadBatSprCHRPalettes_NewGame
 
     
     

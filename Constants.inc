@@ -132,8 +132,8 @@ BANK_BTLPALETTES  = $0C
 BANK_MUSIC        = $0D
 
 BANK_MENUS        = $0E
-BANK_PARTYGEN     = $0E
 
+BANK_PARTYGEN     = $0F
 BANK_TITLE        = $0F
 BANK_INTRO        = $0F
 BANK_Z            = $0F
