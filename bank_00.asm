@@ -2294,7 +2294,8 @@ lut_Treasure:
 .byte $02, WEP28    ; 11 ; NorthWest Castle 1 - Power  Staff
 .byte $02, ARM35    ; 12 ; NorthWest Castle 2 - Iron   Gauntlets
 .byte $02, WEP15    ; 13 ; NorthWest Castle 3 - Falchon
-.byte $00, GOLD16   ; 14 ; Marsh Cave 1       - 295 G
+.byte $01, PHOENIXDOWN ; JIGS - to combat Astos's RUB
+;.byte $00, GOLD16   ; 14 ; Marsh Cave 1       - 295 G 
 .byte $02, ARM11    ; 15 ; Marsh Cave 2       - Copper Bracelet
 .byte $01, HOUSE    ; 16 ; Marsh Cave 3       - HOUSE  
 .byte $00, GOLD21   ; 17 ; Marsh Cave 4       - 385 G
