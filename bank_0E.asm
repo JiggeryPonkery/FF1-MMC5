@@ -599,14 +599,14 @@ M_EquipNameClass:
 .byte $10,$00,$09,$08,$10,$01,$00 ; name and class
 
 M_EquipmentSlots:
-.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$01   ; RIGHT_HAND__ 
-.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$01   ; LEFT__HAND__
-.byte $91,$2B,$A7,$09,$08,$C8,$09,$08,$C9,$01                       ; HEAD________
-.byte $8B,$B2,$A7,$BC,$09,$08,$C8,$09,$08,$C9,$01                   ; BODY________
-.byte $91,$22,$A7,$B6,$09,$07,$C8,$09,$08,$C9,$01                   ; HANDS_______
-.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$09,$03,$C8,$09,$08,$C9,$01       ; ACCESSORY___
-.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$01       ; BATTLE_ITEM_
-.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$00       ; BATTLE_ITEM_
+.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$FF,$D4,$01   ; RIGHT_HAND__[________]_*
+.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$FF,$DB,$01   ; LEFT__HAND__[________]_*
+.byte $91,$2B,$A7,$09,$08,$C8,$09,$08,$C9,$FF,$DC,$01                       ; HEAD________[________]_*
+.byte $8B,$B2,$A7,$BC,$09,$08,$C8,$09,$08,$C9,$FF,$DA,$01                   ; BODY________[________]_*
+.byte $91,$22,$A7,$B6,$09,$07,$C8,$09,$08,$C9,$FF,$DD,$01                   ; HANDS_______[________]_*
+.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$09,$03,$C8,$09,$08,$C9,$FF,$DE,$01       ; ACCESSORY___[________]_*
+.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$FF,$D8,$01       ; BATTLE_ITEM_[________]_*
+.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$FF,$D8,$00       ; BATTLE_ITEM_[________]_*
 
 M_EquipStats:
 .byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$FF,$FF      ; Damage
@@ -2348,9 +2348,7 @@ EquipShop_GiveItemToChar:
     STA CharacterIndexBackup
 
     LDX shop_type       ; see if this is weapon or armor, and
-    BEQ @CheckWeapons   ;  fork appropriately
-    
-    JMP CheckArmor
+    BNE CheckArmor
 
   @CheckWeapons:
     LDA shop_curitem
@@ -2367,6 +2365,7 @@ EquipShop_GiveItemToChar:
     TAX
     DEX                         ; convert to 0-based
     INC inv_weapon, X
+    
    @EquipWeapon_NoSwap: 
     LDX CharacterIndexBackup
     LDA ItemToEquip
@@ -2389,9 +2388,7 @@ CheckArmor:
     JSR IsEquipLegal
     BCS CannotEquip
     
-    JSR LongCall
-    .word UnadjustEquipStats
-    .byte $0F
+    JSR UnEquipStats
     
     LDX ItemToEquip
     LDA lut_ArmorTypes, X ; check type LUT
@@ -2406,7 +2403,8 @@ CheckArmor:
     
     TAX
     DEX
-    INC inv_armor, X
+    INC inv_weapon, X
+    
    @EquipArmor_NoSwap:
     LDX CharacterIndexBackup
     LDA ItemToEquip
