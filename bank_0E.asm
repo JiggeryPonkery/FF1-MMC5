@@ -9480,7 +9480,7 @@ EquipStatsDescBoxNumbers:
     LDA equipoffset
     CMP #06
     BCS @DashStats
-   
+
     LDA equip_impossible
     BEQ :+
    
@@ -9502,7 +9502,20 @@ EquipStatsDescBoxNumbers:
     STA str_buf+2, X
     RTS  
   
-  : TYA
+   @WrongSlot: 
+    LDX tmp+7
+    LDA #$FF
+    STA str_buf, X
+    LDA #$C4
+    STA str_buf+1, X
+    STA str_buf+2, X
+    RTS  
+  
+  : LDA equipoffset
+    CMP slotcheck
+    BNE @WrongSlot 
+  
+    TYA
     JSR PrintCharStat
     LDX tmp+7
     LDY #0
@@ -9547,6 +9560,7 @@ EquipStatsDescBoxString:
 UpdateEquipInventoryStats_CheckViable:
     LDA #0
     STA equip_impossible
+    STA slotcheck
 
     LDA cursor
     ASL A
@@ -9583,6 +9597,8 @@ UpdateEquipInventoryStats_CheckViable:
     
    @ClearStats:            
     LDA equipoffset
+    STA slotcheck
+   @ClearStats_2: 
     CLC 
     ADC CharacterIndexBackup ; add character index
     TAX
@@ -9601,8 +9617,9 @@ UpdateEquipInventoryStats_CheckViable:
     LDX ItemToEquip      
     LDA lut_ArmorTypes, X    ; check type LUT
     CMP equipoffset          ; against equip slot
-    BNE @NoEquip             ; if it equals, its in the right slot to continue
+    BNE @WrongSlot           ; if it equals, its in the right slot to continue
     
+    STA slotcheck
     LDA ItemToEquip
     CLC
     ADC #ARMORSTART
@@ -9618,7 +9635,13 @@ UpdateEquipInventoryStats_CheckViable:
     STA ch_righthand, X      ; save item in that slot 
     RTS                      ; return
     
-    
+  @WrongSlot:
+   LDA #9
+   STA slotcheck   
+   LDA equipoffset
+   JMP @ClearStats_2
+
+  
 
 DrawEquipInventoryCursor:
     LDA cursor                 

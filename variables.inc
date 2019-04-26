@@ -231,9 +231,9 @@ shop_selling      = $03A7
 shop_cursorchange = $03A8
 shop_listdrawn    = $03A9
 shop_listactive   = $03AA
-
-ItemToUnequip     = $03AD
-ItemToEquip       = $03AE
+ItemToUnequip     = $03AC
+ItemToEquip       = $03AD
+slotcheck         = $03AE
 equip_impossible  = $03AF
 shop_x_price      = $03AF
 
@@ -537,7 +537,6 @@ intro_atbyte    = $63  ; shared
 intro_color     = $64  ; shared
 
 dlg_itemid      = $61  ; shared
-equipmenu_tmp   = $61  ; shared
 joy_prevdir     = $61
 cursor          = $62
 cursor_max      = $63
@@ -585,6 +584,7 @@ item_box_offset_old = $73 ; shops
 backup_cursor       = $73 ; shops, menus
 inv_canequipinshop  = $74 ; shops
 spaceruns           = $75 ; drawcomplexstring
+equipmenu_tmp       = $75 ; for unequip/reequipping
 
 dlgmusic_backup = $7C  ; backup music track for restoring music after the dialogue box changes it
 dlgsfx          = $7D  ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
