@@ -9479,11 +9479,11 @@ EquipStatsDescBoxNumbers:
    @TheThing:
     LDA equipoffset
     CMP #06
-    BCS @XStats
+    BCS @DashStats
    
     LDA equip_impossible
     BEQ :+
-    
+   
    @XStats: 
     LDX tmp+7
     LDA #$FF
@@ -9492,6 +9492,15 @@ EquipStatsDescBoxNumbers:
     STA str_buf+1, X
     STA str_buf+2, X
     RTS   
+    
+   @DashStats: 
+    LDX tmp+7
+    LDA #$FF
+    STA str_buf, X
+    LDA #$C2
+    STA str_buf+1, X
+    STA str_buf+2, X
+    RTS  
   
   : TYA
     JSR PrintCharStat
