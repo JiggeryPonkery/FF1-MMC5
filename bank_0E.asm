@@ -552,7 +552,7 @@ lut_MenuText:
 .word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again...
 .word Battle_Ether_MPList     ; 4F ; 79 ; for battle... easier to do it here than copy buncha code over
 .word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
-
+.word M_EquipStats_Blank      ; 51 ; 81 ; 
 
 M_Gold: 
 .byte $04,$FF,$90,$00 ; _G - for gold on menu
@@ -609,7 +609,7 @@ M_EquipmentSlots:
 .byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$00       ; BATTLE_ITEM_
 
 M_EquipStats:
-.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$FF,$FF  ; Damage
+.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$FF,$FF      ; Damage
 .byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01          ; Defense
 .byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$FF,$FF          ; Accuracy
 .byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$00          ; Evasion
@@ -894,6 +894,11 @@ M_MagicMenuMPTitle:
 ;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
 .byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
 
+M_EquipStats_Blank:
+.byte $8D,$A4,$B0,$A4,$66,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;13; Damage
+.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$FF,$FF,$FF,$01          ;11; Defense
+.byte $8A,$A6,$A6,$55,$5E,$4B,$FF,$FF,$FF,$FF,$FF          ;11; Accuracy
+.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$FF,$FF,$00              ;10; Evasion
 
 ;.byte $FF,$95,$81,$C2,$10,$2C,$7A,$10,$34
 ;.byte $FF,$95,$82,$C2,$10,$2D,$7A,$10,$35
@@ -2353,9 +2358,7 @@ EquipShop_GiveItemToChar:
     JSR IsEquipLegal
     BCS CannotEquip
     
-    JSR LongCall
-    .word UnadjustEquipStats
-    .byte $0F
+    JSR UnEquipStats
   
     LDX CharacterIndexBackup
     LDA ch_righthand, X
@@ -2416,7 +2419,12 @@ ReEquipStats:
     .word ReadjustEquipStats
     .byte $0F
     RTS      
-    
+
+UnEquipStats:
+    JSR LongCall
+    .word UnadjustEquipStats
+    .byte $0F    
+    RTS    
     
 SelectAmount:
     LDA #0
@@ -9327,63 +9335,25 @@ EnterEquipMenu:
     JMP @Loop                 ; and loop until one of them is pressed
 
   @A_Pressed:
-    JSR LongCall
-    .word UnadjustEquipStats
-    .byte $0F
-  
     LDA cursor                ; cursor = equip slot
     CLC
     ADC CharacterIndexBackup  ; add character index
     TAX
     LDA ch_righthand, X       ; check equipped item
-    BNE @Remove
+    BEQ :+                   ; if it exists...
+    TAX
+    DEX
+    INC inv_weapon, X        ; put the unequipped weapon in inventory
     
-       @Add:
-        LDA cursor
-        STA equipoffset
-        LDA #0
-        STA cursor
-        STA cursor_max
-        STA item_pageswap
-        JSR EnterEquipInventory
-        JMP :+
-    
-    @Remove:
-    TAX                     ; put item ID in X
-    DEX                     ; subtract 1 to turn it to 0-based item ID
-    
-    LDY cursor
-    STY equipoffset         ; backup cursor position for refreshing the screen
-    ;LDA lut_EquipOffset, Y
-    ;BEQ @RemoveWeapon
-    
-    ;TXA             
-    ;CLC
-    ;ADC #ARMORSTART         ; add armor offset to item ID
-    ;TAX
-    
-    @RemoveWeapon:
-    LDA inv_weapon, X       ; if armor offset was added to X, this is the same as LDA inv_armor, X
-    CMP #99
-    BEQ @ErrorSound
-    
-    INC inv_weapon, X       ; they don't have 99 of this item yet, so add one to the inventory
-    
-    TYA                     ; Y is still equipoffset/cursor
-    CLC
-    ADC CharacterIndexBackup
-    TAX 
+:   STA ItemToUnequip
+    LDA cursor
+    STA equipoffset
     LDA #0
-    STA ch_righthand, X     ; empty that equipment slot
-    
-  : JSR LongCall              ; rebuild their stats
-    .word ReadjustEquipStats
-    .byte $0F
-    JMP EnterEquipMenu        ; then restart this loop once they exit that sub menu
-    
-    @ErrorSound:
-    JSR PlaySFX_Error         ; SOMEHOW you have 99 of that item you're trying to unequip! Sheesh.
-    JMP :-                    ; exit without changing equipment
+    STA cursor
+    STA cursor_max
+    STA item_pageswap
+    JSR EnterEquipInventory
+    JMP EnterEquipMenu
     
   @B_Pressed:                 ; if B pressed....
     RTS
@@ -9402,6 +9372,9 @@ EnterEquipInventory:
     STA joy_a             ; clear joy_a and joy_b counters
     STA joy_b             
     STA menustall         ; and turn off menu stalling (since the PPU is off)
+    LDA #1
+    STA cursor_change
+   
     JSR ClearNT
     JSR DrawEquipInventory ; Draws everything
     JSR TurnMenuScreenOn_ClearOAM
@@ -9409,6 +9382,9 @@ EnterEquipInventory:
     @Loop:
     JSR ClearOAM
     JSR DrawEquipInventoryCursor
+    LDA cursor_change
+    BEQ :+
+  : JSR UpdateEquipInventoryStats
     JSR MenuFrame ;EquipMenuFrame
     
     LDA joy_a
@@ -9420,76 +9396,202 @@ EnterEquipInventory:
     JMP @Loop                      ; and loop until one of them is pressed
     
   @B_Pressed:                 ; if B pressed....
-    RTS
-
+    JSR UnEquipStats
+    LDA equipoffset
+    CLC 
+    ADC CharacterIndexBackup ; add character index
+    TAX
+    LDA ItemToUnequip 
+    STA ch_righthand, X      ; restore original item
+    BEQ :+
+    TAX
+    DEX
+    DEC inv_weapon, X        ; and if it was more than 0, take it out of inventory again
+  : JMP ReEquipStats
+    
   @A_Pressed:
+    LDA equip_impossible
+    BNE @Error
+    
+  : LDX ItemToEquip          ; get the new weapon
+    DEX
+    DEC inv_weapon, X        ; remove it from inventory
+    RTS
+    
+   @Error: 
+    JSR PlaySFX_Error        ; kr-kow if not equippable
+    JMP @Loop
+
+    
+UpdateEquipInventoryStats:    
+    JSR UnEquipStats        
+    JSR UpdateEquipInventoryStats_CheckViable
+    JSR ReEquipStats
+    DEC cursor_change
+    
+;; every time the cursor moves (plus at the very start) the equipped weapon changes:
+;; if it can be equipped, it is, and the stats are adjusted to show that it is--
+;; to show what it would be if the player chooses that one with A
+;; otherwise, the slot is set with 0 and the stats are adjusted to show they have nothing
+;; Pressing B will put the original item back in place
+;; Pressing A will equip the item set by UpdateEquipInventoryStats_CheckViable
+;; If there is 0 amount of an item, it will equip you with nothing
+;; or else give an error if the item set cannot be equipped
+    
+EquipStatsDescBoxNumbers:
+    LDA CharacterIndexBackup
+    STA char_index
+    JSR @FetchStats
+    
+    LDA #03
+    STA dest_x
+    LDA #24
+    STA dest_y
+    
+    LDA #1
+    STA menustall
+    
+    LDA #<(str_buf)
+    STA text_ptr
+    LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+    JMP DrawComplexString
+    
+   @FetchStats:    
+    LDA #$08        
+    STA tmp+7
+    LDA #$3C         ; damage
+    JSR @TheThing
+  
+    LDA #$14
+    STA tmp+7
+    LDA #$3E         ; defense
+    JSR @TheThing
+    
+    LDA #$1E
+    STA tmp+7
+    LDA #$3D         ; accuracy
+    JSR @TheThing
+   
+    LDA #$2A
+    STA tmp+7        
+    LDA #$3F         ; evasion
+   
+   @TheThing:
+    JSR PrintCharStat
+    LDX tmp+7
+    LDY #0
+    
+   @Loop:
+    LDA (text_ptr), Y
+    STA str_buf, X
+    INY
+    INX
+    CPY #3
+    BNE @Loop
+    RTS
+    
+
+EquipStatsDescBoxString:
+    LDA #81
+    ASL A                   ; double A (pointers are 2 bytes)
+    TAX                     ; put in X to index menu string pointer table
+    LDA lut_MenuText, X
+    STA text_ptr
+    LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+
+    LDY #0
+   @Loop:
+    LDA (text_ptr), Y
+    STA str_buf, Y
+    INY 
+    CPY #$2D
+    BNE @Loop
+    
+    INC dest_x
+    INC dest_x
+    
+    LDA #<(str_buf)
+    STA text_ptr
+    LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+    JMP DrawComplexString
+
+
+UpdateEquipInventoryStats_CheckViable:
+    LDA #0
+    STA equip_impossible
+
     LDA cursor
     ASL A
     ASL A
     ASL A
     ADC cursor_max
     STA ItemToEquip
-
+    TAX
+    
     LDA equipoffset
     CMP #06                  ; if offset is over 5--it is either of the battle items
-    BCS @TryEquipWeapon      ; which have no equipping requirements since they don't alter stats
-    ;CMP #0                   ; check if weapon or armor
-    ;BEQ :+ 
+    BCS @ClearStats
+    CMP #0
+    BEQ @DoesWeaponExist
     
-    ;LDA ItemToEquip          ; if its armor, subtract $40
-    ;SEC
-    ;SBC #ARMORSTART    
-    ;STA ItemToEquip
+   @DoesArmorExist: 
+    LDA inv_armor, X
+    BEQ @ClearStats
+    BNE :+
+    
+   @DoesWeaponExist:
+    LDA inv_weapon, X
+    BEQ @ClearStats
     
   : INC ItemToEquip    
     LDA ItemToEquip
     JSR IsEquipLegal         ; This routine subtracts 1 from A
-    BCC @DoEquip         
+    BCC @UpdateStats
     
-   @Error: 
-    JSR PlaySFX_Error        ; kr-kow if not equippable
-    JMP @Loop
+    LDA #1
+    STA equip_impossible
+    
+   @ClearStats:            
+    LDA equipoffset
+    CLC 
+    ADC CharacterIndexBackup ; add character index
+    TAX
+    LDA #0
+    STA ItemToEquip
+    STA ch_righthand, X      ; clear slot
+    RTS
    
-  @DoEquip:
+  @UpdateStats:
     DEC ItemToEquip
-  
     LDX equipoffset
     LDA lut_EquipOffset, X
-    BNE @DoEquip_ArmorCheck
-   
-   @TryEquipWeapon:   
-    LDX ItemToEquip
-    LDA inv_weapon, X        ; check if you have it in your inventory
-    BEQ @Error 
-
-    DEC inv_weapon, X        ; and remove that item from inventory 
-    JMP @FinishEquip         ; and finally give it to the character
+    BEQ @FinishUpdate         
   
-  @DoEquip_ArmorCheck:
+  @UpdateStats_Armor:
     LDX ItemToEquip      
     LDA lut_ArmorTypes, X    ; check type LUT
     CMP equipoffset          ; against equip slot
-    BNE @Error               ; if it equals, its in the right slot to continue equipping
-    
-    LDA inv_armor, X
-    BEQ @Error               ; make sure it exists
-    
-    DEC inv_armor, X         ; and remove that item from inventory 
+    BNE @ClearStats          ; if it equals, its in the right slot to continue
     
     LDA ItemToEquip
     CLC
     ADC #ARMORSTART
     STA ItemToEquip          ; and add $40 to the item
     
-   @FinishEquip:  
+   @FinishUpdate:  
     LDA equipoffset
     CLC 
     ADC CharacterIndexBackup ; add character index
     TAX
     INC ItemToEquip          ; convert to 1-based item
     LDA ItemToEquip
-    STA ch_righthand, X      ; save item in that slot (which should be empty)    
-    RTS                      ; return to Equip screen (exit inventory)
+    STA ch_righthand, X      ; save item in that slot 
+    RTS                      ; return
+    
+    
     
 
 DrawEquipInventoryCursor:
@@ -9524,6 +9626,10 @@ lut_EquipInventoryPageTitle:
 DrawEquipInventory:
     LDA #$09                ; Box List
     JSR DrawMainItemBox
+    
+    LDA #$08                ; Description box
+    JSR DrawMainItemBox
+    JSR EquipStatsDescBoxString ; base string, no stats
    
     LDA #$07                ; Name
     JSR DrawMainItemBox
@@ -9977,7 +10083,7 @@ MoveEquipInventoryCursor:
     STA joy_prevdir              ;  otherwise record changes
     CMP #0                       ; see if buttons have been pressed (rather than released)
     BEQ @Exit                    ; if no buttons pressed, just exit
-
+    
     CMP #$04               ; now see which button was pressed
     BCS @UpDown            ; check for up/down
     CMP #$01               ; otherwise, check for left/right
@@ -9995,6 +10101,7 @@ MoveEquipInventoryCursor:
     DEC cursor
     
     @Done:
+    INC cursor_change
     JMP PlaySFX_MenuMove
     
     @Exit:
@@ -10012,7 +10119,7 @@ MoveEquipInventoryCursor:
     BNE @Done
     
     INC cursor
-    JMP PlaySFX_MenuMove
+    JMP @Done
     
     @SwapPageLeft:
     DEC item_pageswap
@@ -10043,7 +10150,7 @@ MoveEquipInventoryCursor:
     
     LDA #0
     STA cursor_max
-    JMP PlaySFX_MenuMove
+    JMP @UpDownDone
     
     @Up:
     DEC cursor_max
@@ -10055,6 +10162,7 @@ MoveEquipInventoryCursor:
     STA cursor_max
     
     @UpDownDone:
+    INC cursor_change
     JMP PlaySFX_MenuMove
 
     
@@ -10091,7 +10199,7 @@ DrawEquipMenu:
    
    LDA #$18
    STA dest_y
-   LDA #$03 
+   LDA #$03
    STA dest_x
    LDA #13
    JMP DrawCharMenuString  ; Stats
