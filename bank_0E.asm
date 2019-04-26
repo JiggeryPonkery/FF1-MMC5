@@ -8234,7 +8234,6 @@ MoveMagicMenuCursor:
     CMP #$01               ; otherwise, check for left/right
     BNE @Left
 
-
   @Right:
      INC cursor
      LDA cursor
@@ -9384,8 +9383,8 @@ EnterEquipInventory:
     JSR DrawEquipInventoryCursor
     LDA cursor_change
     BEQ :+
-  : JSR UpdateEquipInventoryStats
-    JSR MenuFrame ;EquipMenuFrame
+    JSR UpdateEquipInventoryStats
+  : JSR MenuFrame ;EquipMenuFrame
     
     LDA joy_a
     BNE @A_Pressed            ; check to see if A pressed
@@ -9551,6 +9550,7 @@ UpdateEquipInventoryStats_CheckViable:
     JSR IsEquipLegal         ; This routine subtracts 1 from A
     BCC @UpdateStats
     
+   @NoEquip: 
     LDA #1
     STA equip_impossible
     
@@ -9559,8 +9559,15 @@ UpdateEquipInventoryStats_CheckViable:
     CLC 
     ADC CharacterIndexBackup ; add character index
     TAX
+    LDA equipoffset
+    CMP #06               
+    BCS @EquipmentBag
+    
     LDA #0
     STA ItemToEquip
+   
+   @EquipmentBag:    
+    LDA ItemToEquip
     STA ch_righthand, X      ; clear slot
     RTS
    
@@ -9574,7 +9581,7 @@ UpdateEquipInventoryStats_CheckViable:
     LDX ItemToEquip      
     LDA lut_ArmorTypes, X    ; check type LUT
     CMP equipoffset          ; against equip slot
-    BNE @ClearStats          ; if it equals, its in the right slot to continue
+    BNE @NoEquip             ; if it equals, its in the right slot to continue
     
     LDA ItemToEquip
     CLC
