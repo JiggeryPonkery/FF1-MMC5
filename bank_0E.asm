@@ -9459,24 +9459,41 @@ EquipStatsDescBoxNumbers:
    @FetchStats:    
     LDA #$08        
     STA tmp+7
-    LDA #$3C         ; damage
+    LDY #$3C         ; damage
     JSR @TheThing
   
     LDA #$14
     STA tmp+7
-    LDA #$3E         ; defense
+    LDY #$3E         ; defense
     JSR @TheThing
     
     LDA #$1E
     STA tmp+7
-    LDA #$3D         ; accuracy
+    LDY #$3D         ; accuracy
     JSR @TheThing
    
     LDA #$2A
     STA tmp+7        
-    LDA #$3F         ; evasion
+    LDY #$3F         ; evasion
    
    @TheThing:
+    LDA equipoffset
+    CMP #06
+    BCS @XStats
+   
+    LDA equip_impossible
+    BEQ :+
+    
+   @XStats: 
+    LDX tmp+7
+    LDA #$FF
+    STA str_buf, X
+    LDA #$F0
+    STA str_buf+1, X
+    STA str_buf+2, X
+    RTS   
+  
+  : TYA
     JSR PrintCharStat
     LDX tmp+7
     LDY #0
@@ -9531,9 +9548,6 @@ UpdateEquipInventoryStats_CheckViable:
     TAX
     
     LDA equipoffset
-    CMP #06                  ; if offset is over 5--it is either of the battle items
-    BCS @ClearStats
-    CMP #0
     BEQ @DoesWeaponExist
     
    @DoesArmorExist: 
@@ -9545,7 +9559,11 @@ UpdateEquipInventoryStats_CheckViable:
     LDA inv_weapon, X
     BEQ @ClearStats
     
-  : INC ItemToEquip    
+  : LDA equipoffset
+    CMP #06               
+    BCS @FinishUpdate
+  
+    INC ItemToEquip    
     LDA ItemToEquip
     JSR IsEquipLegal         ; This routine subtracts 1 from A
     BCC @UpdateStats
@@ -9559,15 +9577,8 @@ UpdateEquipInventoryStats_CheckViable:
     CLC 
     ADC CharacterIndexBackup ; add character index
     TAX
-    LDA equipoffset
-    CMP #06               
-    BCS @EquipmentBag
-    
     LDA #0
     STA ItemToEquip
-   
-   @EquipmentBag:    
-    LDA ItemToEquip
     STA ch_righthand, X      ; clear slot
     RTS
    
@@ -9597,7 +9608,6 @@ UpdateEquipInventoryStats_CheckViable:
     LDA ItemToEquip
     STA ch_righthand, X      ; save item in that slot 
     RTS                      ; return
-    
     
     
 
