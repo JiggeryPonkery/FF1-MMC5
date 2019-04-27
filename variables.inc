@@ -732,15 +732,33 @@ btl_msgbuffer   = $0400  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
                          ; this buffer contains on-screen tiles to be drawn to ppu$2240
                          ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
 
-btl_msgdraw_hdr     = $0540
-btl_msgdraw_x       = $0541
-btl_msgdraw_y       = $0542
-btl_msgdraw_width   = $0543
-btl_msgdraw_height  = $0544
-btl_msgdraw_srcptr  = $0543  ; shared -- needs to match btl_msgdraw_width
-                    ; $0544    above +1
-btl_msgdraw_blockcount = $0545      ; the number of blocks drawn
-btl_msgdraw_blockcount_backup = $0546
+btl_msgdraw_hdr         = $0540
+btl_msgdraw_x           = $0541
+btl_msgdraw_y           = $0542
+btl_msgdraw_width       = $0543
+btl_msgdraw_height      = $0544
+btl_msgdraw_srcptr      = $0543  ; shared -- needs to match btl_msgdraw_width?
+;                                ; $0544    above +1
+btl_msgdraw_blockcount         = $0545 ; the number of blocks drawn
+btl_msgdraw_blockcount_backup  = $0546
+btl_combatboxcount             = $0547 ; the number of combat boxes that have been drawn
+btl_combatboxcount_alt         = $0548 ; ANOTHER combatbox counter... this is totally redundant
+DrawBattleMagicBox_loopctr     = $0549
+UndrawNBattleBlocks_loopctr    = $054A
+btl_drawbox_loopctr            = $054B
+btl_msgbuffer_loopctr          = $054C
+EOBCombatBox_tmp               = $054D
+btl_tmp_drawcombatbox1         = $054E
+btl_tmp_drawcombatbox2         = $054F
+DrawBattleMagicBox_toporbottom = $0550
+btltmp_boxleft                 = $0551
+btltmp_boxcenter               = $0552
+btltmp_boxright                = $0553
+btltmp_altmsgbuffer            = $0560  ; $20 bytes read
+btltmp_damageblockbuffer       = $0580  ; 6 bytes used, but $20 are read?
+btl_stringbuf                  = $05A0  ; $21 byte buffer to contain string data for printing (reads $21st byte, but doesn't use?)
+btl_attackbox_itemid           = $05C0  ; 
+btlbox_blockdata               = $0600  ; at least #91 bytes (Gear option is the biggest so far)
 
 
 
@@ -827,7 +845,7 @@ DrawCharTmp = $68B6
 btl_weird_tmp = $68B1
 btl_various_tmp = $68B3 ; + B4
 
-EOBCombatBox_tmp = $68B3
+
 
 ; These next 5 vars are all in temp memory, and are mostly just used for 
 ;  passing into BattleDraw8x8Sprite
@@ -839,8 +857,7 @@ btl8x8spr_a = $68B3 ; attribute
 btl8x8spr_t = $68B4 ; tile ID
 btl8x8spr_i = $68B5 ; slot to draw to (00-3F)
 
-btl_tmp_drawcombatbox1 = $68B3
-btl_tmp_drawcombatbox2 = $68B4
+
   
 btl_tmpindex = $68B3    ; temporary holder for a current index
 btl_tmpchar =  $68B4    ; temporary holder for a 0-based character index
@@ -850,29 +867,15 @@ btltmp_multB = $68B4    ; shared
 btltmp_multC = $68B5
 
 btl_another_loopctr = $68B4
-DrawBattleMagicBox_loopctr = $68B5
-btl_drawbox_loopctr = $68B6
 
-btltmp_boxleft   = $68B3
-btltmp_boxcenter = $68B4
-btltmp_boxright  = $68B5
+
 
 btl_input        = $68B3
 
 btl_soft2000 = $68B7    ; soft copy of $2000 used in battles
 btl_soft2001 = $68B8    ; soft copy of $2001 used in battles
 
-btl_msgbuffer_loopctr = $68B9
 
-btlbox_blockdata    = $68BA
-                    ; $68CF   ???
-                    
-
-
-
-
-
-UndrawNBattleBlocks_loopctr = $6AA5
 
 eobbox_slotid       = $6AA6
 eobbox_textid       = $6AA7
@@ -929,8 +932,7 @@ btlattackspr_nodraw = $6AEE     ; nonzero to hide the weapon/magic sprite entire
 
 btltmp_targetlist   = $6AEF     ; temporary buffer (9 entries) containing possible targets
 
-DrawBattleMagicBox_toporbottom = $6AF8
-btl_combatboxcount  = $6AF8     ; the number of combat boxes that have been drawn
+
 
 btl_targetbacketup  = $6AF9     ; the number of combat boxes that have been drawn
 
@@ -989,7 +991,7 @@ btl_mathbufadd16tmp2 = $6BD0
 
 btl_tmppltassign = $6C88    ; temporary value to assign palette to enemies in a formation
 
-btl_combatboxcount_alt  = $6C8B ; ANOTHER combatbox counter... this is totally redundant
+
 btl_attackid            = $6C8C ; >= $40 for enemy attacks
 
 
@@ -1009,9 +1011,7 @@ explode_max_x   = $6D16
 explode_max_y   = $6D17
 explode_count   = $6D18
 
-btltmp_altmsgbuffer     = $6D19
 
-btltmp_damageblockbuffer   = $6D1C
 
 btltmp_attackerbuffer   = $6D2C
 
@@ -1019,11 +1019,11 @@ ScreenShakeCounter = $6D14
 btl_backgroundflash = $6D16
 ; ????          = $6D14   ; action buffer?  $20 bytes?  contents for combat boxes are placed here?
 
-btl_attackbox_itemid   = $6D24 ; + 25
+
 
 btl_palettes    = $6D34   ; $20 bytes
 
-btl_stringbuf   = $6D54   ; $20 byte buffer to contain string data for printing
+
 
 btltmp_backseat = $6D74   ; $10 byte buffer -- backup of btltmp
 
