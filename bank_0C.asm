@@ -11821,7 +11821,7 @@ DrawEnemyEffect_Mix:
     ADC #$18
     STA explode_max_y
     
-    LDA #$0F                    ; way more explosions for small enemies in the mix formation than in the 9small formation
+    LDA #$06                    ; way more explosions for small enemies in the mix formation than in the 9small formation
     STA explode_count           ;  is this BUGGED?
     
     JSR DrawExplosions_PreserveX  ; doesn't call the Preserve X version -- the one time it would actually make sense to...

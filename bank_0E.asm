@@ -898,7 +898,7 @@ M_EquipStats_Blank:
 .byte $8D,$A4,$B0,$A4,$66,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;13; Damage
 .byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$FF,$FF,$FF,$01          ;11; Defense
 .byte $8A,$A6,$A6,$55,$5E,$4B,$FF,$FF,$FF,$FF,$FF          ;11; Accuracy
-.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$FF,$FF,$00              ;10; Evasion
+.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$FF,$FF,$FF,$00          ;11; Evasion
 
 ;.byte $FF,$95,$81,$C2,$10,$2C,$7A,$10,$34
 ;.byte $FF,$95,$82,$C2,$10,$2D,$7A,$10,$35
@@ -9542,7 +9542,7 @@ EquipStatsDescBoxString:
     LDA (text_ptr), Y
     STA str_buf, Y
     INY 
-    CPY #$2D
+    CPY #$2E
     BNE @Loop
     
     INC dest_x
