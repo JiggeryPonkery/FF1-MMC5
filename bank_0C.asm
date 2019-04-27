@@ -4885,21 +4885,21 @@ ApplyRegenToAllEnemies:
  
     JSR RidiculousThing
 
-    LDY #$00                    ; compare HP and MaxHP buffers
-    LDX #$01
-    JSR MathBuf_Compare         ; C will be set if HP >= HPMax
+    LDX #$09                    ; compare max HP and base damage; X is max hp, Y is base damage
+    LDY #$01                    ; base damage contains how much HP to regen
+    JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
     
     BCC :+                      ; cap at Max HP
-      LDA btl_mathbuf+2
-      STA btl_mathbuf+0
-      LDA btl_mathbuf+3
-      STA btl_mathbuf+1
+      LDA btlmag_defender_hpmax
+      STA math_basedamage
+      LDA btlmag_defender_hpmax+1
+      STA math_basedamage+1
 
   : LDY #en_hp                  ; move HP back to RAM stats
-    LDA btl_mathbuf
+    LDA math_basedamage
     STA (EnemyRAMPointer), Y
     INY
-    LDA btl_mathbuf+1
+    LDA math_basedamage+1
     STA (EnemyRAMPointer), Y
     
     @drawregenbox:
@@ -4921,11 +4921,11 @@ ApplyRegenToAllEnemies:
     LDY #en_hpmax ;#ENROMSTAT_HPMAX
     LDA (EnemyRAMPointer), Y
     STA math_basedamage
-    STA btl_mathbuf+2
+    STA btlmag_defender_hpmax
     INY
     LDA (EnemyRAMPointer), Y
     STA math_basedamage+1
-    STA btl_mathbuf+3
+    STA btlmag_defender_hpmax+1
     
     LSR math_basedamage+1   ; divide by 2
     ROR math_basedamage
@@ -4958,12 +4958,11 @@ ApplyRegenToAllEnemies:
     LDA (EnemyRAMPointer), Y
     CLC
     ADC math_basedamage
-    STA btl_mathbuf
+    STA math_basedamage
     INY			
     LDA (EnemyRAMPointer), Y	
     ADC math_basedamage+1
-    STA btl_mathbuf+1
-    
+    STA math_basedamage+1  ; math_basedamage is now 9% of max HP + current HP
     RTS    
     
     ; Werewolf ; 68   ;
@@ -5179,9 +5178,16 @@ ApplyPoisonToPlayer:
     STA btl_attacker
     JSR DrawCombatBox_Attacker
     
+    LDA #$0F                        ; control code for printing a message I think
+    STA btltmp_altmsgbuffer+9
+    LDA #$14                        ; the message for poison
+    STA btltmp_altmsgbuffer+10
+    LDA #0
+    STA btltmp_altmsgbuffer+11      ; put it in RAM, where the defender usually is
+    
+    LDX #<(btltmp_altmsgbuffer + 9) 
+    LDY #>(btltmp_altmsgbuffer + 9)
     LDA #$02                        ; print "Poisoned"
-    LDY #>POISONTEXT
-    LDX #<POISONTEXT
     JSR DrawCombatBox_L  
     INC btl_combatboxcount_alt
     
@@ -5191,13 +5197,10 @@ ApplyPoisonToPlayer:
     JSR BattleScreenShake_L
     JSR RespondDelay  
     
-    ;LDA #03
-    ;JSR UndrawNBattleBlocks_L
-    JSR ClearAllCombatBoxes      ; JIGS - doesn't seem to matter which one is used, undrawing garbles the screen anyway now
-	;JSR DrawCharacterStatus     ; redraw character stats to reflect post-poison HP
+    JSR ClearAllCombatBoxes     
     
     @Exit:
-        
+
 ;;   JIGS - theoretically, this should make thieves and ninjas try to hide if their health is low enough to cause crouching
 ;     LDA MMC5_tmp
 ;     JSR SetNaturalPose  ; set crouched if health is below 25%
@@ -5218,9 +5221,6 @@ ApplyPoisonToPlayer:
 ;     JSR DrawCharacterStatus     ; draw hidden icon
 ;  :  
     RTS
-    
-    POISONTEXT:
-    .byte $0F,$14,$00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -6439,7 +6439,7 @@ DoPhysicalAttack:
       LDA #BTLMSG_HITS
       STA btl_unfmtcbtbox_buffer+$14
       
-      LDA #$01                          ; draw it in combat box 1
+      LDA #$06                          ; draw it in combat box 1
       LDX #<(btl_unfmtcbtbox_buffer + $10)
       LDY #>(btl_unfmtcbtbox_buffer + $10)
       JSR DrawCombatBox_L
@@ -8196,10 +8196,11 @@ ClearAltMessageBuffer:
     PHA         ; preserves A,X
     TXA
     PHA
-    LDX #$04            ; index starts at 4
+    LDX #0 ; #$04            ; index starts at 4
     LDA #$00
     STA btl_combatboxcount_alt
-    : STA btltmp_altmsgbuffer-5, X  ; but -5?  (also clears explode_count)
+    : ;STA btltmp_altmsgbuffer-5, X  ; but -5?  (also clears explode_count)
+      STA btltmp_altmsgbuffer, X
       INX
       CPX #$20
       BNE :-
@@ -8358,7 +8359,7 @@ DrawCombatBox_Attack:
   @Print:
     STA btl_attackbox_itemid                       
     LDX #<btl_attackbox_itemid
-    LDY #>btl_attackbox_itemid                    ; get pointer to that string in YX
+    LDY #>btl_attackbox_itemid      ; get pointer to that string in YX
     
     INC btl_combatboxcount_alt      ; inc the combat box counter
     
