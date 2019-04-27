@@ -2336,7 +2336,7 @@ lut_Treasure:
 .byte $00, GOLD40   ; 3A ; Earth Cave 13      - 3400 G
 .byte $01, TENT     ; 3B ; Earth Cave 14      - TENT   
 .byte $01, HEAL     ; 3C ; Earth Cave 15      - HEAL Potion
-.byte $00, RUBY     ; 3D ; Earth Cave 16      - RUBY   
+.byte $01, RUBY     ; 3D ; Earth Cave 16      - RUBY   
 .byte $00, GOLD33   ; 3E ; Earth Cave 17      - 1250 G
 .byte $02, ARM19    ; 3F ; Earth Cave 18      - Silver Shield
 .byte $01, CABIN    ; 40 ; Earth Cave 19      - CABIN  
@@ -2455,7 +2455,7 @@ lut_Treasure:
 .byte $02, ARM22    ; B1 ; Sea Shrine 29      - Opal   Shield
 .byte $02, ARM30    ; B2 ; Sea Shrine 30      - Opal   Helmet
 .byte $02, ARM39    ; B3 ; Sea Shrine 31      - Opal   Gauntlets
-.byte $00, SLAB     ; B4 ; Sea Shrine 32      - SLAB   
+.byte $01, SLAB     ; B4 ; Sea Shrine 32      - SLAB   
 .byte $02, WEP33    ; B5 ; Waterfall 1        - Wizard Staff
 .byte $02, ARM32    ; B6 ; Waterfall 2        - Ribbon  
 .byte $00, GOLD57   ; B7 ; Waterfall 3        - 13450 G
@@ -2508,7 +2508,7 @@ lut_Treasure:
 .byte $01, HOUSE    ; E6 ; Sky Palace 17      - HOUSE  
 .byte $00, GOLD31   ; E7 ; Sky Palace 18      - 880 G
 .byte $00, GOLD56   ; E8 ; Sky Palace 19      - 13000 G
-.byte $00, ADAMANT  ; E9 ; Sky Palace 20      - ADAMANT
+.byte $01, ADAMANT  ; E9 ; Sky Palace 20      - ADAMANT
 .byte $00, GOLD41   ; EA ; Sky Palace 21      - 4150 G
 .byte $01, SOFT     ; EB ; Sky Palace 22      - SOFT Potion  
 .byte $00, GOLD40   ; EC ; Sky Palace 23      - 3400 G
