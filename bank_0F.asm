@@ -7549,10 +7549,10 @@ OpenTreasureChest:
     SEC
     SBC #ITEM_MAGICSTART     ; subtract magic offset to conver to spell ID
     TAX
-    LDA inv_magic, X         ; check how many of that spell is stored
-    CMP #4                   ; no reason to have more than 4
-    BCS @TooFull
-       INC inv_magic, X
+    ;LDA inv_magic, X         ; check how many of that spell is stored
+    ;CMP #4                   ; no reason to have more than 4
+    ;BCS @TooFull            ;; JIGS - why not, you can sell 'em now
+       INC inv_magic, X      ;; and something else is wrong if you're pulling over 99 from chests
        JMP @OpenChest
     
     @KeyItem:
@@ -7565,7 +7565,7 @@ OpenTreasureChest:
     LDA game_flags, X        ; set the game flag for this chest to mark it as opened
     ORA #GMFLG_TCOPEN        ; 
     STA game_flags, X        ; 
-    LDA #DLGID_TCGET             ; put the treasure chest dialogue ID in A before exiting!
+    LDA #DLGID_TCGET         ; put the treasure chest dialogue ID in A before exiting!
     RTS
 
   @TooFull:                  ; If too full...
@@ -12097,7 +12097,7 @@ BattleDrawMessageBuffer:
     LDA #>btl_msgbuffer
     STA $89
     
-    LDA #$09
+    LDA #$0A
     STA btl_msgbuffer_loopctr               ; loop down-counter ($0C rows)
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
@@ -12558,8 +12558,7 @@ UndrawBattleBlock:
     LDA #>btlbox_blockdata
     STA btldraw_blockptrstart+1
     
-    ;LDA #$00
-    LDA #0                          ; JIGS - leave the last box always
+    LDA #0                          ; 
     STA btl_msgdraw_blockcount      ; clear the block count
     
   @Loop:
@@ -12778,7 +12777,7 @@ DrawCombatBox:
       CPX #$03
       BNE :-
       
-    LDA btl_tmp_drawcombatbox1                   ; use temp mem (YX provided at start of routine)
+    LDA btl_tmp_drawcombatbox1  ; use temp mem (YX provided at start of routine)
     STA btl_msgdraw_srcptr      ;  as pointer to text data
     LDA btl_tmp_drawcombatbox2
     STA btl_msgdraw_srcptr+1
@@ -13090,7 +13089,7 @@ DrawBattleItemBox:
     @NothingLeft:
      LDA #$10
      STA btl_unfmtcbtbox_buffer + 2, Y ; replace the 0E control code with 10 control code
-     LDA #$07                          ; 8 spaces
+     LDA #$08                          ; 8 spaces
      JMP @AddToBufferLeft
 
   : ;PHA 
@@ -13119,9 +13118,8 @@ DrawBattleItemBox:
     BNE :+ 
     
     @NothingRight:
-    LDA #$10
-    STA btl_unfmtcbtbox_buffer + 7, Y ; replace the 0E control code with 10 control code
-    LDA #$01                          ; 1 space
+    LDA #$FF
+    STA btl_unfmtcbtbox_buffer + 7, Y ; replace the 0E control code with two spaces
     JMP @AddToBufferRight
     
   : ;PHA 
@@ -13390,9 +13388,9 @@ lut_CombatBoxes:
 ;             BOX                      TEXT
 ;       hdr    X    Y   wd   ht     hdr    X    Y
   .BYTE $00, $00, $00, $0A, $03,    $01, $01, $00       ; 0 attacker name
-  .BYTE $00, $0A, $00, $0C, $03,    $01, $0B, $00       ; 1 old attack/new EOB box
+  .BYTE $00, $0A, $00, $0D, $03,    $01, $0B, $00       ; 1 old attack/new EOB box
   .BYTE $00, $00, $03, $0A, $03,    $01, $01, $03       ; 2 defender name
-  .BYTE $00, $0A, $03, $0C, $03,    $01, $0B, $03       ; 3 4old damage/new EOB box
+  .BYTE $00, $0A, $03, $0D, $03,    $01, $0B, $03       ; 3 4old damage/new EOB box
   .BYTE $00, $00, $06, $19, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
   .BYTE $00, $0A, $03, $0A, $03,    $01, $0B, $03       ; 5 damage
   .BYTE $00, $0A, $00, $0A, $03,    $01, $0B, $00       ; 6 their attack ("FROST", "2Hits!" etc)
