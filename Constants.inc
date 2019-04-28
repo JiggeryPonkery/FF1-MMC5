@@ -263,6 +263,9 @@ BTLMSG_CANTHIDE         = $53 ; Can't see to hide!
 BTLMSG_ALREADYHIDING    = $54 ; Already hidden!
 BTLMSG_EYEDROPS         = $55 ; Sight restored!
 BTLMSG_WAKEUPBELL       = $56 ; The bell rings loudly...
+BTLMSG_STEALING         = $57 ; Stealing...
+BTLMSG_STOLE            = $58 ; Stole_
+BTLMSG_SCROLL           = $59 ; _scroll
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs

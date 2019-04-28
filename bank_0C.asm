@@ -45,7 +45,8 @@
 .import DrawManaString_ForBattle
 .import DrawPlayerBox
 .import ShiftLeft6
-
+.import DrawBattleSkillBox_L
+.import StealFromEnemyZ
 
 BANK_THIS = $0C
 
@@ -1223,20 +1224,92 @@ Battle_MainMenu_APressed:
 
 lut_BattleSubMenu:
   .WORD BattleSubMenu_Fight
+  .WORD BattleSubMenu_Skill
   .WORD BattleSubMenu_Magic
-  .WORD BattleSubMenu_Item
   .WORD BattleSubMenu_Equipment
-  
+    
   ;;JIGS - adding things
+
+;; Skill ideas to try and implement  
+; Fighter       Defend      ; guard the back row from attacks
+; Thief         Steal       ; steal from enemy
+; BBelt         Counter     ; defend and attack 1.5x strength if hit
+; RedMage       Runic       ; absorb magic that turn
+; WhiteMage     Chant       ; lose defense to charge next spell
+; BlackMage     Chant
+
   
 lut_BattleSubMenu2:
   .WORD BattleSubMenu_Guard
+  .WORD BattleSubMenu_Item
   .WORD BattleSubMenu_Hide
   .WORD BattleSubMenu_Run
-  .WORD BattleSubMenu_Blank
+;  .WORD BattleSubMenu_Blank
   
 BattleSubMenu_Blank:
   JMP InputCharacterBattleCommand2
+  
+  
+  
+BattleSubMenu_Skill:
+    LDA btlcmd_curchar
+    CLC
+    ROR A
+    ROR A
+    ROR A
+    STA CharacterIndexBackup             ; convert current command character 
+    TAX
+    LDA ch_class, X
+    AND #$0F                             ; get class, throw away sprite bits
+    CMP #CLS_KN                          ; if its over black mage, subtract 6
+    BCC :+
+      SEC
+      SBC #6
+  : STA battle_class
+    CMP #1
+    BNE @DoNothing
+   
+    JSR DrawBattleSkillBox_L
+    INC btl_combatboxcount_alt
+    
+    LDY #$10
+    : LDA lut_SkillCursorPos-1, Y   ; copy over the cursor positions for
+      STA btlcurs_positions-1, Y    ;  the Skill menu
+      DEY
+      BNE :-
+    JSR MenuSelection_2x4           ; and do the logic
+    
+    PHA                             ; backup A/B button press
+    LDA #$01
+    JSR UndrawNBattleBlocks_L       ; undraw the skill box
+    PLA                             ; restore A/B state
+    
+    CMP #$02
+    BNE @Steal                      ; If they pressed B....
+      JMP CancelBattleAction        ; ... cancel
+    
+   @Steal: 
+    LDA #$01
+    JSR UndrawNBattleBlocks_L     ; undraw the command box
+    JSR SelectEnemyTarget           ; Pick a target
+    CMP #$02
+    BNE :+                          ; If they pressed B....
+      JMP CancelBattleAction        ; ... cancel
+  
+  : ;LDA #$01
+    ;JSR UndrawNBattleBlocks_L       ; undraw the enemy box
+  
+    LDA #$FE
+    JMP SetCharacterBattleCommand   ; command 'FE ?? TT'; FE is "steal", TT is enemy target, ?? is not used
+  
+  @DoNothing:
+    JSR DoNothingMessageBox
+    JMP CancelBattleAction
+    
+    
+    
+    
+
   
   
   ;; JIGS - this is new!
@@ -1261,6 +1334,8 @@ BattleSubMenu_Guard:
   TAY
   LDA #$FF
   JMP SetCharacterBattleCommand
+  
+  
 
   ;; JIGS - this is new!  
 BattleSubMenu_Hide:
@@ -1335,43 +1410,7 @@ BattleSubMenu_Magic_NoUndraw:
       JSR DrawCommandBox_L          ;   re-draw the command box
       JMP CancelBattleAction        ;   then cancel this action
       
-  : ;LDA btlcmd_curchar
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    ;ASL A                           ; put usable char index in 68B3,4  (00,40,80,C0)
-    ;STA btl_various_tmp                       ;  68B3 will eventually be index to the player's magic list
-    ;STA btl_various_tmp+1                       ;  68B4 will eventually be index to the player's MP
-    
-    ;LDA DrawBattleMagicBox_toporbottom                       ; this was the "magic page".  So this will be 1 if the user selected a L5-8 spell, and 0 if L1-4 spell
-    ;AND #$01
-    ;ASL A
-    ;ASL A
-    ;PHA                             ; push Page*4
-    ;ASL A
-    ;ASL A
-    ;CLC
-    ;ADC btl_various_tmp
-    ;STA btl_various_tmp                     ; 68B3 = CharIndex + Page*4*4.  (4 spells per level * 4 levels per page) - for magic spell list
-    
-    ;PLA                             ; pull Page*4
-    ;CLC
-    ;ADC btl_various_tmp+1
-    ;STA btl_various_tmp+1                       ; 68B4 = CharIndex + Page*4.  (4 levels per page) - for mp
-    
-    ;LDA btlcurs_y                   ; get Y position of their selection
-    ;ASL A
-    ;ASL A                           ; *4 (4 spells per level)
-    ;CLC
-    ;ADC btlcurs_x                   ; + X position
-    ;CLC
-    ;ADC btl_various_tmp                       ; add to 68B3.  index is now complete:  Index from start of char's spell list, to their chosen spell. 
-    
-    ;; JIGS - what a mess
-    
-    LDA btlcurs_y   ; up/down  (0 to 3)
+  : LDA btlcurs_y   ; up/down  (0 to 3)
     LDX #3          ; 3 spells per level! Since there's no gap between spell levels anymore.
     JSR MultiplyXA
     STA tmp
@@ -3079,9 +3118,9 @@ MenuSelection_Item:
   @Return:  
     RTS  
   
-  
-    
-    
+
+
+
     
     
     
@@ -4115,7 +4154,6 @@ lut_ItemCursorPos:
   .BYTE $08, $C6        ;
   .BYTE $08, $D6        ;
   
-  
 lut_EtherCursorPos:
   .BYTE $18, $A6        ;
   .BYTE $18, $B6        ;
@@ -4125,7 +4163,17 @@ lut_EtherCursorPos:
   .BYTE $58, $B6        ;
   .BYTE $58, $C6        ;
   .BYTE $58, $D6        ;  
-
+  
+lut_SkillCursorPos:  
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  .BYTE $08, $CE        ;
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  lut_EnemyIndex9Small  [$9FF7 :: 0x32007]
@@ -4406,7 +4454,6 @@ lut_CharacterOAMOffset:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 FlashCharacterSprite:
-
     TAY
     LDA lut_CharacterOAMOffset, Y   ; get character's OAM offset
     STA btl_flashsprite1                    ; back it up
@@ -5329,6 +5376,8 @@ Battle_DoPlayerTurn:
     LDA btl_charcmdbuf, Y       ; get command byte
     CMP #$FF
     BEQ @Return                 ; if $FF, player is guarding, do nothing
+    CMP #$FE
+    BEQ @DoSteal
     
     LSR A                       ; shift out bit 0 ('dead' bit)      and throw away
     LSR A                       ; shift out bit 1 ('stone' bit)     and throw away
@@ -5439,10 +5488,132 @@ Battle_DoPlayerTurn:
 ;    CMP #07
 ;    BEQ Player_Hide
     
-    @Return:
+   @Return:
   : RTS
 
+   @DoSteal:
+     LDX btl_charcmdbuf+2, Y           ; X = enemy target
+     LDA @playerid                     ; A = attacker
+   
+StealFromEnemy:
+  ;; not an attack, but loads lots of the necessary things! Maybe for later?
+  ;  JSR LongCall
+  ;  .word PlayerAttackEnemy_PhysicalZ
+  ;  .byte $0F
+
+  ;; for now, to test and make sure stealing works properly, there will be no randomness involved. Just do it.
   
+   ORA #$80
+   STA btl_attacker
+   STX btl_defender_index       ; set defender index
+   STX btl_defender
+  
+   LDA #$00        ; print '02 00 00' to combat box 0
+   TAX             ;  (attacker name in attacker combat box)
+   LDY #$02
+   JSR PrepareAndDrawSimpleCombatBox
+    
+   LDA #$02        ; print '03 00 00' to combat box 2
+   LDY #$03        ;  (defender name in defender combat box)
+   LDX #$00
+   JSR PrepareAndDrawSimpleCombatBox
+   
+   LDA #$0F
+   STA btltmp_damageblockbuffer
+   LDA #BTLMSG_STEALING
+   STA btltmp_damageblockbuffer+1
+   LDA #$03                          ; draw it in combat box 3
+   LDX #<(btltmp_damageblockbuffer)
+   LDY #>(btltmp_damageblockbuffer)
+   JSR DrawCombatBox_L
+   
+   LDA btl_attacker
+   AND #$03
+   STA btl_animatingchar  
+   
+   JSR UnhideCharacter
+   
+   LDA #-8
+   STA btl_walkdirection                  ; walk the character to the left
+   
+  LDA #$20
+  STA btl_walkloopctr                  ; loop down counter
+  
+  ;; 8 pixels per movement... that should be 1 screen width
+   
+  @Loop:
+      LDA btl_animatingchar     ; get the character index
+      ASL A
+      ASL A
+      TAX                       ; index for btl_chardraw buffer
+      
+      LDA btl_walkloopctr
+      AND #$02                  ; toggle animation pose every 4 frames
+      ASL A                     ; switch between pose '0' (stand) and pose '4' (walk)
+      STA btl_chardraw_pose, X
+      
+      LDA btl_chardraw_x, X     ; add the directional value to the X position
+      CLC
+      ADC btl_walkdirection
+      STA btl_chardraw_x, X
+      
+      JSR UpdateSprites_TwoFrames   ; update sprites, do 2 frames of animation
+      
+      DEC btl_walkloopctr
+      BNE @Loop                 ; keep looping
+
+   JSR SetNaturalPose      
+   JSR HideCharacter
+      
+   LDA #$0F
+   STA btltmp_altmsgbuffer
+   LDA #BTLMSG_STOLE
+   STA btltmp_altmsgbuffer+1
+   
+   LDA #3
+   STA btl_combatboxcount_alt     ; fix the stupid box counters
+   DEC btl_combatboxcount
+   DEC btl_combatboxcount
+
+   JSR LongCall
+   .word StealFromEnemyZ
+   .byte $0F
+   
+   LDA battle_stealsuccess
+   BNE :+
+   
+   JSR DoNothingMessageBox
+   JMP ClearAllCombatBoxes        
+   
+ : LDA #$04                          ; draw it in combat box 4
+   LDX #<(btltmp_altmsgbuffer)
+   LDY #>(btltmp_altmsgbuffer)
+   JSR DrawCombatBox_L
+   INC btl_combatboxcount_alt
+   
+   DEC battle_stealsuccess
+   
+   @InputLoop:                   ; Wait for the player to provide
+      JSR DoFrame_WithInput     ;   ANY input
+    BEQ @InputLoop
+    
+   JMP ClearAllCombatBoxes     
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+
+    
   
  ;; JIGS - adding a whole chunk here
 

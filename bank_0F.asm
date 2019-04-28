@@ -53,9 +53,7 @@
 .export LoadBorderPalette_Blue
 .export LoadBridgeSceneGFX_Menu
 .export LoadMenuCHRPal
-;.export LoadNewGameCHRPal
 .export LoadPrice
-;.export LoadPtyGenBGCHRAndPalettes
 .export LoadShopCHRPal
 .export LongCall
 .export Magic_ConvertBitsToBytes
@@ -85,6 +83,9 @@
 .export ShiftLeft6
 .export BattleBackgroundColor_LUT
 .export LoadMenuCHRPal_Z
+.export DrawBattleSkillBox_L
+.export LoadPriceZ
+
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -2042,7 +2043,7 @@ NewGame_LoadStartingStats:
 
   @LoadStats:
     LDA ch_class, X         ; get the class
-    AND #$0F             ;; JIGS - cut off high bits (sprite)
+    AND #$0F                ;; JIGS - cut off high bits (sprite)
     ASL A                   ; $10 bytes of starting data for each class
     ASL A
     ASL A
@@ -10753,7 +10754,13 @@ LoadBackdropPalette:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 lut_ShopPalettes:
-  .BYTE  $0F,$00,$04,$30,  $0F,$00,$0A,$30
+  ;.BYTE  $0F,$00,$04,$30,  $0F,$00,$0A,$30
+;       purple box stuff -- green box stuff 
+ 
+  .BYTE  $0F,$00,$04,$30,  $0F,$00,$11,$30
+ 
+  
+  
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11054,6 +11061,11 @@ lutCursor2x2SpriteTable:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+LoadPriceZ:
+    JSR LoadPrice
+    LDA #BANK_Z
+    JMP SwapPRG_L
 
 LoadPrice:
     STA tmp+2
@@ -12714,7 +12726,7 @@ DrawCommandBox:
       JSR BattleDraw_AddBlockToBuffer         ;  output buffer
       LDX #$00
   : INY
-    CPY #8*5
+    CPY #9*5
     BNE @Loop
     JMP DrawBlockBuffer            ; then finally draw it
     
@@ -12737,6 +12749,46 @@ DrawPlayerBox:
       BNE @Loop
       
     JMP DrawBlockBuffer            ; then finally draw it
+    
+    
+    
+DrawBattleSkillBox_L:
+    LDY #$05                                ; prep the block for the magic/item box
+    : LDA lut_CombatSkillBox-1, Y
+      STA btl_msgdraw_hdr-1, Y
+      DEY
+      BNE :-
+    JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
+    
+    LDA btlcmd_curchar
+    CLC
+    ROR A
+    ROR A
+    ROR A
+    STA CharacterIndexBackup             ; convert current command character 
+    TAX
+    LDA ch_class, X
+    AND #$0F                             ; get class, throw away sprite bits
+    CMP #CLS_KN                          ; if its over black mage, subtract 6
+    BCC :+
+      SEC
+      SBC #6
+  : STA battle_class
+    LDX #5
+    JSR MultiplyXA                       ; then multiply by 5
+    TAY
+    
+    LDX #$00 
+    : LDA lut_CombatSkillBox+5, Y        ; this gets the skill text to put up!
+      STA btl_msgdraw_hdr, X
+      INX
+      INY
+      CPX #5
+      BNE :-
+    JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
+  
+
+    JMP DrawBlockBuffer            ; then finally draw it    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13434,20 +13486,39 @@ lut_BattleCommandBoxInfo:
   .BYTE $01, $0A, $00, <@txt4, >@txt4
   .BYTE $01, $0A, $02, <@txt5, >@txt5 
   .BYTE $01, $0A, $04, <@txt6, >@txt6 
- ; .BYTE $01, $0A, $06, <@txt7, >@txt7 
+  .BYTE $01, $0A, $06, <@txt7, >@txt7 
   
   
   @txt0:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
-  @txt1:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
-  @txt2:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
+  @txt1:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
+  @txt2:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
   @txt3:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
 
   @txt4:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
-  @txt5:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
-  @txt6:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
+  @txt5:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
+  @txt6:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
+  @txt7:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
   
- ; @txt2:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
+ ;
+
+lut_CombatSkillBox:
+;       hdr   X    Y  width  height
+  .BYTE $00, $02, $05, $0C, $03 ; skills
+;       hdr,  X    Y    ptr
+  .BYTE $01, $03, $05, <@txt0, >@txt0   ; text
+  .BYTE $01, $03, $05, <@txt1, >@txt1
+  .BYTE $01, $03, $05, <@txt2, >@txt2
+  .BYTE $01, $03, $05, <@txt3, >@txt3
+  .BYTE $01, $03, $05, <@txt4, >@txt4
+  .BYTE $01, $03, $05, <@txt4, >@txt4 
   
+  @txt0:  .BYTE $8D, $A8, $A9, $A8, $B1, $A7, $00       ; Defend
+  @txt1:  .BYTE $9C, $B7, $A8, $A4, $AF, $00            ; Steal
+  @txt2:  .BYTE $8C, $B2, $B8, $B1, $B7, $A8, $B5, $00  ; Counter
+  @txt3:  .BYTE $9B, $B8, $B1, $AC, $A6, $00            ; Runic
+  @txt4:  .BYTE $8C, $AB, $A4, $B1, $B7, $00            ; Chant
+
+ 
 
 lut_PlayerBoxInfo:
   .BYTE $00, $0F, $00, $11, $09         ; box 

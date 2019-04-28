@@ -13,6 +13,7 @@
 .export BattleConfirmation
 .export LoadEnemyStats
 .export NewGamePartyGeneration
+.export StealFromEnemyZ
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -25,6 +26,8 @@
 .import DrawPalette_L
 .import CancelNewGame
 .import LoadMenuCHRPal_Z
+.import AddGPToParty
+.import LoadPriceZ
 
 
 
@@ -240,7 +243,7 @@ data_EnemyStats:
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   
 ;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ ; Name   
 
-.byte $06,$00,$06,$00,$08,$00,$6A,$FF,$06,$04,$01,$02,$04,$01,$00,$00,$04,$10,$00,$00,$02 ; IMP	
+.byte $06,$00,$06,$00,$08,$00,$6A,$FF,$06,$04,$01,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00 ; IMP	
 .byte $12,$00,$12,$00,$10,$00,$78,$FF,$09,$06,$01,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00 ; GrIMP	
 .byte $18,$00,$06,$00,$14,$00,$69,$FF,$24,$00,$01,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00 ; WOLF	
 .byte $5D,$00,$16,$00,$48,$00,$6C,$FF,$36,$00,$01,$12,$0E,$01,$00,$00,$00,$2E,$00,$00,$00 ; GrWolf	
@@ -267,7 +270,7 @@ data_EnemyStats:
 .byte $BA,$00,$C8,$00,$54,$00,$6A,$FF,$2A,$08,$08,$15,$01,$01,$01,$10,$00,$33,$00,$00,$00 ; CRAWL
 .byte $20,$01,$48,$00,$78,$00,$7A,$FF,$30,$04,$01,$1E,$16,$01,$00,$00,$00,$4C,$00,$00,$00 ; HYENA
 .byte $9E,$04,$58,$02,$C0,$00,$92,$05,$30,$08,$01,$30,$1E,$01,$00,$00,$00,$67,$20,$10,$00 ; CEREBUS
-.byte $C3,$00,$C3,$00,$64,$00,$74,$FF,$12,$0A,$01,$19,$12,$01,$00,$00,$04,$41,$00,$00,$00 ; OGRE
+.byte $C3,$00,$C3,$00,$64,$00,$74,$FF,$12,$0A,$01,$19,$12,$01,$00,$00,$04,$41,$00,$00,$B0 ; OGRE
 .byte $1A,$01,$2C,$01,$84,$00,$7E,$FF,$1E,$0E,$01,$21,$17,$01,$00,$00,$04,$47,$00,$00,$00 ; GrOGRE
 .byte $D3,$02,$D3,$02,$90,$00,$86,$06,$36,$0A,$01,$24,$17,$01,$00,$00,$C4,$50,$00,$80,$00 ; WzOGRE
 .byte $7B,$00,$32,$00,$38,$00,$6B,$FF,$1E,$06,$01,$0E,$06,$01,$02,$04,$02,$2E,$00,$00,$00 ; ASP
@@ -369,6 +372,734 @@ data_EnemyStats:
 .byte $D0,$07,$01,$00,$4C,$04,$FF,$29,$5A,$5A,$04,$55,$4B,$01,$00,$00,$42,$C8,$00,$F0,$00 ; TIAMAT (reprise)
 .byte $00,$00,$00,$00,$D0,$07,$FF,$2A,$64,$64,$02,$C8,$64,$01,$01,$10,$00,$C8,$00,$FF,$00 ; CHAOS
    
+;; First byte: item type  -- $00: gold, $01: consumable, $02: weapon/armor, $03: spell
+;; almost just like treasure chests!
+;;
+;; Second byte: item name; for gold, its the index for the money chests
+;;    
+
+lut_StealList:              
+.byte $00, $00              ; 00 
+.byte $01, HEAL             ; 01 
+.byte $01, X_HEAL           ; 02 
+.byte $01, ETHER            ; 03 
+.byte $01, ELIXIR           ; 04 
+.byte $01, PURE             ; 05 
+.byte $01, SOFT             ; 06 
+.byte $01, PHOENIXDOWN      ; 07 
+.byte $01, TENT             ; 08 
+.byte $01, CABIN            ; 09 
+.byte $01, HOUSE            ; 0A 
+.byte $01, EYEDROPS         ; 0B 
+.byte $01, SMOKEBOMB        ; 0C 
+.byte $01, WAKEUPBELL       ; 0D 
+.byte $02, WEP1             ; 0E 
+.byte $02, WEP2             ; 0F 
+.byte $02, WEP3             ; 10 
+.byte $02, WEP4             ; 11 
+.byte $02, WEP5             ; 12 
+.byte $02, WEP6             ; 13 
+.byte $02, WEP7             ; 14 
+.byte $02, WEP8             ; 15 
+.byte $02, WEP9             ; 16 
+.byte $02, WEP10            ; 17 
+.byte $02, WEP11            ; 18 
+.byte $02, WEP12            ; 19 
+.byte $02, WEP13            ; 1A 
+.byte $02, WEP14            ; 1B 
+.byte $02, WEP15            ; 1C 
+.byte $02, WEP16            ; 1D 
+.byte $02, WEP17            ; 1E 
+.byte $02, WEP18            ; 1F 
+.byte $02, WEP19            ; 20 
+.byte $02, WEP20            ; 21 
+.byte $02, WEP21            ; 22 
+.byte $02, WEP22            ; 23 
+.byte $02, WEP23            ; 24 
+.byte $02, WEP24            ; 25 
+.byte $02, WEP25            ; 26 
+.byte $02, WEP26            ; 27 
+.byte $02, WEP27            ; 28 
+.byte $02, WEP28            ; 29 
+.byte $02, WEP29            ; 2A 
+.byte $02, WEP30            ; 2B 
+.byte $02, WEP31            ; 2C 
+.byte $02, WEP32            ; 2D 
+.byte $02, WEP33            ; 2E 
+.byte $02, WEP34            ; 2F 
+.byte $02, WEP35            ; 30 
+.byte $02, WEP36            ; 31 
+.byte $02, WEP37            ; 32 
+.byte $02, WEP38            ; 33 
+.byte $02, WEP39            ; 34 
+.byte $02, WEP40            ; 35 
+.byte $02, ARM1             ; 36 
+.byte $02, ARM2             ; 37 
+.byte $02, ARM3             ; 38 
+.byte $02, ARM4             ; 39 
+.byte $02, ARM5             ; 3A 
+.byte $02, ARM6             ; 3B 
+.byte $02, ARM7             ; 3C 
+.byte $02, ARM8             ; 3D 
+.byte $02, ARM9             ; 3E 
+.byte $02, ARM10            ; 3F 
+.byte $02, ARM11            ; 40 
+.byte $02, ARM12            ; 41 
+.byte $02, ARM13            ; 42 
+.byte $02, ARM14            ; 43 
+.byte $02, ARM15            ; 44 
+.byte $02, ARM16            ; 45 
+.byte $02, ARM17            ; 46 
+.byte $02, ARM18            ; 47 
+.byte $02, ARM19            ; 48 
+.byte $02, ARM20            ; 49 
+.byte $02, ARM21            ; 4A 
+.byte $02, ARM22            ; 4B 
+.byte $02, ARM23            ; 4C 
+.byte $02, ARM24            ; 4D 
+.byte $02, ARM25            ; 4E 
+.byte $02, ARM26            ; 4F 
+.byte $02, ARM27            ; 50 
+.byte $02, ARM28            ; 51 
+.byte $02, ARM29            ; 52 
+.byte $02, ARM30            ; 53 
+.byte $02, ARM31            ; 54 
+.byte $02, ARM32            ; 55 
+.byte $02, ARM33            ; 56 
+.byte $02, ARM34            ; 57 
+.byte $02, ARM35            ; 58 
+.byte $02, ARM36            ; 59 
+.byte $02, ARM37            ; 5A 
+.byte $02, ARM38            ; 5B 
+.byte $02, ARM39            ; 5C 
+.byte $02, ARM40            ; 5D 
+.byte $03, MG_CURE          ; 5E 
+.byte $03, MG_HARM          ; 5F 
+.byte $03, MG_FOG           ; 60 
+.byte $03, MG_RUSE          ; 61 
+.byte $03, MG_FIRE          ; 62 
+.byte $03, MG_SLEP          ; 63 
+.byte $03, MG_LOCK          ; 64 
+.byte $03, MG_LIT           ; 65 
+.byte $03, MG_LAMP          ; 66 
+.byte $03, MG_MUTE          ; 67 
+.byte $03, MG_ALIT          ; 68 
+.byte $03, MG_INVS          ; 69 
+.byte $03, MG_ICE           ; 6A 
+.byte $03, MG_DARK          ; 6B 
+.byte $03, MG_TMPR          ; 6C 
+.byte $03, MG_SLOW          ; 6D 
+.byte $03, MG_CUR2          ; 6E 
+.byte $03, MG_HRM2          ; 6F 
+.byte $03, MG_AFIR          ; 70 
+.byte $03, MG_HEAL          ; 71 
+.byte $03, MG_FIR2          ; 72 
+.byte $03, MG_HOLD          ; 73 
+.byte $03, MG_LIT2          ; 74 
+.byte $03, MG_LOK2          ; 75 
+.byte $03, MG_PURE          ; 76 
+.byte $03, MG_FEAR          ; 77 
+.byte $03, MG_AICE          ; 78 
+.byte $03, MG_AMUT          ; 79 
+.byte $03, MG_SLP2          ; 7A 
+.byte $03, MG_FAST          ; 7B 
+.byte $03, MG_CONF          ; 7C 
+.byte $03, MG_ICE2          ; 7D 
+.byte $03, MG_CUR3          ; 7E 
+.byte $03, MG_LIFE          ; 7F 
+
+lut_StealList_2:   
+.byte $03, MG_HRM3          ; 80     ; 00
+.byte $03, MG_HEL2          ; 81     ; 01
+.byte $03, MG_FIR3          ; 82     ; 02
+.byte $03, MG_BANE          ; 83     ; 03
+.byte $03, MG_WARP          ; 84     ; 04
+.byte $03, MG_SLO2          ; 85     ; 05
+.byte $03, MG_SOFT          ; 86     ; 06
+.byte $03, MG_EXIT          ; 87     ; 07
+.byte $03, MG_FOG2          ; 88     ; 08
+.byte $03, MG_INV2          ; 89     ; 09
+.byte $03, MG_LIT3          ; 8A     ; 0A
+.byte $03, MG_RUB           ; 8B     ; 0B
+.byte $03, MG_QAKE          ; 8C     ; 0C
+.byte $03, MG_STUN          ; 8D     ; 0D
+.byte $03, MG_CUR4          ; 8E     ; 0E
+.byte $03, MG_HRM4          ; 8F     ; 0F
+.byte $03, MG_ARUB          ; 90     ; 10
+.byte $03, MG_HEL3          ; 91     ; 11
+.byte $03, MG_ICE3          ; 92     ; 12
+.byte $03, MG_BRAK          ; 93     ; 13
+.byte $03, MG_SABR          ; 94     ; 14
+.byte $03, MG_BLND          ; 95     ; 15
+.byte $03, MG_LIF2          ; 96     ; 16
+.byte $03, MG_FADE          ; 97     ; 17
+.byte $03, MG_WALL          ; 98     ; 18
+.byte $03, MG_XFER          ; 99     ; 19
+.byte $03, MG_NUKE          ; 9A     ; 1A
+.byte $03, MG_STOP          ; 9B     ; 1B
+.byte $03, MG_ZAP           ; 9C     ; 1C
+.byte $03, MG_XXXX          ; 9D     ; 1D
+.byte $00, GOLD1            ; 9E     ; 1E
+.byte $00, GOLD2            ; 9F     ; 1F
+.byte $00, GOLD3            ; A0     ; 20
+.byte $00, GOLD4            ; A1     ; 21
+.byte $00, GOLD5            ; A2     ; 22
+.byte $00, GOLD6            ; A3     ; 23
+.byte $00, GOLD7            ; A4     ; 24
+.byte $00, GOLD8            ; A5     ; 25
+.byte $00, GOLD9            ; A6     ; 26
+.byte $00, GOLD10           ; A7     ; 27
+.byte $00, GOLD11           ; A8     ; 28
+.byte $00, GOLD12           ; A9     ; 29
+.byte $00, GOLD13           ; AA     ; 2A
+.byte $00, GOLD14           ; AB     ; 2B
+.byte $00, GOLD15           ; AC     ; 2C
+.byte $00, GOLD16           ; AD     ; 2D
+.byte $00, GOLD17           ; AE     ; 2E
+.byte $00, GOLD18           ; AF     ; 2F
+.byte $00, GOLD19           ; B0     ; 30
+.byte $00, GOLD20           ; B1     ; 31
+.byte $00, GOLD21           ; B2     ; 32
+.byte $00, GOLD22           ; B3     ; 33
+.byte $00, GOLD23           ; B4     ; 34
+.byte $00, GOLD24           ; B5     ; 35
+.byte $00, GOLD25           ; B6     ; 36
+.byte $00, GOLD26           ; B7     ; 37
+.byte $00, GOLD27           ; B8     ; 38
+.byte $00, GOLD28           ; B9     ; 39
+.byte $00, GOLD29           ; BA     ; 3A
+.byte $00, GOLD30           ; BB     ; 3B
+.byte $00, GOLD31           ; BC     ; 3C
+.byte $00, GOLD32           ; BD     ; 3D
+.byte $00, GOLD33           ; BE     ; 3E
+.byte $00, GOLD34           ; BF     ; 3F
+.byte $00, GOLD35           ; C0     ; 40
+.byte $00, GOLD36           ; C1     ; 41
+.byte $00, GOLD37           ; C2     ; 42
+.byte $00, GOLD38           ; C3     ; 43
+.byte $00, GOLD39           ; C4     ; 44
+.byte $00, GOLD40           ; C5     ; 45
+.byte $00, GOLD41           ; C6     ; 46
+.byte $00, GOLD42           ; C7     ; 47
+.byte $00, GOLD43           ; C8     ; 48
+.byte $00, GOLD44           ; C9     ; 49
+.byte $00, GOLD45           ; CA     ; 4A
+.byte $00, GOLD46           ; CB     ; 4B
+.byte $00, GOLD47           ; CC     ; 4C
+.byte $00, GOLD48           ; CD     ; 4D
+.byte $00, GOLD49           ; CE     ; 4E
+.byte $00, GOLD50           ; CF     ; 4F
+.byte $00, GOLD51           ; D0     ; 50
+.byte $00, GOLD52           ; D1     ; 51
+.byte $00, GOLD53           ; D2     ; 52
+.byte $00, GOLD54           ; D3     ; 53
+.byte $00, GOLD55           ; D4     ; 54
+.byte $00, GOLD56           ; D5     ; 55
+.byte $00, GOLD57           ; D6     ; 56
+.byte $00, GOLD58           ; D7     ; 57
+.byte $00, GOLD59           ; D8     ; 58
+.byte $00, GOLD60           ; D9     ; 59
+.byte $00, GOLD61           ; DA     ; 5A
+.byte $00, GOLD62           ; DB     ; 5B
+.byte $00, GOLD63           ; DC     ; 5C
+.byte $00, GOLD64           ; DD     ; 5D
+.byte $00, GOLD65           ; DE     ; 5E
+.byte $00, GOLD66           ; DF     ; 5F
+.byte $00, GOLD67           ; E0     ; 60
+.byte $00, GOLD68           ; E1     ; 61
+.byte $00, GOLD69           ; E2     ; 62
+.byte $00, GOLD70           ; E3     ; 63
+.byte $00, GOLD71           ; E4     ; 64
+.byte $00, GOLD72           ; E5     ; 65
+.byte $00, GOLD73           ; E6     ; 66
+.byte $00, GOLD74           ; E7     ; 67
+.byte $00, GOLD75           ; E8     ; 68
+.byte $00, GOLD76           ; E9     ; 69
+.byte $00, GOLD77           ; EA     ; 6A
+.byte $00, GOLD78           ; EB     ; 6B
+.byte $00, GOLD79           ; EC     ; 6C
+.byte $00, GOLD80           ; ED     ; 6D
+
+
+StealFromEnemyZ:
+    LDA btl_defender
+    JSR GetEnemyRAMPtr    
+    
+    LDY #en_item
+    LDA (EnemyRAMPointer), Y        ; get their item byte
+    BEQ @Nothing
+    
+    CMP #$7F
+    BCS @SecondList
+    
+    ASL A                           ; double it and put in X for the above LUT
+    TAX
+    
+    INC battle_stealsuccess
+    LDA #$0E
+    STA btltmp_altmsgbuffer+2       ; put the item name code into the message buffer
+    
+    LDA #0                          ; then clear it out so it can't be stolen from again
+    STA (EnemyRAMPointer), Y
+    
+    LDA lut_StealList, X            ; get the first byte, to see what kind of thing we're stealing
+    BEQ @StealGold
+    
+    CMP #1
+    BEQ @StealItem
+    
+    CMP #2
+    BEQ @StealEquipment
+    
+   @StealMagic:                     ; do all the different ways of putting items in your inventory
+    LDA lut_StealList+1, X
+    STA btltmp_altmsgbuffer+3       ; put the item name next in the message buffer
+    SEC
+    SBC #ITEM_MAGICSTART
+    TAX
+    INC inv_magic, X
+    LDA #$0F
+    STA btltmp_altmsgbuffer+4
+    LDA #BTLMSG_SCROLL
+    STA btltmp_altmsgbuffer+5       ; and put _scroll at the end of the message
+    CLC
+    RTS
+    
+   @StealEquipment:
+    LDA #$0D
+    STA btltmp_altmsgbuffer+2 ; here, re-write the iten name byte with equipment name byte
+    LDA lut_StealList+1, X
+    TAX
+    DEX
+    STX btltmp_altmsgbuffer+3
+    INC inv_weapon, X
+    CLC
+    RTS
+
+   @StealItem:
+    LDA lut_StealList+1, X
+    STA btltmp_altmsgbuffer+3
+    TAX
+    INC items, X
+    CLC
+    RTS
+
+   @StealGold:
+    LDA #3
+    STA shop_type            ; needed to make sure LoadPrice works right
+   
+    LDA lut_StealList+1, X
+    STA btltmp_altmsgbuffer+3
+    JSR LoadPriceZ           ; get the price of the item (the amount of gold stolen)
+    JSR AddGPToParty         ; add that to the party's GP
+    CLC
+    RTS
+
+   @Nothing:
+    SEC
+    RTS
+    
+   @SecondList: 
+    ASL A                           ; double it and put in X for the above LUT
+    TAX
+    
+    INC battle_stealsuccess
+    LDA #$0E
+    STA btltmp_altmsgbuffer+2       ; put the item name code into the message buffer
+    
+    LDA #0                          ; then clear it out so it can't be stolen from again
+    STA (EnemyRAMPointer), Y
+    
+    LDA lut_StealList_2, X            ; get the first byte, to see what kind of thing we're stealing
+    BEQ @StealGold2
+    
+    CMP #1
+    BEQ @StealItem2
+    
+    CMP #2
+    BEQ @StealEquipment2
+    
+   @StealMagic2:                     ; do all the different ways of putting items in your inventory
+    LDA lut_StealList_2+1, X
+    STA btltmp_altmsgbuffer+3       ; put the item name next in the message buffer
+    SEC
+    SBC #ITEM_MAGICSTART
+    TAX
+    INC inv_magic, X
+    LDA #$0F
+    STA btltmp_altmsgbuffer+4
+    LDA #BTLMSG_SCROLL
+    STA btltmp_altmsgbuffer+5       ; and put _scroll at the end of the message
+    CLC
+    RTS
+    
+   @StealEquipment2:
+    LDA #$0D
+    STA btltmp_altmsgbuffer+2 ; here, re-write the iten name byte with equipment name byte
+    LDA lut_StealList_2+1, X
+    TAX
+    DEX
+    STX btltmp_altmsgbuffer+3
+    INC inv_weapon, X
+    CLC
+    RTS
+
+   @StealItem2:
+    LDA lut_StealList_2+1, X
+    STA btltmp_altmsgbuffer+3
+    TAX
+    INC items, X
+    CLC
+    RTS
+
+   @StealGold2:
+    LDA #3
+    STA shop_type            ; needed to make sure LoadPrice works right
+   
+    LDA lut_StealList_2+1, X
+    STA btltmp_altmsgbuffer+3
+    JSR LoadPriceZ           ; get the price of the item (the amount of gold stolen)
+    JSR AddGPToParty         ; add that to the party's GP
+    CLC
+    RTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
 

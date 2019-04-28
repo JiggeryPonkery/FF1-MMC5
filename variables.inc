@@ -45,6 +45,7 @@ Hidden          = $5CF5 ; for hiding in battle
 HiddenMagic     = $5CF6 ; for hiding in battle 
 Asleep          = $5CF7 ; for sleeping! ...in battle. And save game music things.
 BattleTurn      = $5CF8 ; Keeps track of battle turns and displays them above the character's names ; shared
+battle_class    = $5CF9 ; for doing skills in battle
 soundtesthelper = $5CFA ; Something to do with the sound test screen
 
 ;nothing        = $5CFA ; A, B and C can be used until LongCall_tmp is needed
@@ -94,7 +95,7 @@ AutoTargetOption = unsram + $14
 BattleTextSpeed  = unsram + $15
 BattleBGColor    = unsram + $16
 smokebomb_steps  = unsram + $17
-; unused         = unsram + $18
+battle_stealsuccess = unsram + $18
 ; unused         = unsram + $19
 ; unused         = unsram + $1A
 ; unused         = unsram + $1B

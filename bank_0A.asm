@@ -1161,7 +1161,6 @@ Armor64: ; 7F
 
 ;; JIGS - moved from Bank B.
 data_BattleMessages:
-
 .word BTL_MESSAGE1
 .word BTL_MESSAGE2
 .word BTL_MESSAGE3
@@ -1248,6 +1247,9 @@ data_BattleMessages:
 .word BTL_MESSAGE84
 .word BTL_MESSAGE85
 .word BTL_MESSAGE86
+.word BTL_MESSAGE87
+.word BTL_MESSAGE88
+.word BTL_MESSAGE89
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1421,7 +1423,12 @@ BTL_MESSAGE85:
 .byte $9C,$AC,$AA,$AB,$21,$23,$37,$35,$40,$C4,$00 ; Sight restored!
 BTL_MESSAGE86:
 .byte $9D,$1D,$31,$A8,$4E,$FF,$5C,$2A,$1E,$AF,$26,$A7,$AF,$BC,$69,$00 ; The bell rings loudly..
-
+BTL_MESSAGE87:
+.byte $9C,$B7,$A8,$A4,$AF,$AC,$B1,$AA,$C3,$C0,$00 ; Stealing...
+BTL_MESSAGE88:
+.byte $9C,$B7,$B2,$AF,$A8,$FF,$00  ; Stole_
+BTL_MESSAGE89:
+.byte $B6,$A6,$B5,$B2,$AF,$AF,$00  ; _scroll
 
 
 
