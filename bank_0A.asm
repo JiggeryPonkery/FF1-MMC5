@@ -127,7 +127,7 @@ lut_ItemNamePtrTbl:
 .word NAME_HOUSE        ; 0A 
 .word NAME_EYEDROPS     ; 0B
 .word NAME_SMOKEBOMB    ; 0C
-.word NAME_HORN         ; 0D
+.word NAME_WAKEUPBELL   ; 0D
 .word BLANK             ; 0E
 .word BLANK             ; 0F
 
@@ -482,8 +482,8 @@ NAME_HOUSE:
 NAME_EYEDROPS:
 .byte $8E,$BC,$A8,$A7,$B5,$B2,$B3,$B6,$00 ; Eyedrops
 NAME_SMOKEBOMB:
-.byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$E3,$00 ; Smoke_Q_
-NAME_HORN:
+.byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$E3,$00 ; Smoke__Q
+NAME_WAKEUPBELL:
 .byte $A0,$A4,$AE,$A8,$B8,$B3,$FF,$E4,$00 ; Wakeup_^
 
 

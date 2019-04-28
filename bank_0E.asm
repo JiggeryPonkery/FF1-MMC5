@@ -393,7 +393,7 @@ ElflandBMagic:
 ElflandWMagic2:                               
 .byte MG_PURE, MG_FEAR, MG_AICE, MG_AMUT, $00 ;(Elfland) PURE, FEAR, AICE, AMUT
 ElflandBMagic2:                               
-.byte MG_SLP2, MG_FAST, MG_CONF, MG_ICE3, $00 ;(Elfland) SLP2, FAST, CONF, ICE2
+.byte MG_SLP2, MG_FAST, MG_CONF, MG_ICE2, $00 ;(Elfland) SLP2, FAST, CONF, ICE2
 ElflandTemple:                                
 .byte $C8,$00                                 ;(Elfland) 200g Clinic
 ElflandInn:                                   
@@ -3446,19 +3446,33 @@ DrawShop:
 
               ; Fill attribute tables
     LDA $2002                  ; reset the PPU toggle
-    LDA #>$2300                ; set the ppu addr to $23C0  (attribute tables)
-    STA $2006
-    LDA #<$23C0
-    STA $2006
+ ;   LDA #>$2300                ; set the ppu addr to $23C0  (attribute tables)
+ ;   STA $2006
+ ;   LDA #<$23C0
+ ;   STA $2006
 
-    LDX #$00                     ; loop $40 time to copy our attribute LUT to the on-screen attribute tables
-  @AttribLoop:
-      LDA lut_ShopAttributes, X  ; fetch a byte from the lut
-      STA $2007                  ; draw it
-      INX
-      CPX #$40                   ; repeat until X=$40
-      BCC @AttribLoop
+ 
+ 
+ ;   LDX #$00                     ; loop $40 time to copy our attribute LUT to the on-screen attribute tables
+ ; @AttribLoop:
+ ;     LDA lut_ShopAttributes, X  ; fetch a byte from the lut
+ ;     STA $2007                  ; draw it
+ ;     INX
+ ;     CPX #$40                   ; repeat until X=$40 
+ ;     BCC @AttribLoop
 
+    LDA #>$23D3
+    STA $2006
+    LDA #<$23D3
+    STA $2006
+    LDA #0
+    STA $2007
+    LDX #>$23D3
+    STX $2006
+    LDX #<$23DB
+    STX $2006
+    STA $2007     ; JIGS - only fill these two attribute bytes!
+ 
               ; Draw the shopkeeper
     LDX shop_type                ; get the shop type in X
     LDA lut_ShopkeepAdditive, X  ; use it to fetch the image additive from our LUT
@@ -4834,25 +4848,19 @@ lut_ShopkeepAdditive:
 ;;  for the shop.
 
 lut_ShopAttributes:
-;  .BYTE $FF,$FF,$FF,$55,$55,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$3F,$05,$05,$CF,$FF,$FF
-;  .BYTE $FF,$FF,$33,$00,$00,$CC,$FF,$FF
-;  .BYTE $FF,$FF,$33,$00,$00,$CC,$FF,$FF
+;; JIGS - not the original version, but an older version
+;; purple text for title, green text for gold box
+
+;  .BYTE $55,$55,$55,$55,$55,$FF,$FF,$FF
+;  .BYTE $F5,$F5,$F5,$F5,$F5,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$00,$FF,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$00,$FF,$FF,$FF,$FF
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$AA,$AA,$AA,$AA
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$AA,$AA,$AA
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
-;; JIGS - need this too
-
-  .BYTE $55,$55,$55,$55,$55,$FF,$FF,$FF
-  .BYTE $F5,$F5,$F5,$F5,$F5,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$00,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$00,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$AA,$AA,$AA
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+  
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
