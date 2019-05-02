@@ -2443,7 +2443,15 @@ StandardMapLoop:
     JSR SwapPRG_L
     JSR EnterShop           ; enter the shop
     JSR SMMove_Down         ; JIGS - set player 1 tile below shop door
+   
     JSR ReenterStandardMap  ;  then reenter the map
+    LDA sm_player_x
+    AND #$3F
+    STA sm_player_x
+    LDA sm_player_y
+    AND #$3F
+    STA sm_player_y         ; JIGS - update the thing that stops NPCs from walking through you
+    
     JMP StandardMapLoop     ;  and continue looping
 
   ;; here if the player is to teleport, or to start a fight
@@ -9287,11 +9295,11 @@ MapObjectMove:
        @Exit:
          RTS
 
-:   LDA inroom               ; check to see if the player is in a room
-    AND #1                   ;  specifically, normal rooms (but not locked rooms)
-    BEQ @NotInRoom           ; if player is in a room....
-      LDA mapobj_flgs, X     ; ... check this object's inroom flag
-      BPL @Exit              ; if player in room and object out of room, do not update object
+:   ;LDA inroom               ; check to see if the player is in a room
+    ;AND #1                   ;  specifically, normal rooms (but not locked rooms)
+    ;BEQ @NotInRoom           ; if player is in a room....
+    ;  LDA mapobj_flgs, X     ; ... check this object's inroom flag
+    ;  BPL @Exit              ; if player in room and object out of room, do not update object
                              ; not sure what the point of this is -- however it WILL prevent you from
                              ; being able to shove an object out of the way if they're blocking the
                              ; exit door from the outside (this happened to be before)
@@ -9301,9 +9309,10 @@ MapObjectMove:
   @NotInRoom:
     LDA mapobj_movectr, X    ; check the object's movement down counter
     BEQ @TakeStep            ; if it's zero (expired), have the object take another step
-      SEC
-      SBC #1                 ;  otherwise simply decrement it by 1, and exit
-      STA mapobj_movectr, X  ;  (what did NASIR have against DEC?)
+      ;SEC
+      ;SBC #1                 ;  otherwise simply decrement it by 1, and exit
+      ;STA mapobj_movectr, X  ;  (what did NASIR have against DEC?)
+      DEC mapobj_movectr, X
       RTS
 
 

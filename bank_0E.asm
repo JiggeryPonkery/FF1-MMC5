@@ -3793,7 +3793,7 @@ UpdateShopList_Loop:
     STA str_buf+$48, Y
     STA str_buf+$49, Y
     STA str_buf+$4A, Y
-    LDA #$BB              ; x
+    LDA #$F1              ; x
     STA str_buf+$44, Y
 
     LDA shop_type

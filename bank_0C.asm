@@ -2788,7 +2788,7 @@ EnemyTargetMenu_4Large:
         TYA
     : STA btltmp_targetlist, X
       INX                       ; sort of bugged.  There are only 4 entries in the 4large lut.  This reads
-      CPX #$09                  ; 9 entries, which steps out of bounds, but the entries are never used so 
+      CPX #$04                  ; 9 entries, which steps out of bounds, but the entries are never used so 
       BNE @TranslateLoop        ; it doesn't matter.
       
     LDY #$00
