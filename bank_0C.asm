@@ -256,7 +256,7 @@ lut_MagicData:
 .byte $00,$28,$00,$10,$10,$B0,$23,$00 ; INVISBL 
 .byte $18,$14,$20,$02,$01,$D0,$21,$00 ; ICE    
 .byte $18,$08,$01,$01,$03,$E8,$23,$00 ; DARK   
-.byte $00,$0E,$00,$10,$0D,$B8,$2B,$00 ; TEMPER  
+.byte $00,$0E,$00,$10,$0B,$B8,$2B,$00 ; TEMPER  
 .byte $40,$00,$01,$01,$04,$E8,$2A,$00 ; SLOW    
 .byte $00,$21,$00,$10,$07,$C0,$2B,$00 ; CURE 2  
 .byte $18,$28,$00,$01,$02,$C8,$23,$00 ; HARM 2 
@@ -265,7 +265,7 @@ lut_MagicData:
 .byte $18,$1E,$10,$01,$01,$D0,$27,$00 ; FIRE 2 
 .byte $40,$10,$01,$02,$03,$E8,$27,$00 ; HOLD    
 .byte $18,$1E,$40,$01,$01,$C8,$27,$00 ; BOLT 2 
-.byte $40,$14,$00,$01,$10,$B8,$27,$00 ; LOCK 2  
+.byte $40,$14,$00,$01,$0E,$B8,$27,$00 ; LOCK 2  
 .byte $00,$04,$00,$10,$08,$E0,$2A,$00 ; PURE   
 .byte $18,$28,$01,$01,$05,$E8,$25,$00 ; FEAR        
 .byte $00,$20,$00,$08,$0A,$B0,$21,$00 ; ICE (shield)
@@ -277,7 +277,7 @@ lut_MagicData:
 .byte $00,$42,$00,$10,$07,$C0,$2C,$00 ; CURE 3
 .byte $00,$01,$00,$10,$06,$E0,$21,$00 ; LIFE     ; JIGS - will now cure death, then heal some HP
 .byte $18,$3C,$00,$01,$02,$C8,$25,$00 ; HARM 3 
-.byte $00,$30,$00,$08,$07,$C0,$27,$00 ; HEAL 2
+.byte $00,$18,$00,$08,$07,$C0,$27,$00 ; HEAL 2
 .byte $18,$32,$10,$01,$01,$D0,$25,$00 ; FIRE 3    
 .byte $28,$01,$02,$01,$03,$E8,$22,$00 ; BANE  
 .byte $FF,$00,$00,$08,$00,$00,$00,$00 ; WARP  
@@ -10649,7 +10649,7 @@ BtlMag_PerformSpellEffect:
         .WORD BtlMag_Effect_CureAilment     ; 08   
         .WORD BtlMag_Effect_AbsorbUp        ; 09   
         .WORD BtlMag_Effect_ElemResist      ; 0A   
-        .WORD BtlMag_Effect_AttackUp        ; 0B   ; not actually used by any spells in the original game
+        .WORD BtlMag_Effect_AttackUp        ; 0B   
         .WORD BtlMag_Effect_Fast            ; 0C   
         .WORD BtlMag_Effect_AttackUp2       ; 0D   
         .WORD BtlMag_Effect_EvadeDown       ; 0E   
