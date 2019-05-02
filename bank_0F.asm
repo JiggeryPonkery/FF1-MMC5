@@ -85,7 +85,7 @@
 .export LoadMenuCHRPal_Z
 .export DrawBattleSkillBox_L
 .export LoadPriceZ
-
+.export SkillText2
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -12760,22 +12760,9 @@ DrawBattleSkillBox_L:
       BNE :-
     JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
     
-    LDA btlcmd_curchar
-    CLC
-    ROR A
-    ROR A
-    ROR A
-    STA CharacterIndexBackup             ; convert current command character 
-    TAX
-    LDA ch_class, X
-    AND #$0F                             ; get class, throw away sprite bits
-    CMP #CLS_KN                          ; if its over black mage, subtract 6
-    BCC :+
-      SEC
-      SBC #6
-  : STA battle_class
+    LDA battle_class
     LDX #5
-    JSR MultiplyXA                       ; then multiply by 5
+    JSR MultiplyXA                      ; then multiply by 5
     TAY
     
     LDX #$00 
@@ -13505,18 +13492,25 @@ lut_CombatSkillBox:
 ;       hdr   X    Y  width  height
   .BYTE $00, $02, $05, $0C, $03 ; skills
 ;       hdr,  X    Y    ptr
-  .BYTE $01, $03, $05, <@txt0, >@txt0   ; text
-  .BYTE $01, $03, $05, <@txt1, >@txt1
-  .BYTE $01, $03, $05, <@txt2, >@txt2
-  .BYTE $01, $03, $05, <@txt3, >@txt3
-  .BYTE $01, $03, $05, <@txt4, >@txt4
-  .BYTE $01, $03, $05, <@txt4, >@txt4 
-  
-  @txt0:  .BYTE $8D, $A8, $A9, $A8, $B1, $A7, $00       ; Defend
-  @txt1:  .BYTE $9C, $B7, $A8, $A4, $AF, $00            ; Steal
-  @txt2:  .BYTE $8C, $B2, $B8, $B1, $B7, $A8, $B5, $00  ; Counter
-  @txt3:  .BYTE $9B, $B8, $B1, $AC, $A6, $00            ; Runic
-  @txt4:  .BYTE $8C, $AB, $A4, $B1, $B7, $00            ; Chant
+  .BYTE $01, $03, $05, <SkillText0, >SkillText0   ; 00 ; these match the class
+  .BYTE $01, $03, $05, <SkillText1, >SkillText1   ; 01
+  .BYTE $01, $03, $05, <SkillText2, >SkillText2   ; 02
+  .BYTE $01, $03, $05, <SkillText3, >SkillText3   ; 03
+  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 04
+  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 05
+  .BYTE $01, $03, $05, <SkillText0, >SkillText0   ; 06
+  .BYTE $01, $03, $05, <SkillText1, >SkillText1   ; 07
+  .BYTE $01, $03, $05, <SkillText2, >SkillText2   ; 08
+  .BYTE $01, $03, $05, <SkillText3, >SkillText3   ; 09
+  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 0A
+  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 0B 
+
+SkillText0:  .BYTE $8D, $A8, $A9, $A8, $B1, $A7, $00       ; Defend
+SkillText1:  .BYTE $9C, $B7, $A8, $A4, $AF, $00            ; Steal
+  ;@txt2:  .BYTE $8C, $B2, $B8, $B1, $B7, $A8, $B5, $00  ; Counter
+SkillText2:  .BYTE $94, $AC, $A6, $AE, $00                 ; Kick
+SkillText3:  .BYTE $9B, $B8, $B1, $AC, $A6, $00            ; Runic
+SkillText4:  .BYTE $8C, $AB, $A4, $B1, $B7, $00            ; Chant
 
  
 
@@ -13926,11 +13920,11 @@ DrawBattleString_ControlCode:
     BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
     
     LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
-    CMP #$40                        ; if it's >= 42, then it's a special enemy attack
+    CMP #$41                        ; if it's >= 42, then it's a special enemy attack
     BCC @PrintAttackName_AsItem     ; but less than 42, print it as an item (magic spell)
     
-    LDA #>(lut_EnemyAttack - $40*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
-    LDX #<(lut_EnemyAttack - $40*2) ;   index starts at $40
+    LDA #>(lut_EnemyAttack - $41*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
+    LDX #<(lut_EnemyAttack - $41*2) ;   index starts at $41
     
     ; JIGS - if bugged, use this instead: since lut_EnemyAttack is removed from Dialogue Data...
     ;LDA #>(lut_EnemyAttack) ; 

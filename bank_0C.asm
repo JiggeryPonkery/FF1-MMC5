@@ -47,6 +47,7 @@
 .import ShiftLeft6
 .import DrawBattleSkillBox_L
 .import StealFromEnemyZ
+.import SkillText2
 
 BANK_THIS = $0C
 
@@ -304,7 +305,18 @@ lut_MagicData:
 .byte $6B,$64,$00,$01,$01,$D0,$28,$00 ; FLARE  
 .byte $30,$10,$04,$01,$03,$E8,$20,$00 ; STOP           
 .byte $20,$01,$04,$01,$03,$D8,$2B,$00 ; BANISH         
-.byte $00,$01,$08,$02,$12,$D8,$28,$00 ; DOOM         
+.byte $00,$01,$08,$02,$12,$D8,$28,$00 ; DOOM      
+
+;      ╒ Hit Rate
+;      |   ╒ Effectivity
+;      |   |   ╒ Element
+;      |   |   |   ╒ Target
+;      |   |   |   |   ╒ Effect
+;      |   |   |   |   |   ╒ Graphic
+;      |   |   |   |   |   |   ╒ Palette
+;      |   |   |   |   |   |   |   ╒ Unused
+;      v   v   v   v   v   v   v   v  
+.byte $18,$00,$00,$01,$01,$E8,$20,$00 ; Kick
 
 ;; removed heal and pure data
 
@@ -1257,18 +1269,19 @@ BattleSubMenu_Skill:
     ROR A
     ROR A
     ROR A
-    STA CharacterIndexBackup             ; convert current command character 
+    STA CharacterIndexBackup        ; convert current command character 
     TAX
     LDA ch_class, X
-    AND #$0F                             ; get class, throw away sprite bits
-    CMP #CLS_KN                          ; if its over black mage, subtract 6
-    BCC :+
-      SEC
-      SBC #6
+    AND #$0F                        ; get class, throw away sprite bits
+    ;CMP #CLS_KN                    ; if its over black mage, subtract 6
+    ;BCC :+
+    ;  SEC
+    ;  SBC #6
   : STA battle_class
-    CMP #1
-    BNE @DoNothing
-   
+    BEQ @DoNothing                  ; if fighter, do nothing
+    CMP #3                          ; only thieves and black belts have a skill so far, so
+    BCS @DoNothing                  ; if redmage or higher, do nothing
+
     JSR DrawBattleSkillBox_L
     INC btl_combatboxcount_alt
     
@@ -1285,9 +1298,13 @@ BattleSubMenu_Skill:
     PLA                             ; restore A/B state
     
     CMP #$02
-    BNE @Steal                      ; If they pressed B....
+    BNE :+                          ; If they pressed B....
       JMP CancelBattleAction        ; ... cancel
-    
+
+  : LDA battle_class
+    CMP #2
+    BEQ @Kick
+      
    @Steal: 
     LDA #$01
     JSR UndrawNBattleBlocks_L     ; undraw the command box
@@ -1296,19 +1313,24 @@ BattleSubMenu_Skill:
     BNE :+                          ; If they pressed B....
       JMP CancelBattleAction        ; ... cancel
   
-  : ;LDA #$01
-    ;JSR UndrawNBattleBlocks_L       ; undraw the enemy box
-  
-    LDA #$FE
+  : LDA #$FE
     JMP SetCharacterBattleCommand   ; command 'FE ?? TT'; FE is "steal", TT is enemy target, ?? is not used
   
-  @DoNothing:
+   @DoNothing:
     JSR DoNothingMessageBox
     JMP CancelBattleAction
     
+   @Kick: 
+    LDA btlcmd_curchar
+    ASL A
+    TAY
     
-    
-    
+    LDA #$F4    
+    STA btlcmd_magicgfx, Y 
+    LDA #$20    
+    STA btlcmd_magicgfx+1, Y
+    LDA #$FD
+    JMP SetCharacterBattleCommand  ; like magic spells
 
   
   
@@ -5374,126 +5396,114 @@ Battle_DoPlayerTurn:
     TAY                         ; id*4 in Y (command index)
     
     LDA btl_charcmdbuf, Y       ; get command byte
+    CMP #$FD
+    BEQ @DoKick
     CMP #$FF
     BEQ @Return                 ; if $FF, player is guarding, do nothing
+    CMP #$04
+    BEQ @Attack
+    CMP #$08
+    BEQ @Item
+    CMP #$10
+    BEQ @Equipment
+    CMP #$20
+    BEQ @Run
+    CMP #$40
+    BEQ @Magic
+    CMP #$80
+    BEQ @Hide
     CMP #$FE
     BEQ @DoSteal
-    
-    LSR A                       ; shift out bit 0 ('dead' bit)      and throw away
-    LSR A                       ; shift out bit 1 ('stone' bit)     and throw away
-      
-    LSR A                       ; shift out bit 2 ('attack' bit)
-    BCC :+                      ; if set... attack the enemy
-      LDX btl_charcmdbuf+2, Y           ; X = enemy target
-      LDA @playerid                     ; A = attacker
-      JMP PlayerAttackEnemy_Physical    ; Do the attack!
-      
-  : LSR A                       ; shift out bit 3 ('Item' bit)
-    BCC :+                      ; if set... Item a potion!
-      ;TYA
-      ;PHA                           ; push command index
-      
-      ;LDY @playerid
-      ;LDX btl_charcmdconsumeid, Y   ; get the potion they're using in X (0=heal, 1=pure)
-      ;DEC item_heal, X              ; actually remove the potion from their inventory
-      
-      ;PLA
-      ;TAY                           ; restore command index
-      
-      LDA btl_charcmdbuf+1, Y       ; get the effect ID in A ($40 for heal, $41 for pure)
-      LDX btl_charcmdbuf+2, Y       ; get the target in X
-      LDY @playerid                 ; get the actor in Y
-      JMP Player_DoItem
-      
-  : LSR A                       ; shift out bit 4 ('equipment' bit)
-    BCC :+                      ; if set... use gear!
-      LDA btl_charcmdbuf+1, Y       ; A = effect ID
-      LDX btl_charcmdbuf+2, Y       ; X = target
-      LDY @playerid                 ; Y = attacker
-      JMP Player_DoEquipment
-      
-  : LSR A                       ; shift out bit 5 ('run' bit)
-    BCC :+
-      LDA @playerid                 ; load this player's ID
-      JMP Battle_PlayerTryRun       ; try to run!
-      
-  : LSR A                       ; shift out bit 6 ('magic' bit)
-    BCC :+
-        TYA                         ; back up command index
-        PHA
-        
-        ;LDY @playerid
-        ;LDX btl_charcmdconsumeid, Y ; get the level of this spell
-        ;DEC ch_mp, X                ; take away a spell charge
-        
-        LDY @playerid
-        LDX btl_charcmdconsumeid, Y
-        LDA ch_stats, X
-        SEC
-        SBC #$10
-        STA ch_stats, X ; JIGS - lower high bits by 1, leaving low bits (max mp) alone
-        
-        PLA                         ; restore command index
-        TAY
-        
-        LDA btl_charcmdbuf+1, Y     ; A = effect
-        LDX btl_charcmdbuf+2, Y     ; X = target
-        LDY @playerid               ; Y = attacker
-        JMP Player_DoMagic
-        
-     ;;JIGS - ADDING HIDING
-    
-   : LSR A                       ; shift out bit 7 - hiding
-     BCC :+
-        LDA @playerid
-        JMP Player_Hide        
     
     ;;  Code reaches here if the player had no command, which would only happen if they are
     ;;  immobilized or dead.
     
-    :
-        @ail = $89          ; local, temp ram to hold ailments
+    JMP IsCommandPlayerValid
+
+   @Attack: 
+    LDX btl_charcmdbuf+2, Y           ; X = enemy target
+    LDA @playerid                     ; A = attacker
+    JMP PlayerAttackEnemy_Physical    ; Do the attack!
+
+   @Item:
+    LDA btl_charcmdbuf+1, Y       ; get the effect ID in A ($40 for heal, $41 for pure)
+    LDX btl_charcmdbuf+2, Y       ; get the target in X
+    LDY @playerid                 ; get the actor in Y
+    JMP Player_DoItem
+   
+   @Equipment:   
+    LDA btl_charcmdbuf+1, Y       ; A = effect ID
+    LDX btl_charcmdbuf+2, Y       ; X = target
+    LDY @playerid                 ; Y = attacker
+    JMP Player_DoEquipment
+
+   @Run:
+    JMP Battle_PlayerTryRun       ; try to run!
+
+   @Magic:
+    TYA                         ; back up command index
+    PHA
     
+    LDY @playerid
+    LDX btl_charcmdconsumeid, Y
+    LDA ch_stats, X
+    SEC
+    SBC #$10
+    STA ch_stats, X ; JIGS - lower high bits by 1, leaving low bits (max mp) alone
+    
+    PLA                         ; restore command index
+    TAY
+    
+    LDA btl_charcmdbuf+1, Y     ; A = effect
+    LDX btl_charcmdbuf+2, Y     ; X = target
+    LDY @playerid               ; Y = attacker
+    JMP Player_DoMagic
+        
+   @Hide: 
+    JMP Player_Hide        
+
+   @Return:
+  : RTS
+  
+   @DoKick:
+   JMP KickEnemies
+
+   @DoSteal:
+     LDX btl_charcmdbuf+2, Y           ; X = enemy target
+     LDA @playerid                     ; A = attacker
+     JMP StealFromEnemy
+     
+IsCommandPlayerValid:     
+    @playerid = $88         ; local - holds player ID (0-3)
+    @ail = $89              ; local, temp ram to hold ailments
+
     LDA @playerid
     JSR PrepCharStatPointers        ; load player's ailments
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
     STA @ail
     
+    AND #AIL_DEAD | AIL_STONE
+    BEQ :+
+      CLC
+      RTS
+    
+  : LDA @ail
     AND #AIL_SLEEP          ; are they asleep?
     BEQ :+
-      LDA @playerid         ; if yes, try to wake up
-      JMP Battle_PlayerTryWakeup
+      JSR Battle_PlayerTryWakeup
+      CLC
+      RTS
       
   : LDA @ail
     AND #AIL_STUN           ; are they stunned?
     BEQ :+
-      LDA @playerid
-      JMP Battle_PlayerTryUnstun    ; if yes, try to unstun
-      
-    ; otherwise, they simply don't have an action or they're dead/stone
-    ;   so just exit without doing anything
+      JSR Battle_PlayerTryUnstun    ; if yes, try to unstun
+      CLC
+      RTS
     
-    ;; JIGS - Want thieves and Ninjas to try and hide during surprise attacks? Enable these lines!
-    ;; NOTE - you will also have to change how the striking first variable is checked now... 
-;  : LDA @ail
-;    AND #(AIL_DEAD | AIL_STONE | AIL_DARK) ;; make sure they can't act if they're dead, stone, or blind...
-;    BNE :+
-    
-;    LDY #ch_class - ch_stats
-;    LDA (CharStatsPointer), Y
-;    AND #$0F             
-;    CMP #01
-;    BEQ Player_Hide
-;    CMP #07
-;    BEQ Player_Hide
-    
-   @Return:
-  : RTS
-
-   @DoSteal:
-     LDX btl_charcmdbuf+2, Y           ; X = enemy target
-     LDA @playerid                     ; A = attacker
+  : SEC    
+    RTS 
    
 StealFromEnemy:
   ;; not an attack, but loads lots of the necessary things! Maybe for later?
@@ -5503,12 +5513,16 @@ StealFromEnemy:
 
   ;; for now, to test and make sure stealing works properly, there will be no randomness involved. Just do it.
   
-   ORA #$80
-   STA btl_attacker
    STX btl_defender_index       ; set defender index
    STX btl_defender
+   ORA #$80
+   STA btl_attacker
+
+   JSR IsCommandPlayerValid
+   BCS :+
+       RTS         ; player is dead or stoned or something, so don't do the thing
   
-   LDA #$00        ; print '02 00 00' to combat box 0
+ : LDA #$00        ; print '02 00 00' to combat box 0
    TAX             ;  (attacker name in attacker combat box)
    LDY #$02
    JSR PrepareAndDrawSimpleCombatBox
@@ -5522,6 +5536,8 @@ StealFromEnemy:
    STA btltmp_damageblockbuffer
    LDA #BTLMSG_STEALING
    STA btltmp_damageblockbuffer+1
+   LDA #0
+   STA btltmp_damageblockbuffer+2
    LDA #$03                          ; draw it in combat box 3
    LDX #<(btltmp_damageblockbuffer)
    LDY #>(btltmp_damageblockbuffer)
@@ -5594,21 +5610,92 @@ StealFromEnemy:
    DEC battle_stealsuccess
    
    @InputLoop:                   ; Wait for the player to provide
-      JSR DoFrame_WithInput     ;   ANY input
+      JSR DoFrame_WithInput      ;   ANY input
     BEQ @InputLoop
     
    JMP ClearAllCombatBoxes     
+
    
+KickEnemies:
+    ;; JIGS - kind of like Player_DoMagicEffect
+    LDA $88
+    AND #$03
+    ORA #$80
+    STA btl_attacker            ; make sure high bit is set, and record them as an attacker
+    
+    JSR IsCommandPlayerValid
+    BCS :+
+       RTS         ; player is dead or stoned or something, so don't do the thing
+    
+  : LDA #$FF
+    STA btl_defender
+    LDA #$40
+    STA btl_attackid
+
+    JSR ClearAltMessageBuffer   ; Clear alt message buffer
+    JSR DrawCombatBox_Attacker  ; Draw the attacker name box
+    
+    LDX #<SkillText2
+    LDY #>SkillText2            
+    
+    INC btl_combatboxcount_alt      ; inc the combat box counter
+    
+    LDA #$06                        ; draw the attack name in box 1
+    JSR DrawCombatBox_L
+    
+    LDA #$00
+    STA btlmag_fakeout_ailments             ; clear the fakeout ailments
+    JSR Battle_PrepareMagic                 ; Otherwise, load up magic effect info
+    
+    LDA btl_attacker            ; Load attacker's stat pointer
+    JSR PrepCharStatPointers
+    
+    LDX #0
+    STX btlmag_magicsource
+    
+    LDX #9                      ; max amount of enemies
+   @Loop:
+    LDA btl_enemyIDs, Y         ; check each slot
+    CMP #$FF                    ; if its $FF, decrease X
+    BNE @EnemyExists
+    
+   @NoEnemy:
+    DEX 
    
+   @EnemyExists:                ; go through all 9 slots
+    INY
+    CPY #9
+    BNE @Loop
+    
+    LDY #ch_level - ch_stats    ; backup character level
+    LDA (CharStatsPointer), Y
+    LSR A
+    STA tmp+1
+    
+    LDY #ch_damage - ch_stats   ; get character damage
+    LDA (CharStatsPointer), Y
+    STA tmp                     ; store in tmp
    
+    TXA                         ; put living enemy amount in A
+    CMP #1                      ; if only one enemy, halve attack
+    BNE :+
+    
+    LDA tmp
+    LSR A
+    JMP @SaveKickPotency
+    
+  : LDY #0                       
+    LDX tmp                     ; and damage in X
+    JSR YXDivideA
    
-   
-   
-   
-   
-   
-   
-   
+    ; A = result... should be damage / enemy count
+   @SaveKickPotency: 
+    CLC 
+    ADC tmp+1                   ; add level/2
+    STA btlmag_effectivity      ; that's the kick's effectivity!
+    
+    JSR Battle_PlayerMagic_CastOnTarget     ; And actually cast the spell
+    JMP Battle_EndMagicTurn                 ; End the turn
    
    
 
@@ -5618,6 +5705,7 @@ StealFromEnemy:
  ;; JIGS - adding a whole chunk here
 
 Player_Hide:
+  LDA $88
   PHA
   PHA
   JSR DrawPlayerAttackerCombatBox ; draw attacker box
@@ -5670,6 +5758,7 @@ Player_Hide:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_PlayerTryRun:
+    LDA $88
     PHA                             ; backup player ID
     JSR DrawPlayerAttackerCombatBox ; draw attacker box
     PLA                             ; restore ID
@@ -5775,6 +5864,7 @@ Battle_PlayerTryRun:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_PlayerTryWakeup:
+    LDA $88
     PHA                             ; backup ID
     JSR DrawPlayerAttackerCombatBox ; draw attacker
     PLA                             ; retore ID
@@ -5837,6 +5927,7 @@ Battle_PlayerTryWakeup:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_PlayerTryUnstun:
+    LDA $88
     PHA                                 ; backup player ID
     JSR DrawPlayerAttackerCombatBox     ; draw the attacker box
     PLA                                 ; restore player ID
@@ -6267,6 +6358,7 @@ DoPhysicalAttack:
     LDX #$00
     JSR PrepareAndDrawSimpleCombatBox
     
+DoPhysicalAttack_NoBoxes:    
     JSR ClearMathBufHighBytes   ; zero high bytes of math buffers
     
     LDA #168                    ; base hit chance of 168
@@ -9090,7 +9182,7 @@ Enemy_DoAi:
       STA (EnemyRAMPointer), Y
       JMP @DoSpecialAttack
   : CLC
-    ADC #$40                    ; add $40 to the special attack ID to indicate it's a special attack (0-3F are magic)
+    ADC #$41                    ; add $40 to the special attack ID to indicate it's a special attack (0-3F are magic)
     JMP Enemy_DoMagicEffect     ; and perform the special attack
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10776,21 +10868,24 @@ BtlMag_ApplyDamage:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PutEffectivityInDamageMathBuf:
-    LDY #ch_intelligence - ch_stats
-    LDA (CharStatsPointer), Y
+;    LDY #ch_intelligence - ch_stats
+;    LDA (CharStatsPointer), Y
 
-    LSR A ; divide by 2
-    LSR A ; divide by 4
-    LSR A ; divide by 8
-    STA MMC5_tmp
-    LSR A ; divid by 16
-    ORA MMC5_tmp 
+;    LSR A ; divide by 2
+;    LSR A ; divide by 4
+;    LSR A ; divide by 8
+;    STA MMC5_tmp
+;    LSR A ; divide by 16
+;    CLC
+;    ADC MMC5_tmp
     
     ;Int/16 + Int/8 ... so an Intelligence stat of 80 would give +15 damage
     
-    ORA btlmag_effectivity
+;    ADC btlmag_effectivity
 
-    ;LDA btlmag_effectivity          ; move effectivity into the math buffer!
+;; JIGS - someone else will have to figure that one out...
+
+    LDA btlmag_effectivity          ; move effectivity into the math buffer!
     STA math_basedamage
     LDA #0
     STA math_basedamage+1
