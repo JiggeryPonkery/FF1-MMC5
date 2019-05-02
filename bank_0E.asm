@@ -6476,6 +6476,8 @@ ItemMenu_Loop:
     RTS
     
   @APressed:
+    LDA #0
+    STA backup_cursor_targ
     LDA cursor                 ; if A is pressed while the cursor is on an option
     BEQ @SelectPressed         ; do that option (almost the same as pressing select)
     CMP #01
@@ -6489,6 +6491,7 @@ ItemMenu_Loop:
     LDA item_box, X            ; get the selected item, and put it in A
     ASL A                      ; double it (2 bytes per pointer)
     TAX                        ;   and stick it in X
+    
     LDA @ItemJumpTable, X      ; load the address to jump to from our jump table
     STA tmp                    ; and put it in (tmp)
     LDA @ItemJumpTable+1, X
@@ -6521,7 +6524,7 @@ ItemMenu_Loop:
 .word UseItem_House       ; House
 .word UseItem_Eyedrop     ; Eyedrops
 .word UseItem_Smokebomb   ; Smokebomb
-.word Useitem_bell        ; Wakeup Horn
+.word UseItem_Bell        ; Wakeup Horn
 .word UseItem_Bad         ; unused
 .word UseItem_Bad         ; unused
 
@@ -6859,53 +6862,48 @@ MenuSaveConfirm:
   ;; can't make these labels local because UseItem_Pure hijacks one of the labels ;_;
 
 UseItem_Heal:
-    LDA #30
+    LDA #HEAL_POTENCY
     STA tmp+3
-    JMP :+
+    JMP DrawHealMenu
 
 UseItem_XHeal:    
-    LDA #150
+    LDA #XHEAL_POTENCY
     STA tmp+3
-  : JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
+    
+DrawHealMenu:
+    JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
     LDA #44 
     JSR DrawItemDescBox        ; open up the description box with text ID $20
-       
-  _UseItem_Heal_Loop:
+
+   @UseItem_Heal_Loop:
     JSR ItemTargetMenuLoop     ; run the item target loop.
     BCS @UseItem_Exit           ; if B was pressed (C set), exit this menu
 
     JSR Cursor_to_Index
-    ;LDA cursor                 ; otherwise... A was pressed.
-    ;ROR A                      ;  get the cursor (target character)
-    ;ROR A                      ;  left shift by 6 (make char index:  $40, $80, $C0)
-    ;ROR A
-    ;AND #$C0                   ; mask out relevent bits
-    ;TAX                        ; and put in X
-
     LDA ch_ailments, X         ; check their OB ailments
     CMP #$01
     BEQ @UseItem_Heal_CantUse  ; if dead... can't use
     CMP #$02
     BEQ @UseItem_Heal_CantUse  ; if stone... can't use
     
+    LDA tmp+3
+    CMP #HEAL_POTENCY
+    BNE :+ 
+        DEC item_heal          ; then remove a heal potion from the inventory
+        JMP @DoHeal
+ : DEC item_x_heal
+    
+   @DoHeal: 
     LDA tmp+3                  ; otherwise.. can use!
     JSR MenuRecoverHP_Abs      ;   recover 30 HP for target (index is still in X).  Can use _Abs version
-    JSR DrawItemTargetMenu     ;   because we already checked the ailments
-    JSR MenuWaitForBtn_SFX     ; then redraw the menu to reflect the HP change, and wait for the user to press a button
+    JMP DrawHealMenu
 
-    LDA tmp+3
-    CMP #30
-    BNE :+ 
-        DEC item_heal              ; then remove a heal potion from the inventory
-        JMP EnterItemMenu          ; re-enter item menu (item menu needs to be redrawn)
- : DEC item_x_heal
-
- @UseItem_Exit:
+  @UseItem_Exit:
     JMP EnterItemMenu          ; re-enter item menu (item menu needs to be redrawn)
 
   @UseItem_Heal_CantUse:       ; can't make this local because of stupid UseItem_Pure hijacking the above label
     JSR PlaySFX_Error          ; play the error sound effect
-    JMP _UseItem_Heal_Loop     ; and keep looping until they select a legal target or escape with B
+    JMP @UseItem_Heal_Loop     ; and keep looping until they select a legal target or escape with B
     
     
 ;;;;;;;;;;;;;;;;;;;;
@@ -6915,13 +6913,16 @@ UseItem_XHeal:
 ;;;;;;;;;;;;;;;;;;;;    
 
 UseItem_Ether:
+    LDA #0 
+    STA cursor2
+    
+UseItem_Ether_2:
     JSR DrawMPTargetMenu       ; draw target menu
     LDA #45
     JSR DrawItemDescBox        ; print relevent description text 
     
-    LDA #0 
+    LDA backup_cursor_targ
     STA cursor
-    STA cursor2
     
   @Loop:
     JSR MPTargetMenuLoop       ; do the target menu loop
@@ -6961,18 +6962,20 @@ UseItem_Ether:
     JSR PlayHealSFX
     
     DEC item_ether             ; if we could... remove one from the inventory
-    JSR DrawMPTargetMenu       ; redraw the target menu to reflect the changes
-    @EndLoop:                  ; this is basically MenuWaitForBtn_SFX but it draws sprites...
-        JSR ClearOAM
-        JSR DrawMPTargetSprites
-        JSR MenuFrame 
-        LDA joy_a
-        ORA joy_b
-        BEQ @EndLoop
-        JSR PlaySFX_MenuSel
-        LDA #0
-        STA joy_a
-        STA joy_b
+    JMP UseItem_Ether_2
+    ;JSR DrawMPTargetMenu       ; redraw the target menu to reflect the changes
+    
+    ;@EndLoop:                  ; this is basically MenuWaitForBtn_SFX but it draws sprites...
+    ;    JSR ClearOAM
+    ;    JSR DrawMPTargetSprites
+    ;    JSR MenuFrame 
+    ;    LDA joy_a
+    ;    ORA joy_b
+    ;    BEQ @EndLoop
+    ;    JSR PlaySFX_MenuSel
+    ;    LDA #0
+    ;    STA joy_a
+    ;    STA joy_b
     
   @Exit: 
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
@@ -7017,8 +7020,9 @@ UseItem_Elixir:
     JSR PlayHealSFX
     
     DEC item_elixir            ; if we could... remove one from the inventory
-    JSR DrawItemTargetMenu_Elixir  ; redraw the target menu to reflect the changes
-    JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button (sprite version!)
+    JMP UseItem_Elixir
+    ;JSR DrawItemTargetMenu_Elixir  ; redraw the target menu to reflect the changes
+    ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button (sprite version!)
   @Exit:  
     LDA #0
     STA item_pageswap
@@ -7041,7 +7045,7 @@ UseItem_Pure:
     JSR DrawItemDescBox        ; print relevent description text (ID=$21)
   @Loop:
     JSR ItemTargetMenuLoop     ; do the target menu loop
-    BCS @Exit                 ; if they pressed B (C set), exit
+    BCS @Exit                  ; if they pressed B (C set), exit
 
     LDA #04                    ; otherwise, put "poison" OB ailment
     STA tmp                    ;   in tmp as our ailment to cure
@@ -7050,9 +7054,11 @@ UseItem_Pure:
     
     JSR PlayHealSFX
 
-    DEC item_pure              ; if we could... remove one from the inventory
-    JSR DrawItemTargetMenu     ; redraw the target menu to reflect the changes
-    JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button
+    DEC item_pure               ; if we could... remove one from the inventory
+    ;JSR DrawItemTargetMenu     ; redraw the target menu to reflect the changes
+    ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button
+    JMP UseItem_Pure
+    
    @Exit: 
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
 
@@ -7083,8 +7089,10 @@ UseItem_Soft:
     JSR PlayHealSFX
 
     DEC item_soft              ; remove soft from inventory
-    JSR DrawItemTargetMenu
-    JSR MenuWaitForBtn_SFX
+    ;JSR DrawItemTargetMenu
+    ;JSR MenuWaitForBtn_SFX
+    JMP UseItem_Soft
+    
    @Exit:     
     JMP EnterItemMenu
 
@@ -7118,8 +7126,10 @@ UseItem_PhoenixDown:
     JSR PlayHealSFX
 
     DEC item_down              ; remove phoenix down from inventory
-    JSR DrawItemTargetMenu
-    JSR MenuWaitForBtn_SFX
+    ;JSR DrawItemTargetMenu
+    ;JSR MenuWaitForBtn_SFX
+    JMP UseItem_PhoenixDown
+    
   @Exit: 
     JMP EnterItemMenu
 
@@ -7129,7 +7139,7 @@ UseItem_PhoenixDown:
 
 
 
-Useitem_bell:
+UseItem_Bell:
     LDA #50
     JSR DrawItemDescBox       
     JSR MenuWaitForBtn_SFX
@@ -7217,7 +7227,8 @@ CureOBAilment:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ItemTargetMenuLoop:
-    LDA #0
+    ;LDA #0
+    LDA backup_cursor_targ
     STA cursor      ; reset the cursor to zero
     LDA #4
     STA cursor_max 
@@ -7243,6 +7254,8 @@ ItemTargetMenuLoop:
     BNE @B_Pressed     ; or B
     
     JSR MoveCursorUpDown
+    LDA cursor
+    STA backup_cursor_targ
     JMP @Loop
 
 
@@ -7278,6 +7291,8 @@ MPTargetMenuLoop:
     BNE @B_Pressed     ; or B
 
     JSR MoveMPMenuCursor
+    LDA cursor
+    STA backup_cursor_targ
     JMP @Loop
 
   @A_Pressed:              ; if A was pressed
@@ -7480,12 +7495,12 @@ DrawItemTargetMenu:
     STA dest_y
 
     LDA #0
-    @Loop:
+   @Loop:
     STA submenu_targ    ; set this to 0 
     INC dest_y
     INC dest_y
     INC dest_y
-    
+   
     LDA #17
     JSR DrawCharMenuString  ; draw Name, ailment, HP for each character
     
@@ -7507,9 +7522,9 @@ DrawItemTargetMenu_Elixir:
     STA dest_x
     LDA #$03
     STA dest_y
-    
+ 
     LDA #0
-    @Loop:
+   @Loop:
     STA submenu_targ    ; set this to 0 
     INC dest_y
     INC dest_y
