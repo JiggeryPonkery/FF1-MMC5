@@ -5785,7 +5785,7 @@ Battle_PlayerTryRun:
     ;   simple CMP instruction -- why they decided to bring the math buffer into this is beyond me.
     
     LDY #ch_level - ch_stats        ; Get Level
-    LDA (CharStatsPointer), Y    ; JIGS - fixed
+    LDA (CharStatsPointer), Y       ; JIGS - fixed
     CLC
     ADC #15                         ; level + 15
     TAX                             ; put it in X
@@ -5818,14 +5818,13 @@ Battle_PlayerTryRun:
     
     LDY #ch_battlestate - ch_stats  ; Get Battlestate (hiding)
     LDA (CharStatsPointer), Y       ; JIGS - if hidden, level doesn't factor into it
-    AND #$10                        ; so the running should be easier to achieve
-    BEQ :+
-    LDX #15
+    AND #$10                        ; so the running should be easier to achieve?
+    BEQ :+                          ; Seems like running gets harder the more you level up
     
-    :
+    LDX #15                         ; by increasing the random value higher than 15
     
-    LDA #$00
-    JSR RandAX
+  : LDA #$00                        ; So getting a higher number is bad if you want your luck/speed
+    JSR RandAX                      ; to be higher?
     STA tmp
     
     LDY #ch_speed - ch_stats         ; get player luck
