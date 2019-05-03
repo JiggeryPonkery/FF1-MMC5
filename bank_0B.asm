@@ -585,7 +585,7 @@ data_LevelUpData_Class4:
 .byte %00010011, %11000100 ; Level 31
 .byte %00001100, %00100000 ; Level 32
 .byte %00010000, %10000000 ; Level 33
-.byte %00000111, %01010001 ; Level 34
+.byte %00000111, %01010000 ; Level 34
 .byte %00011001, %10000000 ; Level 35
 .byte %00100100, %00001000 ; Level 36
 .byte %00010010, %01000000 ; Level 37
@@ -897,7 +897,7 @@ data_LevelUpData_Class10:
 .byte %00010011, %11000100 ; Level 31
 .byte %00001100, %00100000 ; Level 32
 .byte %00010000, %10000000 ; Level 33
-.byte %00000111, %01010001 ; Level 34
+.byte %00000111, %01010000 ; Level 34
 .byte %00011001, %10000000 ; Level 35
 .byte %00100100, %00001000 ; Level 36
 .byte %00010010, %01000000 ; Level 37
