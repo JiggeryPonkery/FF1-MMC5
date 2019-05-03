@@ -583,8 +583,9 @@ treasure_offset     = $72 ; maps
 item_box_offset     = $72 ; shops
 item_box_offset_old = $73 ; shops
 backup_cursor       = $73 ; shops, menus
-backup_cursor_targ  = $74 ; menus
+backup_cursor_targ  = $74 ; item menus
 inv_canequipinshop  = $74 ; shops
+battleitemslot      = $74 ; equip menu
 spaceruns           = $75 ; drawcomplexstring
 equipmenu_tmp       = $75 ; for unequip/reequipping
 

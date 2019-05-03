@@ -553,6 +553,9 @@ lut_MenuText:
 .word Battle_Ether_MPList     ; 4F ; 79 ; for battle... easier to do it here than copy buncha code over
 .word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
 .word M_EquipStats_Blank      ; 51 ; 81 ; 
+.word M_EquipInventoryWeapon  ; 52 ; 82 ; 
+.word M_EquipInventoryArmor   ; 53 ; 83 ; 
+.word M_EquipInventorySelect  ; 54 ; 84 ; 
 
 M_Gold: 
 .byte $04,$FF,$90,$00 ; _G - for gold on menu
@@ -909,6 +912,15 @@ M_EquipStats_Blank:
 ;.byte $FF,$95,$87,$C2,$10,$32,$7A,$10,$3A
 ;.byte $FF,$95,$88,$C2,$10,$33,$7A,$10,$3B,$00
 
+M_EquipInventoryWeapon:
+.byte $C1,$FF,$A0,$2B,$B3,$3C,$B6,$FF,$C7,$00 ; Weapons
+
+M_EquipInventoryArmor: 
+.byte $C1,$FF,$FF,$8A,$B5,$B0,$35,$FF,$FF,$C7,$00 ; Armor
+
+M_EquipInventorySelect:
+.byte $9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$35,$FF,$9C,$B7,$2F,$21,$28,$24,$BA,$5B,$A6,$AB,$01
+.byte $FF,$31,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Select or Start to switch between weapons and armor.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9372,6 +9384,7 @@ EnterEquipMenu:
     STA cursor
     STA cursor_max
     STA item_pageswap
+    STA battleitemslot        ; set to weapons for battle item slots
     JSR EnterEquipInventory
     JMP EnterEquipMenu
     
@@ -9391,6 +9404,8 @@ EnterEquipInventory:
     STA $2001             ; turn off the PPU
     STA joy_a             ; clear joy_a and joy_b counters
     STA joy_b             
+    STA joy_select
+    STA joy_start
     STA menustall         ; and turn off menu stalling (since the PPU is off)
     LDA #1
     STA cursor_change
@@ -9411,6 +9426,9 @@ EnterEquipInventory:
     BNE @A_Pressed            ; check to see if A pressed
     LDA joy_b
     BNE @B_Pressed            ; or B
+    LDA joy_start
+    ORA joy_select
+    BNE @Select_Pressed
 
     JSR MoveEquipInventoryCursor   ; if neither A nor B pressed, move the mode cursor
     JMP @Loop                      ; and loop until one of them is pressed
@@ -9428,6 +9446,19 @@ EnterEquipInventory:
     DEX
     DEC inv_weapon, X        ; and if it was more than 0, take it out of inventory again
   : JMP ReEquipStats
+  
+  @Select_Pressed:
+    LDA battleitemslot
+    BEQ @SwitchToArmor
+    
+       @SwitchToWeapon:
+        DEC battleitemslot
+        JMP @DoneSwitch
+        
+       @SwitchToArmor:
+        INC battleitemslot
+       @DoneSwitch:  
+        JMP EnterEquipInventory
     
   @A_Pressed:
     LDA equip_impossible
@@ -9457,6 +9488,11 @@ UpdateEquipInventoryStats:
 ;; Pressing A will equip the item set by UpdateEquipInventoryStats_CheckViable
 ;; If there is 0 amount of an item, it will equip you with nothing
 ;; or else give an error if the item set cannot be equipped
+    
+    LDA equipoffset
+    CMP #6
+    BCC EquipStatsDescBoxNumbers   ; don't display this stuff if on battle item slot
+        RTS 
     
 EquipStatsDescBoxNumbers:
     LDA CharacterIndexBackup
@@ -9498,9 +9534,9 @@ EquipStatsDescBoxNumbers:
     LDY #$3F         ; evasion
    
    @TheThing:
-    LDA equipoffset
-    CMP #06
-    BCS @DashStats
+;    LDA equipoffset
+;    CMP #06
+;    BCS @DashStats
 
     LDA equip_impossible
     BEQ :+
@@ -9514,14 +9550,14 @@ EquipStatsDescBoxNumbers:
     STA str_buf+2, X
     RTS   
     
-   @DashStats: 
-    LDX tmp+7
-    LDA #$FF
-    STA str_buf, X
-    LDA #$C2
-    STA str_buf+1, X
-    STA str_buf+2, X
-    RTS  
+;   @DashStats: 
+;    LDX tmp+7
+;    LDA #$FF
+;    STA str_buf, X
+;    LDA #$C2
+;    STA str_buf+1, X
+;    STA str_buf+2, X
+;    RTS  
   
    @WrongSlot: 
     LDX tmp+7
@@ -9552,7 +9588,38 @@ EquipStatsDescBoxNumbers:
     
 
 EquipStatsDescBoxString:
-    LDA #81
+    LDA equipoffset
+    CMP #6
+    BCC :+
+    
+    ;; if in battle item slots...
+    LDA #23
+    STA dest_y
+    LDA #10
+    STA dest_x
+    
+    LDA battleitemslot
+    BEQ @DrawWeapon
+    
+   @DrawArmor:    
+    LDA #83
+    JSR DrawMenuString
+    JMP @DrawExplanation
+    
+   @DrawWeapon:
+    LDA #82
+    JSR DrawMenuString
+   
+   @DrawExplanation:   
+    INC dest_y
+    INC dest_y
+    LDA #01
+    STA dest_x
+    
+    LDA #84
+    JMP DrawMenuString
+
+  : LDA #81
     ASL A                   ; double A (pointers are 2 bytes)
     TAX                     ; put in X to index menu string pointer table
     LDA lut_MenuText, X
@@ -9593,6 +9660,11 @@ UpdateEquipInventoryStats_CheckViable:
     
     LDA equipoffset
     BEQ @DoesWeaponExist
+    CMP #6
+    BCC @DoesArmorExist
+    
+    LDA battleitemslot
+    BEQ @DoesWeaponExist
     
    @DoesArmorExist: 
     LDA inv_armor, X
@@ -9605,8 +9677,13 @@ UpdateEquipInventoryStats_CheckViable:
     
   : LDA equipoffset
     CMP #06               
-    BCS @FinishUpdate
+    BCC @IsEquipLegal
+    
+    LDA battleitemslot
+    BEQ @FinishUpdate
+    JMP @FinishUpdate_Armor
   
+   @IsEquipLegal:
     INC ItemToEquip    
     LDA ItemToEquip
     JSR IsEquipLegal         ; This routine subtracts 1 from A
@@ -9639,8 +9716,10 @@ UpdateEquipInventoryStats_CheckViable:
     LDA lut_ArmorTypes, X    ; check type LUT
     CMP equipoffset          ; against equip slot
     BNE @WrongSlot           ; if it equals, its in the right slot to continue
-    
+   
     STA slotcheck
+    
+   @FinishUpdate_Armor:
     LDA ItemToEquip
     CLC
     ADC #ARMORSTART
@@ -9726,11 +9805,15 @@ DrawEquipInventory:
     STY MMC5_tmp        ; item counter
     STY MMC5_tmp+1      ; left or right counter
     
-    LDX equipoffset
-    LDA lut_EquipOffset, X
+    LDA equipoffset
     BEQ @Loop
+    CMP #6
+    BCC @ArmorOffset
     
-    @ArmorOffet:
+    LDA battleitemslot  ; if equipoffset is 6 or 7 (battle item)
+    BEQ @Loop           ; check this variable to see if weapon or armor
+    
+    @ArmorOffset:
     LDA MMC5_tmp+2
     CLC
     ADC #ARMORSTART
@@ -9978,70 +10061,6 @@ lut_ArmorTypes:
   
   
     
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  EquipMenuFrame  [$BCF9 :: 0x3BD09]
-;;
-;;    Same as MenuFrame in that it does all the relevent work that needs to 
-;;  be done every frame.  This routine, however, is specifically geared to be
-;;  used for the equip menus.  Specifically, it updates the mode attribute
-;;  bytes (though that's useless in this ROM).  It also does a few extra
-;;  things for the equip menu.
-;;
-;;  USED:  tmp+7 = used for previous direction info *in addition to* joy_prevdir
-;;                 this is apparently so this routine can play the menu move sound effect
-;;                 so the rest of the menu code doesn't have to.  joy_prevdir is still used
-;;                 in other menu code to detect directional presses for cursor movement, though.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;EquipMenuFrame:
-;    JSR WaitForVBlank_L     ; wait for VBlank
-;    LDA #>oam
-;    STA $4014               ; do sprite DMA
-
-;    LDA soft2000          ; reset scroll
-;    STA $2000
-;    LDA #$00
-;    STA $2005
-;    STA $2005
-    
-;    LDA #BANK_THIS
-;    STA cur_bank          ; set cur_bank to this bank
-;    JSR CallMusicPlay     ;   so we can call music play routine
-
-;    INC framecounter      ; inc the frame counter to count this frame
-
-;    LDA #0                ; clear joy_a and joy_b markers so button presses
-;    STA joy_a             ;  will be recognized
-;    STA joy_b
-;    STA joy_select
-
-;    LDA joy               ; get the joy data
-;    AND #$0F              ; isolate directional buttons
-;    STA tmp+7             ; and store it as the previous joy data
-;    JSR UpdateJoy         ; then update joy data
-
-;    LDA joy_a
-;    ORA joy_b             ; see if either A or B pressed
-;    ORa joy_select
-;    BEQ @NotPressed       ; if not... jump ahead
-;    JMP PlaySFX_MenuSel   ; otherwise, play the selection sound effect and exit
-
-
-;  @NotPressed:            ; if neither A nor B have been pressed
-;    LDA joy               ; get the joy data
-;    AND #$0F              ; isolate directional buttons
-;    BEQ @Exit             ; if no directions are pressed, exit
-
-;    CMP tmp+7             ; compare current buttons to previous buttons
-;    BEQ @Exit             ; if no change, then exit
-
-;    JMP PlaySFX_MenuMove  ; otherwise, a new button has been pressed, so play the menu move sound, then exit
-
-;  @Exit:
-;    RTS
 
 
 
