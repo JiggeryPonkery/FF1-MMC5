@@ -2697,11 +2697,11 @@ SumBattleRewardEXP:
     
   @Loop:
       CLC
-      LDA btl_enemystats, Y     ; sum low byte
+      LDA btl_enemyrewards, Y     ; sum low byte
       ADC battlereward
       STA battlereward
       
-      LDA btl_enemystats+1, Y   ; high byte
+      LDA btl_enemyrewards+1, Y   ; high byte
       ADC battlereward+1
       STA battlereward+1
       
@@ -2711,7 +2711,7 @@ SumBattleRewardEXP:
       
       CLC
       TYA                       ; it assumes C is clear here, since sum cannot be over $FFFFFF
-      ADC #28                  ;  add $14 to source index to move to next enemy ($14 bytes per enemy)
+      ADC #04                   ;  add $04 to source index to move to next enemy ($04 bytes per enemy)
       TAY
       
       DEX
@@ -2738,11 +2738,11 @@ SumBattleRewardGP:
     
   @Loop:
       CLC
-      LDA btl_enemystats, Y     ; sum low byte
+      LDA btl_enemyrewards, Y     ; sum low byte
       ADC battlereward
       STA battlereward
       
-      LDA btl_enemystats+1, Y   ; high byte
+      LDA btl_enemyrewards+1, Y   ; high byte
       ADC battlereward+1
       STA battlereward+1
       
@@ -2752,7 +2752,7 @@ SumBattleRewardGP:
       
       CLC
       TYA                       ; it assumes C is clear here, since sum cannot be over $FFFFFF
-      ADC #28                  ;  add $14 to source index to move to next enemy ($14 bytes per enemy)
+      ADC #04                  ;  add $04 to source index to move to next enemy ($04 bytes per enemy)
       TAY
       
       DEX

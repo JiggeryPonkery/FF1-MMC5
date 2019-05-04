@@ -389,37 +389,43 @@ ch_numhitsmult_backup    = ch_backupstats + $0D
 ch_critrate_backup       = ch_backupstats + $0E    
     
 btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes 
-    en_exp          = $00 ; 2 bytes                     1 2
-    en_gp           = $02 ; 2 bytes                     2 3 
-    en_hpmax        = $04 ; 2 bytes                     4 6 
-    en_morale       = $06 ; can be changed with magic   7
-    en_ai           = $07 ;                             8
-    en_evade        = $08 ; can be changed with magic   9
-    en_defense      = $09 ; can be changed with magic   10
-    en_numhits      = $0A ;                             11
-    en_hitrate      = $0B ; can be changed with magic   12
-    en_strength     = $0C ; can be changed with magic   13 
-    en_critrate     = $0D ;                             14
-    en_special      = $0E ;                             15
-    en_attackail    = $0F ;                             16
-    en_category     = $10 ;                             17 
-    en_magdef       = $11 ;                             19 
-    en_elemweakness = $12 ; can be changed with magic   20
-    en_elemresist   = $13 ; can be changed with magic   21  
-    en_item         = $14 ; can be changed by stealing  22
+;    en_exp          = $00 ; 2 bytes                     1 2
+;    en_gp           = $02 ; 2 bytes                     2 3 
+    en_hpmax        = $00 ; 2 bytes                     1 2 
+    en_morale       = $02 ; can be changed with magic   3
+    en_ai           = $03 ;                             4
+    en_evade        = $04 ; can be changed with magic   5
+    en_defense      = $05 ; can be changed with magic   6
+    en_numhits      = $06 ;                             7
+    en_hitrate      = $07 ; can be changed with magic   8
+    en_strength     = $08 ; can be changed with magic   9 
+    en_critrate     = $09 ;                             10
+    en_special      = $0A ;                             11
+    en_attackail    = $0B ;                             12
+    en_category     = $0C ;                             13 
+    en_magdef       = $0D ;                             14 
+    en_elemweakness = $0E ; can be changed with magic   15
+    en_elemresist   = $0F ; can be changed with magic   16
+    en_speed        = $10 ; 
+    en_stealdefense = $11    
+    en_item         = $12 ; can be changed by stealing  17
     ;; this block matches enemy ROM layout
     
-    en_aimagpos     = $15 ;                             23
-    en_aiatkpos     = $16 ;                             24
-    en_numhitsmult  = $17 ; can be changed with magic   25
-    en_ailments     = $18 ; can be changed with magic   26
-    en_hp           = $19 ; $1A ; 2 bytes               27 
-    en_enemyid      = $1B ;                             28
+    en_aimagpos     = $13 ;                             18
+    en_aiatkpos     = $14 ;                             19
+    en_numhitsmult  = $15 ; can be changed with magic   20
+    en_ailments     = $16 ; can be changed with magic   21
+    en_hp           = $17 ; $18 ; 2 bytes               22 23
+    en_enemyid      = $19 ;                             24
     
     ;; JIGS - I am NOT AT ALL convinced I haven't screwed up elemental weakness/resistance bug fixing.
+
+btl_enemyrewards  = $6200
+    en_exp          = $00 ; 2 bytes                     1 2
+    en_gp           = $02 ; 2 bytes                     2 3 
     
-bigstr_buf        = $6200 ; 128 bytes
-SaveScreenCharBuf = $6200 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
+bigstr_buf        = $6300 ; 128 bytes
+SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
 
  
  
