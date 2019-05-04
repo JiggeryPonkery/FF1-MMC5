@@ -425,6 +425,8 @@ lut_MagicBattleMessages:
   .BYTE $1F ; BANISH        ; Exile to 4th dimension
   .BYTE $15 ; DOOM          ; Erased
   
+  .BYTE $00 ; kick 
+  
   ; enemy attacks
   .BYTE $00 ; FROST     ; 
   .BYTE $00 ; HEAT      ; 
@@ -4047,14 +4049,14 @@ lut_PlayerTargetCursorPos:
 ;  .BYTE $B0, $7C
   
 
-  .BYTE $B2, $34    ; char 0
-  .BYTE $B6, $4D    ; char 1
-  .BYTE $BA, $66    ; char 2
-  .BYTE $BE, $7F    ; char 3
-  .BYTE $B2, $34    ; mirrors
-  .BYTE $B6, $4D
-  .BYTE $BA, $66
-  .BYTE $BE, $7F
+  .BYTE $B8, $34    ; char 0
+  .BYTE $BC, $4D    ; char 1
+  .BYTE $C0, $66    ; char 2
+  .BYTE $C4, $7F    ; char 3
+  .BYTE $B8, $34    ; mirrors
+  .BYTE $BC, $4D
+  .BYTE $C0, $66
+  .BYTE $C4, $7F
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8798,7 +8800,7 @@ BtlMag_PrintMagicMessage:
       JMP @Exit
       
   : LDX btl_attackid               ; otherwise, get the attack type
-    CPX #$40                        ; if >= $42, it indicates an enemy attack
+    CPX #$41                        ; if >= $42, it indicates an enemy attack
     ;BCC :+                          ;   These messages are printed elsewhere, so just delay and exit
     ;  JSR RespondDelay              ;   Note that instead of BCC and these calls, it could just "BCS @DelayAndExit"
     ;  JMP @Exit                     ;   and save 6 bytes.  Whatev.
@@ -8825,8 +8827,8 @@ BtlMag_PrintMagicMessage:
     LDA #$0F                        ; 0F = code to indicate we want to print a battle message.
     STA btltmp_altmsgbuffer         ; It's assumed $6D19+2 was already zero'd for the terminator.
     
-    LDX #<$6D19
-    LDY #>$6D19                     ; YA is pointer to the text to print
+    LDX #<btltmp_altmsgbuffer
+    LDY #>btltmp_altmsgbuffer       ; YA is pointer to the text to print
     LDA #$04                        ; combat box 4 (battle message box)
     JSR DrawCombatBox_L             ; Draw it!
     
