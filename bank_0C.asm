@@ -4612,11 +4612,8 @@ DoBattleRound:
     PHA                  ; backup Y
     JSR GetEnemyRAMPtr
     
-    LDY #en_morale                 ; get Morale / rate of fear - from RAM!
-    LDA (EnemyRAMPointer), Y       ; I think the lowest is $6A, or 106
-    
-    LSR A   ; divide by 2 
-    LSR A   ; twice - so 106 is now 26 (some numbers got dropped) ; $FF would be 63
+    LDY #en_speed                 ; get speed
+    LDA (EnemyRAMPointer), Y     
     JMP @FinishLoop
     
     @PlayerLuck:
@@ -4636,11 +4633,11 @@ DoBattleRound:
     STA MMC5_tmp, Y ; Store in temporary memory
     
     LDA #01
-    LDX #50
-    JSR RandAX               ; random number between 1-50
+    LDX #30
+    JSR RandAX               ; random number between 1-30
     
     CLC
-    ADC MMC5_tmp, Y          ; add the random number to the divided morale/player luck
+    ADC MMC5_tmp, Y          ; add the random number to the speed/player luck
     STA MMC5_tmp, Y          ; and save it...
     INY                      ; increase Y
     CPY #$0D                 
