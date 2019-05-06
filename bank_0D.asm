@@ -203,7 +203,7 @@ lut_ScoreData:
 ;.WORD PRELUDE_SQ3
 ;.WORD PRELUDE_SQ4
 
-;; $56
+;; $55
 .WORD MARSHCAVEOLD_SQ1
 .WORD BLANK
 .WORD MARSHCAVEOLD_TRI
@@ -213,14 +213,14 @@ lut_ScoreData:
 ;; JIGS - a copy of the prelude for some reason? 
 ;; Rename these and you have a new song if you have the space for it.
 
-;; $57
+;; $56
 .WORD FANFARE_SQ1
 .WORD BLANK
 .WORD FANFARE_TRI
 .WORD BLANK
 .WORD FANFARE_SQ2
 
-;; $58
+;; $57
 ;.WORD HEAL_SQ1
 ;.WORD BLANK
 ;.WORD HEAL_TRI
@@ -228,7 +228,7 @@ lut_ScoreData:
 ;.WORD HEAL_SQ2
 ;; JIGS - the code that plays this has been disabled
 
-;; $59
+;; $58
 ;.WORD TREASURE_SQ1
 ;.WORD BLANK
 ;.WORD TREASURE_TRI
@@ -236,7 +236,7 @@ lut_ScoreData:
 ;.WORD TREASURE_SQ2
 ;; JIGS - the code that plays this has been disabled
 
-;; $5A
+;; $59
 .WORD BOSS_SQ1
 .WORD BOSS_SQ2
 .WORD BOSS_TRI
@@ -2142,7 +2142,7 @@ BOSS_SQ4:
     .byte $F8,$0C     ; envelope speed $0C
     ;; mini solo
     .byte $DA,$23,$35,$55
-    .byte $72,$79,$78,$79,$39
+    .byte $72,$79,$89,$79,$39
     .byte $53,$35,$25
     .byte $03,$D9,$A3
     .byte $81
@@ -2207,8 +2207,7 @@ BOSS_SQ4:
 ;;
 ;; JIGS - my midi is 150 bpm, so the note lengths here are doubled IN NAME to match it.
 ;; Each $01 of length is 16 ticks in the midi. (384 ticks per quarter note)   
-      
-       
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
