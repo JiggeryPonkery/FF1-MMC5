@@ -1582,9 +1582,9 @@ PrepBattleVarsAndEnterBattle:
     STA btl_soft2000            ; clear soft PPU regs
     STA btl_soft2001
     
-    LDA #$50
-    STA music_track           ; set music track and followup
-    STA btl_followupmusic
+   ; LDA #$50
+   ; STA music_track           ; set music track and followup
+   ; STA btl_followupmusic
     
     LDY BattleTextSpeed
     LDA lut_RespondDelay, Y     ; prep respond rate
@@ -1606,12 +1606,17 @@ PrepBattleVarsAndEnterBattle:
     
     JSR PrepareEnemyFormation   ; build the enemy formation
     
+    LDX btl_battletype
+    LDA BattleMusic_LUT, X
+    STA music_track           ; set music track and followup
+    STA btl_followupmusic
+    
     LDA #$06
     JMP DoCrossPageJump         ; jump to FinishBattlePrepAndFadeIn in bank C
 
   
-;BattleMusic_LUT:
-; .byte $58, $58, $58, $58, $58 ; 9 small, 4 large, mix, fiend, chaos    
+BattleMusic_LUT:
+ .byte $50, $50, $50, $57, $57 ; 9 small, 4 large, mix, fiend, chaos    
     
 
 ;;;;  [$9A00 :: 0x2DA10]
