@@ -1727,17 +1727,16 @@ BLANK:   ; For songs that need to loop
 
 
 BOSS_SQ1:
-   .BYTE $F5,$02     ;duty set 25%
-   .byte $FB         ;tempo FB
-   .byte $F8,$08,$E1 ;envelope speed $08, pattern 1, gradual decay from C
-   .byte $D8,$3C,$6C,$9C,$D9,$0C,$3C,$6C,$9C,$DA,$0C,$3C,$6C,$9C,$DB,$0C
-   .byte $C0,$C4     ; long rest; one eighth note short of two bars!
-   ;; mini-swoosh:
-   .byte $D9,$2A,$5A,$8A,$AA
-   
+    .BYTE $F5,$02     ;duty set 25%
+    .byte $FB         ;tempo FB
+    .byte $F8,$08,$E1 ;envelope speed $08, pattern 1, gradual decay from C
+    .byte $D8,$3C,$6C,$9C,$D9,$0C,$3C,$6C,$9C,$DA,$0C,$3C,$6C,$9C,$DB,$0C
+    .byte $C0,$C5     ; long rest; one and a half bars + a quarter note
     .BYTE $F5,$03     ;duty set 50%
-  
+    ;.byte $D9,$2A,$5A,$8A,$AA
+ 
   BOSS_SQ1START:
+    .byte $D9,$0A,$2A,$3A,$5A,$7A,$8A,$AA,$BA
     .byte $F8,$0C ; envelope speed $0C
     .byte $EC     ;  decay from F with tremolo
     ;; Temple of Fiends bit
@@ -1749,12 +1748,12 @@ BOSS_SQ1:
     .byte $A5,$87,$8C,$AC,$8C,$75,$55
     .byte $70
     .byte $35,$55
-    .byte $73,$D9,$A5,$DA,$35
+    .byte $63,$D9,$A5,$DA,$35
     .byte $25,$05,$25,$35
     .byte $03,$D9,$73
     .byte $A2,$75
-    .byte $85,$DA,$05,$75,$55
-    .byte $13,$35,$55
+    .byte $85,$DA,$05,$55,$35
+    .byte $D9,$B3,$DA,$15,$35
     .byte $31
     .byte $F8,$0B ; envelope speed $0B
     .byte $21
@@ -1800,7 +1799,7 @@ BOSS_SQ1:
     .byte $C5
     .byte $EC     ;  decay from F with tremolo
     .byte $29,$39,$29,$09,$21
-    .byte $C5,$0A,$2A,$3A,$5A,$7A,$8A,$AA,$BA
+    .byte $C5
     .byte $D0
     .WORD BOSS_SQ1START
     
@@ -1831,20 +1830,14 @@ BOSS_SQ2:
    .byte $39,$29,$09,$39,$89,$79,$DA,$09,$D9,$A9,$39,$29,$09,$39,$89,$79,$29,$09
    
    BOSS_SQ2_FIENDTEMPLEPART2_START:
-   .byte $D8,$A7,$D9,$77,$57,$77,$37,$77,$57,$77
+   .byte $D8,$A7,$D9,$67,$37,$67,$D8,$A7,$D9,$67,$37,$67
    .byte $D8,$A7,$D9,$57,$37,$57,$27,$57,$37,$57
    .byte $07,$37,$27,$37,$07,$37,$27,$37
    .byte $D8,$A7,$D9,$27,$07,$27,$D8,$A7,$D9,$27,$07,$27
-   .byte $57,$87,$77,$87,$57,$87,$77,$87
-   .byte $57,$A7,$87,$57,$A7,$87,$A7,$A7
-   
-   BOSS_SQ2_FIENDTEMPLEPART2_ENDRIFF:
-   .byte $D9,$A9,$DA,$29,$09
-   .byte $D3
-   .WORD BOSS_SQ2_FIENDTEMPLEPART2_ENDRIFF
-   
-   .byte $39,$29,$09,$39
-   .byte $27,$D9,$A7,$87,$77,$57,$87,$77,$27
+   .byte $37,$87,$77,$87,$37,$87,$77,$87
+   .byte $37,$B7,$87,$37,$B7,$87,$37,$B7
+   .byte $A7,$DA,$67,$37,$27,$D9,$A7,$67,$37,$27
+   .byte $DA,$27,$D9,$A7,$87,$77,$57,$87,$77,$27
    
    .byte $E1 ;  gradual decay from C
    .byte $F1 
@@ -1927,72 +1920,69 @@ BOSS_TRI:
    .byte $FB         ; tempo FB
    ;.byte $F8,$08,$E0 ; envelope speed and pattern...?
    .byte $C3         ; half note pause
-   @BASSINTRO:
+   BASSINTRO:
    .byte $D8,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$59,$C9,$59,$C9
-   .byte $D1
-   .WORD @BASSINTRO
-   ;; original battle intro
-  
+   .byte $79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$59,$C9,$39,$C9,$29,$C9
+   
    BOSS_TRISTART:
-   .byte $D8,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$39,$C9,$39,$C9
-   .byte $59,$C9,$59,$C9,$59,$C9,$59,$C9,$59,$C9,$59,$C9,$29,$C9,$29,$C9
+   .byte $09,$C9,$09,$C9,$09,$C9,$09,$C9,$09,$C9,$29,$C9,$79,$C9,$09,$C9  
+   .byte $A9,$C9,$A9,$C9,$A9,$C9,$A9,$C9,$A9,$C9,$D9,$29,$C9,$59,$C9,$D8,$A9,$C9  
    .byte $F0
    .WORD BOSS_TRISTART_ALTEND
-   .byte $39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$09,$C9,$09,$C9
-   .byte $39,$C9,$39,$C9,$39,$C9,$39,$C9,$59,$C9,$59,$C9,$59,$C9,$59,$C9
+
+   .byte $89,$C9,$89,$C9,$89,$C9,$89,$C9,$89,$C9,$89,$C9,$79,$C9,$79,$C9
+   .byte $89,$C9,$89,$C9,$89,$C9,$89,$C9,$A9,$C9,$A9,$C9,$59,$C9,$29,$C9
    .byte $D1
    .WORD BOSS_TRISTART
    
    BOSS_TRISTART_ALTEND:
-   .byte $39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9
+   .byte $99,$C9,$99,$C9,$99,$C9,$89,$C9,$89,$C9,$79,$C9,$59,$C9,$29,$C9
    .byte $37,$57,$87,$A7,$D9,$07,$D8,$57,$87,$57
    
    ;;Part 2 of Temple of Fiends bit
    
    BOSS_TRI_BOOPS1:
-   .byte $D8,$37,$D9,$37
-   .byte $D3
+   .byte $39,$C9,$39,$C9,$39,$C9,$A9,$C9
+   .byte $D1
    .word BOSS_TRI_BOOPS1
    
    BOSS_TRI_BOOPS2:
-   .byte $D8,$A7,$D9,$57,$D8,$37,$D9,$57
+   .byte $A9,$C9,$A9,$C9,$A9,$C9,$D9,$59,$C9,$D8
    .byte $D1
    .word BOSS_TRI_BOOPS2
    
    BOSS_TRI_BOOPS3:
-   .byte $07,$77,$D8,$37,$D9,$77
+   .byte $79,$C9,$79,$C9,$79,$C9,$D9,$09,$C9,$D8
    .byte $D1
    .word BOSS_TRI_BOOPS3
    
    BOSS_TRI_BOOPS4:
-   .byte $D8,$77,$D9,$77,$D8,$27,$D9,$77
+   .byte $A9,$C9,$A9,$C9,$A9,$C9,$D9,$29,$C9,$D8
    .byte $D1
    .word BOSS_TRI_BOOPS4
    
    BOSS_TRI_BOOPS5:
-   .byte $D8,$87,$D9,$87,$D8,$37,$D9,$87
+   .byte $39,$C9,$39,$C9,$39,$C9,$A9,$C9
    .byte $D1
    .word BOSS_TRI_BOOPS5
    
    BOSS_TRI_BOOPS6:
-   .byte $D8,$17,$D9,$87
-   .byte $D3
-   .word BOSS_TRI_BOOPS6
-   
+   .byte $89,$C9,$89,$C9,$89,$C9,$69,$C9,$89,$C9,$89,$C9,$39,$C9,$39,$C9
+
    BOSS_TRI_BOOPS7:
-   .byte $D8,$57,$D9,$57,$37
+   .byte $67,$D9,$67,$37,$D8
    .byte $D1
    .word BOSS_TRI_BOOPS7
-   .byte $D8,$57,$D9,$57
+   .byte $67,$D9,$67,$D8
    
    BOSS_TRI_BOOPS8:
-   .byte $D8,$A7,$D9,$A7,$87
+   .byte $A7,$D9,$A7,$87,$D8
    .byte $D1
    .word BOSS_TRI_BOOPS8
-   .byte $D8,$A7,$D9,$A7
+   .byte $A7,$D9,$A7
    
    BOSS_TRI_SEASHRINE_START:
-   .byte $D9,$01
+   .byte $01
    .byte $D8,$A1
    .byte $80
    .byte $A3
@@ -2001,7 +1991,7 @@ BOSS_TRI:
    .byte $81
    .byte $F0
    .WORD BOSS_TRI_SEASHRINE_BRIDGE
-   .byte $81
+   .byte $82,$87,$C7
    .byte $D1
    .WORD BOSS_TRI_SEASHRINE_START
    
@@ -2009,18 +1999,18 @@ BOSS_TRI:
    .byte $87,$C7,$87,$C7,$89,$C9,$89,$C9,$89,$C9,$A9,$C9
    
    BOSS_TRI_SEASHRINE_PART2:
-   .byte $B9,$C9,$B7,$D9,$B9,$C9,$B7,$C7,$77,$B7,$77
-   .byte $09,$C9,$07,$DA,$09,$C9,$07,$C7,$D9,$77,$DA,$07,$D9,$77  
-   .byte $29,$C9,$27,$DA,$29,$C9,$27,$C7,$D9,$A7,$DA,$27,$D9,$27
-   .byte $39,$C9,$37,$DA,$39,$C9,$37,$C7,$D9,$A7,$DA,$37,$D9,$27
+   .byte $DC,$B9,$C9,$B7,$D8,$B9,$C9,$B7,$C7,$77,$B7,$77
+   .byte $09,$C9,$07,$D9,$09,$C9,$07,$C7,$D8,$77,$D9,$07,$D8,$77  
+   .byte $29,$C9,$27,$D9,$29,$C9,$27,$C7,$D8,$A7,$D9,$27,$D8,$27
+   .byte $39,$C9,$37,$D9,$39,$C9,$37,$C7,$D8,$A7,$D9,$37,$D8,$27
    .byte $71 
    .byte $51 
    ;;earth cave/volcano bit
    
    .byte $29,$C9,$29,$C9,$59,$C9,$29,$C9,$09,$C9,$35,$27
-   .byte $C7,$29,$C9,$59,$C9,$29,$C9,$09,$C9,$35,$20
-   ;; Empty bar
-   .byte $29,$C9,$29,$C9,$09,$C9,$D8,$A9,$C9,$89,$C9
+   .byte $C7,$29,$C9,$59,$C9,$29,$C9,$09,$C9,$35,$22
+   .byte $0A,$2A,$3A,$5A,$7A,$8A,$AA,$D9,$0A,$29,$C9
+   .byte $29,$C9,$09,$C9,$D8,$A9,$C9,$89,$C9,$79,$C9,$59,$C9,$39,$C9,$29,$C9
    
    .BYTE $D0
    .WORD BOSS_TRISTART
@@ -2049,8 +2039,8 @@ BOSS_SQ3:
    .byte $37,$D9,$05,$07,$D8,$37,$D9,$05,$07
    .byte $D8,$77,$D9,$25,$27,$D8,$77,$D9,$25,$27
    .byte $D8,$87,$D9,$35,$37,$D8,$87,$D9,$35,$37
-   .byte $D8,$17,$D9,$15,$17,$D8,$17,$D9,$15,$17
-   .byte $D8,$57,$D9,$57,$37,$D8,$57,$D9,$57,$35,$57
+   .byte $D8,$37,$B5,$B7,$37,$B5,$B7
+   .byte $67,$D9,$67,$37,$D8,$67,$D9,$67,$35,$67
    .byte $D8,$A7,$D9,$A7,$87,$37,$D8,$A7,$85,$77
    
    BOSS_SQ3_SEASHRINE_INTRO:
@@ -2090,11 +2080,11 @@ BOSS_SQ3:
    .byte $E8          ; hold, then decay from C
    .byte $71
    .byte $71
-   .byte $71
-   .byte $74
+   .byte $72
    .byte $F8,$08      ; envelope speed $08
    .byte $E1          ; gradual decay from C
-   .byte $77,$77,$57,$37,$27
+   .byte $77,$77
+   .byte $77,$57,$37,$27,$77,$57,$37,$27
    .byte $D0
    .WORD BOSS_SQ3START
    
@@ -2114,20 +2104,23 @@ BOSS_SQ4:
     .byte $C2,$C6 
     .byte $79,$87,$77,$55 
     .byte $71 
-    .byte $71 
+    .byte $61 
     .byte $A1
     .byte $DB,$02,$09,$DA,$A9,$79,$39
     .byte $DB,$20 
-    .byte $DA,$05,$05 
-    .byte $15,$D9,$85,$DA,$35,$D9,$85
-    .byte $A5,$DA,$05,$25,$35
-    .byte $A7,$57,$35,$A7,$87,$DB,$25
+    .byte $F4         ; half volume
+    .byte $EC         ; decay from F with tremelo
+    .byte $55,$35 
+    .byte $DA,$B4,$B7,$DB,$17,$DA,$B7,$A7,$B7
+    .byte $DB,$35,$25,$DA,$A7,$8C,$AC,$8C,$67,$27
+    .byte $A7,$57,$37,$27,$A7,$87,$DB,$25
     .byte $F8,$0D      ; envelope speed $0D
     .byte $30  
     .byte $C0 
     .byte $C1 
-    .byte $F8,$09      ; envelope speed $09
+    .byte $F8,$08      ; envelope speed $08
     .byte $EE          ; fade C->4->B with tremolo
+    .byte $F4          ; un-halve volume    
     
     BOSS_SQ4_SEASHRINE_LOOP:
     .byte $D9,$77,$DA,$37,$27,$37,$07,$37,$57,$37
@@ -2143,11 +2136,11 @@ BOSS_SQ4:
     ;; mini solo
     .byte $DA,$23,$35,$55
     .byte $72,$79,$89,$79,$39
-    .byte $53,$35,$25
-    .byte $03,$D9,$A3
-    .byte $81
-    .byte $DA,$39,$29,$09,$D9,$A9,$89,$79,$59,$39,$DA,$09,$D9,$A9,$89,$79,$59,$39,$29,$09
-    .byte $D8
+    .byte $53,$35,$55
+    .byte $73,$A3
+    .byte $85,$35,$DB,$05,$DA,$A5
+    .byte $75,$35,$DB,$35,$05
+    .byte $DA
     
     .byte $F5,$02      ; 25% duty
     .byte $F8,$0C      ; envelope speed $08
@@ -2163,10 +2156,10 @@ BOSS_SQ4:
     .WORD BOSS_SQ4_TRILLS_BAR2
     
     BOSS_SQ4_TRILLS_BAR3_4:
-    .byte $D9,$2A,$D8,$BA
-    .byte $D9,$2A,$D8,$BA
-    .byte $D9,$2A,$D8,$BA
-    .byte $D9,$2A,$D8,$BA
+    .byte $DB,$2A,$DA,$BA
+    .byte $DB,$2A,$DA,$BA
+    .byte $DB,$2A,$DA,$BA
+    .byte $DB,$2A,$DA,$BA
     .byte $D7
     .WORD BOSS_SQ4_TRILLS_BAR3_4
 
