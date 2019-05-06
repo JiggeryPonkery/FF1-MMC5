@@ -53,6 +53,7 @@ BANK_THIS = $0D
  .ALIGN $100
 lut_ScoreData:
 
+;; $41
 .WORD PRELUDE_SQ1
 .WORD PRELUDE_SQ2
 ;.WORD PRELUDE_TRI 
@@ -60,91 +61,105 @@ lut_ScoreData:
 .WORD PRELUDE_SQ3
 .WORD PRELUDE_SQ4
 
+;; $42
 .WORD PROLOGUE_SQ1
 .WORD BLANK
 .WORD PROLOGUE_TRI
 .WORD PROLOGUE_SQ3
 .WORD PROLOGUE_SQ2
 
-
+;; $43
 .WORD EPILOGUE_SQ1
 .WORD BLANK
 .WORD EPILOGUE_TRI
 .WORD EPILOGUE_SQ3
 .WORD EPILOGUE_SQ2
 
+;; $44
 .WORD OVERWORLD_SQ1
 .WORD BLANK
 .WORD OVERWORLD_TRI
 .WORD OVERWORLD_SQ3
 .WORD OVERWORLD_SQ2
 
+;; $45
 .WORD SHIP_SQ1
 .WORD BLANK
 .WORD SHIP_TRI
 .WORD SHIP_SQ3
 .WORD SHIP_SQ2
 
+;; $46
 .WORD AIRSHIP_SQ1
 .WORD BLANK
 .WORD AIRSHIP_TRI
 .WORD AIRSHIP_SQ3
 .WORD AIRSHIP_SQ2
 
+;; $47
 .WORD TOWN_SQ1
 .WORD BLANK
 .WORD TOWN_TRI
 .WORD TOWN_SQ2
 .WORD TOWN_SQ3
 
+;; $48
 .WORD CASTLE_SQ1
 .WORD BLANK
 .WORD CASTLE_TRI
 .WORD CASTLE_SQ3
 .WORD CASTLE_SQ2
 
+;; $49
 .WORD EARTHCAVE_SQ1
 .WORD BLANK
 .WORD EARTHCAVE_TRI
 .WORD EARTHCAVE_SQ3
 .WORD EARTHCAVE_SQ2
 
+;; $4A
 .WORD MATOYA_SQ1
 .WORD BLANK
 .WORD MATOYA_TRI
 .WORD MATOYA_SQ3
 .WORD MATOYA_SQ2
 
+;; $4B
 .WORD MARSHCAVE_SQ1
 .WORD MARSHCAVE_SQ4
 .WORD MARSHCAVE_TRI
 .WORD MARSHCAVE_SQ2
 .WORD MARSHCAVE_SQ3
 
+;; $4C
 .WORD SEASHRINE_SQ1
 .WORD BLANK
 .WORD SEASHRINE_TRI
 .WORD SEASHRINE_SQ3
 .WORD SEASHRINE_SQ2
 
+;; $4D
 .WORD SKYCASTLE_SQ1
 .WORD SKYCASTLE_SQ4
 .WORD SKYCASTLE_TRI
 .WORD SKYCASTLE_SQ3
 .WORD SKYCASTLE_SQ2
 
+;; $4E
 .WORD FIENDTEMPLE_SQ1
 .WORD BLANK
 .WORD FIENDTEMPLE_TRI
 .WORD FIENDTEMPLE_SQ3
 .WORD FIENDTEMPLE_SQ2
 
+;; $4F
 .WORD SHOP_SQ1
 .WORD BLANK
 .WORD SHOP_TRI
 .WORD SHOP_SQ3
 .WORD SHOP_SQ2
 
+;; $50
 .WORD BATTLE_SQ1
 .WORD BLANK
 ;.WORD BATTLE_SQ2 ;; JIGS - Now played by the MMC5 audio so that SFX don't interrupt it.
@@ -152,6 +167,7 @@ lut_ScoreData:
 .WORD BATTLE_SQ2
 .WORD BATTLE_SQ3
 
+;; $51
 .WORD MENU_SQ1
 .WORD BLANK
 .WORD MENU_TRI
@@ -160,18 +176,21 @@ lut_ScoreData:
 ;; JIGS - the code that plays this has been disabled in menus
 ;; JIGS - BUT it has been moved to the map screen! And is used in inns!
 
+;; $52
 .WORD SLAIN_SQ1
 .WORD SLAIN_SQ4
 .WORD SLAIN_TRI
 .WORD SLAIN_SQ3
 .WORD SLAIN_SQ2
 
+;; $53
 .WORD BATTLEWIN_SQ1
 .WORD BLANK
 .WORD BATTLEWIN_TRI
 .WORD BATTLEWIN_SQ3
 .WORD BATTLEWIN_SQ2
 
+;; $54
 .WORD SAVE_SQ1
 .WORD BLANK
 .WORD SAVE_TRI
@@ -184,6 +203,7 @@ lut_ScoreData:
 ;.WORD PRELUDE_SQ3
 ;.WORD PRELUDE_SQ4
 
+;; $56
 .WORD MARSHCAVEOLD_SQ1
 .WORD BLANK
 .WORD MARSHCAVEOLD_TRI
@@ -193,25 +213,38 @@ lut_ScoreData:
 ;; JIGS - a copy of the prelude for some reason? 
 ;; Rename these and you have a new song if you have the space for it.
 
+;; $57
 .WORD FANFARE_SQ1
 .WORD BLANK
 .WORD FANFARE_TRI
 .WORD BLANK
 .WORD FANFARE_SQ2
 
-.WORD HEAL_SQ1
-.WORD BLANK
-.WORD HEAL_TRI
-.WORD BLANK
-.WORD HEAL_SQ2
+;; $58
+;.WORD HEAL_SQ1
+;.WORD BLANK
+;.WORD HEAL_TRI
+;.WORD BLANK
+;.WORD HEAL_SQ2
 ;; JIGS - the code that plays this has been disabled
 
-.WORD TREASURE_SQ1
-.WORD BLANK
-.WORD TREASURE_TRI
-.WORD BLANK
-.WORD TREASURE_SQ2
+;; $59
+;.WORD TREASURE_SQ1
+;.WORD BLANK
+;.WORD TREASURE_TRI
+;.WORD BLANK
+;.WORD TREASURE_SQ2
 ;; JIGS - the code that plays this has been disabled
+
+;; $5A
+.WORD BOSS_SQ1
+.WORD BOSS_SQ2
+.WORD BOSS_TRI
+.WORD BOSS_SQ3
+.WORD BOSS_SQ4
+
+
+
 
 ;; With thanks to Gil Galad for their music driver disassembly for this sequence data!
 
@@ -1691,6 +1724,492 @@ BLANK:   ; For songs that need to loop
 ;BLANK2: ; For songs that need to end. (note that using this will cause a song to end prematurely once it hits the FF. So... useless. Oops.)
 ;.BYTE $F9,$CA,$FF
 
+
+
+BOSS_SQ1:
+   .BYTE $F5,$02     ;duty set 25%
+   .byte $FB         ;tempo FB
+   .byte $F8,$08,$E1 ;envelope speed $08, pattern 1, gradual decay from C
+   .byte $D8,$3C,$6C,$9C,$D9,$0C,$3C,$6C,$9C,$DA,$0C,$3C,$6C,$9C,$DB,$0C
+   .byte $C0,$C4     ; long rest; one eighth note short of two bars!
+   ;; mini-swoosh:
+   .byte $D9,$2A,$5A,$8A,$AA
+   
+    .BYTE $F5,$03     ;duty set 50%
+  
+  BOSS_SQ1START:
+    .byte $F8,$0C ; envelope speed $0C
+    .byte $EC     ;  decay from F with tremolo
+    ;; Temple of Fiends bit
+    .byte $DA,$03,$D9,$75,$DA,$75
+    .byte $55,$35,$26,$3A,$2A,$05
+    .byte $34,$2C,$3C,$2C,$00
+    ;;EMPTY BAR
+    .byte $03,$D9,$75,$DA,$76,$8A,$9A
+    .byte $A5,$87,$8C,$AC,$8C,$75,$55
+    .byte $70
+    .byte $35,$55
+    .byte $73,$D9,$A5,$DA,$35
+    .byte $25,$05,$25,$35
+    .byte $03,$D9,$73
+    .byte $A2,$75
+    .byte $85,$DA,$05,$75,$55
+    .byte $13,$35,$55
+    .byte $31
+    .byte $F8,$0B ; envelope speed $0B
+    .byte $21
+    ;;Sky Temple bit
+    .byte $F4     ; half volume
+    .byte $25,$29,$39,$29,$09,$20
+    ;;EMPTY BAR
+    .byte $D9,$75,$79,$89,$79,$59,$70
+    ;;EMPTY BAR
+    .byte $25,$29,$39,$29,$09,$20
+    ;;EMPTY,$BAR
+    .byte $05,$09,$29,$09,$D8,$A9,$D9,$03
+    ;;Transition to Sea Shrine bit:
+    .byte $F8,$09 ; envelope speed $09
+    .byte $05     ; volume is at 8
+    .byte $F4     ; un-half volume
+    .byte $ED     ; decay from C with tremolo
+    .byte $05
+    .byte $EC     ; decay from F with tremolo
+    .byte $05
+    .byte $25
+    ;;Sea Shrine bit
+    .byte $F8,$0C ; envelope speed $0C
+    .byte $33,$05,$35
+    .byte $25,$05,$D8,$A5,$D9,$25
+    .byte $00
+    .byte $C3
+    .byte $33,$55,$35
+    .byte $25,$05,$D8,$A5,$D9,$85
+    .byte $72,$89,$79,$57
+    .byte $71
+    .byte $23,$35,$55
+    .byte $35,$25,$05,$75
+    .byte $53,$75,$85
+    .byte $73,$33
+    .byte $03,$75,$55
+    .byte $35,$25,$05,$35
+  ;  .byte $F8,$0B ; envelope speed $0B
+    .byte $21
+    .byte $EF ; fade in then out with tremolo
+    .byte $21
+    ;; wrap up / Sky Castle thing reprise
+    .byte $C5
+    .byte $EC     ;  decay from F with tremolo
+    .byte $29,$39,$29,$09,$21
+    .byte $C5,$0A,$2A,$3A,$5A,$7A,$8A,$AA,$BA
+    .byte $D0
+    .WORD BOSS_SQ1START
+    
+
+   
+BOSS_SQ2:
+   .BYTE $F5,$01     ; duty set 12.5%
+   .byte $FB         ; tempo FB
+   .byte $F8,$08,$E2 ; envelope speed $08, pattern 2, gradual decay from 8
+   .byte $CE         ; evil confusing rest that messes it all up for a tiny echo effect
+   .byte $D8,$3C,$6C,$9C,$0C,$3C,$6C,$9C,$D9,$0C,$3C,$6C,$9C,$DA,$0C
+   ;; $_E ^ of a pause, so this one is 14 thingies off instead of 12
+   .byte $C0,$C4,$CC ; long rest, $B8 in length...
+
+   
+   BOSS_SQ2START:
+   .byte $D9,$79,$39,$09,$39,$29,$39,$79,$39,$09,$D8,$79,$39,$79,$A9,$79,$A9,$79
+   .byte $D9,$59,$29,$D8,$A9,$D9,$29,$09,$29,$59,$29,$D8,$A9,$59,$29,$59,$89,$59,$29,$59
+   .byte $39,$89,$D9,$09,$39,$D8,$A9,$D9,$39,$09,$39,$89,$39,$09,$39,$79,$39,$09,$F0
+   .WORD BOSS_SQSTART_FIENDTEMPLEPART1_ALTEND
+   .byte $39
+   .byte $59,$39,$09,$89,$DA,$39,$29,$09,$89,$59,$29,$D9,$A9,$59,$29,$DA,$29,$D9,$A9,$59
+   .byte $D1 
+   .WORD BOSS_SQ2START
+   
+   BOSS_SQSTART_FIENDTEMPLEPART1_ALTEND:
+   .byte $29 
+   .byte $39,$29,$09,$39,$89,$79,$DA,$09,$D9,$A9,$39,$29,$09,$39,$89,$79,$29,$09
+   
+   BOSS_SQ2_FIENDTEMPLEPART2_START:
+   .byte $D8,$A7,$D9,$77,$57,$77,$37,$77,$57,$77
+   .byte $D8,$A7,$D9,$57,$37,$57,$27,$57,$37,$57
+   .byte $07,$37,$27,$37,$07,$37,$27,$37
+   .byte $D8,$A7,$D9,$27,$07,$27,$D8,$A7,$D9,$27,$07,$27
+   .byte $57,$87,$77,$87,$57,$87,$77,$87
+   .byte $57,$A7,$87,$57,$A7,$87,$A7,$A7
+   
+   BOSS_SQ2_FIENDTEMPLEPART2_ENDRIFF:
+   .byte $D9,$A9,$DA,$29,$09
+   .byte $D3
+   .WORD BOSS_SQ2_FIENDTEMPLEPART2_ENDRIFF
+   
+   .byte $39,$29,$09,$39
+   .byte $27,$D9,$A7,$87,$77,$57,$87,$77,$27
+   
+   .byte $E1 ;  gradual decay from C
+   .byte $F1 
+   .WORD BOSS_SQ2_SEASHRINE_START
+   .byte $E2 ;  gradual decay from 8
+   .byte $F1 
+   .WORD BOSS_SQ2_SEASHRINE_START
+   .byte $F1 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .byte $F1
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR2_5
+   .byte $F1 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9   
+   .byte $F1
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR4
+   .byte $F1
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR2_5
+   .byte $F1
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR6
+   .byte $F1
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR7_8
+   .byte $F1 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .byte $F1 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .BYTE $D0
+   .WORD BOSS_SQ2START
+   
+   
+   BOSS_SQ2_SEASHRINE_START:
+   .byte $D8,$77,$D9,$37,$27,$37,$07,$37,$D8,$A7,$D9,$37
+   .byte $D8,$57,$D9,$27,$07,$27,$D8,$A7,$D9,$27,$D8,$87,$D9,$27
+   .byte $D8,$37,$D9,$07,$D8,$A7,$D9,$07,$D8,$87,$D9,$07,$D8,$77,$D9,$07
+   .byte $F0 
+   .WORD BOSS_SQ2_SEASHRINE_PART1_ALTEND
+   .byte $D8,$57,$D9,$07,$D8,$37,$D9,$27,$D8,$57,$D9,$27,$D8,$A7,$D9,$27
+   .byte $D1 
+   .WORD BOSS_SQ2_SEASHRINE_START
+   
+   BOSS_SQ2_SEASHRINE_PART1_ALTEND:
+   .byte $D8,$37,$D9,$07,$D8,$87,$D9,$07
+   .byte $D1 
+   .WORD BOSS_SQ2_SEASHRINE_PART1_ALTEND
+   .byte $F2
+   
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9:
+   .byte $5A,$2A,$5A,$2A
+   .byte $D7 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .byte $F2
+   
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR2_5:
+   .byte $3A,$0A,$3A,$0A
+   .byte $D7 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR2_5
+   .byte $F2
+   
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR4:
+   .byte $7A,$3A,$7A,$3A
+   .byte $D7 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR4
+   .byte $F2
+   
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR6:
+   .byte $5A,$0A,$5A,$0A
+   .byte $D7 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR6
+   .byte $F2
+   
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR7_8:
+   .byte $2A,$D8,$BA,$D9,$2A,$D8,$BA,$D9,$2A,$D8,$BA,$D9,$2A,$D8,$BA,$D9
+   .byte $D7 
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR7_8
+   .byte $F2
+
+
+   
+   
+BOSS_TRI:
+   .byte $FB         ; tempo FB
+   ;.byte $F8,$08,$E0 ; envelope speed and pattern...?
+   .byte $C3         ; half note pause
+   @BASSINTRO:
+   .byte $D8,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$59,$C9,$59,$C9
+   .byte $D1
+   .WORD @BASSINTRO
+   ;; original battle intro
+  
+   BOSS_TRISTART:
+   .byte $D8,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$39,$C9,$39,$C9
+   .byte $59,$C9,$59,$C9,$59,$C9,$59,$C9,$59,$C9,$59,$C9,$29,$C9,$29,$C9
+   .byte $F0
+   .WORD BOSS_TRISTART_ALTEND
+   .byte $39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$09,$C9,$09,$C9
+   .byte $39,$C9,$39,$C9,$39,$C9,$39,$C9,$59,$C9,$59,$C9,$59,$C9,$59,$C9
+   .byte $D1
+   .WORD BOSS_TRISTART
+   
+   BOSS_TRISTART_ALTEND:
+   .byte $39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9,$39,$C9
+   .byte $37,$57,$87,$A7,$D9,$07,$D8,$57,$87,$57
+   
+   ;;Part 2 of Temple of Fiends bit
+   
+   BOSS_TRI_BOOPS1:
+   .byte $D8,$37,$D9,$37
+   .byte $D3
+   .word BOSS_TRI_BOOPS1
+   
+   BOSS_TRI_BOOPS2:
+   .byte $D8,$A7,$D9,$57,$D8,$37,$D9,$57
+   .byte $D1
+   .word BOSS_TRI_BOOPS2
+   
+   BOSS_TRI_BOOPS3:
+   .byte $07,$77,$D8,$37,$D9,$77
+   .byte $D1
+   .word BOSS_TRI_BOOPS3
+   
+   BOSS_TRI_BOOPS4:
+   .byte $D8,$77,$D9,$77,$D8,$27,$D9,$77
+   .byte $D1
+   .word BOSS_TRI_BOOPS4
+   
+   BOSS_TRI_BOOPS5:
+   .byte $D8,$87,$D9,$87,$D8,$37,$D9,$87
+   .byte $D1
+   .word BOSS_TRI_BOOPS5
+   
+   BOSS_TRI_BOOPS6:
+   .byte $D8,$17,$D9,$87
+   .byte $D3
+   .word BOSS_TRI_BOOPS6
+   
+   BOSS_TRI_BOOPS7:
+   .byte $D8,$57,$D9,$57,$37
+   .byte $D1
+   .word BOSS_TRI_BOOPS7
+   .byte $D8,$57,$D9,$57
+   
+   BOSS_TRI_BOOPS8:
+   .byte $D8,$A7,$D9,$A7,$87
+   .byte $D1
+   .word BOSS_TRI_BOOPS8
+   .byte $D8,$A7,$D9,$A7
+   
+   BOSS_TRI_SEASHRINE_START:
+   .byte $D9,$01
+   .byte $D8,$A1
+   .byte $80
+   .byte $A3
+   .byte $D9,$01
+   .byte $D8,$A1
+   .byte $81
+   .byte $F0
+   .WORD BOSS_TRI_SEASHRINE_BRIDGE
+   .byte $81
+   .byte $D1
+   .WORD BOSS_TRI_SEASHRINE_START
+   
+   BOSS_TRI_SEASHRINE_BRIDGE:
+   .byte $87,$C7,$87,$C7,$89,$C9,$89,$C9,$89,$C9,$A9,$C9
+   
+   BOSS_TRI_SEASHRINE_PART2:
+   .byte $B9,$C9,$B7,$D9,$B9,$C9,$B7,$C7,$77,$B7,$77
+   .byte $09,$C9,$07,$DA,$09,$C9,$07,$C7,$D9,$77,$DA,$07,$D9,$77  
+   .byte $29,$C9,$27,$DA,$29,$C9,$27,$C7,$D9,$A7,$DA,$27,$D9,$27
+   .byte $39,$C9,$37,$DA,$39,$C9,$37,$C7,$D9,$A7,$DA,$37,$D9,$27
+   .byte $71 
+   .byte $51 
+   ;;earth cave/volcano bit
+   
+   .byte $29,$C9,$29,$C9,$59,$C9,$29,$C9,$09,$C9,$35,$27
+   .byte $C7,$29,$C9,$59,$C9,$29,$C9,$09,$C9,$35,$20
+   ;; Empty bar
+   .byte $29,$C9,$29,$C9,$09,$C9,$D8,$A9,$C9,$89,$C9
+   
+   .BYTE $D0
+   .WORD BOSS_TRISTART
+
+
+BOSS_SQ3:
+    .byte $FB         ; tempo FB
+    .byte $C0,$C1     ; two and a half bar pause
+    .BYTE $F5,$02     ; duty set 25%
+   BOSS_SQ3START:
+   .byte $F8,$0C      ; envelope speed $0C
+   .byte $E8          ; hold, then decay from C
+   .byte $D8,$01
+   .byte $DC,$A1
+   .byte $81
+   .byte $83,$A3
+   .byte $D8,$01
+   .byte $DC,$A1
+   .byte $91
+   .byte $81
+   .byte $F8,$08      ; envelope speed $08
+   .byte $E1          ; gradual decay from C
+   .byte $D8
+   .byte $37,$A5,$A7,$37,$A5,$A7
+   .byte $57,$A5,$A7,$57,$A5,$A7
+   .byte $37,$D9,$05,$07,$D8,$37,$D9,$05,$07
+   .byte $D8,$77,$D9,$25,$27,$D8,$77,$D9,$25,$27
+   .byte $D8,$87,$D9,$35,$37,$D8,$87,$D9,$35,$37
+   .byte $D8,$17,$D9,$15,$17,$D8,$17,$D9,$15,$17
+   .byte $D8,$57,$D9,$57,$37,$D8,$57,$D9,$57,$35,$57
+   .byte $D8,$A7,$D9,$A7,$87,$37,$D8,$A7,$85,$77
+   
+   BOSS_SQ3_SEASHRINE_INTRO:
+   .byte $07,$07,$C2
+   .byte $DC,$A7,$A7,$C2
+   .byte $87,$87,$C2
+   .byte $87,$87,$C5,$A7,$A7,$C5
+   .byte $D8,$07,$07,$C2
+   .byte $DC,$A7,$A7,$C2
+   .byte $87,$87,$C2
+   .byte $87,$87,$C7 
+   .byte $87,$87,$87,$D8 
+   .byte $F8,$09      ; envelope speed $09
+   .byte $05
+   
+   BOSS_SQ3_SEASHRINE_PART1:
+   .byte $07,$07,$27,$37,$07,$07,$27,$37
+   .byte $DC,$A7,$A7,$D8,$07,$27,$DC,$A7,$A7,$D8,$07,$27
+   .byte $DC,$87,$87,$A7,$D8,$07,$DC,$87,$87,$A7,$D8,$07 
+   .byte $DC,$87,$87,$A7,$D8,$07
+   .byte $F0
+   .WORD BOSS_SQ3_SEASHRINE_PART1_ALTEND
+   
+   .byte $DC,$A7,$A7,$D8,$07,$27
+   .byte $D1
+   .WORD BOSS_SQ3_SEASHRINE_PART1
+   
+   BOSS_SQ3_SEASHRINE_PART1_ALTEND:
+   .byte $37,$37,$57,$77
+   .byte $27,$27,$57,$27,$07,$35,$25
+   .byte $27,$57,$27,$37,$75,$77
+   .byte $57,$57,$87,$57,$37,$75,$55
+   .byte $57,$87,$57,$77,$A5,$A7
+   .byte $07,$07,$27,$07,$DC,$A7,$D8,$35,$27
+   .byte $55,$37,$75,$57,$85
+   .byte $F8,$0C      ; envelope speed $0C
+   .byte $E8          ; hold, then decay from C
+   .byte $71
+   .byte $71
+   .byte $71
+   .byte $74
+   .byte $F8,$08      ; envelope speed $08
+   .byte $E1          ; gradual decay from C
+   .byte $77,$77,$57,$37,$27
+   .byte $D0
+   .WORD BOSS_SQ3START
+   
+BOSS_SQ4:
+    .byte $FB         ; tempo FB
+    .byte $F4         ; half volume, for later loop
+    .byte $C0,$C1     ; two and a half bar pause
+    
+   BOSS_SQ4START: 
+    .byte $C0,$C1,$C5  ; two and a half bar + quarter note pause
+    .byte $F4          ; un-halve volume    
+    .byte $F5,$03      ; 50% duty
+    .byte $F8,$0C      ; envelope speed $0C
+    .byte $ED          ; decay from C with tremelo
+    .byte $DA,$34,$2C,$3C,$2C,$05,$27,$07,$D9,$A5
+    .byte $DA,$00 
+    .byte $C2,$C6 
+    .byte $79,$87,$77,$55 
+    .byte $71 
+    .byte $71 
+    .byte $A1
+    .byte $DB,$02,$09,$DA,$A9,$79,$39
+    .byte $DB,$20 
+    .byte $DA,$05,$05 
+    .byte $15,$D9,$85,$DA,$35,$D9,$85
+    .byte $A5,$DA,$05,$25,$35
+    .byte $A7,$57,$35,$A7,$87,$DB,$25
+    .byte $F8,$0D      ; envelope speed $0D
+    .byte $30  
+    .byte $C0 
+    .byte $C1 
+    .byte $F8,$09      ; envelope speed $09
+    .byte $EE          ; fade C->4->B with tremolo
+    
+    BOSS_SQ4_SEASHRINE_LOOP:
+    .byte $D9,$77,$DA,$37,$27,$37,$07,$37,$57,$37
+    .byte $D9,$57,$DA,$27,$07,$27,$D9,$A7,$DA,$27,$07,$D9,$A7
+    .byte $37,$DA,$07,$D9,$A7,$DA,$07,$D9,$87,$DA,$07,$D9,$77,$57 
+    .byte $37,$DA,$07,$D9,$A7,$DA,$07,$D9,$87,$DA,$07,$D9,$77,$57 
+    .byte $D2
+    .WORD BOSS_SQ4_SEASHRINE_LOOP
+
+    .byte $F4         ; half volume
+    .byte $EC         ; decay from F with tremelo
+    .byte $F8,$0C     ; envelope speed $0C
+    ;; mini solo
+    .byte $DA,$23,$35,$55
+    .byte $72,$79,$78,$79,$39
+    .byte $53,$35,$25
+    .byte $03,$D9,$A3
+    .byte $81
+    .byte $DA,$39,$29,$09,$D9,$A9,$89,$79,$59,$39,$DA,$09,$D9,$A9,$89,$79,$59,$39,$29,$09
+    .byte $D8
+    
+    .byte $F5,$02      ; 25% duty
+    .byte $F8,$0C      ; envelope speed $08
+    
+    BOSS_SQ4_TRILLS_BAR1:
+    .byte $BA,$7A,$BA,$7A
+    .byte $D7
+    .WORD BOSS_SQ4_TRILLS_BAR1
+    
+    BOSS_SQ4_TRILLS_BAR2:
+    .byte $BA,$8A,$BA,$8A
+    .byte $D7
+    .WORD BOSS_SQ4_TRILLS_BAR2
+    
+    BOSS_SQ4_TRILLS_BAR3_4:
+    .byte $D9,$2A,$D8,$BA
+    .byte $D9,$2A,$D8,$BA
+    .byte $D9,$2A,$D8,$BA
+    .byte $D9,$2A,$D8,$BA
+    .byte $D7
+    .WORD BOSS_SQ4_TRILLS_BAR3_4
+
+    .BYTE $D0
+    .WORD BOSS_SQ4START
+    
+    
+    
+   
+
+
+
+;; DB = orange octave 
+;; DA = yellow octave
+;; D9 = white octave
+;; D8 = blue octave
+;; DC = dark blue octave
+;;   
+;;        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+;; .BYTE $90,$60,$48,$30,$24,$18,$12,$0C,$09,$06,$03,$03,$04,$10,$08,$08 ; FB (75 bpm)
+;;
+;; $_C = half a sixteenth note + 1 ;; 12 used in the opening woosh =  an extra $_7 of length
+;; -- that's why there's an eighth-note gap before the melody starts in the original battle song. 
+;;
+;; LENGTH                              ; PITCH
+;; $_B = $_A                           ; B = B
+;; $_A = half a sixteenth note         ; A = Bb
+;; $_9 = sixteenth note                ; 9 = A
+;; $_8 = sixteenth+half a sixteenth    ; 8 = Ab
+;; $_7 = eighth note                   ; 7 = G
+;; $_6 = eighth+sixteenth              ; 6 = F#
+;; $_5 = fourth note                   ; 5 = F
+;; $_4 = fourth+eigth                  ; 4 = E
+;; $_3 = half note                     ; 3 = Eb
+;; $_2 = third note                    ; 2 = D
+;; $_1 = whole note                    ; 1 = C#
+;; $_0 = one and a half                ; 0 = C
+;;
+;; JIGS - my midi is 150 bpm, so the note lengths here are doubled IN NAME to match it.
+;; Each $01 of length is 16 ticks in the midi. (384 ticks per quarter note)   
+      
+       
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Another little _L jump table  [$B000 :: 0x37010]
@@ -2858,7 +3377,6 @@ lut_NoteLengths:
 ;
 ; FE - Original: none, and the note lengths are messed up/unfinished ; now used for my Marsh Cave replacement
 
-
 ;; With FD, a $_7 is a sixteenth note.
 ;; $_6 = 
 ;; $_5 = 8th
@@ -2954,19 +3472,9 @@ lut_EnvPatterns:
   .BYTE  $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0E,$0E,$0C,$0C,$0B,$0B,$0A,$0A ; pattern $E7 ; only used in my prelude melody
   .BYTE  $09,$09,$08,$08,$07,$07,$06,$06,$05,$05,$04,$04,$04,$03,$03,$03 ;  hold, then decay from F
 
-  ;.BYTE  $0C,$0C,$0C,$0C,$0C,$0C,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E8 -- unused
-  ;.BYTE  $06,$06,$05,$05,$04,$04,$04,$03,$03,$03,$02,$02,$02,$02,$02,$02 ;  hold, then decay from C
-  
-  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00  
-  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-
-  ;; JIGS - since no original song uses this, I'm setting it to the "silent" instrument
-  ;;        So that music that plays in places where square 2 does SFX can use it to silence SFX properly after playing.
-  ;;        That's Battle, and Prologue (plays during tile mini game)
-  ;;        So by the time you need to edit this, hopefully you've worked out a better solution.
-  ;;        Or maybe just don't care about an instrument being used as SFX for a few frames!
-  ;;        You'll probably just use another music engine though...
-  
+  .BYTE  $0C,$0C,$0C,$0C,$0C,$0C,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E8
+  .BYTE  $06,$06,$05,$05,$04,$04,$04,$03,$03,$03,$02,$02,$02,$02,$02,$02 ;  hold, then decay from C
+ 
   .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$04,$03,$03,$03,$03,$03,$03,$03 ; pattern $E9 ; JIGS - only used in my prelude melody
   .BYTE  $03,$03,$02,$02,$02,$02,$02,$02,$02,$02,$01,$01,$01,$01,$01,$01 ;  hold, then decay from 4
 

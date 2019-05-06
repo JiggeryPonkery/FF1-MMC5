@@ -1610,7 +1610,8 @@ PrepBattleVarsAndEnterBattle:
     JMP DoCrossPageJump         ; jump to FinishBattlePrepAndFadeIn in bank C
 
   
-    
+;BattleMusic_LUT:
+; .byte $58, $58, $58, $58, $58 ; 9 small, 4 large, mix, fiend, chaos    
     
 
 ;;;;  [$9A00 :: 0x2DA10]
