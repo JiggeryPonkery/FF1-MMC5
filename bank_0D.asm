@@ -1846,11 +1846,11 @@ BOSS_SQ2:
    .byte $F1 
    .WORD BOSS_SQ2_SEASHRINE_START
    .byte $F1 
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3
    .byte $F1
    .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR2_5
    .byte $F1 
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9   
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3   
    .byte $F1
    .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR4
    .byte $F1
@@ -1858,11 +1858,11 @@ BOSS_SQ2:
    .byte $F1
    .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR6
    .byte $F1
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR7_8
-   .byte $F1 
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
-   .byte $F1 
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .word BOSS_SQ4_TRILLS_BAR1
+   .byte $F1
+   .word BOSS_SQ4_TRILLS_BAR2
+   .byte $F1
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR9
    .BYTE $D0
    .WORD BOSS_SQ2START
    
@@ -1883,10 +1883,10 @@ BOSS_SQ2:
    .WORD BOSS_SQ2_SEASHRINE_PART1_ALTEND
    .byte $F2
    
-   BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9:
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3:
    .byte $5A,$2A,$5A,$2A
    .byte $D7 
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3_9
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR1_3
    .byte $F2
    
    BOSS_SQ2_SEASHRINE_TRILLS_BAR2_5:
@@ -1906,11 +1906,12 @@ BOSS_SQ2:
    .byte $D7 
    .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR6
    .byte $F2
+   .byte $D8
    
-   BOSS_SQ2_SEASHRINE_TRILLS_BAR7_8:
-   .byte $2A,$D8,$BA,$D9,$2A,$D8,$BA,$D9,$2A,$D8,$BA,$D9,$2A,$D8,$BA,$D9
+   BOSS_SQ2_SEASHRINE_TRILLS_BAR9:
+   .byte $BA,$5A,$BA,$5A,$BA,$5A,$BA,$5A
    .byte $D7 
-   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR7_8
+   .WORD BOSS_SQ2_SEASHRINE_TRILLS_BAR9
    .byte $F2
 
 
@@ -2076,14 +2077,16 @@ BOSS_SQ3:
    .byte $57,$87,$57,$77,$A5,$A7
    .byte $07,$07,$27,$07,$DC,$A7,$D8,$35,$27
    .byte $55,$37,$75,$57,$85
-   .byte $F8,$0C      ; envelope speed $0C
-   .byte $E8          ; hold, then decay from C
-   .byte $71
-   .byte $71
-   .byte $72
    .byte $F8,$08      ; envelope speed $08
    .byte $E1          ; gradual decay from C
-   .byte $77,$77
+   .byte $DC          ; VERY BASS
+   .byte $27,$27,$57,$27,$07,$35,$25
+   .byte $27,$57,$27,$07,$35
+   .byte $F8,$0C      ; envelope speed $0C
+   .byte $21
+   .byte $F8,$08      ; envelope speed $08
+   .byte $D8
+   .byte $77
    .byte $77,$57,$37,$27,$77,$57,$37,$27
    .byte $D0
    .WORD BOSS_SQ3START
@@ -2104,7 +2107,7 @@ BOSS_SQ4:
     .byte $C2,$C6 
     .byte $79,$87,$77,$55 
     .byte $71 
-    .byte $61 
+    .byte $D9,$A3,$DA,$63 
     .byte $A1
     .byte $DB,$02,$09,$DA,$A9,$79,$39
     .byte $DB,$20 
@@ -2112,15 +2115,17 @@ BOSS_SQ4:
     .byte $EC         ; decay from F with tremelo
     .byte $55,$35 
     .byte $DA,$B4,$B7,$DB,$17,$DA,$B7,$A7,$B7
-    .byte $DB,$35,$25,$DA,$A7,$8C,$AC,$8C,$67,$27
-    .byte $A7,$57,$37,$27,$A7,$87,$DB,$25
+    .byte $A3,$39,$69,$A9,$DB,$39,$69,$A9,$69,$39
+    .byte $F4          ; un-halve volume   
+    .byte $ED          ; decay from C with tremelo
+    .byte $DA,$A7,$57,$37,$27,$A7,$87,$DB,$25
     .byte $F8,$0D      ; envelope speed $0D
     .byte $30  
     .byte $C0 
     .byte $C1 
     .byte $F8,$08      ; envelope speed $08
     .byte $EE          ; fade C->4->B with tremolo
-    .byte $F4          ; un-halve volume    
+ 
     
     BOSS_SQ4_SEASHRINE_LOOP:
     .byte $D9,$77,$DA,$37,$27,$37,$07,$37,$57,$37
@@ -2145,15 +2150,10 @@ BOSS_SQ4:
     .byte $F5,$02      ; 25% duty
     .byte $F8,$0C      ; envelope speed $08
     
-    BOSS_SQ4_TRILLS_BAR1:
-    .byte $BA,$7A,$BA,$7A
-    .byte $D7
-    .WORD BOSS_SQ4_TRILLS_BAR1
-    
-    BOSS_SQ4_TRILLS_BAR2:
-    .byte $BA,$8A,$BA,$8A
-    .byte $D7
-    .WORD BOSS_SQ4_TRILLS_BAR2
+    .byte $F1
+    .word BOSS_SQ4_TRILLS_BAR1
+    .byte $F1
+    .word BOSS_SQ4_TRILLS_BAR2
     
     BOSS_SQ4_TRILLS_BAR3_4:
     .byte $DB,$2A,$DA,$BA
@@ -2167,8 +2167,17 @@ BOSS_SQ4:
     .WORD BOSS_SQ4START
     
     
+    BOSS_SQ4_TRILLS_BAR1:
+    .byte $BA,$7A,$BA,$7A
+    .byte $D7
+    .WORD BOSS_SQ4_TRILLS_BAR1
+    .byte $F2
     
-   
+    BOSS_SQ4_TRILLS_BAR2:
+    .byte $BA,$8A,$BA,$8A
+    .byte $D7
+    .WORD BOSS_SQ4_TRILLS_BAR2
+    .byte $F2
 
 
 
@@ -2323,6 +2332,24 @@ Music_NewSong:
     CLC
     ADC #2
     STA mu_chanprimer
+    
+    ;; If new songs can't be added, need to re-write this stuff 
+    ;; maybe with this?
+    ;; LDA song_id
+    ;; LDX #10
+    ;; JSR MultiplyXA
+    ;; CLC
+    ;; ADC #<song_pointer_table
+    ;; STA tmp
+    ;; TXA
+    ;; ADC #>song_pointer_table
+    ;; STA tmp+1
+    ;;
+    ;; LDY #0
+    ;; @Loop:
+    ;; LDA (tmp),Y
+    ;; ... read the channel pointers from (tmp), using Y as index
+    ;;
 
     ;CMP #2*3             ; there are 3 channels to load/prime (2 squares + 1 tri).
     CMP #2*5
