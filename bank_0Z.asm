@@ -4762,12 +4762,15 @@ LoadEnemyStats:
     STA btl_enemystats, X
     INX
     INY
-    CPY #23               ; copy the next 19 bytes of ROM data into RAM.
+    CPY #23               ; copy the next 23 bytes of ROM data into RAM.
     BNE @Loop
     
-    STX tmp+1
+    TXA
+    CLC
+    ADC #9                ; add 9 to the "btl_enemystats, X" position, 'cos adding 7 more stats with Y instead
+    STA tmp+1             ; and two bytes are unused so far
    
-    TYA
+    TYA                   ; now using Y to save, so subtract 4 since Y is 4 past the RAM pointer
     SEC
     SBC #4
     TAY
