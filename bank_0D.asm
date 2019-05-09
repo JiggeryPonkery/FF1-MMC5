@@ -1,5 +1,10 @@
 
 .export MusicPlay_L
+.export BackupMapMusic
+.export RestoreMapMusic
+
+.import lut_TilesetMusicTrack
+.import lut_VehicleMusic
 .import MultiplyXA
 
 .include "variables.inc"
@@ -3526,11 +3531,108 @@ lut_EnvPatterns:
 ;  You can use pattern E0 or E1 and just put the hush on it to have it almost the same! Almost.
 ;  Many other patterns can be taken out and replaced with this.
   
+BackupMapMusic:
+    LDA #1
+    STA $5113         ; swap RAM
+    
+    LDY #0
+    LDX #0
+    STX MMC5_tmp
+   @MainLoop:
+    LDA CHAN_START, Y
+    STA MapMusicBackup, Y
+    INY
+    CPY #80
+    BNE @MainLoop
   
+  @ExtraLoop_Start:  
+   LDY #0
+  @ExtraLoop:   
+   LDA EXTRA_CHAN_START, X
+   STA MapMusicBackup1, X
+   INY
+   INX
+   CPY #7
+   BNE @ExtraLoop
+   
+   LDA MMC5_tmp
+   CMP #4
+   BEQ :+
+   
+   TXA 
+   CLC
+   ADC #9
+   TAX
+    
+   INC MMC5_tmp
+   JMP @ExtraLoop_Start
+   
+ : LDA #0
+   STA $5113         ; swap RAM
+   RTS
+
+
+RestoreMapMusic:
+    LDA #1
+    STA $5113         ; swap RAM
+    LDY #0
+    LDX #0
+    STX MMC5_tmp
+   @MainLoop:
+    LDA MapMusicBackup, Y
+    STA CHAN_START, Y
+    INY
+    CPY #80
+    BNE @MainLoop
+  
+  @ExtraLoop_Start:  
+   LDY #0
+  @ExtraLoop:   
+   LDA MapMusicBackup1, X
+   STA EXTRA_CHAN_START, X
+   INY
+   INX
+   CPY #7
+   BNE @ExtraLoop
+   
+   LDA MMC5_tmp
+   CMP #4
+   BEQ :+
+   
+   TXA 
+   CLC
+   ADC #9
+   TAX
+    
+   INC MMC5_tmp
+   JMP @ExtraLoop_Start
+   
+ : LDA mapflags            ; make sure we're on the overworld
+   LSR A                   ; Get SM flag, and shift it into C
+   BCC :+                  ; if set (on overworld), do overworld music
+ 
+   LDX cur_tileset               ; get the tileset
+   LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
+   JMP @End
+   
+ : LDX vehicle
+   LDA lut_VehicleMusic, X  
+ 
+  @End:
+   STA dlgmusic_backup
+   LDA #0
+   STA $5113         ; swap RAM
+   RTS
+ 
+ 
+ 
+ 
+ 
+ 
   
   
   
 .byte "END OF BANK MUSIC"  
   
   
-  
+   

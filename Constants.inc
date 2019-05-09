@@ -23,7 +23,7 @@ CHAN_TRI          = CHAN_START + (2 * CHAN_BYTES)
 CHAN_SQ3          = CHAN_START + (3 * CHAN_BYTES)
 CHAN_SQ4          = CHAN_START + (4 * CHAN_BYTES)
 CHAN_STOP         = CHAN_START + (5 * CHAN_BYTES)
-
+EXTRA_CHAN_START  = ch_loop_marker + $A0
 
 
 

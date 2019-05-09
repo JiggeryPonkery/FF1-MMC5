@@ -48,6 +48,7 @@
 .import DrawBattleSkillBox_L
 .import StealFromEnemyZ
 .import SkillText2
+.import RestoreMapMusic
 
 BANK_THIS = $0C
 
@@ -702,6 +703,9 @@ WaitFrames_BattleResult:
     
     SEC                     ; SEC before exit?  This seems to be pointless.
   WaitFrames_BattleResult_RTS:
+    JSR LongCall
+    .word RestoreMapMusic
+    .byte $0D
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

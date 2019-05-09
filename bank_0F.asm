@@ -86,6 +86,8 @@
 .export DrawBattleSkillBox_L
 .export LoadPriceZ
 .export SkillText2
+.export lut_TilesetMusicTrack
+.export lut_VehicleMusic
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -155,6 +157,7 @@
 .import lut_WeaponArmorNamePtrTbl
 .import WeaponArmorPrices
 .import lut_EnemyAttack
+
 
 .segment "BANK_FIXED"
 
@@ -1976,6 +1979,8 @@ PrepOverworld:
     BNE @NoChange
         LDX vehicle
         LDA lut_VehicleMusic, X  
+        CMP dlgmusic_backup
+        BEQ @NoChange
         STA music_track          
         STA dlgmusic_backup
             
@@ -5866,7 +5871,7 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-.byte $00,$00
+;.byte $00,$00
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going

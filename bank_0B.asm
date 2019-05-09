@@ -25,6 +25,7 @@
 .import LongCall
 .import RandAX
 .import MultiplyXA
+.import BackupMapMusic
 
 .segment "BANK_0B"
 
@@ -1578,6 +1579,10 @@ DoCrossPageJump:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepBattleVarsAndEnterBattle:
+    JSR LongCall
+    .word BackupMapMusic 
+    .byte $0D
+    
     LDA #$00
     STA btl_soft2000            ; clear soft PPU regs
     STA btl_soft2001
