@@ -619,12 +619,11 @@ ExitBattle:
     JSR LongCall
     .word RestoreMapMusic
     .byte $0D
-    LDA #2                          ; wait 2 frames
-    JMP :+
+    JMP WaitFrames_BattleResult_RTS
    
    @ChaosWait:
     LDA #120                        ; otherwise, wait 120 frames (2 seconds)
-  : STA btl_result                  ;  before exiting
+    STA btl_result                  ;  before exiting
     BNE WaitFrames_BattleResult
     
     

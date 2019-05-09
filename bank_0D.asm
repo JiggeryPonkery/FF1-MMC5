@@ -6,6 +6,7 @@
 .import lut_TilesetMusicTrack
 .import lut_VehicleMusic
 .import MultiplyXA
+.import WaitForVBlank_L
 
 .include "variables.inc"
 .include "Constants.inc"
@@ -3629,6 +3630,15 @@ RestoreMapMusic:
  
   @End:
    STA dlgmusic_backup
+   
+   JSR WaitForVBlank_L     ; wait a frame
+    
+    LDA #$00                ; burn a bunch of CPU time -- presumably so that 
+    : SEC                   ;  WaitForVBlank isn't called again so close to start of
+      SBC #$01              ;  vblank.  I don't think this is actually necessary,
+      BNE :-                ;  but it doesn't hurt.
+      
+   JSR WaitForVBlank_L     ; wait another frame
    
    LDA #0
    STA $5113         ; swap RAM
