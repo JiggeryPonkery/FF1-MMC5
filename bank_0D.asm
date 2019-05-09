@@ -3629,7 +3629,7 @@ RestoreMapMusic:
    LDA lut_VehicleMusic, X  
  
   @End:
-   STA dlgmusic_backup
+   STA dlgmusic_backup     ; if this isn't the same as the map music, the map loading will re-start it anyway
    
    JSR WaitForVBlank_L     ; wait a frame
     

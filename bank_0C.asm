@@ -603,11 +603,11 @@ lut_EnemyAi:
 
 ExitBattle:
     JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
-    LDA btl_result
+    LDA btl_result                  ; if running, skip to fade out, don't animate them walking
     CMP #$03
     BEQ :+
     JSR ResetUsePalette
-    JMP PartyWalkAnimation          ; JIGS - makes them all walk to the left
+    JSR PartyWalkAnimation          ; JIGS - makes them all walk to the left
     JMP :++
     
   : JSR BattleFadeOut
@@ -707,7 +707,7 @@ WaitFrames_BattleResult:
     DEC btl_result          ; loop until counter has expired
     BNE WaitFrames_BattleResult
     
-    SEC                     ; SEC before exit?  This seems to be pointless.
+    SEC                     ; SEC before exit? This triggers the End Game bridge scene
   WaitFrames_BattleResult_RTS:
     RTS
 
