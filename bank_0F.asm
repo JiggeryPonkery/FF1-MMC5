@@ -2623,6 +2623,7 @@ ProcessSMInput:
 
       @TalkToTile:          ; if there was no object to talk to....
         JSR TalkToSMTile    ; ... talk to the SM tile instead (open TC or just get misc text)
+        BEQ :+              ; if "nothing here" text, skip dialogue box
         LDX #0              ; clear tile properties (prevent unwanted teleport/battle)
         STX tileprop
 
