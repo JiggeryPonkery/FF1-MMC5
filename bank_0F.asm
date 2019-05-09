@@ -1689,7 +1689,8 @@ BoardShip:
 
     LDA #$45
     STA music_track     ; switch to music track $45 (the ship music)
-
+    STA dlgmusic_backup
+    
     CLC                 ; CLC for succes!
     RTS
 
@@ -1716,6 +1717,7 @@ DockShip:
 
     LDA #$44
     STA music_track     ; switch to music track $44 (overworld theme)
+    STA dlgmusic_backup
 
     RTS                 ; exit
 
@@ -5871,7 +5873,7 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-;.byte $00,$00
+.byte $00,$00
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going
