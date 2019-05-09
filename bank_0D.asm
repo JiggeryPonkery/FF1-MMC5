@@ -3573,6 +3573,15 @@ BackupMapMusic:
 
 
 RestoreMapMusic:
+    LDA #$30
+    STA $4000   ; set Squares and Noise volume to 0
+    STA $4004   ;  clear triangle's linear counter (silencing it next clock)
+    STA $4008
+    STA $400C
+    STA $5000   ; set MMC5 Squares volume to 0
+    STA $5004   ;
+
+
     LDA #1
     STA $5113         ; swap RAM
     LDY #0
@@ -3620,6 +3629,7 @@ RestoreMapMusic:
  
   @End:
    STA dlgmusic_backup
+   
    LDA #0
    STA $5113         ; swap RAM
    RTS

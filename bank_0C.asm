@@ -614,10 +614,17 @@ ExitBattle:
     
   : LDA btl_result                  ; check battle result
     CMP #$FF                        ; if not $FF...
-    BNE WaitFrames_BattleResult_RTS ; ...just jump to a nearby RTS
+    BEQ @ChaosWait
     
+    JSR LongCall
+    .word RestoreMapMusic
+    .byte $0D
+    LDA #2                          ; wait 2 frames
+    JMP :+
+   
+   @ChaosWait:
     LDA #120                        ; otherwise, wait 120 frames (2 seconds)
-    STA btl_result                  ;  before exiting
+  : STA btl_result                  ;  before exiting
     BNE WaitFrames_BattleResult
     
     
@@ -703,9 +710,6 @@ WaitFrames_BattleResult:
     
     SEC                     ; SEC before exit?  This seems to be pointless.
   WaitFrames_BattleResult_RTS:
-    JSR LongCall
-    .word RestoreMapMusic
-    .byte $0D
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
