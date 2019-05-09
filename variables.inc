@@ -1,6 +1,5 @@
 ; JIGS - 
 ; All data that is saved to each game slot is in "work RAM" at $5C00
-; The first $100 bytes of $6000 is basically free space now.
 ; Saving temporarily wipes RAM from $6000 to $7FFF so make sure nothing important is there that needs to be constant while on the save screen.
 
 ; for sound channels (between Bx-Dx)
@@ -17,41 +16,13 @@ ch_vol        = $C  ; output volume
 ch_loopctr    = $D  ; remaining loop counter
 ch_freq       = $E  ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
 ;                   ; these are added in for the music system!
-ch_loop_marker   = $5BF0 ; somehow this will end up at $5C90, $5CA0, $5CB0, $5CC0, and $5CD0
-ch_return        = $5BF1 ; +1
-ch_duty          = $5BF3 
-ch_octave        = $5BF4 
-ch_quiet         = $5BF5
-ch_extraquiet    = $5BF6
-;; The reason these are in with other important save data is that using the save screen will swap out the rest of RAM 
-;; At the very least this could mess up the Prelude's melody's loop counter.
+ch_loop_marker   = $02D9 ; somehow this will end up at $0379, $0389, $0399, $03A9, and $03B9
+ch_return        = $02DA ; +B
+ch_duty          = $02DC ; so $0300 has $121 bytes before it interferes
+ch_octave        = $02DD ; and $0370, $0380, $0390, $03A0, $03B0 all have 9 bytes at the front free
+ch_quiet         = $02DE ; (though they're almost all used up already!)
+ch_extraquiet    = $02DF
 
-MMC5_tmp        = $5CE0 ; 16 bytes, tmp ram not used by the original game
-
-RomRamMapping_lut_index    = $5CED
-btl_loadenemystats_counter = $5CEE
-btl_loadenemystats_index = $5CEF
-
-
-actual_bank     = $5CF0 ; necessary for Disch's longcall routine!
-weasels         = $5CF1 ; Important for saving/loading
-SFX_ErrorTime   = $5CF1 ; might have to do with using the noise channel for error SFX
-TriangleHush    = $5CF2 ; Slowly raises and lowers a DMC thing to quiet the triangle channel
-MenuHush        = $5CF3 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
-soundtest       = $5CF4 ; Something to do with the sound test screen
-BlankItem       = $5CF4 ; Necessary for shops to display correctly
-Hidden          = $5CF5 ; for hiding in battle 
-HiddenMagic     = $5CF6 ; for hiding in battle 
-Asleep          = $5CF7 ; for sleeping! ...in battle. And save game music things.
-BattleTurn      = $5CF8 ; Keeps track of battle turns and displays them above the character's names ; shared
-battle_class    = $5CF9 ; for doing skills in battle
-soundtesthelper = $5CFA ; Something to do with the sound test screen
-
-;nothing        = $5CFA ; A, B and C can be used until LongCall_tmp is needed
-;LongCall_tmp   = $5CFB ; These backup tmp, tmp+1, and the A, X, and Y registers
-LongCall_A      = $5CFD ; The LongCall routine restores them after it swaps banks
-LongCall_Y      = $5CFE
-LongCall_X      = $5CFF
 
 ;; JIGS - this is the new area for all save-game related things...
 
@@ -94,11 +65,11 @@ AutoTargetOption = unsram + $14
 BattleTextSpeed  = unsram + $15
 BattleBGColor    = unsram + $16
 smokebomb_steps  = unsram + $17
-battle_stealsuccess = unsram + $18
+; unused         = unsram + $18
 ; unused         = unsram + $19
 ; unused         = unsram + $1A
 ; unused         = unsram + $1B
-; unused         = unsram + $1C
+
 gold             = unsram + $1D ; 1E ; 1F - 3 bytes
 
 items           = unsram + $20
@@ -156,17 +127,12 @@ item_orb_start  = keyitems + $1C
   orb_earth     = item_orb_start + 3 ; $1F
 item_stop       = item_orb_start + 4 ; $20
 
-inv_magic       = unsram + $50 ; 64 bytes, 1 per spell
-
-
-
-
 
 Character1BattleState = ch_stats + $10 ; these will match up to ch_battlestate in ch_stats
 Character2BattleState = ch_stats + $10 + $40 ; 
 Character3BattleState = ch_stats + $10 + $80 ; 
 Character4BattleState = ch_stats + $10 + $C0 ;
-CharacterStatPointer  = $4E ; $4F ; far as I can tell these are unused by the game...?
+
 
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00
@@ -212,223 +178,14 @@ ch_critrate       = ch_stats + $2E ; effected by equipment, needs to refresh aft
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 
-inv_equip          = unsram + $200
-inv_weapon         = inv_equip ; 64 bytes
-inv_armor          = inv_equip + $40 ; 64 bytes
-inv_trash          = inv_equip + $80 ; 16 bytes to backup thrown away items?
+inv_equip         = unsram + $200
+inv_weapon        = inv_equip ; 64 bytes
+inv_armor         = inv_equip + $40 ; 64 bytes
+inv_magic         = unsram + $280 ; 64 bytes, 1 per spell
 
-game_flags      = unsram + $0300  ; must be on page bound
-
-shop_curprice     = $039C ; 9D, 9E, 9F - 4 bytes ; will mess up buying things if shared
-shop_curitem      = $03A0
-shop_amount       = $03A1
-shop_amount_high  = $03A2
-shop_amount_buy   = $03A3
-shop_amount_max   = $03A4
-shop_charindex    = $03A5
-shop_spell        = $03A6
-shop_selling      = $03A7
-shop_cursorchange = $03A8
-shop_listdrawn    = $03A9
-shop_listactive   = $03AA
-ItemToUnequip     = $03AC
-ItemToEquip       = $03AD
-slotcheck         = $03AE
-equip_impossible  = $03AF
-shop_x_price      = $03AF
+game_flags        = unsram + $0300  ; must be on page bound
 
 
-ptygen          = $6000   ; $4C bytes
- ptygen_class   = ptygen
- ptygen_name    = ptygen+1 ; 7 bytes
- ptygen_name_x  = ptygen+8
- ptygen_name_y  = ptygen+9
- ptygen_class_x = ptygen+10
- ptygen_class_y = ptygen+11
- ptygen_spr_x   = ptygen+12
- ptygen_spr_y   = ptygen+13
- ptygen_box_x   = ptygen+14
- ptygen_box_y   = ptygen+15
- ptygen_curs_x  = ptygen+16
- ptygen_curs_y  = ptygen+17
- ptygen_sprite  = ptygen+18
-
-CharStats_TmpSwap1 = $6000 ; temporarily holds 64 bytes of character data while switching order
-CharStats_TmpSwap2 = $6040 ; temporarily holds 64 bytes of character data while switching order
-
-lutmp_ch_stats  = $6000 ; temporarily holds 64 bytes of each character data while switching in the lineup menu, 256 total
-
-LevelUp_Pointer     = $82
-LevelUp_LoopCounter = $6000
-LevelUp_ClassID     = $6001
-LevelUp_StatByte    = $6002
-LevelUp_LevelIndex  = $6003
-LevelUp_StatIndex   = $6004
-LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
- 
-TempSpellList        = $6000 ; to 6017 ; 24 bytes
-TempSpellListIndex   = $6018
-GetSpellLevelIndex   = $6019
-CharacterIndexBackup = $601A
-CharacterEquipBackup = $601B
-
-btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
-GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
-battle_item         = $600F ; handles item box scrolling and item use
-btl_turnorderBackup = $6010 ; 13 bytes
-
-
-
-btl_attacker                 = $6020
-btl_attacker_damage          = btl_attacker + $01
-btl_attacker_hitrate         = btl_attacker + $02
-btl_attacker_numhits         = btl_attacker + $03
-btl_attacker_numhitsmult     = btl_attacker + $04
-btl_attacker_critrate        = btl_attacker + $05
-btl_attacker_category        = btl_attacker + $06
-btl_attacker_element         = btl_attacker + $07
-btl_attacker_attackailment   = btl_attacker + $08
-btl_attacker_ailments        = btl_attacker + $09
-btl_attacker_graphic         = btl_attacker + $0A ; the graphic used for an attack
-btl_attacker_varplt          = btl_attacker + $0B ; The variable palette color used for an attack
-btl_attacker_hiddenstrength  = btl_attacker + $0C ; helps boost strength when hidden
-btl_attacker_hiddencritrate  = btl_attacker + $0D ; helps boost crit rate when hidden
-btl_attacker_sprite          = btl_attacker + $0E 
-
-btlmag_spellconnected       = btl_attacker + $01
-btlmag_effect               = btl_attacker + $02
-btlmag_effectivity          = btl_attacker + $03
-btlmag_hitrate              = btl_attacker + $04
-btlmag_element              = btl_attacker + $05
-btlmag_fakeout_defindex     = btl_attacker + $06 ; See Battle_DoTurn in bank C for a description of
-btlmag_fakeout_ailments     = btl_attacker + $07 ;   what these 'fakeout' vars are and how/why they're used
-btlmag_fakeout_defplayer    = btl_attacker + $08
-
-btl_defender                 = $6030 
-btl_defender_index           = btl_defender + $01
-btl_defender_damage          = btl_defender + $02
-btl_defender_hitrate         = btl_defender + $03
-btl_defender_defense         = btl_defender + $04
-btl_defender_evasion         = btl_defender + $05
-btl_defender_magicdefense    = btl_defender + $06
-btl_defender_morale          = btl_defender + $07
-btl_defender_category        = btl_defender + $08
-btl_defender_elementweakness = btl_defender + $09
-btl_defender_elementresist   = btl_defender + $0A
-btl_defender_ailments        = btl_defender + $0B
-btl_defender_hpmax           = btl_defender + $0C ; + D? 
-btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
-
-btlmag_defender_intelligence    = btl_defender + $01
-btlmag_defender_speed           = btl_defender + $02
-btlmag_defender_damage          = btl_defender + $03
-btlmag_defender_hitrate         = btl_defender + $04
-btlmag_defender_defense         = btl_defender + $05
-btlmag_defender_evasion         = btl_defender + $06
-btlmag_defender_magicdefense    = btl_defender + $07
-btlmag_defender_morale          = btl_defender + $08
-btlmag_defender_numhitsmult     = btl_defender + $09
-btlmag_defender_category        = btl_defender + $0A
-btlmag_defender_weaponelement   = btl_defender + $0B
-btlmag_defender_weaponcategory  = btl_defender + $0C
-btlmag_defender_elementweakness = btl_defender + $0D
-btlmag_defender_elementresist   = btl_defender + $0E
-btlmag_defender_ailments        = btl_defender + $0F
-btlmag_defender_hpmax           = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2)  ; $6880
-btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $687A
-
-;; Mathbuf stuff
-    MATHBUF_HITCHANCE           = $00
-    MATHBUF_BASEDAMAGE          = $01
-    MATHBUF_NUMHITS             = $02
-    MATHBUF_MAGRANDHIT          = $02
-    MATHBUF_CATEGORY            = $03
-    MATHBUF_ELEMENT             = $04
-    MATHBUF_RANDHIT             = $04
-    MATHBUF_DMGCALC             = $05
-    MATHBUF_CRITCHANCE          = $06
-    MATHBUF_AILMENTCHANCE       = $07
-    MATHBUF_MAGDEFENDERHP       = $08 ;$12
-    MATHBUF_DEFENDERHP          = $08 ;$13
-    MATHBUF_MAGDEFENDERMAXHP    = $09 ;$15
-    MATHBUF_TOTALDAMAGE         = $0A ;$16
-    
-btl_mathbuf = $6040 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
-    math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6040 ; 6856
-    math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $6042 ; 6858
-    math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $6044 ; 685A
-    math_magrandhit     = btl_mathbuf + (MATHBUF_MAGRANDHIT*2)      ; $6044 ; 685A
-    math_category       = btl_mathbuf + (MATHBUF_CATEGORY*2)        ; $6046 ; 685C not really math... but whatever
-    math_element        = btl_mathbuf + (MATHBUF_ELEMENT*2)         ; $6048 ; 685E not really math... but whatever
-    math_randhit        = btl_mathbuf + (MATHBUF_RANDHIT*2)         ; $6048 ; 685E
-    math_dmgcalc        = btl_mathbuf + (MATHBUF_DMGCALC*2)         ; $604A ; 6860
-    math_critchance     = btl_mathbuf + (MATHBUF_CRITCHANCE*2)      ; $604C ; 6862
-    math_ailmentchance  = btl_mathbuf + (MATHBUF_AILMENTCHANCE*2)   ; $604E ; 6864
-;btlmag_defender_hp     = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)   ; $6050 ; $687A
-;btl_defender_hp        = btl_mathbuf + (MATHBUF_DEFENDERHP*2)      ; $6050 ; $687C -- treated as part of math buffer by some code
-;btlmag_defender_hpmax  = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2); $6052 ; $6880
-    battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6054 ; $6882 -- treated as part of math buffer by some code
-
-;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
-ch_backupstats           = $60C0 ;; $10 per character, so fills up to $6140
-ch_slotindex_backup      = ch_backupstats
-ch_intelligence_backup   = ch_backupstats + $01
-ch_speed_backup          = ch_backupstats + $02
-ch_damage_backup         = ch_backupstats + $03
-ch_hitrate_backup        = ch_backupstats + $04
-ch_defense_backup        = ch_backupstats + $05
-ch_evasion_backup        = ch_backupstats + $06
-ch_magicdefense_backup   = ch_backupstats + $07
-ch_elementresist_backup  = ch_backupstats + $08
-ch_elementweak_backup    = ch_backupstats + $09
-ch_weaponelement_backup  = ch_backupstats + $0A 
-ch_weaponcategory_backup = ch_backupstats + $0B 
-ch_numhits_backup        = ch_backupstats + $0C
-ch_numhitsmult_backup    = ch_backupstats + $0D
-ch_critrate_backup       = ch_backupstats + $0E    
-    
-btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes 
-;    en_exp          = $00 ; 2 bytes                     1 2
-;    en_gp           = $02 ; 2 bytes                     2 3 
-    en_hpmax        = $00 ; 2 bytes                     1 2 
-    en_morale       = $02 ; can be changed with magic   3
-    en_ai           = $03 ;                             4
-    en_evade        = $04 ; can be changed with magic   5
-    en_defense      = $05 ; can be changed with magic   6
-    en_numhits      = $06 ;                             7
-    en_hitrate      = $07 ; can be changed with magic   8
-    en_strength     = $08 ; can be changed with magic   9 
-    en_critrate     = $09 ;                             10
-    en_special      = $0A ;                             11
-    en_attackail    = $0B ;                             12
-    en_category     = $0C ;                             13 
-    en_magdef       = $0D ;                             14 
-    en_elemweakness = $0E ; can be changed with magic   15
-    en_elemresist   = $0F ; can be changed with magic   16
-    en_speed        = $10 ; 
-    en_stealdefense = $11    
-    en_item         = $12 ; can be changed by stealing  17
-    ;; this block matches enemy ROM layout
-    
-    en_aimagpos     = $13 ;                             18
-    en_aiatkpos     = $14 ;                             19
-    en_numhitsmult  = $15 ; can be changed with magic   20
-    en_ailments     = $16 ; can be changed with magic   21
-    en_hp           = $17 ; $18 ; 2 bytes               22 23
-    en_enemyid      = $19 ;                             24
-    
-    ;; JIGS - I am NOT AT ALL convinced I haven't screwed up elemental weakness/resistance bug fixing.
-
-btl_enemyrewards  = $6200
-    en_exp          = $00 ; 2 bytes                     1 2
-    en_gp           = $02 ; 2 bytes                     2 3 
-    
-bigstr_buf        = $6300 ; 128 bytes
-SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
-
- 
- 
- 
  
 
 story_dropinput = $07
@@ -614,7 +371,8 @@ battlereward        = $88  ; 3 bytes.  Note that while this var is 3 bytes, this
 ;                          ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
 ;                          ;  will never receive more than 65535 XP/GP in any one battle.
 ;; physical and magical attacks
-CharStatsPointer       = $80
+CharacterStatPointer   = $4E ; $4F ; far as I can tell these are unused by the game...?
+CharStatsPointer       = $80 ; another one!
 CharBackupStatsPointer = $82
 AilmentPrintingPointer = $82
 EnemyRAMPointer        = $84  ; 2 byte pointer to enemy's adjustable stats
@@ -684,10 +442,33 @@ oam_t           = oam+1
 oam_a           = oam+2
 oam_x           = oam+3
 
-puzzle           = $0300  ; used 
-str_buf          = $0300  ; $39 bytes at least -- buffer must not cross page
-item_box         = $0300  ; used in shops
-btl_screenbackup = $0300  ; used in battle
+MMC5_tmp        = $0360 ; 16 bytes, tmp ram not used by the original game
+;; ^ battle turn order uses up $0D of this ^ 
+
+;; some random Jiggers variables ; these can't go past $03x8
+
+actual_bank     = $0370 ; necessary for Disch's longcall routine!
+weasels         = $0371 ; Important for saving/loading
+SFX_ErrorTime   = $0371 ; might have to do with using the noise channel for error SFX
+TriangleHush    = $0372 ; Slowly raises and lowers a DMC thing to quiet the triangle channel
+MenuHush        = $0373 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
+soundtest       = $0374 ; Something to do with the sound test screen
+BlankItem       = $0374 ; Necessary for shops to display correctly
+Hidden          = $0375 ; for hiding in battle 
+HiddenMagic     = $0376 ; for hiding in battle 
+Asleep          = $0377 ; for sleeping! ...in battle. And save game music things.
+BattleTurn      = $0378 ; Keeps track of battle turns and displays them above the character's names ; shared
+battle_class    = $0380 ; for doing skills in battle
+soundtesthelper = $0381 ; Something to do with the sound test screen
+battle_stealsuccess        = $0382
+RomRamMapping_lut_index    = $0383
+btl_loadenemystats_counter = $0384
+btl_loadenemystats_index   = $0385
+LongCall_A      = $0386 ; The LongCall routine restores them after it swaps banks
+LongCall_Y      = $0387
+LongCall_X      = $0388
+
+;; back to original variables
 
 cur_pal         = $03C0       ; 32 bytes
 inroom_pal      = cur_pal+$20 ; 16 bytes
@@ -717,56 +498,270 @@ draw_buf_at_hi  = draw_buf + $50
 draw_buf_at_lo  = draw_buf + $60
 draw_buf_at_msk = draw_buf + $70
 
-;unk_07D2        = $07D2 -- is not the King of Corneria
+MapMusicBackup  = $6000    
+MapMusicBackup1 = $6050    
+MapMusicBackup2 = $6060    
+MapMusicBackup3 = $6070    
+MapMusicBackup4 = $6080    
+MapMusicBackup5 = $6090   ; for backing up music RAM before a battle
 
+ptygen          = $6000   ; $4C bytes
+ ptygen_class   = ptygen
+ ptygen_name    = ptygen+1 ; 7 bytes
+ ptygen_name_x  = ptygen+8
+ ptygen_name_y  = ptygen+9
+ ptygen_class_x = ptygen+10
+ ptygen_class_y = ptygen+11
+ ptygen_spr_x   = ptygen+12
+ ptygen_spr_y   = ptygen+13
+ ptygen_box_x   = ptygen+14
+ ptygen_box_y   = ptygen+15
+ ptygen_curs_x  = ptygen+16
+ ptygen_curs_y  = ptygen+17
+ ptygen_sprite  = ptygen+18
 
+CharStats_TmpSwap1 = $6000 ; temporarily holds 64 bytes of character data while switching order
+CharStats_TmpSwap2 = $6040 ; temporarily holds 64 bytes of character data while switching order
 
+lutmp_ch_stats  = $6000 ; temporarily holds 64 bytes of each character data while switching in the lineup menu, 256 total
 
+LevelUp_Pointer     = $82
+LevelUp_LoopCounter = $6000
+LevelUp_ClassID     = $6001
+LevelUp_StatByte    = $6002
+LevelUp_LevelIndex  = $6003
+LevelUp_StatIndex   = $6004
+LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
+ 
+TempSpellList        = $6000 ; to 6017 ; 24 bytes
+TempSpellListIndex   = $6018
+GetSpellLevelIndex   = $6019
+CharacterIndexBackup = $601A
+CharacterEquipBackup = $601B
+    
+bigstr_buf        = $6300 ; 128 bytes
+SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
+
+puzzle           = $6400  ; used 
+str_buf          = $6400  ; $39 bytes at least -- buffer must not cross page
+item_box         = $6400  ; used in shops
+btl_screenbackup = $6400  ; used in battle
+
+shop_curprice     = $649C ; 9D, 9E, 9F - 4 bytes ; will mess up buying things if shared
+shop_curitem      = $64A0
+shop_amount       = $64A1
+shop_amount_high  = $64A2
+shop_amount_buy   = $64A3
+shop_amount_max   = $64A4
+shop_charindex    = $64A5
+shop_spell        = $64A6
+shop_selling      = $64A7
+shop_cursorchange = $64A8
+shop_listdrawn    = $64A9
+shop_listactive   = $64AA
+ItemToUnequip     = $64AC
+ItemToEquip       = $64AD
+slotcheck         = $64AE
+equip_impossible  = $64AF
+shop_x_price      = $64AF
 
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
 
-;; $0300 is used by the Item option
-btl_stringoutputbuf_anchor = $0300  ; JIGS - only needs to be $20 before btl_stringoutputbuf? 
-btl_enemyIDs               = $0310  ; 9 entries of enemy IDs
-btl_enemyroster            = $031A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
-btl_enemyamount            = $031E  ; JIGS - tmp byte for number of enemies, for battle printing
-btl_stringoutputbuf        = $031F  ; output buffer where decoded strings are printed
-btl_unfmtcbtbox_buffer     = $0340  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
+
+btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
+GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
+battle_item         = $600F ; handles item box scrolling and item use
+btl_turnorderBackup = $6010 ; 13 bytes
+
+
+
+btl_attacker                 = $6020
+btl_attacker_damage          = btl_attacker + $01
+btl_attacker_hitrate         = btl_attacker + $02
+btl_attacker_numhits         = btl_attacker + $03
+btl_attacker_numhitsmult     = btl_attacker + $04
+btl_attacker_critrate        = btl_attacker + $05
+btl_attacker_category        = btl_attacker + $06
+btl_attacker_element         = btl_attacker + $07
+btl_attacker_attackailment   = btl_attacker + $08
+btl_attacker_ailments        = btl_attacker + $09
+btl_attacker_graphic         = btl_attacker + $0A ; the graphic used for an attack
+btl_attacker_varplt          = btl_attacker + $0B ; The variable palette color used for an attack
+btl_attacker_hiddenstrength  = btl_attacker + $0C ; helps boost strength when hidden
+btl_attacker_hiddencritrate  = btl_attacker + $0D ; helps boost crit rate when hidden
+btl_attacker_sprite          = btl_attacker + $0E 
+
+btlmag_spellconnected       = btl_attacker + $01
+btlmag_effect               = btl_attacker + $02
+btlmag_effectivity          = btl_attacker + $03
+btlmag_hitrate              = btl_attacker + $04
+btlmag_element              = btl_attacker + $05
+btlmag_fakeout_defindex     = btl_attacker + $06 ; See Battle_DoTurn in bank C for a description of
+btlmag_fakeout_ailments     = btl_attacker + $07 ;   what these 'fakeout' vars are and how/why they're used
+btlmag_fakeout_defplayer    = btl_attacker + $08
+
+btl_defender                 = $6030 
+btl_defender_index           = btl_defender + $01
+btl_defender_damage          = btl_defender + $02
+btl_defender_hitrate         = btl_defender + $03
+btl_defender_defense         = btl_defender + $04
+btl_defender_evasion         = btl_defender + $05
+btl_defender_magicdefense    = btl_defender + $06
+btl_defender_morale          = btl_defender + $07
+btl_defender_category        = btl_defender + $08
+btl_defender_elementweakness = btl_defender + $09
+btl_defender_elementresist   = btl_defender + $0A
+btl_defender_ailments        = btl_defender + $0B
+btl_defender_hpmax           = btl_defender + $0C ; + D? 
+btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
+
+btlmag_defender_intelligence    = btl_defender + $01
+btlmag_defender_speed           = btl_defender + $02
+btlmag_defender_damage          = btl_defender + $03
+btlmag_defender_hitrate         = btl_defender + $04
+btlmag_defender_defense         = btl_defender + $05
+btlmag_defender_evasion         = btl_defender + $06
+btlmag_defender_magicdefense    = btl_defender + $07
+btlmag_defender_morale          = btl_defender + $08
+btlmag_defender_numhitsmult     = btl_defender + $09
+btlmag_defender_category        = btl_defender + $0A
+btlmag_defender_weaponelement   = btl_defender + $0B
+btlmag_defender_weaponcategory  = btl_defender + $0C
+btlmag_defender_elementweakness = btl_defender + $0D
+btlmag_defender_elementresist   = btl_defender + $0E
+btlmag_defender_ailments        = btl_defender + $0F
+btlmag_defender_hpmax           = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2)  ; $6880
+btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $687A
+
+;; Mathbuf stuff
+    MATHBUF_HITCHANCE           = $00
+    MATHBUF_BASEDAMAGE          = $01
+    MATHBUF_NUMHITS             = $02
+    MATHBUF_MAGRANDHIT          = $02
+    MATHBUF_CATEGORY            = $03
+    MATHBUF_ELEMENT             = $04
+    MATHBUF_RANDHIT             = $04
+    MATHBUF_DMGCALC             = $05
+    MATHBUF_CRITCHANCE          = $06
+    MATHBUF_AILMENTCHANCE       = $07
+    MATHBUF_MAGDEFENDERHP       = $08 ;$12
+    MATHBUF_DEFENDERHP          = $08 ;$13
+    MATHBUF_MAGDEFENDERMAXHP    = $09 ;$15
+    MATHBUF_TOTALDAMAGE         = $0A ;$16
+    
+btl_mathbuf = $6040 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
+    math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6040 ; 6856
+    math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $6042 ; 6858
+    math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $6044 ; 685A
+    math_magrandhit     = btl_mathbuf + (MATHBUF_MAGRANDHIT*2)      ; $6044 ; 685A
+    math_category       = btl_mathbuf + (MATHBUF_CATEGORY*2)        ; $6046 ; 685C not really math... but whatever
+    math_element        = btl_mathbuf + (MATHBUF_ELEMENT*2)         ; $6048 ; 685E not really math... but whatever
+    math_randhit        = btl_mathbuf + (MATHBUF_RANDHIT*2)         ; $6048 ; 685E
+    math_dmgcalc        = btl_mathbuf + (MATHBUF_DMGCALC*2)         ; $604A ; 6860
+    math_critchance     = btl_mathbuf + (MATHBUF_CRITCHANCE*2)      ; $604C ; 6862
+    math_ailmentchance  = btl_mathbuf + (MATHBUF_AILMENTCHANCE*2)   ; $604E ; 6864
+;btlmag_defender_hp     = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)   ; $6050 ; $687A
+;btl_defender_hp        = btl_mathbuf + (MATHBUF_DEFENDERHP*2)      ; $6050 ; $687C -- treated as part of math buffer by some code
+;btlmag_defender_hpmax  = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2); $6052 ; $6880
+    battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6054 ; $6882 -- treated as part of math buffer by some code
+
+;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
+ch_backupstats           = $60C0 ;; $10 per character, so fills up to $6140
+ch_slotindex_backup      = ch_backupstats
+ch_intelligence_backup   = ch_backupstats + $01
+ch_speed_backup          = ch_backupstats + $02
+ch_damage_backup         = ch_backupstats + $03
+ch_hitrate_backup        = ch_backupstats + $04
+ch_defense_backup        = ch_backupstats + $05
+ch_evasion_backup        = ch_backupstats + $06
+ch_magicdefense_backup   = ch_backupstats + $07
+ch_elementresist_backup  = ch_backupstats + $08
+ch_elementweak_backup    = ch_backupstats + $09
+ch_weaponelement_backup  = ch_backupstats + $0A 
+ch_weaponcategory_backup = ch_backupstats + $0B 
+ch_numhits_backup        = ch_backupstats + $0C
+ch_numhitsmult_backup    = ch_backupstats + $0D
+ch_critrate_backup       = ch_backupstats + $0E    
+    
+btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes 
+;    en_exp          = $00 ; 2 bytes                     1 2
+;    en_gp           = $02 ; 2 bytes                     2 3 
+    en_hpmax        = $00 ; 2 bytes                     1 2 
+    en_morale       = $02 ; can be changed with magic   3
+    en_ai           = $03 ;                             4
+    en_evade        = $04 ; can be changed with magic   5
+    en_defense      = $05 ; can be changed with magic   6
+    en_numhits      = $06 ;                             7
+    en_hitrate      = $07 ; can be changed with magic   8
+    en_strength     = $08 ; can be changed with magic   9 
+    en_critrate     = $09 ;                             10
+    en_special      = $0A ;                             11
+    en_attackail    = $0B ;                             12
+    en_category     = $0C ;                             13 
+    en_magdef       = $0D ;                             14 
+    en_elemweakness = $0E ; can be changed with magic   15
+    en_elemresist   = $0F ; can be changed with magic   16
+    en_speed        = $10 ; 
+    en_stealdefense = $11    
+    en_item         = $12 ; can be changed by stealing  17
+    ;; this block matches enemy ROM layout
+    
+    en_aimagpos     = $13 ;                             18
+    en_aiatkpos     = $14 ;                             19
+    en_numhitsmult  = $15 ; can be changed with magic   20
+    en_ailments     = $16 ; can be changed with magic   21
+    en_hp           = $17 ; $18 ; 2 bytes               22 23
+    en_enemyid      = $19 ;                             24
+    
+    ;; JIGS - I am NOT AT ALL convinced I haven't screwed up elemental weakness/resistance bug fixing.
+
+btl_enemyrewards  = $6200
+    en_exp          = $00 ; 2 bytes                     1 2
+    en_gp           = $02 ; 2 bytes                     2 3 
+
+;; $6300 is used by bigstr_buf, which prints the "Ready now?" box and maybe something else
+;; $6400 is used by the Item option
+btl_stringoutputbuf_anchor = $6400  ; JIGS - only needs to be $20 before btl_stringoutputbuf? 
+btl_enemyIDs               = $6410  ; 9 entries of enemy IDs
+btl_enemyroster            = $641A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
+btl_enemyamount            = $641E  ; JIGS - tmp byte for number of enemies, for battle printing
+btl_stringoutputbuf        = $641F  ; output buffer where decoded strings are printed
+btl_unfmtcbtbox_buffer     = $6440  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
                                     ; houses the unformatted text for each combat box.
                                     ; Additional bytes are used for other areas
 
 
-btl_msgbuffer   = $0400  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
+btl_msgbuffer   = $6500  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
                          ; this buffer contains on-screen tiles to be drawn to ppu$2240
                          ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
 
-btl_msgdraw_hdr         = $0540
-btl_msgdraw_x           = $0541
-btl_msgdraw_y           = $0542
-btl_msgdraw_width       = $0543
-btl_msgdraw_height      = $0544
-btl_msgdraw_srcptr      = $0543  ; shared -- needs to match btl_msgdraw_width?
+btl_msgdraw_hdr         = $6640
+btl_msgdraw_x           = $6641
+btl_msgdraw_y           = $6642
+btl_msgdraw_width       = $6643
+btl_msgdraw_height      = $6644
+btl_msgdraw_srcptr      = $6643  ; shared -- needs to match btl_msgdraw_width?
 ;                                ; $0544    above +1
-btl_msgdraw_blockcount         = $0545 ; the number of blocks drawn
-btl_msgdraw_blockcount_backup  = $0546
-btl_combatboxcount             = $0547 ; the number of combat boxes that have been drawn
-btl_combatboxcount_alt         = $0548 ; ANOTHER combatbox counter... this is totally redundant
-DrawBattleMagicBox_loopctr     = $0549
-UndrawNBattleBlocks_loopctr    = $054A
-btl_drawbox_loopctr            = $054B
-btl_msgbuffer_loopctr          = $054C
-EOBCombatBox_tmp               = $054D
-btl_tmp_drawcombatbox1         = $054E
-btl_tmp_drawcombatbox2         = $054F
-DrawBattleMagicBox_toporbottom = $0550
-btltmp_boxleft                 = $0551
-btltmp_boxcenter               = $0552
-btltmp_boxright                = $0553
-btltmp_altmsgbuffer            = $0560  ; $20 bytes read
-btltmp_damageblockbuffer       = $0580  ; 6 bytes used, but $20 are read?
-btl_stringbuf                  = $05A0  ; $21 byte buffer to contain string data for printing (reads $21st byte, but doesn't use?)
-btl_attackbox_itemid           = $05C0  ; 
-btlbox_blockdata               = $0600  ; at least #91 bytes (Gear option is the biggest so far)
+btl_msgdraw_blockcount         = $6645 ; the number of blocks drawn
+btl_msgdraw_blockcount_backup  = $6646
+btl_combatboxcount             = $6647 ; the number of combat boxes that have been drawn
+btl_combatboxcount_alt         = $6648 ; ANOTHER combatbox counter... this is totally redundant
+DrawBattleMagicBox_loopctr     = $6649
+UndrawNBattleBlocks_loopctr    = $664A
+btl_drawbox_loopctr            = $664B
+btl_msgbuffer_loopctr          = $664C
+EOBCombatBox_tmp               = $664D
+btl_tmp_drawcombatbox1         = $664E
+btl_tmp_drawcombatbox2         = $664F
+DrawBattleMagicBox_toporbottom = $6650
+btltmp_boxleft                 = $6651
+btltmp_boxcenter               = $6652
+btltmp_boxright                = $6653
+btltmp_altmsgbuffer            = $6660  ; $20 bytes read
+btltmp_damageblockbuffer       = $6680  ; 6 bytes used, but $20 are read?
+btl_stringbuf                  = $66A0  ; $21 byte buffer to contain string data for printing (reads $21st byte, but doesn't use?)
+btl_attackbox_itemid           = $66C0  ; 
+btlbox_blockdata               = $6700  ; at least #91 bytes (Gear option is the biggest so far)
 
 
 
