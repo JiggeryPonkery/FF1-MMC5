@@ -2989,6 +2989,8 @@ CHRLoad_Cont_2:
     STA joy_start
     STA joy_select
     STA soundtesthelper
+    STA dlgmusic_backup
+    STA soundtest
     RTS               ; and exit the main menu (by RTSing out of its loop)
 
   @A_Pressed:
@@ -3069,17 +3071,17 @@ SoundTestSelect:
     LDA soundtest     
     CMP #$FF
     BNE :+
-      LDA #23
+      LDA #25
       STA soundtest
       CLC
- :  JMP @Exit
+ :  RTS
 
   @Up:                ; up is the same deal...
     LDA #0
     STA soundtesthelper    
     INC soundtest
     LDA soundtest
-    CMP #24
+    CMP #26
     BNE @Exit
       LDA #00
       STA soundtest      
@@ -3113,7 +3115,7 @@ SoundTest_DrawSongName:
     STA dest_x
     LDA #$0C
     STA dest_y   
-    LDA soundtest      ; 0-23 
+    LDA soundtest      ; 0-24 
     LDX #24            ; each song name is 24 bytes across
     JSR MultiplyXA     ; output of A is low byte of multiplication
     CLC
@@ -5449,6 +5451,8 @@ lut_SongNamesLong:
 .byte $9C,$A4,$B9,$AC,$B1,$AA,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Saving
 .byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Healing (Unused)
 .byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Unused)
+.byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle
+.byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle 2
 
 
 

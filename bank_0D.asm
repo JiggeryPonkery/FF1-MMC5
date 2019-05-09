@@ -1,5 +1,6 @@
 
 .export MusicPlay_L
+.import MultiplyXA
 
 .include "variables.inc"
 .include "Constants.inc"
@@ -221,19 +222,19 @@ lut_ScoreData:
 .WORD FANFARE_SQ2
 
 ;; $57
-;.WORD HEAL_SQ1
-;.WORD BLANK
-;.WORD HEAL_TRI
-;.WORD BLANK
-;.WORD HEAL_SQ2
+.WORD HEAL_SQ1
+.WORD BLANK
+.WORD HEAL_TRI
+.WORD BLANK
+.WORD HEAL_SQ2
 ;; JIGS - the code that plays this has been disabled
 
 ;; $58
-;.WORD TREASURE_SQ1
-;.WORD BLANK
-;.WORD TREASURE_TRI
-;.WORD BLANK
-;.WORD TREASURE_SQ2
+.WORD TREASURE_SQ1
+.WORD BLANK
+.WORD TREASURE_TRI
+.WORD BLANK
+.WORD TREASURE_SQ2
 ;; JIGS - the code that plays this has been disabled
 
 ;; $59
@@ -242,6 +243,13 @@ lut_ScoreData:
 .WORD BOSS_TRI
 .WORD BOSS_SQ3
 .WORD BOSS_SQ4
+
+;; $5A
+.WORD MARSHBOSS_SQ1
+.WORD BLANK
+.WORD MARSHBOSS_TRI
+.WORD MARSHBOSS_SQ3
+.WORD MARSHBOSS_SQ2
 
 
 
@@ -1155,7 +1163,6 @@ MARSHCAVEOLD_SQ4:
    .word MARSHCAVEOLD_SQ2   
 
 MARSHCAVEOLD_TRI:
-
    .byte $FB
    D3LOOP2:
    .byte $F8,$08,$EC
@@ -1724,6 +1731,42 @@ BLANK:   ; For songs that need to loop
 ;BLANK2: ; For songs that need to end. (note that using this will cause a song to end prematurely once it hits the FF. So... useless. Oops.)
 ;.BYTE $F9,$CA,$FF
 
+MARSHBOSS_SQ1:
+    .BYTE $F5,$02     ;duty set 25%
+    .byte $FB         ;tempo FB
+    .byte $F8,$08,$E1 ;envelope speed $08, pattern 1, gradual decay from C
+    .byte $D8,$3C,$6C,$9C,$D9,$0C,$3C,$6C,$9C,$DA,$0C,$3C,$6C,$9C,$DB,$0C
+    .byte $C0,$C3     ; long rest; two bars
+    .byte $D0
+    .WORD MARSHCAVEOLD_SQ1
+
+MARSHBOSS_SQ2:
+   .BYTE $F5,$01     ; duty set 12.5%
+   .byte $FB         ; tempo FB
+   .byte $F8,$08,$E2 ; envelope speed $08, pattern 2, gradual decay from 8
+   .byte $CE         ; evil confusing rest that messes it all up for a tiny echo effect
+   .byte $D8,$3C,$6C,$9C,$0C,$3C,$6C,$9C,$D9,$0C,$3C,$6C,$9C,$DA,$0C
+   ;; $_E ^ of a pause, so this one is 14 thingies off instead of 12
+   .byte $C0,$C4,$CC ; long rest, $B8 in length...
+   .byte $D0
+   .WORD MARSHCAVEOLD_SQ2
+
+MARSHBOSS_TRI:
+   .byte $FB,$C3
+   @MARSHBOSS_TRILOOP:
+   ;.byte $D9,$07,$C5,$07,$C5,$C5,$07,$C7,$07,$C7,$07,$C7,$57,$C5,$57,$C5,$57,$C5
+   ;.byte $57,$C5,$57,$C7
+   .byte $D9,$09,$C9,$09,$C9,$09,$C9,$09,$C9,$09,$C9,$09,$C9,$D8,$A9,$C9,$A9,$C9
+   .byte $D1
+   .WORD @MARSHBOSS_TRILOOP
+   .byte $D0
+   .WORD MARSHCAVEOLD_TRI
+
+MARSHBOSS_SQ3:
+   .byte $F6, $FB, $C5, $D0
+   .word MARSHBOSS_SQ1
+
+MARSHBOSS_SQ4:
 
 
 BOSS_SQ1:
@@ -2297,21 +2340,15 @@ Music_NewSong:
     SEC                   ; subtract 1 to make it zero based.  Had to be 1-based before
     SBC #1                ;  because a value of $00 means a song is in progress
 
-;    ASL A                 ; multiply by 8 to get the song pointer table index (8 bytes
-;    ASL A                 ;  of pointers per song)
-;    ASL A
-;    ORA mu_chanprimer     ; OR with the channel we're currently priming (only one is done per frame)
-
     ;; JIGS -- use the MMC5 multiplier registers to use 10 bytes per song, 5 tracks each
-    STA $5205             ; Put music track into the MMC5 Multiplier 
-    LDA #10                
-    STA $5206             ; Multiply by 10
-    LDA $5205
+    LDX #10
+    JSR MultiplyXA
     CLC
     ADC mu_chanprimer     ; And do this instead of ORA
-
     STA tmp               ; this is the low byte of the pointer to the pointer table
-    LDA #>lut_ScoreData   ; get the high byte
+    
+    TXA
+    ADC #>lut_ScoreData   ; get the high byte
     STA tmp+1             ;  (tmp) now points to the pointer table for this track.
 
     LDX mu_chanprimer          ; get the channel we're priming
@@ -2332,40 +2369,16 @@ Music_NewSong:
     CLC
     ADC #2
     STA mu_chanprimer
-    
-    ;; If new songs can't be added, need to re-write this stuff 
-    ;; maybe with this?
-    ;; LDA song_id
-    ;; LDX #10
-    ;; JSR MultiplyXA
-    ;; CLC
-    ;; ADC #<song_pointer_table
-    ;; STA tmp
-    ;; TXA
-    ;; ADC #>song_pointer_table
-    ;; STA tmp+1
-    ;;
-    ;; LDY #0
-    ;; @Loop:
-    ;; LDA (tmp),Y
-    ;; ... read the channel pointers from (tmp), using Y as index
-    ;;
 
-    ;CMP #2*3             ; there are 3 channels to load/prime (2 squares + 1 tri).
     CMP #2*5
-    ;; JIGS ^ 5 channels now!
     BCC @Exit            ; check to see if all 3 of these have been primed.  If not, just exit
                          ;  otherwise... all channels are primed -- music is all set for playback
       LDA #0
       STA music_track    ; zero music_track to indicate that a track is playing
 
-      ;LDA #0                    ; zero loop counters for all channels
       STA ch_loopctr+CHAN_SQ1
       STA ch_loopctr+CHAN_SQ2
       STA ch_loopctr+CHAN_TRI
-      ;STA ch_loopctr+CHAN_STOP  ; this must be intended to be noise -- but since noise isn't
-                                ;  part of the music engine -- this is worthless
-      
       STA ch_loopctr+CHAN_SQ3   ; JIGS : adding Square 3
       STA ch_loopctr+CHAN_SQ4   ; JIGS : adding Square 4
       STA CHAN_SQ1+ch_loop_marker ; JIGS - Wipe the special Jigs Loop Markers so songs don't flip out.
@@ -2373,25 +2386,13 @@ Music_NewSong:
       STA CHAN_TRI+ch_loop_marker
       STA CHAN_SQ3+ch_loop_marker
       STA CHAN_SQ4+ch_loop_marker
-                                
-                                
-
+    
       ;LDA #%00001111
       LDA #%00011111     ; JIGS - can't remember the reason for the 1 byte increase
                          ; MIGHT have to do with the DMA / DMCA / whatever thing that lowers triangle volume
       STA $4015          ; make sure playback for all channels is enabled
       STA $5015          ; make sure playback for all MMC5 channels is enabled (JIGS)
-                         ; And comment out pointless stuff
 
-      ;LDA #0             ; then zero sq2_sfx *again*
-      ;STA sq2_sfx        ;  (again this seems silly to do here)
-
-      ;STA $4002          ; and zero all channel freqs except noise
-      ;STA $4003          ;  utterly pointless as they've already been zerod
-      ;STA $4006
-      ;STA $4007
-      ;STA $400A
-      ;STA $400B
   @Exit:
     RTS
 
@@ -2400,7 +2401,6 @@ Music_NewSong:
   .BYTE CHAN_SQ1,  CHAN_SQ1
   .BYTE CHAN_SQ2,  CHAN_SQ2
   .BYTE CHAN_TRI,  CHAN_TRI
-  ;.BYTE CHAN_STOP, CHAN_STOP  ; unused -- probably was supposed to be noise
   .BYTE CHAN_SQ3, CHAN_SQ3  ; 
   .BYTE CHAN_SQ4, CHAN_SQ4  ; JIGS 
 

@@ -298,7 +298,7 @@ DoOverworld:
   ;  LDA #0
   ;  STA MenuHush
     ;; JIGS ^ Don't hush the music anymore!
-    
+
     JSR PrepOverworld       ; do all overworld preparation
     JSR ScreenWipe_Open     ; then do the screen wipe effect
                             ; then enter the overworld loop
@@ -2552,7 +2552,7 @@ StandardMapLoop:
     CMP #TP_TELE_EXIT       ; lastly... check to ensure this is an exit teleport.  It always will be
     BNE ProcessSMInput      ;   unless the battle marker bit was set, too -- in which case just jump
                             ;   over to input processing (should never happen)
-
+                            
     JSR ScreenWipe_Close    ; wipe the screen closed
     LDA #BANK_TELEPORTINFO  ; swap to bank containing teleport dataa
     JSR SwapPRG_L
@@ -5865,7 +5865,7 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-;.byte $00,$00
+.byte $00,$00
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going
@@ -5909,17 +5909,17 @@ ScreenWipeFrame:
                         ;  updating the sound effect this way makes it effectively update only
                         ;  once every 4 frames.
 
-;     LDA tmp+5
-;     EOR #$FF           ; invert the number of visible scanlines (so that fewer scanlines visible
-;     ASL A              ;   = higher period = lower pitch)
-;     ROL tmp            ; then multiply by 8, rotating carry into tmp (high bits of tmp are unimportant
-;     ASL A              ;  as they only set the length counter).
-;     ROL tmp
-;     ASL A
-;     STA $4006          ; then write that period to sq2's F value
-;     ROL tmp
-;     LDA tmp
-;     STA $4007          ; output F value is -N * 8 where 'N' is the visible scanlines
+     LDA tmp+5
+     EOR #$FF           ; invert the number of visible scanlines (so that fewer scanlines visible
+     ASL A              ;   = higher period = lower pitch)
+     ROL tmp            ; then multiply by 8, rotating carry into tmp (high bits of tmp are unimportant
+     ASL A              ;  as they only set the length counter).
+     ROL tmp
+     ASL A
+     STA $4006          ; then write that period to sq2's F value
+     ROL tmp
+     LDA tmp
+     STA $4007          ; output F value is -N * 8 where 'N' is the visible scanlines
 
   @Exit:
     RTS
@@ -5991,45 +5991,46 @@ StartScreenWipe:
     LDA #>oam             ; and do sprite DMA
     STA $4014
 
-;    LDA #$01              ; silence all channels except for square 1
-;    STA $4015             ;   this stops all music.  Square 1 is used for the wipe sound effect
-;    LDA #0
-;    STA $5015             ;   this stops all MMC5 music. (JIGS)
-    
-    LDA #0
-    STA $4000        ; silence square by setting their volume to zero
-    STA $4004
-    STA $4008        ; triangle silences eventually (once length or linear counter expires)
-    STA $5000        ; silence MMC5 square by setting their volume to zero (JIGS)
-    STA $5004
-  ;  LDA #%10000000          ;  silence the tri by setting the linear counter reload
-  ;  STA $4008               ;  to zero.  This will silence the tri on the next linear counter clock.
+ ; @OverworldTransition:  
+ ;   LDA #$02              ; silence all channels except for square 1
+ ;   STA $4015             ;   this stops all music.  Square 1 is used for the wipe sound effect
+ ;   LDA #0
+ ;   STA $5015             ;   this stops all MMC5 music. (JIGS)
+ ;   JMP :+
 
-    LDA CHAN_SQ1 + ch_freq+1
-    AND #$7F
-    STA CHAN_SQ1 + ch_freq+1
-    LDA CHAN_SQ2 + ch_freq+1
-    AND #$7F
-    STA CHAN_SQ2 + ch_freq+1
-    LDA CHAN_SQ3 + ch_freq+1
-    AND #$7F
-    STA CHAN_SQ3 + ch_freq+1
-    LDA CHAN_SQ3 + ch_freq+1
-    AND #$7F
-    STA CHAN_SQ3 + ch_freq+1
-    LDA CHAN_TRI + ch_freq+1
-    AND #$7F
-    STA CHAN_TRI + ch_freq+1
-    
-;    LDA #22              
-;    STA sq2_sfx           ; mark square 2 as playing SFX for this many frames
+  @NoTransition:    
+    LDA #$30
+    STA $4000   ; set Squares and Noise volume to 0
+    STA $4004   
+    STA $5000   ; set MMC5 Squares volume to 0
+    STA $5004   ;
+    LDA #%10000000
+    STA $4008
 
-;    LDA #$38              ; 12.5% duty (harsh), volume=8
-;    STA $4004             ; uses Square 2 now... you know, the SFX channel?!
-;    LDA #%10001010        ; sweep downwards in pitch with speed=0 (fast!) and shift=2 (medium)
-;    STA $4005             ;  don't set F-value here, though -- that isn't done until
+    ;LDA CHAN_SQ1 + ch_freq+1
+    ;AND #$7F
+    ;STA CHAN_SQ1 + ch_freq+1
+    ;LDA CHAN_SQ2 + ch_freq+1
+    ;AND #$7F
+    ;STA CHAN_SQ2 + ch_freq+1
+    ;LDA CHAN_SQ3 + ch_freq+1
+    ;AND #$7F
+    ;STA CHAN_SQ3 + ch_freq+1
+    ;LDA CHAN_SQ3 + ch_freq+1
+    ;AND #$7F
+    ;STA CHAN_SQ3 + ch_freq+1
+    ;LDA CHAN_TRI + ch_freq+1
+    ;AND #$7F
+    ;STA CHAN_TRI + ch_freq+1
+    
+    ;LDA #22              
+    ;STA sq2_sfx           ; mark square 2 as playing SFX for this many frames
+
+  : LDA #$38              ; 12.5% duty (harsh), volume=8
+    STA $4004             ; uses Square 2 now... you know, the SFX channel?!
+    LDA #%10001010        ; sweep downwards in pitch with speed=0 (fast!) and shift=2 (medium)
+    STA $4005             ;  don't set F-value here, though -- that isn't done until
                           ;  ScreenWipeFrame
-
     RTS                   ; exit
 
 

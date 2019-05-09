@@ -1616,7 +1616,7 @@ PrepBattleVarsAndEnterBattle:
 
   
 BattleMusic_LUT:
- .byte $50, $50, $50, $57, $57 ; 9 small, 4 large, mix, fiend, chaos    
+ .byte $50, $50, $50, $59, $59 ; 9 small, 4 large, mix, fiend, chaos    
     
 
 ;;;;  [$9A00 :: 0x2DA10]
