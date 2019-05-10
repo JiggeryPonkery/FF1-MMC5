@@ -2025,10 +2025,10 @@ ExitShop:
     RTS
 
 ShopBuy:
-    JSR HideShopCursor
     LDX shop_type
     LDA lut_ShopWhatWant, X
     JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
+    ;JSR HideShopCursor
     
 ShopBuy_Loop:    
     LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
@@ -2037,7 +2037,8 @@ ShopBuy_Loop:
     JSR DrawShopBox             ; draw shop box #2 (inv list box)    
     INC shop_listdrawn
 
-  : JSR LoadShopInventory
+  : JSR ShopCursor_Slot1
+    JSR LoadShopInventory
     
     LDX shop_type
     LDA lut_ShopMaxAmount, X    ; gets either #99, #16, or #4 depending on shop type
@@ -2058,6 +2059,7 @@ ShopBuy_Loop:
     STA shop_amount_max         ; save as new max
     BNE @ShopSelectAmount_Prep  ; if its not 0, go buy more
     
+    JSR HideShopCursor
     LDA shop_type               ; get shop type again
     CMP #2
     BEQ @Scrolls                ; if its 2 or 3, its a magic shop
@@ -2084,20 +2086,22 @@ ShopSelectAmount:
   
     JSR Shop_CanAfford          ; check to ensure they can afford this item
     BCC @BuyConfirm             ; if they can, jump ahead to complete the purchase.
+      JSR HideShopCursor
       LDA #$11
       JSR DrawShopDialogueBox   ; if they can't, "you can't afford it" dialogue
       JSR MenuWaitForBtn
       JMP ShopSelectAmount      ; and return to loop
       
    @ShopBuy_Return:
-    LDA #$A0
-    STA shopcurs_x
-    LDA #$20
-    STA shopcurs_y
-    JSR ShopFrame               ; update cursor position   
+    ;LDA #$A0
+    ;STA shopcurs_x
+    ;LDA #$20
+    ;STA shopcurs_y
+    ;JSR ShopFrame               ; update cursor position   
     JMP ShopBuy
   
    @BuyConfirm: 
+    JSR HideShopCursor
     JSR ShopXGoldOkay           ; turns off dancing and prints the price to pay
     JSR ShopLoop_YesNo          ; give them the yes/no option
     BCS @ShopBuy_Return ; ShopSelectAmount        ; if they pressed B, return to selecting the amount
@@ -2161,14 +2165,20 @@ HideShopCursor:
     STA shopcurs_x
     STA shopcurs_y
     JMP ShopFrame               ; update cursor position before drawing things
+    
+ShopCursor_Slot1:
+    LDA #$A0
+    STA shopcurs_x
+    LDA #$20
+    STA shopcurs_y
+    JMP ShopFrame               ; update cursor position before drawing things
 
 ShopSell:
     JSR ConvertInventoryToItemBox
     BNE :+
     JMP NothingToSell 
     
-  : JSR HideShopCursor
-    LDX shop_type
+  : LDX shop_type
     LDA lut_ShopWhatSell, X
     JSR DrawShopDialogueBox     ; "what do you have to sell?"
 
@@ -2179,7 +2189,8 @@ ShopSell_Loop:
     JSR DrawShopBox             ; draw shop box #2 (inv list box)    
     INC shop_listdrawn
 
-  : LDA #0
+  : JSR ShopCursor_Slot1
+    LDA #0
     STA cursor
     LDA #1
     STA shop_selling
@@ -2206,6 +2217,7 @@ ShopSelectAmount_Sell:
       JMP ShopSelectAmount_Sell
       
    @SellConfirm:   
+    JSR HideShopCursor
     JSR ShopXGoldOkay
     JSR ShopLoop_YesNo          ; give them the yes/no option
     BCS ShopSell        ; ShopSelectAmount        ; if they pressed B, return to selecting the amount
