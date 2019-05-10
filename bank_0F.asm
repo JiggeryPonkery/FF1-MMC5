@@ -5873,7 +5873,7 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-.byte $00,$00
+;.byte $00,$00
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going
