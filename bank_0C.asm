@@ -1185,6 +1185,16 @@ CancelBattleAction:
     ;; JIGS - changing movement
     JMP InputCharacterBattleCommand2
     
+    
+UndrawCommandBox_Maybe:
+    LDA btl_battletype
+    CMP #3       ; if fiend or chaos battle...
+    BCC :+
+      RTS        ; nope
+    
+ :  LDA #$01
+    JMP UndrawNBattleBlocks_L     ; undraw the command box
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Battle_MainMenu_APressed  [$94B8 :: 0x314C8]
@@ -1315,8 +1325,7 @@ BattleSubMenu_Skill:
     BEQ @Kick
       
    @Steal: 
-    LDA #$01
-    JSR UndrawNBattleBlocks_L     ; undraw the command box
+    JSR UndrawCommandBox_Maybe
     JSR SelectEnemyTarget           ; Pick a target
     CMP #$02
     BNE :+                          ; If they pressed B....
@@ -1404,8 +1413,7 @@ BattleSubMenu_Hide:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleSubMenu_Fight:
-    LDA #01
-    JSR UndrawNBattleBlocks_L       ; undraw the command menu
+    JSR UndrawCommandBox_Maybe
     JSR SelectEnemyTarget           ; Pick a target
     CMP #$02
     BNE :+                          ; If they pressed B....
@@ -1422,6 +1430,7 @@ BattleSubMenu_Fight:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleSubMenu_Magic:
+    ;JSR UndrawCommandBox_Maybe
     LDA #01
     JSR UndrawNBattleBlocks_L   ; undraw the command box
 
@@ -1539,7 +1548,13 @@ BattleSubMenu_Magic_NoUndraw:
   @CheckTarget_02:                  ; target 02 = target one enemy
     LSR A
     BCC @CheckTarget_04
-      JSR SelectEnemyTarget         ; puts target in Y
+      LDA btl_battletype
+      CMP #3                        ; if its a fiend/chaos battle, don't bother selecting target
+      BCC :+
+        JSR DrawCommandBox_L        ; re-draw the command box
+        LDY #$00                    ; output: Y = the target slot
+        JMP :++
+    : JSR SelectEnemyTarget         ; puts target in Y
       CMP #$02
       BNE :+                        ; if they pressed B to exit
         JMP BattleSubMenu_Magic_NoUndraw     ; redo magic submenu from the beginnning
@@ -2681,15 +2696,22 @@ SelectPlayerTarget:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SelectEnemyTarget:  
-    JSR DrawRosterBox_L         ; and show enemy names instead
+    LDA btl_battletype
+    CMP #3
+    BCC :+
+        LDY #$00                        ; output: Y = the target slot
+        LDA #$01                        ; output: A = 1 ('A' button pressed)
+        RTS
+    
+ :  JSR DrawRosterBox_L         ; and show enemy names instead
 
-    LDA btl_drawflagsA          ; set the flag to indicate we want the cursor drawn
-    ORA #$10                    ; note that this is unnecessary here, since EnemyTargetMenu
-    STA btl_drawflagsA          ; (called below) also does this.
+   ; LDA btl_drawflagsA          ; set the flag to indicate we want the cursor drawn
+   ; ORA #$10                    ; note that this is unnecessary here, since EnemyTargetMenu
+   ; STA btl_drawflagsA          ; (called below) also does this.
     
     LDA #$00                    ; initialize/clear the cursor position
     STA btlcurs
-    LDX #$00                    ; zero X?  Why?  It's never used?
+   ; LDX #$00                    ; zero X?  Why?  It's never used?
     
     LDA btl_battletype          ; get the formation type and use it as an index to the jump table
     ASL A
@@ -2703,7 +2725,7 @@ SelectEnemyTarget:
     LDA #01
     JSR UndrawNBattleBlocks_L 
     JSR DrawCommandBox_L ; re-draw the command box
-  : PLA
+    PLA
     LDY btlcmd_target
     RTS
     
@@ -2719,8 +2741,8 @@ lut_EnemyTargetMenuJumpTbl:
   .WORD EnemyTargetMenu_9Small
   .WORD EnemyTargetMenu_4Large
   .WORD EnemyTargetMenu_Mix
-  .WORD EnemyTargetMenu_FiendChaos
-  .WORD EnemyTargetMenu_FiendChaos
+;  .WORD EnemyTargetMenu_FiendChaos
+;  .WORD EnemyTargetMenu_FiendChaos
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2732,12 +2754,12 @@ lut_EnemyTargetMenuJumpTbl:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-EnemyTargetMenu_FiendChaos:
-    JSR BattleClearVariableSprite   ; clear the cursor sprite
-    JSR BattleFrame                 ; update PPU to refresh OAM
-    LDY #$00                        ; output: Y = the target slot
-    LDA #$01                        ; output: A = 1 ('A' button pressed)
-    RTS
+;EnemyTargetMenu_FiendChaos:
+;    JSR BattleClearVariableSprite   ; clear the cursor sprite
+;    JSR BattleFrame                 ; update PPU to refresh OAM
+;    LDY #$00                        ; output: Y = the target slot
+;    LDA #$01                        ; output: A = 1 ('A' button pressed)
+;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
