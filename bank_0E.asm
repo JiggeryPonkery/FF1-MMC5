@@ -6902,8 +6902,10 @@ DrawHealMenu:
     CMP #HEAL_POTENCY
     BNE :+ 
         DEC item_heal          ; then remove a heal potion from the inventory
+        BEQ @UseItem_Exit                  ; stop if there's no more to use!
         JMP @DoHeal
  : DEC item_x_heal
+   BEQ @UseItem_Exit                  ; stop if there's no more to use!
     
    @DoHeal: 
     LDA tmp+3                  ; otherwise.. can use!
@@ -6974,6 +6976,7 @@ UseItem_Ether_2:
     JSR PlayHealSFX
     
     DEC item_ether             ; if we could... remove one from the inventory
+    BEQ @Exit                  ; stop if there's no more to use!
     JMP UseItem_Ether_2
     ;JSR DrawMPTargetMenu       ; redraw the target menu to reflect the changes
     
@@ -7032,6 +7035,7 @@ UseItem_Elixir:
     JSR PlayHealSFX
     
     DEC item_elixir            ; if we could... remove one from the inventory
+    BEQ @Exit                  ; stop if there's no more to use!
     JMP UseItem_Elixir
     ;JSR DrawItemTargetMenu_Elixir  ; redraw the target menu to reflect the changes
     ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button (sprite version!)
@@ -7067,6 +7071,7 @@ UseItem_Pure:
     JSR PlayHealSFX
 
     DEC item_pure               ; if we could... remove one from the inventory
+    BEQ @Exit                  ; stop if there's no more to use!
     ;JSR DrawItemTargetMenu     ; redraw the target menu to reflect the changes
     ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button
     JMP UseItem_Pure
@@ -7101,6 +7106,7 @@ UseItem_Soft:
     JSR PlayHealSFX
 
     DEC item_soft              ; remove soft from inventory
+    BEQ @Exit                  ; stop if there's no more to use!
     ;JSR DrawItemTargetMenu
     ;JSR MenuWaitForBtn_SFX
     JMP UseItem_Soft
@@ -7138,6 +7144,7 @@ UseItem_PhoenixDown:
     JSR PlayHealSFX
 
     DEC item_down              ; remove phoenix down from inventory
+    BEQ @Exit                  ; stop if there's no more to use!
     ;JSR DrawItemTargetMenu
     ;JSR MenuWaitForBtn_SFX
     JMP UseItem_PhoenixDown
