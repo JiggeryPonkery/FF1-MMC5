@@ -1359,6 +1359,34 @@ BattleSubMenu_Skill:
     LDA #$FD
     JMP SetCharacterBattleCommand  ; like magic spells
 
+SetAutoRun:
+    LDA btlcmd_curchar
+    STA MMC5_tmp+1
+    JSR CharWalkAnimationRight     ; walk this character back to the right
+    JSR HideCharacter              ;; JIGS - rehide them if previously hidden
+   
+   @Loop:
+    JSR @AutoRunSet   
+    INC btlcmd_curchar
+    LDA btlcmd_curchar
+    CMP #4
+    BNE @Loop
+    JMP AutoSet_Ready
+
+ @AutoRunSet:
+    LDA btlcmd_curchar         
+    ASL A
+    ASL A
+    TAY
+    LDA #0
+    STA btl_charcmdbuf+1, Y     ; [1] = X
+    STA btl_charcmdbuf+3, Y     ; only used for ethers (so far)
+    LDA #$20
+    STA btl_charcmdbuf, Y       ; [0] = A
+    LDA btlcmd_curchar          ; see what character to start from
+    ORA #$80
+    STA btl_charcmdbuf+2, Y     ; [2] = Y
+    RTS
   
   
   ;; JIGS - this is new!
@@ -1430,17 +1458,10 @@ SetAutoBattle:
     STA AutoTargetOption        ; turn on AutoTarget
   
    @FirstChar:
-    JSR @AutoBattleSet
     LDA btlcmd_curchar
     STA MMC5_tmp+1
     JSR CharWalkAnimationRight                  ; walk this character back to the right
     JSR HideCharacter                         ;; JIGS - rehide them if previously hidden
-    
-    INC btlcmd_curchar
-    LDA btlcmd_curchar
-    CMP #4
-    BNE @Loop
-    JMP @Ready
     
    @Loop:
     JSR @AutoBattleSet
@@ -1448,17 +1469,7 @@ SetAutoBattle:
     LDA btlcmd_curchar
     CMP #4
     BNE @Loop
-    
-    INC MMC5_tmp+1
-    LDA MMC5_tmp+1
-    STA btlcmd_curchar
-   
-   @Ready: 
-    PLA 
-    PLA
-    PLA
-    PLA ; two JSRs to undo 
-    JMP ReadyToFight
+    JMP AutoSet_Ready
     
    @AutoBattleSet:
     LDA btlcmd_curchar          ; see what character to start from
@@ -1472,6 +1483,17 @@ SetAutoBattle:
     LDA #04
     STA btl_charcmdbuf, Y       ; [0] = A
     RTS
+    
+AutoSet_Ready: 
+    INC MMC5_tmp+1
+    LDA MMC5_tmp+1
+    STA btlcmd_curchar
+    PLA 
+    PLA
+    PLA
+    PLA ; two JSRs to undo 
+    JMP ReadyToFight
+    
 
 BattleSubMenu_Fight:
     JSR UndrawCommandBox_Maybe
@@ -1491,9 +1513,8 @@ BattleSubMenu_Fight:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleSubMenu_Magic:
-    ;JSR UndrawCommandBox_Maybe
     LDA #01
-    JSR UndrawNBattleBlocks_L   ; undraw the command box
+    JSR UndrawNBattleBlocks_L   ; undraw the command or roster box
 
 BattleSubMenu_Magic_NoUndraw:
     LDA btlcmd_curchar              ; <- This is never used
@@ -1612,15 +1633,19 @@ BattleSubMenu_Magic_NoUndraw:
       LDA btl_battletype
       CMP #3                        ; if its a fiend/chaos battle, don't bother selecting target
       BCC :+
-        JSR DrawCommandBox_L        ; re-draw the command box
         LDY #$00                    ; output: Y = the target slot
         JMP :++
-    : JSR SelectEnemyTarget         ; puts target in Y
+    : JSR SelectEnemyTarget_Magic   ; puts target in Y
       CMP #$02
       BNE :+                        ; if they pressed B to exit
         JMP BattleSubMenu_Magic_NoUndraw     ; redo magic submenu from the beginnning
-    : LDA #$40
+    : TYA
+      PHA
+      JSR DrawCommandBox_L        ; re-draw the command box
+      LDA #$40
       LDX btlcmd_spellindex
+      PLA
+      TAY
       JMP SetCharacterBattleCommand ; command = 40 xx TT  (xx = spell, TT = enemy target)
     
   @CheckTarget_04:                  ; target 04 = target self
@@ -2799,6 +2824,28 @@ SelectEnemyTarget:
     
     @ReDrawAfterSelection:
     JMP ($0088)                 ; jump to appropriate target menu code
+    
+SelectEnemyTarget_Magic:  
+    JSR DrawRosterBox_L         ; and show enemy names instead
+    LDA #$00                    ; initialize/clear the cursor position
+    STA btlcurs
+    LDA btl_battletype          ; get the formation type and use it as an index to the jump table
+    ASL A
+    TAY
+    LDA lut_EnemyTargetMenuJumpTbl, Y
+    STA $88
+    LDA lut_EnemyTargetMenuJumpTbl+1, Y
+    STA $89
+    JSR @ReDrawAfterSelection
+    PHA
+    LDA #01
+    JSR UndrawNBattleBlocks_L 
+    PLA
+    LDY btlcmd_target
+    RTS
+    
+    @ReDrawAfterSelection:
+    JMP ($0088)                 ; jump to appropriate target menu code    
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3488,6 +3535,14 @@ MenuSelection_2x4:
     LDA gettingcommand
     BEQ :+                          ; if not on command box, do nothing
     JMP SetAutoBattle
+    
+  : LDA btl_input
+    AND #$04
+    BEQ :+  
+    ;; Select was pressed!
+    LDA gettingcommand
+    BEQ :+
+    JMP SetAutoRun
   
   : JSR @MoveCursor                 ; if A/B are not pressed, then check arrow buttons to move the cursor
     JMP @MainLoop                   ; and repeat
@@ -5629,12 +5684,8 @@ StealFromEnemy:
    STX btl_defender
    ORA #$80
    STA btl_attacker
-
-   JSR IsCommandPlayerValid
-   BCS :+
-       RTS         ; player is dead or stoned or something, so don't do the thing
   
- : LDA #$00        ; print '02 00 00' to combat box 0
+   LDA #$00        ; print '02 00 00' to combat box 0
    TAX             ;  (attacker name in attacker combat box)
    LDY #$02
    JSR PrepareAndDrawSimpleCombatBox
@@ -5735,11 +5786,7 @@ KickEnemies:
     ORA #$80
     STA btl_attacker            ; make sure high bit is set, and record them as an attacker
     
-    JSR IsCommandPlayerValid
-    BCS :+
-       RTS         ; player is dead or stoned or something, so don't do the thing
-    
-  : LDA #$FF
+    LDA #$FF
     STA btl_defender
     LDA #$40
     STA btl_attackid
