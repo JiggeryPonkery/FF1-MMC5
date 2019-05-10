@@ -1681,6 +1681,9 @@ PrepBattleVarsAndEnterBattle:
     STA music_track           ; set music track and followup
     STA btl_followupmusic
     
+    LDA AutoTargetOption
+    STA autobattle
+    
     LDA #$06
     JMP DoCrossPageJump         ; jump to FinishBattlePrepAndFadeIn in bank C
 

@@ -602,17 +602,17 @@ lut_EnemyAi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ExitBattle:
-    JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
     LDA btl_result                  ; if running, skip to fade out, don't animate them walking
     CMP #$03
     BEQ :+
     JSR ResetUsePalette
     JSR PartyWalkAnimation          ; JIGS - makes them all walk to the left
-    JMP :++
+    JMP :++                         ; does its own fadeout, so skip this one
     
   : JSR BattleFadeOut
     
-  : LDA btl_result                  ; check battle result
+  : JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
+    LDA btl_result                  ; check battle result
     CMP #$FF                        ; if not $FF...
     BEQ @ChaosWait
     
@@ -982,6 +982,9 @@ BattleLogicLoop_ReEntry:
     JSR DrawCommandBox_L            ; draw the command box
     JSR UpdateSprites_BattleFrame   ; then do a frame with updated battle sprites
     
+    LDA autobattle
+    STA AutoTargetOption
+    
     LDY #$1C
     LDA #$00
     STA btl_attackid                ; clear attack id?  This seems very strange to do here...
@@ -1014,10 +1017,15 @@ BattleLogicLoop_ReEntry:
     JSR GetCharacterBattleCommand
     ;JSR DrawCharacterStatus
     
+    INC btlcmd_curchar       ; set this to 4 so the BacktrackBattleCommand jump table works right!
+    
+ReadyToFight:
     JSR LongCall             ; swap to Bank Z to draw this
     .word BattleConfirmation
     .byte $0F
-      
+    
+    LDA #0
+    STA gettingcommand    
     LDY #$10
     : LDA lut_ReadyCursorPos-1, Y
       STA btlcurs_positions-1, Y   
@@ -1037,18 +1045,17 @@ BattleLogicLoop_ReEntry:
     JSR DrawCharacterStatus
     
     ; And then do the actual combat!
-  BattleLogicLoop_DoCombat:     ; alternative entry point for when the party is surprised
+BattleLogicLoop_DoCombat:       ; alternative entry point for when the party is surprised
     JSR DoBattleRound
     JSR CheckForEndOfBattle
     JSR RebuildEnemyRoster
     JMP BattleLogicLoop_ReEntry ; JIGS - do this to skip pressing a button again before selecting a command
     
-    RedrawCommandList:
-    LDA #$01                   ; undraw the Battle menu to wipe out the "ready?" message
+RedrawCommandList:
+    JSR DrawCommandBox_L       ; re-draw the command box to cover up the "ready?" message
+    LDA #$01                   ; then un-draw it to reveal the old command box
     JSR UndrawNBattleBlocks_L
-    JSR DrawCommandBox_L       ; then re-draw it
-    ;JSR DrawPlayerBox
-    JMP __GetCharacterBattleCommand_Backtrack_3
+    JSR BacktrackBattleCommand ;; JSR to this instead of flowing, because it will pull the return address!
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1078,6 +1085,7 @@ BacktrackBattleCommand:
   .WORD __GetCharacterBattleCommand_Backtrack_0     ; char 1 backtracks to char 0
   .WORD __GetCharacterBattleCommand_Backtrack_1     ; char 2 backtracks to char 1
   .WORD __GetCharacterBattleCommand_Backtrack_2     ; char 3 backtracks to char 2
+  .WORD __GetCharacterBattleCommand_Backtrack_3     ; ready check backtracks to char 3
   
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1148,7 +1156,6 @@ InputCharacterBattleCommand:
 ;    JSR CharWalkAnimationRight                  ; walk this character back to the right
 ;    JSR UndoCharacterBattleCommand              ; undo the previously input command
 ;    JMP BacktrackBattleCommand                  ; and backtrack to previous character.
-
     LDA btlcmd_curchar
     JSR UnhideCharacter
     JSR CharWalkAnimationLeft                   ; walk this character left
@@ -1304,6 +1311,8 @@ BattleSubMenu_Skill:
     JSR DrawBattleSkillBox_L
     INC btl_combatboxcount_alt
     
+    LDA #0
+    STA gettingcommand    
     LDY #$10
     : LDA lut_SkillCursorPos-1, Y   ; copy over the cursor positions for
       STA btlcurs_positions-1, Y    ;  the Skill menu
@@ -1411,6 +1420,58 @@ BattleSubMenu_Hide:
 ;;  Called when the player selects 'FIGHT'
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+SetAutoBattle:
+    ;LDA AutoTargetOption
+    ;STA autobattle              ; back up AutoTarget preference
+    ;; done during battle var prep
+    
+    LDA #0
+    STA AutoTargetOption        ; turn on AutoTarget
+  
+   @FirstChar:
+    JSR @AutoBattleSet
+    LDA btlcmd_curchar
+    STA MMC5_tmp+1
+    JSR CharWalkAnimationRight                  ; walk this character back to the right
+    JSR HideCharacter                         ;; JIGS - rehide them if previously hidden
+    
+    INC btlcmd_curchar
+    LDA btlcmd_curchar
+    CMP #4
+    BNE @Loop
+    JMP @Ready
+    
+   @Loop:
+    JSR @AutoBattleSet
+    INC btlcmd_curchar
+    LDA btlcmd_curchar
+    CMP #4
+    BNE @Loop
+    
+    INC MMC5_tmp+1
+    LDA MMC5_tmp+1
+    STA btlcmd_curchar
+   
+   @Ready: 
+    PLA 
+    PLA
+    PLA
+    PLA ; two JSRs to undo 
+    JMP ReadyToFight
+    
+   @AutoBattleSet:
+    LDA btlcmd_curchar          ; see what character to start from
+    ASL A
+    ASL A
+    TAY
+    LDA #0
+    STA btl_charcmdbuf+1, Y     ; [1] = X
+    STA btl_charcmdbuf+2, Y     ; [2] = Y
+    STA btl_charcmdbuf+3, Y     ; only used for ethers (so far)
+    LDA #04
+    STA btl_charcmdbuf, Y       ; [0] = A
+    RTS
 
 BattleSubMenu_Fight:
     JSR UndrawCommandBox_Maybe
@@ -1711,6 +1772,8 @@ BattleSubMenu_Item:
     ;STA btl_charcmdbuf+4, Y     ; [4] = tmp <- spell level for ether
     
 EtherManaSelection:
+    LDA #0
+    STA gettingcommand    
     LDY #$10
     : LDA lut_EtherCursorPos-1, Y   ; copy over the cursor positions for
       STA btlcurs_positions-1, Y    ;  the Item menu
@@ -2602,6 +2665,8 @@ DrawWeaponGraphicRow:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepAndGetBattleMainCommand:
+    LDA #1
+    STA gettingcommand
     LDY #$10
     : LDA lut_MainCombatBoxCursorPos-1, Y   ; -1 because Y is 1-based
       STA btlcurs_positions-1, Y
@@ -2623,6 +2688,9 @@ PrepAndGetBattleMainCommand:
 
 SelectPlayerTarget:
     STA btl_targetbacketup                 ; backup the current character
+    
+    LDA #0
+    STA gettingcommand    
     
     LDY #$10                    ; Set the cursor positions
     : LDA lut_PlayerTargetCursorPos-1, Y
@@ -3008,6 +3076,8 @@ BattleTarget_Up:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MenuSelection_Equipment:
+    LDA #0
+    STA gettingcommand    
     LDY #$10
     : LDA lut_EquipmentCursorPos-1, Y
       STA btlcurs_positions-1, Y
@@ -3024,6 +3094,8 @@ MenuSelection_Equipment:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MenuSelection_Item:
+    LDA #0
+    STA gettingcommand    
     LDY #$10
     : LDA lut_ItemCursorPos-1, Y   ; copy over the cursor positions for
       STA btlcurs_positions-1, Y    ;  the Item menu
@@ -3408,6 +3480,15 @@ MenuSelection_2x4:
       PLA                           ; put A/B button state in A
       RTS                           ; exit!
     
+  : LDA btl_input
+    AND #$08
+    BEQ :+
+    
+    ;; Start was pressed!
+    LDA gettingcommand
+    BEQ :+                          ; if not on command box, do nothing
+    JMP SetAutoBattle
+  
   : JSR @MoveCursor                 ; if A/B are not pressed, then check arrow buttons to move the cursor
     JMP @MainLoop                   ; and repeat
     
@@ -5415,6 +5496,10 @@ Battle_DoPlayerTurn:
     AND #$03                    ; mask off the high bit to get the player ID
     STA @playerid               ;  and record it for future use
     
+    JSR IsCommandPlayerValid    ; C set if they're able to act
+    BCC @Nope
+    
+    LDA @playerid
     ASL A
     ASL A
     TAY                         ; id*4 in Y (command index)
@@ -5439,10 +5524,13 @@ Battle_DoPlayerTurn:
     CMP #$FE
     BEQ @DoSteal
     
+    @Nope:
+    RTS
+    
     ;;  Code reaches here if the player had no command, which would only happen if they are
     ;;  immobilized or dead.
     
-    JMP IsCommandPlayerValid
+    ;JMP IsCommandPlayerValid
 
    @Attack: 
     LDX btl_charcmdbuf+2, Y           ; X = enemy target
