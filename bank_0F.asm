@@ -12158,14 +12158,14 @@ BattleDrawMessageBuffer:
     LDA #>btl_msgbuffer
     STA $89
     
-    LDA #$14 ; 0A
+    LDA #$0A ; 0A
     STA btl_msgbuffer_loopctr               ; loop down-counter ($0C rows)
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
       
       LDA $88           ; add $20 to the source pointer to draw next row
       CLC
-      ADC #$10 ; 20 
+      ADC #$20 ; 20 
       STA $88
       LDA $89
       ADC #$00
@@ -12173,7 +12173,7 @@ BattleDrawMessageBuffer:
       
       LDA $8A           ; add $20 to the target PPU address
       CLC
-      ADC #$10 ; 20 
+      ADC #$20 ; 20 
       STA $8A
       LDA $8B
       ADC #$00
@@ -12212,7 +12212,7 @@ Battle_DrawMessageRow:
       STA $2007         ;  and draw them
       INY
       ;CPY #$19
-      CPY #$10 ; 20 ;; JIGS - RAWR
+      CPY #$20 ; 20 ;; JIGS - RAWR
       ;; WHAT A PAIN; this tells the game to stop drawing boxes so they don't cover up the character names...
       ;; instead of just having the programmers not make boxes that are so big they cover up the names...
       ;; which they do anyway... so. Now, it looks for the edge of the screen and stops there.   
@@ -12249,8 +12249,8 @@ BattleDrawMessageBuffer_Reverse:
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
       JSR @AdjustPointers               ; move ptrs to prev row
-      JSR Battle_DrawMessageRow         ; draw another one
-      JSR @AdjustPointers               ; move ptrs again
+      ;JSR Battle_DrawMessageRow         ; draw another one
+      ;JSR @AdjustPointers               ; move ptrs again
       JSR Battle_UpdatePPU_UpdateAudio_FixedBank    ; update audio and stuffs
       
       DEC btl_msgbuffer_loopctr
@@ -12260,7 +12260,7 @@ BattleDrawMessageBuffer_Reverse:
   @AdjustPointers:
     LDA $88     ; subtract $20 from the source pointer
     SEC
-    SBC #$10 ; 20
+    SBC #$20 ; 20
     STA $88
     LDA $89
     SBC #$00
@@ -12268,7 +12268,7 @@ BattleDrawMessageBuffer_Reverse:
     
     LDA $8A     ; and from the dest pointer
     SEC
-    SBC #$10  ; 20
+    SBC #$20  ; 20
     STA $8A
     LDA $8B
     SBC #$00
