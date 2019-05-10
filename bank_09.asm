@@ -371,6 +371,7 @@ EnterMinimap:
     LDA #$51
     ;; JIGS - since the menu theme isn't used, why not use it here! 
     STA music_track        ;   but it's not heard until after all drawing is complete (music routine isn't called)
+    STA dlgmusic_backup
 
     JSR Minimap_PrepDecorCHR   ; Load decoration CHR to RAM (those dragon graphic things)
     JSR Minimap_PrepTitleCHR   ; And the "Final Fantasy" title text

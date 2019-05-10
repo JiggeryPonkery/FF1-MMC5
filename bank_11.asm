@@ -1105,6 +1105,7 @@ EnterMiniGame:
 
     LDA #$42
     STA music_track            ; start music track number $42 (bridge scene music)
+    STA dlgmusic_backup
 
    ;
    ; load the desired palette
@@ -1532,6 +1533,7 @@ EnterBridgeScene:
 
     LDA #$42
     STA music_track         ; start music track $42 (bridge scene music)
+    STA dlgmusic_backup
 
     LDA #0
     STA story_credits       ; start with drawing story (not credits)
