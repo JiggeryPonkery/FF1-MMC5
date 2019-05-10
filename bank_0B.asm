@@ -146,6 +146,7 @@ BANK_THIS = $0B
 ;;                   2 = 2 large & 6 small
 ;;                   3 = Fiend
 ;;                   4 = Chaos
+;;                   5 = Mini boss
 ;;        bits 0-3: graphics set
 ;; +1   = 2 bits per enemy to select picture from the graphics set
 ;; +2-5 = enemy index numbers
@@ -1621,7 +1622,7 @@ PrepBattleVarsAndEnterBattle:
 
   
 BattleMusic_LUT:
- .byte $50, $50, $50, $59, $59 ; 9 small, 4 large, mix, fiend, chaos    
+ .byte $50, $50, $50, $59, $59, $5A, $5A, $5A ; 9 small, 4 large, mix, fiend, chaos, mixed miniboss, pirates, 4 big large minibosses 
     
 
 ;;;;  [$9A00 :: 0x2DA10]
@@ -3309,11 +3310,34 @@ PrepareEnemyFormation:
     LSR A
     STA btl_battletype
     
-    CMP #$02
-    BNE :+
-      JMP PrepareEnemyFormation_Mix         ; type=2    : prepare the 'Mix' enemy formation
-:   BCC PrepareEnemyFormation_SmallLarge    ; type=0,1  : prepare the '9Small' or '4Large' enemy formation
-      JMP PrepareEnemyFormation_FiendChaos  ; type=3,4  : prepare the 'Fiend'/'Chaos' enemy formation
+    CMP #07
+    BEQ @4Large_Boss
+    CMP #06
+    BEQ @Pirates               ; Pirates and 4Large_Boss are special; even though the btlform_type is $6x
+    CMP #05                    ; the SmallLarge formation routine needs A to be 0 or 1
+    BEQ @Mix                   ; to properly place the enemies using lut_EnemyCountByBattleType
+    CMP #04
+    BEQ @BigBoss
+    CMP #03
+    BEQ @BigBoss
+    CMP #02
+    BEQ @Mix
+   
+   @9Small_4Large:   
+    JMP PrepareEnemyFormation_SmallLarge  ; type=0,1  : prepare the '9Small' or '4Large' enemy formation   
+   @Mix: 
+    JMP PrepareEnemyFormation_Mix         ; type=2    : prepare the 'Mix' enemy formation
+   @BigBoss:
+    JMP PrepareEnemyFormation_FiendChaos  ; type=3,4  : prepare the 'Fiend'/'Chaos' enemy formation
+   @Pirates:
+    LDA #0   
+    JMP PrepareEnemyFormation_SmallLarge
+   @4Large_Boss:
+    LDA #1   
+    JMP PrepareEnemyFormation_SmallLarge
+
+
+        
       
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
