@@ -2084,6 +2084,7 @@ ShopSelectAmount:
   
     JSR Shop_CanAfford          ; check to ensure they can afford this item
     BCC @BuyConfirm             ; if they can, jump ahead to complete the purchase.
+      LDA #$11
       JSR DrawShopDialogueBox   ; if they can't, "you can't afford it" dialogue
       JSR MenuWaitForBtn
       JMP ShopSelectAmount      ; and return to loop
