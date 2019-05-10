@@ -11783,13 +11783,13 @@ DrawEnemyEffect:
       JSR WriteAToPPU6Times
       
       JSR BattleUpdatePPU           ; reset scroll, etc
-      
+
+      LDA explode_min_y      
       CLC                           ; move PPU addr to next row
-      LDA explode_min_y
       ADC #$20
       STA explode_min_y
       BCC :+
-        INC explode_min_x
+        INC explode_max_x
     : JSR BattleUpdateAudio         ; update audio for the frame
       DEC explode_min_x
       BNE @EraseLoop
