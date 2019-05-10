@@ -3044,10 +3044,6 @@ MenuSelection_Item:
     LDA #21
     STA dest_y
     
-    ;LDA #BANK_THIS
-    ;STA ret_bank
-    
-    ;JSR WaitForVBlank_L    
     JSR DrawComplexString 
     
   @MainLoop:
@@ -5267,7 +5263,7 @@ ApplyPoisonToPlayer:
     INC btl_combatboxcount_alt
     
 	JSR DrawDamageCombatBox         ; print damage
-    LDA btlmag_playerhitsfx
+    LDA #1
     JSR PlayBattleSFX   
     JSR BattleScreenShake_L
     JSR RespondDelay  
