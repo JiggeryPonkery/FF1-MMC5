@@ -389,8 +389,8 @@ lut_StealList:
 .byte $00, $00         ; *                      ; 06 IGUANA          
 .byte $00, $00         ; *                      ; 07 AGAMA           
 .byte $00, $00         ; *                      ; 08 SAURIA          
-.byte $02, ARM34       ; Copper bracelet        ; 09 GIANT           
-.byte $02, ARM35       ; Silver bracelet        ; 0A FrGIANT         
+.byte $02, ARM11       ; Copper bracelet        ; 09 GIANT           
+.byte $02, ARM12       ; Silver bracelet        ; 0A FrGIANT         
 .byte $01, X_HEAL      ; X_Heal                 ; 0B R`GIANT         
 .byte $01, HEAL        ; Heal                   ; 0C SAHAG           
 .byte $01, PURE        ; Pure                   ; 0D R`SAHAG         
