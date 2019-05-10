@@ -561,7 +561,6 @@ StealFromEnemyZ:
     STA btltmp_altmsgbuffer+2       ; here, re-write the item name byte with equipment name byte
     LDA lut_StealList+1, X
     TAX
-    DEX
     STX btltmp_altmsgbuffer+3
     INC inv_weapon, X
     CLC
