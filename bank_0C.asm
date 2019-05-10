@@ -4453,7 +4453,7 @@ RespondDelay_ClearCombatBoxes:
 
 RespondDelay:
     LDA btl_responddelay        ; get the delay
-    STA btl_respondrate_tmp                   ; stuff it in temp ram as loop counter
+    STA btl_respondrate_tmp     ; stuff it in temp ram as loop counter
     : JSR WaitForVBlank_L       ; wait that many frames
       JSR BattleUpdateAudio     ; updating audio each frame
       DEC btl_respondrate_tmp
