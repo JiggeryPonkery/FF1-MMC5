@@ -12158,14 +12158,14 @@ BattleDrawMessageBuffer:
     LDA #>btl_msgbuffer
     STA $89
     
-    LDA #$0A
+    LDA #$14 ; 0A
     STA btl_msgbuffer_loopctr               ; loop down-counter ($0C rows)
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
       
       LDA $88           ; add $20 to the source pointer to draw next row
       CLC
-      ADC #$20
+      ADC #$10 ; 20 
       STA $88
       LDA $89
       ADC #$00
@@ -12173,7 +12173,7 @@ BattleDrawMessageBuffer:
       
       LDA $8A           ; add $20 to the target PPU address
       CLC
-      ADC #$20
+      ADC #$10 ; 20 
       STA $8A
       LDA $8B
       ADC #$00
@@ -12212,7 +12212,7 @@ Battle_DrawMessageRow:
       STA $2007         ;  and draw them
       INY
       ;CPY #$19
-      CPY #$20 ;; JIGS - RAWR
+      CPY #$10 ; 20 ;; JIGS - RAWR
       ;; WHAT A PAIN; this tells the game to stop drawing boxes so they don't cover up the character names...
       ;; instead of just having the programmers not make boxes that are so big they cover up the names...
       ;; which they do anyway... so. Now, it looks for the edge of the screen and stops there.   
@@ -12243,7 +12243,7 @@ BattleDrawMessageBuffer_Reverse:
     LDA #>(btl_msgbuffer + $9*$20)
     STA $89
     
-    LDA #$05                ; loop down counter.  6 iterations, 2 rows per iterations
+    LDA #$0A ; 05               ; loop down counter.  6 iterations, 2 rows per iterations
     STA btl_msgbuffer_loopctr               ;    = $C rows
     
   @Loop:
@@ -12260,7 +12260,7 @@ BattleDrawMessageBuffer_Reverse:
   @AdjustPointers:
     LDA $88     ; subtract $20 from the source pointer
     SEC
-    SBC #$20
+    SBC #$10 ; 20
     STA $88
     LDA $89
     SBC #$00
@@ -12268,7 +12268,7 @@ BattleDrawMessageBuffer_Reverse:
     
     LDA $8A     ; and from the dest pointer
     SEC
-    SBC #$20
+    SBC #$10  ; 20
     STA $8A
     LDA $8B
     SBC #$00
