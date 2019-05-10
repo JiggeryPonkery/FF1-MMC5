@@ -157,7 +157,7 @@
 .import lut_WeaponArmorNamePtrTbl
 .import WeaponArmorPrices
 .import lut_EnemyAttack
-
+.import lut_DialoguePtrTbl
 
 .segment "BANK_FIXED"
 
@@ -5268,8 +5268,8 @@ DrawDialogueBox:
       SBC #30
 :   STA box_y           ; this is our target Y coord for the text
 
-    LDA #$80            ; enable menu stalling (kind of pointless because the upcoming routine
-    STA menustall       ;  doesn't check it
+   ; LDA #$80            ; enable menu stalling (kind of pointless because the upcoming routine
+   ; STA menustall       ;  doesn't check it
 
     PLA                      ; then pull the dialogue text ID that was pushed at the start of the routine
     JMP DrawDialogueString   ; draw it, then exit!

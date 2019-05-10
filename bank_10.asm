@@ -9,7 +9,7 @@
 .export TalkToObject
 .export HideMapObject
 .export ShowMapObject
-
+.export lut_DialoguePtrTbl
 
 .import FindEmptyWeaponSlot
 
@@ -18,6 +18,7 @@ BANK_THIS = $10
 
 ;.INCBIN "bin/Dialogue_Data.bin"
 
+lut_DialoguePtrTbl:
 .WORD EMPTY             ; 0  ; Nothing here.
 .WORD KING1             ; 1  ; LIGHT WARRIORS.... Just as in Lukahn's prophecy. Garland has kidnapped the Princess. Please help her!!
 .WORD KING2             ; 2  ; Thank you for saving the Princess. To aid your quest I ordered a bridge built to the continent. Go now, and make the ORBS shine again!!
@@ -1291,43 +1292,222 @@ TalkNormTeleport:
 lut_MapObjTalkJumpTbl:
 
  ;; No object (ID=00)
-  .WORD Talk_None
+.WORD Talk_None                ; 00
 
- ;; Several special objects  (ID=01-1F)
-  .WORD Talk_KingConeria, Talk_Garland, Talk_Princess1, Talk_Bikke, Talk_ElfDoc, Talk_ElfPrince, Talk_Astos     ; 01-07
-  .WORD Talk_Nerrick, Talk_Smith, Talk_Matoya, Talk_Unne, Talk_Vampire, Talk_Sarda, Talk_Bahamut, Talk_ifvis    ; 08-0F
-  .WORD Talk_SubEng, Talk_CubeBot, Talk_Princess2, Talk_Fairy, Talk_Titan, Talk_CanoeSage, Talk_norm, Talk_norm ; 10-17
-  .WORD Talk_Replace, Talk_Replace, Talk_fight, Talk_fight, Talk_fight, Talk_fight, Talk_fight, Talk_Unused     ; 18-1F
+ ;; Several special objects(ID=01-1F)
+.WORD Talk_KingConeria         ; 01
+.WORD Talk_Garland             ; 02
+.WORD Talk_Princess1           ; 03
+.WORD Talk_Bikke               ; 04
+.WORD Talk_ElfDoc              ; 05
+.WORD Talk_ElfPrince           ; 06
+.WORD Talk_Astos               ; 07
+.WORD Talk_Nerrick             ; 08
+.WORD Talk_Smith               ; 09
+.WORD Talk_Matoya              ; 0A
+.WORD Talk_Unne                ; 0B
+.WORD Talk_Vampire             ; 0C
+.WORD Talk_Sarda               ; 0D
+.WORD Talk_Bahamut             ; 0E
+.WORD Talk_ifvis               ; 0F
+.WORD Talk_SubEng              ; 10
+.WORD Talk_CubeBot             ; 11
+.WORD Talk_Princess2           ; 12
+.WORD Talk_Fairy               ; 13
+.WORD Talk_Titan               ; 14
+.WORD Talk_CanoeSage           ; 15
+.WORD Talk_norm                ; 16
+.WORD Talk_norm                ; 17
+.WORD Talk_Replace             ; 18
+.WORD Talk_Replace             ; 19
+.WORD Talk_fight               ; 1A
+.WORD Talk_fight               ; 1B
+.WORD Talk_fight               ; 1C
+.WORD Talk_fight               ; 1D
+.WORD Talk_fight               ; 1E
+.WORD Talk_Unused              ; 1f
 
  ;; Coneria people (ID=20-39)
-  .WORD Talk_ifvis, Talk_ifvis, Talk_ifvis, Talk_ifitem, Talk_ifvis, Talk_ifvis, Talk_Invis, Talk_ifbridge    ; 20-27
-  .WORD Talk_ifvis, Talk_ifvis, Talk_ifvis, Talk_ifvis, Talk_ifitem, Talk_ifvis, Talk_ifitem, Talk_ifevent    ; 28-2F
-  .WORD Talk_ifvis, Talk_ifvis, Talk_GoBridge, Talk_ifvis, Talk_4Orb, Talk_norm, Talk_norm, Talk_ifvis        ; 30-37
-  .WORD Talk_ifvis, Talk_norm                                                                                 ; 38-39
+.WORD Talk_ifvis               ; 20
+.WORD Talk_ifvis               ; 21
+.WORD Talk_ifvis               ; 22
+.WORD Talk_ifitem              ; 23
+.WORD Talk_ifvis               ; 24
+.WORD Talk_ifvis               ; 25
+.WORD Talk_Invis               ; 26
+.WORD Talk_ifbridge            ; 27
+.WORD Talk_ifvis               ; 28
+.WORD Talk_ifvis               ; 29
+.WORD Talk_ifvis               ; 2A
+.WORD Talk_ifvis               ; 2B
+.WORD Talk_ifitem              ; 2C
+.WORD Talk_ifvis               ; 2D
+.WORD Talk_ifitem              ; 2E
+.WORD Talk_ifevent             ; 2F
+.WORD Talk_ifvis               ; 30
+.WORD Talk_ifvis               ; 31
+.WORD Talk_GoBridge            ; 32
+.WORD Talk_ifvis               ; 33
+.WORD Talk_4Orb                ; 34
+.WORD Talk_norm                ; 35
+.WORD Talk_norm                ; 36
+.WORD Talk_ifvis               ; 37
+.WORD Talk_ifvis               ; 38
+.WORD Talk_norm                ; 39
 
- ;; Sky Warriors  (ID=3A-3E)
-  .WORD Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_4Orb                                                 ; 3A-3E
+ ;; Sky Warriors(ID=3A-3E)
+.WORD Talk_4Orb                ; 3A
+.WORD Talk_4Orb                ; 3B
+.WORD Talk_4Orb                ; 3C
+.WORD Talk_4Orb                ; 3D
+.WORD Talk_4Orb                ; 3E
 
- ;; The rest  (ID=3F-CF)
-  .WORD Talk_norm                                                                                                       ; 3F
-  .WORD Talk_norm, Talk_norm, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_norm, Talk_ifevent, Talk_ifitem            ; 40-47
-  .WORD Talk_norm, Talk_ifevent, Talk_ifevent, Talk_ifitem, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent      ; 48-4F
-  .WORD Talk_ifevent, Talk_ifevent, Talk_norm, Talk_ifcanoe, Talk_ifitem, Talk_ifevent, Talk_ifevent, Talk_norm         ; 50-57
-  .WORD Talk_norm, Talk_ifcanal, Talk_norm, Talk_norm, Talk_ifitem, Talk_ifitem, Talk_norm, Talk_ifcanal                ; 58-5F
-  .WORD Talk_ifkeytnt, Talk_norm, Talk_ifcanal, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm                   ; 60-67
-  .WORD Talk_ifvis, Talk_norm, Talk_ifearthvamp, Talk_ifitem, Talk_ifvis, Talk_ifearthvamp, Talk_norm, Talk_norm        ; 68-6F
-  .WORD Talk_ifitem, Talk_ifairship, Talk_norm, Talk_ifevent, Talk_ifitem, Talk_norm, Talk_norm, Talk_norm              ; 70-77
-  .WORD Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_4Orb, Talk_ifitem                        ; 78-7F
-  .WORD Talk_ifearthfire, Talk_ifitem, Talk_norm, Talk_norm, Talk_CoOGuy, Talk_norm, Talk_norm, Talk_norm               ; 80-87
-  .WORD Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm                          ; 88-8F
-  .WORD Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_ifitem, Talk_norm, Talk_norm, Talk_norm                        ; 90-97
-  .WORD Talk_norm, Talk_norm, Talk_ifitem, Talk_ifevent, Talk_norm, Talk_norm, Talk_norm, Talk_norm                     ; 98-9F
-  .WORD Talk_norm, Talk_norm, Talk_CubeBotBad, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm                    ; A0-A7
-  .WORD Talk_norm, Talk_ifitem, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_ifevent                     ; A8-AF
-  .WORD Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm                          ; B0-B7
-  .WORD Talk_norm, Talk_norm, Talk_norm, Talk_Chime, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent             ; B8-BF
-  .WORD Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent, Talk_ifevent  ; C0-C7
-  .WORD Talk_ifevent, Talk_ifevent, Talk_BlackOrb, Talk_norm, Talk_norm, Talk_norm, Talk_norm, Talk_norm                ; C8-CF
+ ;; The rest(ID=3F-CF)
+.WORD Talk_norm                ; 3F
+.WORD Talk_norm                ; 40
+.WORD Talk_norm                ; 41
+.WORD Talk_ifevent             ; 42
+.WORD Talk_ifevent             ; 43
+.WORD Talk_ifevent             ; 44
+.WORD Talk_norm                ; 45
+.WORD Talk_ifevent             ; 46
+.WORD Talk_ifitem              ; 47
+.WORD Talk_norm                ; 48
+.WORD Talk_ifevent             ; 49
+.WORD Talk_ifevent             ; 4A
+.WORD Talk_ifitem              ; 4B
+.WORD Talk_ifevent             ; 4C
+.WORD Talk_ifevent             ; 4D
+.WORD Talk_ifevent             ; 4E
+.WORD Talk_ifevent             ; 4F
+.WORD Talk_ifevent             ; 50
+.WORD Talk_ifevent             ; 51
+.WORD Talk_norm                ; 52
+.WORD Talk_ifcanoe             ; 53
+.WORD Talk_ifitem              ; 54
+.WORD Talk_ifevent             ; 55
+.WORD Talk_ifevent             ; 56
+.WORD Talk_norm                ; 57
+.WORD Talk_norm                ; 58
+.WORD Talk_ifcanal             ; 59
+.WORD Talk_norm                ; 5A
+.WORD Talk_norm                ; 5B
+.WORD Talk_ifitem              ; 5C
+.WORD Talk_ifitem              ; 5D
+.WORD Talk_norm                ; 5E
+.WORD Talk_ifcanal             ; 5F
+.WORD Talk_ifkeytnt            ; 60
+.WORD Talk_norm                ; 61
+.WORD Talk_ifcanal             ; 62
+.WORD Talk_norm                ; 63
+.WORD Talk_norm                ; 64
+.WORD Talk_norm                ; 65
+.WORD Talk_norm                ; 66
+.WORD Talk_norm                ; 67
+.WORD Talk_ifvis               ; 68
+.WORD Talk_norm                ; 69
+.WORD Talk_ifearthvamp         ; 6A
+.WORD Talk_ifitem              ; 6B
+.WORD Talk_ifvis               ; 6C
+.WORD Talk_ifearthvamp         ; 6D
+.WORD Talk_norm                ; 6E
+.WORD Talk_norm                ; 6F
+.WORD Talk_ifitem              ; 70
+.WORD Talk_ifairship           ; 71
+.WORD Talk_norm                ; 72
+.WORD Talk_ifevent             ; 73
+.WORD Talk_ifitem              ; 74
+.WORD Talk_norm                ; 75
+.WORD Talk_norm                ; 76
+.WORD Talk_norm                ; 77
+.WORD Talk_4Orb                ; 78
+.WORD Talk_4Orb                ; 79
+.WORD Talk_4Orb                ; 7A
+.WORD Talk_4Orb                ; 7B
+.WORD Talk_4Orb                ; 7C
+.WORD Talk_4Orb                ; 7D
+.WORD Talk_4Orb                ; 7E
+.WORD Talk_ifitem              ; 7F
+.WORD Talk_ifearthfire         ; 80
+.WORD Talk_ifitem              ; 81
+.WORD Talk_norm                ; 82
+.WORD Talk_norm                ; 83
+.WORD Talk_CoOGuy              ; 84
+.WORD Talk_norm                ; 85
+.WORD Talk_norm                ; 86
+.WORD Talk_norm                ; 87
+.WORD Talk_norm                ; 88
+.WORD Talk_norm                ; 89
+.WORD Talk_norm                ; 8A
+.WORD Talk_norm                ; 8B
+.WORD Talk_norm                ; 8C
+.WORD Talk_norm                ; 8D
+.WORD Talk_norm                ; 8E
+.WORD Talk_norm                ; 8F
+.WORD Talk_norm                ; 90
+.WORD Talk_norm                ; 91
+.WORD Talk_norm                ; 92
+.WORD Talk_norm                ; 93
+.WORD Talk_ifitem              ; 94
+.WORD Talk_norm                ; 95
+.WORD Talk_norm                ; 96
+.WORD Talk_norm                ; 97
+.WORD Talk_norm                ; 98
+.WORD Talk_norm                ; 99
+.WORD Talk_ifitem              ; 9A
+.WORD Talk_ifevent             ; 9B
+.WORD Talk_norm                ; 9C
+.WORD Talk_norm                ; 9D
+.WORD Talk_norm                ; 9E
+.WORD Talk_norm                ; 9F
+.WORD Talk_norm                ; A0
+.WORD Talk_norm                ; A1
+.WORD Talk_CubeBotBad          ; A2
+.WORD Talk_norm                ; A3
+.WORD Talk_norm                ; A4
+.WORD Talk_norm                ; A5
+.WORD Talk_norm                ; A6
+.WORD Talk_norm                ; A7
+.WORD Talk_norm                ; A8
+.WORD Talk_ifitem              ; A9
+.WORD Talk_norm                ; AA
+.WORD Talk_norm                ; AB
+.WORD Talk_norm                ; AC
+.WORD Talk_norm                ; AD
+.WORD Talk_norm                ; AE
+.WORD Talk_ifevent             ; AF
+.WORD Talk_norm                ; B0
+.WORD Talk_norm                ; B1
+.WORD Talk_norm                ; B2
+.WORD Talk_norm                ; B3
+.WORD Talk_norm                ; B4
+.WORD Talk_norm                ; B5
+.WORD Talk_norm                ; B6
+.WORD Talk_norm                ; B7
+.WORD Talk_norm                ; B8
+.WORD Talk_norm                ; B9
+.WORD Talk_norm                ; BA
+.WORD Talk_Chime               ; BB
+.WORD Talk_ifevent             ; BC
+.WORD Talk_ifevent             ; BD
+.WORD Talk_ifevent             ; BE
+.WORD Talk_ifevent             ; BF
+.WORD Talk_ifevent             ; C0
+.WORD Talk_ifevent             ; C1
+.WORD Talk_ifevent             ; C2
+.WORD Talk_ifevent             ; C3
+.WORD Talk_ifevent             ; C4
+.WORD Talk_ifevent             ; C5
+.WORD Talk_ifevent             ; C6
+.WORD Talk_ifevent             ; C7
+.WORD Talk_ifevent             ; C8
+.WORD Talk_ifevent             ; C9
+.WORD Talk_BlackOrb            ; CA
+.WORD Talk_norm                ; CB
+.WORD Talk_norm                ; CC
+.WORD Talk_norm                ; CD
+.WORD Talk_norm                ; CE
+.WORD Talk_norm                ; CF
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
