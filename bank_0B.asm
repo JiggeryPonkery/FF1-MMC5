@@ -2961,6 +2961,8 @@ Battle_FlipCharSprite:
     BEQ @Skip               ; if they're dead, skip them
     CMP #$02
     BEQ @Skip               ; if they're stone, skip them
+    CMP #$20             
+    BEQ @Skip               ; if they're asleep, skip them
     
     ; Otherwise, we're going to loop and flip each character sprite
     LDX #$03                ; X is loop down counter.  3 rows of tiles per character
