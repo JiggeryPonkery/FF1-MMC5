@@ -141,7 +141,7 @@ ShopInn:
 ShopItem:
 .byte $FF,$FF,$90,$3A,$25,$5F,$FF,$9C,$28,$23,$00 ; __General Store
 ShopOasis: 
-.byte $8C,$AF,$B2,$3E,$FF,$98,$B8,$21,$9C,$5F,$A8,$00 ; Close Out Sale
+.byte $FF,$8C,$AF,$B2,$3E,$FF,$98,$B8,$21,$9C,$5F,$A8,$00 ; Close Out Sale
 ShopGold:
 .byte $FF,$90,$00 ; _G
 ShopXGoldOK:
