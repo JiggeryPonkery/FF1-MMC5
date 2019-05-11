@@ -68,8 +68,8 @@ smokebomb_steps  = unsram + $17
 ; unused         = unsram + $18
 ; unused         = unsram + $19
 ; unused         = unsram + $1A
-; unused         = unsram + $1B
-
+battleswon       = unsram + $1B
+battlesrun       = unsram + $1C
 gold             = unsram + $1D ; 1E ; 1F - 3 bytes
 
 items           = unsram + $20

@@ -3847,7 +3847,12 @@ PlayFanfareAndCheer:
     STA a:music_track
     STA btl_followupmusic
     
-    LDA #$40                    ; loop counter
+    LDA battleswon
+    CMP #$FF
+    BEQ :+
+       INC battleswon
+    
+  : LDA #$40                    ; loop counter
     STA btl_walkloopctr
   @Loop:
       LDA btl_walkloopctr

@@ -672,9 +672,10 @@ ProcessOWInput:
     LDA vehchgpause  ; see if we're in the middle of a vehicle change pause
     BEQ @NoVehPause  ; if we are...
 
-      SEC
-      SBC #$01
-      STA vehchgpause ; decrement the vehchgpause counter (why doesn't it DEC?)
+      ;SEC
+      ;SBC #$01
+      ;STA vehchgpause ; decrement the vehchgpause counter (why doesn't it DEC?)
+      DEC vehchgpause
       RTS             ; and exit (ignore all input until vehchgpause is zero)
 
   @NoVehPause:
