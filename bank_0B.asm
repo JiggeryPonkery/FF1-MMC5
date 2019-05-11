@@ -1826,7 +1826,6 @@ BattleOver_Run:
     LDA battlesrun
     CMP #$FF
     BEQ :+
-       INC battleswon
        INC battlesrun
     
   : JSR Battle_FlipAllChars         ; Flip all chars so they look like they're running away.
