@@ -5212,7 +5212,7 @@ MainMenuLoop:
       LDA #0
       STA backup_cursor
       JSR EnterItemMenu         ; enter item menu
-      JMP ResumeMainMenu        ; then resume (redraw) main menu
+      JMP EnterMainMenu ; ResumeMainMenu        ; then resume (redraw) main menu
 
   @NotItem:
     CMP #$01
