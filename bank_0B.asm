@@ -1827,6 +1827,7 @@ BattleOver_Run:
     CMP #$FF
     BEQ :+
        INC battleswon
+       INC battlesrun
     
   : JSR Battle_FlipAllChars         ; Flip all chars so they look like they're running away.
   ; JMP ExitBattle                  ; <- Flow into ExitBattle to return to the main game.
