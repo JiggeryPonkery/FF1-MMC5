@@ -9,6 +9,7 @@
 .export lut_WeaponArmorNamePtrTbl
 .export WeaponArmorPrices
 .export lut_EnemyAttack
+.export DumbBottleThing
 
 .import MultiplyXA
 
@@ -149,7 +150,7 @@ lut_ItemNamePtrTbl:
 .word NAME_BOTTLE       ; 1E
 .word NAME_OXYALE       ; 1F
 .word NAME_CANOE        ; 20
-.word BLANK             ; 21
+.word NAME_LEWDS        ; 21
 .word BLANK             ; 22
 .word BLANK             ; 23
 .word BLANK             ; 24
@@ -158,8 +159,8 @@ lut_ItemNamePtrTbl:
 .word BLANK             ; 27
 .word BLANK             ; 28
 .word BLANK             ; 29
-.word BLANK             ; 2A
-.word BLANK             ; 2B
+.word NAME_BOTTLE_ALT   ; 2A
+.word NAME_LEWDS_ALT    ; 2B
 .word ORB1              ; 2C
 .word ORB2              ; 2D
 .word ORB3              ; 2E
@@ -527,10 +528,26 @@ NAME_CUBE:
 .byte $A0,$A4,$B5,$B3,$FF,$8C,$B8,$A5,$A8,$FF,$FF,$FF,$00 ; CUBE
 NAME_BOTTLE:
 .byte $8B,$B2,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; BOTTLE
+NAME_BOTTLE_ALT:
+.byte $8B,$B2,$B7,$B7,$AF,$A8,$00                         ; BOTTLE
 NAME_OXYALE:
 .byte $98,$BB,$BC,$A4,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; OXYALE
 NAME_CANOE:
 .byte $8C,$A4,$B1,$B2,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CANOE
+NAME_LEWDS:
+.byte $95,$A8,$BA,$A7,$FF,$9D,$A8,$BB,$B7,$B6,$FF,$FF,$00 ; Lewd Texts
+NAME_LEWDS_ALT:
+.byte $C5,$C5,$C5,$FF,$8B,$B2,$B2,$AE,$00                 ; ??? Book
+
+
+
+
+
+
+
+
+
+
 
 
 ;;Magic spell names
@@ -1474,8 +1491,8 @@ lut_ItemPrices:
 .word 50000   ; 1E BOTTLE
 .word 0000    ; 1F OXYALE
 .word 0000    ; 20 CANOE
-.word 0000    ; 21 nothing
-.word 0000    ; 22 nothing 
+.word 5000    ; 21 LEWDS
+.word 5000    ; 22 ??? Book
 .word 0000    ; 23 nothing
 .word 0000    ; 24 nothing 
 .word 0000    ; 25 nothing
@@ -1774,7 +1791,28 @@ WeaponArmorPrices:
 .byte $00,$00 ; Armor 64
 
   
+DumbBottleThing:
+    LDY #0
+    DEC text_ptr
+    DEC text_ptr
+    LDA (text_ptr), Y
+    CMP #$07
+    BEQ @Exit
 
+    CPX #BOTTLE
+    BEQ @ChangeBottleName
+    CPX #LEWDS
+    BEQ @ChangeLewdsName
+   @Exit: 
+    RTS
+
+   @ChangeBottleName:
+    LDX #BOTTLE_ALT
+    RTS
+
+   @ChangeLewdsName:
+    LDX #LEWDS_ALT
+    RTS
   
 
 .byte "END OF BANK A"

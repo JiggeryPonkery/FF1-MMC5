@@ -158,6 +158,7 @@
 .import WeaponArmorPrices
 .import lut_EnemyAttack
 .import lut_DialoguePtrTbl
+.import DumbBottleThing
 
 .segment "BANK_FIXED"
 
@@ -1360,9 +1361,9 @@ OWCanMove:
     BNE @Success_1          ; if not, success!
 
   @Caravan:
-    LDA game_flags+OBJID_FAIRY
-    AND #$01             ; check the fairy map object to see if she's visible
-    BNE @Success_2       ; if she is (bottle has been opened already), prevent entering caravan (exit now)
+   ; LDA game_flags+OBJID_FAIRY
+   ; AND #$01             ; check the fairy map object to see if she's visible
+   ; BNE @Success_2       ; if she is (bottle has been opened already), prevent entering caravan (exit now)
 
     LDA #$01             ; otherwise, we need to indicate the player is entering the caravan
     STA entering_shop    ; set entering_shop to nonzero
@@ -8148,6 +8149,8 @@ DrawComplexString:
     STA cur_bank 
     JSR SwapPRG_L         ; swap to BANK_ITEMS (contains item strings)
 
+        JSR DumbBottleThing
+    
     TXA                   ; get item ID
     ASL A                 ; double it (for pointer table lookup)
     TAX                   ; put low byte in X for indexing   
@@ -11328,7 +11331,7 @@ FillItemBox:
       INY                  ; inc our source index
       INC tmp+2            ; inc loop counter
       LDA tmp+2
-      CMP #16              ; only display 16 items at a time
+      CMP #KEYITEM_MAX     ; only display this many items at a time
       BCC @ItemFillLoop
 
     CPX #0                 ; if the dest index is still zero, the player has no items
@@ -11350,7 +11353,7 @@ FillItemBox:
     LDX #15
   @RemoveKeyItemsFromPage1:        ; 
     LDA item_box, X                ; go backwards through the list
-    CMP #16                        ; see if item ID is over $10
+    CMP #item_qty_stop - items     ; see if item ID is over $10
     BCC :+                         ; if it is, set it to 0
        LDA #0                      ; if it isn't, then don't need to check anymore, because all items before it will be under $10 
        STA item_box, X
@@ -11380,7 +11383,8 @@ FillItemBox:
     PHA
 
     ;; JIGS quite a few changes in here, starting with 12 letter quest item names and 8 letter consumable names!
-    ;; Since it uses DrawComplexString, it DOES look for null terminators, and we add one in here. There's no need to pad items out.
+    ;; Quest items draw 12 characters out, while consumables look for a null terminator.
+    ;; The exception is the Bottle, which needs to be 8 letters to fit in the store windows...
     
     LDX tmp+2
     LDY #0
@@ -11399,6 +11403,8 @@ FillItemBox:
   : STX tmp+2               ; backup letter postion counter
     PLA                     ; put X back in A and right-shift it
     LSR A                   ; this restores the unedited item ID number
+    CMP #item_qty_stop - items ; double-check its a quest item
+    BCS @SkipQty
     TAX                     ; put item ID in X
     LDA items, X            ; use it to index inventory to see how many of this item we have
     STA tmp                 ;  put the qty in tmp

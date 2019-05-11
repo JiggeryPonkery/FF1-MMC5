@@ -556,6 +556,7 @@ lut_MenuText:
 .word M_EquipInventoryWeapon  ; 52 ; 82 ; 
 .word M_EquipInventoryArmor   ; 53 ; 83 ; 
 .word M_EquipInventorySelect  ; 54 ; 84 ; 
+.word M_KeyItem18_Desc        ; 55 ; 85 ; 
 
 M_Gold: 
 .byte $04,$FF,$90,$00 ; _G - for gold on menu
@@ -747,6 +748,11 @@ M_KeyItem16_Desc:
 
 M_KeyItem17_Desc: 
 .byte $A2,$B2,$B8,$38,$22,$FF,$A6,$4D,$B6,$B6,$1B,$AB,$1A,$5C,$B9,$25,$C0,$00 ; You can cross the river.
+
+M_KeyItem18_Desc:
+.byte $C6,$9D,$1D,$23,$BE,$1E,$B1,$2E,$B3,$AC,$A6,$B7,$55,$2C,$C5,$C4,$BE,$05
+.byte $C6,$9E,$3E,$50,$26,$44,$AC,$B0,$A4,$AA,$1F,$39,$AC,$3C,$C4,$BE,$05
+.byte $C6,$8A,$BA,$BF,$1B,$41,$B7,$BE,$1E,$A5,$35,$1F,$AA,$C4,$BE,$00
 
 M_KeyItem1_Use:
 .byte $9D,$AB,$1A,$B7,$B8,$B1,$1A,$B3,$AF,$A4,$BC,$B6,$BF,$05
@@ -1973,7 +1979,7 @@ EnterNormalShop:
     LDA lut_ShopWelcome, X
     JSR DrawShopDialogueBox     ; draw the "welcome" dialogue
     LDA shop_type
-    CMP #8
+    CMP #7
     BNE MainShopLoop
 
 EnterCaravan:    
@@ -1996,7 +2002,7 @@ RestartShopLoop:
     LDA #$17  
     JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
     LDA shop_type
-    CMP #8
+    CMP #7
     BEQ EnterCaravan
     
 MainShopLoop:
@@ -2081,7 +2087,12 @@ ShopBuy_Loop:
     INC shop_amount_max         ; increase it for SelectAmount_Buy to work right
     
 ShopSelectAmount:    
-    JSR SelectAmount            ; choose how many of an item to buy
+    LDA shop_curitem            
+    CMP #BOTTLE
+    BNE :+
+        JMP @BuyConfirm
+
+ :  JSR SelectAmount            ; choose how many of an item to buy
     BCS @ShopBuy_Return         ; if B was pressed, go back to choosing an item
   
     JSR Shop_CanAfford          ; check to ensure they can afford this item
@@ -2284,8 +2295,17 @@ ShopCheckInventory:
     LDX cursor
     LDA item_box, X             ; get chosen item ID
     STA shop_curitem            ; save it
+    CMP #BOTTLE
+    BNE :+
     
-    LDA #13
+    LDA #1
+    STA shop_amount_buy
+    JSR ShopLoadPrice_Complex
+    PLA
+    PLA
+    JMP ShopSelectAmount
+    
+  : LDA #13
     JSR MultiplyXA              ; multiply cursor position by each item's str_buf length
     TAY
     
@@ -2609,11 +2629,11 @@ ShopLoadPrice_Complex:
     STA tmp+2
     STA shop_curprice+2
     
-    BCC :+
-       INX
-  : STA tmp+3
-    STA shop_curprice+3
-    
+;;    BCC :+                 ; I'm confused about this.
+;;       INX                 ; why increase X? Never used...?
+;;  : STA tmp+3              ; tmp+3 is same as tmp+2?? Did I mess up... is this not needed at all?
+;;    STA shop_curprice+3    ; shop_curprice+3 isn't even called anywhere!
+
 ;    LDA tmp
 ;    STA shop_curprice
 ;    LDA tmp+1
@@ -2640,7 +2660,12 @@ ShopLoadPrice_Complex:
     LDA format_buf-1
     STA str_buf+$BE
     
-    LDA #24
+    LDA shop_curitem       ; if bottle, don't print
+    CMP #BOTTLE
+    BNE :+
+        RTS 
+    
+  : LDA #24
     STA dest_y
     LDA #06
     STA dest_x
@@ -3566,6 +3591,28 @@ LoadShopInventory:
     LDA #0
     STA item_box+5       ; put a null terminator at the end of the item_box
     STA item_box_offset  ; clear this so the list isn't scrolled
+    
+    LDX #BOTTLE
+    LDA items, X         ; does player have the Bottle?
+    BEQ @End             ; if not, exit
+    
+    LDX #4
+    LDA item_box, X      ; if yes, see if this shop's last item is the Bottle
+    CMP #BOTTLE
+    BNE @End             ; if not, exit
+    
+    LDA #LEWDS           ; change the item the caravan is selling
+    STA item_box, X
+
+    LDX #LEWDS           ; does the player have the new item?
+    LDA items, X          
+    BEQ @End             ; if not, exit
+    
+    LDX #4               ; if yes, set the caravan's last item to nothing
+    LDA #0
+    STA item_box, X
+    
+   @End:
     RTS                  ; and exit
     
 
@@ -6570,6 +6617,7 @@ ItemMenu_Loop:
 .word UseItem_Bottle    ; 1E
 .word UseItem_Oxyale    ; 1F
 .word UseItem_Canoe     ; 20
+.word UseItem_Lewds     ; 21
 
 
 
@@ -6615,6 +6663,7 @@ UseItem_Cube:     LDABRA $24, UseItem_SetDesc ; 36
 
 UseItem_Oxyale:   LDABRA $26, UseItem_SetDesc ; 38
 UseItem_Canoe:    LDABRA $27, UseItem_SetDesc ; 39
+UseItem_Lewds:    LDABRA $55, UseItem_SetDesc ; 85
 
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -6634,7 +6683,7 @@ UseItem_Bottle:
 @OpenBottle:                        ; if the bottle hasn't been opened yet
     ;LDA #0
     ;STA item_bottle                 ; remove the bottle from inventory
-    DEC item_bottle
+    ;DEC item_bottle
     LDY #OBJID_FAIRY
     JSR LongCall
     .word ShowMapObject

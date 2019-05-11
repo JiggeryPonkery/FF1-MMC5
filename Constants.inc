@@ -485,13 +485,13 @@ XHEAL_POTENCY     = $B4 ; 180
 
 LUTE           = $10
 CROWN          = $11
-CRYSTAL        = $12
-HERB           = $13
+CRYSTAL        = $12 ; vanishes on use
+HERB           = $13 ; vanishes on use
 KEY            = $14
-TNT            = $15
-ADAMANT        = $16
+TNT            = $15 ; vanishes on use
+ADAMANT        = $16 ; vanishes on use
 SLAB           = $17
-RUBY           = $18
+RUBY           = $18 ; vanishes on use
 ROD            = $19
 FLOATER        = $1A
 CHIME          = $1B
@@ -500,6 +500,11 @@ CUBE           = $1D
 BOTTLE         = $1E
 OXYALE         = $1F
 CANOE          = $20
+LEWDS          = $21
+BOTTLE_ALT     = $2A ; for shops
+LEWDS_ALT      = $2B
+
+KEYITEM_MAX    = $12 ; 18 key items
 
 FIREORB        = $2C
 WATERORB       = $2D
