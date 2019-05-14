@@ -809,7 +809,7 @@ lut_MapObjCHR      = $A200   ; BANK_MAPCHR
 
 lut_OWPtrTbl       = $8000   ; BANK_OWMAP
 lut_SMPtrTbl       = $8000   ; BANK_STANDARDMAPS
-lut_Domains        = $8000   ; BANK_DOMAINS -- MUST be on page boundary
+;lut_Domains        = $8000   ; BANK_DOMAINS -- MUST be on page boundary
 lut_BatSprCHR      = $9000   ; BANK_BTLCHR -- page
 lut_BatObjCHR      = $A800   ; BANK_BTLCHR -- page
 ;lut_DialoguePtrTbl = $8000   ; BANK_DIALOGUE

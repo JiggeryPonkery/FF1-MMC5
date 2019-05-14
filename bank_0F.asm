@@ -159,6 +159,7 @@
 .import lut_EnemyAttack
 .import lut_DialoguePtrTbl
 .import DumbBottleThing
+.import lut_Domains
 
 .segment "BANK_FIXED"
 

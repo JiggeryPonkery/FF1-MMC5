@@ -12,6 +12,7 @@
 .export data_BridgeCHR
 .export data_BridgeNT
 .export PrintEXPToNext_B
+.export lut_Domains
 
 .import Battle_ReadPPUData_L
 .import Battle_WritePPUData_L
@@ -33,7 +34,7 @@ BANK_THIS = $0B
 
 ;.INCBIN "bin/0B_8000_battledomaindata.bin"
 ; overworld
-
+lut_Domains:
 .byte $E3,$31,$70,$2E,$70,$60,$36,$9F,$E3,$31,$70,$2E,$70,$60,$36,$9F
 .byte $89,$70,$3C,$60,$3C,$39,$39,$3A,$EF,$60,$67,$39,$67,$3A,$B7,$B1
 .byte $EF,$60,$67,$39,$67,$3A,$B7,$B1,$89,$70,$3C,$60,$3C,$39,$39,$3A
@@ -1679,7 +1680,7 @@ PrepBattleVarsAndEnterBattle:
     LDA miniboss_music
     BEQ :+
       LDA #$5A
-      JMP @SaveMusic:
+      JMP @SaveMusic
     
  :  LDX dlgmusic_backup
     LDA BattleMusic_LUT, X
