@@ -602,9 +602,6 @@ lut_EnemyAi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ExitBattle:
-    LDA #0
-    STA miniboss_music
-
     LDA btl_result                  ; if running, skip to fade out, don't animate them walking
     CMP #$03
     BEQ :+

@@ -1629,8 +1629,6 @@ Talk_Garland:
     LDY #OBJID_GARLAND
     JSR HideThisMapObject   ; hide (kill) the Garland object (this object)
     
-    INC miniboss_music
-    
     LDA #BTL_GARLAND
     JSR TalkBattle          ; trigger the battle with Garland
 
@@ -1664,7 +1662,6 @@ Talk_Bikke:
     BCS @AlreadyFought      ; if we already have, skip ahead
 
       JSR SetGameEventFlag  ; otherwise, set event flag to mark him as fought
-      INC miniboss_music
       LDA #BTL_BIKKE        ; then start a battle with Bikke (his pirates)
       JSR TalkBattle
       LDA tmp+1             ; and print [1]
@@ -1753,7 +1750,6 @@ Talk_Astos:
     INC item_crystal       ; give them the Crystal
     LDY #OBJID_ASTOS
     JSR HideThisMapObject  ; hide (kill) Astos' map object (this object)
-    INC miniboss_music
     LDA #BTL_ASTOS         ; trigger battle with Astos
     JSR TalkBattle
 
@@ -1878,7 +1874,6 @@ Talk_Unne:
 Talk_Vampire:
     LDY #OBJID_VAMPIRE      ; Kill/Hide the Vampire object (this object)
     JSR HideThisMapObject
-    INC miniboss_music
     LDA #BTL_VAMPIRE        ; Trigger a battle with the Vampire
     JSR TalkBattle
     LDA tmp+1               ; and print [1]
@@ -2344,11 +2339,11 @@ lut_MapObjTalkData:
 .byte $00,$FF,$00,$00 ; 17 ; Temple of Fiends Plate
 .byte $18,$2E,$00,$19 ; 18 ; 
 .byte $19,$2F,$00,$1A ; 19 ; 
-.byte $1A,$30,$00,$7B ; 1A ; 
-.byte $1B,$FA,$00,$7A ; 1B ; 
-.byte $1C,$FB,$00,$79 ; 1C ; 
-.byte $1D,$FC,$00,$78 ; 1D ; 
-.byte $1E,$FD,$00,$77 ; 1E ; 
+.byte $1A,$30,$00,$7B ; 1A ; Chaos fight
+.byte $1B,$FA,$00,$F3 ; 1B ; Earth Orb (Lich Fight)
+.byte $1C,$FB,$00,$F4 ; 1C ; Fire Orb (Kary Fight) 
+.byte $1D,$FC,$00,$F5 ; 1D ; Water Orb (Kraken Fight)
+.byte $1E,$FD,$00,$F6 ; 1E ; Wind Orb (Tiamat Fight)
 .byte $00,$00,$00,$00 ; 1F ; 
 .byte $12,$31,$32,$00 ; 20 ; 
 .byte $12,$31,$34,$00 ; 21 ; 

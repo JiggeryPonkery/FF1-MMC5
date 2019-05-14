@@ -470,7 +470,7 @@ LongCall_Y      = $0387
 LongCall_X      = $0388
 gettingcommand  = $0390
 
-miniboss_music  = $0398
+
 
 ;; back to original variables
 

@@ -172,8 +172,8 @@ GMFLG_TCOPEN       = %00000100
 
 BTL_VAMPIRE        = $7C
 BTL_ASTOS          = $7D
-BTL_BIKKE          = $7E
-BTL_GARLAND        = $7F
+BTL_BIKKE          = $7A
+BTL_GARLAND        = $79
 
 ;;;;;;;;;;;;;;;;;;
 ;;  battle message IDs  (1-based)
