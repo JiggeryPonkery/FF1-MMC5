@@ -236,7 +236,7 @@ lut_BattleFormations:
 .byte $03,$02,$22,$00,$00,$00,$26,$00,$00,$00,$13,$13,$04,$00,$37,$00  ; 43 ; 2-6 Lobsters                                          ; 3-7 LOBSTER        
 .byte $23,$32,$22,$20,$26,$00,$16,$25,$22,$00,$13,$14,$04,$20,$15,$03  ; 44 ; 1-6 Lobsters, 2-5 SeaSnakes, 2 SeaTrolls              ; 1-5 LOBSTER    0-3 SeaSNAKE
 .byte $21,$04,$0E,$12,$00,$00,$01,$12,$00,$00,$07,$0B,$04,$80,$36,$22  ; 45 ; 0-1 WzSahag, 1-2 GrShark                              ; 3-6 WzSAHAG    2-2 GrSHARK 
-.byte $24,$0C,$2A,$33,$00,$00,$00,$11,$00,$00,$07,$16,$04,$41,$25,$00  ; 46 ;   1 Phantom                                           ; 2-5 GHOST          PHANTOM 
+.byte $24,$0C,$2A,$33,$00,$00,$00,$11,$00,$00,$07,$16,$04,$41,$25,$00  ; 46 ;   1 Phantom                                           ; 2-5 GHOST      
 .byte $2A,$09,$63,$61,$00,$00,$11,$01,$00,$00,$13,$13,$04,$00,$12,$36  ; 47 ;   1 Naga, 0-1 Water                                   ; 1-2 NAGA       3-6 WATER 
 .byte $11,$0D,$12,$14,$00,$00,$11,$01,$00,$00,$07,$09,$04,$40,$12,$12  ; 48 ;   1 GrShark, 0-1 BigEye                               ; 1-2 GrSHARK    1-2 BigEYE 
 .byte $0A,$02,$61,$00,$00,$00,$13,$00,$00,$00,$13,$13,$04,$01,$36,$00  ; 49 ; 1-3 Water                                             ; 3-6 WATER          
@@ -251,7 +251,7 @@ lut_BattleFormations:
 .byte $2A,$09,$64,$62,$00,$00,$11,$01,$00,$00,$04,$2D,$04,$80,$01,$13  ; 52 ;   1 GrNaga, 0-1 Air                                   ; 0-1 GrNAGA     1-3 AIR 
 .byte $26,$0C,$3D,$44,$00,$00,$13,$00,$00,$00,$16,$20,$04,$80,$13,$12  ; 53 ; 1-3 WzVamp                                            ; 1-3 WzVAMP     1-2 ZombieD 
 .byte $2C,$04,$70,$75,$00,$00,$11,$12,$00,$00,$17,$33,$04,$40,$12,$12  ; 54 ;   1 Evilman, 1-2 Nitemare                             ; 1-2 EVILMAN    1-2 NITEMARE 
-.byte $1A,$0F,$65,$66,$00,$00,$12,$12,$00,$00,$30,$31,$04,$40,$11,$00  ; 55 ; 1-2 Chimera, 1-2 Jimera                               ; 1-1 CHIMERA        JIMERA 
+.byte $1A,$0F,$65,$66,$00,$00,$12,$12,$00,$00,$30,$31,$04,$40,$11,$00  ; 55 ; 1-2 Chimera, 1-2 Jimera                               ; 1-1 CHIMERA   
 .byte $2C,$0B,$76,$73,$00,$00,$11,$00,$00,$00,$2E,$2F,$4B,$80,$00,$12  ; 56 ;   1 WarMech                                           ; 1-2 FIGHTER 
 .byte $14,$01,$2F,$00,$00,$00,$12,$00,$00,$00,$1B,$1B,$04,$01,$34,$00  ; 57 ; 1-2 Worm                                              ; 3-4 WORM           
 .byte $1B,$03,$6D,$00,$00,$00,$12,$00,$00,$00,$35,$35,$04,$00,$24,$00  ; 58 ; 1-2 RockGol                                           ; 2-4 RockGOL        
@@ -269,7 +269,7 @@ lut_BattleFormations:
 .byte $13,$01,$23,$00,$00,$00,$12,$00,$00,$00,$11,$11,$1B,$00,$24,$00  ; 64 ; 1-2 Bull                                              ; 2-4 BULL           
 .byte $29,$18,$57,$59,$5B,$00,$02,$02,$11,$00,$2A,$2B,$1E,$60,$24,$02  ; 65 ; 0-2 Caribe, 0-2 Gator, 1 Ocho                         ; 2-4 CARIBE     0-2 GATOR
 .byte $07,$0A,$4A,$49,$45,$46,$12,$02,$01,$01,$1A,$21,$37,$A0,$36,$02  ; 66 ; 1-2 Arachnid, 0-1 Spider, 0-1 Scum, 0-1 Muck          ; 3-6 ARACHNID   0-2 SPIDER 
-.byte $25,$0E,$36,$3B,$00,$00,$13,$02,$00,$00,$1A,$1D,$1B,$80,$47,$00  ; 67 ; 1-3 Catman, 0-2 Saber T                               ; 4-7 CATMAN         Saber T 
+.byte $25,$0E,$36,$3B,$00,$00,$13,$02,$00,$00,$1A,$1D,$1B,$80,$47,$00  ; 67 ; 1-3 Catman, 0-2 Saber T                               ; 4-7 CATMAN     
 .byte $06,$00,$3D,$3C,$00,$00,$00,$25,$00,$00,$1F,$20,$04,$80,$11,$36  ; 68 ; 2-5 WzVamp                                            ; 1-1 WzVAMP     3-6 VAMPIRE 
 .byte $74,$03,$32,$00,$00,$00,$11,$00,$00,$00,$17,$17,$04,$01,$23,$00  ; 69 ;   1 Eye                                               ; 2-3 EYE            
 .byte $06,$02,$3F,$00,$00,$00,$25,$00,$00,$00,$20,$20,$04,$00,$37,$00  ; 6A ; 2-5 R.Goyle                                           ; 3-7 R`GOYLE        
@@ -292,8 +292,8 @@ lut_BattleFormations:
 .byte $4F,$04,$7F,$00,$00,$00,$11,$00,$00,$00,$3E,$3F,$04,$01,$00,$00  ; 7B ;     Chaos                                             ;                 
 .byte $56,$00,$3C,$00,$00,$00,$11,$00,$00,$00,$1F,$1F,$04,$01,$00,$00  ; 7C ;     Vampire                                           ;                 
 .byte $5C,$02,$71,$00,$00,$00,$11,$00,$00,$00,$06,$06,$04,$01,$00,$00  ; 7D ;     Astos                                             ;                 
-.byte $61,$20,$0E,$0D,$0F,$00,$00,$00,$99,$00,$08,$0B,$04,$A1,$12,$88  ; 7E ;   9 Pirates                                           ; 1-2 WzSahag     8-8 R.Sahag
-.byte $5B,$0E,$69,$6E,$00,$00,$11,$00,$00,$00,$13,$2E,$04,$41,$00,$12  ; 7F ;     Garland                                           ;                 1-2 IronGol
+.byte $01,$20,$0E,$0D,$0F,$00,$00,$00,$99,$00,$08,$0B,$04,$A1,$12,$88  ; 7E ;   9 Pirates                                           ; 1-2 WzSahag     8-8 R.Sahag
+.byte $2B,$0E,$69,$6E,$00,$00,$11,$00,$00,$00,$13,$2E,$04,$41,$00,$12  ; 7F ;     Garland                                           ;                 1-2 IronGol
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1676,8 +1676,14 @@ PrepBattleVarsAndEnterBattle:
     
     JSR PrepareEnemyFormation   ; build the enemy formation
     
-    LDX dlgmusic_backup
+    LDA miniboss_music
+    BEQ :+
+      LDA #$5A
+      JMP @SaveMusic:
+    
+ :  LDX dlgmusic_backup
     LDA BattleMusic_LUT, X
+   @SaveMusic: 
     STA music_track           ; set music track and followup
     STA btl_followupmusic
     

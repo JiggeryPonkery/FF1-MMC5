@@ -1628,7 +1628,9 @@ Talk_KingConeria:
 Talk_Garland:
     LDY #OBJID_GARLAND
     JSR HideThisMapObject   ; hide (kill) the Garland object (this object)
-
+    
+    INC miniboss_music
+    
     LDA #BTL_GARLAND
     JSR TalkBattle          ; trigger the battle with Garland
 
@@ -1662,6 +1664,7 @@ Talk_Bikke:
     BCS @AlreadyFought      ; if we already have, skip ahead
 
       JSR SetGameEventFlag  ; otherwise, set event flag to mark him as fought
+      INC miniboss_music
       LDA #BTL_BIKKE        ; then start a battle with Bikke (his pirates)
       JSR TalkBattle
       LDA tmp+1             ; and print [1]
@@ -1750,7 +1753,7 @@ Talk_Astos:
     INC item_crystal       ; give them the Crystal
     LDY #OBJID_ASTOS
     JSR HideThisMapObject  ; hide (kill) Astos' map object (this object)
-
+    INC miniboss_music
     LDA #BTL_ASTOS         ; trigger battle with Astos
     JSR TalkBattle
 
@@ -1875,6 +1878,7 @@ Talk_Unne:
 Talk_Vampire:
     LDY #OBJID_VAMPIRE      ; Kill/Hide the Vampire object (this object)
     JSR HideThisMapObject
+    INC miniboss_music
     LDA #BTL_VAMPIRE        ; Trigger a battle with the Vampire
     JSR TalkBattle
     LDA tmp+1               ; and print [1]

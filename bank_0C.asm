@@ -602,6 +602,9 @@ lut_EnemyAi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ExitBattle:
+    LDA #0
+    STA miniboss_music
+
     LDA btl_result                  ; if running, skip to fade out, don't animate them walking
     CMP #$03
     BEQ :+
@@ -734,9 +737,6 @@ CheckForEndOfBattle:
     STA btltmp+6                        ; Hand off control to another routine in bank B
     LDA #>BattleOver_ProcessResult_L
     STA btltmp+7
-    
-    LDA #0
-    STA Asleep ;; JIGS - keep this 0 so shops don't wig out
     
     LDA #$0B
     JMP BattleCrossPageJump_L
