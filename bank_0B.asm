@@ -181,7 +181,7 @@ lut_BattleFormations:
 .byte $00,$0A,$03,$02,$00,$00,$25,$03,$00,$00,$00,$01,$04,$80,$48,$00  ; 0B ; 2-5 GrWolves, 0-3 Wolves                              ; 8B ; 4-8 GrWolf   
 .byte $12,$07,$1B,$19,$00,$00,$12,$00,$00,$00,$0E,$10,$04,$40,$13,$02  ; 0C ; 1-2 Ogre                                              ; 8C ; 1-3 OGRE       0-2 HYENA 
 .byte $03,$00,$1E,$00,$00,$00,$12,$00,$00,$00,$11,$11,$04,$00,$37,$00  ; 0D ; 1-2 Asp                                               ; 8D ; 3-7 ASP            
-.byte $20,$38,$01,$04,$09,$00,$05,$13,$02,$00,$01,$02,$21,$60,$25,$02  ; 0E ; 0-5 GrImp, 1-3 WrWolf, 0-2 Giant                      ; 8E ; 2-5 GrImp      0-2 WrWolf GIAN
+.byte $20,$38,$01,$04,$09,$00,$05,$13,$02,$00,$01,$02,$21,$60,$25,$02  ; 0E ; 0-5 GrImp, 1-3 WrWolf, 0-2 Giant                      ; 8E ; 2-5 GrImp      0-2 WrWolf
 .byte $04,$0A,$2E,$2D,$00,$00,$00,$14,$00,$00,$18,$19,$04,$80,$25,$25  ; 0F ; 1-4 Specter                                           ; 8F ; 2-5 SPECTER    2-5 GEIST 
 .byte $06,$02,$3E,$00,$00,$00,$23,$00,$00,$00,$1F,$1F,$04,$00,$38,$00  ; 10 ; 2-3 Gargoyle                                          ; 90 ; 3-8 GARGOYLE       
 .byte $00,$0A,$04,$03,$00,$00,$36,$00,$00,$00,$01,$02,$21,$80,$25,$05  ; 11 ; 3-6 WrWolf                                            ; 91 ; 2-5 WrWolf     0-5 GrWolf 
@@ -294,7 +294,7 @@ lut_BattleFormations:
 .byte $56,$00,$3C,$00,$00,$00,$11,$00,$00,$00,$1F,$1F,$04,$01,$00,$00  ; 7C ;     Vampire                                           ; FC ;                 
 .byte $5C,$02,$71,$00,$00,$00,$11,$00,$00,$00,$06,$06,$04,$01,$00,$00  ; 7D ;     Astos                                             ; FD ;                 
 .byte $01,$20,$0E,$0D,$00,$00,$00,$00,$00,$00,$08,$0B,$04,$A1,$12,$88  ; 7E ;                                                       ; FE ; 1-2 WzSahag     8-8 R.Sahag
-.byte $2B,$0E,$69,$6E,$00,$00,$11,$00,$00,$00,$13,$2E,$04,$41,$00,$12  ; 7F ;                                                       ; FF ;                 1-2 IronGol
+.byte $2B,$0E,$00,$6E,$00,$00,$11,$00,$00,$00,$13,$2E,$04,$41,$00,$12  ; 7F ;                                                       ; FF ;                 1-2 IronGol
 
 ;.byte $3D,$01,$78,$00,$00,$00,$11,$00,$00,$00,$36,$37,$04,$01,$00,$00  ; 73 ;     Lich reprise                                      ;                 
 ;.byte $3D,$00,$7A,$00,$00,$00,$11,$00,$00,$00,$38,$39,$04,$01,$00,$00  ; 74 ;     Kary reprise                                      ;                 
@@ -3431,8 +3431,6 @@ PrepareEnemyFormation:
     JMP PrepareEnemyFormation_SmallLarge
 
 
-        
-      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  PrepareEnemyFormation_SmallLarge [$A17E :: 0x2E18E]
@@ -3668,7 +3666,7 @@ PrepareEnemyFormation_Fiend:
     TAX
     
     LDA #$08
-    STA btl_drawformationtmp                   ; 8 rows of tiles.  Used as loop down-counter
+    STA btl_drawformationtmp    ; 8 rows of tiles.  Used as loop down-counter
     
     LDA lut_FiendTSAPtrs, X     ; source TSA data in btltmp+4
     STA btltmp+4
@@ -3822,8 +3820,13 @@ PrepareEnemyFormation_Chaos:
 FinalizeEnemyFormation_FiendChaos:
     LDA #$01
     STA btl_enemycount      ; There is exactly 1 enemy for Fiend/Chaos formations
-    LDA btlform_enids       ; Just use the first enemy ID as the only enemy in this formation
-    STA btl_enemyIDs
+    LDA a:btlformation      ; See if this is a B-formation
+    BPL :+                  ; if it is, load second enemy ID
+      LDA btlform_enids+1
+      JMP :++
+    
+  : LDA btlform_enids       ; Just use the first enemy ID as the only enemy in this formation
+  : STA btl_enemyIDs
     STA btl_enemyroster               ; ???  Duplicated to 6BC9?  Why?  I doubt this is ever used
     JMP WriteAttributes_ClearUnusedEnStats
     
