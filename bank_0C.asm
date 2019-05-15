@@ -1639,10 +1639,10 @@ BattleSubMenu_Magic_NoUndraw:
     : TYA
       PHA
       JSR DrawCommandBox_L        ; re-draw the command box
-      LDA #$40
-      LDX btlcmd_spellindex
       PLA
       TAY
+      LDA #$40
+      LDX btlcmd_spellindex
       JMP SetCharacterBattleCommand ; command = 40 xx TT  (xx = spell, TT = enemy target)
     
   @CheckTarget_04:                  ; target 04 = target self
