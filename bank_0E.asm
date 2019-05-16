@@ -6683,7 +6683,7 @@ UseItem_Bottle:
 @OpenBottle:                        ; if the bottle hasn't been opened yet
     ;LDA #0
     ;STA item_bottle                 ; remove the bottle from inventory
-    ;DEC item_bottle
+    DEC item_bottle
     LDY #OBJID_FAIRY
     JSR LongCall
     .word ShowMapObject
