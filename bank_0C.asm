@@ -5537,6 +5537,7 @@ ApplyRegenToPlayer:
     CLC
     ADC #$10
     STA ch_battlestate, X         ; rehide character
+    DEC Hidden
    
    @DecrementRegeneration:
     LDA ch_battlestate, X
