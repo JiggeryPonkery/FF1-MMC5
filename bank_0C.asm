@@ -6142,8 +6142,8 @@ Battle_PlayerTryRun:
     DEC MMC5_tmp+2    
     BNE @EnemyLoop
     
-    LSR MM5_tmp
-    LSR MM5_tmp
+    LSR MMC5_tmp
+    LSR MMC5_tmp
 
     LDY #ch_level - ch_stats  
     LDA (CharStatsPointer), Y      
