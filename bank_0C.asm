@@ -5682,103 +5682,121 @@ StealFromEnemy:
 
   ;; for now, to test and make sure stealing works properly, there will be no randomness involved. Just do it.
   
-   STX btl_defender_index       ; set defender index
-   STX btl_defender
-   ORA #$80
-   STA btl_attacker
-  
-   LDA #$00        ; print '02 00 00' to combat box 0
-   TAX             ;  (attacker name in attacker combat box)
-   LDY #$02
-   JSR PrepareAndDrawSimpleCombatBox
+    STX btl_defender_index       ; set defender index
+    STX btl_defender
+    ORA #$80
+    STA btl_attacker
+   
+    LDA #$00        ; print '02 00 00' to combat box 0
+    TAX             ;  (attacker name in attacker combat box)
+    LDY #$02
+    JSR PrepareAndDrawSimpleCombatBox
+
+    LDA #$02        ; print '03 00 00' to combat box 2
+    LDY #$03        ;  (defender name in defender combat box)
+    LDX #$00
+    JSR PrepareAndDrawSimpleCombatBox
     
-   LDA #$02        ; print '03 00 00' to combat box 2
-   LDY #$03        ;  (defender name in defender combat box)
-   LDX #$00
-   JSR PrepareAndDrawSimpleCombatBox
-   
-   LDA #$0F
-   STA btltmp_damageblockbuffer
-   LDA #BTLMSG_STEALING
-   STA btltmp_damageblockbuffer+1
-   LDA #0
-   STA btltmp_damageblockbuffer+2
-   LDA #$03                          ; draw it in combat box 3
-   LDX #<(btltmp_damageblockbuffer)
-   LDY #>(btltmp_damageblockbuffer)
-   JSR DrawCombatBox_L
-   
-   LDA btl_attacker
-   AND #$03
-   STA btl_animatingchar  
-   
-   JSR UnhideCharacter
-   
-   LDA #-8
-   STA btl_walkdirection                  ; walk the character to the left
-   
-  LDA #$20
-  STA btl_walkloopctr                  ; loop down counter
+    LDA #$0F
+    STA btltmp_damageblockbuffer
+    LDA #BTLMSG_STEALING
+    STA btltmp_damageblockbuffer+1
+    LDA #0
+    STA btltmp_damageblockbuffer+2
+    LDA #$03                          ; draw it in combat box 3
+    LDX #<(btltmp_damageblockbuffer)
+    LDY #>(btltmp_damageblockbuffer)
+    JSR DrawCombatBox_L
+    
+    LDA btl_attacker
+    AND #$03
+    STA btl_animatingchar  
+    
+    JSR UnhideCharacter
+    
+    LDY #ch_level - ch_stats
+    LDA (CharStatsPointer), Y
+    STA MMC5_tmp                        ; save thief's level
+    
+    LDA #-8
+    STA btl_walkdirection               ; walk the character to the left
+    
+   LDA #$20
+   STA btl_walkloopctr                  ; loop down counter
   
   ;; 8 pixels per movement... that should be 1 screen width
    
-  @Loop:
-      LDA btl_animatingchar     ; get the character index
-      ASL A
-      ASL A
-      TAX                       ; index for btl_chardraw buffer
-      
-      LDA btl_walkloopctr
-      AND #$02                  ; toggle animation pose every 4 frames
-      ASL A                     ; switch between pose '0' (stand) and pose '4' (walk)
-      STA btl_chardraw_pose, X
-      
-      LDA btl_chardraw_x, X     ; add the directional value to the X position
-      CLC
-      ADC btl_walkdirection
-      STA btl_chardraw_x, X
-      
-      JSR UpdateSprites_TwoFrames   ; update sprites, do 2 frames of animation
-      
-      DEC btl_walkloopctr
-      BNE @Loop                 ; keep looping
-
-   JSR SetNaturalPose      
-   JSR HideCharacter
-      
-   LDA #$0F
-   STA btltmp_altmsgbuffer
-   LDA #BTLMSG_STOLE
-   STA btltmp_altmsgbuffer+1
-   
-   LDA #3
-   STA btl_combatboxcount_alt     ; fix the stupid box counters
-   DEC btl_combatboxcount
-   DEC btl_combatboxcount
-
-   JSR LongCall
-   .word StealFromEnemyZ
-   .byte $0F
-   
-   LDA battle_stealsuccess
-   BNE :+
-   
-   JSR DoNothingMessageBox
-   JMP ClearAllCombatBoxes        
-   
- : LDA #$04                          ; draw it in combat box 4
-   LDX #<(btltmp_altmsgbuffer)
-   LDY #>(btltmp_altmsgbuffer)
-   JSR DrawCombatBox_L
-   INC btl_combatboxcount_alt
-   
-   DEC battle_stealsuccess
-   
-   @InputLoop:                   ; Wait for the player to provide
-      JSR DoFrame_WithInput      ;   ANY input
-    BEQ @InputLoop
+   @Loop:
+    LDA btl_animatingchar     ; get the character index
+    ASL A
+    ASL A
+    TAX                       ; index for btl_chardraw buffer
     
-   JMP ClearAllCombatBoxes     
+    LDA btl_walkloopctr
+    AND #$02                  ; toggle animation pose every 4 frames
+    ASL A                     ; switch between pose '0' (stand) and pose '4' (walk)
+    STA btl_chardraw_pose, X
+    
+    LDA btl_chardraw_x, X     ; add the directional value to the X position
+    CLC
+    ADC btl_walkdirection
+    STA btl_chardraw_x, X
+    
+    JSR UpdateSprites_TwoFrames   ; update sprites, do 2 frames of animation
+    
+    DEC btl_walkloopctr
+    BNE @Loop                 ; keep looping
+
+    JSR SetNaturalPose      
+    JSR HideCharacter
+
+    LDA #$0F
+    STA btltmp_altmsgbuffer
+    LDA #BTLMSG_STOLE
+    STA btltmp_altmsgbuffer+1
+    
+    LDA #3
+    STA btl_combatboxcount_alt     ; fix the stupid box counters
+    DEC btl_combatboxcount
+    DEC btl_combatboxcount
+   
+    JSR LongCall
+    .word StealFromEnemyZ
+    .byte $0F
+    
+    LDA battle_stealsuccess
+    CMP #2
+    BEQ @StealMissed
+    CMP #1
+    BEQ @StealHit
+        JSR DoNothingMessageBox
+        JMP ClearAllCombatBoxes        
+
+   @StealMissed:
+    LDA #$0F                      ; print format code for "Missed!" into unformatted buffer
+    STA btltmp_altmsgbuffer+2
+    LDA #BTLMSG_MISSED
+    STA btltmp_altmsgbuffer+3
+    LDA #$00
+    STA btltmp_altmsgbuffer+4
+    
+   @StealHit: 
+    LDA #$04                          ; draw it in combat box 4
+    LDX #<(btltmp_altmsgbuffer)
+    LDY #>(btltmp_altmsgbuffer)
+    JSR DrawCombatBox_L
+    INC btl_combatboxcount_alt
+    
+    LDA #0
+    STA battle_stealsuccess
+    
+    @InputLoop:                   ; Wait for the player to provide
+       JSR DoFrame_WithInput      ;   ANY input
+     BEQ @InputLoop
+     
+    JMP ClearAllCombatBoxes     
+   
+
 
    
 KickEnemies:

@@ -45,6 +45,18 @@ SaveScreenChar12 = sram3+$1C0
 
 
 ;;;;;;;;;;;;;;;;;;
+;;  elements
+ELEMENT_TIME      = $01
+ELEMENT_STUN      = $02
+ELEMENT_POISON    = $04
+ELEMENT_DEATH     = $08
+ELEMENT_FIRE      = $10
+ELEMENT_ICE       = $20
+ELEMENT_LIGHTNING = $40
+ELEMENT_EARTH     = $80
+
+
+;;;;;;;;;;;;;;;;;;
 ;;  enemy categories
 CATEGORY_UNKNOWN     = $01
 CATEGORY_DRAGON      = $02
@@ -76,7 +88,7 @@ ENROMSTAT_ELEMWEAK   = $12
 ENROMSTAT_ELEMRESIST = $13
 ENROMSTAT_ELEMATTACK = $14
 ENROMSTAT_SPEED      = $15
-ENROMSTAT_STEALDIF   = $16 
+ENROMSTAT_LEVEL      = $16 
 ENROMSTAT_ITEM       = $17
 ENROMSTAT_BLANK      = $18
 

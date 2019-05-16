@@ -705,17 +705,19 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes
     en_magdef       = $0D ;                             14 
     en_elemweakness = $0E ; can be changed with magic   15
     en_elemresist   = $0F ; can be changed with magic   16
-    en_speed        = $10 ; 
-    en_stealdefense = $11    
-    en_item         = $12 ; can be changed by stealing  17
+    en_elemattack   = $10 ;                             17
+    en_speed        = $11 ;                             18
+    en_level        = $12 ;                             19  
+    en_item         = $13 ; can be changed by stealing  20
+    en_blank        = $14 ;                             21
     ;; this block matches enemy ROM layout
     
-    en_aimagpos     = $13 ;                             18
-    en_aiatkpos     = $14 ;                             19
-    en_numhitsmult  = $15 ; can be changed with magic   20
-    en_ailments     = $16 ; can be changed with magic   21
-    en_hp           = $17 ; $18 ; 2 bytes               22 23
-    en_enemyid      = $19 ;                             24
+    en_aimagpos     = $15 ;                             22
+    en_aiatkpos     = $16 ;                             23
+    en_numhitsmult  = $17 ; can be changed with magic   24
+    en_ailments     = $18 ; can be changed with magic   25
+    en_hp           = $19 ; $1A ; 2 bytes               26 27
+    en_enemyid      = $1B ;                             28
     
     ;; JIGS - I am NOT AT ALL convinced I haven't screwed up elemental weakness/resistance bug fixing.
 
