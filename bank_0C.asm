@@ -6095,54 +6095,83 @@ Battle_PlayerTryRun:
     ; This code is also WAAAY more complicated and bigger than it needs to be.  This could be done with a
     ;   simple CMP instruction -- why they decided to bring the math buffer into this is beyond me.
     
-    LDY #ch_level - ch_stats        ; Get Level
-    LDA (CharStatsPointer), Y       ; JIGS - fixed
+;    LDY #ch_level - ch_stats        ; Get Level
+;    LDA (CharStatsPointer), Y       ; JIGS - fixed
+;    CLC
+;    ADC #15                         ; level + 15
+;    TAX                             ; put it in X
+;    
+;    LDY #ch_battlestate - ch_stats  ; Get Battlestate (hiding)
+;    LDA (CharStatsPointer), Y       ; JIGS - if hidden, level doesn't factor into it
+;    AND #$10                        ; so the running should be easier to achieve?
+;    BEQ :+                          ; Seems like running gets harder the more you level up
+;    
+;    LDX #15                         ; by increasing the random value higher than 15
+;    
+;  : LDA #$00                        ; So getting a higher number is bad if you want your luck/speed
+;    JSR RandAX                      ; to be higher?
+;    STA tmp
+;    
+;    LDY #ch_speed - ch_stats         ; get player luck
+;    LDA (CharStatsPointer), Y
+;    CMP tmp
+;	BCS @Success
+
+    LDA #0
+    STA MMC5_tmp        ; total speed
+    STA MMC5_tmp+1      ; enemy ID
+    LDA btl_enemycount
+    STA MMC5_tmp+2      ; amount of enemies
+    
+   @EnemyLoop:
+    LDX MMC5_tmp+1
+    JSR DoesEnemyXExist
+    BEQ @NextEnemy
+    
+    LDA MMC5_tmp+1
+    JSR GetEnemyRAMPtr
+    
+    LDY #en_speed
+    LDA (EnemyRAMPointer), Y
     CLC
-    ADC #15                         ; level + 15
-    TAX                             ; put it in X
+    ADC MMC5_tmp
+    STA MMC5_tmp
     
-    ;LDA #$00
-    ;STA btl_mathbuf+3               ; zero high byte of math buffer
-    ;JSR RandAX                      ; random[ 0, level+15 ]
-    ;TAX                             ; random value in X
+   @NextEnemy:
+    INC MMC5_tmp+1
+    DEC MMC5_tmp+2    
+    BNE @EnemyLoop
     
-    ;LDY #ch_speed - ch_stats         ; get player luck
-    ;LDA (CharStatsPointer), Y
+    LSR MM5_tmp
+    LSR MM5_tmp
+
+    LDY #ch_level - ch_stats  
+    LDA (CharStatsPointer), Y      
+    STA MMC5_tmp+1
     
-        ; At this point, the game could just STX tmp, CMP tmp and be done with it.. but noooo.  Bring the math buffer into it!
-        ;  make it even more complicated!  Waste all sorts of space!
+    LSR MMC5_tmp+1
     
-    ;STA btl_mathbuf+2               ; mathbuf+2 now has the player's luck
-    ;LDA #$01
-    ;JSR MathBuf_Sub                 ; mathbuf+2 is now luck-randomval
+    LDY #ch_battlestate - ch_stats  
+    LDA (CharStatsPointer), Y       
+    AND #$10                        
+    BEQ :+                          
+
+    LDA MMC5_tmp+1
+    CLC
+    ADC #15
+    STA MMC5_tmp+1
     
-    ;LDY btl_mathbuf+2               ; clip at zero.  WHY THE FUCK DO YOU KEEP DOING THIS AFTER EVERY SINGLE CALL TO
-    ;LDX btl_mathbuf+3               ; MATHBUF_SUB, FINAL FANTASY!?!?  MATHBUF_SUB ALREADY FREAKING CLIPS THE VALUE! THERE
-    ;JSR ZeroXYIfNegative            ; IS NO NEED TO WASTE FIFTEEN FUCKING BYTES TO DO SOMETHING THAT WAS ALREADY DONE. YOU
-    ;STY btl_mathbuf+2               ; DO IT EVERY TIME, IT IS DRIVING ME CRAZY! MY BRAIN IS GOING TO EXPLODE!!!!!1
-    ;STX btl_mathbuf+3               ; GRAAAAAAAAAH
+  : LDY #ch_speed - ch_stats  
+    LDA (CharStatsPointer), Y     
+    CLC
+    ADC MMC5_tmp+2    
+    CMP MMC5_tmp
+    BCS @Success
     
-    ;LDA btl_mathbuf+2               ; success if low byte was nonzero (if luck > randomval)
-    ;BNE @Success                    ; failure if zero (luck <= randomval)
-    
-    ;; JIGS - Woah. Trying to do this instead:
-    
-    LDY #ch_battlestate - ch_stats  ; Get Battlestate (hiding)
-    LDA (CharStatsPointer), Y       ; JIGS - if hidden, level doesn't factor into it
-    AND #$10                        ; so the running should be easier to achieve?
-    BEQ :+                          ; Seems like running gets harder the more you level up
-    
-    LDX #15                         ; by increasing the random value higher than 15
-    
-  : LDA #$00                        ; So getting a higher number is bad if you want your luck/speed
-    JSR RandAX                      ; to be higher?
-    STA tmp
-    
-    LDY #ch_speed - ch_stats         ; get player luck
-    LDA (CharStatsPointer), Y
-    CMP tmp
-	BCS @Success
-        
+    ;; JIGS - new running formula:
+    ;; All enemy's speed combined / 4
+    ;; Against character's level / 2 + speed (+15 if hiding)
+
   @Fail:
     LDA #BTLMSG_CANTRUN             ; on failure, print 'Can't Run' 
     JMP DrawBtlMsg_ClearCombatBoxes ; then clear all combat boxes and exit

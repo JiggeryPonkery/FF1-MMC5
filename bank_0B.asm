@@ -465,6 +465,13 @@ data_LevelUpData_Class1: ;; Class 1 - Fighter
 .byte %00011000, %00000000 ; Level 48
 .byte %00110000, %00000000 ; Level 49
 
+;; 27 HP
+;; 49 Strength
+;; 35 Agililty
+;; 14 Intelligence
+;; 25 Vitality
+;; 24 Speed
+
 ;; Class 2 - Thief
 data_LevelUpData_Class2:
 .byte %00111001, %00000000 ; Level 1 
@@ -516,6 +523,13 @@ data_LevelUpData_Class2:
 .byte %00010011, %00000000 ; Level 47
 .byte %00001101, %00000000 ; Level 48
 .byte %00010001, %00000000 ; Level 49
+
+;; 18 HP
+;; 33 Strength
+;; 32 Agililty
+;; 17 Intelligence
+;; 16 Vitality
+;; 49 Speed
 
 ;; Class 3 - Black Belt
 data_LevelUpData_Class3:
@@ -569,6 +583,13 @@ data_LevelUpData_Class3:
 .byte %00110110, %00000000 ; Level 48
 .byte %00001010, %00000000 ; Level 49
 
+;; 20 HP
+;; 24 Strength
+;; 25 Agililty
+;; 24 Intelligence
+;; 49 Vitality
+;; 30 Speed
+
 ;;Class 4 - Red Mage
 data_LevelUpData_Class4:
 .byte %00110011, %00000011 ; Level 1 
@@ -620,6 +641,13 @@ data_LevelUpData_Class4:
 .byte %00011001, %00001000 ; Level 47
 .byte %00000100, %01000000 ; Level 48
 .byte %00010010, %00010000 ; Level 49
+
+;; 13 HP
+;; 25 Strength
+;; 17 Agililty
+;; 24 Intelligence
+;; 22 Vitality
+;; 25 Speed
  
 ;;Class 5 - White Mage
 data_LevelUpData_Class5:
@@ -673,6 +701,13 @@ data_LevelUpData_Class5:
 .byte %00010000, %01000000 ; Level 48
 .byte %00001001, %10000000 ; Level 49
 
+;; 15 HP
+;; 18 Strength
+;; 18 Agililty
+;; 29 Intelligence
+;; 19 Vitality
+;; 20 Speed
+
 ;;Class 6 - Black Mage
 data_LevelUpData_Class6:
 .byte %00100100, %00000011 ; Level 1 
@@ -724,6 +759,13 @@ data_LevelUpData_Class6:
 .byte %00000110, %00100000 ; Level 47
 .byte %00000100, %01000000 ; Level 48
 .byte %00000101, %10000000 ; Level 49
+
+;; 12 HP
+;; 13 Strength
+;; 13 Agililty
+;; 49 Intelligence
+;; 14 Vitality
+;; 14 Speed
 
 ;; Class 7 - Knight  
 data_LevelUpData_Class7:
