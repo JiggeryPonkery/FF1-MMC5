@@ -10600,6 +10600,11 @@ BtlMag_LoadEnemyDefenderStats:
     LDA (EnemyRAMPointer), Y    ; Elemental Resistance
     STA btlmag_defender_elementresist
     
+    INY                        
+    INY
+    LDA (EnemyRAMPointer), Y    ; Speed
+    STA btlmag_defender_speed
+    
     LDY #en_numhitsmult         
     LDA (EnemyRAMPointer), Y    ; Hit multiplier
     STA btlmag_defender_numhitsmult
@@ -10678,6 +10683,11 @@ BtlMag_SaveEnemyDefenderStats:
     INY                        
     LDA btlmag_defender_elementresist
     STA (EnemyRAMPointer), Y    ; Elemental Resistance
+    
+    INY                        
+    INY
+    LDA btlmag_defender_speed
+    STA (EnemyRAMPointer), Y    ; Speed
     
     LDY #en_numhitsmult         
     LDA btlmag_defender_numhitsmult
