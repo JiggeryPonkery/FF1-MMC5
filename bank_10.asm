@@ -273,7 +273,7 @@ lut_DialoguePtrTbl:
 .WORD KARY              ; FB ; Is it you, the tinder that defeated the FIEND of the Earth, and disturbed my sleep? I, KARY will now show you the force of Fire, and you shall burn in its flames!!
 .WORD KRAKEN            ; FC ; The FIEND's ball is shattered, evaporating all the water. Ho, Ho, Ho.... How foolhardy to dare challenge me, KRAKEN the FIEND of the Water.
 .WORD TIAMAT            ; FD ; Lightning erupts from the FIEND's ball.... So, you have come this far.... I, TIAMAT the FIEND of the Wind will now put an end to your adventure!!
-.WORD LEFEIN17          ; FE ; What?? You can speak Lefeinish?
+.WORD GAIA2_2           ; FE ; What?? You can speak Lefeinish?
 .WORD STONEPLATE        ; FF ; There is a stone plate on the floor.... You sense something.... Evil?....
 
 
@@ -1040,7 +1040,7 @@ KRAKEN:
 TIAMAT: 
 .byte $A0,$AB,$39,$C5,$C5,$05,$A2,$B2,$B8,$38,$22,$24,$B3,$2B,$AE,$FF,$95,$A8,$A9,$A8,$1F,$30,$AB,$C5,$00
 
-LEFEIN17: 
+GAIA2_2: 
 .byte $9D,$AB,$25,$1A,$AC,$1E,$A4,$24,$28,$B1,$1A,$B3,$AF,$39,$A8,$05,$B2,$B1,$1B,$AB,$1A,$A9,$AF,$B2,$35,$69,$05,$A2,$B2,$B8,$24,$3A,$B6,$1A,$B6,$B2,$34,$1C,$1F,$AA,$69,$05,$8E,$B9,$61,$C5,$69,$00
 
 STONEPLATE: 
@@ -1292,7 +1292,7 @@ TalkNormTeleport:
 lut_MapObjTalkJumpTbl:
 
  ;; No object (ID=00)
-.WORD Talk_None                ; 00
+.WORD Talk_None                ; 00     
 
  ;; Several special objects(ID=01-1F)
 .WORD Talk_KingConeria         ; 01
@@ -2313,12 +2313,12 @@ Talk_Chime:
 lut_MapObjTalkData:
   ;.INCBIN "bin/0E_95D5_objectdata.bin"
   
-.byte $00,$00,$00,$00 ; 00 ; 
-.byte $00,$01,$02,$03 ; 01 ; 
+.byte $00,$00,$00,$00 ; 00 ; Nothing
+.byte $00,$01,$02,$03 ; 01 ; King Corneria
 .byte $00,$04,$00,$00 ; 02 ; Garland (Temple of Fiends)
 .byte $00,$05,$00,$00 ; 03 ; Kidnapped Princess
 .byte $00,$08,$09,$0A ; 04 ; Bikke
-.byte $00,$0B,$0C,$0D ; 05 ; 
+.byte $00,$0B,$0C,$0D ; 05 ; Elf Doctor
 .byte $00,$0E,$0F,$10 ; 06 ; Elf Prince
 .byte $00,$11,$12,$00 ; 07 ; Astos
 .byte $00,$13,$14,$00 ; 08 ; TNT Dwarf
@@ -2328,49 +2328,49 @@ lut_MapObjTalkData:
 .byte $00,$1D,$00,$00 ; 0C ; Vampire
 .byte $00,$1E,$18,$00 ; 0D ; Sarda
 .byte $00,$1F,$20,$18 ; 0E ; Bahamut
-.byte $13,$21,$22,$00 ; 0F ; 
+.byte $13,$21,$22,$00 ; 0F ; Talk_ifvis -- same as Black Orb... if... Fairy is visible??
 .byte $00,$25,$26,$00 ; 10 ; Submarine Engineer
-.byte $00,$27,$28,$00 ; 11 ; 
+.byte $00,$27,$28,$00 ; 11 ; Cube Robot
 .byte $00,$06,$07,$00 ; 12 ; Rescued Princess
 .byte $00,$23,$24,$00 ; 13 ; Fairy
 .byte $00,$29,$2A,$00 ; 14 ; Titan
-.byte $00,$2B,$2C,$00 ; 15 ; 
+.byte $00,$2B,$2C,$00 ; 15 ; Canoe Sage
 .byte $00,$FF,$00,$00 ; 16 ; Earth Plate
 .byte $00,$FF,$00,$00 ; 17 ; Temple of Fiends Plate
-.byte $18,$2E,$00,$19 ; 18 ; 
-.byte $19,$2F,$00,$1A ; 19 ; 
+.byte $18,$2E,$00,$19 ; 18 ; Garland (Past 1)
+.byte $19,$2F,$00,$1A ; 19 ; Garland (Past 2)
 .byte $1A,$30,$00,$7B ; 1A ; Chaos fight
 .byte $1B,$FA,$00,$F3 ; 1B ; Earth Orb (Lich Fight)
 .byte $1C,$FB,$00,$F4 ; 1C ; Fire Orb (Kary Fight) 
 .byte $1D,$FC,$00,$F5 ; 1D ; Water Orb (Kraken Fight)
 .byte $1E,$FD,$00,$F6 ; 1E ; Wind Orb (Tiamat Fight)
-.byte $00,$00,$00,$00 ; 1F ; 
-.byte $12,$31,$32,$00 ; 20 ; 
-.byte $12,$31,$34,$00 ; 21 ; 
-.byte $12,$33,$34,$00 ; 22 ; 
-.byte $01,$35,$36,$00 ; 23 ; 
-.byte $12,$33,$34,$00 ; 24 ; 
-.byte $12,$37,$34,$00 ; 25 ; 
-.byte $00,$38,$39,$00 ; 26 ; 
-.byte $00,$3A,$34,$00 ; 27 ; 
-.byte $12,$33,$34,$00 ; 28 ; 
-.byte $12,$3B,$3C,$00 ; 29 ; 
-.byte $12,$3D,$3E,$00 ; 2A ; 
-.byte $12,$3F,$34,$00 ; 2B ; 
-.byte $05,$40,$41,$00 ; 2C ; 
-.byte $12,$33,$32,$00 ; 2D ; 
-.byte $05,$42,$41,$00 ; 2E ; 
-.byte $06,$33,$34,$00 ; 2F ; 
-.byte $12,$31,$34,$00 ; 30 ; 
-.byte $12,$43,$18,$00 ; 31 ; 
-.byte $00,$46,$18,$00 ; 32 ; 
-.byte $12,$33,$34,$00 ; 33 ; 
-.byte $00,$45,$44,$00 ; 34 ; 
-.byte $00,$47,$00,$00 ; 35 ; 
-.byte $00,$48,$00,$00 ; 36 ; 
-.byte $12,$33,$49,$00 ; 37 ; 
-.byte $12,$33,$4A,$00 ; 38 ; 
-.byte $00,$4B,$00,$00 ; 39 ; 
+.byte $00,$00,$00,$00 ; 1F ; Unused
+.byte $12,$31,$32,$00 ; 20 ; Talk_ifvis    (Corneria People and their routines)
+.byte $12,$31,$34,$00 ; 21 ; Talk_ifvis    
+.byte $12,$33,$34,$00 ; 22 ; Talk_ifvis    
+.byte LUTE,$35,$36,$00 ; 23 ; Talk_ifitem   (Lute)
+.byte $12,$33,$34,$00 ; 24 ; Talk_ifvis    
+.byte $12,$37,$34,$00 ; 25 ; Talk_ifvis    
+.byte $00,$38,$39,$00 ; 26 ; Talk_Invis    
+.byte $00,$3A,$34,$00 ; 27 ; Talk_ifbridge 
+.byte $12,$33,$34,$00 ; 28 ; Talk_ifvis    
+.byte $12,$3B,$3C,$00 ; 29 ; Talk_ifvis    
+.byte $12,$3D,$3E,$00 ; 2A ; Talk_ifvis    
+.byte $12,$3F,$34,$00 ; 2B ; Talk_ifvis    
+.byte KEY,$40,$41,$00 ; 2C ; Talk_ifitem   (Key)
+.byte $12,$33,$32,$00 ; 2D ; Talk_ifvis    
+.byte KEY,$42,$41,$00 ; 2E ; Talk_ifitem   (Key)
+.byte $06,$33,$34,$00 ; 2F ; Talk_ifevent  
+.byte $12,$31,$34,$00 ; 30 ; Talk_ifvis    
+.byte $12,$43,$18,$00 ; 31 ; Talk_ifvis    
+.byte $00,$46,$18,$00 ; 32 ; Talk_GoBridge 
+.byte $12,$33,$34,$00 ; 33 ; Talk_ifvis    
+.byte $00,$45,$44,$00 ; 34 ; Talk_4Orb     
+.byte $00,$47,$00,$00 ; 35 ; Talk_norm     
+.byte $00,$48,$00,$00 ; 36 ; Talk_norm     
+.byte $12,$33,$49,$00 ; 37 ; Talk_ifvis    
+.byte $12,$33,$4A,$00 ; 38 ; Talk_ifvis    
+.byte $00,$4B,$00,$00 ; 39 ; Talk_norm     
 .byte $00,$4D,$4C,$00 ; 3A ; Sky Warrior 1
 .byte $00,$4E,$4C,$00 ; 3B ; Sky Warrior 2
 .byte $00,$4F,$4C,$00 ; 3C ; Sky Warrior 3
@@ -2379,148 +2379,148 @@ lut_MapObjTalkData:
 .byte $00,$52,$00,$00 ; 3F ; Scared Pravoka Townsfolk
 .byte $00,$53,$00,$00 ; 40 ; Scared Pravoka Townsfolk
 .byte $00,$54,$00,$00 ; 41 ; Scared Pravoka Townsfolk
-.byte $04,$55,$56,$00 ; 42 ; 
-.byte $04,$57,$58,$00 ; 43 ; 
-.byte $06,$59,$5A,$00 ; 44 ; 
-.byte $00,$5B,$00,$00 ; 45 ; 
-.byte $06,$5C,$5A,$00 ; 46 ; 
-.byte $04,$5E,$5D,$00 ; 47 ; 
-.byte $00,$42,$00,$00 ; 48 ; 
-.byte $06,$59,$5F,$00 ; 49 ; 
-.byte $06,$59,$60,$00 ; 4A ; 
-.byte $05,$59,$5A,$00 ; 4B ; 
-.byte $06,$59,$5A,$00 ; 4C ; 
-.byte $06,$61,$5A,$00 ; 4D ; 
-.byte $06,$62,$5A,$00 ; 4E ; 
-.byte $06,$63,$64,$00 ; 4F ; 
-.byte $06,$65,$5A,$00 ; 50 ; 
-.byte $06,$66,$67,$00 ; 51 ; 
-.byte $00,$68,$00,$00 ; 52 ; 
-.byte $11,$69,$6B,$00 ; 53 ; 
-.byte $0B,$6A,$6B,$00 ; 54 ; 
-.byte $06,$61,$5A,$00 ; 55 ; 
-.byte $06,$61,$5A,$00 ; 56 ; 
-.byte $00,$4C,$00,$00 ; 57 ; Kee Kee
-.byte $00,$6C,$00,$00 ; 58 ; 
-.byte $00,$6D,$6E,$00 ; 59 ; 
-.byte $00,$6F,$00,$00 ; 5A ; 
-.byte $00,$70,$00,$00 ; 5B ; 
-.byte $03,$6F,$71,$00 ; 5C ; 
-.byte $15,$73,$72,$00 ; 5D ; 
-.byte $00,$74,$00,$00 ; 5E ; 
-.byte $00,$75,$6E,$00 ; 5F ; 
-.byte $00,$76,$77,$00 ; 60 ; 
-.byte $00,$71,$00,$00 ; 61 ; 
-.byte $00,$75,$6E,$00 ; 62 ; 
-.byte $00,$77,$00,$00 ; 63 ; 
-.byte $00,$78,$00,$00 ; 64 ; 
-.byte $00,$78,$00,$00 ; 65 ; 
-.byte $00,$78,$00,$00 ; 66 ; 
-.byte $00,$78,$00,$00 ; 67 ; 
-.byte $0C,$7A,$79,$00 ; 68 ; 
-.byte $00,$7B,$00,$00 ; 69 ; 
-.byte $00,$7C,$7D,$00 ; 6A ; 
-.byte $15,$7F,$7E,$00 ; 6B ; 
-.byte $0C,$81,$80,$00 ; 6C ; 
-.byte $00,$83,$18,$00 ; 6D ; 
-.byte $00,$82,$00,$00 ; 6E ; 
-.byte $00,$84,$00,$00 ; 6F ; 
-.byte $15,$86,$85,$00 ; 70 ; 
-.byte $00,$87,$88,$00 ; 71 ; 
-.byte $00,$89,$00,$00 ; 72 ; 
-.byte $0E,$18,$8A,$00 ; 73 ; 
-.byte $15,$86,$8B,$00 ; 74 ; 
-.byte $00,$18,$00,$00 ; 75 ; 
-.byte $00,$18,$00,$00 ; 76 ; 
-.byte $00,$8C,$00,$00 ; 77 ; 
-.byte $00,$96,$8D,$00 ; 78 ; 
-.byte $00,$97,$8E,$00 ; 79 ; 
-.byte $00,$98,$8F,$00 ; 7A ; 
-.byte $00,$99,$90,$00 ; 7B ; 
-.byte $00,$9A,$91,$00 ; 7C ; 
-.byte $00,$9B,$92,$00 ; 7D ; 
-.byte $00,$9C,$93,$00 ; 7E ; 
-.byte $00,$9D,$94,$00 ; 7F ; 
-.byte $00,$95,$9E,$00 ; 80 ; 
-.byte $12,$9F,$10,$00 ; 81 ; 
-.byte $00,$A0,$00,$00 ; 82 ; 
-.byte $00,$A1,$00,$00 ; 83 ; 
-.byte $84,$2D,$00,$00 ; 84 ; 
-.byte $00,$E2,$00,$00 ; 85 ; 
-.byte $00,$E3,$00,$00 ; 86 ; 
-.byte $00,$E4,$00,$00 ; 87 ; 
-.byte $00,$E5,$00,$00 ; 88 ; 
-.byte $00,$E6,$00,$00 ; 89 ; 
-.byte $00,$E7,$00,$00 ; 8A ; 
-.byte $00,$E8,$00,$00 ; 8B ; 
-.byte $00,$E9,$00,$00 ; 8C ; 
-.byte $00,$EA,$00,$00 ; 8D ; 
-.byte $00,$EB,$00,$00 ; 8E ; 
-.byte $00,$EC,$00,$00 ; 8F ; 
-.byte $00,$ED,$00,$00 ; 90 ; 
-.byte $00,$EE,$00,$00 ; 91 ; 
-.byte $00,$EF,$00,$00 ; 92 ; 
-.byte $00,$AE,$00,$00 ; 93 ; 
-.byte $08,$A3,$A2,$00 ; 94 ; 
-.byte $00,$A4,$00,$00 ; 95 ; 
-.byte $00,$A5,$00,$00 ; 96 ; 
-.byte $00,$A6,$00,$00 ; 97 ; 
-.byte $00,$A7,$00,$00 ; 98 ; 
-.byte $00,$A8,$00,$00 ; 99 ; 
-.byte $14,$AA,$A9,$00 ; 9A ; 
-.byte $0E,$AB,$AC,$00 ; 9B ; 
-.byte $00,$AD,$00,$00 ; 9C ; 
-.byte $00,$AF,$00,$00 ; 9D ; 
-.byte $00,$B0,$00,$00 ; 9E ; 
-.byte $00,$B1,$00,$00 ; 9F ; 
-.byte $00,$B2,$00,$00 ; A0 ; 
-.byte $00,$B3,$00,$00 ; A1 ; 
-.byte $00,$27,$28,$00 ; A2 ; 
-.byte $00,$B4,$00,$00 ; A3 ; 
-.byte $00,$B5,$00,$00 ; A4 ; 
-.byte $00,$B6,$00,$00 ; A5 ; 
-.byte $00,$B7,$00,$00 ; A6 ; 
-.byte $00,$B8,$00,$00 ; A7 ; 
-.byte $00,$B9,$00,$00 ; A8 ; 
-.byte $13,$BB,$BA,$00 ; A9 ; 
-.byte $00,$BC,$00,$00 ; AA ; 
-.byte $00,$BD,$00,$00 ; AB ; 
-.byte $00,$BE,$00,$00 ; AC ; 
-.byte $00,$BF,$00,$00 ; AD ; 
-.byte $00,$C0,$00,$00 ; AE ; 
-.byte $0B,$C1,$FE,$00 ; AF ; 
-.byte $00,$C2,$00,$00 ; B0 ; 
-.byte $00,$C3,$00,$00 ; B1 ; 
-.byte $00,$C4,$00,$00 ; B2 ; 
-.byte $00,$C5,$00,$00 ; B3 ; 
-.byte $00,$C6,$00,$00 ; B4 ; 
-.byte $00,$C7,$00,$00 ; B5 ; 
-.byte $00,$C8,$00,$00 ; B6 ; 
-.byte $00,$C9,$00,$00 ; B7 ; 
-.byte $00,$CA,$00,$00 ; B8 ; 
-.byte $00,$CB,$00,$00 ; B9 ; 
-.byte $00,$CC,$00,$00 ; BA ; 
-.byte $00,$CD,$CE,$D0 ; BB ; 
-.byte $0B,$D0,$CF,$00 ; BC ; 
-.byte $0B,$D0,$D1,$00 ; BD ; 
-.byte $0B,$D0,$D2,$00 ; BE ; 
-.byte $0B,$D0,$D3,$00 ; BF ; 
-.byte $0B,$D0,$D4,$00 ; C0 ; 
-.byte $0B,$D0,$D5,$00 ; C1 ; 
-.byte $0B,$D0,$D6,$00 ; C2 ; 
-.byte $0B,$D0,$D7,$00 ; C3 ; 
-.byte $0B,$D0,$D8,$00 ; C4 ; 
-.byte $0B,$D0,$D9,$00 ; C5 ; 
-.byte $0B,$D0,$DA,$00 ; C6 ; 
-.byte $0B,$D0,$DB,$00 ; C7 ; 
-.byte $0B,$D0,$DC,$00 ; C8 ; 
-.byte $0B,$D0,$DD,$00 ; C9 ; 
-.byte $00,$21,$22,$00 ; CA ; Black Orb
-.byte $00,$D0,$00,$00 ; CB ; 
-.byte $00,$DE,$00,$00 ; CC ; 
-.byte $00,$DF,$00,$00 ; CD ; 
-.byte $00,$E0,$00,$00 ; CE ; 
-.byte $00,$E1,$00,$00 ; CF ; 
+.byte $04,$55,$56,$00 ; 42 ; Talk_ifevent    
+.byte $04,$57,$58,$00 ; 43 ; Talk_ifevent    
+.byte $06,$59,$5A,$00 ; 44 ; Talk_ifevent    
+.byte $00,$5B,$00,$00 ; 45 ; Talk_norm       
+.byte $06,$5C,$5A,$00 ; 46 ; Talk_ifevent    
+.byte HERB,$5E,$5D,$00 ; 47 ; Talk_ifitem     (Herb)
+.byte $00,$42,$00,$00 ; 48 ; Talk_norm       
+.byte $06,$59,$5F,$00 ; 49 ; Talk_ifevent    
+.byte $06,$59,$60,$00 ; 4A ; Talk_ifevent    
+.byte KEY,$59,$5A,$00 ; 4B ; Talk_ifitem     (Key)
+.byte $06,$59,$5A,$00 ; 4C ; Talk_ifevent    
+.byte $06,$61,$5A,$00 ; 4D ; Talk_ifevent    
+.byte $06,$62,$5A,$00 ; 4E ; Talk_ifevent    
+.byte $06,$63,$64,$00 ; 4F ; Talk_ifevent    
+.byte $06,$65,$5A,$00 ; 50 ; Talk_ifevent    
+.byte $06,$66,$67,$00 ; 51 ; Talk_ifevent    
+.byte $00,$68,$00,$00 ; 52 ; Talk_norm       
+.byte $11,$69,$6B,$00 ; 53 ; Talk_ifcanoe    
+.byte FLOATER,$6A,$6B,$00 ; 54 ; Talk_ifitem     (Floater)
+.byte $06,$61,$5A,$00 ; 55 ; Talk_ifevent    
+.byte $06,$61,$5A,$00 ; 56 ; Talk_ifevent    
+.byte $00,$4C,$00,$00 ; 57 ; Talk_norm       (Kee Kee)
+.byte $00,$6C,$00,$00 ; 58 ; Talk_norm       
+.byte $00,$6D,$6E,$00 ; 59 ; Talk_ifcanal    
+.byte $00,$6F,$00,$00 ; 5A ; Talk_norm       
+.byte $00,$70,$00,$00 ; 5B ; Talk_norm       
+.byte CRYSTAL,$6F,$71,$00 ; 5C ; Talk_ifitem     (Crystal)
+.byte EARTHORB,$73,$72,$00 ; 5D ; Talk_ifitem     (Earth Orb)
+.byte $00,$74,$00,$00 ; 5E ; Talk_norm       
+.byte $00,$75,$6E,$00 ; 5F ; Talk_ifcanal    
+.byte $00,$76,$77,$00 ; 60 ; Talk_ifkeytnt   
+.byte $00,$71,$00,$00 ; 61 ; Talk_norm       
+.byte $00,$75,$6E,$00 ; 62 ; Talk_ifcanal    
+.byte $00,$77,$00,$00 ; 63 ; Talk_norm       
+.byte $00,$78,$00,$00 ; 64 ; Talk_norm       
+.byte $00,$78,$00,$00 ; 65 ; Talk_norm       
+.byte $00,$78,$00,$00 ; 66 ; Talk_norm       
+.byte $00,$78,$00,$00 ; 67 ; Talk_norm       
+.byte $0C,$7A,$79,$00 ; 68 ; Talk_ifvis      
+.byte $00,$7B,$00,$00 ; 69 ; Talk_norm       
+.byte $00,$7C,$7D,$00 ; 6A ; Talk_ifearthvamp
+.byte EARTHORB,$7F,$7E,$00 ; 6B ; Talk_ifitem     (Earth Orb)
+.byte $0C,$81,$80,$00 ; 6C ; Talk_ifvis      
+.byte $00,$83,$18,$00 ; 6D ; Talk_ifearthvamp
+.byte $00,$82,$00,$00 ; 6E ; Talk_norm       
+.byte $00,$84,$00,$00 ; 6F ; Talk_norm       
+.byte EARTHORB,$86,$85,$00 ; 70 ; Talk_ifitem     (Earth Orb)
+.byte $00,$87,$88,$00 ; 71 ; Talk_ifairship  
+.byte $00,$89,$00,$00 ; 72 ; Talk_norm       
+.byte $0E,$18,$8A,$00 ; 73 ; Talk_ifevent    
+.byte EARTHORB,$86,$8B,$00 ; 74 ; Talk_ifitem     (Earth Orb) Jim!
+.byte $00,$18,$00,$00 ; 75 ; Talk_norm       
+.byte $00,$18,$00,$00 ; 76 ; Talk_norm       
+.byte $00,$8C,$00,$00 ; 77 ; Talk_norm       
+.byte $00,$96,$8D,$00 ; 78 ; Talk_4Orb       
+.byte $00,$97,$8E,$00 ; 79 ; Talk_4Orb       
+.byte $00,$98,$8F,$00 ; 7A ; Talk_4Orb       
+.byte $00,$99,$90,$00 ; 7B ; Talk_4Orb       
+.byte $00,$9A,$91,$00 ; 7C ; Talk_4Orb       
+.byte $00,$9B,$92,$00 ; 7D ; Talk_4Orb       
+.byte $00,$9C,$93,$00 ; 7E ; Talk_4Orb       
+.byte $00,$9D,$94,$00 ; 7F ; Talk_ifitem     (? No item)
+.byte $00,$95,$9E,$00 ; 80 ; Talk_ifearthfire
+.byte CANOE,$9F,$10,$00 ; 81 ; Talk_ifitem     (Fire Orb) ; JIGS - talks about the Floater, changing to Canoe
+.byte $00,$A0,$00,$00 ; 82 ; Talk_norm       
+.byte $00,$A1,$00,$00 ; 83 ; Talk_norm       
+.byte $84,$2D,$00,$00 ; 84 ; Talk_CoOGuy     Castle of Ordeals sage
+.byte $00,$E2,$00,$00 ; 85 ; Talk_norm       
+.byte $00,$E3,$00,$00 ; 86 ; Talk_norm       
+.byte $00,$E4,$00,$00 ; 87 ; Talk_norm       
+.byte $00,$E5,$00,$00 ; 88 ; Talk_norm       
+.byte $00,$E6,$00,$00 ; 89 ; Talk_norm       
+.byte $00,$E7,$00,$00 ; 8A ; Talk_norm       
+.byte $00,$E8,$00,$00 ; 8B ; Talk_norm       
+.byte $00,$E9,$00,$00 ; 8C ; Talk_norm       
+.byte $00,$EA,$00,$00 ; 8D ; Talk_norm       
+.byte $00,$EB,$00,$00 ; 8E ; Talk_norm       
+.byte $00,$EC,$00,$00 ; 8F ; Talk_norm       
+.byte $00,$ED,$00,$00 ; 90 ; Talk_norm       
+.byte $00,$EE,$00,$00 ; 91 ; Talk_norm       
+.byte $00,$EF,$00,$00 ; 92 ; Talk_norm       
+.byte $00,$AE,$00,$00 ; 93 ; Talk_norm       
+.byte SLAB,$A3,$A2,$00 ; 94 ; Talk_ifitem     (Slab) Unne's Brother in Onrac
+.byte $00,$A4,$00,$00 ; 95 ; Talk_norm       
+.byte $00,$A5,$00,$00 ; 96 ; Talk_norm       
+.byte $00,$A6,$00,$00 ; 97 ; Talk_norm       
+.byte $00,$A7,$00,$00 ; 98 ; Talk_norm       
+.byte $00,$A8,$00,$00 ; 99 ; Talk_norm       
+.byte WATERORB,$AA,$A9,$00 ; 9A ; Talk_ifitem     (Water Orb) ; JIGS - original was air orb for some reason? Old sage by submarine
+.byte $0E,$AB,$AC,$00 ; 9B ; Talk_ifevent         Onrac Dragon before and after class change
+.byte $00,$AD,$00,$00 ; 9C ; Talk_norm       
+.byte $00,$AF,$00,$00 ; 9D ; Talk_norm       
+.byte $00,$B0,$00,$00 ; 9E ; Talk_norm       
+.byte $00,$B1,$00,$00 ; 9F ; Talk_norm       
+.byte $00,$B2,$00,$00 ; A0 ; Talk_norm       
+.byte $00,$B3,$00,$00 ; A1 ; Talk_norm       
+.byte $00,$27,$28,$00 ; A2 ; Talk_CubeBotBad 
+.byte $00,$B4,$00,$00 ; A3 ; Talk_norm       
+.byte $00,$B5,$00,$00 ; A4 ; Talk_norm       
+.byte $00,$B6,$00,$00 ; A5 ; Talk_norm       
+.byte $00,$B7,$00,$00 ; A6 ; Talk_norm       
+.byte $00,$B8,$00,$00 ; A7 ; Talk_norm       
+.byte $00,$B9,$00,$00 ; A8 ; Talk_norm       
+.byte WATERORB,$BB,$BA,$00 ; A9 ; Talk_ifitem     (Water Orb)
+.byte $00,$BC,$00,$00 ; AA ; Talk_norm       
+.byte $00,$BD,$00,$00 ; AB ; Talk_norm       
+.byte $00,$BE,$00,$00 ; AC ; Talk_norm       
+.byte $00,$BF,$00,$00 ; AD ; Talk_norm       
+.byte $00,$C0,$00,$00 ; AE ; Talk_norm       
+.byte $0B,$C1,$FE,$00 ; AF ; Talk_ifevent    Gaia guy before and after learning Leifenish
+.byte $00,$C2,$00,$00 ; B0 ; Talk_norm       
+.byte $00,$C3,$00,$00 ; B1 ; Talk_norm       
+.byte $00,$C4,$00,$00 ; B2 ; Talk_norm       
+.byte $00,$C5,$00,$00 ; B3 ; Talk_norm       
+.byte $00,$C6,$00,$00 ; B4 ; Talk_norm       
+.byte $00,$C7,$00,$00 ; B5 ; Talk_norm       
+.byte $00,$C8,$00,$00 ; B6 ; Talk_norm       
+.byte $00,$C9,$00,$00 ; B7 ; Talk_norm       
+.byte $00,$CA,$00,$00 ; B8 ; Talk_norm       
+.byte $00,$CB,$00,$00 ; B9 ; Talk_norm       
+.byte $00,$CC,$00,$00 ; BA ; Talk_norm       
+.byte $00,$CD,$CE,$D0 ; BB ; Talk_Chime      
+.byte $0B,$D0,$CF,$00 ; BC ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D1,$00 ; BD ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D2,$00 ; BE ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D3,$00 ; BF ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D4,$00 ; C0 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D5,$00 ; C1 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D6,$00 ; C2 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D7,$00 ; C3 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D8,$00 ; C4 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$D9,$00 ; C5 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$DA,$00 ; C6 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$DB,$00 ; C7 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$DC,$00 ; C8 ; Talk_ifevent   Leifen citizens
+.byte $0B,$D0,$DD,$00 ; C9 ; Talk_ifevent   Leifen citizens
+.byte $00,$21,$22,$00 ; CA ; Talk_BlackOrb  Black Orb
+.byte $00,$D0,$00,$00 ; CB ; Talk_norm      Leifen going Lu...pa? still
+.byte $00,$DE,$00,$00 ; CC ; Talk_norm      Robot talking about the Cube being flown off  
+.byte $00,$DF,$00,$00 ; CD ; Talk_norm      Transporter requires Cube
+.byte $00,$E0,$00,$00 ; CE ; Talk_norm      Robot guy misses his master
+.byte $00,$E1,$00,$00 ; CF ; Talk_norm      Window over the world 
 
 
 
