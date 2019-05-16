@@ -4770,71 +4770,71 @@ DoBattleRound:
     ; You could argue that this is BUGGED.  The fix would be to rewrite this
     ; loop to do a traditional iterative shuffle algorithm.
     
-    ;;JIGS - what if turn order was based on luck and enemy morale?
+    ;;JIGS - what if turn order was based on speed stats?
     
-    @MainLoop:
-    LDA btl_turnorder, Y ; 
-    BMI @PlayerLuck          ; N was set by loading an 8 if it was a player
+   @MainLoop:
+    LDA btl_turnorder, Y 
+    BMI @PlayerLuck            ; N was set by loading an 8 if it was a player
     
-    @EnemyMorale:
+   @EnemyMorale:
     TYA 
-    PHA                  ; backup Y
+    PHA                        ; backup Y
     JSR GetEnemyRAMPtr
     
-    LDY #en_speed                 ; get speed
+    LDY #en_speed              ; get speed
     LDA (EnemyRAMPointer), Y     
     JMP @FinishLoop
     
-    @PlayerLuck:
+   @PlayerLuck:
     TYA 
-    PHA                  ; backup Y
+    PHA                        ; backup Y
     AND #$03
     JSR PrepCharStatPointers 
     
-    LDY #ch_speed - ch_stats         ; get player luck
+    LDY #ch_speed - ch_stats   ; get player speed
     LDA (CharStatsPointer), Y
     
-    @FinishLoop:
-    TAX             ; whoops, backup A into X
-    PLA 
-    TAY             ; restore Y
-    TXA             ; restore A
-    STA MMC5_tmp, Y ; Store in temporary memory
+   @FinishLoop:
+    TAX                        ; whoops, backup A into X
+    PLA  
+    TAY                        ; restore Y
+    TXA                        ; restore A
+    STA MMC5_tmp, Y            ; Store in temporary memory
     
     LDA #01
-    LDX #30
-    JSR RandAX               ; random number between 1-30
+    LDX #15
+    JSR RandAX                 ; random number between 1-15
     
     CLC
-    ADC MMC5_tmp, Y          ; add the random number to the speed/player luck
-    STA MMC5_tmp, Y          ; and save it...
-    INY                      ; increase Y
+    ADC MMC5_tmp, Y            ; add the random number to the speed/player luck
+    STA MMC5_tmp, Y            ; and save it...
+    INY                        ; increase Y
     CPY #$0D                 
     BNE @MainLoop
     
     ;; So now we have a second turn order, full of spooooky math. 
     
     LDX #0
-    STX tmp ; zero TMP
-    STX btl_curturn ; and make sure this is 0
-    @ThirdLoop:
+    STX tmp                    ; zero TMP
+    STX btl_curturn            ; and make sure this is 0
+   @ThirdLoop:
     LDY #0
-    @SecondLoop:
+   @SecondLoop:
     LDA MMC5_tmp, Y
     CMP tmp
     BCC @Lower
     
-    @Higher: ; if higher, save as the new number to compare against
+   @Higher:                    ; if higher, save as the new number to compare against
     BEQ @Same
     STA tmp
         
-    @Lower: ; if lower, do nothing
+   @Lower:                     ; if lower, do nothing
     INY
     CPY #$0D
     BNE @SecondLoop
-    JMP @ThirdLoop ; repeat again to match the highest with itself
+    JMP @ThirdLoop             ; repeat again to match the highest with itself
     
-    @Same: ; if its the same, we found the highest number possible. Grab their ID backup and slot them in to go.
+   @Same: ; if its the same, we found the highest number possible. Grab their ID backup and slot them in to go.
     CMP #0 ; eventually, 0s will start getting compared to 0s... when that happens...
     BEQ @Lower ; go back and do nothing
     
@@ -4842,9 +4842,9 @@ DoBattleRound:
     STA btl_turnorder, X
     LDA #0
     STA MMC5_tmp, Y    
-    STA tmp ; and reset TMP 
+    STA tmp                    ; and reset TMP 
     INX 
-    CPX #$0D ; when X hits this, all combatants have been indexed properly!
+    CPX #$0D                   ; when X hits this, all combatants have been indexed properly!
     BNE @ThirdLoop
     
     ;; JIGS - original code below
