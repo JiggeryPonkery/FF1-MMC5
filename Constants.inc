@@ -282,6 +282,7 @@ BTLMSG_WAKEUPBELL       = $56 ; The bell rings loudly...
 BTLMSG_STEALING         = $57 ; Stealing...
 BTLMSG_STOLE            = $58 ; Stole_
 BTLMSG_SCROLL           = $59 ; _scroll
+BTLMSG_REGENERATING     = $5A ; Begins healing slowly
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs

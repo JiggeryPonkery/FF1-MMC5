@@ -262,7 +262,8 @@ lut_MagicData:
 .byte $00,$21,$00,$10,$07,$C0,$2B,$00 ; CURE 2  
 .byte $18,$28,$00,$01,$02,$C8,$23,$00 ; HARM 2 
 .byte $00,$10,$00,$08,$0A,$B0,$26,$00 ; FIRE (shield)
-.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ; HEAL    
+.byte $03,$20,$00,$08,$15,$C0,$28,$00 ; HEAL    
+;.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ; HEAL    
 .byte $18,$1E,$10,$01,$01,$D0,$27,$00 ; FIRE 2 
 .byte $40,$10,$01,$02,$03,$E8,$27,$00 ; HOLD    
 .byte $18,$1E,$40,$01,$01,$C8,$27,$00 ; BOLT 2 
@@ -278,7 +279,8 @@ lut_MagicData:
 .byte $00,$42,$00,$10,$07,$C0,$2C,$00 ; CURE 3
 .byte $00,$01,$00,$10,$06,$E0,$21,$00 ; LIFE     ; JIGS - will now cure death, then heal some HP
 .byte $18,$3C,$00,$01,$02,$C8,$25,$00 ; HARM 3 
-.byte $00,$18,$00,$08,$07,$C0,$27,$00 ; HEAL 2
+.byte $04,$40,$00,$08,$15,$C0,$27,$00 ; HEAL 2
+;.byte $00,$18,$00,$08,$07,$C0,$27,$00 ; HEAL 2
 .byte $18,$32,$10,$01,$01,$D0,$25,$00 ; FIRE 3    
 .byte $28,$01,$02,$01,$03,$E8,$22,$00 ; BANE  
 .byte $FF,$00,$00,$08,$00,$00,$00,$00 ; WARP  
@@ -294,7 +296,8 @@ lut_MagicData:
 .byte $00,$00,$00,$10,$0F,$C0,$21,$00 ; CURE 4 
 .byte $30,$50,$00,$01,$02,$C8,$2C,$00 ; HARM 4    
 .byte $00,$89,$00,$08,$0A,$B0,$25,$00 ; RUB (shield)
-.byte $30,$30,$00,$08,$07,$C0,$25,$00 ; HEAL 3
+.byte $05,$60,$00,$08,$15,$C0,$25,$00 ; HEAL 3
+;.byte $30,$30,$00,$08,$07,$C0,$25,$00 ; HEAL 3
 .byte $18,$46,$20,$01,$01,$D0,$2B,$00 ; ICE 3  
 .byte $40,$02,$02,$02,$03,$C8,$20,$00 ; BREAK  
 .byte $00,$10,$00,$04,$0D,$B0,$20,$00 ; SABER 
@@ -380,7 +383,8 @@ lut_MagicBattleMessages:
   .BYTE $01 ; CURE 2        ; HP up!
   .BYTE $00 ; HARM 2 
   .BYTE $0C ; FIRE (shield) ; Defend fire
-  .BYTE $01 ; HEAL          ; HP up!
+;  .BYTE $01 ; HEAL          ; HP up!
+  .BYTE BTLMSG_REGENERATING  ; Begins healing slowly
   .BYTE $00 ; FIRE 2 
   .BYTE $0D ; HOLD          ; Attack halted
   .BYTE $00 ; BOLT 2 
@@ -396,7 +400,8 @@ lut_MagicBattleMessages:
   .BYTE $01 ; CURE 3        ; HP up!
   .BYTE $4F ; LIFE          ; Revived from the brink!
   .BYTE $00 ; HARM 3 
-  .BYTE $01 ; HEAL 2        ; HP up!
+;  .BYTE $01 ; HEAL 2        ; HP up!
+  .BYTE BTLMSG_REGENERATING  ; Begins healing slowly
   .BYTE $00 ; FIRE 3    
   .BYTE $4D ; BANE          ; Poison smoke
   .BYTE $4A ; WARP          ; Ineffective now
@@ -412,7 +417,8 @@ lut_MagicBattleMessages:
   .BYTE $18 ; CURE 4        ; HP max!
   .BYTE $00 ; HARM 4    
   .BYTE $19 ; RUB (shield)  ; Defend magic ;; JIGS should be "defend death?"
-  .BYTE $01 ; HEAL 3        ; HP up!
+;  .BYTE $01 ; HEAL 3        ; HP up!
+  .BYTE BTLMSG_REGENERATING  ; Begins healing slowly
   .BYTE $00 ; ICE 3  
   .BYTE $00 ; BREAK  
   .BYTE $1B ; SABER         ; Weapon became enchanted
@@ -1113,7 +1119,7 @@ GetCharacterBattleCommand:
     
     LDY # ch_battlestate - ch_stats ; 
     LDA (CharStatsPointer), Y       ; in case they guarded then chose to re-select their command
-    AND #$1F                        ; undo the guard state
+    AND #$7F                        ; undo the guard state
     STA (CharStatsPointer), Y
     
     LDY # ch_ailments - ch_stats    ; See if this character has any ailment that would prevent them from inputting
@@ -3685,7 +3691,7 @@ UnhideCharacter:
     AND #$10                        ; check only for Hidden state
     BEQ :+                 
         LDA (CharStatsPointer), Y
-        AND #$EF                    ; keep Guard state if it exists
+        AND #$EF                    ; keep Guard state if it exists, as well as regen potency and turns
         STA (CharStatsPointer), Y
         LDA #01
         STA Hidden
@@ -5114,7 +5120,26 @@ ApplyRegenToAllEnemies:
 	JSR DoesEnemyXExist
 	BEQ @Next
  
-    JSR RidiculousThing
+    LDY #en_hpmax ;#ENROMSTAT_HPMAX
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage
+    STA btlmag_defender_hpmax
+    INY
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage+1
+    STA btlmag_defender_hpmax+1
+    
+    JSR GetNinePercent
+    
+    LDY #en_hp      
+    LDA (EnemyRAMPointer), Y
+    CLC
+    ADC math_basedamage
+    STA math_basedamage
+    INY			
+    LDA (EnemyRAMPointer), Y	
+    ADC math_basedamage+1
+    STA math_basedamage+1  ; math_basedamage is now 9% of max HP + current HP
 
     LDX #$09                    ; compare max HP and base damage; X is max hp, Y is base damage
     LDY #$01                    ; base damage contains how much HP to regen
@@ -5146,55 +5171,6 @@ ApplyRegenToAllEnemies:
     BNE @MainLoop
     RTS
 
-    RidiculousThing:
-    ;; requires a JSR because of a range error with the @Next... 
-    
-    LDY #en_hpmax ;#ENROMSTAT_HPMAX
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage
-    STA btlmag_defender_hpmax
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage+1
-    STA btlmag_defender_hpmax+1
-    
-    LSR math_basedamage+1   ; divide by 2
-    ROR math_basedamage
-    LSR math_basedamage+1   ; divide by 2
-    ROR math_basedamage
-    
-    LDA math_basedamage
-    STA tmp
-    LDA math_basedamage+1
-    STA tmp+1               ; tmp is now 25% max HP
-    
-    LSR math_basedamage+1   ; divide by 2 again
-    ROR math_basedamage     ; math_basedamage is now 12.5% max HP
-        
-    LDA math_basedamage+1    
-    CLC
-    ADC tmp+1
-    STA math_basedamage+1
-    LDA math_basedamage
-    CLC
-    ADC tmp                 ; math_basedamage is now 37.5% max HP? 
-    STA math_basedamage
-    
-    LSR math_basedamage+1   ; divide by 2 again
-    ROR math_basedamage     ; math_basedamage is now 
-    LSR math_basedamage+1   ; divide by 2 again
-    ROR math_basedamage     ; math_basedamage is now 9.??% ?  
-    
-    LDY #en_hp      
-    LDA (EnemyRAMPointer), Y
-    CLC
-    ADC math_basedamage
-    STA math_basedamage
-    INY			
-    LDA (EnemyRAMPointer), Y	
-    ADC math_basedamage+1
-    STA math_basedamage+1  ; math_basedamage is now 9% of max HP + current HP
-    RTS    
     
     ; Werewolf ; 68   ;
     ; WzOgre   ; 144  ;
@@ -5236,16 +5212,16 @@ ApplyEndOfRoundEffects:
     INC BattleTurn
     
     LDA Character1BattleState 
-    AND #$1F
+    AND #$7F
     STA Character1BattleState
     LDA Character2BattleState 
-    AND #$1F
+    AND #$7F
     STA Character2BattleState
     LDA Character3BattleState 
-    AND #$1F
+    AND #$7F
     STA Character3BattleState
     LDA Character4BattleState 
-    AND #$1F
+    AND #$7F
     STA Character4BattleState   ; clear Guard state for everyone
     
     JSR DrawCharacterStatus     
@@ -5367,8 +5343,18 @@ ApplyPoisonToPlayer:
  ;  STA MMC5_tmp+1      ; JIGS - for thieves hiding when critical
     TAX                 ; put index in X
     STA @index          ; and back it up for later
+    
+    LDA @id
+    ORA #$80
+    STA btl_attacker
+    
+    LDA ch_battlestate, X
+    AND #$0F            ; get regen state
+    BEQ :+
+    
+    JSR ApplyRegenToPlayer
 
-    LDA ch_ailments, X  ; get this character's ailments
+  : LDA ch_ailments, X  ; get this character's ailments
     AND #AIL_POISON
     BEQ @Exit           ; if poison = no, then z = 1
     
@@ -5396,7 +5382,7 @@ ApplyPoisonToPlayer:
     ORA ch_curhp, X ; if high and low are 0 
     BNE @DrawPoisonAsAttack
     
-    @Dead:
+   @Dead:
     LDA #0              ; clip their HP at zero... 
     STA ch_curhp, X          
     STA ch_curhp+1, X                  
@@ -5404,12 +5390,12 @@ ApplyPoisonToPlayer:
     STA ch_ailments, X        ; give them the DEAD ailment
     
     @DrawPoisonAsAttack:            ; Who is getting poisoned
-    LDA @id
-    ORA #$80
-    STA btl_attacker
+    LDA btl_combatboxcount_alt      ; if a combat box is already drawn, don't draw another
+    BNE :+                          ; this is in case the character regenerated and printed their name already
+    
     JSR DrawCombatBox_Attacker
     
-    LDA #$0F                        ; control code for printing a message I think
+  : LDA #$0F                        ; control code for printing a message I think
     STA btltmp_altmsgbuffer+9
     LDA #$14                        ; the message for poison
     STA btltmp_altmsgbuffer+10
@@ -5430,7 +5416,16 @@ ApplyPoisonToPlayer:
     
     JSR ClearAllCombatBoxes     
     
-    @Exit:
+   @Exit:
+    LDA btl_combatboxcount_alt ; in case the player regenerated but wasn't poisoned
+    BEQ :+
+    
+    LDA btl_combatboxcount_alt
+    JSR UndrawNBattleBlocks_L   ; clear all combat boxes
+    DEC btl_combatboxcount_alt
+    
+  : RTS  
+    
 
 ;;   JIGS - theoretically, this should make thieves and ninjas try to hide if their health is low enough to cause crouching
 ;     LDA MMC5_tmp
@@ -5450,8 +5445,144 @@ ApplyPoisonToPlayer:
 ;     BNE :+              ; if NOT crouching, skip
 ;     JSR Player_Hide
 ;     JSR DrawCharacterStatus     ; draw hidden icon
-;  :  
+;  :  RTS
+
+    
+    
+    
+ApplyRegenToPlayer:
+            @id    = $685A  ; local - temp to hold character ID ; math_numhits
+    LDA ch_maxhp, X
+    STA math_basedamage
+    STA btlmag_defender_hpmax
+    LDA ch_maxhp+1, X
+    STA math_basedamage+1
+    STA btlmag_defender_hpmax+1
+
+    LDA ch_battlestate, X
+    AND #$60                    ; clear out everything but potency (2, 4, or 6)    
+    CMP #$20
+    BNE :+ 
+       JSR GetNinePercent       
+       JMP @DoneDividing
+  : CMP #$40
+    BNE :+    
+       JSR GetNineteenPercent
+       
+    ; these percentages aren't exact, but they're good enough for me 
+
+   @TwentyFivePercent:
+  : LSR math_basedamage+1   ; divide by 2
+    ROR math_basedamage
+    LSR math_basedamage+1   ; divide by 2
+    ROR math_basedamage
+  
+   @DoneDividing:    
+    LDA ch_curhp, X
+    CLC
+    ADC math_basedamage
+    STA math_basedamage
+    LDA ch_curhp+1, X
+    ADC math_basedamage+1
+    STA math_basedamage+1      ; math_basedamage is now 9% of max HP + current HP
+    
+    TXA
+    PHA
+
+    LDX #$09                    ; compare max HP and base damage; X is max hp, Y is base damage
+    LDY #$01                    ; base damage contains how much HP to regen
+    JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
+    
+    BCC :+                      ; cap at Max HP
+      LDA btlmag_defender_hpmax
+      STA math_basedamage
+      LDA btlmag_defender_hpmax+1
+      STA math_basedamage+1
+
+  : PLA
+    TAX                         ; move HP back to RAM stats
+    LDA math_basedamage
+    STA ch_curhp, X
+    LDA math_basedamage+1
+    STA ch_curhp+1, X
+    
+    LDA ch_battlestate, X       ; see if they're hidden
+    AND #$10
+    BEQ @NotHidden              ; if not, skip
+    
+    LDA ch_battlestate, X       ; if they are, remove hidden bit
+    AND #$EF
+    STA ch_battlestate, X
+    
+    LDA #1 
+    STA Hidden                   ; set re-hide flag
+    
+   @NotHidden: 
+    TXA
+    PHA                          ; backup X 
+   
+    LDA #0
+    JSR PlayBattleSFX            ; play heal SFX
+    JSR UpdateSprites_BattleFrame
+    LDA @id
+    JSR FlashCharacterSprite
+    
+    PLA
+    TAX
+    
+    LDA Hidden                    ; if Hidden is 1, skip re-hiding
+    BEQ @DecrementRegeneration
+    
+    LDA ch_battlestate, X
+    CLC
+    ADC #$10
+    STA ch_battlestate, X         ; rehide character
+   
+   @DecrementRegeneration:
+    LDA ch_battlestate, X
+    SEC
+    SBC #1
+    STA ch_battlestate, X   ; subtract 1 from the regen state to mark this turn has been used up
+    
+   @drawregenbox:
+	JSR DrawCombatBox_Attacker    ; draw the attacker box
+	LDA #BTLMSG_REGEN             
+    JMP DrawBtlMsg_ClearIt
+
+
+GetNinePercent:
+    LSR math_basedamage+1   ; divide by 2
+    ROR math_basedamage
+    LSR math_basedamage+1   ; divide by 2
+    ROR math_basedamage
+
+GetNineteenPercent:    
+    LDA math_basedamage
+    STA tmp
+    LDA math_basedamage+1
+    STA tmp+1               ; tmp is now 25% max HP
+    
+    LSR math_basedamage+1   ; divide by 2 again
+    ROR math_basedamage     ; math_basedamage is now 12.5% max HP | 50%
+        
+    LDA math_basedamage+1                                       ; | 150%
+    CLC
+    ADC tmp+1
+    STA math_basedamage+1
+    LDA math_basedamage
+    CLC
+    ADC tmp                 ; math_basedamage is now 37.5% max HP? 
+    STA math_basedamage
+    
+    LSR math_basedamage+1   ; divide by 2 again
+    ROR math_basedamage     ; math_basedamage is now 
+    LSR math_basedamage+1   ; divide by 2 again
+    ROR math_basedamage     ; math_basedamage is now 9.??% ?  
     RTS
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7280,46 +7411,61 @@ DrawCharacterStatus:
     STA CharacterIndexBackup   ; temp var for character index/loop counter
     
 @CharacterLoop:
-    LDA #$00                        ; start of first string, invisible tile
-    STA btl_unfmtcbtbox_buffer, X
-    STA btl_unfmtcbtbox_buffer+3, X ; start of second string, invisible tile now, but could change
+    LDA #$00                        
+    STA btl_unfmtcbtbox_buffer, X   ; start of first string, invisible tile
+    STA btl_unfmtcbtbox_buffer+3, X ; start of second string, invisible tile
+    STA btl_unfmtcbtbox_buffer+6, X ; start of third string, invisible tile
+    
     LDA CharacterIndexBackup
     JSR PrepCharStatPointers
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y    
+    
+    ; 0 1 2
+    ; 3 4 5
+    ; 6 7 x - the tiles will be laid out like this, where 2, 5, and 7 are null terminators
+
     PHA                             ; backup ailment to use again
     AND #$07                        ; only check these v ailments first
     JSR @FindAilment
-    STA btl_unfmtcbtbox_buffer+1, X ; heavy ailment (dead, stone, poison)
-    LDY #ch_battlestate - ch_stats
-    LDA (CharStatsPointer), Y    
-    BEQ @NoState                    ; if 0, skip changing it from $F2
-    CMP #$10                        ; Hidden icon has priority over guarding icon
-    BEQ @Hidden
-    ;; JIGS - for now, there can be no other state, so if its not $00 and not $10, it must be $80
-    ;; later, will need to flesh this out!
-
-   @Guarding:
-    LDA #$EF
-    JMP :+
+    STA btl_unfmtcbtbox_buffer+4, X ; heavy ailment (dead, stone, poison)
     
-   @Hidden: 
-    LDA #$7E
-  : STA btl_unfmtcbtbox_buffer+3, X ; start of second string; hidden or guarding
-    
-   @NoState: 
     PLA                             ; fetch ailment
     AND #$78                        ; remove dead, stone, poison, and $80 from ailment
     JSR @FindAilment
-    STA btl_unfmtcbtbox_buffer+4, X ; light ailment (blind, sleep, stun, mute)
+    STA btl_unfmtcbtbox_buffer+1, X ; light ailment (blind, sleep, stun, mute)
+    
+    LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y    
+    BEQ @NoState                    ; if 0, skip changing it
+    AND #$10                        ; hidden?
+    BEQ :+
+        LDA #$7E
+        STA btl_unfmtcbtbox_buffer+6, X ; start of third string
+        
+  : LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y            
+    AND #$80                        ; guarding?
+    BEQ :+
+        LDA #$EF
+        STA btl_unfmtcbtbox_buffer+3, X ; start of second string
+    
+  : LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #$0F                        ; regenerating? -- ignore the potency bits and just check the turns left
+    BEQ @NoState
+        LDA #$F2
+        STA btl_unfmtcbtbox_buffer, X ; start of first string
+    
+   @NoState: 
     LDA #$FF
     STA btl_unfmtcbtbox_buffer+2, X
     STA btl_unfmtcbtbox_buffer+5, X ; null terminate each bit
-    STA btl_unfmtcbtbox_buffer+6, X ; and create a blank third line
+    STA btl_unfmtcbtbox_buffer+7, X ; and create a blank third line
     
     TXA
     CLC
-    ADC #7                          ; add 7 to X to move forward in the buffer
+    ADC #8                          ; add 8 to X to move forward in the buffer
     TAX
     
     LDA CharacterIndexBackup
@@ -7366,7 +7512,7 @@ DrawCharacterStatus:
     STA AilmentPrintingPointer+1
     INY
     INX 
-    CPX #11                        ; three lines per character, so count 4*3 $00s
+    CPX #12                        ; three lines per character, so count 4*3 $00s
     BNE @ResetLocation             ; minus 1, because the last one doesn't need to be three lines
     
     JSR BattleUpdatePPU                 ; reset scroll 
@@ -10403,7 +10549,7 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     BEQ @NotHidden              ; if they're not hidden, skip all this 
     
     LDA (CharStatsPointer), Y ; reload to preserve low bits
-    AND #$0F ; remove hiding bit
+    AND #$EF ; remove hiding bit
     STA (CharStatsPointer), Y   
     
     LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
@@ -10445,6 +10591,10 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     INY
     LDA (CharStatsPointer), Y
     STA btlmag_defender_hpmax+1
+    
+    INY
+    LDA (CharStatsPointer), Y
+    STA btlmag_defender_battlestate
     
     LDY #ch_intelligence - ch_stats
     LDA (CharStatsPointer), Y
@@ -10729,6 +10879,10 @@ BtlMag_SavePlayerDefenderStats:
     INY
     STA (CharStatsPointer), Y
     
+    LDY #ch_battlestate - ch_stats
+    LDA btlmag_defender_battlestate
+    STA (CharStatsPointer), Y
+    
     LDA btlmag_defender_intelligence
     LDY #ch_intelligence - ch_stats
     STA (CharStatsPointer), Y
@@ -10847,6 +11001,7 @@ BtlMag_PerformSpellEffect:
         .WORD BtlMag_Effect_InflictAilment2 ; 12   
         .WORD BtlMag_Effect_Life2           ; 13   
         .WORD BtlMag_Effect_CureAilment     ; 14   ; for Soft
+        .WORD BtlMag_Effect_Regen           ; 15
         
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11223,7 +11378,7 @@ BtlMag_Effect_LowerMorale:
     BEQ BtlMag_Effect_Slow_RTS
     
     JSR BtlMag_DidSpellConnect      ; see if the spell connected
-    BCC BtlMag_Effect_CureAil_RTS   ; if not, jump ahead to an RTS
+    BCC BtlMag_Effect_Slow_RTS      ; if not, jump ahead to an RTS
     
     LDA btlmag_defender_morale      ; subtract spell effectivity from defender morale
     SEC
@@ -11238,6 +11393,20 @@ BtlMag_Effect_LowerMorale:
 ;;  BtlMag_Effect_RecoverHP  [$B999 :: 0x339A9]
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BtlMag_Effect_Regen:
+    LDA btlmag_defender_ailments    ; Check defender ailment
+    AND #AIL_DEAD
+    BNE BtlMag_Effect_Slow_RTS       ; If they're dead, do nothing
+    
+    JSR BtlMag_MarkSpellConnected
+    
+    LDA btlmag_defender_battlestate
+    AND #$90                        ; clear out everything but hiding and guarding
+    ORA btlmag_effectivity          ; add in heal potency (2, 4, or 6)
+    ORA btlmag_hitrate              ; add in amount of turns to heal for
+    STA btlmag_defender_battlestate
+    RTS
 
 BtlMag_Effect_Life2:    
     JSR BtlMag_Effect_CureAilment   ; cure death

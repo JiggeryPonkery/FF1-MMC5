@@ -1267,6 +1267,7 @@ data_BattleMessages:
 .word BTL_MESSAGE87
 .word BTL_MESSAGE88
 .word BTL_MESSAGE89
+.word BTL_MESSAGE90
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1446,7 +1447,8 @@ BTL_MESSAGE88:
 .byte $9C,$B7,$B2,$AF,$A8,$FF,$00  ; Stole_
 BTL_MESSAGE89:
 .byte $B6,$A6,$B5,$B2,$AF,$AF,$00  ; _scroll
-
+BTL_MESSAGE90:
+.byte $8B,$A8,$AA,$1F,$1E,$1D,$5F,$1F,$47,$B6,$AF,$46,$AF,$BC,$00 ; Begins healing slowly
 
 
 
