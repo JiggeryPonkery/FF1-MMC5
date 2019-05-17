@@ -4790,7 +4790,7 @@ DoBattleRound:
     TXA                        ; restore A
     STA MMC5_tmp, Y            ; Store in temporary memory
     
-    LDA #0
+    LDX #0
     JSR RandAX                 ; random number between 0 and Entity's Speed
     
     CLC
