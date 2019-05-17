@@ -4764,9 +4764,8 @@ DoBattleRound:
     ;;JIGS - what if turn order was based on speed stats?
     
    @MainLoop:
-    TYA 
-    PHA                        ; backup Y
-    LDA btl_turnorder, Y 
+    STY tmp
+    LDA btl_turnorderBackup, Y 
     BMI @PlayerSpeed           ; N was set by loading an 8 if it was a player
     
    @EnemySpeed:
@@ -4784,13 +4783,11 @@ DoBattleRound:
     LDA (CharStatsPointer), Y
     
    @FinishLoop:
-    TAX                        ; whoops, backup A into X
-    PLA  
-    TAY                        ; restore Y
-    TXA                        ; restore A
+    LDY tmp
     STA MMC5_tmp, Y            ; Store in temporary memory
     
-    LDX #0
+    TAX
+    LDA #0
     JSR RandAX                 ; random number between 0 and Entity's Speed
     
     CLC
@@ -4804,7 +4801,7 @@ DoBattleRound:
     
     LDX #0
     STX tmp                    ; zero TMP
-    STX btl_curturn            ; and make sure this is 0
+    STX btl_curturn            ; and make sure this is 0 - will be a mini loop counter
    @ThirdLoop:
     LDY #0
    @SecondLoop:
@@ -4820,20 +4817,28 @@ DoBattleRound:
     INY
     CPY #$0D
     BNE @SecondLoop
+    INC btl_curturn            ; increase once, to note that one loop is done
+    LDA btl_curturn            ; then check and see if two loops were done
+    CMP #2                     ; if two loops, break out and get to where X can be inc'd
+    BEQ :+
+    
     JMP @ThirdLoop             ; repeat again to match the highest with itself
     
    @Same: ; if its the same, we found the highest number possible. Grab their ID backup and slot them in to go.
     CMP #0 ; eventually, 0s will start getting compared to 0s... when that happens...
     BEQ @Lower ; go back and do nothing
     
-    LDA btl_turnorderBackup, Y 
+  : LDA btl_turnorderBackup, Y 
     STA btl_turnorder, X
     LDA #0
     STA MMC5_tmp, Y    
     STA tmp                    ; and reset TMP 
+    STA btl_curturn            ; and this again
     INX 
     CPX #$0D                   ; when X hits this, all combatants have been indexed properly!
     BNE @ThirdLoop
+    
+    
     
     ;; JIGS - original code below
     
