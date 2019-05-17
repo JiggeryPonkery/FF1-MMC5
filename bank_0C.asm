@@ -6164,7 +6164,7 @@ Battle_PlayerTryRun:
   : LDY #ch_speed - ch_stats  
     LDA (CharStatsPointer), Y     
     CLC
-    ADC MMC5_tmp+2    
+    ADC MMC5_tmp+1    
     CMP MMC5_tmp
     BCS @Success
     
