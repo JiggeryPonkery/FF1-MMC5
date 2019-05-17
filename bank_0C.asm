@@ -74,7 +74,7 @@ BANK_THIS = $0C
 ;lut_WeaponData:
 ;  .INCBIN "bin/0C_8000_weapondata.bin"
 
-lut_WeaponSpells:
+lut_EquipmentSpells:
 .byte $00 ; Wooden nunchucks
 .byte $00 ; Small knife 
 .byte $00 ; Wooden staff
@@ -115,59 +115,31 @@ lut_WeaponSpells:
 .byte $00 ; Katana
 .byte $00 ; Excalibur
 .byte $00 ; Masamune
+.byte $00 ;     
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
 
-; Here's the element and category bytes shown in binary.
-; Good luck trying to know what setting each byte actually does.
-; I read somewhere that ice/fire armour or weapons are backwards 
-; and those are the only ones that do anything with elements here...
-;    
-;                 Element   Category    
-; Flame Sword   ; 0001,0000 1000,1000
-; Ice sword     ; 0020,0000 1000,1100 
-; Dragon sword  ; 0000,0000 0000,0010
-; Giant sword   ; 0000,0000 0000,0100
-; Sun sword     ; 0000,0000 1000,1100
-; Coral sword   ; 0000,0000 0010,0000
-; Were sword    ; 0000,0000 0001,0000
-; Rune Sword    ; 0000,0000 0011,0000
-; Excalibur     ; 1111,1111 1111,1111
-;                 ^^^^ ^^^^ ^^^^ ^^^^
-;                 |||| |||| |||| |||╘???  
-;                 |||| |||| |||| ||╘Dragon  
-;                 |||| |||| |||| |╘Giant  
-;                 |||| |||| |||| ╘Undead  
-;                 |||| |||| |||╘Were 
-;                 |||| |||| ||╘Water  
-;                 |||| |||| |╘Magic  
-;                 |||| |||| ╘Regenerative  
-;                 |||| |||╘Instant death?  
-;                 |||| ||╘Stun?  
-;                 |||| |╘Poison?
-;                 |||| ╘Rub?  
-;                 |||╘Fire  
-;                 ||╘Ice  
-;                 |╘Lightning  
-;                 ╘Earth?  
-;
-; Best guesses taken from FF Hackster!
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Armor data!  [$8140 :: 0x30150]
-;;
-;;  4 bytes per armor, 40 armors ($A0 bytes total)
-;;
-;;  byte 0:  Evade penality
-;;  byte 1:  Absorb boost
-;;  byte 2:  Elemental defense
-;;  byte 3:  Spell cast
-
-;lut_ArmorData:
-;    .INCBIN "bin/0C_8140_armordata.bin"
-
-;; JIGS - see bank Z for actual data!!!
-
-lut_ArmorSpells:
 .byte $00 ; Cloth T 
 .byte $00 ; Wooden armor
 .byte $00 ; Chain armor
@@ -208,10 +180,68 @@ lut_ArmorSpells:
 .byte 55  ;$37 ; Power Gauntlet - casts SABER
 .byte $00 ; Opal Gauntlet
 .byte $00 ; Protect Ring
+.byte $00 ;     
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
 
 ;; As you can see here, to set a spell, you can abandon the $ and just use the number of the spell. 
 ;; Reference Bank A for the spell list in normal people numbers, or Constants.inc for hex!
 
+; Here's the element and category bytes shown in binary.
+; Good luck trying to know what setting each byte actually does.
+; I read somewhere that ice/fire armour or weapons are backwards 
+; and those are the only ones that do anything with elements here...
+;    
+;                 Element   Category    
+; Flame Sword   ; 0001,0000 1000,1000
+; Ice sword     ; 0020,0000 1000,1100 
+; Dragon sword  ; 0000,0000 0000,0010
+; Giant sword   ; 0000,0000 0000,0100
+; Sun sword     ; 0000,0000 1000,1100
+; Coral sword   ; 0000,0000 0010,0000
+; Were sword    ; 0000,0000 0001,0000
+; Rune Sword    ; 0000,0000 0011,0000
+; Excalibur     ; 1111,1111 1111,1111
+;                 ^^^^ ^^^^ ^^^^ ^^^^
+;                 |||| |||| |||| |||╘???  
+;                 |||| |||| |||| ||╘Dragon  
+;                 |||| |||| |||| |╘Giant  
+;                 |||| |||| |||| ╘Undead  
+;                 |||| |||| |||╘Were 
+;                 |||| |||| ||╘Water  
+;                 |||| |||| |╘Magic  
+;                 |||| |||| ╘Regenerative  
+;                 |||| |||╘Instant death?  
+;                 |||| ||╘Stun?  
+;                 |||| |╘Poison?
+;                 |||| ╘Rub?  
+;                 |||╘Fire  
+;                 ||╘Ice  
+;                 |╘Lightning  
+;                 ╘Earth?  
+;
+; Best guesses taken from FF Hackster!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1868,9 +1898,6 @@ BattleSubMenu_Equipment:
       
   : LDA btlcurs_x               ; Selected column
     AND #$01
-    ;STA WeaponPointer           ; (selected column stored in $88 for later)
-    ;ASL A                       ;  * 4
-    ;ASL A
     STA btl_various_tmp
     LDA btlcurs_y               ;  + Selected row
     AND #$03
@@ -1884,14 +1911,7 @@ BattleSubMenu_Equipment:
     ;; 2       3
     ;; 4       5 
     ;; 6       7 
-    ;;    
-    ;; slots 0, 6, and 7 are weapons, so get that data from a LUT
-    
-    TAX
-    LDA ItemBox_WeaponArmor_LUT, X
-    STA WeaponPointer
-    TXA
-        
+
     ADC #ch_righthand - ch_stats  ; + offset for character equipment = index for ob stats
     PHA
     
@@ -1902,54 +1922,25 @@ BattleSubMenu_Equipment:
     TAY
     
     LDA (CharStatsPointer), Y   ; Get the selected equipment
-    ;AND #$7F                    ; mask off the 'equipped' bit
     BEQ @NothingBox             ; if zero, print nothing box and exit
     
-    STA WeaponPointer+1         ; if nonzero, stick it in $89
-    DEC WeaponPointer+1         ; convert from 1-based to 0-based
+    STA WeaponPointer           ; if nonzero, stick it in $89
+    DEC WeaponPointer           ; convert from 1-based to 0-based
     
-    LDA WeaponPointer           ; get the selected column (0=weapon, 1=armor)
-    BNE @GetArmorSpell          ; if armor selected jump ahead
-    
-    LDA WeaponPointer+1         ; otherwise weapon selected, get the index
+    LDA WeaponPointer           ; otherwise weapon selected, get the index
     LDY btlcmd_curchar
-    ;CLC
-    ;ADC #TCITYPE_WEPSTART       ; convert from weapon index to item index
     STA btl_charcmditem, Y      ; record it in command buffer as item being used
     
-    LDX WeaponPointer+1
-    LDA lut_WeaponSpells, X
-    ;LDA WeaponPointer+1         ; get weapon index
-    ;JSR GetPointerToWeaponData  ; get a pointer to that weapon's data (in XA)
-    JMP @GetSpellCast
-
-  @GetArmorSpell:
-    LDA WeaponPointer+1         ; armor index
-    LDY btlcmd_curchar
-    CLC
-    ADC #ARMORSTART             ; convert to item index
-    STA btl_charcmditem, Y      ; record as item being used
-    
-    LDX WeaponPointer+1
-    LDA lut_ArmorSpells, X
-    ;JSR GetPointerToArmorData   ; pointer to armor data in XA
+    LDX WeaponPointer
+    LDA lut_EquipmentSpells, X
     
   @GetSpellCast:
-    ;STA WeaponPointer           ; store pointer to wep/armor data in $88,89
-    ;STX WeaponPointer+1
-    ;LDY #$03                    ; Y=3 to index, since byte 3 in both wep/armor data is the "spell cast" entry
-    ;LDA (WeaponPointer), Y                ; get spell cast
-    
     TAX                             ; put it in X
     DEX                             ; DEX to make it 0-based (FF becomes "no spell")
     LDY btlcmd_curchar              ; Y=cur char -- default to targetting yourself
     LDA #$10
     JMP SetCharacterBattleCommand
-    
-    
-    
-ItemBox_WeaponArmor_LUT:
-.byte $00,$01,$01,$01,$01,$01,$00,$00  ; 0 = weapon, 1 = armor
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3786,7 +3777,7 @@ PartyWalkAnimation:
       
       LDY # ch_ailments - ch_stats  ; See if this character has any ailment that would prevent them from moving
       LDA (CharStatsPointer), Y   
-      AND # AIL_DEAD | AIL_STONE  
+      AND # AIL_DEAD | AIL_STONE | AIL_SLEEP
       BNE :+
   
       LDA btl_animatingchar
