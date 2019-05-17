@@ -5902,6 +5902,7 @@ UseMagic_WARP:
     LDA #0               ; turn off PPU and APU
     STA $2001
     STA $4015
+    STA MenuHush
     RTS                  ; and RTS.  See notes below
 
 UseMagic_EXIT:
@@ -5915,6 +5916,7 @@ UseMagic_EXIT:
     JSR UseMagic_SpendMP ; JIGS 
     
   UseMagic_DoEXIT:
+    DEC MenuHush
     JMP DoOverworld           ; then restart logic on overworld by JMPing to DoOverworld
     
   CancelWarp_Exit: 
