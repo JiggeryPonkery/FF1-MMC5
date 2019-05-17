@@ -4764,21 +4764,19 @@ DoBattleRound:
     ;;JIGS - what if turn order was based on speed stats?
     
    @MainLoop:
-    LDA btl_turnorder, Y 
-    BMI @PlayerLuck            ; N was set by loading an 8 if it was a player
-    
-   @EnemyMorale:
     TYA 
     PHA                        ; backup Y
+    LDA btl_turnorder, Y 
+    BMI @PlayerSpeed           ; N was set by loading an 8 if it was a player
+    
+   @EnemySpeed:
     JSR GetEnemyRAMPtr
     
     LDY #en_speed              ; get speed
     LDA (EnemyRAMPointer), Y     
     JMP @FinishLoop
     
-   @PlayerLuck:
-    TYA 
-    PHA                        ; backup Y
+   @PlayerSpeed:
     AND #$03
     JSR PrepCharStatPointers 
     
@@ -4792,9 +4790,8 @@ DoBattleRound:
     TXA                        ; restore A
     STA MMC5_tmp, Y            ; Store in temporary memory
     
-    LDA #01
-    LDX #15
-    JSR RandAX                 ; random number between 1-15
+    LDA #0
+    JSR RandAX                 ; random number between 0 and Entity's Speed
     
     CLC
     ADC MMC5_tmp, Y            ; add the random number to the speed/player luck
