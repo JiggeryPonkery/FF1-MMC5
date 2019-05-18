@@ -4721,7 +4721,7 @@ PrepCharStatPointers:
 
 lut_InitialTurnOrder:
   .BYTE $00, $01, $02, $03, $04, $05, $06, $07, $08     ; enemy IDs
-  .BYTE $80, $81, $82, $83                              ; character IDs
+  .BYTE $80, $81, $82, $83, $7F                         ; character IDs
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4738,7 +4738,7 @@ lut_InitialTurnOrder:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DoBattleRound:
-    LDY #$0D                        ; initialize turn order buffer
+    LDY #$0E                        ; initialize turn order buffer
     : LDA lut_InitialTurnOrder-1, Y ;  by just copying values from a lut
      ; STA btl_turnorder-1, Y
       STA btl_turnorderBackup-1, Y ;; JIGS - using a backup first
@@ -4784,15 +4784,15 @@ DoBattleRound:
     
    @FinishLoop:
     LDY tmp
-    STA MMC5_tmp, Y            ; Store in temporary memory
+    STA btl_turnorderSpeed, Y            ; Store in temporary memory
     
     TAX
     LDA #0
     JSR RandAX                 ; random number between 0 and Entity's Speed
     
     CLC
-    ADC MMC5_tmp, Y            ; add the random number to the speed/player luck
-    STA MMC5_tmp, Y            ; and save it...
+    ADC btl_turnorderSpeed, Y            ; add the random number to the speed/player luck
+    STA btl_turnorderSpeed, Y            ; and save it...
     INY                        ; increase Y
     CPY #$0D                 
     BNE @MainLoop
@@ -4805,14 +4805,15 @@ DoBattleRound:
    @ThirdLoop:
     LDY #0
    @SecondLoop:
-    LDA MMC5_tmp, Y
+    LDA btl_turnorderSpeed, Y
+    ;BEQ @Skip
     CMP tmp
     BCC @Lower
     
    @Higher:                    ; if higher, save as the new number to compare against
     BEQ @Same
     STA tmp
-        
+
    @Lower:                     ; if lower, do nothing
     INY
     CPY #$0D
@@ -4820,20 +4821,21 @@ DoBattleRound:
     INC btl_curturn            ; increase once, to note that one loop is done
     LDA btl_curturn            ; then check and see if two loops were done
     CMP #2                     ; if two loops, break out and get to where X can be inc'd
-    BEQ :+
+    BNE @ThirdLoop             ; repeat again to match the highest with itself
     
-    JMP @ThirdLoop             ; repeat again to match the highest with itself
+    ;; now Y is pointing at $7F in btl_turnorderBackup, so the rest of the turn order gets filled with this
     
    @Same: ; if its the same, we found the highest number possible. Grab their ID backup and slot them in to go.
     CMP #0 ; eventually, 0s will start getting compared to 0s... when that happens...
     BEQ @Lower ; go back and do nothing
-    
-  : LDA btl_turnorderBackup, Y 
+  
+    LDA btl_turnorderBackup, Y 
     STA btl_turnorder, X
     LDA #0
-    STA MMC5_tmp, Y    
+    STA btl_turnorderSpeed, Y    
     STA tmp                    ; and reset TMP 
     STA btl_curturn            ; and this again
+   ;@Skip: 
     INX 
     CPX #$0D                   ; when X hits this, all combatants have been indexed properly!
     BNE @ThirdLoop
@@ -4874,6 +4876,8 @@ DoBattleRound:
     
     LDA btl_turnorder, Y        ; get whoever's turn it is
     BMI @TakeTurn               ; if it's a player, take their turn
+      CMP #$7F                  ; if its a blank enemy, skip it
+      BEQ @NextTurn
       TAY                       ; otherwise it's an enemy... so:
       LDA btl_enemyIDs, Y       ; get this slot's enemy ID
       CMP #$FF
@@ -4892,7 +4896,7 @@ DoBattleRound:
     LDA tmp
   
   : JSR Battle_DoTurn                       ; do their turn
-    JSR DrawCharacterStatus                 ; update character on-screen stats
+  ;  JSR DrawCharacterStatus                 ; update character on-screen stats
     JSR DrawPlayerBox                       ; draw the player box overtop the current player box
     LDA #$01                                ; then undraw it; effectively updates HP
     JSR UndrawNBattleBlocks_L               ; 
@@ -6042,6 +6046,7 @@ Player_Hide:
   
   @PrintStuff:
   JSR DrawBattleMessageCombatBox
+  JSR DrawCharacterStatus          ; draw hidden status icon
   JMP RespondDelay_ClearCombatBoxes 
 
     
@@ -10954,7 +10959,7 @@ BtlMag_SavePlayerDefenderStats:
     LDA btlmag_defender_weaponcategory
     STA (CharStatsPointer), Y
     
-    RTS
+    JMP DrawCharacterStatus                 ; update icons to reflect any status changes
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

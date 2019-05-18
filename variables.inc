@@ -576,10 +576,10 @@ btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
 GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
 battle_item         = $600F ; handles item box scrolling and item use
 btl_turnorderBackup = $6010 ; 13 bytes
+btl_turnorderSpeed  = $6020 ; 13 bytes
 
 
-
-btl_attacker                 = $6020
+btl_attacker                 = $6030
 btl_attacker_damage          = btl_attacker + $01
 btl_attacker_hitrate         = btl_attacker + $02
 btl_attacker_numhits         = btl_attacker + $03
@@ -604,7 +604,7 @@ btlmag_fakeout_defindex     = btl_attacker + $06 ; See Battle_DoTurn in bank C f
 btlmag_fakeout_ailments     = btl_attacker + $07 ;   what these 'fakeout' vars are and how/why they're used
 btlmag_fakeout_defplayer    = btl_attacker + $08
 
-btl_defender                 = $6030 
+btl_defender                 = $6040 
 btl_defender_index           = btl_defender + $01
 btl_defender_damage          = btl_defender + $02
 btl_defender_hitrate         = btl_defender + $03
@@ -654,7 +654,7 @@ btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $68
     MATHBUF_MAGDEFENDERMAXHP    = $09 ;$15
     MATHBUF_TOTALDAMAGE         = $0A ;$16
     
-btl_mathbuf = $6040 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
+btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
     math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6040 ; 6856
     math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $6042 ; 6858
     math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $6044 ; 685A
@@ -671,7 +671,7 @@ btl_mathbuf = $6040 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathemati
     battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6054 ; $6882 -- treated as part of math buffer by some code
 
 ;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
-ch_backupstats           = $60C0 ;; $10 per character, so fills up to $6140
+ch_backupstats           = $60C0 ;; $10 per character, so fills up to $60FF
 ch_slotindex_backup      = ch_backupstats
 ch_intelligence_backup   = ch_backupstats + $01
 ch_speed_backup          = ch_backupstats + $02
