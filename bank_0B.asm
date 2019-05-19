@@ -1840,7 +1840,7 @@ Shift6TAX:
 
 BattleOver_ProcessResult:
     LDA #BANK_THIS              ; set callback bank for music
-    STA a:cur_bank
+    STA cur_bank
     
      DEC ch_level
      DEC ch_level+$40
@@ -1860,7 +1860,7 @@ BattleOver_ProcessResult:
     ;  Note that the party has already done their cheering animation, and the fanfare
     ;  music is already playing.
     
-    LDA a:btlformation      ; check the formation ID
+    LDA btlformation      ; check the formation ID
     CMP #$7B                ; $7B is Chaos's formation
     BNE :+                  ; if we just killed Chaos....
       LDA #$FF                  ; set btl_result to $FF to create a dramatic pause after fadeout
@@ -1912,7 +1912,7 @@ ExitBattle:
 
 GameOver:
     LDA #$52
-    STA a:music_track           ; Play the sad "game over" music
+    STA music_track           ; Play the sad "game over" music
     STA btl_followupmusic
     
     LDA #$00
@@ -2466,7 +2466,7 @@ LvlUp_LevelUp:
       STA @displaybuffer+4
       
       LDA #BANK_THIS                ; set swap-back bank to this bank.
-      STA a:cur_bank
+      STA cur_bank
       
       LDA #$04
       LDX #<@displaybuffer
@@ -2936,7 +2936,7 @@ DrawEOBCombatBox:
     STA EOBCombatBox_tmp               ; backup the combo box ID
     
     LDA #BANK_THIS          ; set the current bank for the music driver
-    STA a:cur_bank          ; seems weird to do this here...
+    STA cur_bank          ; seems weird to do this here...
     
     TXA                     ; Get the EOB string ID to print
     ASL A                   ; x2 to use as index
@@ -3018,12 +3018,12 @@ WaitForAnyInput:
 
 MusicPlay:
     LDA #BANK_THIS          ; tell CallMusicPlay which bank to swap back to
-    STA a:cur_bank
+    STA cur_bank
     
-    LDA a:music_track       ; check this track
+    LDA music_track       ; check this track
     BPL :+                  ; if it's finished...
       LDA btl_followupmusic ;   ... load followup music
-      STA a:music_track     ;   and play it   (not sure why this is necessary)
+      STA music_track     ;   and play it   (not sure why this is necessary)
       
   : JMP CallMusicPlay_L 
   
@@ -3219,7 +3219,7 @@ ChaosDeath:
       BNE @WaitLoop
       
     LDA #$80                ; stop music playback
-    STA a:music_track
+    STA music_track
     STA btl_followupmusic
     JSR MusicPlay
     
@@ -3415,7 +3415,7 @@ PrepareEnemyFormation:
       DEX
       BPL :-
       
-    LDA a:btlformation          ; See if this is a B-formation
+    LDA btlformation          ; See if this is a B-formation
     BPL :+                      ; if it is, replace A-formation values with the B-formation values
       LDA btlform_enqtyB        ; use formation B min/max values
       STA btlform_enqty
@@ -3862,7 +3862,7 @@ PrepareEnemyFormation_Chaos:
 FinalizeEnemyFormation_FiendChaos:
     LDA #$01
     STA btl_enemycount      ; There is exactly 1 enemy for Fiend/Chaos formations
-    LDA a:btlformation      ; See if this is a B-formation
+    LDA btlformation      ; See if this is a B-formation
     BPL :+                  ; if it is, load second enemy ID
       LDA btlform_enids+1
       JMP :++

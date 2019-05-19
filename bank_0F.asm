@@ -11671,7 +11671,7 @@ EnterBattle:
 
     LDA #BANK_BTLDATA         ; here we load the battle formation data
     JSR SwapPRG_L             ; swap to the bank containing that data
-    LDA a:btlformation        ; get the formation ID
+    LDA btlformation        ; get the formation ID
     AND #$7F                  ; remove the 'Formation B' bit to get the raw formation ID
     LDX #0                    ;  mulitply the formation ID by 16 (shift by 4) and rotate
     STX btltmp+11             ;  bits into btltmp+11.  The end result is that (btltmp+10) will
@@ -11702,7 +11702,7 @@ EnterBattle:
   ;; Turn off PPU and clear nametables
 
     LDA #0
-    STA a:menustall           ; disable menu stalling
+    STA menustall           ; disable menu stalling
     JSR Battle_PPUOff         ; turn PPU off
     LDA $2002                 ; reset PPU toggle
 
@@ -11723,13 +11723,13 @@ EnterBattle:
   ;; Draw Various (hardcoded) boxes on the screen
 
 ;    LDA #1              ; box at 1,1
-;    STA a:box_x         ; with dims 16,18
+;    STA box_x         ; with dims 16,18
 ;    LDX #16             ;  this is the box housing the enemies (big box on the left)
 ;    LDY #18
 ;    JSR BattleBox_vAXY
 
 ;    LDA #17             ; box at 17,1
-;    STA a:box_x         ; with dims 8,16
+;    STA box_x         ; with dims 8,16
 ;    LDA #1              ;  this is the box housing the player sprites (box on right)
 ;    LDX #8
 ;    LDY #18
@@ -11746,7 +11746,7 @@ EnterBattle:
 ;    JSR Battle_PlayerBox
 
 ;;    LDA #1              ; box at 1,1
-;;   STA a:box_x         ; with dims 16,18
+;;   STA box_x         ; with dims 16,18
 ;;    LDX #30             ;  this is the box housing the enemies (big box on the left)
 ;;    LDY #18
 ;;   JSR BattleBox_vAXY
@@ -11805,7 +11805,7 @@ EnterBattle:
     
     
     LDA #28              ; box at 1,1
-    STA a:box_x         ; with dims 16,18
+    STA box_x         ; with dims 16,18
     LDA #1
     LDX #4             ;  this is the box housing the enemies (big box on the left)
     LDY #3
@@ -11917,17 +11917,17 @@ SetPPUAddr_XA:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;Battle_PlayerBox:
-;    STA a:box_x        ; record A as X coord
-;    STX a:box_y        ; record X as Y coord
+;    STA box_x        ; record A as X coord
+;    STX box_y        ; record X as Y coord
 
 ;    PHA                ; then back up A and X
 ;    TXA
 ;    PHA
 
 ;    LDX #6
-;    STX a:box_wd       ; set width to 6
+;    STX box_wd       ; set width to 6
 ;    INX
-;    STX a:box_ht       ; and height to 7
+;    STX box_ht       ; and height to 7
 
 ;    JSR Battle_PPUOff  ; turn off the PPU
 ;    JSR DrawBox_L      ; draw the box
@@ -11950,9 +11950,9 @@ SetPPUAddr_XA:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleBox_vAXY:
-    STA a:box_y         ; just dump A,X,Y to box_y, box_wd, and box_ht
-    STX a:box_wd
-    STY a:box_ht
+    STA box_y         ; just dump A,X,Y to box_y, box_wd, and box_ht
+    STX box_wd
+    STY box_ht
     JSR Battle_PPUOff   ; turn the PPU off
     JMP DrawBox_L       ; then draw the box
 
@@ -11966,8 +11966,8 @@ BattleBox_vAXY:
 
 Battle_PPUOff:
     LDA #0
-    STA a:soft2000     ; clear soft2000
-    STA a:unk_FE       ; ?? I don't think this is ever used
+    STA soft2000     ; clear soft2000
+    STA unk_FE       ; ?? I don't think this is ever used
     STA $2000          ; disable NMIs
     STA $2001          ; and turn off PPU
     RTS
@@ -12123,10 +12123,10 @@ Battle_UpdatePPU_UpdateAudio_FixedBank:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 BattleUpdateAudio_FixedBank:
-    LDA a:music_track
+    LDA music_track
     BPL :+
       LDA btl_followupmusic
-      STA a:music_track
+      STA music_track
 :   JMP CallMusicPlay_L
 
 
@@ -12141,7 +12141,7 @@ BattleUpdateAudio_FixedBank:
 BattleWaitForVBlank_L:
 BattleWaitForVBlank:
     LDA btl_soft2000
-    STA a:soft2000
+    STA soft2000
     JMP WaitForVBlank_L
     
 

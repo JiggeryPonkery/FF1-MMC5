@@ -3838,7 +3838,7 @@ PlayFanfareAndCheer:
     JSR UndrawNBattleBlocks_L     ; undraw the player name and HP box
 
     LDA #$53                    ; play fanfare music
-    STA a:music_track
+    STA music_track
     STA btl_followupmusic
     
     LDA battleswon
@@ -4482,11 +4482,11 @@ DoMagicFlash:
 
 BattleUpdateAudio:
     LDA #BANK_THIS
-    STA a:cur_bank          ; set the swap-back bank (necessary because music playback is in another bank)
-    LDA a:music_track
+    STA cur_bank          ; set the swap-back bank (necessary because music playback is in another bank)
+    LDA music_track
     BPL :+                  ; if the high bit of the music track is set (indicating the current song is finished)...
       LDA btl_followupmusic ;   then play the followup music
-      STA a:music_track
+      STA music_track
 :   JSR CallMusicPlay_L     ; Call music playback to keep it playing
     JMP UpdateBattleSFX     ; and update sound effects to keep them playing
     
@@ -7764,7 +7764,7 @@ ResetUsePalette:
 BattleFadeIn:
     JSR BattleClearOAM          ; Clear OAM
     LDA #$00
-    STA a:soft2000              ; clear other PPU settings
+    STA soft2000              ; clear other PPU settings
     STA $2001                   ; including disabling rendering, though since btl_soft2001 has
                                 ;   rendering enabled, rendering will be re-enabled when palettes are updated
     
@@ -12755,7 +12755,7 @@ PlayBattleSFX:
     
     LDY #$00                    ; Start reading the header
     LDA (btltmp+10), Y          ; byte 0 of header:  the sound effect length in frames
-    STA a:sq2_sfx               ; record this to sq2_sfx so that music playback doesn't interfere with the sound effect
+    STA sq2_sfx               ; record this to sq2_sfx so that music playback doesn't interfere with the sound effect
     STA btlsfx_framectr
     INY
     LDA (btltmp+10), Y          ; byte 1 of header:  sequence length of the square
