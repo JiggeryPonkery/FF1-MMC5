@@ -461,6 +461,11 @@ LeifenBMagic:
 UnusedShop:                                   
 .byte $FF,$00                                 
 
+;; Coneraia      - 40
+;; Pravoka       - 80
+;; Elfland       - 200
+;; Crescent Lake - 400 
+;; Onrac / Gaiat - 750 g
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -740,7 +745,7 @@ M_KeyItem14_Desc:
 .byte $B6,$BA,$AC,$B5,$58,$1F,$1B,$AB,$1A,$8C,$9E,$8B,$8E,$C0,$00 ; Colors gather and[enter]swirl in the CUBE.
 
 M_KeyItem15_Desc: 
-.byte $92,$B7,$2D,$1E,$A8,$B0,$B3,$B7,$BC,$C0,$00 ; It is empty.
+;.byte $92,$B7,$2D,$1E,$A8,$B0,$B3,$B7,$BC,$C0,$00 ; It is empty.
 
 M_KeyItem16_Desc:
 .byte $9D,$AB,$1A,$98,$A1,$A2,$8A,$95,$8E,$43,$55,$B1,$30,$1D,$B6,$05
@@ -2034,7 +2039,8 @@ ShopBuy:
     LDX shop_type
     LDA lut_ShopWhatWant, X
     JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
-    ;JSR HideShopCursor
+    JSR ResetShopListAttributes
+    JSR ResetScroll
     
 ShopBuy_Loop:    
     LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
@@ -2104,11 +2110,6 @@ ShopSelectAmount:
       JMP ShopSelectAmount      ; and return to loop
       
    @ShopBuy_Return:
-    ;LDA #$A0
-    ;STA shopcurs_x
-    ;LDA #$20
-    ;STA shopcurs_y
-    ;JSR ShopFrame               ; update cursor position   
     JMP ShopBuy
   
    @BuyConfirm: 
@@ -2192,6 +2193,8 @@ ShopSell:
   : LDX shop_type
     LDA lut_ShopWhatSell, X
     JSR DrawShopDialogueBox     ; "what do you have to sell?"
+    JSR ResetShopListAttributes
+    JSR ResetScroll
 
 ShopSell_Loop:    
     LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
