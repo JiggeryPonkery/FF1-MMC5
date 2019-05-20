@@ -6707,9 +6707,9 @@ DoPhysicalAttack_NoBoxes:
     LDA btl_attacker_critrate   ; base crit chance of attacker's crit rate
     STA math_critchance
     
-    JSR LongCall                
-        .WORD ClericCheck
-        .byte $0F
+    ;JSR LongCall                
+    ;    .WORD ClericCheck
+    ;    .byte $0F
     ;; See Bank Z file for more info. Despite the name, if a player is hidden, subtracts 40 from the enemy's hit chance.
     
     LDA btl_attacker_ailments   ; if attacker has DARK status, penalty of 40 to their hit chance
@@ -6728,6 +6728,21 @@ DoPhysicalAttack_NoBoxes:
       ADC #40
       STA math_hitchance
       
+  : LDA btl_defender_hidden    ; if defender is hidden, subtract another 40 from the attacker's hit chance
+    BEQ :+
+      LDA math_hitchance
+      SEC
+      SBC #40
+      STA math_hitchance
+ 
+      LDA btl_defender_class
+      AND #CLS_TH | CLS_NJ
+      BEQ :+
+      LDA math_hitchance
+      SEC
+      SBC #40
+      STA math_hitchance
+
   : LDA btl_attacker_category       ; see if attacker category matches defender category
     AND btl_defender_category
     STA math_category
@@ -7110,19 +7125,6 @@ DoPhysicalAttack_NoBoxes:
         JSR DrawBattleMessageCombatBox ; this has to be called from this bank, not Bank Z... I still don't understand why, but oh well!
         JSR RespondDelay
         ;; back to original battle code...
-        
-  : LDA battle_hitsconnected   ;; JIGS - did any hits connect?
-    BEQ :+                     
-    LDA btl_defender_ailments  ;; if so, then if they're asleep, wake 'em up!
-    AND #AIL_SLEEP
-    BEQ :+
-      LDA btl_defender_ailments
-      SEC
-      SBC #AIL_SLEEP
-      STA btl_defender_ailments ; remove sleep ailment
-      LDA #$27
-      JSR DrawBattleMessageCombatBox ; print "Woke up"
-      JSR RespondDelay
   
  :  LDA #MATHBUF_DEFENDERHP
     LDX #MATHBUF_DEFENDERHP
@@ -7148,25 +7150,22 @@ DoPhysicalAttack_NoBoxes:
   : LDA #BTLMSG_TERMINATED              ; otherwise, print the "Terminated" battle message
   @DeathMsg:
     JSR DrawBattleMessageCombatBox
-  ; JMP DoPhysicalAttack_Exit    <- flow into
-
-DoPhysicalAttack_Exit:
     JMP RespondDelay_ClearCombatBoxes
 
     ;; JIGS some moved/fixed code:
      
 EnemyDoAilment:
     LDA battle_defenderisplayer
-    BEQ @AfterAilment           ; skip if player is attacker
+    BEQ @TryWake                    ; skip if player is attacker
     LDA btl_attacker_attackailment
-    BEQ @AfterAilment           ; skip if enemy doesn't do ailments
+    BEQ @TryWake                    ; skip if enemy doesn't do ailments
     LDA battle_hitsconnected
-    BEQ @EnemyMissed           ; skip if no hits connected
+    BEQ @End                        ; skip if no hits connected
+
     LDA #100                
     STA math_ailmentchance          ; base chance of connecting ailment = 100
     LDA btl_defender_elementresist
     AND btl_attacker_element
-    STA btl_weird_thing                       ; ?pointless sta/lda
     BEQ :+                          ; if defender resists attacker's element
       LDA #$00                      ; chance to connect with ailment is zero  (later will be changed to 1)
       STA math_ailmentchance
@@ -7186,28 +7185,40 @@ EnemyDoAilment:
     STA battle_ailmentrandchance    ; random value between [0,200]
     
     CMP #200
-    BEQ @AfterAilment           ; if == 200, skip ahead (no ailment)
+    BEQ @TryWake                    ; if == 200, skip ahead (no ailment)
     
     LDA math_ailmentchance
     CMP battle_ailmentrandchance
-    BCC @AfterAilment           ; if ailment chance >= rand value, apply the ailment!
+    BCC @TryWake                    ; if ailment chance >= rand value, apply the ailment!
       LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
       EOR #$FF                      ;  the defender does not already have.
       AND btl_attacker_attackailment
+      BEQ @End                      ; if its 0, the player already has the ailments the enemy can give them--but if they're asleep, they would stay asleep
       
       JSR PrintPlayerAilmentMessageFromAttack   ; print the message for those ailments
       
       LDA btl_defender_ailments     ; apply the ailment
       ORA btl_attacker_attackailment
       STA btl_defender_ailments
-    
-    @AfterAilment:
-    @EnemyMissed:
-    ;RTS
+      JMP @End
+   
+   @TryWake:
+    LDA btl_defender_ailments    
+    AND #AIL_SLEEP
+    BEQ @End
+      LDA btl_defender_ailments
+      SEC
+      SBC #AIL_SLEEP
+      STA btl_defender_ailments ; remove sleep ailment
+      LDA #$27
+      JSR DrawBattleMessageCombatBox ; print "Woke up"
+      JSR RespondDelay
+   
+    @End:
+DoPhysicalAttack_Exit:    
     JMP RespondDelay_ClearCombatBoxes
     
-    
-    
+   
     
     
     

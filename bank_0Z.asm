@@ -135,7 +135,8 @@ lut_WeaponData:
 ;;  byte 0:  Evade penality
 ;;  byte 1:  Absorb boost
 ;;  byte 2:  Elemental defense
-;;  byte 3:  Spell cast
+;;  byte 3:  Spell cast -- JIGS - now elemental weakness
+;;  Spell LUT is in Bank C on its own now
 
 lut_ArmorData:
 ;    .INCBIN "bin/0C_8140_armordata.bin"
@@ -143,63 +144,61 @@ lut_ArmorData:
 ;      v ------------------- Evade penalty
 ;          v --------------- Absorb boost
 ;              v ----------- Elemental defense
-;                        v - Spell
+;                        v - Elemental weakness 
 
-;.byte $02,$01,%00000000,$00 ; Cloth T ;; original
-.byte $00,$02,%00000000,$00 ; Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
-.byte $08,$04,%00000000,$00 ; Wooden armor
-.byte $0F,$0F,%00000000,$00 ; Chain armor
-.byte $17,$18,%00000000,$00 ; Iron armor
-.byte $21,$22,%00000000,$00 ; Steel armor
-.byte $08,$12,%00000000,$00 ; Silver armor
-.byte $0A,$22,%00100000,$00 ; Flame armor
-.byte $0A,$22,%00010000,$00 ; Ice armor
-.byte $0A,$2A,%01000000,$00 ; Opal armor
-.byte $0A,$2A,%01110000,$00 ; Dragon armor
-.byte $01,$04,%00000000,$00 ; Copper Q
-.byte $01,$0F,%00000000,$00 ; Silver Q
-.byte $01,$18,%00000000,$00 ; Gold Q
-.byte $01,$22,%00000000,$00 ; Opal Q
-.byte $02,$18,%00011000,$2C ; white T        - casts INVIS 2
-.byte $02,$18,%00100100,$20 ; Black T        - casts ICE 2
-.byte $00,$02,%00000000,$00 ; Wooden shield
-.byte $00,$04,%00000000,$00 ; Iron shield
-.byte $00,$08,%00000000,$00 ; Silver shield
-.byte $00,$0C,%00100000,$00 ; Flame shield
-.byte $00,$0C,%00010000,$00 ; Ice shield
-.byte $00,$10,%00000100,$00 ; Opal shield
-.byte $00,$10,%00000010,$00 ; Aegis shield
-.byte $00,$02,%00000000,$00 ; Buckler
-.byte $02,$08,%00000000,$00 ; Protect cape
-.byte $01,$01,%00000000,$00 ; Cap
-.byte $03,$03,%00000000,$00 ; Wooden helm
-.byte $05,$05,%00000000,$00 ; Iron helm
-.byte $03,$06,%00000000,$00 ; Silver helm
-.byte $03,$08,%00000000,$00 ; Opal helm
-.byte $03,$06,%00000000,$14 ; Heal helm      - casts HEAL
-.byte $01,$01,%11111111,$00 ; Ribbon
-.byte $01,$01,%00000000,$00 ; Gloves
-.byte $03,$02,%00000000,$00 ; Copper Gauntlet
-.byte $05,$04,%00000000,$00 ; Iron Gauntlet
-.byte $03,$06,%00000000,$00 ; Silver Gauntlet
-.byte $03,$06,%00000000,$17 ; Zeus Gauntlet  - casts BOLT 2
-.byte $03,$06,%00000000,$37 ; Power Gauntlet - casts SABER
-.byte $03,$08,%00000000,$00 ; Opal Gauntlet
-.byte $01,$08,%00001000,$00 ; Protect Ring
+;.byte $02,$01,%00000000,%00000000 ; Cloth T ;; original
+.byte $00,$02,%00000000,%00000000 ; Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
+.byte $08,$04,%00000000,%00000000 ; Wooden armor
+.byte $0F,$0F,%00000000,%00000000 ; Chain armor
+.byte $17,$18,%00000000,%00000000 ; Iron armor
+.byte $21,$22,%00000000,%00000000 ; Steel armor
+.byte $08,$12,%00000000,%00000000 ; Silver armor
+.byte $0A,$22,%00100000,%00010000 ; Flame armor
+.byte $0A,$22,%00010000,%00100000 ; Ice armor
+.byte $0A,$2A,%01000000,%00000000 ; Opal armor
+.byte $0A,$2A,%01110000,%00000000 ; Dragon armor
+.byte $01,$04,%00000000,%00000000 ; Copper Q
+.byte $01,$0F,%00000000,%00000000 ; Silver Q
+.byte $01,$18,%00000000,%00000000 ; Gold Q
+.byte $01,$22,%00000000,%00000000 ; Opal Q
+.byte $02,$18,%00011000,%00000000 ; white T        - casts INVIS 2
+.byte $02,$18,%00100100,%00000000 ; Black T        - casts ICE 2
+.byte $00,$02,%00000000,%00000000 ; Wooden shield
+.byte $00,$04,%00000000,%00000000 ; Iron shield
+.byte $00,$08,%00000000,%00000000 ; Silver shield
+.byte $00,$0C,%00100000,%00010000 ; Flame shield
+.byte $00,$0C,%00010000,%00100000 ; Ice shield
+.byte $00,$10,%00000100,%00000000 ; Opal shield
+.byte $00,$10,%00000010,%00000000 ; Aegis shield
+.byte $00,$02,%00000000,%00000000 ; Buckler
+.byte $02,$08,%00000000,%00000000 ; Protect cape
+.byte $01,$01,%00000000,%00000000 ; Cap
+.byte $03,$03,%00000000,%00000000 ; Wooden helm
+.byte $05,$05,%00000000,%00000000 ; Iron helm
+.byte $03,$06,%00000000,%00000000 ; Silver helm
+.byte $03,$08,%00000000,%00000000 ; Opal helm
+.byte $03,$06,%00000000,%00000000 ; Heal helm      - casts HEAL
+.byte $01,$01,%11111111,%00000000 ; Ribbon
+.byte $01,$01,%00000000,%00000000 ; Gloves
+.byte $03,$02,%00000000,%00000000 ; Copper Gauntlet
+.byte $05,$04,%00000000,%00000000 ; Iron Gauntlet
+.byte $03,$06,%00000000,%00000000 ; Silver Gauntlet
+.byte $03,$06,%00000000,%00000000 ; Zeus Gauntlet  - casts BOLT 2
+.byte $03,$06,%00000000,%00000000 ; Power Gauntlet - casts SABER
+.byte $03,$08,%00000000,%00000000 ; Opal Gauntlet
+.byte $01,$08,%00001000,%00000000 ; Protect Ring
 
-;; As you can see here, to set a spell, you can abandon the $ and just use the number of the spell. 
-;; Reference Bank A for the spell list in normal people numbers, or Constants.inc for hex!
 ;; And for the elemental defense:
 ;  
 ;
-;  ╒-Maybe instant death of some sort, or Earth? (Enemy attack CRACK makes sense, earth-based instant death spell...)
+;  ╒-Earth
 ;  |╒-Lightning
 ;  ||╒-Ice
 ;  |||╒-Fire
 ;  |||| ╒-Rub (instant death)
-;  |||| |╒-Time? Poison?
+;  |||| |╒-Poison
 ;  |||| ||╒-Stun
-;  |||| |||╒-Probably another kind of instant death! This game loves it! Might possibly be sleep.
+;  |||| |||╒-Time
 ;  vvvv vvvv
 ;; 0000,0000
 
@@ -3598,7 +3597,7 @@ ReadjustEquipStats:
     TAY
     ADC #>lut_ArmorData    ; then get high byte of pointer (ADC to catch appropriate carry)
     STA tmp+1              ; (tmp) is now a pointer to this armor's stats
-
+    
     LDA ch_evasion, X      ; get char's evade
     SEC
     SBC (tmp), Y           ; subtract armor evade penalty
@@ -3612,9 +3611,14 @@ ReadjustEquipStats:
 
     LDA ch_elementresist, X ; get elemental resistence
     INY                     ;   inc source index
-    ORA ($10), Y            ; combine this armor's elemental resistence
+    ORA (tmp), Y            ; combine this armor's elemental resistence
     STA ch_elementresist, X ; and write back
-    RTS                    ; and exit
+    
+    LDA ch_elementweak, X   ; get elemental weakness
+    INY
+    ORA (tmp), Y            ; combine this armor's elemental weakness
+    STA ch_elementweak, X   ; and write back
+    RTS                     ; and exit
 
 
 
@@ -3708,14 +3712,10 @@ ReadjustBBEquipStats:
 ;; This checks if the player attacker is a cleric, and doubles their crit chance against undead enemies. 
 ;; JIGS - leaving this here as proof of concept... My hack idea originally turned fighters/knights into undead-slayers. You can do the same!
     
- ClericCheck:                       ;; this also changes the enemy's hit chance if the player is hidden
-    LDA battle_defenderisplayer                       ; is it player attacking?
-    BNE @CheckHiddenPlayer          ; if not, check if defending player is hidden
-    RTS     ; remove this and enable the rest!
-     
-;    LDY #ch_class - ch_stats        ; 
-;    LDA (CharStatsPointer), Y   ; Check the class
-;    AND #$0F                        ; cut off high bits (sprite)
+ ClericCheck:         
+;    LDA battle_defenderisplayer     ; is it player attacking?
+;    BNE @return
+;    LDA btl_defender_class
 ;    BEQ :+                          ; if fighter
 ;    CMP #$06                        ; or knight
 ;    BNE @return
@@ -3726,39 +3726,34 @@ ReadjustBBEquipStats:
 ;    @return:
 ;    RTS
  
-   @CheckHiddenPlayer:
-    LDA #ch_battlestate - ch_stats   ; if defender is hidden, subtract another 40 from the attacker's hit chance
-    AND #$10 ; knock off non-hiding bits
-    BNE :+
-      LDA math_hitchance
-      SEC
-      SBC #40
-      STA math_hitchance
- :  RTS
- 
- 
-    ;; This checks if the player attacker is a given class, and gives a status effect to their critical hits.
-  
- CritCheck:
+
+
+
+    
+;; This checks if the player attacker is a given class, and gives a status effect to their critical hits.
+    
+CritCheck:
     LDA #0
     STA MMC5_tmp
-    ;LDA battle_defenderisplayer
-    ;BNE @CritReturn
- ;   LDA #1
- ;   LDX #100                        ; 
- ;   JSR RandAX                      ; 
- ;   CMP #50                         ; Player needs to roll 50 or over to do their special thing.
- ;   BCC @CritReturn
+    LDA battle_defenderisplayer
+    BNE @CritReturn
+    
     LDA btl_attacker
     JSR PrepCharStatPointers
-    
-    LDY #ch_class - ch_stats        ; 
-    LDA (CharStatsPointer), Y    ; Check the class
+    LDY #ch_speed - ch_stats        ; 
+    LDA (CharStatsPointer), Y       ; get speed (luck)
+    ASL A
+    LDX #100                        ; 
+    JSR RandAX                      ; Random number between speed/luck and 100
+    CMP #75                         ; Gotta roll over 75 to do the thing
+    BCC @CritReturn
+
+    LDA btl_attacker_class  
     AND #$0F             ;; JIGS - cut off high bits (sprite)
-    CMP #$01                        ; IF thief, goto CritSteal
-    BEQ @CritSteal                   
-    CMP #$07                        ; IF ninja, goto CritSteal
-    BEQ @CritSteal                   
+    CMP #$01                        ; IF thief, goto CritCrit
+    BEQ @CritCrit                   
+    CMP #$07                        ; IF ninja, goto CritCrit
+    BEQ @CritCrit                   
     CMP #$02                        ; IF bbelt, goto CritStun
     BEQ @CritStun
     CMP #$08                        ; IF master, goto CritStun
@@ -3775,10 +3770,10 @@ ReadjustBBEquipStats:
     BEQ @CritStrength
     CMP #$0A                        ; IF whitewiz, goto CritStrength
     BEQ @CritStrength
-        @CritReturn:
-        RTS
-    
-    @CritStun:
+   @CritReturn:
+    RTS
+
+   @CritStun:
     LDA btl_defender_elementresist
     AND #$01
     BEQ :+                          ; if defender resists the special attack's element (stun 01)
@@ -3786,7 +3781,7 @@ ReadjustBBEquipStats:
   : LDA #$10                        ; Stun ailment as used by STUN's effectivity in original game
     JMP @CritAddAilment
                 
-    @CritConfuse:
+   @CritConfuse:
     LDA btl_defender_elementresist
     AND #$08
     BEQ :+                          ; if defender resists the special attack's element (dark/confuses 08)
@@ -3794,7 +3789,7 @@ ReadjustBBEquipStats:
   : LDA #$80                        ; Confuse ailment as used by CONF's effectivity in original game
     JMP @CritAddAilment
          
-    @CritSlow:
+   @CritSlow:
     LDA btl_defender
     LDY #en_numhitsmult  
     LDA (EnemyRAMPointer), Y                    ; hit multiplier from RAM stats
@@ -3810,7 +3805,7 @@ ReadjustBBEquipStats:
     STA MMC5_tmp
     RTS
      
-    @CritStrength:                  
+   @CritStrength:                  
     LDA btl_attacker_damage
     CLC
     ADC #4
@@ -3822,29 +3817,22 @@ ReadjustBBEquipStats:
     STA MMC5_tmp    
     RTS 
     
-    @CritSteal:
-    LDA MMC5_tmp+6
-    STA tmp
-    LDA MMC5_tmp+7
-    STA tmp+1
-    LDA #0                           
-    STA tmp+2                        
-    JSR AddGPToParty     
-     LDA #BTLMSG_STOLEGOLD
-     STA MMC5_tmp
+   @CritCrit:
+    LDA btl_attacker_critrate
+    CLC
+    ADC #4
+    BCC :+
+      LDA #$FF
+ : 	LDY #ch_critrate - ch_stats
+    STA (CharStatsPointer), Y
+    LDA #BTLMSG_CRITUP
+    STA MMC5_tmp    
      RTS
-
    
-    @CritAddAilment:
-    ;PHA
-    ;AND btl_defender_ailments    ; See if defender has this ailment already
-    ;BEQ :+                       ; If yes...
-    ;   PLA                       ; fix the stack
-    ;   RTS                       ; cancel the specialty
+   @CritAddAilment:
     BIT btl_defender_ailments
     BNE @noailment
- :  ;PLA
-    ORA btl_defender_ailments    ; add to existing ailments
+ :  ORA btl_defender_ailments    ; add to existing ailments
     STA btl_defender_ailments    
     LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
     CMP #$05                     ; is it still the black mage's turn?
@@ -3854,60 +3842,59 @@ ReadjustBBEquipStats:
   :    LDA #BTLMSG_CONFUSED      
        STA MMC5_tmp 
        RTS
-       
+
   : LDA #BTLMSG_PARALYZED_A
     STA MMC5_tmp
-        
-    @noailment:
+
+   @noailment:
     RTS
 
     
     
-    ThiefHiddenCheck:
-    LDY #ch_battlestate - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #$10 ; clear all but hiding bits
+ThiefHiddenCheck:
+    LDA btl_attacker_hidden
     BEQ @Return    
     
     LDA btl_attacker_hitrate ; regardless of class, double their hit rate
-    ASL A ; btl_attacker_hitrate ; I realise I could just do this, but I'm worried it might overflow, so I'm gonna...
+    ASL A 
     BCC :+
     LDA #$FF                  ; cap at FF
  : 	STA btl_attacker_hitrate 
     
-    LDA btl_attacker_critrate ; regardless of class, double their crit rate
-    ASL A ; btl_attacker_critrate ; I realise I could just do this, but I'm worried it might overflow, so I'm gonna...
-    BCC :+
-    LDA #$FF                  ; cap at FF
- : 	STA btl_attacker_critrate 
-    
-    LDY #ch_class - ch_stats         
-    LDA (CharStatsPointer), Y
-    AND #$0F             ;; JIGS - cut off high bits (sprite)
-    CMP #$01                     ; if thief   
-    BEQ @HiddenBoost
-    CMP #$07                     ; if ninja
-    BEQ @HiddenBoost
-       @Return: 
-       RTS
-    
-    @HiddenBoost:
-    LDA btl_attacker_hiddenstrength 
-    LSR A ; btl_attacker_hiddenstrength ; divide by 2 
-    CLC
-    ADC btl_attacker_damage
-    BCC :+
-    LDA #$FF                  ; cap at FF
- : 	STA btl_attacker_damage       ; I think this should basically make the strength 50% higher, or x1.5
-
-    LDA btl_attacker_hiddencritrate
+    LDA btl_attacker_critrate ; regardless of class, 1.5x their crit rate
+    LSR A
+    STA btl_attacker_attackailment ; save as half
     CLC
     ADC btl_attacker_critrate
     BCC :+
     LDA #$FF                  ; cap at FF
- : 	STA btl_attacker_critrate       ; Thieves get x3 CritRate
+ : 	STA btl_attacker_critrate 
+    
+    LDA btl_attacker_class
+    CMP #$01                     ; if thief   
+    BEQ @HiddenBoost
+    CMP #$07                     ; if ninja
+    BEQ @HiddenBoost
+   @Return: 
+       RTS
+
+   @HiddenBoost:
+    LDA btl_attacker_damage
+    LSR A                        ; divide by 2 
+    CLC
+    ADC btl_attacker_damage
+    BCC :+
+    LDA #$FF                     ; cap at FF
+ : 	STA btl_attacker_damage      ; I think this should basically make the strength 50% higher, or x1.5
+
+    LDA btl_attacker_attackailment
+    CLC
+    ADC btl_attacker_critrate
+    BCC :+
+    LDA #$FF                     ; cap at FF
+ : 	STA btl_attacker_critrate    ; Thieves get x2 CritRate
     RTS
-      
+
 
 
 
@@ -3923,7 +3910,7 @@ ReadjustBBEquipStats:
 
     ;; JIGS : Loads the class to see if the character is a black belt or master, then loads sprite to decide what palette to use for the li'l fisties
       
-    HandPalette:
+HandPalette:
     LDA battle_defenderisplayer       ; gotta make sure its a player attacking, first. If not, skip all this.
     BNE @Done
     
@@ -3937,7 +3924,7 @@ ReadjustBBEquipStats:
     ;; No reason to check, really... This allows everyone to have a little green/tan or reddish dust cloud when they attack. :D
     ;; But only BB/Masters get fist icons. That's set when everything else about weapons is set.
     
-    @Fists:
+   @Fists:
     LDY #ch_class - ch_stats
     LDA (CharStatsPointer), Y    ; Check the sprite
     AND #$F0             ;; JIGS - cut off low bits to get sprite
@@ -3953,7 +3940,7 @@ ReadjustBBEquipStats:
     CMP #$B0 ; Black Wizard
     BEQ @Tan
     
-    @RedWhite: ; everything else
+   @RedWhite: ; everything else
     LDA #$36
     STA btl_usepalette + $19
     LDA #$16
@@ -3962,7 +3949,7 @@ ReadjustBBEquipStats:
     STA btl_usepalette + $1B
     RTS
     
-    @Tan:   
+   @Tan:   
     LDA #$28
     STA btl_usepalette + $19
     LDA #$18
@@ -3970,13 +3957,10 @@ ReadjustBBEquipStats:
     LDA #$08
     STA btl_usepalette + $1B
     
-    @Done:
+   @Done:
     RTS   
 
-      
-      
-      
-      
+
 ;; JIGS - here is all the 3 Save File things.
 
 
@@ -4942,14 +4926,21 @@ PlayerAttackEnemy_PhysicalZ:
     
     LDY #ch_class - ch_stats
     LDA (CharStatsPointer), Y
+    AND #$0F                        ;; cut off high bits to get class
+    STA btl_attacker_class
+    LDA (CharStatsPointer), Y
     AND #$F0                        ;; JIGS cut off low bits to get sprite
     JSR ShiftSpriteHightoLow
     STA btl_attacker_sprite
     
+    LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #$10                        ;; get hidden state
+    STA btl_attacker_hidden
+    
     LDY #ch_damage - ch_stats
     LDA (CharStatsPointer), Y
     STA btl_attacker_damage
-    STA btl_attacker_hiddenstrength
     
     INY ; ch_hitrate
     LDA (CharStatsPointer), Y
@@ -4982,13 +4973,15 @@ PlayerAttackEnemy_PhysicalZ:
     INY ; ch_critrate             
     LDA (CharStatsPointer), Y
     STA btl_attacker_critrate
-    STA btl_attacker_hiddencritrate
     
-   ; LDY #ch_ailments - ch_stats     ;; - JIGS ?? no? 
-   ; LDA (CharStatsPointer), Y
-   ; STA btl_attacker_ailments
+    LDY #ch_ailments - ch_stats   
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailments
     
-    JSR ThiefHiddenCheck ;; JIGS - note that this is added, so it upgrades the Thief's stats a bit if they're hidden.
+    JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
+    ;; 2x hit rate
+    ;; 1.5x crit rate (2x for thief/ninja)
+    ;; 1.5x damage for thief/ninja
     
     ;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Defender/ENEMY stats
@@ -5018,7 +5011,10 @@ PlayerAttackEnemy_PhysicalZ:
     INY
     LDA (EnemyRAMPointer), Y
     STA btl_defender_hp+1
-   
+    
+    LDA #0
+    STA btl_defender_class
+    STA btl_defender_hidden   
     RTS
     
     
@@ -5050,6 +5046,10 @@ PlayerAttackEnemy_PhysicalZ:
     
     LDA #$01                    ; mark that the defender is a player and not an enemy
     STA battle_defenderisplayer
+    
+    LDA #0
+    STA btl_attacker_class
+    STA btl_attacker_hidden  
     
     LDY #en_strength          
     LDA (EnemyRAMPointer), Y
@@ -5093,18 +5093,25 @@ PlayerAttackEnemy_PhysicalZ:
     ;; JIGS - first two are always 0, so saving space...
     LDA #$00
     STA btl_defender_category
-    STA btl_defender_elementweakness
     STA GuardDefense
+
+    LDY #(ch_class - ch_stats)
+    LDA (CharStatsPointer), Y
+    AND #$0F                         ;; cut off high bits to get class
+    STA btl_defender_class
     
     LDY #(ch_evasion - ch_stats)
     LDA (CharStatsPointer), Y
     STA btl_defender_evasion
     
     LDY #(ch_battlestate - ch_stats)
+    LDA (CharStatsPointer), Y     ; check battlestate for Hiding
+    AND #$10
+    STA btl_defender_hidden
     LDA (CharStatsPointer), Y     ; check battlestate for Guarding
     AND #$80                      ; if not guarding, resume as normal
-    BEQ :+                        ; otherwise, do a bit of math...
-    
+    BEQ :+
+
     LDY #(ch_level - ch_stats)
     LDA (CharStatsPointer), Y     ; guard defense is level * 2
     ASL A
@@ -5123,6 +5130,10 @@ PlayerAttackEnemy_PhysicalZ:
     LDY #(ch_elementresist - ch_stats)
     LDA (CharStatsPointer), Y
     STA btl_defender_elementresist
+    
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_defender_elementweakness
     
     LDY #(ch_curhp - ch_stats)       
     LDA (CharStatsPointer), Y
