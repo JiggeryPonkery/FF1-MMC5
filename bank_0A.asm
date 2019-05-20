@@ -1430,7 +1430,7 @@ BTL_MESSAGE79:
 BTL_MESSAGE80:
 .byte $9B,$A8,$AA,$A8,$B1,$A8,$B5,$A4,$B7,$A8,$A7,$FF,$91,$99,$00 ; Regenerated HP ; JIGS - added this
 BTL_MESSAGE81:
-.byte $9C,$B7,$B2,$AF,$A8,$FF,$AA,$B2,$AF,$A7,$C4,$00  ; Stole gold! ; JIGS - added this
+.byte $8F,$A8,$A8,$AF,$AC,$B1,$AA,$FF,$AF,$B8,$A6,$AE,$BC,$C4,$00  ; Feeling lucky!
 BTL_MESSAGE82:
 .BYTE $9C,$AF,$AC,$B3,$B3,$A8,$A7,$FF,$AC,$B1,$B7,$B2,$FF,$AB,$AC,$A7,$AC,$B1,$AA,$C3,$C0,$00 ; Slipped into hiding...
 BTL_MESSAGE83:
