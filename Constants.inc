@@ -272,8 +272,8 @@ BTLMSG_POISONSMOKE      = $4D ; Poison smoke
 BTLMSG_NOTHINGHAPPENS   = $4E ; Nothing happens
 ; JIGS - adding these:
 BTLMSG_LIFE             = $4F ; Revived from the brink!
-BTLMSG_REGEN            = $50 ; Regenerated HP ;; JIGS - added this
-BTLMSG_STOLEGOLD        = $51 ; Stole gold! ;; JIGS - added this
+BTLMSG_REGEN            = $50 ; Regenerated HP 
+BTLMSG_CRITUP           = $51 ; 
 BTLMSG_HIDING           = $52 ; Slipped into hiding... 
 BTLMSG_CANTHIDE         = $53 ; Can't see to hide!
 BTLMSG_ALREADYHIDING    = $54 ; Already hidden!
