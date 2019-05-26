@@ -15,7 +15,6 @@
 
 BANK_THIS = $0A
 
-;.INCBIN "bin/bank_0A_data.bin"
 ; Dialogue data! This is moved to its own bank now, because the 7 letter spell names pushed me 50 bytes over the limit and damnit
 ; I'm not going to switch everything back to 6 letter spells now!
 

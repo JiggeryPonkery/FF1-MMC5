@@ -817,6 +817,81 @@ MG_START = $30
   MG_XXXX = MG_START + $3F
 
 
+  
+  
+;;;;;;;;;;;;;;;;;;
+;;  Map IDs and Banks
+
+MAP_00  = $00
+MAP_01  = $01
+MAP_02  = $02
+MAP_03  = $03
+MAP_04  = $04
+MAP_05  = $05
+MAP_06  = $06
+MAP_07  = $07
+MAP_08  = $08
+MAP_09  = $09
+MAP_0A  = $0A
+MAP_0B  = $0B
+MAP_0C  = $0C
+MAP_0D  = $0D
+MAP_0E  = $0E
+MAP_0F  = $0F
+MAP_10  = $10
+MAP_11  = $11
+MAP_12  = $12
+MAP_13  = $13
+MAP_14  = $14
+MAP_15  = $15
+MAP_16  = $16
+MAP_17  = $17
+MAP_18  = $18
+MAP_19  = $19
+MAP_1A  = $1A
+MAP_1B  = $1B
+MAP_1C  = $1C
+MAP_1D  = $1D
+MAP_1E  = $1E
+MAP_1F  = $1F
+MAP_20  = $20
+MAP_21  = $21
+MAP_22  = $22
+MAP_23  = $23
+MAP_24  = $24
+MAP_25  = $25
+MAP_26  = $26
+MAP_27  = $27
+MAP_28  = $28
+MAP_29  = $29
+MAP_2A  = $2A
+MAP_2B  = $2B
+MAP_2C  = $2C
+MAP_2D  = $2D
+MAP_2E  = $2E
+MAP_2F  = $2F
+MAP_30  = $30
+MAP_31  = $31
+MAP_32  = $32
+MAP_33  = $33
+MAP_34  = $34
+MAP_35  = $35
+MAP_36  = $36
+MAP_37  = $37
+MAP_38  = $38
+MAP_39  = $39
+MAP_3A  = $3A
+MAP_3B  = $3B
+MAP_3C  = $3C
+
+MAP_BANKCHANGE_2 = MAP_19 ; first map in SM_Bank_2
+MAP_BANKCHANGE_3 = MAP_2C ; first map in SM_Bank_3
+  
+SM_BANK_1 = $04
+SM_BANK_2 = $05
+SM_BANK_3 = $06
+  
+  
 ;; labels that couldn't be inserted in data
 
 

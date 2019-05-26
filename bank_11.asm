@@ -107,7 +107,7 @@ MiniGame_ShufflePuzzle:
 
   .ALIGN  $100
 lut_MinigameCHR:
-  .INCBIN "bin/0D_9E00_puzzle_1bpp.chr"
+  .INCBIN "chr/puzzle_1bpp.chr"
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -115,7 +115,7 @@ lut_MinigameCHR:
 ;;
 ;;  data for the "The End" graphic.  See 'DrawFancyTheEndGraphic' below for details.
 data_TheEndDrawData:
-  .INCBIN "bin/0D_A000_theenddrawdata.bin"
+  .INCBIN "bin/ending_drawdata.bin"
 
 
   
@@ -651,7 +651,7 @@ lut_TheEndPixelPosition_Yhi = lut_TheEndPixelPosition_Ylo + $50 ; $A6D1
 lut_TheEndPixelPosition_X   = lut_TheEndPixelPosition_Yhi + $50 ; $A721
 lut_TheEndPixelMasks        = lut_TheEndPixelPosition_X   + $50 ; $A771
 
-  .INCBIN "bin/0D_A681_theendluts.bin"
+  .INCBIN "bin/ending_LUTs.bin"
 
   
 ; $A779 -- unused
@@ -771,8 +771,6 @@ MiniGame_VertSlide:
 ;;  at a time.  Each string in this text cooresponds to one page.
 
 lut_StoryText:
-;  .INCBIN "bin/0D_A800_storytext.bin"
-
 .WORD SLIDE1 
 .WORD SLIDE2
 .WORD SLIDE3
@@ -1451,10 +1449,8 @@ MiniGame_ProcessInput:
 ;;  unknown - unused  [$B5C9 :: 0x375D9]
 
 lut_OrbCHR: 
-  .INCBIN "bin/0D_B5C9_menuorbs.bin"
+  .INCBIN "chr/menuorbs.chr"
 
-;  .INCBIN "bin/0D_B5C9_unknown.bin"
-;; JIGS - same thing, just not unknown anymore!
 ;; Note that the graphics are edited a bit to give the menu some neat connecting box tiles.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2320,10 +2316,6 @@ MiniGame_HorzSlide:
 
 ;  .ALIGN  $100
 lut_CreditsText:
-;  .INCBIN "bin/0D_BB00_credittext.bin"
-;; JIGS - unpacked and labeled for editing
-
-
 .word CREDITSLIDE1
 .word CREDITSLIDE2
 .word CREDITSLIDE3
@@ -2589,18 +2581,6 @@ lut_EndingBGPal:
   .BYTE $0F,$00,$01,$30,  $0F,$32,$21,$30,  $0F,$2C,$2A,$1A,  $0F,$00,$0F,$30
 
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Intro Story Text  [$BF20 :: 0x37F30]
-;;
-;;    Processed as a Complex String.  Output during the intro story
-;;  (first screen visible when starting the game)
-
-;lut_IntroStoryText:
-  ;.INCBIN "bin/0D_BF20_introtext.bin"
-  
-  ;; JIGS - moved to Bank 10
 
 
 

@@ -16,8 +16,6 @@
 
 BANK_THIS = $10
 
-;.INCBIN "bin/Dialogue_Data.bin"
-
 lut_DialoguePtrTbl:
 .WORD EMPTY             ; 0  ; Nothing here.
 .WORD KING1             ; 1  ; LIGHT WARRIORS.... Just as in Lukahn's prophecy. Garland has kidnapped the Princess. Please help her!!
@@ -1325,7 +1323,7 @@ lut_MapObjTalkJumpTbl:
 .WORD Talk_fight               ; 1C
 .WORD Talk_fight               ; 1D
 .WORD Talk_fight               ; 1E
-.WORD Talk_Unused              ; 1f
+.WORD Talk_Unused              ; 1F
 
  ;; Coneria people (ID=20-39)
 .WORD Talk_ifvis               ; 20
@@ -1427,7 +1425,7 @@ lut_MapObjTalkJumpTbl:
 .WORD Talk_4Orb                ; 7C
 .WORD Talk_4Orb                ; 7D
 .WORD Talk_4Orb                ; 7E
-.WORD Talk_ifitem              ; 7F
+.WORD Talk_4Orb                ; 7F ; fixed weird Sage 
 .WORD Talk_ifearthfire         ; 80
 .WORD Talk_ifitem              ; 81
 .WORD Talk_norm                ; 82
@@ -2311,7 +2309,6 @@ Talk_Chime:
 
 
 lut_MapObjTalkData:
-  ;.INCBIN "bin/0E_95D5_objectdata.bin"
   
 .byte $00,$00,$00,$00 ; 00 ; Nothing
 .byte $00,$01,$02,$03 ; 01 ; King Corneria
@@ -2336,7 +2333,7 @@ lut_MapObjTalkData:
 .byte $00,$29,$2A,$00 ; 14 ; Titan
 .byte $00,$2B,$2C,$00 ; 15 ; Canoe Sage
 .byte $00,$FF,$00,$00 ; 16 ; Earth Plate
-.byte $00,$FF,$00,$00 ; 17 ; Temple of Fiends Plate
+.byte $00,$FF,$00,$00 ; 17 ; Temple of Fiends Plate 
 .byte $18,$2E,$00,$19 ; 18 ; Garland (Past 1)
 .byte $19,$2F,$00,$1A ; 19 ; Garland (Past 2)
 .byte $1A,$30,$00,$7B ; 1A ; Chaos fight
@@ -2345,32 +2342,32 @@ lut_MapObjTalkData:
 .byte $1D,$FC,$00,$F5 ; 1D ; Water Orb (Kraken Fight)
 .byte $1E,$FD,$00,$F6 ; 1E ; Wind Orb (Tiamat Fight)
 .byte $00,$00,$00,$00 ; 1F ; Unused
-.byte $12,$31,$32,$00 ; 20 ; Talk_ifvis    (Corneria People and their routines)
-.byte $12,$31,$34,$00 ; 21 ; Talk_ifvis    
-.byte $12,$33,$34,$00 ; 22 ; Talk_ifvis    
-.byte LUTE,$35,$36,$00 ; 23 ; Talk_ifitem   (Lute)
-.byte $12,$33,$34,$00 ; 24 ; Talk_ifvis    
-.byte $12,$37,$34,$00 ; 25 ; Talk_ifvis    
-.byte $00,$38,$39,$00 ; 26 ; Talk_Invis    
-.byte $00,$3A,$34,$00 ; 27 ; Talk_ifbridge 
-.byte $12,$33,$34,$00 ; 28 ; Talk_ifvis    
-.byte $12,$3B,$3C,$00 ; 29 ; Talk_ifvis    
-.byte $12,$3D,$3E,$00 ; 2A ; Talk_ifvis    
-.byte $12,$3F,$34,$00 ; 2B ; Talk_ifvis    
-.byte KEY,$40,$41,$00 ; 2C ; Talk_ifitem   (Key)
-.byte $12,$33,$32,$00 ; 2D ; Talk_ifvis    
-.byte KEY,$42,$41,$00 ; 2E ; Talk_ifitem   (Key)
+.byte $12,$31,$32,$00 ; 20 ; Talk_ifvis    Coneria castle people
+.byte $12,$31,$34,$00 ; 21 ; Talk_ifvis             unused?
+.byte $12,$33,$34,$00 ; 22 ; Talk_ifvis             v
+.byte LUTE,$35,$36,$00 ; 23 ; Talk_ifitem   (Lute)  v
+.byte $12,$33,$34,$00 ; 24 ; Talk_ifvis             v
+.byte $12,$37,$34,$00 ; 25 ; Talk_ifvis             v
+.byte $00,$38,$39,$00 ; 26 ; Talk_Invis             v
+.byte $00,$3A,$34,$00 ; 27 ; Talk_ifbridge          unused?
+.byte $12,$33,$34,$00 ; 28 ; Talk_ifvis             unused?
+.byte $12,$3B,$3C,$00 ; 29 ; Talk_ifvis             ^
+.byte $12,$3D,$3E,$00 ; 2A ; Talk_ifvis             ^ 
+.byte $12,$3F,$34,$00 ; 2B ; Talk_ifvis             ^
+.byte KEY,$40,$41,$00 ; 2C ; Talk_ifitem   (Key)    ^
+.byte $12,$33,$32,$00 ; 2D ; Talk_ifvis             ^
+.byte KEY,$42,$41,$00 ; 2E ; Talk_ifitem   (Key) -- End Coneria castle people
 .byte $06,$33,$34,$00 ; 2F ; Talk_ifevent  
 .byte $12,$31,$34,$00 ; 30 ; Talk_ifvis    
-.byte $12,$43,$18,$00 ; 31 ; Talk_ifvis    
-.byte $00,$46,$18,$00 ; 32 ; Talk_GoBridge 
-.byte $12,$33,$34,$00 ; 33 ; Talk_ifvis    
-.byte $00,$45,$44,$00 ; 34 ; Talk_4Orb     
-.byte $00,$47,$00,$00 ; 35 ; Talk_norm     
-.byte $00,$48,$00,$00 ; 36 ; Talk_norm     
-.byte $12,$33,$49,$00 ; 37 ; Talk_ifvis    
-.byte $12,$33,$4A,$00 ; 38 ; Talk_ifvis    
-.byte $00,$4B,$00,$00 ; 39 ; Talk_norm     
+.byte $12,$43,$18,$00 ; 31 ; Talk_ifvis    ; Coneria Townpeople start
+.byte $00,$46,$18,$00 ; 32 ; Talk_GoBridge    v
+.byte $12,$33,$34,$00 ; 33 ; Talk_ifvis       v 
+.byte $00,$45,$44,$00 ; 34 ; Talk_4Orb        v
+.byte $00,$47,$00,$00 ; 35 ; Talk_norm        v
+.byte $00,$48,$00,$00 ; 36 ; Talk_norm        ^ 
+.byte $12,$33,$49,$00 ; 37 ; Talk_ifvis       ^
+.byte $12,$33,$4A,$00 ; 38 ; Talk_ifvis       ^
+.byte $00,$4B,$00,$00 ; 39 ; Talk_norm     ; End Coneria townpeople
 .byte $00,$4D,$4C,$00 ; 3A ; Sky Warrior 1
 .byte $00,$4E,$4C,$00 ; 3B ; Sky Warrior 2
 .byte $00,$4F,$4C,$00 ; 3C ; Sky Warrior 3
@@ -2379,128 +2376,128 @@ lut_MapObjTalkData:
 .byte $00,$52,$00,$00 ; 3F ; Scared Pravoka Townsfolk
 .byte $00,$53,$00,$00 ; 40 ; Scared Pravoka Townsfolk
 .byte $00,$54,$00,$00 ; 41 ; Scared Pravoka Townsfolk
-.byte $04,$55,$56,$00 ; 42 ; Talk_ifevent    
-.byte $04,$57,$58,$00 ; 43 ; Talk_ifevent    
-.byte $06,$59,$5A,$00 ; 44 ; Talk_ifevent    
-.byte $00,$5B,$00,$00 ; 45 ; Talk_norm       
-.byte $06,$5C,$5A,$00 ; 46 ; Talk_ifevent    
-.byte HERB,$5E,$5D,$00 ; 47 ; Talk_ifitem     (Herb)
-.byte $00,$42,$00,$00 ; 48 ; Talk_norm       
-.byte $06,$59,$5F,$00 ; 49 ; Talk_ifevent    
-.byte $06,$59,$60,$00 ; 4A ; Talk_ifevent    
+.byte $04,$55,$56,$00 ; 42 ; Talk_ifevent      ^
+.byte $04,$57,$58,$00 ; 43 ; Talk_ifevent      ^ 
+.byte $06,$59,$5A,$00 ; 44 ; Talk_ifevent    ; Pravoka Townsfolk end
+.byte $00,$5B,$00,$00 ; 45 ; Talk_norm       ; Castle Elves start
+.byte $06,$5C,$5A,$00 ; 46 ; Talk_ifevent              v
+.byte HERB,$5E,$5D,$00 ; 47 ; Talk_ifitem     (Herb)   v
+.byte $00,$42,$00,$00 ; 48 ; Talk_norm                 ^
+.byte $06,$59,$5F,$00 ; 49 ; Talk_ifevent              ^
+.byte $06,$59,$60,$00 ; 4A ; Talk_ifevent    ; Castle Elves end
 .byte KEY,$59,$5A,$00 ; 4B ; Talk_ifitem     (Key)
 .byte $06,$59,$5A,$00 ; 4C ; Talk_ifevent    
-.byte $06,$61,$5A,$00 ; 4D ; Talk_ifevent    
-.byte $06,$62,$5A,$00 ; 4E ; Talk_ifevent    
-.byte $06,$63,$64,$00 ; 4F ; Talk_ifevent    
-.byte $06,$65,$5A,$00 ; 50 ; Talk_ifevent    
-.byte $06,$66,$67,$00 ; 51 ; Talk_ifevent    
-.byte $00,$68,$00,$00 ; 52 ; Talk_norm       
-.byte $11,$69,$6B,$00 ; 53 ; Talk_ifcanoe    
-.byte FLOATER,$6A,$6B,$00 ; 54 ; Talk_ifitem     (Floater)
+.byte $06,$61,$5A,$00 ; 4D ; Talk_ifevent    ; Elfland townsfolk start
+.byte $06,$62,$5A,$00 ; 4E ; Talk_ifevent                  v
+.byte $06,$63,$64,$00 ; 4F ; Talk_ifevent                  v
+.byte $06,$65,$5A,$00 ; 50 ; Talk_ifevent                  v
+.byte $06,$66,$67,$00 ; 51 ; Talk_ifevent                  ^
+.byte $00,$68,$00,$00 ; 52 ; Talk_norm                     ^
+.byte $11,$69,$6B,$00 ; 53 ; Talk_ifcanoe                  ^ 
+.byte FLOATER,$6A,$6B,$00 ; 54 ; Talk_ifitem   (Floater) ; Elfland townsfolk end
 .byte $06,$61,$5A,$00 ; 55 ; Talk_ifevent    
 .byte $06,$61,$5A,$00 ; 56 ; Talk_ifevent    
 .byte $00,$4C,$00,$00 ; 57 ; Talk_norm       (Kee Kee)
-.byte $00,$6C,$00,$00 ; 58 ; Talk_norm       
-.byte $00,$6D,$6E,$00 ; 59 ; Talk_ifcanal    
-.byte $00,$6F,$00,$00 ; 5A ; Talk_norm       
-.byte $00,$70,$00,$00 ; 5B ; Talk_norm       
-.byte CRYSTAL,$6F,$71,$00 ; 5C ; Talk_ifitem     (Crystal)
-.byte EARTHORB,$73,$72,$00 ; 5D ; Talk_ifitem     (Earth Orb)
-.byte $00,$74,$00,$00 ; 5E ; Talk_norm       
-.byte $00,$75,$6E,$00 ; 5F ; Talk_ifcanal    
-.byte $00,$76,$77,$00 ; 60 ; Talk_ifkeytnt   
-.byte $00,$71,$00,$00 ; 61 ; Talk_norm       
-.byte $00,$75,$6E,$00 ; 62 ; Talk_ifcanal    
-.byte $00,$77,$00,$00 ; 63 ; Talk_norm       
-.byte $00,$78,$00,$00 ; 64 ; Talk_norm       
-.byte $00,$78,$00,$00 ; 65 ; Talk_norm       
-.byte $00,$78,$00,$00 ; 66 ; Talk_norm       
-.byte $00,$78,$00,$00 ; 67 ; Talk_norm       
-.byte $0C,$7A,$79,$00 ; 68 ; Talk_ifvis      
-.byte $00,$7B,$00,$00 ; 69 ; Talk_norm       
-.byte $00,$7C,$7D,$00 ; 6A ; Talk_ifearthvamp
-.byte EARTHORB,$7F,$7E,$00 ; 6B ; Talk_ifitem     (Earth Orb)
-.byte $0C,$81,$80,$00 ; 6C ; Talk_ifvis      
-.byte $00,$83,$18,$00 ; 6D ; Talk_ifearthvamp
-.byte $00,$82,$00,$00 ; 6E ; Talk_norm       
-.byte $00,$84,$00,$00 ; 6F ; Talk_norm       
-.byte EARTHORB,$86,$85,$00 ; 70 ; Talk_ifitem     (Earth Orb)
-.byte $00,$87,$88,$00 ; 71 ; Talk_ifairship  
-.byte $00,$89,$00,$00 ; 72 ; Talk_norm       
-.byte $0E,$18,$8A,$00 ; 73 ; Talk_ifevent    
-.byte EARTHORB,$86,$8B,$00 ; 74 ; Talk_ifitem     (Earth Orb) Jim!
+.byte $00,$6C,$00,$00 ; 58 ; Talk_norm     ; Dwarf Start   
+.byte $00,$6D,$6E,$00 ; 59 ; Talk_ifcanal      v
+.byte $00,$6F,$00,$00 ; 5A ; Talk_norm         v
+.byte $00,$70,$00,$00 ; 5B ; Talk_norm         v
+.byte CRYSTAL,$6F,$71,$00 ; 5C ; Talk_ifitem   v  (Crystal)
+.byte EARTHORB,$73,$72,$00 ; 5D ; Talk_ifitem  v  (Earth Orb)
+.byte $00,$74,$00,$00 ; 5E ; Talk_norm         ^
+.byte $00,$75,$6E,$00 ; 5F ; Talk_ifcanal      ^
+.byte $00,$76,$77,$00 ; 60 ; Talk_ifkeytnt     ^
+.byte $00,$71,$00,$00 ; 61 ; Talk_norm         ^
+.byte $00,$75,$6E,$00 ; 62 ; Talk_ifcanal      ^
+.byte $00,$77,$00,$00 ; 63 ; Talk_norm     ; Dwarf End  
+.byte $00,$78,$00,$00 ; 64 ; Talk_norm     ; broom  
+.byte $00,$78,$00,$00 ; 65 ; Talk_norm     ; broom
+.byte $00,$78,$00,$00 ; 66 ; Talk_norm     ; broom
+.byte $00,$78,$00,$00 ; 67 ; Talk_norm     ; broom  
+.byte $0C,$7A,$79,$00 ; 68 ; Talk_ifvis          ; Melmond townsfolk start
+.byte $00,$7B,$00,$00 ; 69 ; Talk_norm                               v
+.byte $00,$7C,$7D,$00 ; 6A ; Talk_ifearthvamp                        v
+.byte EARTHORB,$7F,$7E,$00 ; 6B ; Talk_ifitem     (Earth Orb)        v   
+.byte $0C,$81,$80,$00 ; 6C ; Talk_ifvis                              v
+.byte $00,$83,$18,$00 ; 6D ; Talk_ifearthvamp                        v
+.byte $00,$82,$00,$00 ; 6E ; Talk_norm                               v
+.byte $00,$84,$00,$00 ; 6F ; Talk_norm                               ^
+.byte EARTHORB,$86,$85,$00 ; 70 ; Talk_ifitem     (Earth Orb)        ^
+.byte $00,$87,$88,$00 ; 71 ; Talk_ifairship                          ^
+.byte $00,$89,$00,$00 ; 72 ; Talk_norm                               ^
+.byte $0E,$18,$8A,$00 ; 73 ; Talk_ifevent                            ^
+.byte EARTHORB,$86,$8B,$00 ; 74 ; Talk_ifitem     (Earth Orb) Jim! ; Melmond townsfolk end
 .byte $00,$18,$00,$00 ; 75 ; Talk_norm       
 .byte $00,$18,$00,$00 ; 76 ; Talk_norm       
-.byte $00,$8C,$00,$00 ; 77 ; Talk_norm       
-.byte $00,$96,$8D,$00 ; 78 ; Talk_4Orb       
-.byte $00,$97,$8E,$00 ; 79 ; Talk_4Orb       
-.byte $00,$98,$8F,$00 ; 7A ; Talk_4Orb       
-.byte $00,$99,$90,$00 ; 7B ; Talk_4Orb       
-.byte $00,$9A,$91,$00 ; 7C ; Talk_4Orb       
-.byte $00,$9B,$92,$00 ; 7D ; Talk_4Orb       
-.byte $00,$9C,$93,$00 ; 7E ; Talk_4Orb       
-.byte $00,$9D,$94,$00 ; 7F ; Talk_ifitem     (? No item)
-.byte $00,$95,$9E,$00 ; 80 ; Talk_ifearthfire
-.byte CANOE,$9F,$10,$00 ; 81 ; Talk_ifitem     (Fire Orb) ; JIGS - talks about the Floater, changing to Canoe
-.byte $00,$A0,$00,$00 ; 82 ; Talk_norm       
-.byte $00,$A1,$00,$00 ; 83 ; Talk_norm       
+.byte $00,$8C,$00,$00 ; 77 ; Talk_norm       ; Crescent Lake people start
+.byte $00,$96,$8D,$00 ; 78 ; Talk_4Orb                    v
+.byte $00,$97,$8E,$00 ; 79 ; Talk_4Orb                    v
+.byte $00,$98,$8F,$00 ; 7A ; Talk_4Orb                    v
+.byte $00,$99,$90,$00 ; 7B ; Talk_4Orb                    v
+.byte $00,$9A,$91,$00 ; 7C ; Talk_4Orb                    v
+.byte $00,$9B,$92,$00 ; 7D ; Talk_4Orb                    ^
+.byte $00,$9C,$93,$00 ; 7E ; Talk_4Orb                    ^
+.byte $00,$9D,$94,$00 ; 7F ; Talk_4Orb 
+.byte $00,$95,$9E,$00 ; 80 ; Talk_ifearthfire             ^
+.byte CANOE,$9F,$10,$00 ; 81 ; Talk_ifitem     (Fire Orb) ^ ; JIGS - talks about the Floater, changing to Canoe
+.byte $00,$A0,$00,$00 ; 82 ; Talk_norm                    ^
+.byte $00,$A1,$00,$00 ; 83 ; Talk_norm       Crescent Lake people end 
 .byte $84,$2D,$00,$00 ; 84 ; Talk_CoOGuy     Castle of Ordeals sage
-.byte $00,$E2,$00,$00 ; 85 ; Talk_norm       
-.byte $00,$E3,$00,$00 ; 86 ; Talk_norm       
-.byte $00,$E4,$00,$00 ; 87 ; Talk_norm       
-.byte $00,$E5,$00,$00 ; 88 ; Talk_norm       
-.byte $00,$E6,$00,$00 ; 89 ; Talk_norm       
-.byte $00,$E7,$00,$00 ; 8A ; Talk_norm       
-.byte $00,$E8,$00,$00 ; 8B ; Talk_norm       
-.byte $00,$E9,$00,$00 ; 8C ; Talk_norm       
-.byte $00,$EA,$00,$00 ; 8D ; Talk_norm       
-.byte $00,$EB,$00,$00 ; 8E ; Talk_norm       
-.byte $00,$EC,$00,$00 ; 8F ; Talk_norm       
-.byte $00,$ED,$00,$00 ; 90 ; Talk_norm       
+.byte $00,$E2,$00,$00 ; 85 ; Talk_norm    ; Cardia dragons start
+.byte $00,$E3,$00,$00 ; 86 ; Talk_norm       v
+.byte $00,$E4,$00,$00 ; 87 ; Talk_norm       v
+.byte $00,$E5,$00,$00 ; 88 ; Talk_norm       v
+.byte $00,$E6,$00,$00 ; 89 ; Talk_norm       v
+.byte $00,$E7,$00,$00 ; 8A ; Talk_norm       v
+.byte $00,$E8,$00,$00 ; 8B ; Talk_norm       ^
+.byte $00,$E9,$00,$00 ; 8C ; Talk_norm       ^
+.byte $00,$EA,$00,$00 ; 8D ; Talk_norm       ^ 
+.byte $00,$EB,$00,$00 ; 8E ; Talk_norm       ^
+.byte $00,$EC,$00,$00 ; 8F ; Talk_norm    ; bahamut's room dragons   
+.byte $00,$ED,$00,$00 ; 90 ; Talk_norm    ; bahamut's room dragons   
 .byte $00,$EE,$00,$00 ; 91 ; Talk_norm       
 .byte $00,$EF,$00,$00 ; 92 ; Talk_norm       
-.byte $00,$AE,$00,$00 ; 93 ; Talk_norm       
-.byte SLAB,$A3,$A2,$00 ; 94 ; Talk_ifitem     (Slab) Unne's Brother in Onrac
-.byte $00,$A4,$00,$00 ; 95 ; Talk_norm       
-.byte $00,$A5,$00,$00 ; 96 ; Talk_norm       
-.byte $00,$A6,$00,$00 ; 97 ; Talk_norm       
-.byte $00,$A7,$00,$00 ; 98 ; Talk_norm       
-.byte $00,$A8,$00,$00 ; 99 ; Talk_norm       
-.byte WATERORB,$AA,$A9,$00 ; 9A ; Talk_ifitem     (Water Orb) ; JIGS - original was air orb for some reason? Old sage by submarine
-.byte $0E,$AB,$AC,$00 ; 9B ; Talk_ifevent         Onrac Dragon before and after class change
-.byte $00,$AD,$00,$00 ; 9C ; Talk_norm       
-.byte $00,$AF,$00,$00 ; 9D ; Talk_norm       
-.byte $00,$B0,$00,$00 ; 9E ; Talk_norm       
-.byte $00,$B1,$00,$00 ; 9F ; Talk_norm       
-.byte $00,$B2,$00,$00 ; A0 ; Talk_norm       
+.byte $00,$AE,$00,$00 ; 93 ; Talk_norm    ; Onrac townsfolk start  
+.byte SLAB,$A3,$A2,$00 ; 94 ; Talk_ifitem (Slab) v  Unne's Brother in Onrac
+.byte $00,$A4,$00,$00 ; 95 ; Talk_norm           v
+.byte $00,$A5,$00,$00 ; 96 ; Talk_norm           v
+.byte $00,$A6,$00,$00 ; 97 ; Talk_norm           v
+.byte $00,$A7,$00,$00 ; 98 ; Talk_norm           v
+.byte $00,$A8,$00,$00 ; 99 ; Talk_norm           v
+.byte WATERORB,$AA,$A9,$00 ; 9A ; Talk_ifitem    ^ (Water Orb) ; JIGS - original was air orb for some reason? Old sage by submarine
+.byte $0E,$AB,$AC,$00 ; 9B ; Talk_ifevent        ^ Onrac Dragon before and after class change
+.byte $00,$AD,$00,$00 ; 9C ; Talk_norm           ^
+.byte $00,$AF,$00,$00 ; 9D ; Talk_norm           ^
+.byte $00,$B0,$00,$00 ; 9E ; Talk_norm           ^
+.byte $00,$B1,$00,$00 ; 9F ; Talk_norm           ^
+.byte $00,$B2,$00,$00 ; A0 ; Talk_norm      ; Onrac townsfolk end 
 .byte $00,$B3,$00,$00 ; A1 ; Talk_norm       
 .byte $00,$27,$28,$00 ; A2 ; Talk_CubeBotBad 
-.byte $00,$B4,$00,$00 ; A3 ; Talk_norm       
-.byte $00,$B5,$00,$00 ; A4 ; Talk_norm       
-.byte $00,$B6,$00,$00 ; A5 ; Talk_norm       
-.byte $00,$B7,$00,$00 ; A6 ; Talk_norm       
-.byte $00,$B8,$00,$00 ; A7 ; Talk_norm       
-.byte $00,$B9,$00,$00 ; A8 ; Talk_norm       
-.byte WATERORB,$BB,$BA,$00 ; A9 ; Talk_ifitem     (Water Orb)
-.byte $00,$BC,$00,$00 ; AA ; Talk_norm       
-.byte $00,$BD,$00,$00 ; AB ; Talk_norm       
-.byte $00,$BE,$00,$00 ; AC ; Talk_norm       
+.byte $00,$B4,$00,$00 ; A3 ; Talk_norm     ; mermaids start
+.byte $00,$B5,$00,$00 ; A4 ; Talk_norm        v
+.byte $00,$B6,$00,$00 ; A5 ; Talk_norm        v
+.byte $00,$B7,$00,$00 ; A6 ; Talk_norm        v
+.byte $00,$B8,$00,$00 ; A7 ; Talk_norm        v
+.byte $00,$B9,$00,$00 ; A8 ; Talk_norm        ^
+.byte WATERORB,$BB,$BA,$00 ; A9 ; Talk_ifitem ^ (Water Orb)
+.byte $00,$BC,$00,$00 ; AA ; Talk_norm        ^
+.byte $00,$BD,$00,$00 ; AB ; Talk_norm        ^
+.byte $00,$BE,$00,$00 ; AC ; Talk_norm     ; end mermaids  
 .byte $00,$BF,$00,$00 ; AD ; Talk_norm       
-.byte $00,$C0,$00,$00 ; AE ; Talk_norm       
-.byte $0B,$C1,$FE,$00 ; AF ; Talk_ifevent    Gaia guy before and after learning Leifenish
-.byte $00,$C2,$00,$00 ; B0 ; Talk_norm       
-.byte $00,$C3,$00,$00 ; B1 ; Talk_norm       
-.byte $00,$C4,$00,$00 ; B2 ; Talk_norm       
-.byte $00,$C5,$00,$00 ; B3 ; Talk_norm       
-.byte $00,$C6,$00,$00 ; B4 ; Talk_norm       
-.byte $00,$C7,$00,$00 ; B5 ; Talk_norm       
-.byte $00,$C8,$00,$00 ; B6 ; Talk_norm       
-.byte $00,$C9,$00,$00 ; B7 ; Talk_norm       
-.byte $00,$CA,$00,$00 ; B8 ; Talk_norm       
-.byte $00,$CB,$00,$00 ; B9 ; Talk_norm       
-.byte $00,$CC,$00,$00 ; BA ; Talk_norm       
-.byte $00,$CD,$CE,$D0 ; BB ; Talk_Chime      
+.byte $00,$C0,$00,$00 ; AE ; Talk_norm     ; Gaia townsfolk start  
+.byte $0B,$C1,$FE,$00 ; AF ; Talk_ifevent    Gaia guy before v and after learning Leifenish
+.byte $00,$C2,$00,$00 ; B0 ; Talk_norm                       v
+.byte $00,$C3,$00,$00 ; B1 ; Talk_norm                       v
+.byte $00,$C4,$00,$00 ; B2 ; Talk_norm                       v
+.byte $00,$C5,$00,$00 ; B3 ; Talk_norm                       v
+.byte $00,$C6,$00,$00 ; B4 ; Talk_norm                       v
+.byte $00,$C7,$00,$00 ; B5 ; Talk_norm                       ^
+.byte $00,$C8,$00,$00 ; B6 ; Talk_norm                       ^
+.byte $00,$C9,$00,$00 ; B7 ; Talk_norm                       ^
+.byte $00,$CA,$00,$00 ; B8 ; Talk_norm                       ^
+.byte $00,$CB,$00,$00 ; B9 ; Talk_norm                       ^
+.byte $00,$CC,$00,$00 ; BA ; Talk_norm      ; Gaia townsfolk end 
+.byte $00,$CD,$CE,$D0 ; BB ; Talk_Chime     ; Leifen guy what gives the chime
 .byte $0B,$D0,$CF,$00 ; BC ; Talk_ifevent   Leifen citizens
 .byte $0B,$D0,$D1,$00 ; BD ; Talk_ifevent   Leifen citizens
 .byte $0B,$D0,$D2,$00 ; BE ; Talk_ifevent   Leifen citizens

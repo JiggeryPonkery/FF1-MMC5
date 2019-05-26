@@ -72,7 +72,6 @@ BANK_THIS = $0C
 ;; JIGS - see bank Z for actual data!!!
 
 ;lut_WeaponData:
-;  .INCBIN "bin/0C_8000_weapondata.bin"
 
 lut_EquipmentSpells:
 .byte $00 ; Wooden nunchucks
@@ -256,9 +255,6 @@ lut_EquipmentSpells:
 ;;    see MAGDATA constants in Constants.inc for layout description
 
 lut_MagicData:
-   ; .INCBIN "bin/0C_81E0_magicdata.bin"
-
-
 ;
 ; JIGS - I highly recommend using FFHackster to design your magic, then copy-paste the data into the .bin above
 ;        and comment out the stuff below. For weapons and armours, too.
@@ -506,7 +502,6 @@ lut_MagicBattleMessages:
 ;;  See ENROMSTAT_xxx constants in Constants.inc for layout
 
 ;data_EnemyStats:
-  ;.INCBIN "bin/0C_8520_enemydata.bin"
   
   ;; JIGS - see bank Z!!
   
@@ -517,7 +512,7 @@ lut_MagicBattleMessages:
 ;;    LUT of 64 4-byte palettes for use with battle formations
 
 lut_BattlePalettes:
-  .INCBIN "bin/0C_8F20_battlepalettes.bin"
+  .INCBIN "bin/battlepalettes.bin"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -531,7 +526,6 @@ lut_BattlePalettes:
 ;;  bytes $B-$E = special attacks (0 based), or 'FF' to mark end of attacks
 
 lut_EnemyAi:
-  ;.INCBIN "bin/0C_9020_aidata.bin"
   
   ;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ; 00 ; Frost Wolf

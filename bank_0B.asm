@@ -32,7 +32,6 @@
 
 BANK_THIS = $0B
 
-;.INCBIN "bin/0B_8000_battledomaindata.bin"
 ; overworld
 lut_Domains:
 .byte $E3,$31,$70,$2E,$70,$60,$36,$9F,$E3,$31,$70,$2E,$70,$60,$36,$9F
@@ -164,7 +163,6 @@ lut_Domains:
 .ALIGN $100            ; must be on page bound
 
 lut_BattleFormations:
-;  .INCBIN "bin/0B_8400_battleformations.bin" 
 
 ;;    $0  $1  $2  $3  $4  $5  $6  $7  $8  $9  $A  $B  $C  $D  $E  $F        ; Formation 1                                           ;    ; Formation 2
 .byte $00,$00,$00,$01,$00,$00,$35,$00,$00,$00,$00,$01,$04,$40,$36,$04  ; 00 ; 3-5 Imps                                              ; 80 ; 3-6 Imps       0-4 GrImps
@@ -315,7 +313,6 @@ lut_BattleFormations:
 ;;  LUT for battle encounter rates per map  [$8C00 :: 0x2CC10]
 
 lut_BattleRates:
-  ;.INCBIN "bin/0B_8C00_mapencounterrates.bin"
   
 .byte $0A,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
 .byte $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
@@ -406,7 +403,6 @@ lut_ExpToAdvance:
 ;;                 bit 7 means you'll get a level 8 charge
 
 data_LevelUpData_Raw:
-;  .INCBIN "bin/0B_9094_levelupdata.bin"
 
 ;; ...still, I'd rather use FFHackster and just cut/paste the data into the .bin...
 
@@ -1088,7 +1084,6 @@ data_LevelUpData_Class12:
 ;;      $40 bytes of NT TSA (8x8 image)
 ;;      $10 bytes of attributes  (4x4)
 data_FiendTSA:
-  ;.INCBIN "bin/0B_92E0_fiendtsa.bin"
   
 .byte $00,$12,$13,$14,$15,$16,$17,$18,$19,$1A,$1B,$1C,$1D,$1E,$1F,$00
 .byte $20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$2A,$2B,$2C,$2D,$2E,$2F
@@ -1138,7 +1133,6 @@ data_FiendTSA:
 ;;      $10 bytes of attributes  (4x4)
 ;;      $08 bytes of padding
 data_ChaosTSA:
-  ;.INCBIN "bin/0B_9420_chaostsa.bin"
   
 .byte $00,$00,$00,$12,$13,$00,$14,$15,$16,$17,$00,$00,$00,$00,$00,$00
 .byte $18,$19,$1A,$1B,$1C,$1D,$1E,$1F,$20,$00,$00,$00,$00,$21,$22,$23
@@ -1164,7 +1158,6 @@ data_ChaosTSA:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Enemy names [$94E0 :: 0x2D4F0]
 data_EnemyNames:
-  ;.INCBIN "bin/0B_94E0_enemynames.bin"
 
 .word ENEMYNAME1  
 .word ENEMYNAME2  
@@ -4853,7 +4846,7 @@ lut_IBCharStatsPtrTable:
 ;;
 
 data_EpilogueCHR:
-  .INCBIN "bin/0B_A800_endingbridge_chrnt.bin"
+  .INCBIN "chr/endingbridge_chrnt.bin"
   
 data_EpilogueNT =       data_EpilogueCHR + $800         ; $B000
 data_BridgeCHR  =       data_EpilogueNT  + $400         ; $B400

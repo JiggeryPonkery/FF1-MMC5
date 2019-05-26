@@ -18,52 +18,45 @@
 BANK_THIS = $09
 
 lut_ShopCHR:
-.INCBIN "bin/bank_09_data.bin" 
+.INCBIN "chr/shop_text.chr" 
 
-  ;; JIGS: Battle sprites split from previous incbin into this one:
- 
- ;.INCBIN "bin/bank_09_chrbattlesprites.bin"
- 
- ;; then split again into these:
+
+;; JIGS: Battle sprites split into class
 
 FighterSprites: 
-.INCBIN "bin/Fighter.chr"
+.INCBIN "chr/class/Fighter.chr"
 ThiefSprites: 
-.INCBIN "bin/Thief.chr"
+.INCBIN "chr/class/Thief.chr"
 BlackBeltSprites: 
-.INCBIN "bin/BlackBelt.chr"  
+.INCBIN "chr/class/BlackBelt.chr"  
 RedMageSprites: 
-.INCBIN "bin/RedMage.chr"
+.INCBIN "chr/class/RedMage.chr"
 WhiteMageSprites: 
-.INCBIN "bin/WhiteMage.Chr"
+.INCBIN "chr/class/WhiteMage.Chr"
 BlackMageSprites: 
-.INCBIN "bin/BlackMage.chr"
+.INCBIN "chr/class/BlackMage.chr"
 KnightSprites: 
-.INCBIN "bin/Knight.Chr"
+.INCBIN "chr/class/Knight.Chr"
 NinjaSprites: 
-.INCBIN "bin/Ninja.Chr"
+.INCBIN "chr/class/Ninja.Chr"
 MasterSprites: 
-.INCBIN "bin/Master.Chr"  
+.INCBIN "chr/class/Master.Chr"  
 RedWizSprites: 
-.INCBIN "bin/RedWiz.Chr"
+.INCBIN "chr/class/RedWiz.Chr"
 WhiteWizSprites: 
-.INCBIN "bin/WhiteWiz.Chr"
+.INCBIN "chr/class/WhiteWiz.Chr"
 BlackWizSprites: 
-.INCBIN "bin/BlackWiz.Chr"
+.INCBIN "chr/class/BlackWiz.Chr"
 
  
 
- ;; Weapon and Magic Casting Sprites below
+;; Weapon and Magic Casting Sprites
   
- .INCBIN "bin/bank_09_weaponmagicsprites.bin"
+ .INCBIN "chr/weapon_magic_sprites.chr"
 
- ;; JIGS - Disch's original disassembly had a long string of data here.
- ;; Turns out it was character, weapon, and magic sprites, so I sorted them out into bin files! 
- ;; Now they're easy to edit with YY-CHR or by copying edited data from a FFHackster-compatible rom.
-
-
- 
- 
+;; JIGS - Disch's original disassembly had a long string of data here.
+;; Turns out it was character, weapon, and magic sprites, so I sorted them out! 
+;; Now they're easy to edit with YY-CHR or by copying edited data from a FFHackster-compatible rom.
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -88,44 +81,13 @@ lut_MinimapNT:
 
   .ALIGN $100
 chr_MinimapDecor:
-  .INCBIN "bin/minimap_decor.chr"
+  .INCBIN "chr/minimap_decor.chr"
 
 
   .ALIGN $100
 chr_MinimapTitle:
-  .INCBIN "bin/minimap_title.chr"
+  .INCBIN "chr/minimap_title.chr"
 
-
-
-
-;; B980  ????  can't be unused... can it?   Sure isn't used by minimap
-
-; .BYTE $00,$21,$11,$11,$02,$02,$04,$18,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$1F,$11,$11,$2D,$02,$04,$08,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$02,$1C,$04,$7F,$04,$04,$08,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$01,$29,$29,$02,$02,$04,$18,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$3F,$00,$3F,$04,$04,$04,$08,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$10,$10,$10,$18,$16,$10,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$04,$7F,$04,$04,$04,$08,$30,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$00,$1E,$00,$00,$00,$00,$3F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-
-;; JIGS - things might break, but I haven't seen anything so far!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
