@@ -648,7 +648,8 @@ ExitBattle:
     
     JSR LongCall
     .word RestoreMapMusic
-    .byte $0D
+    .byte BANK_MUSIC
+    
     JMP WaitFrames_BattleResult_RTS
    
    @ChaosWait:
@@ -685,7 +686,7 @@ FinishBattlePrepAndFadeIn_L:                                    ; $9006
 FinishBattlePrepAndFadeIn:
     JSR LongCall
     .word LoadEnemyStats              ; this is all pretty self explanitory
-    .byte $0F
+    .byte BANK_ENEMYSTATS
     
     JSR BattleUpdatePPU
     
@@ -1049,7 +1050,7 @@ BattleLogicLoop_ReEntry:
 ReadyToFight:
     JSR LongCall             ; swap to Bank Z to draw this
     .word BattleConfirmation
-    .byte $0F
+    .byte BANK_Z
     
     LDA #0
     STA gettingcommand    
@@ -1783,7 +1784,8 @@ BattleSubMenu_Item:
     JSR DrawManaBox
     JSR LongCall
     .word DrawManaString_ForBattle
-    .byte $0E
+    .byte BANK_MENUS
+    
     JSR EtherManaSelection      ; pressing A will set tmp 
     PHA                         ; backup the A/B button press
     LDA #$01
@@ -5223,7 +5225,7 @@ ApplyEndOfRoundEffects:
     PrintBattleTurnNumber:
     JSR LongCall
     .word PrintBattleTurn
-    .byte $0E
+    .byte BANK_MENUS
     
     JSR WaitForVBlank_L
     
@@ -5885,7 +5887,7 @@ StealFromEnemy:
    
     JSR LongCall
     .word StealFromEnemyZ
-    .byte $0F
+    .byte BANK_ENEMYSTATS
     
     LDA battle_stealsuccess
     CMP #2
@@ -6328,7 +6330,7 @@ PlayerAttackEnemy_Physical:
 
     JSR LongCall
     .word PlayerAttackEnemy_PhysicalZ
-    .byte $0F
+    .byte BANK_ENEMYSTATS
     
     ;; JIGS - whew, alright so...
     ;;        This whole bit was moved to Bank Z, which also contains a check to see if
@@ -6470,7 +6472,7 @@ EnemyAttackPlayer_Physical:
     
     JSR LongCall
     .word EnemyAttackPlayer_PhysicalZ
-    .byte $0F
+    .byte BANK_ENEMYSTATS
 
     ;; JIGS - again, moved to Bank Z to make space here for other changes, and to try and fix some bugs
     
@@ -6849,7 +6851,8 @@ DoPhysicalAttack_NoBoxes:
         
   : JSR LongCall
     .word HandPalette
-    .byte $0F
+    .byte BANK_ENEMYSTATS
+    
     JSR DoFrame_UpdatePalette
       ;; JIGS - Check character class and sprite to decide what colour fists to use...
       ;; Since any sprite can be a blackbelt...
@@ -7111,7 +7114,7 @@ DoPhysicalAttack_NoBoxes:
         BNE :+
          JSR LongCall                     ; JIGS - critical hit checker! 
         .WORD CritCheck
-        .byte $0F                                                     
+        .byte BANK_ENEMYSTATS                                                 
 
         LDA MMC5_tmp        ; load special attack message
         BEQ :+              ; ignore if 0

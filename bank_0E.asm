@@ -1029,7 +1029,7 @@ PrintCharStat:
 @ExpToNext:
       JSR LongCall
       .word PrintEXPToNext_B
-      .byte $0B      
+      .byte BANK_BTLDATA
       JMP PrintNumber_5Digit
       
 
@@ -2463,13 +2463,13 @@ CheckArmor:
 ReEquipStats:
     JSR LongCall
     .word ReadjustEquipStats
-    .byte $0F
+    .byte BANK_EQUIPSTATS
     RTS      
 
 UnEquipStats:
     JSR LongCall
     .word UnadjustEquipStats
-    .byte $0F    
+    .byte BANK_EQUIPSTATS
     RTS    
     
 SelectAmount:
@@ -4742,7 +4742,7 @@ SaveGame:
  STA weasels ; weasels will help save the game
  JSR LongCall
  .word SaveScreen
- .byte $0F 
+ .byte BANK_TITLE
  
   LDA music_track             ; check the music track
   CMP #$81                    ; if $81 (no music currently playing)...
@@ -5337,7 +5337,7 @@ MainMenuLoop:
     JSR ClearNT             ; clear the NT
     JSR LongCall
     .word OptionsMenu
-    .byte $0F
+    .byte BANK_TITLE
     LDA #$01
     STA cur_pal+14
     JMP ResumeMainMenu
@@ -6692,7 +6692,7 @@ UseItem_Bottle:
     LDY #OBJID_FAIRY
     JSR LongCall
     .word ShowMapObject
-    .byte $10        
+    .byte BANK_DIALOGUE
     ;JSR ShowMapObject               ; mark the fairy object as visible
     LDA #43                         ; Draw "Pop... a fiary pops out" etc description text
     JSR DrawItemDescBox_Fanfare     ;   with fanfare!
@@ -6722,7 +6722,7 @@ UseItem_Rod:
 
     JSR LongCall
     .word HideMapObject
-    .byte $10    
+    .byte BANK_DIALOGUE
     ;JSR HideMapObject           ; otherwise.. first time rod is being used.  Hide the rod plate
     LDA #41                      ;  load up the relevent description text
     JSR DrawItemDescBox_Fanfare ;  and draw it with fanfare!
@@ -6758,7 +6758,7 @@ UseItem_Lute:
     ASL A                       ; completely pointless shift (undoes above LSR, but has no real effect)
     JSR LongCall
     .word HideMapObject
-    .byte $10    
+    .byte BANK_DIALOGUE
     ;JSR HideMapObject           ; hide the lute plate object
     LDA #40                     ; get relevent description text
     JSR DrawItemDescBox_Fanfare ;  and draw it ... WITH FANFARE!

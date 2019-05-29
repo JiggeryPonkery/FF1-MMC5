@@ -108,29 +108,20 @@ MAGDATA_UNUSED       = $07
 ;;  banks to swap to for different things
 ;;
 
-BANK_OBJINFO      = $00
-BANK_MAPMANPAL    = $00
-BANK_OWINFO       = $00
-BANK_SMINFO       = $00
-BANK_TREASURE     = $00
-BANK_TELEPORTINFO = $00
-BANK_STARTUPINFO  = $00
-BANK_STARTINGSTATS= $00
-BANK_BACKDROPPAL  = $00
+BANK_BATTLECHR    = $00
 
-BANK_OWMAP        = $01
 
-BANK_MAPCHR       = $02
 
-BANK_TILESETCHR   = $03
+BANK_MINIMAP      = $04
+BANK_MENUCHR      = $04
+BANK_BTLCHR       = $04
 
-BANK_STANDARDMAPS = $04   ; used with ORA, so low 2 bits of bank number must be clear
+BANK_TILESETCHR   = $06
 
-BANK_BATTLECHR    = $07
-
-BANK_MINIMAP      = $09
-BANK_MENUCHR      = $09
-BANK_BTLCHR       = $09
+BANK_ORBCHR       = $09
+BANK_MINIGAME     = $09
+BANK_BRIDGESCENE  = $09
+BANK_ENDINGSCENE  = $09
 
 BANK_BTLMESSAGES  = $0A
 BANK_ITEMS        = $0A 
@@ -153,16 +144,25 @@ BANK_PARTYGEN     = $0F
 BANK_TITLE        = $0F
 BANK_INTRO        = $0F
 BANK_Z            = $0F
+BANK_ENEMYSTATS   = $0F
+BANK_EQUIPSTATS   = $0F
 
 BANK_TALKTOOBJ    = $10
 BANK_DIALOGUE     = $10 
 
-BANK_ORBCHR       = $11
-BANK_MINIGAME     = $11
-BANK_BRIDGESCENE  = $11
-BANK_ENDINGSCENE  = $11
+BANK_OBJINFO      = $11
+BANK_MAPMANPAL    = $11
+BANK_OWINFO       = $11
+BANK_SMINFO       = $11
+BANK_TREASURE     = $11
+BANK_TELEPORTINFO = $11
+BANK_STARTUPINFO  = $11
+BANK_STARTINGSTATS= $11
+BANK_BACKDROPPAL  = $11
 
+BANK_MAPCHR       = $13
 
+BANK_OWMAP        = $1E
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -887,17 +887,16 @@ MAP_3C  = $3C
 MAP_BANKCHANGE_2 = MAP_19 ; first map in SM_Bank_2
 MAP_BANKCHANGE_3 = MAP_2C ; first map in SM_Bank_3
   
-SM_BANK_1 = $04
-SM_BANK_2 = $05
-SM_BANK_3 = $06
+SM_BANK_1 = $16
+SM_BANK_2 = $17
+SM_BANK_3 = $18
   
   
 ;; labels that couldn't be inserted in data
 
 
 lut_MapObjCHR      = $A200   ; BANK_MAPCHR
-
-lut_OWPtrTbl       = $8000   ; BANK_OWMAP
+;lut_OWPtrTbl       = $8000   ; BANK_OWMAP
 lut_SMPtrTbl       = $8000   ; BANK_STANDARDMAPS
 ;lut_Domains        = $8000   ; BANK_DOMAINS -- MUST be on page boundary
 lut_BatSprCHR      = $9000   ; BANK_BTLCHR -- page

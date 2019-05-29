@@ -160,6 +160,7 @@
 .import lut_DialoguePtrTbl
 .import DumbBottleThing
 .import lut_Domains
+.import lut_OWPtrTbl
 
 .segment "BANK_FIXED"
 
@@ -178,7 +179,7 @@ GameStart:
     LDA #0                      ; Turn off the PPU
     STA $2000
     STA $2001
-    STA unk_FE                  ; ?? I don't think this is ever used
+    ;STA unk_FE                  ; ?? I don't think this is ever used
  
     LDA #$08                    ; Sprites use pattern table at $1xxx
     STA soft2000
@@ -5905,7 +5906,7 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-.byte $00,$00
+.byte $00,$00,$00
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going

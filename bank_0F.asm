@@ -1056,7 +1056,7 @@ JigsIntro:
     
     JSR LongCall
     .word LoadShopCHRForBank_Z
-    .byte $09
+    .byte BANK_MENUCHR
     
 ;;   JIGS - this saves having to have the lut_ShopCHR copy-pasted in this bank.
     
@@ -1449,7 +1449,7 @@ IntroTitlePrepare_BankZ:
   
     JSR LongCall
     .word IntroTitlePrepare
-    .byte $0E    
+    .byte BANK_MENUS    
 
     LDA #0
     STA joy_a              ; clear A, B, Start button catchers
@@ -2558,7 +2558,7 @@ DrawOptions:
  
   JSR LongCall
   .word BattleBGColorDigits
-  .byte $0E
+  .byte BANK_MENUS
   
   LDA $2002          ; PPU toggle... needed or not?
   LDA #>$2239        ; Color is drawn here
@@ -4018,9 +4018,6 @@ SaveScreen:
   LDA #1
   STA $5113                ; swap battery-backed PRG RAM into $8000 page   
   JSR SaveScreenHelper  
- ; JSR LongCall
- ; .word LoadBattleSpritesForBank_Z
- ; .byte $09
  
  LDA #1
  STA box_x

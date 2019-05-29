@@ -1695,7 +1695,7 @@ DoCrossPageJump:
 PrepBattleVarsAndEnterBattle:
     JSR LongCall
     .word BackupMapMusic 
-    .byte $0D
+    .byte BANK_MUSIC
     
     LDA #$00
     STA btl_soft2000            ; clear soft PPU regs
