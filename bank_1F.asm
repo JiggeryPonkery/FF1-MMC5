@@ -10478,6 +10478,20 @@ LoadBattleBGCHRAndPalettes:
 
     LDX ow_tile                   ; Get last OW tile we stepped on
     LDA lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
+    
+    ;; every backdrop is 1 tile of black, 1 row of graphics, and another 1 tile of black
+    ;; for a total of $120 bytes
+    ;; but they're arranged in #BANK_BATTLEBG in $10 tile rows
+    ;; So an ID of 09 would be at $8900
+    
+  ;  AND #$0F     ; mask with $0F (there are only 16 battle BGs)
+  ;  ORA #$80
+  ;  STA tmp+1
+  ;  LDA #$00
+  ;  STA tmp
+  ;  LDA #BANK_BATTLEBG
+  ;  JMP SwapPRG_L
+    
     JSR LoadBattleBGCHRPointers   ; Swap in desired bank, and set up pointers to battle backdrop
     LDA #$00                      ; Dest address = $0000
     LDX #$01                      ; Load 1 row of tiles
@@ -10514,6 +10528,30 @@ LoadBattleBGCHRAndPalettes:
     AND #$0F         ;  mask out lower bits (higher bits are different formation data)
     LDY #$20         ; set Y to #$20, so that CHR loading will continue 2 tiles into the row
     STA enCHRpage    ; put Enemy CHR page ID in enCHRpage (for future use?)
+
+;    LDY #2
+;   @LoadSmallLoop: 
+;    LDA (tmp+4), Y
+;    CMP #$FF
+;    BEQ :+
+    
+    
+;  : LDA (tmp+4), Y
+;    CMP #$FF
+;    BEQ :+
+    
+;  : LDA (tmp+4), Y
+;    CMP #$FF
+;    BEQ :+  
+
+;  : LDA (tmp+4), Y
+;    CMP #$FF
+;    BEQ :+  
+    
+   
+
+
+
 
     JSR LoadBattleBGCHRPointers    ; load pointers for Enemy CHR
     INC tmp+1                      ; increment high byte of pointer (enemy CHR starts 1 row in, before that is battle backdrop)
@@ -11701,7 +11739,7 @@ EnterBattle:
 
     LDA #BANK_BTLDATA         ; here we load the battle formation data
     JSR SwapPRG_L             ; swap to the bank containing that data
-    LDA btlformation        ; get the formation ID
+    LDA btlformation          ; get the formation ID
     AND #$7F                  ; remove the 'Formation B' bit to get the raw formation ID
     LDX #0                    ;  mulitply the formation ID by 16 (shift by 4) and rotate
     STX btltmp+11             ;  bits into btltmp+11.  The end result is that (btltmp+10) will

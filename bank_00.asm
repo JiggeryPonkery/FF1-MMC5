@@ -4,9 +4,6 @@
 
 .segment "BANK_00"
 
-.import WaitForVBlank_L
-.import CallMusicPlay_L
-
 BANK_THIS = $00
 
 .incbin "chr/battle_blankspace.chr"
