@@ -10,6 +10,7 @@
 .export WeaponArmorPrices
 .export lut_EnemyAttack
 .export DumbBottleThing
+.export data_EnemyNames
 
 .import MultiplyXA
 
@@ -105,6 +106,389 @@ EnemyAttack26:
 ;.byte $F1,$6F,$F6,$FF,$FF,$FF,$FF,$00 ; 
 ;.byte $8F,$B5,$9C,$59,$91,$B4,$FF,$00 ; 
 ;.byte $97,$8B,$56
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  Enemy names [$94E0 :: 0x2D4F0]
+data_EnemyNames:
+
+.word ENEMYNAME1  
+.word ENEMYNAME2  
+.word ENEMYNAME3  
+.word ENEMYNAME4  
+.word ENEMYNAME5  
+.word ENEMYNAME6  
+.word ENEMYNAME7  
+.word ENEMYNAME8  
+.word ENEMYNAME9  
+.word ENEMYNAME10 
+.word ENEMYNAME11 
+.word ENEMYNAME12 
+.word ENEMYNAME13 
+.word ENEMYNAME14 
+.word ENEMYNAME15 
+.word ENEMYNAME16 
+.word ENEMYNAME17 
+.word ENEMYNAME18 
+.word ENEMYNAME19 
+.word ENEMYNAME20 
+.word ENEMYNAME21 
+.word ENEMYNAME22 
+.word ENEMYNAME23 
+.word ENEMYNAME24 
+.word ENEMYNAME25 
+.word ENEMYNAME26 
+.word ENEMYNAME27 
+.word ENEMYNAME28 
+.word ENEMYNAME29 
+.word ENEMYNAME30 
+.word ENEMYNAME31 
+.word ENEMYNAME32 
+.word ENEMYNAME33 
+.word ENEMYNAME34 
+.word ENEMYNAME35 
+.word ENEMYNAME36 
+.word ENEMYNAME37 
+.word ENEMYNAME38 
+.word ENEMYNAME39 
+.word ENEMYNAME40 
+.word ENEMYNAME41 
+.word ENEMYNAME42 
+.word ENEMYNAME43 
+.word ENEMYNAME44 
+.word ENEMYNAME45 
+.word ENEMYNAME46 
+.word ENEMYNAME47 
+.word ENEMYNAME48 
+.word ENEMYNAME49 
+.word ENEMYNAME50 
+.word ENEMYNAME51 
+.word ENEMYNAME52 
+.word ENEMYNAME53 
+.word ENEMYNAME54 
+.word ENEMYNAME55 
+.word ENEMYNAME56 
+.word ENEMYNAME57 
+.word ENEMYNAME58 
+.word ENEMYNAME59 
+.word ENEMYNAME60 
+.word ENEMYNAME61 
+.word ENEMYNAME62 
+.word ENEMYNAME63 
+.word ENEMYNAME64 
+.word ENEMYNAME65 
+.word ENEMYNAME66 
+.word ENEMYNAME67 
+.word ENEMYNAME68 
+.word ENEMYNAME69 
+.word ENEMYNAME70 
+.word ENEMYNAME71 
+.word ENEMYNAME72 
+.word ENEMYNAME73 
+.word ENEMYNAME74 
+.word ENEMYNAME75 
+.word ENEMYNAME76 
+.word ENEMYNAME77 
+.word ENEMYNAME78 
+.word ENEMYNAME79 
+.word ENEMYNAME80 
+.word ENEMYNAME81 
+.word ENEMYNAME82 
+.word ENEMYNAME83 
+.word ENEMYNAME84 
+.word ENEMYNAME85 
+.word ENEMYNAME86 
+.word ENEMYNAME87 
+.word ENEMYNAME88 
+.word ENEMYNAME89 
+.word ENEMYNAME90 
+.word ENEMYNAME91 
+.word ENEMYNAME92 
+.word ENEMYNAME93 
+.word ENEMYNAME94 
+.word ENEMYNAME95 
+.word ENEMYNAME96 
+.word ENEMYNAME97 
+.word ENEMYNAME98 
+.word ENEMYNAME99 
+.word ENEMYNAME100
+.word ENEMYNAME101
+.word ENEMYNAME102
+.word ENEMYNAME103
+.word ENEMYNAME104
+.word ENEMYNAME105
+.word ENEMYNAME106
+.word ENEMYNAME107
+.word ENEMYNAME108
+.word ENEMYNAME109
+.word ENEMYNAME110
+.word ENEMYNAME111
+.word ENEMYNAME112
+.word ENEMYNAME113
+.word ENEMYNAME114
+.word ENEMYNAME115
+.word ENEMYNAME116
+.word ENEMYNAME117
+.word ENEMYNAME118
+.word ENEMYNAME119
+.word ENEMYNAME120
+.word ENEMYNAME120
+.word ENEMYNAME121
+.word ENEMYNAME121
+.word ENEMYNAME122
+.word ENEMYNAME122
+.word ENEMYNAME123
+.word ENEMYNAME123
+.word ENEMYNAME124
+
+
+ENEMYNAME1:
+.byte $92,$96,$99,$00                       ; IMP	
+ENEMYNAME2:
+.byte $90,$B5,$92,$96,$99,$00               ; GrIMP	
+ENEMYNAME3:
+.byte $A0,$98,$95,$8F,$00                   ; WOLF	
+ENEMYNAME4:
+.byte $90,$B5,$A0,$98,$95,$8F,$00           ; GrWolf	
+ENEMYNAME5:
+.byte $A0,$B5,$A0,$98,$95,$8F,$00           ; WrWolf     
+ENEMYNAME6:
+.byte $8F,$B5,$A0,$98,$95,$8F,$00           ; FrWOLF     
+ENEMYNAME7:
+.byte $92,$90,$9E,$8A,$97,$8A,$00           ; IGUANA     
+ENEMYNAME8:
+.byte $8A,$90,$8A,$96,$8A,$00               ; AGAMA
+ENEMYNAME9:
+.byte $9C,$8A,$9E,$9B,$92,$8A,$00           ; SAURIA
+ENEMYNAME10:
+.byte $90,$92,$8A,$97,$9D,$00               ; GIANT
+ENEMYNAME11:
+.byte $8F,$B5,$90,$92,$8A,$97,$9D,$00       ; FrGIANT
+ENEMYNAME12:
+.byte $9B,$C0,$90,$92,$8A,$97,$9D,$00       ; R.GIANT
+ENEMYNAME13:
+.byte $9C,$8A,$91,$8A,$90,$00               ; SAHAG
+ENEMYNAME14:
+.byte $9B,$C0,$9C,$8A,$91,$8A,$90,$00       ; R.SAHAG
+ENEMYNAME15:
+.byte $A0,$BD,$9C,$8A,$91,$8A,$90,$00       ; WzSAHAG
+ENEMYNAME16:
+.byte $99,$92,$9B,$8A,$9D,$8E,$00           ; PIRATE
+ENEMYNAME17:
+.byte $94,$A2,$A3,$98,$94,$9E,$00           ; KYZOKU
+ENEMYNAME18:
+.byte $9C,$91,$8A,$9B,$94,$00               ; SHARK
+ENEMYNAME19:
+.byte $90,$B5,$9C,$91,$8A,$9B,$94,$00       ; GrSHARK
+ENEMYNAME20:
+.byte $98,$A7,$A7,$8E,$A2,$8E,$00           ; OddEYE
+ENEMYNAME21:
+.byte $8B,$AC,$AA,$8E,$A2,$8E,$00           ; BigEYE
+ENEMYNAME22:
+.byte $8B,$98,$97,$8E,$00                   ; BONE
+ENEMYNAME23:
+.byte $9B,$C0,$8B,$98,$97,$8E,$00           ; R.BONE
+ENEMYNAME24:
+.byte $8C,$9B,$8E,$8E,$99,$00               ; CREEP
+ENEMYNAME25:
+.byte $8C,$9B,$8A,$A0,$95,$00               ; CRAWL
+ENEMYNAME26:
+.byte $91,$A2,$8E,$97,$8A,$00               ; HYENA
+ENEMYNAME27:
+.byte $8C,$8E,$9B,$8E,$8B,$9E,$9C,$00       ; CEREBUS
+ENEMYNAME28:
+.byte $98,$90,$9B,$8E,$00                   ; OGRE
+ENEMYNAME29:
+.byte $90,$B5,$98,$90,$9B,$8E,$00           ; GrOGRE
+ENEMYNAME30:
+.byte $A0,$BD,$98,$90,$9B,$8E,$00           ; WzOGRE
+ENEMYNAME31:
+.byte $8A,$9C,$99,$00                       ; ASP
+ENEMYNAME32:
+.byte $8C,$98,$8B,$9B,$8A,$00               ; COBRA
+ENEMYNAME33:
+.byte $9C,$A8,$A4,$9C,$97,$8A,$94,$8E,$00   ; SeaSNAKE
+ENEMYNAME34:
+.byte $9C,$8C,$98,$9B,$99,$92,$98,$97,$00   ; SCORPION
+ENEMYNAME35:
+.byte $95,$98,$8B,$9C,$9D,$8E,$9B,$00       ; LOBSTER
+ENEMYNAME36:
+.byte $8B,$9E,$95,$95,$00                   ; BULL
+ENEMYNAME37:
+.byte $A3,$B2,$B0,$8B,$9E,$95,$95,$00       ; ZomBULL
+ENEMYNAME38:
+.byte $9D,$9B,$98,$95,$95,$00               ; TROLL
+ENEMYNAME39:
+.byte $9C,$A8,$A4,$9D,$9B,$98,$95,$95,$00   ; SeaTROLL
+ENEMYNAME40:
+.byte $9C,$91,$8A,$8D,$98,$A0,$00           ; SHADOW
+ENEMYNAME41:
+.byte $92,$96,$8A,$90,$8E,$00               ; IMAGE
+ENEMYNAME42:
+.byte $A0,$9B,$8A,$92,$9D,$91,$00           ; WRAITH
+ENEMYNAME43:
+.byte $90,$91,$98,$9C,$9D,$00               ; GHOST
+ENEMYNAME44:
+.byte $A3,$98,$96,$8B,$92,$8E,$00           ; ZOMBIE
+ENEMYNAME45:
+.byte $90,$91,$98,$9E,$95,$00               ; GHOUL 
+ENEMYNAME46:
+.byte $90,$8E,$92,$9C,$9D,$00               ; GEIST
+ENEMYNAME47:
+.byte $9C,$99,$8E,$8C,$9D,$8E,$9B,$00       ; SPECTER
+ENEMYNAME48:
+.byte $A0,$98,$9B,$96,$00                   ; WORM
+ENEMYNAME49:
+.byte $9C,$A4,$B1,$A7,$FF,$A0,$00           ; Sand W
+ENEMYNAME50:
+.byte $90,$B5,$A8,$BC,$FF,$A0,$00           ; Grey W
+ENEMYNAME51:
+.byte $8E,$A2,$8E,$00                       ; EYE
+ENEMYNAME52:
+.byte $99,$91,$8A,$97,$9D,$98,$96,$00       ; PHANTOM
+ENEMYNAME53:
+.byte $96,$8E,$8D,$9E,$9C,$8A,$00           ; MEDUSA
+ENEMYNAME54:
+.byte $90,$B5,$96,$8E,$8D,$9E,$9C,$8A,$00   ; GrMEDUSA
+ENEMYNAME55:
+.byte $8C,$8A,$9D,$96,$8A,$97,$00           ; CATMAN
+ENEMYNAME56:
+.byte $96,$8A,$97,$8C,$8A,$9D,$00           ; MANCAT
+ENEMYNAME57:
+.byte $99,$8E,$8D,$8E,$00                   ; PEDE
+ENEMYNAME58:
+.byte $90,$B5,$99,$8E,$8D,$8E,$00           ; GrPEDE
+ENEMYNAME59:
+.byte $9D,$92,$90,$8E,$9B,$00               ; TIGER
+ENEMYNAME60:
+.byte $9C,$A4,$A5,$A8,$B5,$FF,$9D,$00       ; Saber T
+ENEMYNAME61:
+.byte $9F,$8A,$96,$99,$92,$9B,$8E,$00       ; VAMPIRE
+ENEMYNAME62:
+.byte $A0,$BD,$9F,$8A,$96,$99,$00           ; WzVAMP
+ENEMYNAME63:
+.byte $90,$8A,$9B,$90,$98,$A2,$95,$8E,$00   ; GARGOYLE
+ENEMYNAME64:
+.byte $9B,$C0,$90,$98,$A2,$95,$8E,$00       ; R.GOYLE
+ENEMYNAME65:
+.byte $8E,$8A,$9B,$9D,$91,$00               ; EARTH
+ENEMYNAME66:
+.byte $8F,$92,$9B,$8E,$00                   ; FIRE
+ENEMYNAME67:
+.byte $8F,$B5,$B2,$B6,$B7,$FF,$8D,$00       ; Frost D
+ENEMYNAME68:
+.byte $9B,$A8,$A7,$FF,$8D,$00               ; Red D
+ENEMYNAME69:
+.byte $A3,$B2,$B0,$A5,$AC,$A8,$8D,$00       ; ZombieD
+ENEMYNAME70:
+.byte $9C,$8C,$9E,$96,$00                   ; SCUM
+ENEMYNAME71:
+.byte $96,$9E,$8C,$94,$00                   ; MUCK
+ENEMYNAME72:
+.byte $98,$98,$A3,$8E,$00                   ; OOZE
+ENEMYNAME73:
+.byte $9C,$95,$92,$96,$8E,$00               ; SLIME
+ENEMYNAME74:
+.byte $9C,$99,$92,$8D,$8E,$9B,$00           ; SPIDER
+ENEMYNAME75:
+.byte $8A,$9B,$8A,$8C,$91,$97,$92,$8D,$00   ; ARACHNID
+ENEMYNAME76:
+.byte $96,$8A,$97,$9D,$92,$8C,$98,$9B,$00   ; MATICOR
+ENEMYNAME77:
+.byte $9C,$99,$91,$92,$97,$A1,$00           ; SPHINX
+ENEMYNAME78:
+.byte $9B,$C0,$8A,$97,$94,$A2,$95,$98,$00   ; R.ANKYLO
+ENEMYNAME79:
+.byte $8A,$97,$94,$A2,$95,$98,$00           ; ANKYLO
+ENEMYNAME80:
+.byte $96,$9E,$96,$96,$A2,$00               ; MUMMY
+ENEMYNAME81:
+.byte $A0,$BD,$96,$9E,$96,$96,$A2,$00       ; WzMUMMY
+ENEMYNAME82:
+.byte $8C,$98,$8C,$9D,$9B,$92,$8C,$8E,$00   ; COCTRICE
+ENEMYNAME83:
+.byte $99,$8E,$9B,$92,$95,$92,$9C,$94,$00   ; PERILISK
+ENEMYNAME84:
+.byte $A0,$A2,$9F,$8E,$9B,$97,$00           ; WYVERN
+ENEMYNAME85:
+.byte $A0,$A2,$9B,$96,$00                   ; WYRM
+ENEMYNAME86:
+.byte $9D,$A2,$9B,$98,$00                   ; TYRO
+ENEMYNAME87:
+.byte $9D,$FF,$9B,$8E,$A1,$00               ; T REX
+ENEMYNAME88:
+.byte $8C,$8A,$9B,$92,$8B,$8E,$00           ; CARIBE
+ENEMYNAME89:
+.byte $9B,$C0,$8C,$8A,$9B,$92,$8B,$8E,$00   ; R.CARIBE
+ENEMYNAME90:
+.byte $90,$8A,$9D,$98,$9B,$00               ; GATOR
+ENEMYNAME91:
+.byte $8F,$B5,$90,$8A,$9D,$98,$9B,$00       ; FrGATOR
+ENEMYNAME92:
+.byte $98,$8C,$91,$98,$00                   ; OCHO
+ENEMYNAME93:
+.byte $97,$8A,$98,$8C,$91,$98,$00           ; NAOCHO
+ENEMYNAME94:
+.byte $91,$A2,$8D,$9B,$8A,$00               ; HYDRA
+ENEMYNAME95:
+.byte $9B,$C0,$91,$A2,$8D,$9B,$8A,$00       ; R.HYDRA
+ENEMYNAME96:
+.byte $90,$9E,$8A,$9B,$8D,$00               ; GAURD
+ENEMYNAME97:
+.byte $9C,$8E,$97,$9D,$9B,$A2,$00           ; SENTRY
+ENEMYNAME98:
+.byte $A0,$8A,$9D,$8E,$9B,$00               ; WATER
+ENEMYNAME99:
+.byte $8A,$92,$9B,$00                       ; AIR
+ENEMYNAME100:
+.byte $97,$8A,$90,$8A,$00                   ; NAGA
+ENEMYNAME101:
+.byte $90,$B5,$97,$8A,$90,$8A,$00           ; GrNAGA
+ENEMYNAME102:
+.byte $8C,$91,$92,$96,$8E,$9B,$8A,$00       ; CHIMERA
+ENEMYNAME103:
+.byte $93,$92,$96,$8E,$9B,$8A,$00           ; JIMERA
+ENEMYNAME104:
+.byte $A0,$92,$A3,$8A,$9B,$8D,$00           ; WIZARD
+ENEMYNAME105:
+.byte $9C,$98,$9B,$8C,$8E,$9B,$8E,$9B,$00   ; SORCERER
+ENEMYNAME106:
+.byte $90,$8A,$9B,$95,$8A,$97,$8D,$00       ; GARLAND
+ENEMYNAME107:
+.byte $90,$A4,$B6,$FF,$8D,$00               ; Gas D
+ENEMYNAME108:
+.byte $8B,$AF,$B8,$A8,$FF,$8D,$00           ; Blue D
+ENEMYNAME109:
+.byte $96,$B8,$A7,$90,$98,$95,$00           ; MudGOL
+ENEMYNAME110:
+.byte $9B,$B2,$A6,$AE,$90,$98,$95,$00       ; RockGOL
+ENEMYNAME111:
+.byte $92,$B5,$B2,$B1,$90,$98,$95,$00       ; IronGOL
+ENEMYNAME112:
+.byte $8B,$8A,$8D,$96,$8A,$97,$00           ; BADMAN
+ENEMYNAME113:
+.byte $8E,$9F,$92,$95,$96,$8A,$97,$00       ; EVILMAN
+ENEMYNAME114:
+.byte $8A,$9C,$9D,$98,$9C,$00               ; ASTOS
+ENEMYNAME115:
+.byte $96,$8A,$90,$8E,$00                   ; MAGE
+ENEMYNAME116:
+.byte $8F,$92,$90,$91,$9D,$8E,$9B,$00       ; FIGHTER
+ENEMYNAME117:
+.byte $96,$8A,$8D,$99,$98,$97,$A2,$00        ; MADPONY
+ENEMYNAME118:
+.byte $97,$92,$9D,$8E,$96,$8A,$9B,$8E,$00    ; NITEMARE
+ENEMYNAME119:
+.byte $A0,$A4,$B5,$96,$8E,$8C,$91,$00        ; WarMECH
+ENEMYNAME120:
+.byte $95,$92,$8C,$91,$00                    ; LICH
+ENEMYNAME121:
+.byte $94,$8A,$9B,$A2,$00                    ; KARY
+ENEMYNAME122:
+.byte $94,$9B,$8A,$94,$8E,$97,$00            ; KRAKEN
+ENEMYNAME123:
+.byte $9D,$92,$8A,$96,$8A,$9D,$00            ; TIAMAT
+ENEMYNAME124:
+.byte $8C,$91,$8A,$98,$9C,$00                ; CHAOS  
 
 ; But here's all the items and some more!
 ; When the game looks up an item name, it first gets the pointer--the two byte .word names here--and then looks that up from a table of sorts?
