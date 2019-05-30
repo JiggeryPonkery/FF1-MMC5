@@ -287,6 +287,9 @@ dlgflg_reentermap = $56  ; flag to indicate the map needs re-entering due to dia
 cur_bank        = $57
 ret_bank        = $58
 
+descboxopen     = $59
+
+
 format_buf      = $60  ; 7 bytes (5A-60) -- must not cross page bound
 
 shutter_a       = $61  ; shared
@@ -335,12 +338,13 @@ enCHRpage       = $6B
 
 altareffect     = $6C  ; flag to indicate altar effect is to occur (screen shaking, monochrome diagonal window thing)
 
+sq2_sfx         = $6D
+
 shop_cursor_ptr = $6E ; +$6F
 
-equipoffset     = $70 ; menus
-Woosh           = $71 ; battle
-cursor_change   = $71 ; magic menu 
+enemy_load      = $70 ; all $10 bytes, 4 per enemy
 
+cursor_change       = $71 ; magic menu 
 treasure_offset     = $72 ; maps
 item_box_offset     = $72 ; shops
 item_box_offset_old = $73 ; shops
@@ -348,14 +352,9 @@ backup_cursor       = $73 ; shops, menus
 backup_cursor_targ  = $74 ; item menus
 inv_canequipinshop  = $74 ; shops
 battleitemslot      = $74 ; equip menu
-spaceruns           = $75 ; drawcomplexstring
 equipmenu_tmp       = $75 ; for unequip/reequipping
 
-dlgmusic_backup = $7C  ; backup music track for restoring music after the dialogue box changes it
-dlgsfx          = $7D  ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
 
-sq2_sfx         = $7E
-descboxopen     = $7F
 
 ;;
 ;; Pointers
@@ -418,6 +417,9 @@ btlsfxnse_ptr       = $9E
 
 framecounter    = $F0  ; 2 bytes!
 
+equipoffset     = $F2 ; menus
+Woosh           = $F3 ; battle
+
 npcdir_seed     = $F4  ; RNG seed for determining direction for NPCs to walk
 
 battlestep      = $F5
@@ -426,7 +428,10 @@ battlecounter   = $F7
 battlerate      = $F8  ; X/256 chance of a random encounter occuring (SM only apparently)
 
 startintrocheck = $F9
-;respondrate     = $FA
+spaceruns       = $FA ; drawcomplexstring
+
+dlgmusic_backup = $FB  ; backup music track for restoring music after the dialogue box changes it
+dlgsfx          = $FC  ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
 
 NTsoft2000      = $FD  ; same as soft2000, but used to track coarse NT scroll
 unk_FE          = $FE
