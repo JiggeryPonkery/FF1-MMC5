@@ -161,6 +161,7 @@
 .import DumbBottleThing
 .import lut_Domains
 .import lut_OWPtrTbl
+.import BattleIcons
 
 .segment "BANK_FIXED"
 
@@ -10476,33 +10477,48 @@ LoadBattleBGCHRAndPalettes:
     LDA #BANK_OWINFO              ; Swap to BANK_OWINFO
     JSR SwapPRG_L
 
+    ;; JIGS - slight changes
+    
     LDX ow_tile                   ; Get last OW tile we stepped on
-    LDA lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
+    LDY lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
+    ;; Load Y instead of A
+    
+    LDA #BANK_BATTLEBG           ; swap to bank with backdrops
+    JSR SwapPRG_L
     
     ;; every backdrop is 1 tile of black, 1 row of graphics, and another 1 tile of black
     ;; for a total of $120 bytes
     ;; but they're arranged in #BANK_BATTLEBG in $10 tile rows
     ;; So an ID of 09 would be at $8900
+   
+    TYA                           ; now transfer Y to A-- saves having to do an LDA #0 again
+    AND #$0F                      ; mask with $0F (there are only 16 battle BGs)
+    ORA #$80                      ; add $80 to get high byte
+    STA tmp+1                     ; save high byte
+ 
+    LDA #0
+    STA tmp                       ; save low byte
+    LDY $2002                     ; reset PPU address toggle
+    STA $2006                     ; Dest address = $0000
+    STA $2006
+    JSR @FillBlackTile            ; and fill one tile with 0s
+    INX                           ; X = 1 row
+    TAY                           ; Y = 0 
     
-  ;  AND #$0F     ; mask with $0F (there are only 16 battle BGs)
-  ;  ORA #$80
-  ;  STA tmp+1
-  ;  LDA #$00
-  ;  STA tmp
-  ;  LDA #BANK_BATTLEBG
-  ;  JMP SwapPRG_L
-    
-    JSR LoadBattleBGCHRPointers   ; Swap in desired bank, and set up pointers to battle backdrop
-    LDA #$00                      ; Dest address = $0000
-    LDX #$01                      ; Load 1 row of tiles
-    JSR CHRLoadToA                ; Load up the CHR
-
-  @Loop:                  ; Battle backdrops are actually 1 row + 2 tiles ($12 tiles)
-      LDA (tmp), Y        ;   so loop to load another 2 tiles ($20 bytes)
-      STA $2007
-      INY
-      CPY #$20
-      BCC @Loop
+    JSR CHRLoad_Cont
+    JSR @FillBlackTile            ; fill second tile with 0s
+  
+  ; JSR LoadBattleBGCHRPointers   ; Swap in desired bank, and set up pointers to battle backdrop
+  ; LDA #$00                      ; Dest address = $0000
+  ; LDX #$01                      ; Load 1 row of tiles
+  ; JSR CHRLoadToA                ; Load up the CHR
+   
+ ; @Loop:                  ; Battle backdrops are actually 1 row + 2 tiles ($12 tiles)
+ ;     LDA (tmp), Y        ;   so loop to load another 2 tiles ($20 bytes)
+ ;     STA $2007
+ ;     INY
+ ;     CPY #$20
+ ;     BCC @Loop
 
     LDA btlformation ; get battle formation number
     ASL A            ; multiply it by 16
@@ -10529,36 +10545,29 @@ LoadBattleBGCHRAndPalettes:
     LDY #$20         ; set Y to #$20, so that CHR loading will continue 2 tiles into the row
     STA enCHRpage    ; put Enemy CHR page ID in enCHRpage (for future use?)
 
-;    LDY #2
-;   @LoadSmallLoop: 
-;    LDA (tmp+4), Y
-;    CMP #$FF
-;    BEQ :+
-    
-    
-;  : LDA (tmp+4), Y
-;    CMP #$FF
-;    BEQ :+
-    
-;  : LDA (tmp+4), Y
-;    CMP #$FF
-;    BEQ :+  
-
-;  : LDA (tmp+4), Y
-;    CMP #$FF
-;    BEQ :+  
-    
-   
-
-
-
-
     JSR LoadBattleBGCHRPointers    ; load pointers for Enemy CHR
     INC tmp+1                      ; increment high byte of pointer (enemy CHR starts 1 row in, before that is battle backdrop)
     LDX #$07                       ; load 7 rows
     JSR CHRLoad_Cont               ;   continue CHR loading from Y=$20
+    
+   ; LDA #<BattleIcons
+   ; STA tmp+1
+   ; LDA #>BattleIcons
+   ; STA tmp
+   ; do something to just load 6 tiles after enemy graphics
+    
     JSR LoadMenuCHR                ; load CHR for font/menu/etc
     JMP LoadBattleBGPalettes       ; finally.. load palettes for menu and backdrop
+    
+    
+   @FillBlackTile:    
+    LDA #0
+    LDX #$10
+   @Loop:
+    STA $2007             ; write $10 zeros to clear the tile
+    DEX
+    BNE @Loop
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

@@ -2,6 +2,8 @@
 .include "variables.inc"
 .include "macros.inc"
 
+.export BattleIcons
+
 .segment "BANK_03"
 
 BANK_THIS = $03
@@ -22,5 +24,8 @@ BANK_THIS = $03
 .incbin "chr/backdrops/0D_cave_4.chr"
 .incbin "chr/backdrops/0E_cave_5.chr"
 .incbin "chr/backdrops/0F_waterfall.chr"
+
+BattleIcons:
+.incbin "chr/battleicons.chr"
 
 .byte "END OF BANK 03"
