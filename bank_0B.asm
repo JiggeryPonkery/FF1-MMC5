@@ -1520,6 +1520,7 @@ PrepBattleVarsAndEnterBattle:
     STA btl_soft2000            ; clear soft PPU regs
     STA btl_soft2001
     
+    STA DrawPlayerHPCounter    ; make sure this is 0
    ; LDA #$50
    ; STA music_track           ; set music track and followup
    ; STA btl_followupmusic
