@@ -13895,8 +13895,18 @@ DrawPlayerHP:
     LDA format_buf-2
     JSR DrawBattleString_DrawChar
     LDA format_buf-1
-    JMP DrawBattleString_DrawChar   ; and print it
+    ;JMP DrawBattleString_DrawChar   ; and print it
+    JSR DrawBattleString_DrawChar
+    INC DrawPlayerHPCounter
+    LDA DrawPlayerHPCounter
+    CMP #8
+    BNE :+
     
+    LDA #0
+    STA DrawPlayerHPCounter
+    JSR CallMusicPlay
+    
+  : RTS
     
 ;;  DrawBattleString_Code11  [$FB1E :: 0x3FB2E]
 DrawBattleString_Code11:            ; print a number 
