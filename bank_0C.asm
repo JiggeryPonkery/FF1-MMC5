@@ -7253,9 +7253,11 @@ EnemyDoAilment:
     CMP battle_ailmentrandchance
     BCC @TryWake                    ; if ailment chance >= rand value, apply the ailment!
       LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
-      EOR #$FF                      ;  the defender does not already have.
+      EOR #$FF                      ; the defender does not already have.
       AND btl_attacker_attackailment
-      BEQ @End                      ; if its 0, the player already has the ailments the enemy can give them--but if they're asleep, they would stay asleep
+      BEQ @CheckSleep               ; if its 0, the player already has the ailments the enemy can give them
+      ;; Note that in the case an enemy has more than 1 ailment to give,
+      ;; They will apply both ailments again if the defender only has one of them?
       
       JSR PrintPlayerAilmentMessageFromAttack   ; print the message for those ailments
       
@@ -7263,7 +7265,12 @@ EnemyDoAilment:
       ORA btl_attacker_attackailment
       STA btl_defender_ailments
       JMP @End
-   
+
+   @CheckSleep:
+    LDA btl_attacker_attackailment  ; the defender has this ailment
+    AND #AIL_SLEEP                  ; is the ailment sleep?
+    BEQ @End                        ; if it is, don't wake them
+    
    @TryWake:
     LDA btl_defender_ailments    
     AND #AIL_SLEEP
@@ -7271,7 +7278,7 @@ EnemyDoAilment:
       LDA btl_defender_ailments
       SEC
       SBC #AIL_SLEEP
-      STA btl_defender_ailments ; remove sleep ailment
+      STA btl_defender_ailments      ; remove sleep ailment
       LDA #$27
       JSR DrawBattleMessageCombatBox ; print "Woke up"
       JSR RespondDelay
