@@ -9910,26 +9910,32 @@ LoadMapObjects:
     LDA #$0F        ; set loop counter to $0F ($0F objects to load per map)
     STA tmp+11
 
-    LDA #0
-    STA tmp+13      ; zero high byte of source pointer
+   ; LDA #0
+   ; STA tmp+13      ; zero high byte of source pointer
     LDA cur_map     ; get current map
-    ASL A           ;  all this shifting and mathmatics is to multiply by $30
-    ROL tmp+13      ;    ($30 bytes per map)
-    ASL A           ;  This is done by shifting to get *$20 and *$10, then adding them together
-    ROL tmp+13
-    ASL A
-    ROL tmp+13
-    ASL A
-    ROL tmp+13
-    LDY tmp+13
+   ; ASL A           ;  all this shifting and mathmatics is to multiply by $30
+   ; ROL tmp+13      ;    ($30 bytes per map)
+   ; ASL A           ;  This is done by shifting to get *$20 and *$10, then adding them together
+   ; ROL tmp+13
+   ; ASL A
+   ; ROL tmp+13
+   ; ASL A
+   ; ROL tmp+13
+   ; LDY tmp+13
+   ; STA tmp+12
+   ; ASL tmp+12
+   ; ROL tmp+13
+   ; CLC
+   ; ADC tmp+12
+   ; STA tmp+12
+   ; TYA
+   ; ADC tmp+13            ;  here, we have "cur_map * $30"
+   
+    LDX #$30
+    JSR MultiplyXA
     STA tmp+12
-    ASL tmp+12
-    ROL tmp+13
+    TXA
     CLC
-    ADC tmp+12
-    STA tmp+12
-    TYA
-    ADC tmp+13            ;  here, we have "cur_map * $30"
     ADC #>lut_MapObjects  ;  add the pointer to the LUT to the high byte to get the final source pointer
     STA tmp+13            ;  tmp+12 now points to "lut_MapObjects + (cur_map * $30)"
 
@@ -10364,28 +10370,34 @@ LoadMapObjCHR:
     LDA #$00
     STA $2006      ; set PPU Addr to $1100 (start of map object CHR)
 
-    LDA #0
-    STA tmp+5      ; 0 -> tmp+5
+  ;  LDA #0
+  ;  STA tmp+5      ; 0 -> tmp+5
     LDA cur_map    ; get current map ID
-    ASL A          ; multiply by 16 (rotating carry into tmp+5)
-    ROL tmp+5
-    ASL A
-    ROL tmp+5
-    ASL A
-    ROL tmp+5
-    ASL A
-    ROL tmp+5
-    STA tmp+4      ; tmp+4 is now 16-bit value:  map_id*16
+  ;  ASL A          ; multiply by 16 (rotating carry into tmp+5)
+  ;  ROL tmp+5
+  ;  ASL A
+  ;  ROL tmp+5
+  ;  ASL A
+  ;  ROL tmp+5
+  ;  ASL A
+  ;  ROL tmp+5
+  ;  STA tmp+4      ; tmp+4 is now 16-bit value:  map_id*16
 
-    LDY tmp+5      ; put high byte in Y (temporary).
-    ASL tmp+4      ; shift again (*32)
-    ROL tmp+5      ; tmp+4 is now 16-bit value:  map_id*32... A,Y are now 16-bit value:  map_id*16
+  ;  LDY tmp+5      ; put high byte in Y (temporary).
+  ;  ASL tmp+4      ; shift again (*32)
+  ;  ROL tmp+5      ; tmp+4 is now 16-bit value:  map_id*32... A,Y are now 16-bit value:  map_id*16
 
-    CLC
-    ADC tmp+4
+  ;  CLC
+  ;  ADC tmp+4
+  ;  STA tmp+4
+  ;  TYA
+  ;  ADC tmp+5             ; add them together (effectively multiplying by 48).  Carry after this is impossible even if map_id == FF
+  
+    LDX #48
+    JSR MultiplyXA
     STA tmp+4
-    TYA
-    ADC tmp+5             ; add them together (effectively multiplying by 48).  Carry after this is impossible even if map_id == FF
+    TXA
+    CLC
     ADC #>lut_MapObjects  ; add to the high byte of our pointer
     STA tmp+5             ; (tmp+4) now effectively a pointer to:  lut_MapObjects + map_id*48
 
