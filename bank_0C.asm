@@ -1392,10 +1392,9 @@ BattleSubMenu_Skill:
     TAX
     LDA ch_class, X
     AND #$0F                        ; get class, throw away sprite bits
-    ;CMP #CLS_KN                    ; if its over black mage, subtract 6
-    ;BCC :+
-    ;  SEC
-    ;  SBC #6
+    CMP #CLS_KN                    ; if its over black mage, subtract 6
+    BCC :+
+      SBC #6
   : STA battle_class
     BEQ @DoNothing                  ; if fighter, do nothing
     CMP #3                          ; only thieves and black belts have a skill so far, so
