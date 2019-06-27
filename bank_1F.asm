@@ -13897,6 +13897,15 @@ DrawPlayerHP:
     LDA format_buf-1
     ;JMP DrawBattleString_DrawChar   ; and print it
     JSR DrawBattleString_DrawChar
+    
+    ;; fix for dropped music frames:
+    ;; Player HP is converted 8 times (4 characters, current HP / Max HP)
+    ;; This takes up quite a few scanlines for some reason,
+    ;; and after doing this, whatever routines that follow don't wait for VBlank and 
+    ;; do music soon enough, resulting in a frame (possibly 2?) of music not updating
+    ;; So every time an HP number is converted from hex to decimal,
+    ;; It increases a counter, and when it hits 8, it forces a frame/audio update
+    
     INC DrawPlayerHPCounter
     LDA DrawPlayerHPCounter
     CMP #8
@@ -13904,6 +13913,7 @@ DrawPlayerHP:
     
     LDA #0
     STA DrawPlayerHPCounter
+    JSR WaitForVBlank
     JSR CallMusicPlay
     
   : RTS
