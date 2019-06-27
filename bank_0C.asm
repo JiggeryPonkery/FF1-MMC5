@@ -4957,8 +4957,8 @@ DoBattleRound:
     LDA tmp
   
   : JSR Battle_DoTurn                       ; do their turn
-  ;  JSR DrawCharacterStatus                 ; update character on-screen stats
     JSR DrawPlayerBox                       ; draw the player box overtop the current player box
+    JSR DrawCharacterStatus                 ; update character on-screen stats
     LDA #$01                                ; then undraw it; effectively updates HP
     JSR UndrawNBattleBlocks_L               ; 
     JSR BattleTurnEnd_CheckForBattleEnd     ; wrap up / see if battle is over (will double-RTS if battle is over)
@@ -11040,6 +11040,7 @@ BtlMag_SavePlayerDefenderStats:
     STA (CharStatsPointer), Y
     
     JMP DrawCharacterStatus                 ; update icons to reflect any status changes
+    ; while this is done at the end of every turn, spells that cast over the party can show their effect immediately
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
