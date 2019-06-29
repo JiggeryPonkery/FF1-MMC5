@@ -354,7 +354,7 @@ inv_canequipinshop  = $74 ; shops
 battleitemslot      = $74 ; equip menu
 equipmenu_tmp       = $75 ; for unequip/reequipping
 DrawPlayerHPCounter = $76 ; counter for how many times player HP has been drawn in battle
-
+DialogueTable_1or2  = $77 ; important for dialogue
 
 ;;
 ;; Pointers

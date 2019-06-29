@@ -162,6 +162,7 @@
 .import lut_Domains
 .import lut_OWPtrTbl
 .import BattleIcons
+.import GetDialogueString
 
 .segment "BANK_FIXED"
 
@@ -7182,23 +7183,25 @@ DrawDialogueString:
     STA cur_bank          ; set cur_bank to bank containing dialogue text (for Music_Play)
     JSR SwapPRG_L         ; and swap to that bank
 
-    TXA                   ; get the string ID back
-    ASL A                 ; double it (2 bytes per pointer)
-    TAX                   ; and put in X for indexing
-    BCS @HiTbl            ; if string ID was >= $80 use 2nd half of table, otherwise use first half
+;    TXA                   ; get the string ID back
+;    ASL A                 ; double it (2 bytes per pointer)
+;    TAX                   ; and put in X for indexing
+;    BCS @HiTbl            ; if string ID was >= $80 use 2nd half of table, otherwise use first half
 
-    @LoTbl:
-      LDA lut_DialoguePtrTbl, X        ; load up the pointer into text_ptr
-      STA text_ptr
-      LDA lut_DialoguePtrTbl+1, X
-      STA text_ptr+1
-      JMP @PtrLoaded                   ; then jump ahead
+;    @LoTbl:
+;      LDA lut_DialoguePtrTbl, X        ; load up the pointer into text_ptr
+;      STA text_ptr
+;      LDA lut_DialoguePtrTbl+1, X
+;      STA text_ptr+1
+;      JMP @PtrLoaded                   ; then jump ahead
 
-    @HiTbl:
-      LDA lut_DialoguePtrTbl+$100, X   ; same, but read from 2nd half of pointer table
-      STA text_ptr
-      LDA lut_DialoguePtrTbl+$101, X
-      STA text_ptr+1
+;    @HiTbl:
+;      LDA lut_DialoguePtrTbl+$100, X   ; same, but read from 2nd half of pointer table
+;      STA text_ptr
+;      LDA lut_DialoguePtrTbl+$101, X
+;      STA text_ptr+1
+
+   JSR GetDialogueString
 
   @PtrLoaded:             ; here, text_ptr points to the desired string
     LDA #10
