@@ -20,6 +20,7 @@
 BANK_THIS = $10
 
 lut_DialoguePtrTbl:
+lut_DialoguePtrTbl_2:
 .WORD EMPTY             ; 0  ; Nothing here.
 .WORD KING1             ; 1  ; LIGHT WARRIORS.... Just as in Lukahn's prophecy. Garland has kidnapped the Princess. Please help her!!
 .WORD KING2             ; 2  ; Thank you for saving the Princess. To aid your quest I ordered a bridge built to the continent. Go now, and make the ORBS shine again!!
