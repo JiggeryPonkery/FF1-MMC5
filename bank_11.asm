@@ -328,52 +328,172 @@ lut_SMTilesetAttr:
 ;; $8800 ;; 
 ;; Map tile data, 0x100 bytes per tileset
 ; 2 bytes per tile:
-;  +0: bits 5-7: 000 = normal
-;                001 = battle! Battle in $6a, BG in $53
-;                010 = WARP!
-;                011 = Warp without transition
-;                100 = Map-to-map teleport (+1 is target)
-;                101 = Warp without transition
-;                110 = Map-to-world teleport (+1 is target)
-;                111 = Warp without transition
-;      bits 0-4: 00000 = No battle here
-;                00001 = Can't step here
-;                0001x = Door; +1 is shop number or 0 for regular door
-;                0010x = Need KEY
-;                0011x = Exit room by stepping here (?)
-;                0100x = Treasure chest (contents specified by +1)
-;                0101x = Spiked square if +1 bit 7 clear, otherwise normal battle
-;                0110x = Damage square
-;                0111x = Need CROWN to step here
-;                1000x = Need CUBE to step here
-;                1001x = Need all ORBS to step here
-;                1010x = Use ROD
-;                1011x = Use LUTE
-;                1100x = Give Earth orb
-;                1101x = Give Fire orb
-;                1110x = Give Water orb
-;                1111x = Give Wind orb
+;  +0: bits 5-7: 000..... ; 0-1x     = normal
+;                001..... ; 2-3x     = battle! Battle in $6a, BG in $53
+;                010..... ; 4-5x     = WARP!
+;                011..... ; 6-7x     = Warp without transition
+;                100..... ; 8-9x     = Map-to-map teleport (+1 is target)
+;                101..... ; A-Bx     = Warp without transition
+;                110..... ; C-Dx     = Map-to-world teleport (+1 is target)
+;                111..... ; E-Fx     = Warp without transition
+;      bits 0-4: ...00000 ; 00       = No battle here
+;                ...00001 ; 01       = Can't step here
+;                ...0001x ; 03 - 02  = Door; +1 is shop number or 0 for regular door
+;                ...0010x ; 05 - 04  = Need KEY
+;                ...0011x ; 07 - 06  = Closes door
+;                ...0100x ; 09 - 08  = Treasure chest (contents specified by +1)
+;                ...0101x ; 0B - 0A  = Spiked square if +1 bit 7 clear, otherwise normal battle
+;                ...0110x ; 0D - 0C  = Damage square
+;                ...0111x ; 0F - 0E  = Need CROWN to step here
+;                ...1000x ; 11 - 10  = Need CUBE to step here
+;                ...1001x ; 13 - 12  = Need all ORBS to step here
+;                ...1010x ; 15 - 14  = Use ROD
+;                ...1011x ; 17 - 16  = Use LUTE
+;                ...1100x ; 19 - 18  = Light orb depending on map ID
+;                ...1101x ; 1B - 1A  = nothing yet
+;                ...1110x ; 1D - 1C  = Secondary Treasure chest
+;                ...1111x ; 1F - 1E  = nothing yet
+
+; old:
+;                ...1100x ; 19 - 18  = Give Earth orb
+;                ...1101x ; 1B - 1A  = Give Fire orb
+;                ...1110x ; 1D - 1C  = Give Water orb
+;                ...1111x ; 1F - 1E  = Give Wind orb
 ;          Also: bit 0: set if sprites cannot step here
 ;          Also: bit 1: If set, no message when pressing A at this square
 ;  +1: index for whatever is specified in byte 0
 
 lut_SMTilesetProp:
-.byte $00,$00,$00,$00,$00,$00,$01,$00,$01,$00,$01,$00,$01,$00,$01,$00 ; Town
-.byte $01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$01,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00
-.byte $01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$03,$01,$03,$02
-.byte $01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$01,$00,$03,$03,$01,$00
-.byte $01,$00,$01,$00,$00,$00,$00,$00,$00,$00,$03,$04,$01,$E6,$01,$EE
-.byte $01,$00,$01,$EF,$00,$00,$00,$00,$01,$00,$06,$00,$03,$05,$00,$00
-.byte $06,$00,$06,$00,$06,$00,$01,$F7,$06,$00,$06,$00,$03,$06,$03,$07
-.byte $03,$08,$03,$09,$03,$0A,$03,$0B,$03,$0C,$03,$0D,$03,$0E,$40,$00
-.byte $80,$20,$03,$0F,$03,$10,$03,$11,$03,$12,$03,$13,$03,$14,$03,$15
-.byte $03,$16,$03,$17,$03,$18,$03,$19,$03,$1A,$03,$1B,$03,$1C,$03,$1D
-.byte $03,$1E,$03,$1F,$03,$20,$03,$21,$03,$22,$03,$23,$03,$24,$03,$25
-.byte $03,$26,$03,$27,$03,$28,$03,$29,$03,$2A,$03,$2B,$03,$2C,$03,$2D
-.byte $03,$2E,$03,$2F,$03,$30,$03,$31,$03,$32,$03,$33,$03,$34,$03,$35
-.byte $03,$36,$03,$37,$03,$38,$03,$39,$03,$3A,$03,$3B,$03,$3C,$03,$3D
-.byte $03,$3E,$03,$3F,$03,$40,$03,$41,$03,$42,$03,$43,$03,$44,$01,$DB
+
+; Town
+.byte $00,$00 ; Grass
+.byte $00,$00 ; Grass - left side in dark shade
+.byte $00,$00 ; Grass - left side in dark shade, shade end
+.byte $01,$00 ; Wall
+.byte $01,$00 ; Wall
+.byte $01,$00 ; Wall
+.byte $01,$00 ; Wall - left side end
+.byte $01,$00 ; Wall - middle
+.byte $01,$00 ; Wall - right side end
+.byte $01,$00 ; Wall - right side in shade
+.byte $01,$00 ; Vertical wall - left side grass
+.byte $01,$00 ; Vertical wall - right side grass, shade top end
+.byte $01,$00 ; Vertical wall - right side shade
+.byte $01,$00 ; Vertical wall - bottom corner, right side shade, bottom is grass
+.byte $01,$00 ; Tree
+.byte $01,$00 ; Two trees/bush
+.byte $00,$00 ; Cobbles
+.byte $00,$00 ; Cobbles, curved upper left corner
+.byte $00,$00 ; Cobbles, curved upper right corner
+.byte $00,$00 ; Cobbles, curved lower left corner
+.byte $00,$00 ; Cobbles, curved lower right corner
+.byte $00,$00 ; Cobbles, lower left corner in shade
+.byte $00,$00 ; Cobbles, upper left corner in shade, lower left in shade end piece
+.byte $01,$00 ; Roof tile, back side
+.byte $01,$00 ; Roof tile continuous
+.byte $01,$00 ; Roof tile, back side
+.byte $01,$00 ; Clinic sign
+.byte $01,$00 ; Roof gable
+.byte $01,$00 ; Hat window
+.byte $01,$00 ; Eye windows
+.byte $03,$01 ; Door - Coneria Weapons
+.byte $03,$02 ; Door - Pravoka Weapons
+.byte $01,$00 ; Item sign
+.byte $01,$00 ; Weapon sign
+.byte $01,$00 ; Shield sign
+.byte $01,$00 ; W. magic sig
+.byte $01,$00 ; B. magic sign
+.byte $01,$00 ; Inn sign
+.byte $03,$03 ; Door - Elfland Weapons
+.byte $01,$00 ; Water
+.byte $01,$00 ; Water, left side shade
+.byte $01,$00 ; Water, left side shade with end piece
+.byte $00,$00 ; Bridge =
+.byte $00,$00 ; Bridge ||
+.byte $00,$00 ; Steps
+.byte $03,$04 ; Door - Melmond Weapons
+.byte $01,$E6 ; Fountain (come wash your face)
+.byte $01,$EE ; Grave (This is a tomb.)
+.byte $01,$00 ; Fence
+.byte $01,$EF ; Well (Ordinary well dialogue.)
+.byte $00,$00 ; Sand
+.byte $00,$00 ; Sandy Grass
+.byte $01,$00 ; Palm trees
+.byte $06,$00 ; Stairs - Door Closer
+.byte $03,$05 ; Door - Crescent Lake Weapons
+.byte $00,$00 ; Opened door
+.byte $06,$00 ; Cobbles - Door Closer
+.byte $06,$00 ; Grass - Door Closer
+.byte $06,$00 ; Bridge || - Door Closer
+.byte $01,$F7 ; Water (At the bottom of the spring, something is flowing.)
+.byte $06,$00 ; Sand - Door Closer
+.byte $06,$00 ; Sandy Grass - Door Closer
+.byte $03,$06 ; Door - Gaia Weapon
+.byte $03,$07 ; Door - unused shop
+.byte $03,$08 ; Door - unused shop
+.byte $03,$09 ; Door - unused shop
+.byte $03,$0A ; Door - unused shop
+.byte $03,$0B ; Door - Coneria Armor
+.byte $03,$0C ; Door - Pravoka Armor
+.byte $03,$0D ; Door - Elfland Armor
+.byte $03,$0E ; Door - Melmond Armor
+.byte $40,$00 ; Grass (teleport?)
+.byte $80,$20 ; Submarine (teleport to underwater shrine)
+.byte $03,$0F ; Door - LakeArmor     
+.byte $03,$10 ; Door - GaiaArmor     
+.byte $03,$11 ; Door - UnusedShop    
+.byte $03,$12 ; Door - UnusedShop    
+.byte $03,$13 ; Door - UnusedShop    
+.byte $03,$14 ; Door - UnusedShop    
+.byte $03,$15 ; Door - ConeriaWMagic
+.byte $03,$16 ; Door - ProvokaWMagic 
+.byte $03,$17 ; Door - ElflandWMagic 
+.byte $03,$18 ; Door - MelmondWMagic 
+.byte $03,$19 ; Door - LakeWMagic    
+.byte $03,$1A ; Door - ElflandWMagic2
+.byte $03,$1B ; Door - GaiaWMagic    
+.byte $03,$1C ; Door - GaiaWMagic2   
+.byte $03,$1D ; Door - OnracWMagic   
+.byte $03,$1E ; Door - LeifenWMagic  
+.byte $03,$1F ; Door - ConeriaBMagic
+.byte $03,$20 ; Door - ProvokaBMagic 
+.byte $03,$21 ; Door - ElflandBMagic 
+.byte $03,$22 ; Door - MelmondBMagic 
+.byte $03,$23 ; Door - LakeBMagic    
+.byte $03,$24 ; Door - ElflandBMagic2
+.byte $03,$25 ; Door - GaiaBMagic    
+.byte $03,$26 ; Door - GaiaBMagic2   
+.byte $03,$27 ; Door - OnracBMagic   
+.byte $03,$28 ; Door - LeifenBMagic  
+.byte $03,$29 ; Door - ConeriaTemple
+.byte $03,$2A ; Door - ElflandTemple 
+.byte $03,$2B ; Door - LakeTemple    
+.byte $03,$2C ; Door - GaiaTemple    
+.byte $03,$2D ; Door - OnracTemple   
+.byte $03,$2E ; Door - ProvokaTemple 
+.byte $03,$2F ; Door - UnusedShop    
+.byte $03,$30 ; Door - UnusedShop    
+.byte $03,$31 ; Door - UnusedShop    
+.byte $03,$32 ; Door - UnusedShop    
+.byte $03,$33 ; Door - ConeriaInn   
+.byte $03,$34 ; Door - ProvokaInn    
+.byte $03,$35 ; Door - ElflandInn    
+.byte $03,$36 ; Door - MelmondInn    
+.byte $03,$37 ; Door - LakeInn       
+.byte $03,$38 ; Door - GaiaInn       
+.byte $03,$39 ; Door - OnracInn      
+.byte $03,$3A ; Door - UnusedShop    
+.byte $03,$3B ; Door - UnusedShop    
+.byte $03,$3C ; Door - UnusedShop    
+.byte $03,$3D ; Door - ConeriaItem  
+.byte $03,$3E ; Door - ProvokaItem   
+.byte $03,$3F ; Door - ElflandItem   
+.byte $03,$40 ; Door - LakeItem      
+.byte $03,$41 ; Door - GaiaItem      
+.byte $03,$42 ; Door - OnracItem     
+.byte $03,$43 ; Door - UnusedShop    
+.byte $03,$44 ; Door - UnusedShop    
+.byte $01,$DB ; Grave (special) 
 
 .byte $01,$00,$01,$00,$01,$00,$01,$00,$00,$00,$01,$00,$01,$00,$00,$00 ; Castle
 .byte $01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$01,$00,$00,$00 
@@ -390,11 +510,11 @@ lut_SMTilesetProp:
 .byte $0A,$80,$8E,$16,$8E,$18,$09,$01,$09,$02,$09,$03,$09,$04,$09,$05
 .byte $09,$06,$09,$0D,$09,$0E,$09,$0F,$09,$10,$09,$11,$09,$12,$09,$13
 .byte $09,$7B,$09,$7C,$09,$7D,$09,$7E,$09,$7F,$09,$80,$09,$81,$09,$82
-.byte $09,$83,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $09,$83,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 
 
 .byte $01,$00,$01,$00,$01,$00,$01,$00,$00,$00,$01,$00,$01,$00,$00,$00 ; Cave
-.byte $01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$18,$F3,$C0,$05
-.byte $01,$00,$01,$00,$00,$00,$01,$00,$01,$00,$C0,$00,$C0,$01,$1A,$F4
+.byte $01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$18,$F3,$C0,$05 
+.byte $01,$00,$01,$00,$00,$00,$01,$00,$01,$00,$C0,$00,$C0,$01,$18,$F4 ; $1A,$F4 (fire orb)
 .byte $40,$00,$80,$0C,$00,$00,$0A,$1E,$0A,$1F,$0A,$21,$0A,$6E,$C0,$06
 .byte $14,$00,$0A,$6F,$0A,$27,$0A,$28,$80,$05,$80,$06,$80,$07,$80,$08
 .byte $80,$09,$80,$0A,$80,$0B,$80,$0D,$80,$0E,$40,$00,$0A,$80,$0A,$29
@@ -419,7 +539,7 @@ lut_SMTilesetProp:
 .byte $01,$00,$0C,$00,$06,$00,$05,$BF,$00,$00,$01,$00,$00,$00,$00,$00
 .byte $0A,$2C,$0A,$2D,$0A,$2E,$0A,$2F,$0A,$30,$0A,$69,$0A,$80,$0A,$00
 .byte $0A,$4A,$0A,$80,$00,$00,$09,$21,$09,$22,$09,$23,$09,$24,$09,$25
-.byte $09,$26,$09,$27,$09,$28,$09,$29,$09,$2A,$09,$2B,$09,$2C,$09,$2D
+.byte $09,$26,$09,$27,$09,$28,$09,$29,$09,$2A,$09,$2B,$09,$2C,$09,$2D 
 .byte $09,$6B,$09,$6C,$09,$6D,$09,$6E,$09,$6F,$09,$70,$09,$71,$09,$72
 .byte $09,$73,$09,$74,$09,$75,$09,$76,$09,$77,$09,$78,$09,$79,$09,$7A
 .byte $09,$84,$09,$85,$09,$86,$09,$87,$09,$88,$09,$89,$09,$8A,$09,$8B
@@ -445,7 +565,7 @@ lut_SMTilesetProp:
 
 .byte $01,$00,$01,$00,$01,$00,$01,$00,$00,$00,$01,$00,$01,$00,$00,$00 ; Shrine
 .byte $01,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01,$00,$00,$00,$C0,$07
-.byte $01,$00,$01,$00,$01,$00,$1C,$F5,$01,$00,$01,$00,$00,$00,$01,$00
+.byte $01,$00,$01,$00,$01,$00,$18,$F5,$01,$00,$01,$00,$00,$00,$01,$00 ; $1C,$F5,$01,$00,$01,$00,$00,$00,$01,$00 = water orb
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $0A,$10,$0A,$44,$0A,$45,$0A,$49,$0A,$4A,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -461,7 +581,7 @@ lut_SMTilesetProp:
 .byte $09,$B1,$09,$B2,$09,$B3,$09,$B4,$00,$00,$00,$00,$00,$00,$00,$00
 
 .byte $01,$00,$01,$00,$01,$00,$01,$00,$00,$00,$01,$00,$01,$00,$00,$00 ; Sky Palace
-.byte $01,$00,$00,$00,$C0,$08,$00,$00,$01,$00,$1E,$F6,$01,$00,$01,$00
+.byte $01,$00,$00,$00,$C0,$08,$00,$00,$01,$00,$18,$F6,$01,$00,$01,$00 ; $1E,$F6,$01,$00,$01,$00 - air orb
 .byte $01,$F8,$01,$F8,$01,$F8,$01,$F8,$01,$F8,$01,$00,$00,$00,$01,$00
 .byte $01,$00,$01,$F9,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -1098,11 +1218,11 @@ lut_MapObjGfx:
 .byte $02 ; 37 ; Old Lady
 .byte $01 ; 38 ; Woman
 .byte $0A ; 39 ; Man
-.byte $11 ; 3A ; Bat
-.byte $11 ; 3B ; Bat
-.byte $11 ; 3C ; Bat
-.byte $11 ; 3D ; Bat
-.byte $11 ; 3E ; Bat
+.byte $11 ; 3A ; Bat (Sky Warrior)
+.byte $11 ; 3B ; Bat (Sky Warrior)
+.byte $11 ; 3C ; Bat (Sky Warrior)
+.byte $11 ; 3D ; Bat (Sky Warrior)
+.byte $11 ; 3E ; Bat (Sky Warrior)
 .byte $0A ; 3F ; Man
 .byte $0B ; 40 ; Sage
 .byte $01 ; 41 ; Woman
@@ -1127,7 +1247,7 @@ lut_MapObjGfx:
 .byte $18 ; 54 ; Elf Woman
 .byte $19 ; 55 ; Elf Man
 .byte $19 ; 56 ; Elf Man
-.byte $11 ; 57 ; Bat
+.byte $11 ; 57 ; Bat (all the normal bats)
 .byte $0C ; 58 ; Dwarf
 .byte $0C ; 59 ; Dwarf
 .byte $0C ; 5A ; Dwarf

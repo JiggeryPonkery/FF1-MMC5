@@ -422,6 +422,11 @@ TP_NOTEXT_MASK    = %11000010   ; if any of these bits set, "Nothing Here" is fo
 TP_BATTLEMARKER   = %00100000
 TP_NOMOVE         = %00000001
 
+AIRORB_MAP        = $33         ; map ID that the orbs are found on
+WATERORB_MAP      = $2A
+FIREORB_MAP       = $24
+EARTHORB_MAP      = $20
+
 ;;;;;;;;;;;;;;;;;;
 ;;  overworld map tile properties
 

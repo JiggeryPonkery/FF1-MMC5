@@ -223,13 +223,13 @@ GameStart:
      BNE @Loop
  
     TXA
-    STA game_flags+$12
-    STA game_flags+$13
-    STA game_flags+$19 
-    STA game_flags+$1A  
-    STA game_flags+$3F 
-    STA game_flags+$40
-    STA game_flags+$41  
+    STA game_flags+$12    ;   Princess in Coneria, vanished until rescued
+    STA game_flags+$13    ;   Fairy, vanished until rescued from bottle
+    STA game_flags+$19    ;   Second Garland at end game
+    STA game_flags+$1A    ;   Third Garland at end game
+    STA game_flags+$3F    ;   Three Provka citizens hiding from pirates: man
+    STA game_flags+$40    ;   Sage
+    STA game_flags+$41    ;   Woman
     
     LDA #4                ; reset the respond rate to zero ;; JIGS - setting it to a nice frisky 5
     STA BattleTextSpeed   ;
@@ -3585,10 +3585,27 @@ SMMove_Up:
 
 
 lut_SMMoveJmpTbl:
-  .WORD SMMove_Norm,     SMMove_Door,    SMMove_Door,     SMMove_CloseRoom
-  .WORD SMMove_Treasure, SMMove_Battle,  SMMove_Dmg,      SMMove_Crown
-  .WORD SMMove_Cube,     SMMove_4Orbs,   SMMove_UseRod,   SMMove_UseLute
-  .WORD SMMove_EarthOrb, SMMove_FireOrb, SMMove_WaterOrb, SMMove_AirOrb
+  .WORD SMMove_Norm     
+  .WORD SMMove_Door    
+  .WORD SMMove_Door     
+  .WORD SMMove_CloseRoom
+  .WORD SMMove_Treasure 
+  .WORD SMMove_Battle  
+  .WORD SMMove_Dmg      
+  .WORD SMMove_Crown
+  .WORD SMMove_Cube     
+  .WORD SMMove_4Orbs   
+  .WORD SMMove_UseRod   
+  .WORD SMMove_UseLute
+  .WORD SMMove_LightOrb
+  .WORD SMMove_Norm
+  .WORD SMMove_Treasure
+  .WORD SMMove_Norm  
+  
+  ;.WORD SMMove_EarthOrb 
+  ;.WORD SMMove_FireOrb 
+  ;.WORD SMMove_WaterOrb 
+  ;.WORD SMMove_AirOrb
 
  ;; SMMove_Treasure  [$CDC1 :: 0x3CDD1]
  ;;  TP_SPEC_TREASURE
@@ -3624,17 +3641,13 @@ SMMove_Battle:
     LDA #TP_BATTLEMARKER  ;   record it so the appropriate battle is triggered.
     STA tileprop          ; and also replace the tileprop byte with the battle marker bit to start a battle
 
+ ;; SMMove_UseRod, SMMove_UseLute  [$CE0E :: 0x3CE1E]
+ ;;  this routine is duplicated a lot -- these are for TP_SPEC_USEROD and TP_SPEC_USELUTE    
+SMMove_UseRod:
+SMMove_UseLute:    
+SMMove_Dmg:
     CLC               ; CLC because movement is A-OK, and exit
     RTS
-
- ;; SMMove_Dmg  [$CDE4 :: 0x3CDF4]
- ;;  TP_SPEC_DAMAGE
-
-SMMove_Dmg:
-    CLC            ; CLC so signal move is okay, and exit
-    RTS
-
-
 
  ;; SMMove_Crown  [$CDE6 :: 0x3CDF6]
  ;;  TP_SPEC_CROWN
@@ -3681,47 +3694,41 @@ SMMove_HaveSpecialItem:
     CLC               ; CLC to allow movement
     RTS
 
- ;; SMMove_UseRod, SMMove_UseLute  [$CE0E :: 0x3CE1E]
- ;;  this routine is duplicated a lot -- these are for TP_SPEC_USEROD and TP_SPEC_USELUTE
-
-SMMove_UseRod:
-    CLC
-    RTS
-
-SMMove_UseLute:
-    CLC
-    RTS
-
  ;; SMMove_xOrb  [$CE12 :: 0x3CE22]
  ;;  these routines for the four altars (TP_SPEC_EARTHORB, TP_SPEC_FIREORB, etc)
  ;;  each of these routines are identical, except they all check different orbs
 
+SMMove_LightOrb:          ; JIGS - check map, to see which orb to try lighting
+    LDA cur_map
+    CMP #AIRORB_MAP
+    BEQ SMMove_AirOrb
+    CMP #WATERORB_MAP
+    BEQ SMMove_WaterOrb
+    CMP #FIREORB_MAP
+    BEQ SMMove_FireOrb
+ 
 SMMove_EarthOrb:
     LDA orb_earth          ; see if orb already lit
     BNE SMMove_OK          ; if it is, just have player move normally
-    LDA #1
-    STA orb_earth          ; otherwise, light up the orb
+    INC orb_earth          ; otherwise, light up the orb
     BNE SMMove_AltarEffect ; and do the altar effect (always branches)
 
 SMMove_FireOrb:
     LDA orb_fire
     BNE SMMove_OK
-    LDA #1
-    STA orb_fire
+    INC orb_fire
     BNE SMMove_AltarEffect
 
 SMMove_WaterOrb:
     LDA orb_water
     BNE SMMove_OK
-    LDA #1
-    STA orb_water
+    INC orb_water
     BNE SMMove_AltarEffect
 
 SMMove_AirOrb:
     LDA orb_air
     BNE SMMove_OK
-    LDA #1
-    STA orb_air           ; no BNE here because it just flows directly into altar effect
+    INC orb_air           ; no BNE here because it just flows directly into altar effect
 
 SMMove_AltarEffect:
     INC altareffect       ; set the altar effect flag
@@ -3759,6 +3766,7 @@ SMMove_CloseRoom:
  ;; SMMove_OK  [$CE4F :: 0x3CE5F]
  ;;  branched/jumped to by various routines when a move is legal
 
+SMMove_Norm:
 SMMove_OK:
     CLC        ; CLC to indicate player can move, then exit
     RTS
@@ -3766,9 +3774,8 @@ SMMove_OK:
  ;; SMMove_Norm  [$CE51 :: 0x3CE61]
  ;;  for normal (nonspecial) tiles.
 
-SMMove_Norm:
-    CLC        ; CLC because player can move here
-    RTS
+;    CLC        ; CLC because player can move here
+;    RTS
 
  ;; SMMove_Door  [$CE53 :: 0x3CE63]
  ;;  Called for TP_SPEC_DOOR and TP_SPEC_LOCKED
@@ -4079,7 +4086,10 @@ PrepStandardMap:
  ;   .BYTE $47, $48, $49, $4A, $4B, $4C, $4D, $4E
  
  ;; JIGS - moving this to the bottom so I can add some code without a critical timing error...
-
+.byte $00
+.byte $00 ; and now fixing it again
+;.byte $00
+;.byte $00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
