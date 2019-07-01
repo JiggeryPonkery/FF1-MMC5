@@ -70,33 +70,33 @@ lut_DialoguePtrTbl_2:
 .WORD CHAOS1            ; 2E ; Remember me, Garland? Your puny lot thought it had defeated me. But, the Four FIENDS sent me back 2000 years into the past.
 .WORD CHAOS2            ; 2F ; From here I sent the Four FIENDS to the future. The FIENDS will send me back to here, and the Time-Loop will go on.
 .WORD CHAOS3            ; 30 ; After 2000 years, I will be forgotten, and the Time-Loop will close. I will live forever, and you shall meet doom!!
-.WORD CORNERIACASTLE1   ; 31 ; The King is looking for the LIGHT WARRIORS. You do not happen to be them do you?
-.WORD CORNERIACASTLE2   ; 32 ; Yes Sir!! I belong to the Honor Guard of Castle Coneria.
-.WORD CORNERIACASTLE3   ; 33 ; Please! Save the Princess!
-.WORD CORNERIACASTLE4   ; 34 ; Thank you for rescuing the Princess.
-.WORD CORNERIACASTLE5   ; 35 ; Legend says that the LUTE can break the evil gate.
-.WORD CORNERIACASTLE6   ; 36 ; Garland used to be a good knight until....
-.WORD CORNERIACASTLE7   ; 37 ; In sadness, the Queen locked herself inside.
-.WORD CORNERIACASTLE8   ; 38 ; The Princess was looking for you!
-.WORD CORNERIACASTLE9   ; 39 ; So, you are the LIGHT WARRIORS?
+.WORD ConeriaCASTLE1   ; 31 ; The King is looking for the LIGHT WARRIORS. You do not happen to be them do you?
+.WORD ConeriaCASTLE2   ; 32 ; Yes Sir!! I belong to the Honor Guard of Castle Coneria.
+.WORD ConeriaCASTLE3   ; 33 ; Please! Save the Princess!
+.WORD ConeriaCASTLE4   ; 34 ; Thank you for rescuing the Princess.
+.WORD ConeriaCASTLE5   ; 35 ; Legend says that the LUTE can break the evil gate.
+.WORD ConeriaCASTLE6   ; 36 ; Garland used to be a good knight until....
+.WORD ConeriaCASTLE7   ; 37 ; In sadness, the Queen locked herself inside.
+.WORD ConeriaCASTLE8   ; 38 ; The Princess was looking for you!
+.WORD ConeriaCASTLE9   ; 39 ; So, you are the LIGHT WARRIORS?
 .WORD BLACKSMITH3       ; 3A ; Don't be greedy. You already have too many weapons to carry.'
-.WORD CORNERIACASTLE10  ; 3B ; I am Jane, Queen of Coneria. Please save my daughter, Princess Sara.
-.WORD CORNERIACASTLE11  ; 3C ; Thank you for saving Princess Sara.
-.WORD CORNERIACASTLE12  ; 3D ; Oh.... My sister....
-.WORD CORNERIACASTLE13  ; 3E ; My sister is back safe! Thank you.
-.WORD CORNERIACASTLE14  ; 3F ; Reports say that Garland holds the Princess in a Temple to the northwest.
-.WORD CORNERIACASTLE15  ; 40 ; Use that KEY. Inside what you find will be quite helpful.
-.WORD CORNERIACASTLE16  ; 41 ; 400 years ago the Treasury was locked by the mystic KEY. Our ancestors gave the KEY to the Prince of ElfLand for safekeeping.
-.WORD CORNERIACASTLE17  ; 42 ; This treasure room is locked with the mystical KEY.
-.WORD CORNERIACASTLE18  ; 43 ; The King is sure that someday the LIGHT WARRIORS will come to save the Princess, just as in Lukahn's prophecy.
-.WORD CORNERIATOWN1     ; 44 ; Lukahn left this town, to join his colleagues at Crescent Lake.
-.WORD CORNERIATOWN2     ; 45 ; As legend foretold, once again the ORBS shine!! Quickly, to fulfill the legend, take them to the Temple north of here, and stand in the center.
-.WORD CORNERIATOWN3     ; 46 ; Go to the King.
-.WORD CORNERIATOWN4     ; 47 ; I am Arylon, the Dancer!
-.WORD CORNERIATOWN5     ; 48 ; This is Coneria, the dream city.
-.WORD CORNERIATOWN6     ; 49 ; North of Coneria lives a witch named Matoya.
-.WORD CORNERIATOWN7     ; 4A ; Matoya has poor eyesight. She needs the CRYSTAL to see.
-.WORD CORNERIATOWN8     ; 4B ; My home is Pravoka, a beautiful port city far east of here.
+.WORD ConeriaCASTLE10  ; 3B ; I am Jane, Queen of Coneria. Please save my daughter, Princess Sara.
+.WORD ConeriaCASTLE11  ; 3C ; Thank you for saving Princess Sara.
+.WORD ConeriaCASTLE12  ; 3D ; Oh.... My sister....
+.WORD ConeriaCASTLE13  ; 3E ; My sister is back safe! Thank you.
+.WORD ConeriaCASTLE14  ; 3F ; Reports say that Garland holds the Princess in a Temple to the northwest.
+.WORD ConeriaCASTLE15  ; 40 ; Use that KEY. Inside what you find will be quite helpful.
+.WORD ConeriaCASTLE16  ; 41 ; 400 years ago the Treasury was locked by the mystic KEY. Our ancestors gave the KEY to the Prince of ElfLand for safekeeping.
+.WORD ConeriaCASTLE17  ; 42 ; This treasure room is locked with the mystical KEY.
+.WORD ConeriaCASTLE18  ; 43 ; The King is sure that someday the LIGHT WARRIORS will come to save the Princess, just as in Lukahn's prophecy.
+.WORD ConeriaTOWN1     ; 44 ; Lukahn left this town, to join his colleagues at Crescent Lake.
+.WORD ConeriaTOWN2     ; 45 ; As legend foretold, once again the ORBS shine!! Quickly, to fulfill the legend, take them to the Temple north of here, and stand in the center.
+.WORD ConeriaTOWN3     ; 46 ; Go to the King.
+.WORD ConeriaTOWN4     ; 47 ; I am Arylon, the Dancer!
+.WORD ConeriaTOWN5     ; 48 ; This is Coneria, the dream city.
+.WORD ConeriaTOWN6     ; 49 ; North of Coneria lives a witch named Matoya.
+.WORD ConeriaTOWN7     ; 4A ; Matoya has poor eyesight. She needs the CRYSTAL to see.
+.WORD ConeriaTOWN8     ; 4B ; My home is Pravoka, a beautiful port city far east of here.
 .WORD CUTEBAT           ; 4C ; Kee....Kee....
 .WORD SKYWARRIOR1       ; 4D ; Help! The FIEND's curse turned us into bats. With the ORBS shining anew, once again we can speak!
 .WORD SKYWARRIOR2       ; 4E ; The Four FIENDS power is rooted 2000 years ago. The real enemy is in that time.
@@ -478,85 +478,85 @@ CHAOS2:
 CHAOS3: 
 .byte $8A,$A9,$B7,$25,$FF,$82,$80,$80,$80,$50,$2B,$63,$BF,$FF,$92,$33,$AC,$4E,$05,$A5,$A8,$43,$35,$AA,$B2,$B7,$B7,$3A,$BF,$20,$3B,$1B,$1D,$05,$9D,$AC,$34,$C2,$95,$B2,$B2,$B3,$33,$AC,$4E,$38,$AF,$B2,$3E,$C0,$FF,$92,$05,$BA,$AC,$4E,$65,$AC,$B9,$1A,$A9,$B2,$23,$B9,$25,$BF,$20,$3B,$05,$BC,$B2,$B8,$24,$41,$4E,$FF,$34,$A8,$21,$A7,$B2,$49,$C4,$C4,$00
 
-CORNERIACASTLE1: 
+ConeriaCASTLE1: 
 .byte $9D,$AB,$1A,$94,$1F,$AA,$2D,$1E,$AF,$B2,$B2,$AE,$1F,$AA,$43,$35,$05,$B7,$AB,$1A,$95,$92,$90,$91,$9D,$FF,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C0,$FF,$A2,$26,$05,$A7,$B2,$FF,$B1,$B2,$21,$41,$B3,$B3,$3A,$1B,$B2,$31,$1A,$1C,$A8,$B0,$05,$A7,$B2,$50,$26,$C5,$00
 
-CORNERIACASTLE2: 
+ConeriaCASTLE2: 
 .byte $A2,$A8,$1E,$9C,$AC,$B5,$C4,$C4,$05,$92,$FF,$62,$AF,$B2,$2A,$1B,$2E,$1C,$1A,$91,$3C,$35,$05,$90,$B8,$2F,$27,$4C,$FF,$8C,$A4,$37,$AF,$1A,$8C,$3C,$25,$AC,$A4,$C0,$00
 
-CORNERIACASTLE3: 
+ConeriaCASTLE3: 
 .byte $99,$AF,$2B,$3E,$C4,$05,$9C,$A4,$B9,$1A,$1C,$1A,$99,$B5,$1F,$A6,$2C,$B6,$C4,$00
 
-CORNERIACASTLE4: 
+ConeriaCASTLE4: 
 .byte $9D,$AB,$22,$AE,$50,$26,$43,$35,$FF,$23,$B6,$A6,$B8,$1F,$AA,$05,$B7,$AB,$1A,$99,$B5,$1F,$A6,$2C,$B6,$C0,$00
 
-CORNERIACASTLE5: 
+ConeriaCASTLE5: 
 .byte $95,$A8,$AA,$3A,$A7,$24,$A4,$BC,$B6,$1B,$AB,$39,$1B,$1D,$05,$95,$9E,$9D,$8E,$38,$22,$31,$23,$A4,$AE,$1B,$AB,$1A,$A8,$B9,$61,$05,$AA,$A4,$53,$C0,$00
 
-CORNERIACASTLE6: 
+ConeriaCASTLE6: 
 .byte $90,$A4,$B5,$AF,$22,$27,$B8,$3E,$A7,$1B,$2E,$A5,$1A,$A4,$05,$AA,$B2,$B2,$27,$AE,$B1,$AC,$AA,$AB,$21,$B8,$B1,$57,$AF,$69,$00
 
-CORNERIACASTLE7: 
+ConeriaCASTLE7: 
 .byte $92,$B1,$24,$A4,$A7,$B1,$2C,$B6,$BF,$1B,$AB,$1A,$9A,$B8,$A8,$3A,$05,$AF,$B2,$A6,$AE,$A8,$27,$1D,$B5,$3E,$AF,$54,$1F,$B6,$AC,$A7,$A8,$C0,$00
 
-CORNERIACASTLE8: 
+ConeriaCASTLE8: 
 .byte $9D,$AB,$1A,$99,$B5,$1F,$A6,$2C,$1E,$BA,$3F,$05,$AF,$B2,$B2,$AE,$1F,$AA,$43,$35,$50,$26,$C4,$00
 
-CORNERIACASTLE9: 
+ConeriaCASTLE9: 
 .byte $9C,$B2,$BF,$50,$26,$20,$B5,$1A,$1C,$A8,$05,$95,$92,$90,$91,$9D,$FF,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$C5,$00
 
 BLACKSMITH3: 
 .byte $8D,$B2,$B1,$BE,$21,$A5,$1A,$AA,$23,$40,$BC,$C0,$FF,$A2,$26,$05,$A4,$AF,$23,$A4,$A7,$4B,$41,$B9,$1A,$28,$2E,$B0,$22,$BC,$05,$BA,$A8,$A4,$B3,$3C,$B6,$1B,$2E,$A6,$2F,$B5,$BC,$C0,$00
 
-CORNERIACASTLE10: 
+ConeriaCASTLE10: 
 .byte $92,$FF,$A4,$B0,$FF,$93,$22,$A8,$BF,$FF,$9A,$B8,$A8,$A8,$29,$4C,$05,$8C,$B2,$B1,$25,$AC,$A4,$C0,$FF,$99,$AF,$2B,$B6,$1A,$B6,$A4,$B9,$1A,$B0,$BC,$05,$A7,$A4,$B8,$AA,$AB,$B7,$25,$BF,$FF,$99,$B5,$1F,$A6,$2C,$1E,$9C,$2F,$A4,$C0,$00
 
-CORNERIACASTLE11: 
+ConeriaCASTLE11: 
 .byte $9D,$AB,$22,$AE,$50,$26,$43,$35,$24,$A4,$B9,$1F,$AA,$05,$99,$B5,$1F,$A6,$2C,$1E,$9C,$2F,$A4,$C0,$00
 
-CORNERIACASTLE12: 
+ConeriaCASTLE12: 
 .byte $98,$AB,$69,$FF,$96,$BC,$24,$30,$B7,$25,$69,$00
 
-CORNERIACASTLE13: 
+ConeriaCASTLE13: 
 .byte $96,$BC,$24,$30,$B7,$25,$2D,$1E,$A5,$5E,$AE,$24,$A4,$A9,$A8,$C4,$05,$9D,$AB,$22,$AE,$50,$26,$C0,$00
 
-CORNERIACASTLE14: 
+ConeriaCASTLE14: 
 .byte $9B,$A8,$B3,$35,$B7,$1E,$B6,$A4,$BC,$1B,$41,$21,$90,$2F,$AF,$22,$A7,$05,$AB,$B2,$AF,$A7,$B6,$1B,$AB,$1A,$99,$B5,$1F,$A6,$2C,$1E,$1F,$20,$05,$9D,$A8,$B0,$B3,$AF,$1A,$28,$1B,$AB,$1A,$B1,$35,$1C,$BA,$2C,$B7,$C0,$00
 
-CORNERIACASTLE15: 
+ConeriaCASTLE15: 
 .byte $9E,$B6,$1A,$1C,$A4,$21,$94,$8E,$A2,$C0,$FF,$92,$B1,$B6,$AC,$A7,$A8,$05,$BA,$AB,$A4,$21,$BC,$26,$43,$1F,$27,$BA,$AC,$4E,$31,$A8,$05,$B4,$B8,$5B,$1A,$1D,$AF,$B3,$A9,$B8,$AF,$C0,$00
 
-CORNERIACASTLE16: 
+ConeriaCASTLE16: 
 .byte $84,$80,$80,$50,$2B,$B5,$1E,$A4,$AA,$B2,$1B,$1D,$05,$9D,$B5,$2B,$B6,$55,$BC,$33,$A4,$1E,$AF,$B2,$A6,$AE,$A8,$27,$A5,$BC,$05,$B7,$AB,$1A,$B0,$BC,$37,$AC,$A6,$FF,$94,$8E,$A2,$C0,$FF,$98,$55,$05,$A4,$B1,$A6,$2C,$28,$B5,$1E,$AA,$A4,$B9,$1A,$1C,$1A,$94,$8E,$A2,$05,$B7,$B2,$1B,$AB,$1A,$99,$B5,$1F,$A6,$1A,$4C,$FF,$8E,$AF,$A9,$95,$22,$A7,$05,$A9,$B2,$B5,$24,$A4,$A9,$A8,$AE,$A8,$A8,$B3,$1F,$AA,$C0,$00
 
-CORNERIACASTLE17: 
+ConeriaCASTLE17: 
 .byte $9D,$AB,$30,$1B,$23,$3F,$55,$1A,$4D,$49,$2D,$B6,$05,$AF,$B2,$A6,$AE,$A8,$27,$BA,$AC,$1C,$1B,$AB,$1A,$B0,$BC,$37,$AC,$51,$AF,$05,$94,$8E,$A2,$C0,$00
 
-CORNERIACASTLE18: 
+ConeriaCASTLE18: 
 .byte $9D,$AB,$1A,$94,$1F,$AA,$2D,$1E,$B6,$55,$1A,$1C,$39,$05,$B6,$B2,$34,$A7,$A4,$BC,$1B,$AB,$1A,$95,$92,$90,$91,$9D,$05,$A0,$8A,$9B,$9B,$92,$98,$9B,$9C,$33,$AC,$4E,$38,$49,$1A,$28,$05,$B6,$A4,$B9,$1A,$1C,$1A,$99,$B5,$1F,$A6,$2C,$B6,$BF,$05,$AD,$B8,$37,$20,$1E,$1F,$FF,$95,$B8,$AE,$A4,$AB,$B1,$BE,$B6,$05,$B3,$B5,$B2,$B3,$1D,$A6,$BC,$C0,$00
 
-CORNERIATOWN1: 
+ConeriaTOWN1: 
 .byte $95,$B8,$AE,$A4,$AB,$29,$45,$A9,$B7,$1B,$AB,$30,$1B,$46,$B1,$BF,$05,$B7,$B2,$FF,$AD,$B2,$1F,$FF,$3D,$1E,$A6,$B2,$4E,$2B,$AA,$B8,$2C,$05,$A4,$B7,$FF,$8C,$23,$B6,$A6,$3A,$B7,$FF,$95,$A4,$AE,$A8,$C0,$00
 
-CORNERIATOWN2: 
+ConeriaTOWN2: 
 .byte $8A,$B6,$FF,$45,$AA,$3A,$27,$A9,$B2,$23,$28,$AF,$A7,$BF,$36,$B1,$48,$05,$A4,$AA,$A4,$1F,$1B,$AB,$1A,$98,$9B,$8B,$9C,$24,$AB,$1F,$A8,$C4,$C4,$05,$9A,$B8,$AC,$A6,$AE,$AF,$BC,$BF,$1B,$2E,$A9,$B8,$AF,$A9,$AC,$4E,$1B,$1D,$05,$AF,$A8,$AA,$3A,$A7,$BF,$1B,$A4,$AE,$1A,$1C,$A8,$B0,$1B,$2E,$1C,$A8,$05,$9D,$A8,$B0,$B3,$AF,$1A,$B1,$35,$1C,$36,$54,$1D,$23,$BF,$05,$A4,$B1,$A7,$24,$B7,$A4,$B1,$27,$1F,$1B,$AB,$1A,$A6,$3A,$B7,$25,$C0,$00
 
-CORNERIATOWN3: 
+ConeriaTOWN3: 
 .byte $90,$B2,$1B,$2E,$1C,$1A,$94,$1F,$AA,$C0,$00
 
-CORNERIATOWN4: 
+ConeriaTOWN4: 
 .byte $92,$FF,$A4,$B0,$FF,$8A,$B5,$BC,$AF,$3C,$BF,$1B,$AB,$1A,$8D,$22,$A6,$25,$C4,$00
 
-CORNERIATOWN5: 
+ConeriaTOWN5: 
 .byte $9D,$AB,$AC,$1E,$30,$FF,$8C,$3C,$25,$AC,$A4,$BF,$1B,$1D,$05,$A7,$B5,$2B,$B0,$38,$5B,$BC,$C0,$00
 
-CORNERIATOWN6: 
+ConeriaTOWN6: 
 .byte $97,$B2,$B5,$1C,$36,$54,$8C,$3C,$25,$AC,$A4,$65,$AC,$B9,$2C,$05,$A4,$FF,$BA,$5B,$A6,$AB,$FF,$B1,$A4,$34,$27,$96,$A4,$28,$BC,$A4,$C0,$00
 
-CORNERIATOWN7: 
+ConeriaTOWN7: 
 .byte $96,$A4,$28,$BC,$A4,$FF,$41,$1E,$B3,$B2,$35,$05,$A8,$BC,$2C,$AC,$AA,$AB,$B7,$C0,$FF,$9C,$AB,$1A,$5A,$40,$B6,$1B,$1D,$05,$8C,$9B,$A2,$9C,$9D,$8A,$95,$1B,$B2,$24,$A8,$A8,$C0,$00
 
-CORNERIATOWN8: 
+ConeriaTOWN8: 
 .byte $96,$BC,$59,$49,$1A,$AC,$1E,$99,$B5,$A4,$B9,$B2,$AE,$A4,$BF,$20,$05,$A5,$A8,$A4,$B8,$57,$A9,$B8,$AF,$4F,$35,$21,$A6,$5B,$BC,$43,$2F,$05,$A8,$A4,$B6,$21,$4C,$FF,$1D,$23,$C0,$00
 
 CUTEBAT: 
@@ -2378,7 +2378,7 @@ Talk_Chime:
 
 lut_MapObjTalkData:
 .byte $00,$00,$00,$00,$00         ; 00 ; Nothing
-.byte $00,$01,$02,$03,$00         ; 01 ; King Corneria
+.byte $00,$01,$02,$03,$00         ; 01 ; King Coneria
 .byte $00,$04,$00,$00,$00         ; 02 ; Garland (Temple of Fiends)
 .byte $00,$05,$00,$00,$00         ; 03 ; Kidnapped Princess
 .byte $00,$08,$09,$0A,$00         ; 04 ; Bikke

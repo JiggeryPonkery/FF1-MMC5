@@ -269,7 +269,7 @@ ShopHowMany_Sell:
 
 lut_ShopData:
 .word UnusedShop        ; 00 
-.word CorneriaWeapon    ; 01 
+.word ConeriaWeapon    ; 01 
 .word ProvokaWeapon     ; 02 
 .word ElflandWeapon     ; 03 
 .word MelmondWeapon     ; 04 
@@ -279,17 +279,17 @@ lut_ShopData:
 .word UnusedShop        ; 08 
 .word UnusedShop        ; 09 
 .word UnusedShop        ; 0A 
-.word CorneriaArmor    ; 0B 
-.word ProvokaArmor     ; 0C 
-.word ElflandArmor     ; 0D 
-.word MelmondArmor     ; 0E 
-.word LakeArmor        ; 0F 
-.word GaiaArmor        ; 10
+.word ConeriaArmor     ; 0B 
+.word ProvokaArmor      ; 0C 
+.word ElflandArmor      ; 0D 
+.word MelmondArmor      ; 0E 
+.word LakeArmor         ; 0F 
+.word GaiaArmor         ; 10
 .word UnusedShop        ; 11
 .word UnusedShop        ; 12
 .word UnusedShop        ; 13
 .word UnusedShop        ; 14
-.word CorneriaWMagic    ; 15
+.word ConeriaWMagic    ; 15
 .word ProvokaWMagic     ; 16
 .word ElflandWMagic     ; 17
 .word MelmondWMagic     ; 18
@@ -299,7 +299,7 @@ lut_ShopData:
 .word GaiaWMagic2       ; 1C
 .word OnracWMagic       ; 1D
 .word LeifenWMagic      ; 1E
-.word CorneriaBMagic    ; 1F
+.word ConeriaBMagic    ; 1F
 .word ProvokaBMagic     ; 20
 .word ElflandBMagic     ; 21
 .word MelmondBMagic     ; 22
@@ -309,7 +309,7 @@ lut_ShopData:
 .word GaiaBMagic2       ; 26
 .word OnracBMagic       ; 27
 .word LeifenBMagic      ; 28
-.word CorneriaTemple    ; 29
+.word ConeriaTemple    ; 29
 .word ElflandTemple     ; 2A
 .word LakeTemple        ; 2B
 .word GaiaTemple        ; 2C
@@ -319,7 +319,7 @@ lut_ShopData:
 .word UnusedShop        ; 30
 .word UnusedShop        ; 31
 .word UnusedShop        ; 32
-.word CorneriaInn       ; 33
+.word ConeriaInn       ; 33
 .word ProvokaInn        ; 34
 .word ElflandInn        ; 35
 .word MelmondInn        ; 36
@@ -329,7 +329,7 @@ lut_ShopData:
 .word UnusedShop        ; 3A
 .word UnusedShop        ; 3B
 .word UnusedShop        ; 3C
-.word CorneriaItem      ; 3D
+.word ConeriaItem      ; 3D
 .word ProvokaItem       ; 3E
 .word ElflandItem       ; 3F
 .word LakeItem          ; 40
@@ -354,20 +354,20 @@ lut_ShopData:
 ;|  |  |  | Fifth Item for Sale
 ;|  |  |  |  |   Town			               Explanation
 ;|__|__|__|__|____|__________________________|_______________________
-CorneriaWeapon:
-.byte WEP3+1, WEP2+1, WEP1+1, WEP4+1, WEP5+1  ;(Corneria) Wooden Staff, Small Knife, Wooden Nunchuku, Rapier, Iron Hammer
-CorneriaArmor:
-.byte ARM1+1, ARM2+1, ARM3+1, $00             ;(Corneria) Cloth, Wooden Armor, Chain Armor
-CorneriaWMagic:
-.byte MG_CURE, MG_HARM, MG_FOG, MG_RUSE, $00  ;(Corneria) CURE, HARM, FOG, RUSE
-CorneriaBMagic:
-.byte MG_FIRE, MG_SLEP, MG_LOCK, MG_LIT, $00  ;(Corneria) FIRE, SLEP, LOCK, LIT
-CorneriaTemple:
-.byte $28,$00,$00                             ;(Corneria) 40g Clinic
-CorneriaInn:                               
-.byte $1E,$00,$00                             ;(Corneria) 30g Inn
-CorneriaItem:                               
-.byte HEAL, PURE, TENT, $00                   ;(Corneria) Heal, Pure, Tent
+ConeriaWeapon:
+.byte WEP3+1, WEP2+1, WEP1+1, WEP4+1, WEP5+1  ;(Coneria) Wooden Staff, Small Knife, Wooden Nunchuku, Rapier, Iron Hammer
+ConeriaArmor:
+.byte ARM1+1, ARM2+1, ARM3+1, $00             ;(Coneria) Cloth, Wooden Armor, Chain Armor
+ConeriaWMagic:
+.byte MG_CURE, MG_HARM, MG_FOG, MG_RUSE, $00  ;(Coneria) CURE, HARM, FOG, RUSE
+ConeriaBMagic:
+.byte MG_FIRE, MG_SLEP, MG_LOCK, MG_LIT, $00  ;(Coneria) FIRE, SLEP, LOCK, LIT
+ConeriaTemple:
+.byte $28,$00,$00                             ;(Coneria) 40g Clinic
+ConeriaInn:                               
+.byte $1E,$00,$00                             ;(Coneria) 30g Inn
+ConeriaItem:                               
+.byte HEAL, PURE, TENT, $00                   ;(Coneria) Heal, Pure, Tent
 ProvokaWeapon:                              
 .byte WEP5+1, WEP6+1, WEP7+1, WEP8+1, $00     ;(Provoka) Iron Hammer, Short Sword, Hand Axe, Scimtar
 ProvokaArmor:                              

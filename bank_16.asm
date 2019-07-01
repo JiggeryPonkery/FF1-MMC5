@@ -91,7 +91,7 @@ BANK_THIS = $16
 ;; Banks are chosen by comparing against the constants #MAP_BANKCHANGE_3 and 2 (see LoadStandardMap)
 ;; Each bank has its own named pointer table.
 
-.word CONERIA
+.word Coneria
 .word PRAVOKA
 .word ELFLAND
 .word MELMOND
@@ -99,7 +99,7 @@ BANK_THIS = $16
 .word GAIA
 .word ONRAC
 .word LEIFEN
-.word CONERIA_CASTLE_1F
+.word Coneria_CASTLE_1F
 .word ELFLAND_CASTLE
 .word NORTHWEST_CASTLE
 .word CASTLE_OF_ORDEALS_1F
@@ -115,9 +115,9 @@ BANK_THIS = $16
 .word SARDAS_CAVE
 .word MARSH_CAVE_B1
 .word MIRAGE_TOWER_1F
-.word CONERIA_CASTLE_2F
+.word Coneria_CASTLE_2F
 
-CONERIA:
+Coneria:
 .incbin "bin/maps/map_00.bin"
 
 PRAVOKA:
@@ -141,7 +141,7 @@ ONRAC:
 LEIFEN:
 .incbin "bin/maps/map_07.bin"
 
-CONERIA_CASTLE_1F:
+Coneria_CASTLE_1F:
 .incbin "bin/maps/map_08.bin"
 
 ELFLAND_CASTLE:
@@ -189,7 +189,7 @@ MARSH_CAVE_B1:
 MIRAGE_TOWER_1F:
 .incbin "bin/maps/map_17.bin"
 
-CONERIA_CASTLE_2F:
+Coneria_CASTLE_2F:
 .incbin "bin/maps/map_18.bin"
 
 .byte "END OF BANK 16"
