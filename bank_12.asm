@@ -14,6 +14,7 @@
 .export lut_MapObjGfx
 .export lut_ClassStartingStats
 .export lut_Treasure
+.export lut_Treasure_2
 .export lut_BackdropPal
 .export lut_BtlBackdrops
 .export lut_MapObjects
@@ -2321,6 +2322,265 @@ lut_Treasure:
 .byte $00, GOLD68   ; FE ; ToF Revisited 7    - 65000 G
 .byte $00, $00      ; FF ;Unused             - 
 
+;; JIGS - this is an entirely new treasure table. None of these are used by the original game.
 
+lut_Treasure_2:
+.byte $00, $00      ; 00 ; Unused             - 
+.byte $02, ARM4     ; 01 ; Coneria 1          - Iron   Armor
+.byte $02, ARM18    ; 02 ; Coneria 2          - Iron   Shield
+.byte $01, TNT      ; 03 ; Coneria 3          - TNT    
+.byte $02, WEP11    ; 04 ; Coneria 4          - Iron   Staff
+.byte $02, WEP12    ; 05 ; Coneria 5          - Sabre  
+.byte $02, WEP16    ; 06 ; Coneria 6          - Silver Knife
+.byte $01, CABIN    ; 07 ; Temple of Fiends 1 - CABIN  
+.byte $01, HEAL     ; 08 ; Temple of Fiends 2 - HEAL Potion
+.byte $02, ARM26    ; 09 ; Temple of Fiends 3 - Cap    
+.byte $02, WEP27    ; 0A ; Temple of Fiends 4 - Rune   Sword
+.byte $02, WEP26    ; 0B ; Temple of Fiends 5 - Were   Sword
+.byte $01, SOFT     ; 0C ; Temple of Fiends 6 - SOFT Potion  
+.byte $02, WEP18    ; 0D ; Elfland 1          - Silver Hammer
+.byte $00, GOLD22   ; 0E ; Elfland 2          - 400 G
+.byte $00, GOLD19   ; 0F ; Elfland 3          - 330 G
+.byte $02, ARM34    ; 10 ; Elfland 4          - Copper Gauntlets
+.byte $02, WEP28    ; 11 ; NorthWest Castle 1 - Power  Staff
+.byte $02, ARM35    ; 12 ; NorthWest Castle 2 - Iron   Gauntlets
+.byte $02, WEP15    ; 13 ; NorthWest Castle 3 - Falchon
+.byte $01, PHOENIXDOWN ; JIGS - to combat Astos's RUB
+;.byte $00, GOLD16   ; 14 ; Marsh Cave 1       - 295 G 
+.byte $02, ARM11    ; 15 ; Marsh Cave 2       - Copper Bracelet
+.byte $01, HOUSE    ; 16 ; Marsh Cave 3       - HOUSE  
+.byte $00, GOLD21   ; 17 ; Marsh Cave 4       - 385 G
+.byte $00, GOLD27   ; 18 ; Marsh Cave 5       - 620 G
+.byte $02, WEP6     ; 19 ; Marsh Cave 6       - Short  Sword
+.byte $00, GOLD28   ; 1A ; Marsh Cave 7       - 680 G
+.byte $02, WEP10    ; 1B ; Marsh Cave 8       - Large  Knife
+.byte $01, CROWN    ; 1C ; Marsh Cave 9       - CROWN  
+.byte $02, ARM4     ; 1D ; Marsh Cave 10      - Iron   Armor
+.byte $02, ARM12    ; 1E ; Marsh Cave 11      - Silver Bracelet
+.byte $02, WEP16    ; 1F ; Marsh Cave 12      - Silver Knife
+.byte $00, GOLD32   ; 20 ; Marsh Cave 13      - 1020 G
+.byte $01, GOLD23   ; 21 ; Dwarf Cave 1       - 450 G
+.byte $00, GOLD26   ; 22 ; Dwarf Cave 2       - 575 G
+.byte $01, CABIN    ; 23 ; Dwarf Cave 3       - CABIN  
+.byte $02, ARM27    ; 24 ; Dwarf Cave 4       - Iron   Helmet
+.byte $02, ARM27    ; 25 ; Dwarf Cave 5       - Wooden Helmet
+.byte $02, WEP22    ; 26 ; Dwarf Cave 6       - Dragon Sword
+.byte $02, WEP16    ; 27 ; Dwarf Cave 7       - Silver Knife
+.byte $02, ARM6     ; 28 ; Dwarf Cave 8       - Silver Armor
+.byte $00, GOLD26   ; 29 ; Dwarf Cave 9       - 575 G
+.byte $01, HOUSE    ; 2A ; Dwarf Cave 10      - HOUSE  
+.byte $01, HEAL     ; 2B ; Matoya's Cave 1    - HEAL Potion
+.byte $01, PURE     ; 2C ; Matoya's Cave 2    - PURE Potion
+.byte $01, HEAL     ; 2D ; Matoya's Cave 3    - HEAL Potion
+.byte $00, GOLD31   ; 2E ; Earth Cave 1       - 880 G
+.byte $01, HEAL     ; 2F ; Earth Cave 2       - HEAL Potion
+.byte $01, PURE     ; 30 ; Earth Cave 3       - PURE Potion
+.byte $00, GOLD30   ; 31 ; Earth Cave 4       - 795 G
+.byte $00, GOLD37   ; 32 ; Earth Cave 5       - 1975 G
+.byte $02, WEP25    ; 33 ; Earth Cave 6       - Coral  Sword
+.byte $01, CABIN    ; 34 ; Earth Cave 7       - CABIN  
+.byte $00, GOLD19   ; 35 ; Earth Cave 8       - 330 G
+.byte $00, GOLD42   ; 36 ; Earth Cave 9       - 5000 G
+.byte $02, ARM17    ; 37 ; Earth Cave 10      - Wooden Shield
+.byte $00, GOLD26   ; 38 ; Earth Cave 11      - 575 G
+.byte $00, GOLD32   ; 39 ; Earth Cave 12      - 1020 G
+.byte $00, GOLD40   ; 3A ; Earth Cave 13      - 3400 G
+.byte $01, TENT     ; 3B ; Earth Cave 14      - TENT   
+.byte $01, HEAL     ; 3C ; Earth Cave 15      - HEAL Potion
+.byte $01, RUBY     ; 3D ; Earth Cave 16      - RUBY   
+.byte $00, GOLD33   ; 3E ; Earth Cave 17      - 1250 G
+.byte $02, ARM19    ; 3F ; Earth Cave 18      - Silver Shield
+.byte $01, CABIN    ; 40 ; Earth Cave 19      - CABIN  
+.byte $00, GOLD43   ; 41 ; Earth Cave 20      - 5450 G
+.byte $00, GOLD35   ; 42 ; Earth Cave 21      - 1520 G
+.byte $02, WEP2     ; 43 ; Earth Cave 22      - Wooden Staff
+.byte $00, GOLD40   ; 44 ; Earth Cave 23      - 3400 G
+.byte $00, GOLD34   ; 45 ; Earth Cave 24      - 1455 G
+.byte $02, ARM29    ; 46 ; Titan's Tunnel 1   - Silver Helmet
+.byte $00, GOLD23   ; 47 ; Titan's Tunnel 2   - 450 G
+.byte $00, GOLD27   ; 48 ; Titan's Tunnel 3   - 620 G
+.byte $02, WEP14    ; 49 ; Titan's Tunnel 4   - Great  Axe
+.byte $01, HEAL     ; 4A ; Gurgu Volcano 1    - HEAL Potion
+.byte $01, CABIN    ; 4B ; Gurgu Volcano 2    - CABIN  
+.byte $00, GOLD37   ; 4C ; Gurgu Volcano 3    - 1975 G
+.byte $01, PURE     ; 4D ; Gurgu Volcano 4    - PURE Potion
+.byte $01, HEAL     ; 4E ; Gurgu Volcano 5    - HEAL Potion
+.byte $00, GOLD34   ; 4F ; Gurgu Volcano 6    - 1455 G
+.byte $02, ARM19    ; 50 ; Gurgu Volcano 7    - Silver Shield
+.byte $00, GOLD35   ; 51 ; Gurgu Volcano 8    - 1520 G
+.byte $02, ARM29    ; 52 ; Gurgu Volcano 9    - Silver Helmet
+.byte $02, ARM36    ; 53 ; Gurgu Volcano 10   - Silver Gauntlets
+.byte $00, GOLD36   ; 54 ; Gurgu Volcano 11   - 1760 G
+.byte $02, WEP19    ; 55 ; Gurgu Volcano 12   - Silver Axe
+.byte $00, GOLD30   ; 56 ; Gurgu Volcano 13   - 795 G
+.byte $00, GOLD29   ; 57 ; Gurgu Volcano 14   - 750 G
+.byte $02, WEP23    ; 58 ; Gurgu Volcano 15   - Giant  Sword
+.byte $00, GOLD41   ; 59 ; Gurgu Volcano 16   - 4150 G
+.byte $00, GOLD35   ; 5A ; Gurgu Volcano 17   - 1520 G
+.byte $02, ARM29    ; 5B ; Gurgu Volcano 18   - Silver Helmet
+.byte $01, SOFT     ; 5C ; Gurgu Volcano 19   - SOFT Potion  
+.byte $00, GOLD39   ; 5D ; Gurgu Volcano 20   - 2750 G
+.byte $00, GOLD36   ; 5E ; Gurgu Volcano 21   - 1760 G
+.byte $02, WEP2     ; 5F ; Gurgu Volcano 22   - Wooden Staff
+.byte $00, GOLD33   ; 60 ; Gurgu Volcano 23   - 1250 G
+.byte $00, GOLD1    ; 61 ; Gurgu Volcano 24   - 10 G
+.byte $00, GOLD10   ; 62 ; Gurgu Volcano 25   - 155 G
+.byte $01, HOUSE    ; 63 ; Gurgu Volcano 26   - HOUSE  
+.byte $00, GOLD38   ; 64 ; Gurgu Volcano 27   - 2000 G
+.byte $02, WEP21    ; 65 ; Gurgu Volcano 28   - Ice    Sword
+.byte $00, GOLD31   ; 66 ; Gurgu Volcano 29   - 880 G
+.byte $01, PURE     ; 67 ; Gurgu Volcano 30   - PURE Potion
+.byte $02, ARM20    ; 68 ; Gurgu Volcano 31   - Flame  Shield
+.byte $00, GOLD46   ; 69 ; Gurgu Volcano 32   - 7340 G
+.byte $02, ARM7     ; 6A ; Gurgu Volcano 33   - Flame  Armor
+.byte $01, HEAL     ; 6B ; Ice Cave 1         - HEAL Potion
+.byte $00, GOLD54   ; 6C ; Ice Cave 2         - 10000 G
+.byte $00, GOLD52   ; 6D ; Ice Cave 3         - 9500 G
+.byte $01, TENT     ; 6E ; Ice Cave 4         - TENT   
+.byte $02, ARM21    ; 6F ; Ice Cave 5         - Ice    Shield
+.byte $02, ARM1     ; 70 ; Ice Cave 6         - Cloth  
+.byte $02, WEP20    ; 71 ; Ice Cave 7         - Flame  Sword
+.byte $01, FLOATER  ; 72 ; Ice Cave 8         - FLOATER
+.byte $00, GOLD48   ; 73 ; Ice Cave 9         - 7900 G
+.byte $00, GOLD43   ; 74 ; Ice Cave 10        - 5450 G
+.byte $00, GOLD53   ; 75 ; Ice Cave 11        - 9900 G
+.byte $00, GOLD42   ; 76 ; Ice Cave 12        - 5000 G
+.byte $00, GOLD12   ; 77 ; Ice Cave 13        - 180 G
+.byte $00, GOLD55   ; 78 ; Ice Cave 14        - 12350 G
+.byte $02, ARM36    ; 79 ; Ice Cave 15        - Silver Gauntlets
+.byte $02, ARM8     ; 7A ; Ice Cave 16        - Ice    Armor
+.byte $02, ARM37    ; 7B ; Castle of Ordeal 1 - Zeus   Gauntlets
+.byte $01, HOUSE    ; 7C ; Castle of Ordeal 2 - HOUSE  
+.byte $00, GOLD34   ; 7D ; Castle of Ordeal 3 - 1455 G
+.byte $00, GOLD46   ; 7E ; Castle of Ordeal 4 - 7340 G
+.byte $02, ARM13    ; 7F ; Castle of Ordeal 5 - Gold   Bracelet
+.byte $02, WEP21    ; 80 ; Castle of Ordeal 6 - Ice    Sword
+.byte $02, ARM35    ; 81 ; Castle of Ordeal 7 - Iron   Gauntlets
+.byte $02, WEP30    ; 82 ; Castle of Ordeal 8 - Heal   Staff
+.byte $01, TAIL     ; 83 ; Castle of Ordeal 9 - TAIL   
+.byte $00, GOLD34   ; 84 ; Cardia 1           - 1455 G
+.byte $00, GOLD38   ; 85 ; Cardia 2           - 2000 G
+.byte $00, GOLD39   ; 86 ; Cardia 3           - 2750 G
+.byte $00, GOLD39   ; 87 ; Cardia 4           - 2750 G
+.byte $00, GOLD35   ; 88 ; Cardia 5           - 1520 G
+.byte $00, GOLD1    ; 89 ; Cardia 6           - 10 G
+.byte $00, GOLD24   ; 8A ; Cardia 7           - 500 G
+.byte $01, HOUSE    ; 8B ; Cardia 8           - HOUSE  
+.byte $00, GOLD26   ; 8C ; Cardia 9           - 575 G
+.byte $01, SOFT     ; 8D ; Cardia 10          - SOFT Potion  
+.byte $01, CABIN    ; 8E ; Cardia 11          - CABIN  
+.byte $00, GOLD52   ; 8F ; Cardia 12          - 9500 G
+.byte $00, GOLD11   ; 90 ; Cardia 13          - 160 G
+.byte $00, $00      ; 91 ; Not Used 1         - 530 G
+.byte $00, $00      ; 92 ; Not Used 2         - Small  Knife
+.byte $00, $00      ; 93 ; Not Used 3         - Cap    
+.byte $00, $00      ; 94 ; Not Used 4         - Zeus   Gauntlets
+.byte $02, ARM32    ; 95 ; Sea Shrine 1       - Ribbon  
+.byte $00, GOLD53   ; 96 ; Sea Shrine 2       - 9900 G
+.byte $00, GOLD46   ; 97 ; Sea Shrine 3       - 7340 G
+.byte $00, GOLD39   ; 98 ; Sea Shrine 4       - 2750 G
+.byte $00, GOLD47   ; 99 ; Sea Shrine 5       - 7690 G
+.byte $00, GOLD49   ; 9A ; Sea Shrine 6       - 8135 G
+.byte $00, GOLD43   ; 9B ; Sea Shrine 7       - 5450 G
+.byte $00, GOLD21   ; 9C ; Sea Shrine 8       - 385 G
+.byte $02, ARM38    ; 9D ; Sea Shrine 9       - Power  Gauntlets
+.byte $02, WEP29    ; 9E ; Sea Shrine 10      - Light  Axe
+.byte $00, GOLD53   ; 9F ; Sea Shrine 11      - 9900 G
+.byte $00, GOLD38   ; A0 ; Sea Shrine 12      - 2000 G
+.byte $00, GOLD23   ; A1 ; Sea Shrine 13      - 450 G
+.byte $00, GOLD8    ; A2 ; Sea Shrine 14      - 110 G
+.byte $02, WEP29    ; A3 ; Sea Shrine 15      - Light  Axe
+.byte $02, ARM9     ; A4 ; Sea Shrine 16      - Opal   Armor
+.byte $00, GOLD2    ; A5 ; Sea Shrine 17      - 20 G
+.byte $02, WEP31    ; A6 ; Sea Shrine 18      - Mage   Staff
+.byte $00, GOLD55   ; A7 ; Sea Shrine 19      - 12350 G
+.byte $00, GOLD50   ; A8 ; Sea Shrine 20      - 9000 G
+.byte $00, GOLD36   ; A9 ; Sea Shrine 21      - 1760 G
+.byte $02, ARM14    ; AA ; Sea Shrine 22      - Opal   Bracelet
+.byte $00, GOLD39   ; AB ; Sea Shrine 23      - 2750 G
+.byte $00, GOLD54   ; AC ; Sea Shrine 24      - 10000 G
+.byte $00, GOLD1    ; AD ; Sea Shrine 25      - 10 G
+.byte $00, GOLD41   ; AE ; Sea Shrine 26      - 4150 G
+.byte $00, GOLD42   ; AF ; Sea Shrine 27      - 5000 G
+.byte $01, PURE     ; B0 ; Sea Shrine 28      - PURE Potion
+.byte $02, ARM22    ; B1 ; Sea Shrine 29      - Opal   Shield
+.byte $02, ARM30    ; B2 ; Sea Shrine 30      - Opal   Helmet
+.byte $02, ARM39    ; B3 ; Sea Shrine 31      - Opal   Gauntlets
+.byte $01, SLAB     ; B4 ; Sea Shrine 32      - SLAB   
+.byte $02, WEP33    ; B5 ; Waterfall 1        - Wizard Staff
+.byte $02, ARM32    ; B6 ; Waterfall 2        - Ribbon  
+.byte $00, GOLD57   ; B7 ; Waterfall 3        - 13450 G
+.byte $00, GOLD44   ; B8 ; Waterfall 4        - 6400 G
+.byte $00, GOLD42   ; B9 ; Waterfall 5        - 5000 G
+.byte $02, WEP32    ; BA ; Waterfall 6        - Defense
+.byte $00, $00      ; BB ; Not Used 5         - HEAL Potion
+.byte $00, $00      ; BC ; Not Used 6         - HEAL Potion
+.byte $00, $00      ; BD ; Not Used 7         - HEAL Potion
+.byte $00, $00      ; BE ; Not Used 8         - HEAL Potion
+.byte $00, $00      ; BF ; Not Used 9         - HEAL Potion
+.byte $00, $00      ; C0 ; Not Used 10        - HEAL Potion
+.byte $00, $00      ; C1 ; Not Used 11        - HEAL Potion
+.byte $00, $00      ; C2 ; Not Used 12        - HEAL Potion
+.byte $00, $00      ; C3 ; Not Used 13        - HEAL Potion
+.byte $02, ARM23    ; C4 ; Mirage Tower 1     - Aegis  Shield
+.byte $00, GOLD39   ; C5 ; Mirage Tower 2     - 2750 G
+.byte $00, GOLD40   ; C6 ; Mirage Tower 3     - 3400 G
+.byte $00, GOLD62   ; C7 ; Mirage Tower 4     - 18010 G
+.byte $01, CABIN    ; C8 ; Mirage Tower 5     - CABIN  
+.byte $02, ARM31    ; C9 ; Mirage Tower 6     - Heal   Helmet
+.byte $00, GOLD31   ; CA ; Mirage Tower 7     - 880 G
+.byte $02, WEP34    ; CB ; Mirage Tower 8     - Vorpal 
+.byte $01, HOUSE    ; CC ; Mirage Tower 9     - HOUSE  
+.byte $00, GOLD47   ; CD ; Mirage Tower 10    - 7690 G
+.byte $02, WEP24    ; CE ; Mirage Tower 11    - Sun    Sword
+.byte $00, GOLD54   ; CF ; Mirage Tower 12    - 10000 G
+.byte $02, ARM10    ; D0 ; Mirage Tower 13    - Dragon Armor
+.byte $00, GOLD49   ; D1 ; Mirage Tower 14    - 8135 G
+.byte $00, GOLD48   ; D2 ; Mirage Tower 15    - 7900 G
+.byte $02, WEP36    ; D3 ; Mirage Tower 16    - Thor   Hammer
+.byte $00, GOLD55   ; D4 ; Mirage Tower 17    - 12350 G
+.byte $00, GOLD56   ; D5 ; Mirage Tower 18    - 13000 G
+.byte $00, GOLD53   ; D6 ; Sky Palace 1       - 9900 G
+.byte $01, HEAL     ; D7 ; Sky Palace 2       - HEAL Potion
+.byte $00, GOLD42   ; D8 ; Sky Palace 3       - 4150 G
+.byte $00, GOLD48   ; D9 ; Sky Palace 4       - 7900 G
+.byte $00, GOLD42   ; DA ; Sky Palace 5       - 5000 G
+.byte $02, ARM40    ; DB ; Sky Palace 6       - ProRing
+.byte $00, GOLD45   ; DC ; Sky Palace 7       - 6720 G
+.byte $02, ARM31    ; DD ; Sky Palace 8       - Heal   Helmet
+.byte $00, GOLD12   ; DE ; Sky Palace 9       - 180 G
+.byte $02, WEP37    ; DF ; Sky Palace 10      - Bane   Sword
+.byte $02, ARM15    ; E0 ; Sky Palace 11      - White  Shirt
+.byte $02, ARM16    ; E1 ; Sky Palace 12      - Black  Shirt
+.byte $02, ARM32    ; E2 ; Sky Palace 13      - Ribbon  
+.byte $02, ARM39    ; E3 ; Sky Palace 14      - Opal   Gauntlets
+.byte $02, ARM22    ; E4 ; Sky Palace 15      - Opal   Shield
+.byte $02, ARM29    ; E5 ; Sky Palace 16      - Silver Helmet
+.byte $01, HOUSE    ; E6 ; Sky Palace 17      - HOUSE  
+.byte $00, GOLD31   ; E7 ; Sky Palace 18      - 880 G
+.byte $00, GOLD56   ; E8 ; Sky Palace 19      - 13000 G
+.byte $01, ADAMANT  ; E9 ; Sky Palace 20      - ADAMANT
+.byte $00, GOLD41   ; EA ; Sky Palace 21      - 4150 G
+.byte $01, SOFT     ; EB ; Sky Palace 22      - SOFT Potion  
+.byte $00, GOLD40   ; EC ; Sky Palace 23      - 3400 G
+.byte $02, WEP38    ; ED ; Sky Palace 24      - Katana 
+.byte $01, ARM25    ; EE ; Sky Palace 25      - ProCape
+.byte $02, ARM1     ; EF ; Sky Palace 26      - Cloth  
+.byte $00, GOLD52   ; F0 ; Sky Palace 27      - 9500 G
+.byte $01, SOFT     ; F1 ; Sky Palace 28      - SOFT Potion  
+.byte $00, GOLD44   ; F2 ; Sky Palace 29      - 6400 G
+.byte $00, GOLD49   ; F3 ; Sky Palace 30      - 8135 G
+.byte $00, GOLD50   ; F4 ; Sky Palace 31      - 9000 G
+.byte $01, HEAL     ; F5 ; Sky Palace 32      - HEAL Potion
+.byte $02, ARM40    ; F6 ; Sky Palace 33      - ProRing
+.byte $00, GOLD45   ; F7 ; Sky Palace 34      - 5450 G
+.byte $02, WEP40    ; F8 ; ToF Revisited 1    - Masmune
+.byte $00, GOLD66   ; F9 ; ToF Revisited 2    - 26000 G
+.byte $02, WEP38    ; FA ; ToF Revisited 3    - Katana 
+.byte $02, ARM40    ; FB ; ToF Revisited 4    - ProRing
+.byte $02, ARM25    ; FC ; ToF Revisited 5    - ProCape
+.byte $00, GOLD67   ; FD ; ToF Revisited 6    - 45000 G
+.byte $00, GOLD68   ; FE ; ToF Revisited 7    - 65000 G
+.byte $00, $00      ; FF ;Unused             - 
 
 .byte "END OF BANK 12"

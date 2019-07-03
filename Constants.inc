@@ -453,6 +453,8 @@ TP_TELE_MASK      = %00000011
 TP_SPEC_MASK      = %00011111
 TP_BATTLEMARKER   = $FF
 
+TP_TREASURE_OPEN  = $70
+
 AIRORB_MAP        = $33         ; map ID that the orbs are found on
 WATERORB_MAP      = $2A
 FIREORB_MAP       = $24

@@ -150,6 +150,7 @@
 .import lut_InitUnsramFirstPage
 .import lut_ClassStartingStats
 .import lut_Treasure
+.import lut_Treasure_2
 .import lut_BackdropPal
 .import lut_BtlBackdrops
 .import lut_MapObjects
@@ -3276,30 +3277,6 @@ Copy256:
     RTS                ; and exit
 
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
-;;    
-;; JIGS - redrawing treasure chests to be open!   
-;;   
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
-    
-; The top part of chests are 2A and 2B, and need to be replaced with 7A and 7B
-; Easy enough; ORA $70 ... 
-; First, find the treasure chest's tile ID
-; Reverse tileprop? 
-;
-;
-;
-; got to get the upper left tile at $0500 and the upper right in $0580
-;
-;
-;
-;
-;
-;
-
-    
-    
-    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3840,6 +3817,7 @@ SMMove_Door:
     BCS :+               ; if the inroom flag was previously cleared (coming from outside a room)...
       JSR PlayDoorSFX    ;  ... play the door sound effect
 
+SetChestAddr:      
 :   LDA scroll_y         ; get the Y scroll for drawing
     CLC
     ADC #7               ; add 7 to get the row to which the player is on
@@ -3948,6 +3926,7 @@ RedrawDoor:
 
   @Redraw:
     STA inroom             ; record new inroom status (previously stuffed in A)
+    
     LDA $2002              ; reset PPU toggle
 
     LDA doorppuaddr+1      ; load the target PPU address
@@ -4070,6 +4049,65 @@ PrepStandardMap:
 
     JSR LoadSMCHR           ; load all the necessary CHR
     JSR LoadSMTilesetData   ; load tileset and TSA data
+
+    ;; JIGS - here, it checks all the tile properties of the map's tileset to see if there's a chest
+    ;; When it finds a chest, it checks to see if its open
+    ;; If its open, it swaps the upper tiles to use the opened chest graphic
+    
+    LDY #0                  ; set Y to 0 to use as loop counter and index
+    STY tmp                 ; Set tmp to 0  
+    LDA cur_tileset         ; Load current map's tileset
+    CLC
+    ADC #>lut_SMTilesetProp ; and set high byte to the tileset properties table
+    STA tmp+1
+   
+   @CheckTreasureLoop1:   
+    LDA (tmp), Y            ; Load a byte of the tileset properties table
+    CMP #TP_SPEC_TREASURE   ; if it matches a chest
+    BEQ @IsChestOpen        ; check if the chest is open!
+    CMP #TP_SPEC_TREASURE_2 ; and again for chest type #2
+    BEQ @IsChestOpen
+   
+   @IncY2:   
+    INY                     ; if not, increase Y by 2 (each tile is 2 bytes) 
+   @IncY1:
+    INY
+    BNE @CheckTreasureLoop1 ; if Y hasn't wrapped, keep checking for more chests
+    JMP @ContinueLoad       ; after all 256 bytes (128 tiles) are checked, resume loading the map like the original game
+   
+   @IsChestOpen:
+    PHA                    ; backup the chest type
+    INY                    ; inc Y to check the second byte of the tileset properties table 
+    LDA (tmp), Y           
+    TAX                    ; put that in X
+    PLA                    ; restore the chest byte into A
+    LSR A                  ; Chest table 1 is 9 (1001) and Chest table 2 is A (1010)
+    BCS @ChestTable1       ; so figure out if its 1 or 2 by checking carry after shifting
+    
+   @ChestTable2:
+    LDA game_flags, X      ; with X as the chest index, check game_flags to see if its set open
+    AND #GMFLG_TCOPEN_2     
+    BEQ @IncY1             ; if its not, go back up to the main loop, but only inc Y by 1 more
+    BNE :+                 ; if it is, skip ahead
+   
+   @ChestTable1:   
+    LDA game_flags, X      ; same, but check a different open bit flag!
+    AND #GMFLG_TCOPEN 
+    BEQ @IncY1
+    
+  : DEY                      ; decrement Y back to the previous byte of the table
+    TYA                      ; put in A
+    LSR A                    ; and halve it
+    TAX                      ; then put it into X
+    LDA tileset_data+$100, X ; Load up the upper left tile of the chest
+    ORA #TP_TREASURE_OPEN    ; ORA with #$70 to change it to the open chest tile
+    STA tileset_data+$100, X ; and save it
+    LDA tileset_data+$180, X ; Do the same with the upper right tile
+    ORA #TP_TREASURE_OPEN
+    STA tileset_data+$180, X
+    JMP @IncY2               ; Then jump back to inc Y by 2 to check the next tile property 
+    
+   @ContinueLoad: 
     JSR LoadMapPalettes     ; load palettes
     JSR DrawFullMap         ; draw the map onto the screen
 
@@ -7622,27 +7660,52 @@ lut_NTRowStartHi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 OpenTreasureChest:
+    ;TYA
+    ;LSR A                    ; halve it again
+    ;PHA                      ; save Y
+
     LDA #BANK_TREASURE       ; swap to bank containing treasure chest info
     JSR SwapPRG_L
 
+    LDX tileprop
     LDA tileprop+1           ; double chest index and put in X
+    CPX #TP_SPEC_TREASURE_2
+    BEQ @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
+    
+   @ChestTable_1: 
     ASL A
     TAX
     BCC :+
     
     LDA lut_Treasure+$101, X ; if treasure chest is over $7F, check the second half of the LUT
-    JMP :++
+    STA dlg_itemid
+    LDA lut_Treasure+$100, X
+    STA treasure_offset
+    JMP @CheckTreasure
     
   : LDA lut_Treasure+1, X    ; use it to get the contents of the chest
-  : STA dlg_itemid           ; record that as the item id so it can be printed in the dialogue box
+    STA dlg_itemid           ; record that as the item id so it can be printed in the dialogue box
+    LDA lut_Treasure, X 
+    STA treasure_offset
+    JMP @CheckTreasure
     
-    BCC :+                    
+   @ChestTable_2: 
+    ASL A
+    TAX
+    BCC :+
     
-    LDA lut_Treasure+$100, X ; now that dlg_itemid is set, look at what KIND of item it is...
-    JMP :++
+    LDA lut_Treasure_2+$101, X ; if treasure chest is over $7F, check the second half of the LUT
+    STA dlg_itemid
+    LDA lut_Treasure_2+$100, X
+    STA treasure_offset
+    JMP @CheckTreasure
     
-  : LDA lut_Treasure, X 
-  : STA treasure_offset
+  : LDA lut_Treasure_2+1, X    ; use it to get the contents of the chest
+    STA dlg_itemid           ; record that as the item id so it can be printed in the dialogue box
+    LDA lut_Treasure_2, X 
+    STA treasure_offset
+  
+   @CheckTreasure:
     BEQ @Gold                ; if 0, its gold
 
     CMP #1                   
@@ -7658,13 +7721,13 @@ OpenTreasureChest:
         INC dlg_itemid
         JMP @OpenChest
     
-    @Gold:
+   @Gold:
     LDA dlg_itemid
     JSR LoadPrice            ; get the price of the item (the amount of gold in the chest)
     JSR AddGPToParty         ; add that price to the party's GP
     JMP @OpenChest           ; then mark the chest as open, and exit
     
-    @Item:
+   @Item:
     LDA dlg_itemid
     CMP #ITEM_MAGICSTART     ; if its a magic thing...
     BCS @Magic
@@ -7681,7 +7744,12 @@ OpenTreasureChest:
       INC items, X           ; give them one of this item -- but only if they have < 99
       JMP @OpenChest
     
-    @Magic:
+   @TooFull:                  ; If too full...
+    ;PLA
+    LDA #DLGID_CANTCARRY     ; select "You can't carry any more" text
+    RTS
+    
+   @Magic:
     SEC
     SBC #ITEM_MAGICSTART     ; subtract magic offset to conver to spell ID
     TAX
@@ -7691,22 +7759,52 @@ OpenTreasureChest:
        INC inv_magic, X      ;; and something else is wrong if you're pulling over 99 from chests
        JMP @OpenChest
     
-    @KeyItem:
+   @KeyItem:
     TAX
     INC items, X
     INC dlgsfx               ; turn on key-item jingle 
       
-    @OpenChest:
+   @OpenChest:
+    LDX tileprop
+    CPX #TP_SPEC_TREASURE_2
+    BEQ @FlagChest_2 
+   
+   @FlagChest_1:
     LDX tileprop+1           ; re-get the chest index
     LDA game_flags, X        ; set the game flag for this chest to mark it as opened
     ORA #GMFLG_TCOPEN        ; 
-    STA game_flags, X        ; 
+    JMP :+
+    
+   @FlagChest_2: 
+    LDX tileprop+1           ; re-get the chest index
+    LDA game_flags, X        ; set the game flag for this chest to mark it as opened
+    ORA #GMFLG_TCOPEN_2
+    
+  : STA game_flags, X        ; 
+
+   LDA #0                    ; since SetChestAddr hijacks the door-drawing code
+   STA tileprop+1            ; tileprop+1 needs to be 0
+   LDA facing                ; and joy needs to be the direction the character is facing
+   STA joy                   ; instead of the direction they're going to be moving
+   
+   JSR SetChestAddr
+    
+   @DrawOpenChest:
+    JSR WaitForVBlank
+    LDA $2002
+    LDA doorppuaddr+1
+    STA $2006
+    LDA doorppuaddr
+    STA $2006
+    LDA #$7A
+    STA $2007
+    LDA #$7B
+    STA $2007
+    JSR SetSMScroll
+   
     LDA #DLGID_TCGET         ; put the treasure chest dialogue ID in A before exiting!
     RTS
 
-  @TooFull:                  ; If too full...
-    LDA #DLGID_CANTCARRY     ; select "You can't carry any more" text
-    RTS
 
   
 

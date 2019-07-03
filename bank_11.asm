@@ -397,134 +397,134 @@ lut_SMTilesetAttr:
 lut_SMTilesetProp:
 
 ; Town
-.byte $00,$00 ; Grass
-.byte $00,$00 ; Grass - left side in dark shade
-.byte $00,$00 ; Grass - left side in dark shade, shade end
-.byte $80,$00 ; Wall
-.byte $80,$00 ; Wall
-.byte $80,$00 ; Wall
-.byte $80,$00 ; Wall - left side end
-.byte $80,$00 ; Wall - middle
-.byte $80,$00 ; Wall - right side end
-.byte $80,$00 ; Wall - right side in shade
-.byte $80,$00 ; Vertical wall - left side grass
-.byte $80,$00 ; Vertical wall - right side grass, shade top end
-.byte $80,$00 ; Vertical wall - right side shade
-.byte $80,$00 ; Vertical wall - bottom corner, right side shade, bottom is grass
-.byte $80,$00 ; Tree
-.byte $80,$00 ; Two trees/bush
-.byte $00,$00 ; Cobbles
-.byte $00,$00 ; Cobbles, curved upper left corner
-.byte $00,$00 ; Cobbles, curved upper right corner
-.byte $00,$00 ; Cobbles, curved lower left corner
-.byte $00,$00 ; Cobbles, curved lower right corner
-.byte $00,$00 ; Cobbles, lower left corner in shade
-.byte $00,$00 ; Cobbles, upper left corner in shade, lower left in shade end piece
-.byte $80,$00 ; Roof tile, back side
-.byte $80,$00 ; Roof tile continuous
-.byte $80,$00 ; Roof tile, back side
-.byte $80,$00 ; Clinic sign
-.byte $80,$00 ; Roof gable
-.byte $80,$00 ; Hat-shaped window
-.byte $80,$00 ; Two small windows
-.byte $04,$01 ; Door - Coneria Weapons
-.byte $04,$02 ; Door - Pravoka Weapons
-.byte $80,$00 ; Item sign
-.byte $80,$00 ; Weapon sign
-.byte $80,$00 ; Shield sign
-.byte $80,$00 ; W. magic sig
-.byte $80,$00 ; B. magic sign
-.byte $80,$00 ; Inn sign
-.byte $04,$03 ; Door - Elfland Weapons
-.byte $80,$00 ; Water
-.byte $80,$00 ; Water, left side shade
-.byte $80,$00 ; Water, left side shade with end piece
-.byte $00,$00 ; Bridge =
-.byte $00,$00 ; Bridge ||
-.byte $00,$00 ; Steps
-.byte $04,$04 ; Door - Melmond Weapons
-.byte $C0,$E6 ; Fountain (come wash your face)
-.byte $C0,$EE ; Grave (This is a tomb.)
-.byte $80,$00 ; Fence
-.byte $C0,$EF ; Well (Ordinary well dialogue.)
-.byte $00,$00 ; Sand
-.byte $00,$00 ; Sandy Grass
-.byte $80,$00 ; Palm trees
-.byte $06,$00 ; Stairs - Door Closer
-.byte $04,$05 ; Door - Crescent Lake Weapons
-.byte $00,$00 ; Opened door
-.byte $06,$00 ; Cobbles - Door Closer
-.byte $06,$00 ; Grass - Door Closer
-.byte $06,$00 ; Bridge || - Door Closer
-.byte $C0,$F7 ; Water (At the bottom of the spring, something is flowing.)
-.byte $06,$00 ; Sand - Door Closer
-.byte $06,$00 ; Sandy Grass - Door Closer
-.byte $04,$06 ; Door - Gaia Weapon
-.byte $04,$07 ; Door - unused shop
-.byte $04,$08 ; Door - unused shop
-.byte $04,$09 ; Door - unused shop
-.byte $04,$0A ; Door - unused shop
-.byte $04,$0B ; Door - Coneria Armor
-.byte $04,$0C ; Door - Pravoka Armor
-.byte $04,$0D ; Door - Elfland Armor
-.byte $04,$0E ; Door - Melmond Armor
-.byte $01,$00 ; Grass (teleport?)
-.byte $02,$20 ; Submarine (teleport to underwater shrine)
-.byte $04,$0F ; Door - LakeArmor     
-.byte $04,$10 ; Door - GaiaArmor     
-.byte $04,$11 ; Door - UnusedShop    
-.byte $04,$12 ; Door - UnusedShop    
-.byte $04,$13 ; Door - UnusedShop    
-.byte $04,$14 ; Door - UnusedShop    
-.byte $04,$15 ; Door - ConeriaWMagic
-.byte $04,$16 ; Door - ProvokaWMagic 
-.byte $04,$17 ; Door - ElflandWMagic 
-.byte $04,$18 ; Door - MelmondWMagic 
-.byte $04,$19 ; Door - LakeWMagic    
-.byte $04,$1A ; Door - ElflandWMagic2
-.byte $04,$1B ; Door - GaiaWMagic    
-.byte $04,$1C ; Door - GaiaWMagic2   
-.byte $04,$1D ; Door - OnracWMagic   
-.byte $04,$1E ; Door - LeifenWMagic  
-.byte $04,$1F ; Door - ConeriaBMagic
-.byte $04,$20 ; Door - ProvokaBMagic 
-.byte $04,$21 ; Door - ElflandBMagic 
-.byte $04,$22 ; Door - MelmondBMagic 
-.byte $04,$23 ; Door - LakeBMagic    
-.byte $04,$24 ; Door - ElflandBMagic2
-.byte $04,$25 ; Door - GaiaBMagic    
-.byte $04,$26 ; Door - GaiaBMagic2   
-.byte $04,$27 ; Door - OnracBMagic   
-.byte $04,$28 ; Door - LeifenBMagic  
-.byte $04,$29 ; Door - ConeriaTemple
-.byte $04,$2A ; Door - ElflandTemple 
-.byte $04,$2B ; Door - LakeTemple    
-.byte $04,$2C ; Door - GaiaTemple    
-.byte $04,$2D ; Door - OnracTemple   
-.byte $04,$2E ; Door - ProvokaTemple 
-.byte $04,$2F ; Door - UnusedShop    
-.byte $04,$30 ; Door - UnusedShop    
-.byte $04,$31 ; Door - UnusedShop    
-.byte $04,$32 ; Door - UnusedShop    
-.byte $04,$33 ; Door - ConeriaInn   
-.byte $04,$34 ; Door - ProvokaInn    
-.byte $04,$35 ; Door - ElflandInn    
-.byte $04,$36 ; Door - MelmondInn    
-.byte $04,$37 ; Door - LakeInn       
-.byte $04,$38 ; Door - GaiaInn       
-.byte $04,$39 ; Door - OnracInn      
-.byte $04,$3A ; Door - UnusedShop    
-.byte $04,$3B ; Door - UnusedShop    
-.byte $04,$3C ; Door - UnusedShop    
-.byte $04,$3D ; Door - ConeriaItem  
-.byte $04,$3E ; Door - ProvokaItem   
-.byte $04,$3F ; Door - ElflandItem   
-.byte $04,$40 ; Door - LakeItem      
-.byte $04,$41 ; Door - GaiaItem      
-.byte $04,$42 ; Door - OnracItem     
-.byte $04,$43 ; Door - UnusedShop    
-.byte $04,$44 ; Door - UnusedShop    
-.byte $C0,$DB ; Grave (special) 
+.byte $00,$00 ; 00 Grass
+.byte $00,$00 ; 01 Grass - left side in dark shade
+.byte $00,$00 ; 02 Grass - left side in dark shade, shade end
+.byte $80,$00 ; 03 Wall
+.byte $80,$00 ; 04 Wall
+.byte $80,$00 ; 05 Wall
+.byte $80,$00 ; 06 Wall - left side end
+.byte $80,$00 ; 07 Wall - middle
+.byte $80,$00 ; 08 Wall - right side end
+.byte $80,$00 ; 09 Wall - right side in shade
+.byte $80,$00 ; 0A Vertical wall - left side grass
+.byte $80,$00 ; 0B Vertical wall - right side grass, shade top end
+.byte $80,$00 ; 0C Vertical wall - right side shade
+.byte $80,$00 ; 0D Vertical wall - bottom corner, right side shade, bottom is grass
+.byte $80,$00 ; 0E Tree
+.byte $80,$00 ; 0F Two trees/bush
+.byte $00,$00 ; 10 Cobbles
+.byte $00,$00 ; 11 Cobbles, curved upper left corner
+.byte $00,$00 ; 12 Cobbles, curved upper right corner
+.byte $00,$00 ; 13 Cobbles, curved lower left corner
+.byte $00,$00 ; 14 Cobbles, curved lower right corner
+.byte $00,$00 ; 15 Cobbles, lower left corner in shade
+.byte $00,$00 ; 16 Cobbles, upper left corner in shade, lower left in shade end piece
+.byte $80,$00 ; 17 Roof tile, back side
+.byte $80,$00 ; 18 Roof tile continuous
+.byte $80,$00 ; 19 Roof tile, back side
+.byte $80,$00 ; 1A Clinic sign
+.byte $80,$00 ; 1B Roof gable
+.byte $80,$00 ; 1C Hat-shaped window
+.byte $80,$00 ; 1D Two small windows
+.byte $04,$01 ; 1E Door - Coneria Weapons
+.byte $04,$02 ; 1F Door - Pravoka Weapons
+.byte $80,$00 ; 20 Item sign
+.byte $80,$00 ; 21 Weapon sign
+.byte $80,$00 ; 22 Shield sign
+.byte $80,$00 ; 23 W. magic sig
+.byte $80,$00 ; 24 B. magic sign
+.byte $80,$00 ; 25 Inn sign
+.byte $04,$03 ; 26 Door - Elfland Weapons
+.byte $80,$00 ; 27 Water
+.byte $80,$00 ; 28 Water, left side shade
+.byte $80,$00 ; 29 Water, left side shade with end piece
+.byte $00,$00 ; 2A Bridge =
+.byte $00,$00 ; 2B Bridge ||
+.byte $00,$00 ; 2C Steps
+.byte $04,$04 ; 2D Door - Melmond Weapons
+.byte $C0,$E6 ; 2E Fountain (come wash your face)
+.byte $C0,$EE ; 2F Grave (This is a tomb.)
+.byte $80,$00 ; 30 Fence
+.byte $C0,$EF ; 31 Well (Ordinary well dialogue.)
+.byte $00,$00 ; 32 Sand
+.byte $00,$00 ; 33 Sandy Grass
+.byte $80,$00 ; 34 Palm trees
+.byte $06,$00 ; 35 Stairs - Door Closer
+.byte $04,$05 ; 36 Door - Crescent Lake Weapons
+.byte $00,$00 ; 37 Opened door
+.byte $06,$00 ; 38 Cobbles - Door Closer
+.byte $06,$00 ; 39 Grass - Door Closer
+.byte $06,$00 ; 3A Bridge || - Door Closer
+.byte $C0,$F7 ; 3B Water (At the bottom of the spring, something is flowing.)
+.byte $06,$00 ; 3C Sand - Door Closer
+.byte $06,$00 ; 3D Sandy Grass - Door Closer
+.byte $04,$06 ; 3E Door - Gaia Weapon
+.byte $04,$07 ; 3F Door - unused shop
+.byte $04,$08 ; 40 Door - unused shop
+.byte $04,$09 ; 41 Door - unused shop
+.byte $04,$0A ; 42 Door - unused shop
+.byte $04,$0B ; 43 Door - Coneria Armor
+.byte $04,$0C ; 44 Door - Pravoka Armor
+.byte $04,$0D ; 45 Door - Elfland Armor
+.byte $04,$0E ; 46 Door - Melmond Armor
+.byte $01,$00 ; 47 Grass (teleport?)
+.byte $02,$20 ; 48 Submarine (teleport to underwater shrine)
+.byte $04,$0F ; 49 Door - LakeArmor     
+.byte $04,$10 ; 4A Door - GaiaArmor     
+.byte $04,$11 ; 4B Door - UnusedShop    
+.byte $04,$12 ; 4C Door - UnusedShop    
+.byte $04,$13 ; 4D Door - UnusedShop    
+.byte $04,$14 ; 4E Door - UnusedShop    
+.byte $04,$15 ; 4F Door - ConeriaWMagic
+.byte $04,$16 ; 50 Door - ProvokaWMagic 
+.byte $04,$17 ; 51 Door - ElflandWMagic 
+.byte $04,$18 ; 52 Door - MelmondWMagic 
+.byte $04,$19 ; 53 Door - LakeWMagic    
+.byte $04,$1A ; 54 Door - ElflandWMagic2
+.byte $04,$1B ; 55 Door - GaiaWMagic    
+.byte $04,$1C ; 56 Door - GaiaWMagic2   
+.byte $04,$1D ; 57 Door - OnracWMagic   
+.byte $04,$1E ; 58 Door - LeifenWMagic  
+.byte $04,$1F ; 59 Door - ConeriaBMagic
+.byte $04,$20 ; 5A Door - ProvokaBMagic 
+.byte $04,$21 ; 5B Door - ElflandBMagic 
+.byte $04,$22 ; 5C Door - MelmondBMagic 
+.byte $04,$23 ; 5D Door - LakeBMagic    
+.byte $04,$24 ; 5E Door - ElflandBMagic2
+.byte $04,$25 ; 5F Door - GaiaBMagic    
+.byte $04,$26 ; 60 Door - GaiaBMagic2   
+.byte $04,$27 ; 61 Door - OnracBMagic   
+.byte $04,$28 ; 62 Door - LeifenBMagic  
+.byte $04,$29 ; 63 Door - ConeriaTemple
+.byte $04,$2A ; 64 Door - ElflandTemple 
+.byte $04,$2B ; 65 Door - LakeTemple    
+.byte $04,$2C ; 66 Door - GaiaTemple    
+.byte $04,$2D ; 67 Door - OnracTemple   
+.byte $04,$2E ; 68 Door - ProvokaTemple 
+.byte $04,$2F ; 69 Door - UnusedShop    
+.byte $04,$30 ; 6A Door - UnusedShop    
+.byte $04,$31 ; 6B Door - UnusedShop    
+.byte $04,$32 ; 6C Door - UnusedShop    
+.byte $04,$33 ; 6D Door - ConeriaInn   
+.byte $04,$34 ; 6E Door - ProvokaInn    
+.byte $04,$35 ; 6F Door - ElflandInn    
+.byte $04,$36 ; 70 Door - MelmondInn    
+.byte $04,$37 ; 71 Door - LakeInn       
+.byte $04,$38 ; 72 Door - GaiaInn       
+.byte $04,$39 ; 73 Door - OnracInn      
+.byte $04,$3A ; 74 Door - UnusedShop    
+.byte $04,$3B ; 75 Door - UnusedShop    
+.byte $04,$3C ; 76 Door - UnusedShop    
+.byte $04,$3D ; 77 Door - ConeriaItem  
+.byte $04,$3E ; 78 Door - ProvokaItem   
+.byte $04,$3F ; 79 Door - ElflandItem   
+.byte $04,$40 ; 7A Door - LakeItem      
+.byte $04,$41 ; 7B Door - GaiaItem      
+.byte $04,$42 ; 7C Door - OnracItem     
+.byte $04,$43 ; 7D Door - UnusedShop    
+.byte $04,$44 ; 7E Door - UnusedShop    
+.byte $C0,$DB ; 7F Grave (special) 
 
 ; Castle
 .byte $80,$00 ; In room, upper left corner 
