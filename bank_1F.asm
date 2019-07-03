@@ -7790,7 +7790,27 @@ OpenTreasureChest:
    JSR SetChestAddr
     
    @DrawOpenChest:
-    JSR WaitForVBlank
+    LDA #%00000011             ; first clunk
+    STA $400C
+    LDA #%00001011
+    STA $400E
+    LDA #$0
+    STA $400F         
+    
+    LDA #10
+    STA noise_sfx              ; play noise for 10 frames
+  : JSR WaitForVBlank
+    JSR CallMusicPlay
+    DEC noise_sfx 
+    BNE :-
+    
+    LDA #%00000011             ; second clunk
+    STA $400C
+    LDA #%00001000
+    STA $400E
+    LDA #0
+    STA $400F         
+    
     LDA $2002
     LDA doorppuaddr+1
     STA $2006

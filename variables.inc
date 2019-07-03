@@ -287,7 +287,7 @@ cur_bank        = $57
 ret_bank        = $58
 
 descboxopen     = $59
-
+noise_sfx       = $59  ; for opening chests
 
 format_buf      = $60  ; 7 bytes (5A-60) -- must not cross page bound
 
