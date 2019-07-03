@@ -150,15 +150,16 @@ BANK_EQUIPSTATS   = $0F
 BANK_TALKTOOBJ    = $10
 BANK_DIALOGUE     = $10 
 
-BANK_OBJINFO      = $11
 BANK_MAPMANPAL    = $11
 BANK_OWINFO       = $11
 BANK_SMINFO       = $11
-BANK_TREASURE     = $11
-BANK_TELEPORTINFO = $11
 BANK_STARTUPINFO  = $11
-BANK_STARTINGSTATS= $11
-BANK_BACKDROPPAL  = $11
+
+BANK_BACKDROPPAL  = $12
+BANK_STARTINGSTATS= $12
+BANK_OBJINFO      = $12
+BANK_TREASURE     = $12
+BANK_TELEPORTINFO = $12
 
 BANK_MAPCHR       = $13
 
@@ -179,7 +180,8 @@ MAPTILE_LOCKEDDOOR = $3B
 GMFLG_OBJVISIBLE   = %00000001    ; must be low bit (often shifted out)
 GMFLG_EVENT        = %00000010    ; must be bit 1 (shifted out)
 GMFLG_TCOPEN       = %00000100
-
+GMFLG_TCOPEN_2     = %00001000
+GMFLG_OBJVISIBLE_2 = %10000000    ; must be high bit (shifted out the other way)
 
 ;;;;;;;;;;;;;;;;;;
 ;;  battle formation IDs
@@ -391,36 +393,65 @@ TCITYPE_GPSTART    = TCITYPE_ARMSTART+$28
 ;;;;;;;;;;;;;;;;;;
 ;;  standard map tile properties
 
-TP_SPEC_DOOR      = %00000010
-TP_SPEC_LOCKED    = %00000100
-TP_SPEC_CLOSEROOM = %00000110
-TP_SPEC_TREASURE  = %00001000
-TP_SPEC_BATTLE    = %00001010
-TP_SPEC_DAMAGE    = %00001100
-TP_SPEC_CROWN     = %00001110
-TP_SPEC_CUBE      = %00010000
-TP_SPEC_4ORBS     = %00010010
-TP_SPEC_USEROD    = %00010100
-TP_SPEC_USELUTE   = %00010110
-TP_SPEC_EARTHORB  = %00011000
-TP_SPEC_FIREORB   = %00011010
-TP_SPEC_WATERORB  = %00011100
-TP_SPEC_AIRORB    = %00011110
+;TP_SPEC_DOOR      = %00000010
+;TP_SPEC_LOCKED    = %00000100
+;TP_SPEC_CLOSEROOM = %00000110
+;TP_SPEC_TREASURE  = %00001000
+;TP_SPEC_BATTLE    = %00001010
+;TP_SPEC_DAMAGE    = %00001100
+;TP_SPEC_CROWN     = %00001110
+;TP_SPEC_CUBE      = %00010000
+;TP_SPEC_4ORBS     = %00010010
+;TP_SPEC_USEROD    = %00010100
+;TP_SPEC_USELUTE   = %00010110
+;TP_SPEC_EARTHORB  = %00011000
+;TP_SPEC_FIREORB   = %00011010
+;TP_SPEC_WATERORB  = %00011100
+;TP_SPEC_AIRORB    = %00011110
+;TP_SPEC_MASK      = %00011110
 
-TP_SPEC_MASK      = %00011110
+;TP_TELE_EXIT      = %11000000   ; "exit" teleport (standard map to overworld map)
+;TP_TELE_NORM      = %10000000   ; "normal" teleport (standard map to standard map)
+;TP_TELE_WARP      = %01000000   ; "warp" teleport (go back to previous floor)
+;TP_TELE_NONE      = 0
 
+;TP_TELE_MASK      = %11000000
 
-TP_TELE_EXIT      = %11000000   ; "exit" teleport (standard map to overworld map)
-TP_TELE_NORM      = %10000000   ; "normal" teleport (standard map to standard map)
-TP_TELE_WARP      = %01000000   ; "warp" teleport (go back to previous floor)
-TP_TELE_NONE      = 0
+;TP_NOTEXT_MASK    = %11000010   ; if any of these bits set, "Nothing Here" is forced when you talk to tile
 
-TP_TELE_MASK      = %11000000
+;TP_BATTLEMARKER   = %00100000
+;TP_NOMOVE         = %00000001
 
-TP_NOTEXT_MASK    = %11000010   ; if any of these bits set, "Nothing Here" is forced when you talk to tile
+TP_TELE_NONE       = $00
+TP_TELE_WARP       = $01  ; "warp" teleport (go back to previous floor)
+TP_TELE_NORM       = $02  ; "normal" teleport (standard map to standard map)
+TP_TELE_EXIT       = $03  ; "exit" teleport (standard map to overworld map)
+TP_SPEC_DOOR       = $04
+TP_SPEC_LOCKED     = $05
+TP_SPEC_CLOSEROOM  = $06
+TP_SPEC_DAMAGE     = $07
+TP_SPEC_BATTLE     = $08
+TP_SPEC_TREASURE   = $09
+TP_SPEC_TREASURE_2 = $0A
+TP_SPEC_USEKEYITEM = $0B
+TP_SPEC_USESAVE    = $0C
+TP_SPEC_HP         = $0D
+TP_SPEC_MP         = $0E
+TP_SPEC_HPMP       = $0F
+TP_SPEC_CUREDEATH  = $10
+TP_SPEC_CUREAIL    = $11
+TP_SPEC_LIGHTORB   = $12
+TP_SPEC_4ORBS      = $13
+TP_SPEC_CUBE       = $14
+TP_SPEC_CROWN      = $15
 
-TP_BATTLEMARKER   = %00100000
-TP_NOMOVE         = %00000001
+TP_NOMOVE         = %10000000
+TP_HASTEXT_MASK   = %01000000
+TP_HIDESPRITE     = %00100000
+
+TP_TELE_MASK      = %00000011
+TP_SPEC_MASK      = %00011111
+TP_BATTLEMARKER   = $FF
 
 AIRORB_MAP        = $33         ; map ID that the orbs are found on
 WATERORB_MAP      = $2A

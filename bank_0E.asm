@@ -5210,6 +5210,8 @@ MainMenuResetCursorMax:
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ;  Get SM flag, and shift it into C
     BCS @SetCursorMax5      ; if not on overworld, then don't let cursor touch save option
+    
+    ;GetSMTilePropNow - for later
         LDA #6
         JMP :+
         
@@ -6711,10 +6713,15 @@ UseItem_Rod:
     BCC @CantUse        ;  if on overworld, can't use the Rod here
 
     LDA tileprop_now          ; get the properties of the tile we're stepping on
-    AND #TP_SPEC_MASK         ; mask out the 'special' bits
-    CMP #TP_SPEC_USEROD       ; see if the special bits mark this tile as a "use rod" tile
+    ;AND #TP_SPEC_MASK         ; mask out the 'special' bits
+    ;GetSMTilePropNow already did that!
+    CMP #TP_SPEC_USEKEYITEM   ; see if the special bits mark this tile as a "use key item" tile
     BNE @CantUse              ; if not... can't use the rod here
 
+    LDA tileprop_now+1        ; get the second byte
+    CMP item_rod              ; see if its the rod
+    BNE @CantUse              ; if not, can't use it here
+    
     LDY #OBJID_RODPLATE       ; check the rod plate object, to see if
     LDA game_flags, Y         ;   the rod has been used yet
     LSR A                     ;   shift that flag into C
@@ -6746,9 +6753,12 @@ UseItem_Lute:
     BCC @CantUse        ;  if SM flag clear (on overworld), can't use the Lute here
 
     LDA tileprop_now            ; get the special properties  of the tile we're stepping on
-    AND #TP_SPEC_MASK           ;  mask out 'special' bits
-    CMP #TP_SPEC_USELUTE        ;  see if this tile is marked as "use lute"
+    CMP #TP_SPEC_USEKEYITEM     ;  see if this tile is marked as "use lute"
     BNE @CantUse                ; if not... can't use
+    
+    LDA tileprop_now+1        ; get the second byte
+    CMP item_lute             ; see if its the rod
+    BNE @CantUse              ; if not, can't use it here
 
     LDY #OBJID_LUTEPLATE        ; check the lute plate object, to see if
     LDA game_flags, Y           ;   the lute has been used yet

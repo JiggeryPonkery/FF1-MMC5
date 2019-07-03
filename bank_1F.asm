@@ -2432,18 +2432,21 @@ StandardMapLoop:
 :     LDA entering_shop     ; jump ahead to shop code if entering a shop
       BNE @Shop
 
-      LDA tileprop                         ; lastly, check to see if a battle or teleport is triggered
-      AND #TP_TELE_MASK | TP_BATTLEMARKER
-      BEQ :+
-        JMP @TeleOrBattle
+      LDA tileprop          ; lastly, check to see if a battle or teleport is triggered
+      CMP #TP_BATTLEMARKER  ; if tileprop = $FF, its a battle
+      BEQ @Battle
+      CMP #TP_TELE_WARP
+      BEQ @Warp
+      CMP #TP_TELE_NORM
+      BEQ @NormalTeleport
+      CMP #TP_TELE_EXIT
+      BEQ @ExitTeleport
 
 :     JSR ProcessSMInput    ; if none of those things -- process input, and continue
   @Continue:
     JSR ClearOAM            ; clear OAM
     JSR DrawSMSprites       ; and draw all sprites
     JMP StandardMapLoop     ; then keep looping
-
-
 
   @Shop:
     JSR GetSMTilePropNow    ; get the 'now' properties of the tile the player is on
@@ -2468,11 +2471,7 @@ StandardMapLoop:
     JMP StandardMapLoop     ;  and continue looping
 
   ;; here if the player is to teleport, or to start a fight
-  @TeleOrBattle:
-    CMP #TP_TELE_WARP       ; see if this is a teleport or fight
-    BCS @TeleOrWarp         ;  if property flags >= TP_TELE_WARP, this is a teleport or Warp
-
-   ;;  Otherwise, here, this is a BATTLE
+  @Battle:
     JSR GetSMTilePropNow    ; get 'now' tile properties (don't know why -- seems useless?)
     LDA #0
     STA tileprop            ; zero tile property byte to prevent unending battles from being triggered
@@ -2498,15 +2497,12 @@ StandardMapLoop:
 :   JSR ReenterStandardMap  ; if this was just a normal battle, reenter the map
     JMP StandardMapLoop     ; and resume the loop
 
+  @ExitTeleport:
+    JMP @NextExitTeleport ; to deal with range errors...
 
-  @TeleOrWarp:              ; code reaches here if we're teleporting or warping
-    BNE @Teleport           ; if property flags = TP_TELE_WARP, this is a warp...
-      JSR ScreenWipe_Close  ; ... so just close the screen with a wipe and RTS.  This RTS
-      RTS                   ;   will either go to the overworld loop, or to one "layer" up in this SM loop
-
-  @Teleport:
-    CMP #TP_TELE_NORM     ; lastly, see if this is a normal teleport (to standard map)
-    BNE @ExitTeleport     ;    or exit teleport (to overworld map)
+  @Warp:                   ; code reaches here if we're teleporting or warping
+    JMP ScreenWipe_Close   ; ... so just close the screen with a wipe and RTS.  This RTS
+    ;RTS                   ;   will either go to the overworld loop, or to one "layer" up in this SM loop
 
   @NormalTeleport:        ; normal teleport!
     LDA sm_scroll_x       ;  push the scroll (player position), inroom flags,
@@ -2519,10 +2515,8 @@ StandardMapLoop:
     PHA
     LDA cur_tileset
     PHA
-
-    JSR ScreenWipe_Close    ; wipe the screen closed
-    LDA #BANK_TELEPORTINFO  ; swap to the bank containing teleport info
-    JSR SwapPRG_L
+    
+    JSR @TeleportThing  
 
     LDX tileprop+1          ; get the teleport ID in X for indexing teleport data
 
@@ -2560,15 +2554,13 @@ StandardMapLoop:
 
     JMP DoStandardMap       ; then JMP to DoStandardMap to reload everything that needs reloading
                             ;   and do the map loop
-
-@ExitTeleport:
-    CMP #TP_TELE_EXIT       ; lastly... check to ensure this is an exit teleport.  It always will be
-    BNE ProcessSMInput      ;   unless the battle marker bit was set, too -- in which case just jump
-                            ;   over to input processing (should never happen)
-                            
+  @TeleportThing:
     JSR ScreenWipe_Close    ; wipe the screen closed
-    LDA #BANK_TELEPORTINFO  ; swap to bank containing teleport dataa
-    JSR SwapPRG_L
+    LDA #BANK_TELEPORTINFO  ; swap to the bank containing teleport info
+    JMP SwapPRG_L                            
+
+  @NextExitTeleport:       
+    JSR @TeleportThing
 
     LDX tileprop+1          ; get the teleport ID in X
     LDA lut_ExitTele_X, X   ;  get X coord
@@ -2581,7 +2573,7 @@ StandardMapLoop:
     SBC #7
     STA ow_scroll_y
 
-    JMP DoOverworld         ; then jump to the overworld
+    JMP DoOverworld         ; then jump to the overworld    
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2762,6 +2754,7 @@ CanPlayerMoveSM:
     BEQ @CantMove                  ; then this is a nomove tile -- can't move here
 
     AND #TP_SPEC_MASK            ; otherwise, toss the NOMOVE bit and keep the special bits
+    ASL A                        ; double it
     TAX                          ; throw that in X for indexing
     LDA lut_SMMoveJmpTbl, X      ; use it as an index to get a pointer from the jump table
     STA tmp
@@ -3062,7 +3055,8 @@ GetSMTilePropNow:
     LDA tileset_prop, X   ; get the first property byte
     AND #TP_SPEC_MASK     ; isolate the 'special' bits
     STA tileprop_now      ; and record them!
-
+    LDA tileset_prop+1, X
+    STA tileprop_now+1
     RTS                   ; exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3131,26 +3125,35 @@ TalkToSMTile:
     AND #TP_SPEC_MASK         ;  see if its special bits indicate it's a treasure chest
     CMP #TP_SPEC_TREASURE
     BEQ @TreasureChest        ; if it is, jump ahead to TC routine
-
+    CMP #TP_SPEC_TREASURE_2
+    BEQ @TreasureChest2       ; if it is, jump ahead to TC routine
+    
     LDA tileprop              ; otherwise, reload property byte
-    AND #TP_NOTEXT_MASK       ; see if any of the NOTEXT bits are set
-    BNE @Nothing              ; if any are... force "Nothing Here" text
+    AND #TP_HASTEXT_MASK      ; see if the HASTEXT bit is set
+    BEQ @Nothing              ; if not... force "Nothing Here" text
 
     LDA tileprop+1            ; otherwise, simply use the 2nd property byte as the dialogue
     RTS                       ;  tied to this tile, and exit
 
   @Nothing:                   ; if forced "Nothing Here" text...
-    LDA #DLGID_NOTHING
+    ;LDA #DLGID_NOTHING
+    ; A will be 0 here 
     RTS
 
   @TreasureChest:             ; if the tile is a treasure chest
     LDX tileprop+1            ; put the chest ID in X
     LDA game_flags, X         ; get the game flag associated with that chest
     AND #GMFLG_TCOPEN         ;   to see if the chest has already been opened
-    BEQ :+                    ; if it has....
+    JMP :+                    
+
+  @TreasureChest2:            ; if the tile is a treasure chest
+    LDX tileprop+1            ; put the chest ID in X
+    LDA game_flags, X         ; get the game flag associated with that chest
+    AND #GMFLG_TCOPEN_2       ;   to see if the chest has already been opened
+:   BEQ :+                    ; if it has....
       LDA #DLGID_EMPTYTC      ; select "The Chest is empty" text, and exit
       RTS
-
+      
 :   JMP OpenTreasureChest     ; otherwise, open the chest
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3272,6 +3275,32 @@ Copy256:
     INC tmp+3          ; inc dest pointer
     RTS                ; and exit
 
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+;;    
+;; JIGS - redrawing treasure chests to be open!   
+;;   
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
+    
+; The top part of chests are 2A and 2B, and need to be replaced with 7A and 7B
+; Easy enough; ORA $70 ... 
+; First, find the treasure chest's tile ID
+; Reverse tileprop? 
+;
+;
+;
+; got to get the upper left tile at $0500 and the upper right in $0580
+;
+;
+;
+;
+;
+;
+
+    
+    
+    
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Standard Map Movement  [$CC80 :: 0x3CC90]
@@ -3585,34 +3614,52 @@ SMMove_Up:
 
 
 lut_SMMoveJmpTbl:
-  .WORD SMMove_Norm     
-  .WORD SMMove_Door    
-  .WORD SMMove_Door     
-  .WORD SMMove_CloseRoom
-  .WORD SMMove_Treasure 
-  .WORD SMMove_Battle  
-  .WORD SMMove_Dmg      
-  .WORD SMMove_Crown
-  .WORD SMMove_Cube     
-  .WORD SMMove_4Orbs   
-  .WORD SMMove_UseRod   
-  .WORD SMMove_UseLute
-  .WORD SMMove_LightOrb
-  .WORD SMMove_Norm
-  .WORD SMMove_Treasure
-  .WORD SMMove_Norm  
-  
-  ;.WORD SMMove_EarthOrb 
-  ;.WORD SMMove_FireOrb 
-  ;.WORD SMMove_WaterOrb 
-  ;.WORD SMMove_AirOrb
+;;  .WORD SMMove_Norm       ; 
+;;  .WORD SMMove_Door       ; 
+;;  .WORD SMMove_Door       ; 
+;;  .WORD SMMove_CloseRoom  ; 
+;;  .WORD SMMove_Treasure   ; 
+;;  .WORD SMMove_Battle     ; 
+;;  .WORD SMMove_Dmg        ; 
+;;  .WORD SMMove_Crown      ; 
+;;  .WORD SMMove_Cube       ; 
+;;  .WORD SMMove_4Orbs      ; 
+;;  .WORD SMMove_UseRod     ; 
+;;  .WORD SMMove_UseLute    ; 
+;;  .WORD SMMove_LightOrb   ; 
+;;  .WORD SMMove_Norm       ; 
+;;  .WORD SMMove_Treasure   ; 
+;;  .WORD SMMove_Norm       ; 
+;;  
+;;  ;.WORD SMMove_EarthOrb 
+;;  ;.WORD SMMove_FireOrb 
+;;  ;.WORD SMMove_WaterOrb 
+;;  ;.WORD SMMove_AirOrb
 
- ;; SMMove_Treasure  [$CDC1 :: 0x3CDD1]
- ;;  TP_SPEC_TREASURE
-
-SMMove_Treasure:
-    SEC               ; SEC to prevent player movement (can't move onto treasure chests)
-    RTS
+    .WORD SMMove_Norm
+    .WORD SMMove_Norm ; Warp to previous map
+    .WORD SMMove_Norm ; Teleport to map
+    .WORD SMMove_Norm ; Teleport to overworld
+    .WORD SMMove_Door
+    .WORD SMMove_Door 
+    .WORD SMMove_CloseRoom
+    .WORD SMMove_Dmg
+    .WORD SMMove_Battle
+    .WORD SMMove_NoMove ; Treasure chest
+    .WORD SMMove_NoMove ; Treasure chest
+    .WORD SMMove_Norm ; UseKeyItem    
+    .WORD SMMove_Norm ; UseSave    
+    .WORD SMMove_NoMove ; HP    
+    .WORD SMMove_NoMove ; MP
+    .WORD SMMove_NoMove ; HP/MP
+    .WORD SMMove_NoMove ; CureDeath    
+    .WORD SMMove_NoMove ; CureAilments
+    .WORD SMMove_LightOrb
+    .WORD SMMove_4Orbs 
+    .WORD SMMove_Cube
+    .WORD SMMove_Crown
+    
+    
 
  ;; SMMove_Battle  [$CDC3 :: 0x3CDD3]
  ;;  TP_SPEC_BATTLE
@@ -3641,56 +3688,57 @@ SMMove_Battle:
     LDA #TP_BATTLEMARKER  ;   record it so the appropriate battle is triggered.
     STA tileprop          ; and also replace the tileprop byte with the battle marker bit to start a battle
 
- ;; SMMove_UseRod, SMMove_UseLute  [$CE0E :: 0x3CE1E]
- ;;  this routine is duplicated a lot -- these are for TP_SPEC_USEROD and TP_SPEC_USELUTE    
-SMMove_UseRod:
-SMMove_UseLute:    
+ 
+SMMove_UseKeyItem:
 SMMove_Dmg:
+SMMove_Norm:
+SMMove_OK:
     CLC               ; CLC because movement is A-OK, and exit
     RTS
 
- ;; SMMove_Crown  [$CDE6 :: 0x3CDF6]
- ;;  TP_SPEC_CROWN
+;SMMove_Crown:
+;    LDA item_crown              ; see if the player has the crown
+;    BEQ SMMove_NoSpecialItem    ; if not, can't move
+;    BNE SMMove_HaveSpecialItem  ; otherwise, can move (always branches)
+
+;SMMove_Cube:
+;    LDA item_cube                ; see if player has the cube
+;    BNE SMMove_HaveSpecialItem   ; otherwise, can move (always branches)    
+    
+;SMMove_NoSpecialItem:
+;    LDA #0             ; erase first byte of tile properties to prevent teleport
+;    STA tileprop
 
 SMMove_Crown:
     LDA item_crown              ; see if the player has the crown
-    BEQ SMMove_NoSpecialItem    ; if not, can't move
     BNE SMMove_HaveSpecialItem  ; otherwise, can move (always branches)
-
- ;; SMMove_NoSpecialItem  [$CDED :: 0x3CDFD]
- ;;  called when the player does NOT have the special item required to move here
-
-SMMove_NoSpecialItem:
-    SEC                ; SEC to disallow movement
-    LDA #0             ; erase first byte of tile properties to prevent teleport
-    STA tileprop
-    RTS
-
- ;; SMMove_Cube  [$CDF3 :: 0x3CE03]
- ;;  TP_SPEC_CUBE
+    BEQ SMMove_OK
 
 SMMove_Cube:
     LDA item_cube                ; see if player has the cube
-    BEQ SMMove_NoSpecialItem     ; if not, can't move
-    BNE SMMove_HaveSpecialItem   ; otherwise, can move (always branches)
+    BNE SMMove_HaveSpecialItem   ; otherwise, can move (always branches)    
+    BEQ SMMove_OK
 
- ;; SMMove_4Orbs  [$CDFA :: 0x3CE0A]
- ;;  TP_SPEC_4ORBS
+SMMove_NoMove:
+    SEC                ; SEC to disallow movement
+    RTS
 
 SMMove_4Orbs:
     LDA orb_fire              ; check to see if the player has all four orbs lit
     AND orb_water
     AND orb_air
     AND orb_earth
-    BEQ SMMove_NoSpecialItem  ; if not, can't move
+    BEQ SMMove_NoMove         ; if not, can't move
                               ; otherwise can (flow directly into SMMove_HaveSpecialItem)
 
  ;; SMMove_HaveSpecialItem  [$CE08 :: 0x3CE18]
  ;;  called when the player has a special item required to move onto this tile
 
 SMMove_HaveSpecialItem:
-    LDA #$54
-    STA music_track   ; play music track $54 (fanfare)
+    ;LDA #$54
+    ;STA music_track   ; play music track $54 (fanfare)
+    LDA #TP_TELE_NORM ; now overwrite the properties with a map to map teleport
+    STA tileprop    
     CLC               ; CLC to allow movement
     RTS
 
@@ -3711,19 +3759,19 @@ SMMove_EarthOrb:
     LDA orb_earth          ; see if orb already lit
     BNE SMMove_OK          ; if it is, just have player move normally
     INC orb_earth          ; otherwise, light up the orb
-    BNE SMMove_AltarEffect ; and do the altar effect (always branches)
+    JMP SMMove_AltarEffect ; and do the altar effect (always branches)
 
 SMMove_FireOrb:
     LDA orb_fire
     BNE SMMove_OK
     INC orb_fire
-    BNE SMMove_AltarEffect
+    JMP SMMove_AltarEffect
 
 SMMove_WaterOrb:
     LDA orb_water
     BNE SMMove_OK
     INC orb_water
-    BNE SMMove_AltarEffect
+    JMP SMMove_AltarEffect
 
 SMMove_AirOrb:
     LDA orb_air
@@ -3744,6 +3792,8 @@ SMMove_CloseRoom:
     EOR #$84          ; otherwise, clear the inroom flag, and set the 'exiting' flag
     STA inroom        ; record that so the room will be exited
     JSR PlayDoorSFX   ; play the door sound effect
+    CLC                   ; CLC to allow player to move
+    RTS
 
     ; no JMP or RTS -- code continues on to SMMove_OK
     ;  note the game doesn't set doorppuaddr here even though closing the door
@@ -3763,29 +3813,19 @@ SMMove_CloseRoom:
     ; Another possible fix is to rebuild doorppuaddr here to point to 1 row above where the player
     ;  is moving to (since close door graphics are generally 1 tile below the door they're closing)
 
- ;; SMMove_OK  [$CE4F :: 0x3CE5F]
- ;;  branched/jumped to by various routines when a move is legal
-
-SMMove_Norm:
-SMMove_OK:
-    CLC        ; CLC to indicate player can move, then exit
-    RTS
-
- ;; SMMove_Norm  [$CE51 :: 0x3CE61]
- ;;  for normal (nonspecial) tiles.
-
-;    CLC        ; CLC because player can move here
-;    RTS
 
  ;; SMMove_Door  [$CE53 :: 0x3CE63]
  ;;  Called for TP_SPEC_DOOR and TP_SPEC_LOCKED
 
 SMMove_Door:
     LSR A                                       ; downshift to get the door bits into the low 2 bits
-    AND #(TP_SPEC_DOOR | TP_SPEC_LOCKED) >> 1   ; mask out the door bits
+    ;AND #(TP_SPEC_DOOR | TP_SPEC_LOCKED) >> 1   ; mask out the door bits
 
-    CMP #TP_SPEC_LOCKED >> 1  ; see if the door is locked
-    BNE @OpenDoor             ; if not.. open the door
+    ;CMP #TP_SPEC_LOCKED >> 1  ; see if the door is locked
+    ;BNE @OpenDoor             ; if not.. open the door
+    LSR A  ; downshift again to return to actual tileprop id
+    BCC @OpenDoor
+    ;; JIGS - locked door is %xxxxx101 and normal door is $xxxxx100, so shifting the 1 to check carry is good enough
 
     LDX #0                    ; otherwise (door is locked)
     STX tileprop+1            ; erase the secondary attribute byte (prevent it from being a locked shop)
@@ -4359,7 +4399,7 @@ StartMapMove:
     JMP @Finalize        ; and jump to @Finalize to do final stuff
 
 
-    RTS                  ; useless RTS (impossible to reach)
+    ;RTS                  ; useless RTS (impossible to reach)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10499,7 +10539,7 @@ LoadShopBGCHRPalettes:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadBattleBGCHRAndPalettes:
-    LDA #BANK_OWINFO              ; Swap to BANK_OWINFO
+    LDA #BANK_BACKDROPPAL              ; Swap to BANK_OWINFO
     JSR SwapPRG_L
 
     ;; JIGS - slight changes
@@ -10929,7 +10969,7 @@ lut_ShopPalettes:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadBattleBackdropPalette:
-     LDA #BANK_OWINFO         ; Swap to required bank
+     LDA #BANK_BACKDROPPAL    ; Swap to required bank
      JSR SwapPRG_L
      LDX ow_tile              ; Get last OW tile stepped on
      LDA lut_BtlBackdrops, X  ; use it to index and get battle backdrop ID
