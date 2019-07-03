@@ -586,7 +586,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; Pillar
 .byte $01,$00 ; Grass - Warp to previous map
 .byte $06,$00 ; Cobble floor, closes doors
-.byte $05,$BF ; Closed door (locked)
+.byte $45,$BF ; Closed door (locked)
 .byte $80,$00 ; Open air/sky
 .byte $03,$04 ; Grass - Exit Coneria Castle
 .byte $00,$00 ; Floor
@@ -716,7 +716,7 @@ lut_SMTilesetProp:
 .byte $00,$00 ; Blank floor
 .byte $00,$00 ; ?? Weird looking cave floor ??
 .byte $06,$00 ; Cave floor, closes doors
-.byte $05,$BF ; Closed door (locked)
+.byte $45,$BF ; Closed door (locked)
 .byte $80,$00 ; Water/Lava
 .byte $07,$00 ; Damage tile, lava
 .byte $80,$00 ; Cave filler
@@ -846,7 +846,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; Well
 .byte $07,$00 ; Damage tile, Ice
 .byte $06,$00 ; Cave floor, closes doors
-.byte $05,$BF ; Closed door (locked)
+.byte $45,$BF ; Closed door (locked)
 .byte $00,$00 ; Blank floor
 .byte $80,$00 ; Cave filler
 .byte $00,$00 ; Blank floor
@@ -976,7 +976,7 @@ lut_SMTilesetProp:
 .byte $00,$00 ; Floor glyph
 .byte $80,$00 ; Pillar
 .byte $06,$00 ; Tower floor, closes doors
-.byte $05,$BF ; Closed door (locked)
+.byte $45,$BF ; Closed door (locked)
 .byte $00,$00 ; Shag carpeting?
 .byte $00,$00 ; Blank floor
 .byte $00,$00 ; Blank floor
@@ -1106,7 +1106,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; Pillar
 .byte $00,$00 ; blank floor
 .byte $06,$00 ; Shrine floor, closes doors
-.byte $05,$BF ; Closed door (locked)
+.byte $45,$BF ; Closed door (locked)
 .byte $80,$00 ; Water
 .byte $00,$00 ; Shag carpeting?
 .byte $00,$00 ; Blank floor
@@ -1236,7 +1236,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; Water
 .byte $80,$00 ; Space
 .byte $06,$00 ; Shrine floor, closes doors
-.byte $05,$BF ; Closed door (locked)
+.byte $45,$BF ; Closed door (locked)
 .byte $00,$00 ; Blank floor
 .byte $00,$00 ; Blank floor
 .byte $00,$00 ; Blank floor
@@ -1366,7 +1366,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; Pillar
 .byte $80,$00 ; Block
 .byte $06,$00 ; Temple floor, closes doors 
-.byte $05,$BF ; Closed door (locked) 
+.byte $45,$BF ; Closed door (locked) 
 .byte $00,$00 ; Grass
 .byte $80,$00 ; Sky
 .byte $00,$00 ; Temple floor
