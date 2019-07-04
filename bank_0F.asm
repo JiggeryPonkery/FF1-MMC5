@@ -1461,7 +1461,7 @@ IntroTitlePrepare_BankZ:
 
     
 ClearNT_FillBackground:
-    LDA #$F2; 6D ; EF
+    LDA #$7F; 6D ; EF
     STA MMC5_tmp
     JMP ClearNT_Color
     
@@ -2561,18 +2561,18 @@ DrawOptions:
   .byte BANK_MENUS
   
   LDA $2002          ; PPU toggle... needed or not?
-  LDA #>$2239        ; Color is drawn here
+  LDA #>$223A        ; Color is drawn here
   STA $2006
-  LDA #<$2239
+  LDA #<$223A
   STA $2006
   LDA format_buf-2
   STA $2007
   LDA format_buf-1
   STA $2007
   
-  LDA #>$21FA        ; Respond rate is drawn here
+  LDA #>$21FB        ; Respond rate is drawn here
   STA $2006
-  LDA #<$21FA
+  LDA #<$21FB
   STA $2006
   LDA BattleTextSpeed ; get the current respond rate (which is zero based)
   CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
@@ -2582,7 +2582,7 @@ DrawOptions:
   STA $2005
   STA $2005
  
-  LDA #27
+  LDA #29
   STA dest_x
   LDA #15
   STA dest_y
