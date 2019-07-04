@@ -159,6 +159,7 @@
 .import WeaponArmorPrices
 .import lut_EnemyAttack
 .import lut_DialoguePtrTbl
+.import lut_DialoguePtrTbl_2
 .import DumbBottleThing
 .import lut_Domains
 .import lut_OWPtrTbl
@@ -3121,7 +3122,11 @@ GetSMTileProperties:
 
 TalkToSMTile:
     JSR GetSMTileProperties   ; get the properties of the tile at the given coords
+    STY tmp+10                ; backup Y
 
+    LDA #BANK_DIALOGUE        ; set the bank to print from
+    STA DialogueTable_1or2        
+    
     LDA tileprop              ; get 1st property byte
     AND #TP_SPEC_MASK         ;  see if its special bits indicate it's a treasure chest
     CMP #TP_SPEC_TREASURE
@@ -3137,8 +3142,7 @@ TalkToSMTile:
     RTS                       ;  tied to this tile, and exit
 
   @Nothing:                   ; if forced "Nothing Here" text...
-    ;LDA #DLGID_NOTHING
-    ; A will be 0 here 
+    LDA #DLGID_NOTHING
     RTS
 
   @TreasureChest:             ; if the tile is a treasure chest
@@ -3151,11 +3155,13 @@ TalkToSMTile:
     LDX tileprop+1            ; put the chest ID in X
     LDA game_flags, X         ; get the game flag associated with that chest
     AND #GMFLG_TCOPEN_2       ;   to see if the chest has already been opened
-:   BEQ :+                    ; if it has....
+  : BEQ :+                    ; if it has....
+      JSR IsThisAChest        ; if its not a chest tile, don't print any dialogue
+      BNE @Nothing
       LDA #DLGID_EMPTYTC      ; select "The Chest is empty" text, and exit
       RTS
       
-:   JMP OpenTreasureChest     ; otherwise, open the chest
+  : JMP OpenTreasureChest     ; otherwise, open the chest
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3622,8 +3628,8 @@ lut_SMMoveJmpTbl:
     .WORD SMMove_CloseRoom
     .WORD SMMove_Dmg
     .WORD SMMove_Battle
-    .WORD SMMove_NoMove ; Treasure chest
-    .WORD SMMove_NoMove ; Treasure chest
+    .WORD SMMove_Norm ; Treasure
+    .WORD SMMove_Norm ; Treasure
     .WORD SMMove_Norm ; UseKeyItem    
     .WORD SMMove_Norm ; UseSave    
     .WORD SMMove_NoMove ; HP    
@@ -4100,6 +4106,8 @@ PrepStandardMap:
     LSR A                    ; and halve it
     TAX                      ; then put it into X
     LDA tileset_data+$100, X ; Load up the upper left tile of the chest
+    CMP #$2A                 ; see if its actually a treasure box graphic...
+    BNE @IncY2               ; if not, skip it; otherwise
     ORA #TP_TREASURE_OPEN    ; ORA with #$70 to change it to the open chest tile
     STA tileset_data+$100, X ; and save it
     LDA tileset_data+$180, X ; Do the same with the upper right tile
@@ -4166,7 +4174,7 @@ PrepStandardMap:
  ;; JIGS - moving this to the bottom so I can add some code without a critical timing error...
 .byte $00
 .byte $00 ; and now fixing it again
-;.byte $00
+.byte $00
 ;.byte $00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5996,7 +6004,7 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-.byte $00,$00,$00
+.byte $00
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going
@@ -7267,29 +7275,14 @@ DrawDialogueString_Done:
 DrawDialogueString:
     TAX                   ; put string ID in X temporarily
 
-    LDA #BANK_DIALOGUE
+    LDA DialogueTable_1or2 ; this is set by NPC's lut_MapObjTalkData stuff ; $10 if using first table, $11 if second
     STA cur_bank          ; set cur_bank to bank containing dialogue text (for Music_Play)
     JSR SwapPRG_L         ; and swap to that bank
 
-;    TXA                   ; get the string ID back
-;    ASL A                 ; double it (2 bytes per pointer)
-;    TAX                   ; and put in X for indexing
-;    BCS @HiTbl            ; if string ID was >= $80 use 2nd half of table, otherwise use first half
-
-;    @LoTbl:
-;      LDA lut_DialoguePtrTbl, X        ; load up the pointer into text_ptr
-;      STA text_ptr
-;      LDA lut_DialoguePtrTbl+1, X
-;      STA text_ptr+1
-;      JMP @PtrLoaded                   ; then jump ahead
-
-;    @HiTbl:
-;      LDA lut_DialoguePtrTbl+$100, X   ; same, but read from 2nd half of pointer table
-;      STA text_ptr
-;      LDA lut_DialoguePtrTbl+$101, X
-;      STA text_ptr+1
-
-   JSR GetDialogueString
+    JSR GetDialogueString
+    
+    ;LDA #BANK_DIALOGUE
+    ;STA DialogueTable_1or2 ; reset to use $10 
 
   @PtrLoaded:             ; here, text_ptr points to the desired string
     LDA #10
@@ -7660,21 +7653,18 @@ lut_NTRowStartHi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 OpenTreasureChest:
-    ;TYA
-    ;LSR A                    ; halve it again
-    ;PHA                      ; save Y
-
     LDA #BANK_TREASURE       ; swap to bank containing treasure chest info
     JSR SwapPRG_L
 
-    LDX tileprop
     LDA tileprop+1           ; double chest index and put in X
-    CPX #TP_SPEC_TREASURE_2
+    ASL A                    ; this might set carry
+    TAX
+    
+    LDA tileprop
+    AND #TP_SPEC_TREASURE_2
     BEQ @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
     
    @ChestTable_1: 
-    ASL A
-    TAX
     BCC :+
     
     LDA lut_Treasure+$101, X ; if treasure chest is over $7F, check the second half of the LUT
@@ -7690,8 +7680,6 @@ OpenTreasureChest:
     JMP @CheckTreasure
     
    @ChestTable_2: 
-    ASL A
-    TAX
     BCC :+
     
     LDA lut_Treasure_2+$101, X ; if treasure chest is over $7F, check the second half of the LUT
@@ -7723,7 +7711,7 @@ OpenTreasureChest:
     
    @Gold:
     LDA dlg_itemid
-    JSR LoadPrice            ; get the price of the item (the amount of gold in the chest)
+    JSR LoadTreasurePrice    ; get the price of the item (the amount of gold in the chest)
     JSR AddGPToParty         ; add that price to the party's GP
     JMP @OpenChest           ; then mark the chest as open, and exit
     
@@ -7745,7 +7733,6 @@ OpenTreasureChest:
       JMP @OpenChest
     
    @TooFull:                  ; If too full...
-    ;PLA
     LDA #DLGID_CANTCARRY     ; select "You can't carry any more" text
     RTS
     
@@ -7781,6 +7768,9 @@ OpenTreasureChest:
     ORA #GMFLG_TCOPEN_2
     
   : STA game_flags, X        ; 
+   
+   JSR IsThisAChest
+   BNE @NotChest             ; so skip ahead to alternate message
 
    LDA #0                    ; since SetChestAddr hijacks the door-drawing code
    STA tileprop+1            ; tileprop+1 needs to be 0
@@ -7822,11 +7812,20 @@ OpenTreasureChest:
     STA $2007
     JSR SetSMScroll
    
-    LDA #DLGID_TCGET         ; put the treasure chest dialogue ID in A before exiting!
+  : LDA #DLGID_TCGET         ; put the treasure chest dialogue ID in A before exiting!
+    RTS
+ 
+  @NotChest:
+    LDA #DLGID_HIDDENTREASURE
     RTS
 
-
-  
+IsThisAChest:
+   LDA tmp+10                ; get backed-up Y
+   LSR A                     ; halve it
+   TAY                       ; put it back in Y
+   LDA tsa_ul, X             ; use it to index the upper left chest tile
+   CMP #$2A                  ; if its not $2A, its not using the chest graphic
+   RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8897,7 +8896,12 @@ DrawOWSprites:
 
 
 DrawPlayerMapmanSprite:
-    LDA #$70
+    LDA tileprop
+    AND #TP_HIDESPRITE
+    BEQ :+ 
+      RTS                  ; exit without drawing player
+
+  : LDA #$70
     STA spr_x              ; set X coord to $70 (7 tiles from left of screen)
 
     LDA lut_VehicleSprY, Y ; get proper Y coord from LUT (different vehicles have different Y coords)
@@ -9756,7 +9760,7 @@ CanMapObjMove:             ; first thing to check is the map
     ASL A                  ; double the tile number (2 bytes of properties per tile)
     TAY                    ; throw in Y for indexing
     LDA tileset_data, Y    ; fetch the first byte of properties for this tile
-    AND #TP_TELE_MASK | TP_NOMOVE  ; see if this tile is a teleport tile, or a tile you can't move on
+    AND #TP_TELE_MASK | TP_NOMOVE | TP_HIDESPRITE ; see if this tile is a teleport tile, or a tile you can't move on
     BEQ :+                 ; if either teleport or nomove, NPCs can't walk here, so 
       SEC                  ;  SEC to indicate failure (can't move)
       RTS                  ; and exit
@@ -11396,6 +11400,8 @@ LoadPrice:
     JMP :++
 
   : LDA tmp+2
+  
+LoadTreasurePrice:
     ASL A
     STA tmp+2
     LDA #>lut_ItemPrices

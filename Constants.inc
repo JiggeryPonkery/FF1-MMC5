@@ -147,21 +147,23 @@ BANK_Z            = $0F
 BANK_ENEMYSTATS   = $0F
 BANK_EQUIPSTATS   = $0F
 
-BANK_TALKTOOBJ    = $10
 BANK_DIALOGUE     = $10 
+BANK_TALKTOOBJ    = $10
 
-BANK_MAPMANPAL    = $11
-BANK_OWINFO       = $11
-BANK_SMINFO       = $11
-BANK_STARTUPINFO  = $11
+BANK_DIALOGUE_2   = $11 
 
-BANK_BACKDROPPAL  = $12
-BANK_STARTINGSTATS= $12
-BANK_OBJINFO      = $12
-BANK_TREASURE     = $12
-BANK_TELEPORTINFO = $12
+BANK_MAPMANPAL    = $12
+BANK_OWINFO       = $12
+BANK_SMINFO       = $12
+BANK_STARTUPINFO  = $12
 
-BANK_MAPCHR       = $13
+BANK_BACKDROPPAL  = $13
+BANK_STARTINGSTATS= $13
+BANK_OBJINFO      = $13
+BANK_TREASURE     = $13
+BANK_TELEPORTINFO = $13
+
+BANK_MAPCHR       = $14
 
 BANK_OWMAP        = $1E
 
@@ -377,10 +379,12 @@ OBJID_BLACKORB     = $CA
 ;;
 
 DLGID_NOTHING      = $00   ; "Nothing Here"
+DLGID_HIDDENTREASURE = $01 ; "Searching around, you find..."
 DLGID_DONTBEGREEDY = $3A   ; from Smith if you have too many weapons
 DLGID_TCGET        = $F0   ; "In this chest you find..."
 DLGID_CANTCARRY    = $F1   ; "You can't carry anymore"
 DLGID_EMPTYTC      = $F2   ; "this treasure chest is empty"
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;  treasure item type ranges
