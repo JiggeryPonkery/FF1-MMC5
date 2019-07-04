@@ -7435,7 +7435,7 @@ DrawDialogueString:
       STA text_ptr
       
       ;; JIGS - swap back to dialogue bank
-      LDA #BANK_DIALOGUE
+      LDA DialogueTable_1or2
       JSR SwapPRG_L         
       ;;
 

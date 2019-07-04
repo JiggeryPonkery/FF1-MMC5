@@ -1750,7 +1750,7 @@ lut_MapObjTalkData:
 .byte $0C,$7A,$79,$00,$11         ; 68 ; Talk_ifvis          ; Melmond townsfolk start
 .byte $00,$7B,$00,$00,$11         ; 69 ; Talk_norm                               v
 .byte $00,$7C,$7D,$00,$11         ; 6A ; Talk_ifearthvamp                        v
-.byte EARTHORB,$7F,$7E,$11        ; 6B ; Talk_ifitem     (Earth Orb)        v   
+.byte EARTHORB,$7F,$7E,$00,$11    ; 6B ; Talk_ifitem     (Earth Orb)        v   
 .byte $0C,$81,$80,$00,$11         ; 6C ; Talk_ifvis                              v
 .byte $00,$83,$18,$00,$11         ; 6D ; Talk_ifearthvamp                        v
 .byte $00,$82,$00,$00,$11         ; 6E ; Talk_norm                               v

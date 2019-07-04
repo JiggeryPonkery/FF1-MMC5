@@ -6729,7 +6729,7 @@ UseItem_Rod:
 
     JSR LongCall
     .word HideMapObject
-    .byte BANK_DIALOGUE
+    .byte BANK_TALKTOOBJ
     ;JSR HideMapObject           ; otherwise.. first time rod is being used.  Hide the rod plate
     LDA #41                      ;  load up the relevent description text
     JSR DrawItemDescBox_Fanfare ;  and draw it with fanfare!
@@ -6768,7 +6768,7 @@ UseItem_Lute:
     ASL A                       ; completely pointless shift (undoes above LSR, but has no real effect)
     JSR LongCall
     .word HideMapObject
-    .byte BANK_DIALOGUE
+    .byte BANK_TALKTOOBJ
     ;JSR HideMapObject           ; hide the lute plate object
     LDA #40                     ; get relevent description text
     JSR DrawItemDescBox_Fanfare ;  and draw it ... WITH FANFARE!

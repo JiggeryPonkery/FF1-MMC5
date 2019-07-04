@@ -6,6 +6,8 @@ BANK_THIS = $11
 
 .segment "BANK_11"
 
+;.export GetDialogueString
+
 
 lut_DialoguePtrTbl:
 .WORD EMPTY             ; 0  ; Nothing here.
