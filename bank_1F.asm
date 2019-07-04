@@ -440,7 +440,7 @@ DoOWTransitions:
     LDA entering_shop     ; see if we're entering a shop (caravan)
     BEQ @SkipShop         ; if not... skip it
 
-      JSR GetOWTile       ; Get overworld tile (why do this here?  doesn't make sense)
+      ;JSR GetOWTile       ; Get overworld tile (why do this here?  doesn't make sense)
       LDA #$00
       JSR CyclePalettes   ; cycle out the palette
 
@@ -671,9 +671,11 @@ FlyAirship:
 
 
 ProcessOWInput:
-    LDA tileprop     ; check properties of tile we just stepped on
-    AND #OWTP_FOREST ; see if the forest bit is on
-    STA inforest     ; and store result in 'inforest'
+    ;LDA tileprop     ; check properties of tile we just stepped on
+    ;AND #OWTP_FOREST ; see if the forest bit is on
+    ;STA inforest     ; and store result in 'inforest'
+    ;; JIGS - it is an odd place, and will result in sprites coming out of the forest if you can't move!
+    
                  ; seems like an odd place to do that... since it has nothing to do with input
 
     LDA vehchgpause  ; see if we're in the middle of a vehicle change pause
@@ -806,7 +808,7 @@ ProcessOWInput:
 
   @CantMove:
     LDA #0
-    STA tileprop         ; if you can't move... kill tile properties
+    ;STA tileprop         ; if you can't move... kill tile properties
     STA tileprop+1       ; to prevent undesired teleports/battles
     RTS                  ; and exit
 
@@ -1764,6 +1766,7 @@ IsOnBridge:
     CMP bridge_y
     BNE IsOnCanal      ; same with Y coord
 
+OnABridgeSuccess:    
     LDA #0             ; otherwise... success!  we're on the bridge!
     STA tileprop+1     ;  zero the tileprop+1
     CLC                ; CLC to indicate success
@@ -1788,12 +1791,13 @@ IsOnCanal:
 
     LDA tmp+3
     CMP canal_y
-    BNE @Fail          ; Y coord
+    BEQ OnABridgeSuccess
+    ;BNE @Fail          ; Y coord
 
-    LDA #0             ; do all same stuff on success
-    STA tileprop+1
-    CLC
-    RTS
+    ;LDA #0             ; do all same stuff on success
+    ;STA tileprop+1
+    ;CLC
+    ;RTS
 
   @Fail:
     SEC                ; SEC to indicate failure
@@ -1867,7 +1871,10 @@ GetOWTile:
     LDA tileset_prop, X  ; get the first property byte from the tileset
     AND #OWTP_SPEC_MASK  ; mask out the special bits
     STA tileprop_now     ; and record it
-
+    LDA tileset_prop, X  ; get it again
+    AND #OWTP_FOREST     ; see if the forest bit is on
+    ;STA inforest         ; and store result in 'inforest'
+    
     RTS              ; then exit
 
 
@@ -2451,7 +2458,7 @@ StandardMapLoop:
     JMP StandardMapLoop     ; then keep looping
 
   @Shop:
-    JSR GetSMTilePropNow    ; get the 'now' properties of the tile the player is on
+   ; JSR GetSMTilePropNow    ; get the 'now' properties of the tile the player is on
     LDA #0                  ;   this seems totally useless to do here
     STA inroom              ; clear the inroom flags so that we're out of rooms when we enter the shop
     LDA #2                  ;   this is to counter the effect of shop enterances also being doors that enter rooms
@@ -2474,7 +2481,7 @@ StandardMapLoop:
 
   ;; here if the player is to teleport, or to start a fight
   @Battle:
-    JSR GetSMTilePropNow    ; get 'now' tile properties (don't know why -- seems useless?)
+   ; JSR GetSMTilePropNow    ; get 'now' tile properties (don't know why -- seems useless?)
     LDA #0
     STA tileprop            ; zero tile property byte to prevent unending battles from being triggered
     JSR BattleTransition    ; do the battle transition effect
@@ -2766,9 +2773,11 @@ CanPlayerMoveSM:
     JMP (tmp)                    ; jump to the routine in the jumptable
 
   @CantMove:
-    LDA #0                     ; if they couldn't move...
+    ;LDA #0                     ; if they couldn't move...
+    LDA tileprop
+    AND #TP_HIDESPRITE    
     STA tileprop               ; clear tile properties to prevent a battle or teleport
-    STA tileprop+1             ; or somesuch
+    ;STA tileprop+1             ; or somesuch
     SEC                        ;  and SEC to indicate they can't move
     RTS
 
@@ -4175,7 +4184,7 @@ PrepStandardMap:
 .byte $00
 .byte $00 ; and now fixing it again
 .byte $00
-;.byte $00
+.byte $00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8831,7 +8840,8 @@ DrawOWSprites:
   @OnFoot:
     JSR DrawPlayerMapmanSprite  ; draw the mapman sprite
 
-    LDA inforest         ; check to see if we're in the forest
+    JSR GetOWTile        ; get the CURRENT tile they're standing on; "inforest" is in A when it exits
+    ;LDA inforest        ; check to see if we're in the forest
     BEQ @NotInForest     ; if not, skip ahead
 
       LDA sprindex       ; if we are in a forest... hide the bottom half of the player by
@@ -8839,9 +8849,15 @@ DrawOWSprites:
       SBC #$0C           ; subtract $C and put it in X (this will point it to the 
       TAX                ;   2nd of the 4 8x8 sprites drawn -- DL player mapman sprite)
 
-      LDA #$F4           ; new Y coord = $F4 (offscreen -- removes the sprite)
-      STA oam+$00, X     ;  hide DL sprite
-      STA oam+$08, X     ;  hide DR sprite
+     ; LDA #$F4           ; new Y coord = $F4 (offscreen -- removes the sprite)
+     ; STA oam+$00, X     ;  hide DL sprite
+     ; STA oam+$08, X     ;  hide DR sprite
+      LDA oam_a, X
+      ORA #$20
+      STA oam_a, X
+      LDA oam_a+8, X
+      ORA #$20
+      STA oam_a+8, X
 
   @NotInForest:
     LDA airship_vis      ; check airship visibility
@@ -8896,12 +8912,7 @@ DrawOWSprites:
 
 
 DrawPlayerMapmanSprite:
-    LDA tileprop
-    AND #TP_HIDESPRITE
-    BEQ :+ 
-      RTS                  ; exit without drawing player
-
-  : LDA #$70
+    LDA #$70
     STA spr_x              ; set X coord to $70 (7 tiles from left of screen)
 
     LDA lut_VehicleSprY, Y ; get proper Y coord from LUT (different vehicles have different Y coords)
