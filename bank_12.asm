@@ -410,7 +410,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; 0B Vertical wall - right side grass, shade top end
 .byte $80,$00 ; 0C Vertical wall - right side shade
 .byte $80,$00 ; 0D Vertical wall - bottom corner, right side shade, bottom is grass
-.byte $80,$20 ; 0E Tree
+.byte $80,$00 ; 0E Tree
 .byte $80,$00 ; 0F Two trees/bush
 .byte $00,$00 ; 10 Cobbles
 .byte $00,$00 ; 11 Cobbles, curved upper left corner

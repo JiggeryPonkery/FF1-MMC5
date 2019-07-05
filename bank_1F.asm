@@ -2773,11 +2773,9 @@ CanPlayerMoveSM:
     JMP (tmp)                    ; jump to the routine in the jumptable
 
   @CantMove:
-    ;LDA #0                     ; if they couldn't move...
-    LDA tileprop
-    AND #TP_HIDESPRITE    
+    LDA #0                     ; if they couldn't move...
     STA tileprop               ; clear tile properties to prevent a battle or teleport
-    ;STA tileprop+1             ; or somesuch
+    STA tileprop+1             ; or somesuch
     SEC                        ;  and SEC to indicate they can't move
     RTS
 
@@ -9359,7 +9357,23 @@ ConvertOWToSprite:
 DrawSMSprites:
     LDY #1
     JSR DrawPlayerMapmanSprite    ; draw the player mapman sprite (on foot -- no ship/airship/etc)
-    JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
+    JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
+    LDA tileset_prop, X           ; reload first byte
+    AND #TP_HIDESPRITE            ; check the hide sprite switch
+    BEQ :+
+      LDX #0                      ; set X to sprite index 0 (first sprite, always player)
+    @MaskPlayer:                  
+      LDA oam_a, X                ; load up the attribyte byte for that sprite
+      ORA #$20                    ; add in the "background priority" bit
+      STA oam_a, X                ; save it
+      INX                         ; inc X by 4 to check next sprite
+      INX
+      INX
+      INX 
+      CPX #$10                    ; if X is not yet $10 (4+4+4+4), keep looping
+      BNE @MaskPlayer
+    
+  : JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
