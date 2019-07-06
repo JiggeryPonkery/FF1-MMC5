@@ -165,6 +165,12 @@
 .import lut_OWPtrTbl
 .import BattleIcons
 .import GetDialogueString
+.import MenuFillPartyHP
+.import MenuRecoverPartyMP
+.import FullHealingTile
+.import CurePartyDeath
+.import CurePartyOtherAilments
+.import PlayHealSFX_Map
 
 .segment "BANK_FIXED"
 
@@ -3140,6 +3146,16 @@ TalkToSMTile:
     BEQ @TreasureChest        ; if it is, jump ahead to TC routine
     CMP #TP_SPEC_TREASURE_2
     BEQ @TreasureChest2       ; if it is, jump ahead to TC routine
+    CMP #TP_SPEC_HP
+    BEQ @HealHP
+    CMP #TP_SPEC_MP        
+    BEQ @HealpMP
+    CMP #TP_SPEC_HPMP      
+    BEQ @HealBoth
+    CMP #TP_SPEC_CUREDEATH 
+    BEQ @HealDeath
+    CMP #TP_SPEC_CUREAIL   
+    BEQ @HealAilments    
     
     LDA tileprop              ; otherwise, reload property byte
     AND #TP_HASTEXT_MASK      ; see if the HASTEXT bit is set
@@ -3169,6 +3185,52 @@ TalkToSMTile:
       RTS
       
   : JMP OpenTreasureChest     ; otherwise, open the chest
+  
+  
+  @HealHP:
+   JSR BankEStuff
+   JSR MenuFillPartyHP
+  @Return:
+   JSR PlayHealSFX_Map
+   LDA tileprop+1  
+   RTS
+  
+  @HealpMP:
+   JSR BankEStuff
+   JSR MenuRecoverPartyMP
+   JMP @Return
+  
+  @HealBoth:
+   JSR BankEStuff
+   JSR FullHealingTile
+   JMP @Return
+  
+  @HealDeath:
+   JSR BankEStuff
+   JSR CurePartyDeath
+   JMP @Return
+  
+  @HealAilments:    
+   JSR BankEStuff
+   JSR CurePartyOtherAilments
+   JMP @Return
+   
+BankEStuff:
+  LDA #BANK_MENUS
+  JMP SwapPRG_L
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

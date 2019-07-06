@@ -378,12 +378,20 @@ OBJID_BLACKORB     = $CA
 ;;  common dialogue IDs
 ;;
 
-DLGID_NOTHING      = $00   ; "Nothing Here"
-DLGID_HIDDENTREASURE = $01 ; "Searching around, you find..."
+; table 2
 DLGID_DONTBEGREEDY = $3A   ; from Smith if you have too many weapons
-DLGID_TCGET        = $F0   ; "In this chest you find..."
-DLGID_CANTCARRY    = $F1   ; "You can't carry anymore"
-DLGID_EMPTYTC      = $F2   ; "this treasure chest is empty"
+
+; table 1
+DLGID_NOTHING        = $00   ; "Nothing Here"
+DLGID_HIDDENTREASURE = $01   ; "Searching around, you find..."
+DLGID_HPRESTORED     = $02
+DLGID_MPRESTORED     = $03
+DLGID_HPMPRESTORED   = $04
+DLGID_REVIVED        = $05
+DLGID_AILMENTSCURED  = $06
+DLGID_TCGET          = $F0   ; "In this chest you find..."
+DLGID_CANTCARRY      = $F1   ; "You can't carry anymore"
+DLGID_EMPTYTC        = $F2   ; "this treasure chest is empty"
 
 
 ;;;;;;;;;;;;;;;;;;

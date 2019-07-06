@@ -15,6 +15,12 @@
 .export TurnMenuScreenOn_ClearOAM
 .export DrawManaString_ForBattle
 .export BattleBGColorDigits
+.export MenuFillPartyHP
+.export MenuRecoverPartyMP
+.export FullHealingTile
+.export CurePartyDeath
+.export CurePartyOtherAilments
+.export PlayHealSFX_Map
 
 .import AddGPToParty
 .import CallMusicPlay
@@ -1499,6 +1505,45 @@ lut_DecD4_lo:  .BYTE <1000,<2000,<3000,<4000,<5000,<6000,<7000,<8000,<9000
 
 lut_DecD3_md:  .BYTE >100,>200,>300,>400,>500,>600,>700,>800,>900
 lut_DecD3_lo:  .BYTE <100,<200,<300,<400,<500,<600,<700,<800,<900
+
+
+
+
+
+
+
+
+
+
+
+CurePartyDeath:
+    LDA %11111110            ; get every ailment EXCEPT death
+    STA tmp                  ; store in tmp
+    JMP CurePartyAilment
+
+CurePartyOtherAilments:
+    LDA #AIL_DEAD            ; get only the death ailment
+    STA tmp
+    
+CurePartyAilment:
+    LDX #0                   ; zero X
+  : LDA ch_ailments, X       ; get character ailment
+    AND tmp                  ; AND to cut out everything except the ailment to cure
+    STA ch_ailments, X       ; save it
+    LDA ch_curhp, X          ; then check their HP
+    BNE :+                   ; if they have more than 0
+        LDA ch_curhp+1          ; check the high byte
+        BNE :+               ; if THAT has more than 0, then they're fine, skip ahead
+        CLC                  ; otherwise, give them 1 HP
+        ADC #1
+        STA ch_curhp, X
+  : TXA                      ; transfer X to A
+    CLC                      ; add #$40
+    ADC #$40                 ; to index the next character
+    TAX
+    BEQ :--                  ; if A = 0, the index wrapped, exit
+    RTS
+
 
 
 
@@ -4796,6 +4841,9 @@ MenuFillPartyHP:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+FullHealingTile:           ; the tile in maps that heals all HP/MP
+    JSR MenuFillPartyHP
+
 MenuRecoverPartyMP:
     LDX #0                 ; X is our character index.  Start with character 0
 
@@ -5114,8 +5162,9 @@ PlaySFX_MenuMove:
     
  PlayHealSFX:
  LDA MuteSFXOption
- BNE @Done
+ BNE SFX_Done
  
+ PlayHealSFX_Map:
  LDA #%01000111 ; 
  STA $4004
 
@@ -5131,7 +5180,7 @@ PlaySFX_MenuMove:
  LDA #$20
  STA sq2_sfx      ; indicate square 2 is playing a sound effect for $20 frames
  
- @Done:
+ SFX_Done:
  RTS              ;  and exit!  
  
  

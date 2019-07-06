@@ -20,11 +20,11 @@ BANK_THIS = $10
 lut_DialoguePtrTbl:
 .WORD EMPTY             ; 00 ; Nothing here.
 .WORD HIDDENTREASURE    ; 01 ; While searching around, you found...
-.WORD EMPTY             ; 02 ; Nothing here.
-.WORD EMPTY             ; 03 ; Nothing here.
-.WORD EMPTY             ; 04 ; Nothing here.
-.WORD EMPTY             ; 05 ; Nothing here.
-.WORD EMPTY             ; 06 ; Nothing here.
+.WORD RECOVEREDHP       ; 02 ; A soft light spreads throughout the party... HP restored!
+.WORD RECOVEREDMP       ; 03 ; A soft light spreads throughout the party... MP restored!
+.WORD RECOVEREDHPMP     ; 04 ; A soft light spreads throughout the party... HP and MP restored!
+.WORD REVIVED           ; 05 ; A soft light spreads throughout the party... Revived!
+.WORD AILMENTSCURED     ; 06 ; A soft light spreads throughout the party... Cured!
 .WORD EMPTY             ; 07 ; Nothing here.
 .WORD EMPTY             ; 08 ; Nothing here.
 .WORD EMPTY             ; 09 ; Nothing here.
@@ -304,12 +304,31 @@ GetDialogueString:
 
 
 
+EMPTY: 
+.byte $97,$B2,$1C,$1F,$47,$1D,$23,$C0,$00
 
 HIDDENTREASURE:
 .byte $A0,$3D,$45,$24,$2B,$B5,$A6,$3D,$2A,$20,$4D,$B8,$3B,$05,$56,$64,$A9,$26,$3B,$69,$01,$02,$00
 
-EMPTY: 
-.byte $97,$B2,$1C,$1F,$47,$1D,$23,$C0,$00
+RECOVEREDHP:
+.BYTE $FF,$FF,$8A,$24,$4C,$21,$68,$AA,$AB,$21,$B6,$B3,$23,$A4,$A7,$1E,$05,$FF,$1C,$4D,$B8,$AA,$AB,$26,$21,$1C,$1A,$B3,$2F,$B7,$BC,$C3,$C3,$05,$05,$05
+.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$91,$99,$FF,$9B,$2C,$28,$23,$A7,$C4,$00
+
+RECOVEREDMP:
+.BYTE $FF,$FF,$8A,$24,$4C,$21,$68,$AA,$AB,$21,$B6,$B3,$23,$A4,$A7,$1E,$05,$FF,$1C,$4D,$B8,$AA,$AB,$26,$21,$1C,$1A,$B3,$2F,$B7,$BC,$C3,$C3,$05,$05,$05
+.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$96,$99,$FF,$9B,$2C,$28,$23,$A7,$C4,$00
+
+RECOVEREDHPMP:
+.BYTE $FF,$FF,$8A,$24,$4C,$21,$68,$AA,$AB,$21,$B6,$B3,$23,$A4,$A7,$1E,$05,$FF,$1C,$4D,$B8,$AA,$AB,$26,$21,$1C,$1A,$B3,$2F,$B7,$BC,$C3,$C3,$05,$05,$05
+.BYTE $FF,$FF,$91,$99,$20,$3B,$FF,$96,$99,$FF,$9B,$2C,$28,$23,$A7,$C4,$00
+
+REVIVED:
+.BYTE $FF,$FF,$8A,$24,$4C,$21,$68,$AA,$AB,$21,$B6,$B3,$23,$A4,$A7,$1E,$05,$FF,$1C,$4D,$B8,$AA,$AB,$26,$21,$1C,$1A,$B3,$2F,$B7,$BC,$C3,$C3,$05,$05,$05
+.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$9B,$A8,$B9,$AC,$32,$A7,$C4,$00
+
+AILMENTSCURED:
+.BYTE $FF,$FF,$8A,$24,$4C,$21,$68,$AA,$AB,$21,$B6,$B3,$23,$A4,$A7,$1E,$05,$FF,$1C,$4D,$B8,$AA,$AB,$26,$21,$1C,$1A,$B3,$2F,$B7,$BC,$C3,$C3,$05,$05,$05
+.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$8C,$55,$40,$C4,$00
 
 FLOORSWORD: 
 .byte $97,$B2,$C4,$05,$9D,$AB,$A4,$21,$AC,$1E,$AD,$B8,$37,$20,$B1,$05,$B8,$B1,$B8,$B6,$A4,$A5,$AF,$1A,$B6,$A4,$B0,$B3,$45,$C0,$00

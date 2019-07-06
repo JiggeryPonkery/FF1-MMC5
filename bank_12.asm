@@ -361,11 +361,11 @@ lut_SMTilesetAttr:
 ; 0A - Treasure Chest, Second Table ; Chest ID in +1
 ; 0B - Can use Quest item here ; Item in +1 
 ; 0C - Can save/Rest here
-; 0D - Restore HP
-; 0E - Restore MP
-; 0F - Restore HP/MP
-; 10 - Revive from Death
-; 11 - Revive from Ailments -Death
+; 0D - Restore HP           ; +1 = ID of restore message (DLGID_HPRESTORED)
+; 0E - Restore MP           ; +1 = ID of restore message (DLGID_MPRESTORED)
+; 0F - Restore HP/MP        ; +1 = ID of restore message (DLGID_HPMPRESTORED
+; 10 - Revive from Death    ; +1 = ID of restore message (DLGID_REVIVED)
+; 11 - Revive from Ailments ; +1 = ID of restore message (DLGID_AILMENTSCURED)
 ; 12 - Grant Orb based on Map ID
 ; 13 - Requires 4 Orbs to Activate Teleport
 ; 14 - Requires CUBE to Activate Teleport
@@ -382,7 +382,7 @@ lut_SMTilesetAttr:
 ; 1F - 
 ; 
 ; 
-; 
+;
 
 
 
