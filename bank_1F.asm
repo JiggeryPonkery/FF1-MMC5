@@ -165,12 +165,7 @@
 .import lut_OWPtrTbl
 .import BattleIcons
 .import GetDialogueString
-.import MenuFillPartyHP
-.import MenuRecoverPartyMP
-.import FullHealingTile
-.import CurePartyDeath
-.import CurePartyOtherAilments
-.import PlayHealSFX_Map
+.import TalkToTile_BankE
 
 .segment "BANK_FIXED"
 
@@ -2161,7 +2156,7 @@ NewGame_LoadStartingStats:
 MapTileDamage:
     LDA framecounter      ; get the frame counter
     AND #$01              ; isolate low bit and use as a quick monochrome toggle
-    ORA #$1E              ; OR with typical PPU flags
+    ORA #%00111110        ; OR with typical PPU flags (JIGS - plus red emphasis! ow!)
     STA $2001             ; and write to PPU reg.  This results in a rapid toggle between
                           ;  normal/monochrome mode (toggles every frame).  This produces the flashy effect
 
@@ -3146,18 +3141,12 @@ TalkToSMTile:
     BEQ @TreasureChest        ; if it is, jump ahead to TC routine
     CMP #TP_SPEC_TREASURE_2
     BEQ @TreasureChest2       ; if it is, jump ahead to TC routine
-    CMP #TP_SPEC_HP
-    BEQ @HealHP
-    CMP #TP_SPEC_MP        
-    BEQ @HealpMP
-    CMP #TP_SPEC_HPMP      
-    BEQ @HealBoth
-    CMP #TP_SPEC_CUREDEATH 
-    BEQ @HealDeath
-    CMP #TP_SPEC_CUREAIL   
-    BEQ @HealAilments    
-    
-    LDA tileprop              ; otherwise, reload property byte
+    CMP #TP_SPEC_CUREAIL      ; then see if its under this...
+    BCS :+                    ; if its over, skip ahead
+        CMP #TP_SPEC_HP       ; if under, see if its over this.
+        BCS @SwapBanks        ; and if over, swap banks to handle things
+
+  : LDA tileprop              ; otherwise, reload property byte
     AND #TP_HASTEXT_MASK      ; see if the HASTEXT bit is set
     BEQ @Nothing              ; if not... force "Nothing Here" text
 
@@ -3186,51 +3175,33 @@ TalkToSMTile:
       
   : JMP OpenTreasureChest     ; otherwise, open the chest
   
-  
-  @HealHP:
-   JSR BankEStuff
-   JSR MenuFillPartyHP
-  @Return:
-   JSR PlayHealSFX_Map
-   LDA tileprop+1  
-   RTS
-  
-  @HealpMP:
-   JSR BankEStuff
-   JSR MenuRecoverPartyMP
-   JMP @Return
-  
-  @HealBoth:
-   JSR BankEStuff
-   JSR FullHealingTile
-   JMP @Return
-  
-  @HealDeath:
-   JSR BankEStuff
-   JSR CurePartyDeath
-   JMP @Return
-  
-  @HealAilments:    
-   JSR BankEStuff
-   JSR CurePartyOtherAilments
-   JMP @Return
-   
-BankEStuff:
-  LDA #BANK_MENUS
-  JMP SwapPRG_L
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+   @SwapBanks:
+    LDA #BANK_MENUS
+    JSR SwapPRG_L
+    JSR TalkToTile_BankE  ; do the healing routines here
+    LDA #20               ; loop for 20 frames
+    STA tmp+10
+    
+   @FlashyLoop: 
+    LDA framecounter      ; get the frame counter
+    AND #$01              ; isolate low bit and use as a quick monochrome toggle
+    ORA #%10011110        ; set blue colour emphasis, keep PPU on, no greyscale
+    STA $2001 
+    
+    JSR WaitForVBlank
+    JSR CallMusicPlay_NoSwap
+      INC framecounter
+      BNE :+
+      INC framecounter+1  ;   inc high byte if low byte wrapped
+    
+  : DEC tmp+10
+    BNE @FlashyLoop
+    
+    LDA #%00011110        ; turn off blue colour emphasis, keep PPU on, no greyscale
+    STA $2001 
+    LDA tileprop+1        ; finally, get the message to display
+    RTS
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

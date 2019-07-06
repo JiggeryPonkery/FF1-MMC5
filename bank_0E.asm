@@ -15,12 +15,7 @@
 .export TurnMenuScreenOn_ClearOAM
 .export DrawManaString_ForBattle
 .export BattleBGColorDigits
-.export MenuFillPartyHP
-.export MenuRecoverPartyMP
-.export FullHealingTile
-.export CurePartyDeath
-.export CurePartyOtherAilments
-.export PlayHealSFX_Map
+.export TalkToTile_BankE
 
 .import AddGPToParty
 .import CallMusicPlay
@@ -1507,23 +1502,40 @@ lut_DecD3_md:  .BYTE >100,>200,>300,>400,>500,>600,>700,>800,>900
 lut_DecD3_lo:  .BYTE <100,<200,<300,<400,<500,<600,<700,<800,<900
 
 
+TalkToTile_BankE:
+   LDA tileprop           
+   AND #TP_SPEC_MASK  
+   CMP #TP_SPEC_MP        
+   BEQ @HealpMP
+   CMP #TP_SPEC_HPMP      
+   BEQ @HealBoth
+   CMP #TP_SPEC_CUREDEATH 
+   BEQ @HealDeath
+   CMP #TP_SPEC_CUREAIL   
+   BEQ @HealAilments    
+ ; CMP #TP_SPEC_HP
+ ; BEQ @HealHP
+  
+  @HealHP:
+   JSR MenuFillPartyHP
+   JMP PlayHealSFX_Map
+  
+  @HealpMP:
+   JSR MenuRecoverPartyMP
+   JMP PlayHealSFX_Map
+  
+  @HealBoth:
+   JSR FullHealingTile
+   JMP PlayHealSFX_Map
+  
+  @HealDeath:
+   LDA %11111110            ; get every ailment EXCEPT death
+   STA tmp                  ; store in tmp
+   JMP CurePartyAilment
 
-
-
-
-
-
-
-
-
-CurePartyDeath:
-    LDA %11111110            ; get every ailment EXCEPT death
-    STA tmp                  ; store in tmp
-    JMP CurePartyAilment
-
-CurePartyOtherAilments:
-    LDA #AIL_DEAD            ; get only the death ailment
-    STA tmp
+  @HealAilments:
+   LDA #AIL_DEAD            ; get only the death ailment
+   STA tmp
     
 CurePartyAilment:
     LDX #0                   ; zero X
@@ -1542,7 +1554,7 @@ CurePartyAilment:
     ADC #$40                 ; to index the next character
     TAX
     BEQ :--                  ; if A = 0, the index wrapped, exit
-    RTS
+    JMP PlayHealSFX_Map
 
 
 
@@ -5258,16 +5270,21 @@ ResumeMainMenu:
 MainMenuResetCursorMax:    
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ;  Get SM flag, and shift it into C
-    BCS @SetCursorMax5      ; if not on overworld, then don't let cursor touch save option
+    BCS @CheckTile          ; if not on overworld, then don't let cursor touch save option
     
-    ;GetSMTilePropNow - for later
-        LDA #6
-        JMP :+
-        
-    @SetCursorMax5:    
+   @SetMax6:
+    LDA #6
+    JMP :+
+
+   @CheckTile:       
+    LDA tileprop_now        ; check tile they're standing on
+    AND #TP_SPEC_MASK        ; mask out nomove, hastext, hidesprite
+    CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
+    BEQ @SetMax6            ; then allow using the save option!
+    
+   @SetMax5:     
     LDA #5                        ;; JIGS - set cursor max to 5
   : STA cursor_max                ; flow seamlessly into MainMenuLoop
-                                    
 
 MainMenuLoop:
     JSR ClearOAM                  ; clear OAM (erasing all existing sprites)
