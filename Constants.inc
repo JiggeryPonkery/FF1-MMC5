@@ -443,19 +443,30 @@ TP_SPEC_LOCKED     = $05
 TP_SPEC_CLOSEROOM  = $06
 TP_SPEC_DAMAGE     = $07
 TP_SPEC_BATTLE     = $08
-TP_SPEC_TREASURE   = $09
-TP_SPEC_TREASURE_2 = $0A
-TP_SPEC_USEKEYITEM = $0B
-TP_SPEC_USESAVE    = $0C
-TP_SPEC_HP         = $0D
-TP_SPEC_MP         = $0E
-TP_SPEC_HPMP       = $0F
-TP_SPEC_CUREDEATH  = $10
-TP_SPEC_CUREAIL    = $11
-TP_SPEC_LIGHTORB   = $12
-TP_SPEC_4ORBS      = $13
-TP_SPEC_CUBE       = $14
-TP_SPEC_CROWN      = $15
+TP_SPEC_USEKEYITEM = $09
+TP_SPEC_USESAVE    = $0A
+TP_SPEC_LIGHTORB   = $0B
+TP_SPEC_4ORBS      = $0C
+TP_SPEC_CUBE       = $0D
+TP_SPEC_CROWN      = $0E
+TP_SPEC_CRACKFLOOR = $0F
+TP_SPEC_ICEFLOOR   = $10
+;                     11
+;                     12
+;                     13
+;                     14
+;                     15
+;                     16
+;                     17
+TP_SPEC_TREASURE   = $18
+TP_SPEC_TREASURE_2 = $19
+TP_SPEC_HP         = $1A
+TP_SPEC_MP         = $1B
+TP_SPEC_HPMP       = $1C
+TP_SPEC_CUREDEATH  = $1D
+TP_SPEC_CUREAIL    = $1E
+
+
 
 TP_NOMOVE         = %10000000
 TP_HASTEXT_MASK   = %01000000

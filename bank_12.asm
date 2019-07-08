@@ -357,38 +357,34 @@ lut_SMTilesetAttr:
 ; 06 - Closes Door above tile
 ; 07 - Damage square
 ; 08 - Battle ; +1 = 80 for random encounter, else its Battle ID
-; 09 - Treasure Chest, First Table ; Chest ID in +1
-; 0A - Treasure Chest, Second Table ; Chest ID in +1
-; 0B - Can use Quest item here ; Item in +1 
-; 0C - Can save/Rest here
-; 0D - Restore HP           ; +1 = ID of restore message (DLGID_HPRESTORED)
-; 0E - Restore MP           ; +1 = ID of restore message (DLGID_MPRESTORED)
-; 0F - Restore HP/MP        ; +1 = ID of restore message (DLGID_HPMPRESTORED
-; 10 - Revive from Death    ; +1 = ID of restore message (DLGID_REVIVED)
-; 11 - Revive from Ailments ; +1 = ID of restore message (DLGID_AILMENTSCURED)
-; 12 - Grant Orb based on Map ID
-; 13 - Requires 4 Orbs to Activate Teleport
-; 14 - Requires CUBE to Activate Teleport
-; 15 - Requires CROWN to Activate Teleport
-; 16 - Activates Save Screen (like a bed or campfire)?
-; 17 - 
-; 18 - 
-; 19 - 
-; 1A - 
-; 1B - 
-; 1C - 
-; 1D - 
-; 1E - 
-; 1F - 
-; 
-; 
-;
+; 09 - Can use Quest item here ; Item in +1 
+; 0A - Can save/Rest here
+; 0B - Grant Orb based on Map ID
+; 0C - Requires 4 Orbs to Activate Teleport
+; 0D - Requires CUBE to Activate Teleport
+; 0E - Requires CROWN to Activate Teleport
+; 0F - Cracked floor
+; 10 - Slippery floor
+; 11 - Activates Save Screen (like a bed or campfire)?
+; 12
+; 13
+; 14
+; 15
+; 16
+; 17
+; 18 
+; 19 - Treasure Chest, First Table ; Chest ID in +1
+; 1A - Treasure Chest, Second Table ; Chest ID in +1
+; 1B - Restore HP           ; +1 = ID of restore message (DLGID_HPRESTORED)
+; 1C - Restore MP           ; +1 = ID of restore message (DLGID_MPRESTORED)
+; 1D - Restore HP/MP        ; +1 = ID of restore message (DLGID_HPMPRESTORED
+; 1E - Revive from Death    ; +1 = ID of restore message (DLGID_REVIVED)
+; 1F - Revive from Ailments ; +1 = ID of restore message (DLGID_AILMENTSCURED)
 
-
-
-
-
-
+;; to save space with a jump table, I moved the interaction ones to the end, keeping the ones the player
+;; will most likely move on at the front. This means that its necessary to set the "cannot walk" bit for
+;; the tiles without a jump table entry! Thus, all original treasure chests are $99, and healing tiles
+;; would be $Dx - can't step, unique dialogue + 1 
 
 
 
@@ -396,7 +392,7 @@ lut_SMTilesetAttr:
 lut_SMTilesetProp:
 
 ; Town
-.byte $00,$00 ; 00 Grass
+.byte $10,$00 ; 00 Grass
 .byte $00,$00 ; 01 Grass - left side in dark shade
 .byte $00,$00 ; 02 Grass - left side in dark shade, shade end
 .byte $80,$00 ; 03 Wall
@@ -623,30 +619,30 @@ lut_SMTilesetProp:
 .byte $08,$80 ; In room, Floor - Random encounter
 .byte $08,$00 ; In room, Floor - Battle 0
 .byte $08,$80 ; Cobbles - Random encounter
-.byte $15,$16 ; In room, Crown-required throne seat
-.byte $15,$18 ; In room, Crown-required throne seat
-.byte $89,$01 ; In room, Treasure
-.byte $89,$02 ; In room, Treasure
-.byte $89,$03 ; In room, Treasure
-.byte $89,$04 ; In room, Treasure
-.byte $89,$05 ; In room, Treasure
-.byte $89,$06 ; In room, Treasure
-.byte $89,$0D ; In room, Treasure
-.byte $89,$0E ; In room, Treasure
-.byte $89,$0F ; In room, Treasure
-.byte $89,$10 ; In room, Treasure
-.byte $89,$11 ; In room, Treasure
-.byte $89,$12 ; In room, Treasure
-.byte $89,$13 ; In room, Treasure
-.byte $89,$7B ; In room, Treasure
-.byte $89,$7C ; In room, Treasure
-.byte $89,$7D ; In room, Treasure
-.byte $89,$7E ; In room, Treasure
-.byte $89,$7F ; In room, Treasure
-.byte $89,$80 ; In room, Treasure
-.byte $89,$81 ; In room, Treasure
-.byte $89,$82 ; In room, Treasure
-.byte $89,$83 ; In room, Treasure
+.byte $0E,$16 ; In room, Crown-required throne seat
+.byte $0E,$18 ; In room, Crown-required throne seat
+.byte $99,$01 ; In room, Treasure
+.byte $99,$02 ; In room, Treasure
+.byte $99,$03 ; In room, Treasure
+.byte $99,$04 ; In room, Treasure
+.byte $99,$05 ; In room, Treasure
+.byte $99,$06 ; In room, Treasure
+.byte $99,$0D ; In room, Treasure
+.byte $99,$0E ; In room, Treasure
+.byte $99,$0F ; In room, Treasure
+.byte $99,$10 ; In room, Treasure
+.byte $99,$11 ; In room, Treasure
+.byte $99,$12 ; In room, Treasure
+.byte $99,$13 ; In room, Treasure
+.byte $99,$7B ; In room, Treasure
+.byte $99,$7C ; In room, Treasure
+.byte $99,$7D ; In room, Treasure
+.byte $99,$7E ; In room, Treasure
+.byte $99,$7F ; In room, Treasure
+.byte $99,$80 ; In room, Treasure
+.byte $99,$81 ; In room, Treasure
+.byte $99,$82 ; In room, Treasure
+.byte $99,$83 ; In room, Treasure
 .byte $00,$00 ; Floor 
 .byte $00,$00 ; Floor 
 .byte $00,$00 ; Floor 
@@ -722,67 +718,67 @@ lut_SMTilesetProp:
 .byte $80,$00 ; Cave filler
 .byte $08,$2A ; In room, blank floor - Battle 2A
 .byte $08,$80 ; Cave floor - random encounters 
-.byte $89,$2E ; In room, treasure
-.byte $89,$2F ; In room, treasure
-.byte $89,$30 ; In room, treasure
-.byte $89,$31 ; In room, treasure
-.byte $89,$32 ; In room, treasure
-.byte $89,$33 ; In room, treasure
-.byte $89,$34 ; In room, treasure
-.byte $89,$35 ; In room, treasure
-.byte $89,$36 ; In room, treasure
-.byte $89,$37 ; In room, treasure
-.byte $89,$38 ; In room, treasure
-.byte $89,$39 ; In room, treasure
-.byte $89,$3A ; In room, treasure
-.byte $89,$3B ; In room, treasure
-.byte $89,$3C ; In room, treasure
-.byte $89,$3D ; In room, treasure
-.byte $89,$3E ; In room, treasure
-.byte $89,$3F ; In room, treasure
-.byte $89,$40 ; In room, treasure
-.byte $89,$41 ; In room, treasure
-.byte $89,$42 ; In room, treasure
-.byte $89,$43 ; In room, treasure
-.byte $89,$44 ; In room, treasure
-.byte $89,$45 ; In room, treasure
-.byte $89,$46 ; In room, treasure
-.byte $89,$47 ; In room, treasure
-.byte $89,$48 ; In room, treasure
-.byte $89,$49 ; In room, treasure
-.byte $89,$4A ; In room, treasure
-.byte $89,$4B ; In room, treasure
-.byte $89,$4C ; In room, treasure
-.byte $89,$4D ; In room, treasure
-.byte $89,$4E ; In room, treasure
-.byte $89,$4F ; In room, treasure
-.byte $89,$50 ; In room, treasure
-.byte $89,$51 ; In room, treasure
-.byte $89,$52 ; In room, treasure
-.byte $89,$53 ; In room, treasure
-.byte $89,$54 ; In room, treasure
-.byte $89,$55 ; In room, treasure
-.byte $89,$56 ; In room, treasure
-.byte $89,$57 ; In room, treasure
-.byte $89,$58 ; In room, treasure
-.byte $89,$59 ; In room, treasure
-.byte $89,$5A ; In room, treasure
-.byte $89,$5B ; In room, treasure
-.byte $89,$5C ; In room, treasure
-.byte $89,$5D ; In room, treasure
-.byte $89,$5E ; In room, treasure
-.byte $89,$5F ; In room, treasure
-.byte $89,$60 ; In room, treasure
-.byte $89,$61 ; In room, treasure
-.byte $89,$62 ; In room, treasure
-.byte $89,$63 ; In room, treasure
-.byte $89,$64 ; In room, treasure
-.byte $89,$65 ; In room, treasure
-.byte $89,$66 ; In room, treasure
-.byte $89,$67 ; In room, treasure
-.byte $89,$68 ; In room, treasure
-.byte $89,$69 ; In room, treasure
-.byte $89,$6A ; In room, treasure
+.byte $99,$2E ; In room, treasure
+.byte $99,$2F ; In room, treasure
+.byte $99,$30 ; In room, treasure
+.byte $99,$31 ; In room, treasure
+.byte $99,$32 ; In room, treasure
+.byte $99,$33 ; In room, treasure
+.byte $99,$34 ; In room, treasure
+.byte $99,$35 ; In room, treasure
+.byte $99,$36 ; In room, treasure
+.byte $99,$37 ; In room, treasure
+.byte $99,$38 ; In room, treasure
+.byte $99,$39 ; In room, treasure
+.byte $99,$3A ; In room, treasure
+.byte $99,$3B ; In room, treasure
+.byte $99,$3C ; In room, treasure
+.byte $99,$3D ; In room, treasure
+.byte $99,$3E ; In room, treasure
+.byte $99,$3F ; In room, treasure
+.byte $99,$40 ; In room, treasure
+.byte $99,$41 ; In room, treasure
+.byte $99,$42 ; In room, treasure
+.byte $99,$43 ; In room, treasure
+.byte $99,$44 ; In room, treasure
+.byte $99,$45 ; In room, treasure
+.byte $99,$46 ; In room, treasure
+.byte $99,$47 ; In room, treasure
+.byte $99,$48 ; In room, treasure
+.byte $99,$49 ; In room, treasure
+.byte $99,$4A ; In room, treasure
+.byte $99,$4B ; In room, treasure
+.byte $99,$4C ; In room, treasure
+.byte $99,$4D ; In room, treasure
+.byte $99,$4E ; In room, treasure
+.byte $99,$4F ; In room, treasure
+.byte $99,$50 ; In room, treasure
+.byte $99,$51 ; In room, treasure
+.byte $99,$52 ; In room, treasure
+.byte $99,$53 ; In room, treasure
+.byte $99,$54 ; In room, treasure
+.byte $99,$55 ; In room, treasure
+.byte $99,$56 ; In room, treasure
+.byte $99,$57 ; In room, treasure
+.byte $99,$58 ; In room, treasure
+.byte $99,$59 ; In room, treasure
+.byte $99,$5A ; In room, treasure
+.byte $99,$5B ; In room, treasure
+.byte $99,$5C ; In room, treasure
+.byte $99,$5D ; In room, treasure
+.byte $99,$5E ; In room, treasure
+.byte $99,$5F ; In room, treasure
+.byte $99,$60 ; In room, treasure
+.byte $99,$61 ; In room, treasure
+.byte $99,$62 ; In room, treasure
+.byte $99,$63 ; In room, treasure
+.byte $99,$64 ; In room, treasure
+.byte $99,$65 ; In room, treasure
+.byte $99,$66 ; In room, treasure
+.byte $99,$67 ; In room, treasure
+.byte $99,$68 ; In room, treasure
+.byte $99,$69 ; In room, treasure
+.byte $99,$6A ; In room, treasure
 .byte $00,$00 ; Blank floor
 
 ; Safe Cave   ; 
@@ -861,58 +857,58 @@ lut_SMTilesetProp:
 .byte $08,$4A ; In room, bottom wall, Battle 
 .byte $08,$80 ; Cave floor, Random encounters
 .byte $00,$00 ; Blank floor
-.byte $89,$21 ; In room, Treasure
-.byte $89,$22 ; In room, Treasure
-.byte $89,$23 ; In room, Treasure
-.byte $89,$24 ; In room, Treasure
-.byte $89,$25 ; In room, Treasure
-.byte $89,$26 ; In room, Treasure
-.byte $89,$27 ; In room, Treasure
-.byte $89,$28 ; In room, Treasure
-.byte $89,$29 ; In room, Treasure
-.byte $89,$2A ; In room, Treasure
-.byte $89,$2B ; In room, Treasure
-.byte $89,$2C ; In room, Treasure
-.byte $89,$2D ; In room, Treasure
-.byte $89,$6B ; In room, Treasure
-.byte $89,$6C ; In room, Treasure
-.byte $89,$6D ; In room, Treasure
-.byte $89,$6E ; In room, Treasure
-.byte $89,$6F ; In room, Treasure
-.byte $89,$70 ; In room, Treasure
-.byte $89,$71 ; In room, Treasure
-.byte $89,$72 ; In room, Treasure
-.byte $89,$73 ; In room, Treasure
-.byte $89,$74 ; In room, Treasure
-.byte $89,$75 ; In room, Treasure
-.byte $89,$76 ; In room, Treasure
-.byte $89,$77 ; In room, Treasure
-.byte $89,$78 ; In room, Treasure
-.byte $89,$79 ; In room, Treasure
-.byte $89,$7A ; In room, Treasure
-.byte $89,$84 ; In room, Treasure
-.byte $89,$85 ; In room, Treasure
-.byte $89,$86 ; In room, Treasure
-.byte $89,$87 ; In room, Treasure
-.byte $89,$88 ; In room, Treasure
-.byte $89,$89 ; In room, Treasure
-.byte $89,$8A ; In room, Treasure
-.byte $89,$8B ; In room, Treasure
-.byte $89,$8C ; In room, Treasure
-.byte $89,$8D ; In room, Treasure
-.byte $89,$8E ; In room, Treasure
-.byte $89,$8F ; In room, Treasure
-.byte $89,$90 ; In room, Treasure
-.byte $89,$91 ; In room, Treasure
-.byte $89,$92 ; In room, Treasure
-.byte $89,$93 ; In room, Treasure
-.byte $89,$94 ; In room, Treasure
-.byte $89,$B5 ; In room, Treasure
-.byte $89,$B6 ; In room, Treasure
-.byte $89,$B7 ; In room, Treasure
-.byte $89,$B8 ; In room, Treasure
-.byte $89,$B9 ; In room, Treasure
-.byte $89,$BA ; In room, Treasure
+.byte $99,$21 ; In room, Treasure
+.byte $99,$22 ; In room, Treasure
+.byte $99,$23 ; In room, Treasure
+.byte $99,$24 ; In room, Treasure
+.byte $99,$25 ; In room, Treasure
+.byte $99,$26 ; In room, Treasure
+.byte $99,$27 ; In room, Treasure
+.byte $99,$28 ; In room, Treasure
+.byte $99,$29 ; In room, Treasure
+.byte $99,$2A ; In room, Treasure
+.byte $99,$2B ; In room, Treasure
+.byte $99,$2C ; In room, Treasure
+.byte $99,$2D ; In room, Treasure
+.byte $99,$6B ; In room, Treasure
+.byte $99,$6C ; In room, Treasure
+.byte $99,$6D ; In room, Treasure
+.byte $99,$6E ; In room, Treasure
+.byte $99,$6F ; In room, Treasure
+.byte $99,$70 ; In room, Treasure
+.byte $99,$71 ; In room, Treasure
+.byte $99,$72 ; In room, Treasure
+.byte $99,$73 ; In room, Treasure
+.byte $99,$74 ; In room, Treasure
+.byte $99,$75 ; In room, Treasure
+.byte $99,$76 ; In room, Treasure
+.byte $99,$77 ; In room, Treasure
+.byte $99,$78 ; In room, Treasure
+.byte $99,$79 ; In room, Treasure
+.byte $99,$7A ; In room, Treasure
+.byte $99,$84 ; In room, Treasure
+.byte $99,$85 ; In room, Treasure
+.byte $99,$86 ; In room, Treasure
+.byte $99,$87 ; In room, Treasure
+.byte $99,$88 ; In room, Treasure
+.byte $99,$89 ; In room, Treasure
+.byte $99,$8A ; In room, Treasure
+.byte $99,$8B ; In room, Treasure
+.byte $99,$8C ; In room, Treasure
+.byte $99,$8D ; In room, Treasure
+.byte $99,$8E ; In room, Treasure
+.byte $99,$8F ; In room, Treasure
+.byte $99,$90 ; In room, Treasure
+.byte $99,$91 ; In room, Treasure
+.byte $99,$92 ; In room, Treasure
+.byte $99,$93 ; In room, Treasure
+.byte $99,$94 ; In room, Treasure
+.byte $99,$B5 ; In room, Treasure
+.byte $99,$B6 ; In room, Treasure
+.byte $99,$B7 ; In room, Treasure
+.byte $99,$B8 ; In room, Treasure
+.byte $99,$B9 ; In room, Treasure
+.byte $99,$BA ; In room, Treasure
 .byte $00,$00 ; Blank floor
 
 ; Tower       ; 
@@ -960,7 +956,7 @@ lut_SMTilesetProp:
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
-.byte $14,$2B ; In room, Cube-required teleport
+.byte $0D,$2B ; In room, Cube-required teleport
 .byte $08,$80 ; In room, Random encounters
 .byte $08,$00 ; In room, battle
 .byte $08,$00 ; In room, battle
@@ -981,45 +977,45 @@ lut_SMTilesetProp:
 .byte $00,$00 ; Blank floor
 .byte $00,$00 ; Blank floor
 .byte $08,$80 ; Cave floor, random encounters
-.byte $89,$14 ; In room, Treasure
-.byte $89,$15 ; In room, Treasure
-.byte $89,$16 ; In room, Treasure
-.byte $89,$17 ; In room, Treasure
-.byte $89,$18 ; In room, Treasure
-.byte $89,$19 ; In room, Treasure
-.byte $89,$1A ; In room, Treasure
-.byte $89,$1B ; In room, Treasure
-.byte $89,$1C ; In room, Treasure
-.byte $89,$1D ; In room, Treasure
-.byte $89,$1E ; In room, Treasure
-.byte $89,$1F ; In room, Treasure
-.byte $89,$20 ; In room, Treasure
-.byte $89,$C4 ; In room, Treasure
-.byte $89,$C5 ; In room, Treasure
-.byte $89,$C6 ; In room, Treasure
-.byte $89,$C7 ; In room, Treasure
-.byte $89,$C8 ; In room, Treasure
-.byte $89,$C9 ; In room, Treasure
-.byte $89,$CA ; In room, Treasure
-.byte $89,$CB ; In room, Treasure
-.byte $89,$CC ; In room, Treasure
-.byte $89,$CD ; In room, Treasure
-.byte $89,$CE ; In room, Treasure
-.byte $89,$CF ; In room, Treasure
-.byte $89,$D0 ; In room, Treasure
-.byte $89,$D1 ; In room, Treasure
-.byte $89,$D2 ; In room, Treasure
-.byte $89,$D3 ; In room, Treasure
-.byte $89,$D4 ; In room, Treasure
-.byte $89,$D5 ; In room, Treasure
-.byte $89,$BB ; In room, Treasure
-.byte $89,$BC ; In room, Treasure
-.byte $89,$BD ; In room, Treasure
-.byte $89,$BE ; In room, Treasure
-.byte $89,$BF ; In room, Treasure
-.byte $89,$C0 ; In room, Treasure
-.byte $89,$C1 ; In room, Treasure
-.byte $89,$C2 ; In room, Treasure
+.byte $99,$14 ; In room, Treasure
+.byte $99,$15 ; In room, Treasure
+.byte $99,$16 ; In room, Treasure
+.byte $99,$17 ; In room, Treasure
+.byte $99,$18 ; In room, Treasure
+.byte $99,$19 ; In room, Treasure
+.byte $99,$1A ; In room, Treasure
+.byte $99,$1B ; In room, Treasure
+.byte $99,$1C ; In room, Treasure
+.byte $99,$1D ; In room, Treasure
+.byte $99,$1E ; In room, Treasure
+.byte $99,$1F ; In room, Treasure
+.byte $99,$20 ; In room, Treasure
+.byte $99,$C4 ; In room, Treasure
+.byte $99,$C5 ; In room, Treasure
+.byte $99,$C6 ; In room, Treasure
+.byte $99,$C7 ; In room, Treasure
+.byte $99,$C8 ; In room, Treasure
+.byte $99,$C9 ; In room, Treasure
+.byte $99,$CA ; In room, Treasure
+.byte $99,$CB ; In room, Treasure
+.byte $99,$CC ; In room, Treasure
+.byte $99,$CD ; In room, Treasure
+.byte $99,$CE ; In room, Treasure
+.byte $99,$CF ; In room, Treasure
+.byte $99,$D0 ; In room, Treasure
+.byte $99,$D1 ; In room, Treasure
+.byte $99,$D2 ; In room, Treasure
+.byte $99,$D3 ; In room, Treasure
+.byte $99,$D4 ; In room, Treasure
+.byte $99,$D5 ; In room, Treasure
+.byte $99,$BB ; In room, Treasure
+.byte $99,$BC ; In room, Treasure
+.byte $99,$BD ; In room, Treasure
+.byte $99,$BE ; In room, Treasure
+.byte $99,$BF ; In room, Treasure
+.byte $99,$C0 ; In room, Treasure
+.byte $99,$C1 ; In room, Treasure
+.byte $99,$C2 ; In room, Treasure
 .byte $00,$00 ; Blank Floor
 .byte $00,$00 ; Blank Floor
 .byte $00,$00 ; Blank Floor
@@ -1110,7 +1106,7 @@ lut_SMTilesetProp:
 .byte $00,$00 ; Shag carpeting?
 .byte $00,$00 ; Blank floor
 .byte $00,$00 ; Blank floor
-.byte $13,$01 ; In room, Time warp - teleport to Temple of Fiends past
+.byte $0C,$01 ; In room, Time warp - teleport to Temple of Fiends past
 .byte $01,$00 ; Submarine - Warp to previous map (Onrac)
 .byte $01,$00 ; Stairs up - Warp to previous map
 .byte $02,$21 ; Stairs up - Sea Shrine 2
@@ -1132,44 +1128,44 @@ lut_SMTilesetProp:
 .byte $08,$80 ; In room, random encounters
 .byte $08,$10 ; In room, battle
 .byte $08,$80 ; Shrine floor, random encounters
-.byte $89,$07 ; In room, Treasure
-.byte $89,$08 ; In room, Treasure
-.byte $89,$09 ; In room, Treasure
-.byte $89,$0A ; In room, Treasure
-.byte $89,$0B ; In room, Treasure
-.byte $89,$0C ; In room, Treasure
-.byte $89,$95 ; In room, Treasure
-.byte $89,$96 ; In room, Treasure
-.byte $89,$97 ; In room, Treasure
-.byte $89,$98 ; In room, Treasure
-.byte $89,$99 ; In room, Treasure
-.byte $89,$9A ; In room, Treasure
-.byte $89,$9B ; In room, Treasure
-.byte $89,$9C ; In room, Treasure
-.byte $89,$9D ; In room, Treasure
-.byte $89,$9E ; In room, Treasure
-.byte $89,$9F ; In room, Treasure
-.byte $89,$A0 ; In room, Treasure
-.byte $89,$A1 ; In room, Treasure
-.byte $89,$A2 ; In room, Treasure
-.byte $89,$A3 ; In room, Treasure
-.byte $89,$A4 ; In room, Treasure
-.byte $89,$A5 ; In room, Treasure
-.byte $89,$A6 ; In room, Treasure
-.byte $89,$A7 ; In room, Treasure
-.byte $89,$A8 ; In room, Treasure
-.byte $89,$A9 ; In room, Treasure
-.byte $89,$AA ; In room, Treasure
-.byte $89,$AB ; In room, Treasure
-.byte $89,$AC ; In room, Treasure
-.byte $89,$AD ; In room, Treasure
-.byte $89,$AE ; In room, Treasure
-.byte $89,$AF ; In room, Treasure
-.byte $89,$B0 ; In room, Treasure
-.byte $89,$B1 ; In room, Treasure
-.byte $89,$B2 ; In room, Treasure
-.byte $89,$B3 ; In room, Treasure
-.byte $89,$B4 ; In room, Treasure
+.byte $99,$07 ; In room, Treasure
+.byte $99,$08 ; In room, Treasure
+.byte $99,$09 ; In room, Treasure
+.byte $99,$0A ; In room, Treasure
+.byte $99,$0B ; In room, Treasure
+.byte $99,$0C ; In room, Treasure
+.byte $99,$95 ; In room, Treasure
+.byte $99,$96 ; In room, Treasure
+.byte $99,$97 ; In room, Treasure
+.byte $99,$98 ; In room, Treasure
+.byte $99,$99 ; In room, Treasure
+.byte $99,$9A ; In room, Treasure
+.byte $99,$9B ; In room, Treasure
+.byte $99,$9C ; In room, Treasure
+.byte $99,$9D ; In room, Treasure
+.byte $99,$9E ; In room, Treasure
+.byte $99,$9F ; In room, Treasure
+.byte $99,$A0 ; In room, Treasure
+.byte $99,$A1 ; In room, Treasure
+.byte $99,$A2 ; In room, Treasure
+.byte $99,$A3 ; In room, Treasure
+.byte $99,$A4 ; In room, Treasure
+.byte $99,$A5 ; In room, Treasure
+.byte $99,$A6 ; In room, Treasure
+.byte $99,$A7 ; In room, Treasure
+.byte $99,$A8 ; In room, Treasure
+.byte $99,$A9 ; In room, Treasure
+.byte $99,$AA ; In room, Treasure
+.byte $99,$AB ; In room, Treasure
+.byte $99,$AC ; In room, Treasure
+.byte $99,$AD ; In room, Treasure
+.byte $99,$AE ; In room, Treasure
+.byte $99,$AF ; In room, Treasure
+.byte $99,$B0 ; In room, Treasure
+.byte $99,$B1 ; In room, Treasure
+.byte $99,$B2 ; In room, Treasure
+.byte $99,$B3 ; In room, Treasure
+.byte $99,$B4 ; In room, Treasure
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
@@ -1252,40 +1248,40 @@ lut_SMTilesetProp:
 .byte $08,$80 ; In room, random encounters
 .byte $08,$80 ; In room, random encounters
 .byte $08,$80 ; Palace floor, random encounters
-.byte $89,$D6 ; In room, Treasure
-.byte $89,$D7 ; In room, Treasure
-.byte $89,$D8 ; In room, Treasure
-.byte $89,$D9 ; In room, Treasure
-.byte $89,$DA ; In room, Treasure
-.byte $89,$DB ; In room, Treasure
-.byte $89,$DC ; In room, Treasure
-.byte $89,$DD ; In room, Treasure
-.byte $89,$DE ; In room, Treasure
-.byte $89,$DF ; In room, Treasure
-.byte $89,$E0 ; In room, Treasure
-.byte $89,$E1 ; In room, Treasure
-.byte $89,$E2 ; In room, Treasure
-.byte $89,$E3 ; In room, Treasure
-.byte $89,$E4 ; In room, Treasure
-.byte $89,$E5 ; In room, Treasure
-.byte $89,$E6 ; In room, Treasure
-.byte $89,$E7 ; In room, Treasure
-.byte $89,$E8 ; In room, Treasure
-.byte $89,$E9 ; In room, Treasure
-.byte $89,$EA ; In room, Treasure
-.byte $89,$EB ; In room, Treasure
-.byte $89,$EC ; In room, Treasure
-.byte $89,$ED ; In room, Treasure
-.byte $89,$EE ; In room, Treasure
-.byte $89,$EF ; In room, Treasure
-.byte $89,$F0 ; In room, Treasure
-.byte $89,$F1 ; In room, Treasure
-.byte $89,$F2 ; In room, Treasure
-.byte $89,$F3 ; In room, Treasure
-.byte $89,$F4 ; In room, Treasure
-.byte $89,$F5 ; In room, Treasure
-.byte $89,$F6 ; In room, Treasure
-.byte $89,$F7 ; In room, Treasure
+.byte $99,$D6 ; In room, Treasure
+.byte $99,$D7 ; In room, Treasure
+.byte $99,$D8 ; In room, Treasure
+.byte $99,$D9 ; In room, Treasure
+.byte $99,$DA ; In room, Treasure
+.byte $99,$DB ; In room, Treasure
+.byte $99,$DC ; In room, Treasure
+.byte $99,$DD ; In room, Treasure
+.byte $99,$DE ; In room, Treasure
+.byte $99,$DF ; In room, Treasure
+.byte $99,$E0 ; In room, Treasure
+.byte $99,$E1 ; In room, Treasure
+.byte $99,$E2 ; In room, Treasure
+.byte $99,$E3 ; In room, Treasure
+.byte $99,$E4 ; In room, Treasure
+.byte $99,$E5 ; In room, Treasure
+.byte $99,$E6 ; In room, Treasure
+.byte $99,$E7 ; In room, Treasure
+.byte $99,$E8 ; In room, Treasure
+.byte $99,$E9 ; In room, Treasure
+.byte $99,$EA ; In room, Treasure
+.byte $99,$EB ; In room, Treasure
+.byte $99,$EC ; In room, Treasure
+.byte $99,$ED ; In room, Treasure
+.byte $99,$EE ; In room, Treasure
+.byte $99,$EF ; In room, Treasure
+.byte $99,$F0 ; In room, Treasure
+.byte $99,$F1 ; In room, Treasure
+.byte $99,$F2 ; In room, Treasure
+.byte $99,$F3 ; In room, Treasure
+.byte $99,$F4 ; In room, Treasure
+.byte $99,$F5 ; In room, Treasure
+.byte $99,$F6 ; In room, Treasure
+.byte $99,$F7 ; In room, Treasure
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor

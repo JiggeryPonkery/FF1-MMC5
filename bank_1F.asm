@@ -2701,7 +2701,7 @@ ProcessSMInput:
  ;; Select button pressed
  ;;
 
-      JSR GetSMTilePropNow     ; do all the same stuff as when start is pressed.
+      ;JSR GetSMTilePropNow     ; do all the same stuff as when start is pressed.
       LDA #0                   ;   though I don't know why you'd need to get the now tile properties...
       STA joy_select
       LDA #$02
@@ -2759,10 +2759,12 @@ CanPlayerMoveSM:
 
     JSR GetSMTileProperties        ; otherwise, get the properties of the tile they're moving to
     LDA tileprop
-    AND #TP_SPEC_MASK | TP_NOMOVE  ; mask out special and NOMOVE bits
-    CMP #TP_NOMOVE                 ; if all special bits clear, and NOMOVE bit is set
-    BEQ @CantMove                  ; then this is a nomove tile -- can't move here
+    ;AND #TP_SPEC_MASK | TP_NOMOVE  ; mask out special and NOMOVE bits
+    ;CMP #TP_NOMOVE                 ; if all special bits clear, and NOMOVE bit is set
+    AND #TP_NOMOVE
+    BNE @CantMove                  ; then this is a nomove tile -- can't move here
 
+    LDA tileprop
     AND #TP_SPEC_MASK            ; otherwise, toss the NOMOVE bit and keep the special bits
     ASL A                        ; double it
     TAX                          ; throw that in X for indexing
@@ -3668,24 +3670,28 @@ lut_SMMoveJmpTbl:
     .WORD SMMove_CloseRoom
     .WORD SMMove_Dmg
     .WORD SMMove_Battle
-    .WORD SMMove_Norm ; Treasure
-    .WORD SMMove_Norm ; Treasure
     .WORD SMMove_Norm ; UseKeyItem    
     .WORD SMMove_Norm ; UseSave    
-    .WORD SMMove_NoMove ; HP    
-    .WORD SMMove_NoMove ; MP
-    .WORD SMMove_NoMove ; HP/MP
-    .WORD SMMove_NoMove ; CureDeath    
-    .WORD SMMove_NoMove ; CureAilments
     .WORD SMMove_LightOrb
     .WORD SMMove_4Orbs 
     .WORD SMMove_Cube
     .WORD SMMove_Crown
     
+    ;; JIGS - this table is only for tiles without the No Move bit set. 
+    ;; since the following tiles have the bit set, they've been removed
+    
+    ;.WORD SMMove_NoMove ; HP    
+    ;.WORD SMMove_NoMove ; MP
+    ;.WORD SMMove_NoMove ; HP/MP
+    ;.WORD SMMove_NoMove ; CureDeath    
+    ;.WORD SMMove_NoMove ; CureAilments
+    ;.WORD SMMove_Norm ; Treasure
+    ;.WORD SMMove_Norm ; Treasure
     
 
  ;; SMMove_Battle  [$CDC3 :: 0x3CDD3]
  ;;  TP_SPEC_BATTLE
+ 
 
 SMMove_Battle:
     LDA tileprop+1         ; check the secondary property byte to see which battle to do
