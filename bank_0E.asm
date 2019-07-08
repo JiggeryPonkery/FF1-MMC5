@@ -5278,7 +5278,6 @@ MainMenuResetCursorMax:
 
    @CheckTile:       
     LDA tileprop_now        ; check tile they're standing on
-    AND #TP_SPEC_MASK        ; mask out nomove, hastext, hidesprite
     CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
     BEQ @SetMax6            ; then allow using the save option!
     
@@ -6889,11 +6888,16 @@ UseItem_Tent:
     LDA joy
     AND #$80
     BEQ :+    
-        
+
     LDA mapflags            ; ensure we're on the overworld
     LSR A                   ;  shift SM flag into C
-    BCS @CantUse            ;  if set (in standard map), can't use tent here
+    BCC @Use                ;  if set (in standard map), can't use tent here
+
+    LDA tileprop_now
+    CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
+    BNE @CantUse
     
+   @Use: 
     DEC item_tent           ; otherwise... remove 1 tent from the inventory
     LDA #30
     JSR MenuRecoverPartyHP  ; give 30 HP to the whole party
@@ -6923,8 +6927,13 @@ UseItem_Cabin:
     
     LDA mapflags            ; exactly the same as tents... except....
     LSR A
-    BCS @CantUse
+    BCC @Use                ;  if set (in standard map), can't use here
+
+    LDA tileprop_now
+    CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
+    BNE @CantUse
     
+   @Use: 
     DEC item_cabin          ; remove cabins from inventory instead of tents
     LDA #60                 ;  recover 60 HP instead of 30
     JSR MenuRecoverPartyHP
@@ -6953,8 +6962,13 @@ UseItem_House:
 
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ;  Get SM flag, and shift it into C
-    BCS @CantUse            ;  if set (not on overworld), can't use house here
+    BCC @Use                ;  if set (in standard map), can't use here
 
+    LDA tileprop_now
+    CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
+    BNE @CantUse
+
+   @Use:
     DEC item_house          ; otherwise... remove a house from our inventory
     LDA #120
     JSR MenuRecoverPartyHP  ; give the whole party 120 HP
