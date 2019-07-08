@@ -392,7 +392,7 @@ lut_SMTilesetAttr:
 lut_SMTilesetProp:
 
 ; Town
-.byte $10,$00 ; 00 Grass
+.byte $00,$00 ; 00 Grass
 .byte $00,$00 ; 01 Grass - left side in dark shade
 .byte $00,$00 ; 02 Grass - left side in dark shade, shade end
 .byte $80,$00 ; 03 Wall
