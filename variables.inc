@@ -277,6 +277,7 @@ mu_chan         = $4D
 entering_shop   = $50 ; nonzero = about to enter shop
 shop_id         = $51
 
+tileprop_last   = $51 ; for moving when shop_id isn't needed
 tileprop_now    = $52 ; 2 bytes special tile properties that we're on (tileprop isn't necessarily what we're standing on)
 
 ow_tile         = $54
@@ -354,7 +355,7 @@ battleitemslot      = $74 ; equip menu
 equipmenu_tmp       = $75 ; for unequip/reequipping
 DrawPlayerHPCounter = $76 ; counter for how many times player HP has been drawn in battle
 DialogueTable_1or2  = $77 ; important for dialogue
-
+UnderABridge        = $78 ; in standard maps, for movement/sprite stuff
 dlgflg_reentermap   = $7F  ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
 
 ;;

@@ -916,18 +916,20 @@ SetOWScroll:
     LDA $2002           ; reset PPU toggle
 
     LDA ow_scroll_x     ; get the overworld scroll position (use this as a scroll_x,
-    ASL A               ;    since there is no scroll_x)
-    ASL A
-    ASL A
-    ASL A               ; *16 (tiles are 16 pixels wide)
+    ;ASL A               ;    since there is no scroll_x)
+    ;ASL A
+    ;ASL A
+    ;ASL A               ; *16 (tiles are 16 pixels wide)
+    JSR ShiftLeft4
     ORA move_ctr_x      ; OR with move counter (effectively makes the move counter the fine scroll)
     STA $2005           ; write this as our X scroll
 
     LDA scroll_y        ; get scroll_y
-    ASL A
-    ASL A
-    ASL A
-    ASL A               ; *16 (tiles are 16 pixels tall)
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A               ; *16 (tiles are 16 pixels tall)
+    JSR ShiftLeft4
     ORA move_ctr_y      ; OR with move counter
     STA $2005           ; and set as Y scroll
 
@@ -2067,10 +2069,11 @@ NewGame_LoadStartingStats:
   @LoadStats:
     LDA ch_class, X         ; get the class
     AND #$0F                ;; JIGS - cut off high bits (sprite)
-    ASL A                   ; $10 bytes of starting data for each class
-    ASL A
-    ASL A
-    ASL A
+    ;ASL A                   ; $10 bytes of starting data for each class
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    JSR ShiftLeft4
     TAY                     ; source index in Y
     
     ;; lut_ClassStartingStats table contains $B bytes of data, padded to $10
@@ -2681,7 +2684,7 @@ ProcessSMInput:
       LDA #0
       STA joy_start            ; clear start button catcher
 
-      JSR GetSMTilePropNow     ; get the properties of the tile we're standing on (for LUTE/ROD purposes)
+     ; JSR GetSMTilePropNow     ; get the properties of the tile we're standing on (for LUTE/ROD purposes)
       LDA #$02
       JSR CyclePalettes        ; cycle palettes out with code 2 (2=standard map)
 
@@ -2753,6 +2756,38 @@ ProcessSMInput:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 CanPlayerMoveSM:
+    JSR GetSMTilePropNow    ; see if under or over a bridge
+    CMP #TP_SPEC_BRIDGEHORZ ; =
+    BNE :+
+    
+   @HorizontalBridge: 
+    LDA UnderABridge ; if under it (1), allow movement north-south only
+    BEQ @EastWest    ; if below (0), allow movement east-west only
+    
+   @NorthSouth:
+    LDA facing
+    LSR A       ; Put Right bit in carry
+    BCS @CantMove
+    LSR A       ; Put Left bit in carry
+    BCS @CantMove
+    BCC :++     ; no need to check up/down bits; movement is allowed
+
+  : CMP #TP_SPEC_BRIDGEVERT ; ||
+    BNE :+  
+    
+   @VerticalBridge:
+    LDA UnderABridge ; if under it (1), allow movement east-west only
+    BEQ @NorthSouth  ; if below (0), allow movement north-south only
+  
+   @EastWest:
+    LDA facing
+    LSR A       ; put Right bit in carry
+    BCS :+
+    LSR A       ; put Left bit in carry
+    BCS :+
+    BCC @CantMove ; otherwise, can't move, because trying to walk off the side of the bridge
+    
+  : LDA facing
     JSR GetSMTargetCoords      ; get target coords (coords which player is attempting to move to)
     JSR IsObjectInPath         ; see if a map object is in their path
     BCS @CantMove              ; if yes... path is blocked -- can't move
@@ -3064,11 +3099,11 @@ GetSMTilePropNow:
     LDA (tmp), Y          ; get the tile from the map
     ASL A                 ; *2  (2 bytes of properties per tile)
     TAX                   ; put index in X
+    LDA tileset_prop+1, X
+    STA tileprop_now+1
     LDA tileset_prop, X   ; get the first property byte
     AND #TP_SPEC_MASK     ; isolate the 'special' bits
     STA tileprop_now      ; and record them!
-    LDA tileset_prop+1, X
-    STA tileprop_now+1
     RTS                   ; exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3350,8 +3385,8 @@ StandardMapMovement:
     LDA move_speed        ; see if the player is moving
     BEQ SetSMScroll       ; if not, just skip ahead and set the scroll
                           ; the rest of this is only done during movement
-      JSR SM_MovePlayer     ; Move the player in the desired direction
-      JSR MapPoisonDamage   ; do poison damage
+      JSR SM_MovePlayer   ; Move the player in the desired direction
+    : JSR MapPoisonDamage   ; do poison damage
 
       LDA tileprop          ; get the properties for this tile
       AND #TP_SPEC_MASK     ; mask out the special bits
@@ -3360,6 +3395,7 @@ StandardMapMovement:
         JMP MapTileDamage   ;  ... do map tile damage
   :   RTS
 
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Set SM Scroll  [$CCA1 :: 0x3CCB1]
@@ -3377,18 +3413,20 @@ SetSMScroll:
     STA $2000           ; and the actual $2000
 
     LDA sm_scroll_x     ; get the standard map scroll position
-    ASL A
-    ASL A
-    ASL A
-    ASL A               ; *16 (tiles are 16 pixels wide)
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A               ; *16 (tiles are 16 pixels wide)
+    JSR ShiftLeft4
     ORA move_ctr_x      ; OR with move counter (effectively makes the move counter the fine scroll)
     STA $2005           ; write this as our X scroll
 
     LDA scroll_y        ; get scroll_y
-    ASL A
-    ASL A
-    ASL A
-    ASL A               ; *16 (tiles are 16 pixels tall)
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A               ; *16 (tiles are 16 pixels tall)
+    JSR ShiftLeft4
     ORA move_ctr_y      ; OR with move counter
     STA $2005           ; and set as Y scroll
 
@@ -3403,16 +3441,26 @@ SetSMScroll:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-SMMove_Right:
+SM_LeftRightMoveDrawJobCheck:
     LDA mapdraw_job        ; is there a draw job to do?
     BEQ @NoJob             ; if not... no job
-      JSR DoMapDrawJob     ; otherwise, do the job
+      JSR DoMapDrawJob     ; otherwise... do the job
 
   @NoJob:
-    JSR SetSMScroll        ; set scroll
+    JSR SetSMScroll        ; set scroll, load move_ctr_x
+    LDA move_ctr_x
+    CMP #$08               ; if = 8, then halfway done the move
+    BNE :+
+    
+    JSR ToggleBridgeHideSpriteOff ; if stepping out from under a bridge, show the sprite again
+    
+  : LDA move_ctr_x
+    RTS
 
-    LDA move_ctr_x         ; add movement speed
+SMMove_Right:
+    JSR SM_LeftRightMoveDrawJobCheck
+
+   ;LDA move_ctr_x         ; add movement speed
     CLC                    ;  to our X move counter
     ADC move_speed
     AND #$0F               ; mask low bits to keep within a tile
@@ -3422,8 +3470,9 @@ SMMove_Right:
       RTS                  ;  and exit
 
   @FullTile:
-    STA move_speed         ; after moving a full tile, zero movement speed
-    STA move_ctr_x         ; and move counter
+    ;STA move_speed         ; after moving a full tile, zero movement speed
+    ;STA move_ctr_x         ; and move counter
+    JSR SM_MoveFullTileDone
 
     LDA sm_scroll_x        ; add 1 to SM scroll X
     CLC
@@ -3447,14 +3496,9 @@ SMMove_Right:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SMMove_Left:
-    LDA mapdraw_job        ; is there a draw job to do?
-    BEQ @NoJob             ; if not... no job
-      JSR DoMapDrawJob     ; otherwise... do the job
+    JSR SM_LeftRightMoveDrawJobCheck
 
-  @NoJob:
-    JSR SetSMScroll        ; set scroll
-
-    LDA move_ctr_x         ; get the move counter.  If zero, we need to move one tile to left
+   ;LDA move_ctr_x         ; get the move counter.  If zero, we need to move one tile to left
     BNE @NoTileChg         ;   otherwise we don't need to change tiles
 
     LDA sm_scroll_x        ; subtract 1 from the SM X scroll
@@ -3480,9 +3524,10 @@ SMMove_Left:
     RTS                    ; and exit
 
   @FullTile:
-    STA move_speed         ; if we've moved a full tile, zero our speed
-    STA move_ctr_x         ; and our counter
-    RTS                    ; and exit
+    JMP SM_MoveFullTileDone
+   ; STA move_speed         ; if we've moved a full tile, zero our speed
+   ; STA move_ctr_x         ; and our counter
+   ; RTS                    ; and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3514,21 +3559,7 @@ SM_MovePlayer:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SMMove_Down:
-    LDA mapdraw_job     ; see if a drawing job needs to be performed
-    BEQ @NoJob          ; if not... skip ahead
-
-    CMP #$01            ; if drawing job=1 (attributes)...
-    BEQ @Job            ;   do it right away
-
-    LDA move_ctr_y      ; otherwise, only do the job if we're halfway between tiles
-    CMP #$08            ;   (8 pixels between the move)
-    BNE @NoJob          ; if not 8 pixels between the move... don't do the job
-
-  @Job:
-    JSR DoMapDrawJob       ; do the map drawing job, then proceed normally
-
-  @NoJob:
-    JSR SetSMScroll        ; set SM scroll
+    JSR SM_UpDownMoveDrawJobCheck
 
     LDA move_ctr_y         ; get the Y move counter
     CLC
@@ -3540,8 +3571,9 @@ SMMove_Down:
     RTS                    ; and exit
 
   @FullTile:               ; if we've moved a full tile
-    STA move_speed         ; zero our move speed (A=0 here) to stop moving
-    STA move_ctr_y         ; also zero our move counter
+    JSR SM_MoveFullTileDone
+    ;STA move_speed         ; zero our move speed (A=0 here) to stop moving
+    ;STA move_ctr_y         ; also zero our move counter
 
     LDA sm_scroll_y        ; increment SM Y scroll
     CLC
@@ -3568,21 +3600,7 @@ SMMove_Down:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SMMove_Up:
-    LDA mapdraw_job        ; see if a job needs to be done
-    BEQ @NoJob             ; if not, no job
-
-    CMP #$01
-    BEQ @Job               ; if job=1, do it right away
-
-    LDA move_ctr_y         ; otherwise, only do it when we're halfway between tiles
-    CMP #$08
-    BNE @NoJob
-
-  @Job:
-    JSR DoMapDrawJob
-
-  @NoJob:
-    JSR SetSMScroll        ; set scroll
+    JSR SM_UpDownMoveDrawJobCheck
 
     LDA move_ctr_y         ; get move counter
     BNE @NoTileChg         ; if it's zero, we need to change tiles.  Otherwise, skip ahead
@@ -3606,17 +3624,59 @@ SMMove_Up:
     SEC                    ; here, A=move counter
     SBC move_speed         ; subtract the movement speed from the counter
     AND #$0F               ; mask it to keep it in a 16x16 tile 
-    BEQ @FullTile          ; if it's now zero... we've moved a full tile
+    ;BEQ @FullTile          ; if it's now zero... we've moved a full tile
+    BEQ SM_MoveFullTileDone
 
     STA move_ctr_y         ; otherwise, simply write back the move counter
     RTS                    ;  and exit
 
-  @FullTile:
-    STA move_speed         ; if we moved a full tile, zero the move speed (stop player from moving)
-    STA move_ctr_y         ; and zero the move counter
-    RTS                    ; then exit
+  ;@FullTile:
+    ;STA move_speed         ; if we moved a full tile, zero the move speed (stop player from moving)
+    ;STA move_ctr_y         ; and zero the move counter
+    ;RTS                    ; then exit
+    ;JMP SM_MoveFullTileDone
 
 
+;; JIGS - up and down does this stuff, so no reason to have it copy-pasted twice
+SM_UpDownMoveDrawJobCheck:
+    LDA mapdraw_job        ; see if a job needs to be done
+    BEQ @NoJob             ; if not, no job
+
+    CMP #$01
+    BEQ @Job               ; if job=1, do it right away
+
+    LDA move_ctr_y         ; otherwise, only do it when we're halfway between tiles
+    CMP #$08
+    BNE @NoJob
+
+    JSR ToggleBridgeHideSpriteOff ; if stepping out from under a bridge, show the sprite again
+    
+  @Job:
+    JSR DoMapDrawJob
+
+  @NoJob:
+    JMP SetSMScroll        ; set scroll and return
+
+ToggleBridgeHideSpriteOff:    
+   LDA tileprop_now
+   CMP #TP_SPEC_BRIDGEHORZ   
+   BEQ @UnhideSprite
+   CMP #TP_SPEC_BRIDGEVERT
+   BNE :+
+   
+  @UnhideSprite:
+   LDA #0
+   STA UnderABridge
+ : RTS
+
+SM_MoveFullTileDone:
+   STA move_speed    
+   STA move_ctr_y    
+   STA move_ctr_x
+   LDA tileprop_now
+   STA tileprop_last
+   RTS
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  SMMove Jump Table  [$CDA1 :: 0x3CDB1]
@@ -3676,6 +3736,9 @@ lut_SMMoveJmpTbl:
     .WORD SMMove_4Orbs 
     .WORD SMMove_Cube
     .WORD SMMove_Crown
+    .WORD SMMove_BridgeHorizontal
+    .WORD SMMove_BridgeVertical
+    .WORD SMMove_Norm ; deep water
     
     ;; JIGS - this table is only for tiles without the No Move bit set. 
     ;; since the following tiles have the bit set, they've been removed
@@ -3687,8 +3750,29 @@ lut_SMMoveJmpTbl:
     ;.WORD SMMove_NoMove ; CureAilments
     ;.WORD SMMove_Norm ; Treasure
     ;.WORD SMMove_Norm ; Treasure
-    
+ 
+  
+SMMove_BridgeHorizontal: ; = 
+    LDA facing
+    LSR A                ; get right facing bit
+    BCS SMMove_OK
+    LSR A                ; get left facing bit
+    BCS SMMove_OK
 
+HideUnderBridge:
+    INC UnderABridge
+    CLC
+    RTS
+    
+SMMove_BridgeVertical: ; ||
+    LDA facing
+    LSR A
+    BCS HideUnderBridge
+    LSR A
+    BCS HideUnderBridge
+    BCC SMMove_OK
+
+   
  ;; SMMove_Battle  [$CDC3 :: 0x3CDD3]
  ;;  TP_SPEC_BATTLE
  
@@ -3725,6 +3809,7 @@ SMMove_OK:
     CLC               ; CLC because movement is A-OK, and exit
     RTS
 
+    
 ;SMMove_Crown:
 ;    LDA item_crown              ; see if the player has the crown
 ;    BEQ SMMove_NoSpecialItem    ; if not, can't move
@@ -4447,13 +4532,13 @@ StartMapMove:
     STA tmp              ;   this addition is done in @Vertical.  So write the desired addivite to tmp
 
     LDA mapdraw_nty      ; add $F to the NT Y
-    CLC                  ;   just so we can subtract it later
-    ADC #$0F             ; Waste of time.  The row to draw to is the row that we're scrolled to
-    CMP #$0F             ;   so we don't need to change mapdraw_nty at all when moving down
-    BCC @Vertical        ; will never branch
+ ;   CLC                  ;   just so we can subtract it later
+ ;   ADC #$0F             ; Waste of time.  The row to draw to is the row that we're scrolled to
+ ;   CMP #$0F             ;   so we don't need to change mapdraw_nty at all when moving down
+ ;   BCC @Vertical        ; will never branch
 
-    SEC                  ; subtract the $F we just added (dumb)
-    SBC #$0F
+ ;   SEC                  ; subtract the $F we just added (dumb)
+ ;   SBC #$0F
     JMP @Vertical
 
   @Up:
@@ -4511,10 +4596,11 @@ StartMapMove:
 DoMapDrawJob:
     LDA $2002           ; reset PPU toggle  (seems odd to do here...)
 
+    DEC mapdraw_job
     LDA mapdraw_job     ; find which job we're to do
-    SEC
-    SBC #1              ; decrement the job (to mark this job as complete 
-    STA mapdraw_job     ;   and to move to the next job)
+    ;SEC
+    ;SBC #1              ; decrement the job (to mark this job as complete 
+    ;STA mapdraw_job     ;   and to move to the next job)
 
     BEQ @Attributes     ; if original job was 1 (0 after decrement)... do attributes
 
@@ -6940,10 +7026,11 @@ CyclePalettes:
 
 DoAltarEffect:
     LDA sm_scroll_x      ; get the X scroll for the map
-    ASL A                ; multiply it by 16 to get the value need to be written to $2005
-    ASL A
-    ASL A
-    ASL A
+    ;ASL A                ; multiply it by 16 to get the value need to be written to $2005
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    JSR ShiftLeft4
     STA tmp+15           ; record it for future use in the routine
 
     LDA NTsoft2000       ; copy the NT scroll to the main soft2000 var
@@ -8881,20 +8968,23 @@ DrawOWSprites:
     ;LDA inforest        ; check to see if we're in the forest
     BEQ @NotInForest     ; if not, skip ahead
 
-      LDA sprindex       ; if we are in a forest... hide the bottom half of the player by
-      SEC                ;   getting the sprite index
-      SBC #$0C           ; subtract $C and put it in X (this will point it to the 
-      TAX                ;   2nd of the 4 8x8 sprites drawn -- DL player mapman sprite)
+   ;   LDA sprindex       ; if we are in a forest... hide the bottom half of the player by
+   ;   SEC                ;   getting the sprite index
+   ;   SBC #$0C           ; subtract $C and put it in X (this will point it to the 
+   ;   TAX                ;   2nd of the 4 8x8 sprites drawn -- DL player mapman sprite)
 
      ; LDA #$F4           ; new Y coord = $F4 (offscreen -- removes the sprite)
      ; STA oam+$00, X     ;  hide DL sprite
      ; STA oam+$08, X     ;  hide DR sprite
-      LDA oam_a, X
-      ORA #$20
-      STA oam_a, X
-      LDA oam_a+8, X
-      ORA #$20
-      STA oam_a+8, X
+     
+     ; LDX #4
+     ; LDA oam_a, X
+     ; ORA #$20
+     ; STA oam_a, X
+     ; LDA oam_a+8, X
+     ; ORA #$20
+     ; STA oam_a+8, X
+     JSR HideSpriteBottomHalf
 
   @NotInForest:
     LDA airship_vis      ; check airship visibility
@@ -9340,10 +9430,11 @@ ConvertOWToSprite:
     CMP #$10            ; see if result is >= $10
     BCS @OutOfBounds    ; if it is -- out of bounds
 
-    ASL A               ; multiply that tile by 16
-    ASL A               ;   to get the pixel (16 pixels per tile)
-    ASL A
-    ASL A
+   ; ASL A               ; multiply that tile by 16
+   ; ASL A               ;   to get the pixel (16 pixels per tile)
+   ; ASL A
+   ; ASL A
+   JSR ShiftLeft4
 
     CLC                 ; CLEAR carry (subtract an additional 1 in the folling SBC)
                         ;   this is because NES sprites are drawn 1 scanline below their specified
@@ -9362,10 +9453,11 @@ ConvertOWToSprite:
     CMP #$10            ; out of bounds if >= $10
     BCS @OutOfBounds
 
-    ASL A               ; multiply by 16
-    ASL A
-    ASL A
-    ASL A
+   ; ASL A               ; multiply by 16
+   ; ASL A
+   ; ASL A
+   ; ASL A
+   JSR ShiftLeft4
 
     SEC                 ; SEC (no additional 1 this time)
     SBC move_ctr_x      ; subtract fine X scroll
@@ -9396,15 +9488,29 @@ ConvertOWToSprite:
 DrawSMSprites:
     LDY #1
     JSR DrawPlayerMapmanSprite    ; draw the player mapman sprite (on foot -- no ship/airship/etc)
-    JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
-    LDA tileset_prop, X           ; reload first byte
+    LDA UnderABridge
+    ;BNE @MaskPlayer
+    BEQ :+
+      LDX #0
+      LDA #$F4           ; new Y coord = $F4 (offscreen -- removes the sprite)
+      STA oam+$00, X   
+      STA oam+$04, X
+      STA oam+$08, X   
+      STA oam+$0C, X 
+      BNE :++        ; always branches
+    
+  : JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
+    CMP #TP_SPEC_DEEPWATER
+    BNE :+
+      JSR HideSpriteBottomHalf
+      BNE :+           ; always branches
+      
+  : LDA tileset_prop, X           ; reload first byte
     AND #TP_HIDESPRITE            ; check the hide sprite switch
     BEQ :+
       LDX #0                      ; set X to sprite index 0 (first sprite, always player)
     @MaskPlayer:                  
-      LDA oam_a, X                ; load up the attribyte byte for that sprite
-      ORA #$20                    ; add in the "background priority" bit
-      STA oam_a, X                ; save it
+      JSR HideSpriteThing
       INX                         ; inc X by 4 to check next sprite
       INX
       INX
@@ -9414,7 +9520,17 @@ DrawSMSprites:
     
   : JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
 
-
+HideSpriteBottomHalf:
+    LDX #$04
+    JSR HideSpriteThing
+    LDX #$0C
+  
+HideSpriteThing:
+    LDA oam_a, X                ; load up the attribyte byte for that sprite
+    ORA #$20                    ; add in the "background priority" bit
+    STA oam_a, X                ; save it
+    RTS
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Vehicle facing table offset  [$E417 :: 0x3E427]
@@ -9964,10 +10080,11 @@ DrawMapObject:
     CMP #$10              ; ensure coarse Y scroll puts the object on the actual screen
     BCS @DontDraw         ; if not, don't draw it
 
-    ASL A                 ; multiply coarse scroll by 16
-    ASL A
-    ASL A
-    ASL A
+    JSR ShiftLeft4
+    ;ASL A                 ; multiply coarse scroll by 16
+    ;ASL A
+    ;ASL A
+    ;ASL A
     ORA tmp               ; and add fine scroll to get the actual Y pos
     CMP #$E8              ; if the actual Y pos is off the bottom of the screen
     BCS @DontDraw         ; don't draw (this seems redundant)
@@ -9988,10 +10105,11 @@ DrawMapObject:
     CMP #$10
     BCS @DontDraw
 
-    ASL A
-    ASL A
-    ASL A
-    ASL A
+    JSR ShiftLeft4
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A
     ORA tmp
     CMP #$F8              ; $F8 is off the right side of the screen, not E8 (screen is wider than it is tall)
     BCC @ObjectOnScreen
@@ -10772,17 +10890,19 @@ LoadBattleBGCHRAndPalettes:
  ;     BCC @Loop
 
     LDA btlformation ; get battle formation number
-    ASL A            ; multiply it by 16
-    ASL A
-    ASL A
-    ASL A
+    ;ASL A            ; multiply it by 16
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    JSR ShiftLeft4
     STA tmp+4        ; put low byte in tmp+4
     LDA btlformation
     AND #$7F         ; drop the "Formation B" bit
-    LSR A
-    LSR A
-    LSR A
-    LSR A
+    ;LSR A
+    ;LSR A
+    ;LSR A
+    ;LSR A
+    JSR ShiftLeft4
     CLC
     ADC #>lut_BattleFormations   ; add to high byte of pointer
     STA tmp+5         ; and put it in $15.  (tmp+4) now points to lut_BattleFormations+(formation * 16)
@@ -13301,11 +13421,12 @@ DrawBattleMagicBox:
   @DoMagicSorting:
     STA TempSpellListIndex ; backup Y
     LDA DrawBattleMagicBox_loopctr
-    ASL A
-    ASL A
-    ASL A
-    ASL A
-    ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    JSR ShiftLeft5
     TAX
 
     ; Print the 'L#' text on the left side of the box
@@ -13449,8 +13570,9 @@ ShiftLeft6:
     ASL A
 ShiftLeft5:
     ASL A
+ShiftLeft4:
     ASL A
-    ASL A
+    ASL A ; shifting left 3 times wouldn't save any bytes...
     ASL A
     ASL A
     RTS

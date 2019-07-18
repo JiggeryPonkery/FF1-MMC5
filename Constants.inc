@@ -449,9 +449,9 @@ TP_SPEC_LIGHTORB   = $0B
 TP_SPEC_4ORBS      = $0C
 TP_SPEC_CUBE       = $0D
 TP_SPEC_CROWN      = $0E
-TP_SPEC_CRACKFLOOR = $0F
-TP_SPEC_ICEFLOOR   = $10
-;                     11
+TP_SPEC_BRIDGEHORZ = $0F
+TP_SPEC_BRIDGEVERT = $10
+TP_SPEC_DEEPWATER  = $11
 ;                     12
 ;                     13
 ;                     14

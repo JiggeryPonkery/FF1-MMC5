@@ -363,10 +363,10 @@ lut_SMTilesetAttr:
 ; 0C - Requires 4 Orbs to Activate Teleport
 ; 0D - Requires CUBE to Activate Teleport
 ; 0E - Requires CROWN to Activate Teleport
-; 0F - Cracked floor
-; 10 - Slippery floor
-; 11 - Activates Save Screen (like a bed or campfire)?
-; 12
+; 0F - Horizontal Bridge = 
+; 10 - Vertical Bridge ||
+; 11 - Deep Water
+; 12 - Activates Save Screen (like a bed or campfire)?
 ; 13
 ; 14
 ; 15
@@ -431,11 +431,11 @@ lut_SMTilesetProp:
 .byte $80,$00 ; 24 B. magic sign
 .byte $80,$00 ; 25 Inn sign
 .byte $04,$03 ; 26 Door - Elfland Weapons
-.byte $80,$00 ; 27 Water
-.byte $80,$00 ; 28 Water, left side shade
-.byte $80,$00 ; 29 Water, left side shade with end piece
-.byte $00,$00 ; 2A Bridge =
-.byte $00,$00 ; 2B Bridge ||
+.byte $11,$00 ; 27 Water
+.byte $11,$00 ; 28 Water, left side shade
+.byte $11,$00 ; 29 Water, left side shade with end piece
+.byte $0F,$00 ; 2A Bridge =
+.byte $10,$00 ; 2B Bridge ||
 .byte $00,$00 ; 2C Steps
 .byte $04,$04 ; 2D Door - Melmond Weapons
 .byte $C0,$E6 ; 2E Fountain (come wash your face)
