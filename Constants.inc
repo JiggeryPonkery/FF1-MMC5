@@ -945,8 +945,8 @@ MAP_3A  = $3A
 MAP_3B  = $3B
 MAP_3C  = $3C
 
-MAP_BANKCHANGE_2 = MAP_19 ; first map in SM_Bank_2
-MAP_BANKCHANGE_3 = MAP_2C ; first map in SM_Bank_3
+MAP_BANKCHANGE_2 = MAP_18 ; first map in SM_Bank_2
+MAP_BANKCHANGE_3 = MAP_2A ; first map in SM_Bank_3
   
 SM_BANK_1 = $16
 SM_BANK_2 = $17

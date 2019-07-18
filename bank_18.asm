@@ -6,6 +6,8 @@
 
 BANK_THIS = $18
 
+.WORD Sea_Shrine_B5              ; 2A ; Sea Shrine B5
+.WORD Sea_Shrine_B4              ; 2B ; Sea Shrine B4
 .word Sea_Shrine_B3              ; 2C ;
 .word Sea_Shrine_B2              ; 2D ;
 .word Sea_Shrine_B1              ; 2E ;
@@ -23,6 +25,12 @@ BANK_THIS = $18
 .word Temple_of_Fiends_7F_Wind   ; 3A ;
 .word Temple_of_Fiends_8F_Chaos  ; 3B ;
 .word Titans_Tunnel              ; 3C ;
+
+Sea_Shrine_B5:
+.incbin "bin/maps/map_2A.bin"
+
+Sea_Shrine_B4:
+.incbin "bin/maps/map_2B.bin"
 
 Sea_Shrine_B3:
 .incbin "bin/maps/map_2C.bin"

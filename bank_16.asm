@@ -115,7 +115,7 @@ BANK_THIS = $16
 .word SARDAS_CAVE
 .word MARSH_CAVE_B1
 .word MIRAGE_TOWER_1F
-.word Coneria_CASTLE_2F
+
 
 Coneria:
 .incbin "bin/maps/map_00.bin"
@@ -188,8 +188,5 @@ MARSH_CAVE_B1:
 
 MIRAGE_TOWER_1F:
 .incbin "bin/maps/map_17.bin"
-
-Coneria_CASTLE_2F:
-.incbin "bin/maps/map_18.bin"
 
 .byte "END OF BANK 16"

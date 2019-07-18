@@ -6,6 +6,7 @@
 
 BANK_THIS = $17
 
+.word Coneria_CASTLE_2F
 .WORD Castle_of_Ordeals_2F ; 19 ; Castle of Ordeals 2F
 .WORD Castle_of_Ordeals_3F ; 1A ; Castle of Ordeals 3F
 .WORD Marsh_Cave_B2        ; 1B ; Marsh Cave B2
@@ -23,8 +24,11 @@ BANK_THIS = $17
 .WORD Bahamuts_Room_B2     ; 27 ; Bahamut's Room B2
 .WORD Mirage_Tower_2F      ; 28 ; Mirage Tower 2F
 .WORD Mirage_Tower_3F      ; 29 ; Mirage Tower 3F
-.WORD Sea_Shrine_B5        ; 2A ; Sea Shrine B5
-.WORD Sea_Shrine_B4        ; 2B ; Sea Shrine B4
+
+
+
+Coneria_CASTLE_2F:
+.incbin "bin/maps/map_18.bin"
 
 Castle_of_Ordeals_2F:
 .incbin "bin/maps/map_19.bin"
@@ -77,10 +81,8 @@ Mirage_Tower_2F:
 Mirage_Tower_3F:
 .incbin "bin/maps/map_29.bin"
 
-Sea_Shrine_B5:
-.incbin "bin/maps/map_2A.bin"
 
-Sea_Shrine_B4:
-.incbin "bin/maps/map_2B.bin"
+
+
 
 .byte "END OF BANK 17"
