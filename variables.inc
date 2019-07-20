@@ -258,7 +258,7 @@ mm_maprow       = $41 ; shared
 
 vehicle         = $42 ;1=walking, 2=canoe, 4=ship, 8=airship
 
-inforest        = $43 ; nonzero if in forest
+mapspritehide   = $43 ; nonzero if in forest
 
 tileprop        = $44 ; 2 bytes
 
@@ -354,8 +354,7 @@ battleitemslot      = $74 ; equip menu
 equipmenu_tmp       = $75 ; for unequip/reequipping
 DrawPlayerHPCounter = $76 ; counter for how many times player HP has been drawn in battle
 DialogueTable_1or2  = $77 ; important for dialogue
-UnderABridge        = $78 ; in standard maps, for movement/sprite stuff
-tileprop_last       = $79 ; for moving when shop_id isn't needed
+tileprop_last       = $78 ; for moving when shop_id isn't needed
 dlgflg_reentermap   = $7F  ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
 
 ;;

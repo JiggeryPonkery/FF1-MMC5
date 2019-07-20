@@ -166,6 +166,7 @@
 .import BattleIcons
 .import GetDialogueString
 .import TalkToTile_BankE
+.import AssignMapTileDamage_Z
 
 .segment "BANK_FIXED"
 
@@ -2291,35 +2292,12 @@ MapPoisonDamage:       ; first thing is to check if ANY characters are poisoned.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 AssignMapTileDamage:
-    LDX #$00              ; zero loop counter and char index
+    LDA #BANK_Z
+    JSR SwapPRG_L
+    JSR AssignMapTileDamage_Z
+    JMP SwapPRG_L
 
-  @Loop:
-    LDA ch_curhp+1, X     ; check high byte of HP
-    BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this guy damage
-
-    LDA ch_curhp, X       ; otherwise, check low byte
-    CMP #2                ; if < 2, skip damage (don't take away their last HP)
-    BCC @DmgSkip
-
-  @DmgSubtract:
-    LDA ch_curhp, X       ; subtract 1 HP
-    SEC
-    SBC #1
-    STA ch_curhp, X
-    LDA ch_curhp+1, X
-    SBC #0
-    STA ch_curhp+1, X
-
-  @DmgSkip:
-    TXA                   ; add $40 to char index (next character in party)
-    CLC
-    ADC #$40
-    TAX
-
-    BNE @Loop             ; loop until it wraps (4 iterations)
-    RTS                   ; then exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2761,7 +2739,7 @@ CanPlayerMoveSM:
     BNE :+
     
    @HorizontalBridge: 
-    LDA UnderABridge ; if under it (1), allow movement north-south only
+    LDA mapspritehide ; if under it (1), allow movement north-south only
     BEQ @EastWest    ; if below (0), allow movement east-west only
     
    @NorthSouth:
@@ -2776,7 +2754,7 @@ CanPlayerMoveSM:
     BNE :+  
     
    @VerticalBridge:
-    LDA UnderABridge ; if under it (1), allow movement east-west only
+    LDA mapspritehide ; if under it (1), allow movement east-west only
     BEQ @NorthSouth  ; if below (0), allow movement north-south only
   
    @EastWest:
@@ -3452,7 +3430,7 @@ SM_LeftRightMoveDrawJobCheck:
     CMP #$08               ; if = 8, then halfway done the move
     BNE :+
     
-    JSR ToggleBridgeHideSpriteOff ; if stepping out from under a bridge, show the sprite again
+    JSR ToggleHideSprite ; if stepping out from under a bridge, show the sprite again
     
   : LDA move_ctr_x
     RTS
@@ -3649,7 +3627,7 @@ SM_UpDownMoveDrawJobCheck:
     CMP #$08
     BNE @NoJob
 
-    JSR ToggleBridgeHideSpriteOff ; if stepping out from under a bridge, show the sprite again
+    JSR ToggleHideSprite ; if stepping out from under a bridge, show the sprite again
     
   @Job:
     JSR DoMapDrawJob
@@ -3657,17 +3635,11 @@ SM_UpDownMoveDrawJobCheck:
   @NoJob:
     JMP SetSMScroll        ; set scroll and return
 
-ToggleBridgeHideSpriteOff:    
-   LDA tileprop_now
-   CMP #TP_SPEC_BRIDGEHORZ   
-   BEQ @UnhideSprite
-   CMP #TP_SPEC_BRIDGEVERT
-   BNE :+
-   
-  @UnhideSprite:
-   LDA #0
-   STA UnderABridge
- : RTS
+ToggleHideSprite:    
+   LDA mapspritehide
+   JSR ShiftLeft4
+   STA mapspritehide
+   RTS
 
 SM_MoveFullTileDone:
    STA move_speed    
@@ -3738,7 +3710,7 @@ lut_SMMoveJmpTbl:
     .WORD SMMove_Crown
     .WORD SMMove_BridgeHorizontal
     .WORD SMMove_BridgeVertical
-    .WORD SMMove_Norm ; deep water
+    .WORD SMMove_DeepWater ; deep water
     
     ;; JIGS - this table is only for tiles without the No Move bit set. 
     ;; since the following tiles have the bit set, they've been removed
@@ -3759,17 +3731,26 @@ SMMove_BridgeHorizontal: ; =
     LSR A                ; get left facing bit
     BCS SMMove_OK
 
-HideUnderBridge:
-    INC UnderABridge
+SMMove_HideUnderBridge:
+    LDA mapspritehide
+    ORA #2
+    BNE SMMove_SaveHideSprite
+    
+SMMove_DeepWater:    
+    LDA mapspritehide
+    ORA #8
+
+SMMove_SaveHideSprite:
+    STA mapspritehide
     CLC
     RTS
     
 SMMove_BridgeVertical: ; ||
     LDA facing
     LSR A
-    BCS HideUnderBridge
+    BCS SMMove_HideUnderBridge
     LSR A
-    BCS HideUnderBridge
+    BCS SMMove_HideUnderBridge
     BCC SMMove_OK
 
    
@@ -3944,10 +3925,10 @@ SMMove_Door:
     LDX #0                    ; otherwise (door is locked)
     STX tileprop+1            ; erase the secondary attribute byte (prevent it from being a locked shop)
     LDX item_mystickey        ; check to see if the player has the key
-    BNE @OpenDoor             ; if they do, open the door
+    BNE @OpenDoor        ; if they do, open the door
       SEC                ; otherwise (no key, locked door), SEC to indicate player can't move here
       RTS                ; and exit
-
+    
   @OpenDoor:
     ASL inroom           ; shift the inroom flag (high bit) into C
     STA inroom           ; then write the door bits to inroom to mark that we're opening a door (or locked door)
@@ -9484,32 +9465,31 @@ ConvertOWToSprite:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; JIGS - reworked this.
+;; mapspritehide holds all the information on how to hide the player's sprite
+;; $0x = no hiding... yet
+;; $80 = hide bottom half by changing background priority
+;; $40 = hide entire sprite by changing background priority
+;; $20 = hide entire sprite by moving it off-screen
+
 
 DrawSMSprites:
     LDY #1
     JSR DrawPlayerMapmanSprite    ; draw the player mapman sprite (on foot -- no ship/airship/etc)
-    LDA UnderABridge
-    ;BNE @MaskPlayer
-    BEQ :+
-      LDX #0
-      LDA #$F4           ; new Y coord = $F4 (offscreen -- removes the sprite)
-      STA oam+$00, X   
-      STA oam+$04, X
-      STA oam+$08, X   
-      STA oam+$0C, X 
-      BNE :++        ; always branches
-    
-  : JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
-    CMP #TP_SPEC_DEEPWATER
-    BNE :+
-      JSR HideSpriteBottomHalf
-      BNE :+           ; always branches
+    LDA mapspritehide
+    ASL A
+    BCC :+
       
-  : LDA tileset_prop, X           ; reload first byte
-    AND #TP_HIDESPRITE            ; check the hide sprite switch
-    BEQ :+
+     @Forest_Water:
+      JSR HideSpriteBottomHalf
+      BNE @Done
+      
+  : ASL A 
+    BCC :+
+    
+     @BackgroundPriority:
       LDX #0                      ; set X to sprite index 0 (first sprite, always player)
-    @MaskPlayer:                  
+     @MaskPlayer:                  
       JSR HideSpriteThing
       INX                         ; inc X by 4 to check next sprite
       INX
@@ -9517,8 +9497,40 @@ DrawSMSprites:
       INX 
       CPX #$10                    ; if X is not yet $10 (4+4+4+4), keep looping
       BNE @MaskPlayer
-    
-  : JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
+      BEQ @Done
+      
+  : ASL A
+    BCC @Done
+     
+     @Offscreen:
+      LDX #0
+      LDA #$F4           ; new Y coord = $F4 (offscreen -- removes the sprite)
+      STA oam+$00, X   
+      STA oam+$04, X
+      STA oam+$08, X   
+      STA oam+$0C, X 
+     
+;  : JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
+;    CMP #TP_SPEC_DEEPWATER
+;    BNE :+
+;      JSR HideSpriteBottomHalf
+;      BNE :+           ; always branches
+      
+;  : LDA tileset_prop, X           ; reload first byte
+;    AND #TP_HIDESPRITE            ; check the hide sprite switch
+;    BEQ :+
+;      LDX #0                      ; set X to sprite index 0 (first sprite, always player)
+;    @MaskPlayer:                  
+;      JSR HideSpriteThing
+;      INX                         ; inc X by 4 to check next sprite
+;      INX
+;      INX
+;      INX 
+;      CPX #$10                    ; if X is not yet $10 (4+4+4+4), keep looping
+;      BNE @MaskPlayer
+   
+  @Done: 
+   JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
 
 HideSpriteBottomHalf:
     LDX #$04

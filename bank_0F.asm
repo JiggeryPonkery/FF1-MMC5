@@ -14,6 +14,7 @@
 .export LoadEnemyStats
 .export NewGamePartyGeneration
 .export StealFromEnemyZ
+.export AssignMapTileDamage_Z
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -681,7 +682,45 @@ StealFromEnemyZ:
 
     
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Assign Map Tile Damage [$C861 :: 0x3C871]
+;;
+;;    Deals 1 damage to all party members (for standard map damaging tiles
+;;  -- Frost/Lava).
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+AssignMapTileDamage_Z:
+    LDX #$00              ; zero loop counter and char index
+
+  @Loop:
+    LDA ch_curhp+1, X     ; check high byte of HP
+    BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this guy damage
+
+    LDA ch_curhp, X       ; otherwise, check low byte
+    CMP #2                ; if < 2, skip damage (don't take away their last HP)
+    BCC @DmgSkip
+
+  @DmgSubtract:
+    LDA ch_curhp, X       ; subtract 1 HP
+    SEC
+    SBC #1
+    STA ch_curhp, X
+    LDA ch_curhp+1, X
+    SBC #0
+    STA ch_curhp+1, X
+
+  @DmgSkip:
+    TXA                   ; add $40 to char index (next character in party)
+    CLC
+    ADC #$40
+    TAX
+
+    BNE @Loop             ; loop until it wraps (4 iterations)
+    LDA cur_bank
+    RTS                   ; then exit
 
 
 

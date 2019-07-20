@@ -41,29 +41,134 @@ BANK_THIS = $12
 ; %0 0 0 0, 0 0 0 0 <- bit order, if I have it understood right
 
 lut_OWTileset:
-.byte $06,$40, $0E,$89, $0E,$89, $0E,$40, $1E,$40, $0E,$40, $0E,$40, $0B,$42
-.byte $0E,$40, $0F,$00, $0F,$00, $0F,$00, $0F,$00, $0F,$00, $0E,$8E, $2E,$00
-
-.byte $0F,$00, $0F,$00, $0F,$00, $0E,$40, $1E,$40, $0E,$40, $0B,$42, $0B,$42
-.byte $0B,$42, $0F,$00, $0F,$00, $0E,$8A, $0E,$8A, $4E,$98, $0E,$00, $2E,$00
-
-.byte $0F,$00, $0F,$00, $0F,$00, $0E,$40, $0E,$40, $0E,$40, $0E,$40, $0B,$42
-.byte $0E,$40, $0E,$8B, $0E,$8B, $0E,$90, $0F,$00, $0F,$00, $0F,$00, $0E,$94
-;                                                          
-.byte $0F,$00, $0F,$00, $0E,$95, $0F,$00, $0E,$99, $0E,$9A, $8E,$00, $CE,$00
-.byte $0E,$8C, $0E,$8C, $0E,$96, $0E,$00, $0F,$00, $0E,$00, $0F,$00, $0E,$00
-
-.byte $0D,$41, $0D,$41, $0E,$40, $0E,$40, $0D,$41, $0E,$40, $0D,$93, $0F,$00
-.byte $0F,$00, $0E,$81, $0E,$82, $0F,$00, $0E,$83, $0E,$84, $0E,$85, $0F,$00
-
-.byte $0D,$41, $0D,$41, $0E,$40, $0E,$40, $06,$40, $0E,$40, $06,$00, $0E,$8D
-.byte $0E,$8D, $06,$00, $0E,$86, $0F,$00, $0F,$00, $0E,$87, $0F,$00, $0F,$00
-
-.byte $06,$40, $06,$40, $0E,$40, $0E,$40, $0E,$8F, $0E,$8F, $0E,$91, $0E,$9B
-.byte $0E,$9C, $0E,$9D, $0E,$80, $0F,$00, $0E,$92, $0E,$88, $0E,$97, $0F,$00
-
-.byte $06,$40, $06,$40, $0E,$40, $0E,$40, $0E,$00, $0E,$00, $06,$00, $2E,$00
-.byte $2E,$00, $2E,$00, $2E,$00, $0F,$00, $0F,$00, $0F,$00, $0F,$00, $0F,$00
+.byte $06,$40  ; Plain grass
+.byte $0E,$89  ; Enter coneria Castle Left
+.byte $0E,$89  ; Enter coneria Castle Right
+.byte $0E,$40  ; Forest UL
+.byte $1E,$40  ; Forest top
+.byte $0E,$40  ; Forest UR
+.byte $0E,$40  ; Ocean UL
+.byte $0B,$42  ; Ocean top
+.byte $0E,$40  ; Ocean UR
+.byte $0F,$00  ; Big Castle top left
+.byte $0F,$00  ; Big Castle top right
+.byte $0F,$00  ; Small castle top left
+.byte $0F,$00  ; Small castle rop right
+.byte $0F,$00  ; Desert tower top
+.byte $0E,$8E  ; Earth Cave entrance
+.byte $2E,$00  ; Dock, left side
+.byte $0F,$00  ; Cave UL
+.byte $0F,$00  ; Cave top
+.byte $0F,$00  ; Cave UR
+.byte $1E,$40  ; Forest Left
+.byte $1E,$40  ; Forst Middle
+.byte $1E,$40  ; Forest Right
+.byte $0B,$42  ; Ocean left
+.byte $0B,$42  ; Ocean middle
+.byte $0B,$42  ; Ocean right
+.byte $0F,$00  ; Big castle middle left
+.byte $0F,$00  ; Big castle middle right
+.byte $0E,$8A  ; Enter Flfland Castle
+.byte $0E,$8A  ; Enter Elfland Castle
+.byte $4E,$98  ; Enter Desert tower
+.byte $0E,$00  ; Desert Tower shadow
+.byte $2E,$00  ; Docks, right side
+.byte $0F,$00  ; Cave left
+.byte $0F,$00  ; Cave middle
+.byte $0F,$00  ; Cave right
+.byte $0E,$40  ; Forest BL
+.byte $1E,$40  ; Forest bottom
+.byte $0E,$40  ; Forest BR
+.byte $0E,$40  ; Ocean BL
+.byte $0B,$42  ; Ocean bottom
+.byte $0E,$40  ; Ocean BR
+.byte $0E,$8B  ; Enter Astos Castle Left
+.byte $0E,$8B  ; Enter Astos Castle right
+.byte $0E,$90  ; Enter Ice Cave
+.byte $0F,$00  ; Town wall UL
+.byte $0F,$00  ; Town wall top
+.byte $0F,$00  ; Town wall UR
+.byte $0E,$94  ; Enter Dwarf Cave
+.byte $0F,$00  ; Cave BL
+.byte $0F,$00  ; Cave Bottom
+.byte $0E,$95  ; Enter Matoya's Cave
+.byte $0F,$00  ; Cave BR
+.byte $0E,$99  ; Enter Titan's Tunnel East
+.byte $0E,$9A  ; Enter Titan's Tunnel West
+.byte $8E,$00  ; Desert Caravan shop
+.byte $CE,$00  ; Desert Raise airship 
+.byte $0E,$8C  ; Enter Castle of Ordeals Left
+.byte $0E,$8C  ; Enter Castle of Ordeals Right
+.byte $0E,$96  ; Enter Sarda's Cave
+.byte $0E,$00  ; Town Wall top grass-/
+.byte $0F,$00  ; Town wall top /-pavement
+.byte $0E,$00  ; Town pavement
+.byte $0F,$00  ; Town wall top pavement-\ 
+.byte $0E,$00  ; Town wall top \-grass
+.byte $0D,$41  ; River UL
+.byte $0D,$41  ; River UR
+.byte $0E,$40  ; Desert UL
+.byte $0E,$40  ; Desert UR
+.byte $0D,$41  ; River
+.byte $0E,$40  ; Desert
+.byte $0D,$93  ; Waterfall
+.byte $0F,$00  ; Temple of Fiends roof left
+.byte $0F,$00  ; Temple of Fiends roof right
+.byte $0E,$81  ; Enter Coneria
+.byte $0E,$82  ; Enter Pravoka
+.byte $0F,$00  ; Town Wall middle grass-/
+.byte $0E,$83  ; Enter Elfland
+.byte $0E,$84  ; Enter Melmond
+.byte $0E,$85  ; Enter Crescent Lake
+.byte $0F,$00  ; Town wall middle \-grass
+.byte $0D,$41  ; River BL
+.byte $0D,$41  ; River BR
+.byte $0E,$40  ; Desert BL
+.byte $0E,$40  ; Desert BR
+.byte $06,$40  ; Plains
+.byte $1E,$40  ; Marsh
+.byte $06,$00  ; Temple of Fiends grass/pavement left
+.byte $0E,$8D  ; Enter Temple of Fiends Left
+.byte $0E,$8D  ; Enter Temple of Fiends right
+.byte $06,$00  ; Temple of Fiends pavement/grass right
+.byte $0E,$86  ; Enter Gaia
+.byte $0F,$00  ; Town Wall less grass-/
+.byte $0F,$00  ; Town wall grass-curve left
+.byte $0E,$87  ; Enter Onrac
+.byte $0F,$00  ; Town wall curve-grass right
+.byte $0F,$00  ; Town wall \-less grass
+.byte $06,$40  ; Plains UL
+.byte $06,$40  ; Plains UR
+.byte $1E,$40  ; Marsh UL
+.byte $1E,$40  ; Marsh UR
+.byte $0E,$8F  ; Volcano top left  (enter)
+.byte $0E,$8F  ; Volcano top right (enter)
+.byte $0E,$91  ; Cardia Cave 2
+.byte $0E,$9B  ; Cardia Cave 3
+.byte $0E,$9C  ; Cardia Cave 4
+.byte $0E,$9D  ; Cardia Cave 5
+.byte $0E,$80  ; Cardia Cave 1
+.byte $0F,$00  ; Town Wall /-pavement left
+.byte $0E,$92  ; Enter Bahamut's room
+.byte $0E,$88  ; Enter Leifen
+.byte $0E,$97  ; Enter Marsh Cave
+.byte $0F,$00  ; Town Wall pavement-\ right
+.byte $06,$40  ; Plains BL
+.byte $06,$40  ; Plains BR
+.byte $1E,$40  ; Marsh BL
+.byte $1E,$40  ; Marsh BR
+.byte $0E,$00  ; Volcano bottom left
+.byte $0E,$00  ; Volcano bottom right
+.byte $06,$00  ; Grass, no fight
+.byte $2E,$00  ; Docks, BR
+.byte $2E,$00  ; Docks, bottom
+.byte $2E,$00  ; Docks, BL
+.byte $2E,$00  ; Docks, UR
+.byte $0F,$00  ; Town Wall curve left
+.byte $0F,$00  ; Town wall bottom
+.byte $0F,$00  ; Town Wall gate left
+.byte $0F,$00  ; Town wall gate right
+.byte $0F,$00  ; Town wall curve right
 
 ; world map pattern table assignment
 .byte $20,$89,$8B,$21,$26,$23,$53,$4F,$3F,$01,$7E,$8D,$01,$73,$1C,$F5
