@@ -885,7 +885,9 @@ OverworldMovement:
     LDA move_speed        ; check movement speed
     BEQ SetOWScroll_PPUOn ; if zero (we're not moving), just set the scroll and exit
 
-    JSR OW_MovePlayer     ; otherwise... process party movement
+   ; JSR OW_MovePlayer     ; otherwise... process party movement
+   JSR SM_MovePlayer
+   ;; JIGS - SM_MovePlayer handles all the same things by changing mapflags when it needs to do overworld stuff
 
     LDA vehicle           ; check the current vehicle
     CMP #$01              ; are they on foot?
@@ -950,38 +952,38 @@ SetOWScroll:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-OWMove_Right:
-    LDA mapdraw_job        ; is there a draw job to do?
-    BEQ @NoJob             ; if not... no job
-      JSR DoMapDrawJob     ; otherwise, do the job
+;OWMove_Right:
+;    LDA mapdraw_job        ; is there a draw job to do?
+;    BEQ @NoJob             ; if not... no job
+;      JSR DoMapDrawJob     ; otherwise, do the job
 
-  @NoJob:
-    JSR SetOWScroll_PPUOn  ; turn on PPU, set scroll
+;  @NoJob:
+;    JSR SetOWScroll_PPUOn  ; turn on PPU, set scroll
 
-    LDA move_ctr_x         ; add movement speed
-    CLC                    ;  to our X move counter
-    ADC move_speed
-    AND #$0F               ; mask low bits to keep within a tile
-    BEQ @FullTile          ; if result is zero, we've moved a full tile
+;    LDA move_ctr_x         ; add movement speed
+;    CLC                    ;  to our X move counter
+;    ADC move_speed
+;    AND #$0F               ; mask low bits to keep within a tile
+;    BEQ @FullTile          ; if result is zero, we've moved a full tile
 
-    STA move_ctr_x         ; otherwise, simply write back the counter
-    RTS                    ;  and exit
+;    STA move_ctr_x         ; otherwise, simply write back the counter
+;    RTS                    ;  and exit
 
-  @FullTile:
-    STA move_speed         ; after moving a full tile, zero movement speed
-    STA move_ctr_x         ; and move counter
+;  @FullTile:
+;    STA move_speed         ; after moving a full tile, zero movement speed
+;    STA move_ctr_x         ; and move counter
 
-    LDA ow_scroll_x        ; +1 to our overworld scroll X
-    CLC
-    ADC #$01
-    STA ow_scroll_x
+;    LDA ow_scroll_x        ; +1 to our overworld scroll X
+;    CLC
+;    ADC #$01
+;    STA ow_scroll_x
 
-    AND #$10               ; get nametable bit of scroll ($10=use nt@$2400, $00=use nt@$2000)
-    LSR NTsoft2000         ; shift out and discard old NTX scroll bit
-    CMP #$10               ; sets C if A=$10 (use nt@$2400).  clears C otherwise
-    ROL NTsoft2000         ; shift C into NTX scroll bit (indicating the proper NT to use)
+;    AND #$10               ; get nametable bit of scroll ($10=use nt@$2400, $00=use nt@$2000)
+;    LSR NTsoft2000         ; shift out and discard old NTX scroll bit
+;    CMP #$10               ; sets C if A=$10 (use nt@$2400).  clears C otherwise
+;    ROL NTsoft2000         ; shift C into NTX scroll bit (indicating the proper NT to use)
 
-    RTS                    ; then exit
+;    RTS                    ; then exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -991,42 +993,42 @@ OWMove_Right:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-OWMove_Left:
-    LDA mapdraw_job        ; is there a draw job to do?
-    BEQ @NoJob             ; if not... no job
-      JSR DoMapDrawJob     ; otherwise... do the job
+;OWMove_Left:
+;    LDA mapdraw_job        ; is there a draw job to do?
+;    BEQ @NoJob             ; if not... no job
+;      JSR DoMapDrawJob     ; otherwise... do the job
 
-  @NoJob:
-    JSR SetOWScroll_PPUOn  ; set scroll and turn PPU on
+;  @NoJob:
+;    JSR SetOWScroll_PPUOn  ; set scroll and turn PPU on
 
-    LDA move_ctr_x         ; get the move counter.  If zero, we need to move one tile to left
-    BNE @NoTileChg         ;   otherwise we don't need to change tiles
+;    LDA move_ctr_x         ; get the move counter.  If zero, we need to move one tile to left
+;    BNE @NoTileChg         ;   otherwise we don't need to change tiles
 
-    LDA ow_scroll_x        ; subtract 1 from the OW X scroll
-    SEC
-    SBC #$01
-    STA ow_scroll_x
+;    LDA ow_scroll_x        ; subtract 1 from the OW X scroll
+;    SEC
+;    SBC #$01
+ ;   STA ow_scroll_x
 
-    AND #$10               ; get the nametable bit ($10=use nt@$2400... $00=use nt@$2000)
-    LSR NTsoft2000         ; shift out and discard old NTX scroll bit
-    CMP #$10               ; sets C if A=$10 (use nt@$2400).  clears C otherwise
-    ROL NTsoft2000         ; shift C into NTX scroll bit (indicating the proper NT to use)
+ ;   AND #$10               ; get the nametable bit ($10=use nt@$2400... $00=use nt@$2000)
+ ;   LSR NTsoft2000         ; shift out and discard old NTX scroll bit
+ ;   CMP #$10               ; sets C if A=$10 (use nt@$2400).  clears C otherwise
+ ;   ROL NTsoft2000         ; shift C into NTX scroll bit (indicating the proper NT to use)
 
-    LDA move_ctr_x         ; get the move counter
+ ;   LDA move_ctr_x         ; get the move counter
 
-  @NoTileChg:
-    SEC                    ; A=move counter at this point
-    SBC move_speed         ; subtract the move speed from the counter
-    AND #$0F               ; mask it to keep it in the tile
-    BEQ @FullTile          ; if zero, we've moved a full tile
+ ; @NoTileChg:
+ ;   SEC                    ; A=move counter at this point
+ ;   SBC move_speed         ; subtract the move speed from the counter
+ ;   AND #$0F               ; mask it to keep it in the tile
+ ;   BEQ @FullTile          ; if zero, we've moved a full tile
 
-    STA move_ctr_x         ; otherwise, just write the move counter back
-    RTS                    ; and exit
+ ;   STA move_ctr_x         ; otherwise, just write the move counter back
+ ;   RTS                    ; and exit
 
-  @FullTile:
-    STA move_speed         ; if we've moved a full tile, zero our speed
-    STA move_ctr_x         ; and our counter
-    RTS                    ; and exit
+ ; @FullTile:
+ ;   STA move_speed         ; if we've moved a full tile, zero our speed
+ ;   STA move_ctr_x         ; and our counter
+ ;   RTS                    ; and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1063,65 +1065,15 @@ OWMove_Left:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-OW_MovePlayer:
-    LDA facing          ; check to see which way we're facing
-    LSR A
-    BCS OWMove_Right    ; moving right
-    LSR A
-    BCS OWMove_Left     ; moving left
-    LSR A
-    BCS OWMove_Down     ; moving down
-    JMP OWMove_Up       ; moving up
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Overworld Move Down  [$C3D2 :: 0x3C3E2]
-;;
-;;    See OW_MovePlayer for details
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-OWMove_Down:
-    LDA mapdraw_job     ; see if a drawing job needs to be performed
-    BEQ @NoJob          ; if not... skip ahead
-
-    CMP #$01            ; if drawing job=1 (attributes)...
-    BEQ @Job            ;   do it right away
-
-    LDA move_ctr_y      ; otherwise, only do the job if we're halfway between tiles
-    CMP #$08            ;   (8 pixels between the move)
-    BNE @NoJob          ; if not 8 pixels between the move... don't do the job
-
-  @Job:
-    JSR DoMapDrawJob       ; do the map drawing job, then proceed normally
-
-  @NoJob:
-    JSR SetOWScroll_PPUOn  ; turn the PPU on, and set the appropriate overworld scroll
-
-    LDA move_ctr_y         ; get the Y move counter
-    CLC
-    ADC move_speed         ; add our movement speed to it
-    AND #$0F               ; and mask it to keep it within the current tile
-    BEQ @FullTile          ; if it's now zero, we've moved 1 full tile
-
-    STA move_ctr_y         ; otherwise, simply record the new move counter
-    RTS                    ; and exit
-
-  @FullTile:               ; if we've moved a full tile
-    STA move_speed         ; zero our move speed (A=0 here) to stop moving
-    STA move_ctr_y         ; also zero our move counter
-
-    INC ow_scroll_y        ; update the overworld scroll
-
-    LDA scroll_y           ; and update our map scroll
-    CLC
-    ADC #1                 ;   by adding 1 to it
-    CMP #$0F
-    BCC :+
-      SBC #$0F             ;   and make it wrap from E->0  (nametables are only 15 tiles tall.. not 16)
-:   STA scroll_y           ; write it back
-    RTS                    ; and exit
-
+;OW_MovePlayer:
+;    LDA facing          ; check to see which way we're facing
+;    LSR A
+;    BCS OWMove_Right    ; moving right
+;    LSR A
+;    BCS OWMove_Left     ; moving left
+;    LSR A
+;    BCS OWMove_Down     ; moving down
+   ; JMP OWMove_Up       ; moving up
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1131,50 +1083,102 @@ OWMove_Down:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-OWMove_Up:
-    LDA mapdraw_job        ; see if a job needs to be done
-    BEQ @NoJob             ; if not, no job
+;OWMove_Up:
+;    LDA mapdraw_job        ; see if a job needs to be done
+;    BEQ @NoJob             ; if not, no job
 
-    CMP #$01
-    BEQ @Job               ; if job=1, do it right away
+;    CMP #$01
+;    BEQ @Job               ; if job=1, do it right away
 
-    LDA move_ctr_y         ; otherwise, only do it when we're halfway between tiles
-    CMP #$08
-    BNE @NoJob
+;    LDA move_ctr_y         ; otherwise, only do it when we're halfway between tiles
+;    CMP #$08
+;    BNE @NoJob
 
-  @Job:
-    JSR DoMapDrawJob
+;  @Job:
+;    JSR DoMapDrawJob
 
-  @NoJob:
-    JSR SetOWScroll_PPUOn  ; turn PPU on and set scroll
+;  @NoJob:
+;    JSR SetOWScroll_PPUOn  ; turn PPU on and set scroll
 
-    LDA move_ctr_y         ; get move counter
-    BNE @NoTileChg         ; if it's zero, we need to change tiles.  Otherwise, skip ahead
+;    LDA move_ctr_y         ; get move counter
+;    BNE @NoTileChg         ; if it's zero, we need to change tiles.  Otherwise, skip ahead
 
-    DEC ow_scroll_y        ; dec the OW scroll
+;    DEC ow_scroll_y        ; dec the OW scroll
 
-    LDA scroll_y           ; subtract 1 from the map scroll Y
-    SEC
-    SBC #$01
-    BCS :+
-      ADC #$0F             ; and have it wrap from 0->E
-:   STA scroll_y           ; then write it back
+;    LDA scroll_y           ; subtract 1 from the map scroll Y
+;    SEC
+;    SBC #$01
+;    BCS :+
+;      ADC #$0F             ; and have it wrap from 0->E
+;:   STA scroll_y           ; then write it back
 
-    LDA move_ctr_y         ; get move counter again
+;    LDA move_ctr_y         ; get move counter again
 
-  @NoTileChg:
-    SEC                    ; here, A=move counter
-    SBC move_speed         ; subtract the movement speed from the counter
-    AND #$0F               ; mask it to keep it in a 16x16 tile 
-    BEQ @FullTile          ; if it's now zero... we've moved a full tile
+;  @NoTileChg:
+;    SEC                    ; here, A=move counter
+;    SBC move_speed         ; subtract the movement speed from the counter
+;    AND #$0F               ; mask it to keep it in a 16x16 tile 
+;    BEQ @FullTile          ; if it's now zero... we've moved a full tile
 
-    STA move_ctr_y         ; otherwise, simply write back the move counter
-    RTS                    ;  and exit
+;    STA move_ctr_y         ; otherwise, simply write back the move counter
+;    RTS                    ;  and exit
 
-  @FullTile:
-    STA move_speed         ; if we moved a full tile, zero the move speed (stop player from moving)
-    STA move_ctr_y         ; and zero the move counter
-    RTS                    ; then exit
+;  @FullTile:
+;    STA move_speed         ; if we moved a full tile, zero the move speed (stop player from moving)
+;    STA move_ctr_y         ; and zero the move counter
+;    RTS                    ; then exit
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Overworld Move Down  [$C3D2 :: 0x3C3E2]
+;;
+;;    See OW_MovePlayer for details
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+;OWMove_Down:
+;    LDA mapdraw_job     ; see if a drawing job needs to be performed
+;    BEQ @NoJob          ; if not... skip ahead
+
+;    CMP #$01            ; if drawing job=1 (attributes)...
+;    BEQ @Job            ;   do it right away
+
+;    LDA move_ctr_y      ; otherwise, only do the job if we're halfway between tiles
+;    CMP #$08            ;   (8 pixels between the move)
+;    BNE @NoJob          ; if not 8 pixels between the move... don't do the job
+
+;  @Job:
+;    JSR DoMapDrawJob       ; do the map drawing job, then proceed normally
+
+;  @NoJob:
+;    JSR SetOWScroll_PPUOn  ; turn the PPU on, and set the appropriate overworld scroll
+
+;    LDA move_ctr_y         ; get the Y move counter
+;    CLC
+;    ADC move_speed         ; add our movement speed to it
+;    AND #$0F               ; and mask it to keep it within the current tile
+;    BEQ @FullTile          ; if it's now zero, we've moved 1 full tile
+
+;    STA move_ctr_y         ; otherwise, simply record the new move counter
+;    RTS                    ; and exit
+
+;  @FullTile:               ; if we've moved a full tile
+;    STA move_speed         ; zero our move speed (A=0 here) to stop moving
+;    STA move_ctr_y         ; also zero our move counter
+
+;    INC ow_scroll_y        ; update the overworld scroll
+
+;    LDA scroll_y           ; and update our map scroll
+;    CLC
+;    ADC #1                 ;   by adding 1 to it
+;    CMP #$0F
+;    BCC :+
+;      SBC #$0F             ;   and make it wrap from E->0  (nametables are only 15 tiles tall.. not 16)
+;:   STA scroll_y           ; write it back
+;    RTS                    ; and exit
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3425,8 +3429,15 @@ SM_LeftRightMoveDrawJobCheck:
       JSR DoMapDrawJob     ; otherwise... do the job
 
   @NoJob:
-    JSR SetSMScroll        ; set scroll, load move_ctr_x
-    LDA move_ctr_x
+    LDA mapflags
+    LSR A
+    BCC @Overworld    
+     JSR SetSMScroll        ; set scroll, load move_ctr_x
+     JMP :+
+     
+   @Overworld:
+    JSR SetOWScroll_PPUOn 
+  : LDA move_ctr_x
     CMP #$08               ; if = 8, then halfway done the move
     BNE :+
     
@@ -3452,13 +3463,24 @@ SMMove_Right:
     ;STA move_ctr_x         ; and move counter
     JSR SM_MoveFullTileDone
 
+    LDA mapflags
+    LSR A
+    BCC @Overworld
+    
     LDA sm_scroll_x        ; add 1 to SM scroll X
     CLC
     ADC #$01
     AND #$3F               ; and wrap at 64 tiles
     STA sm_scroll_x
+    JMP :+
 
-    AND #$10               ; get nametable bit of scroll ($10=use nt@$2400, $00=use nt@$2000)
+  @Overworld:  
+    LDA ow_scroll_x        ; +1 to our overworld scroll X
+    CLC
+    ADC #$01
+    STA ow_scroll_x
+    
+  : AND #$10               ; get nametable bit of scroll ($10=use nt@$2400, $00=use nt@$2000)
     LSR NTsoft2000         ; shift out and discard old NTX scroll bit
     CMP #$10               ; sets C if A=$10 (use nt@$2400).  clears C otherwise
     ROL NTsoft2000         ; shift C into NTX scroll bit (indicating the proper NT to use)
@@ -3479,13 +3501,24 @@ SMMove_Left:
    ;LDA move_ctr_x         ; get the move counter.  If zero, we need to move one tile to left
     BNE @NoTileChg         ;   otherwise we don't need to change tiles
 
+    LDA mapflags
+    LSR A
+    BCC @Overworld
+
     LDA sm_scroll_x        ; subtract 1 from the SM X scroll
     SEC
     SBC #$01
     AND #$3F               ; and wrap at 64 tiles
     STA sm_scroll_x
+    JMP :+
+   
+  @Overworld:
+    LDA ow_scroll_x        ; subtract 1 from the OW X scroll
+    SEC
+    SBC #$01
+    STA ow_scroll_x
 
-    AND #$10               ; get the nametable bit ($10=use nt@$2400... $00=use nt@$2000)
+  : AND #$10               ; get the nametable bit ($10=use nt@$2400... $00=use nt@$2000)
     LSR NTsoft2000         ; shift out and discard old NTX scroll bit
     CMP #$10               ; sets C if A=$10 (use nt@$2400).  clears C otherwise
     ROL NTsoft2000         ; shift C into NTX scroll bit (indicating the proper NT to use)
@@ -3526,48 +3559,7 @@ SM_MovePlayer:
     BCS SMMove_Left     ; moving left
     LSR A
     BCS SMMove_Down     ; moving down
-    JMP SMMove_Up       ; moving up
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Standard Map Move Down  [$CD29 :: 0x3CD39]
-;;
-;;    See SM_MovePlayer for details
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-SMMove_Down:
-    JSR SM_UpDownMoveDrawJobCheck
-
-    LDA move_ctr_y         ; get the Y move counter
-    CLC
-    ADC move_speed         ; add our movement speed to it
-    AND #$0F               ; and mask it to keep it within the current tile
-    BEQ @FullTile          ; if it's now zero, we've moved 1 full tile
-
-    STA move_ctr_y         ; otherwise, simply record the new move counter
-    RTS                    ; and exit
-
-  @FullTile:               ; if we've moved a full tile
-    JSR SM_MoveFullTileDone
-    ;STA move_speed         ; zero our move speed (A=0 here) to stop moving
-    ;STA move_ctr_y         ; also zero our move counter
-
-    LDA sm_scroll_y        ; increment SM Y scroll
-    CLC
-    ADC #$01
-    AND #$3F               ; and wrap at 64 tiles
-    STA sm_scroll_y
-
-    LDA scroll_y           ; and update our map scroll
-    CLC
-    ADC #1                 ;   by adding 1 to it
-    CMP #$0F
-    BCC :+
-      SBC #$0F             ;   and make it wrap from E->0  (nametables are only 15 tiles tall.. not 16)
-:   STA scroll_y           ; write it back
-    RTS                    ; and exit
-
+;    JMP SMMove_Up       ; moving up
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3583,13 +3575,21 @@ SMMove_Up:
     LDA move_ctr_y         ; get move counter
     BNE @NoTileChg         ; if it's zero, we need to change tiles.  Otherwise, skip ahead
 
+    LDA mapflags
+    LSR A
+    BCC @Overworld
+    
     LDA sm_scroll_y        ; decrement SM Y scroll
     SEC
     SBC #$01
     AND #$3F               ; and wrap at 64 tiles
     STA sm_scroll_y
+    JMP :+
+   
+   @Overworld:
+    DEC ow_scroll_y
 
-    LDA scroll_y           ; subtract 1 from the map scroll Y
+  : LDA scroll_y           ; subtract 1 from the map scroll Y
     SEC
     SBC #$01
     BCS :+
@@ -3612,7 +3612,56 @@ SMMove_Up:
     ;STA move_speed         ; if we moved a full tile, zero the move speed (stop player from moving)
     ;STA move_ctr_y         ; and zero the move counter
     ;RTS                    ; then exit
-    ;JMP SM_MoveFullTileDone
+    ;JMP SM_MoveFullTileDone    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Standard Map Move Down  [$CD29 :: 0x3CD39]
+;;
+;;    See SM_MovePlayer for details
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+SMMove_Down:
+    JSR SM_UpDownMoveDrawJobCheck
+    
+    LDA move_ctr_y         ; get the Y move counter
+    CLC
+    ADC move_speed         ; add our movement speed to it
+    AND #$0F               ; and mask it to keep it within the current tile
+    BEQ @FullTile          ; if it's now zero, we've moved 1 full tile
+    
+    STA move_ctr_y         ; otherwise, simply record the new move counter
+    RTS                    ; and exit
+
+  @FullTile:               ; if we've moved a full tile
+    JSR SM_MoveFullTileDone
+    
+    LDA mapflags
+    LSR A
+    BCC @Overworld
+    
+    LDA sm_scroll_y        ; increment SM Y scroll
+    CLC
+    ADC #$01
+    AND #$3F               ; and wrap at 64 tiles
+    STA sm_scroll_y
+    JMP :+
+    
+   @Overworld: 
+    INC ow_scroll_y
+
+  : LDA scroll_y           ; and update our map scroll
+    CLC
+    ADC #1                 ;   by adding 1 to it
+    CMP #$0F
+    BCC :+
+      SBC #$0F             ;   and make it wrap from E->0  (nametables are only 15 tiles tall.. not 16)
+:   STA scroll_y           ; write it back
+    RTS                    ; and exit
+
+
+
 
 
 ;; JIGS - up and down does this stuff, so no reason to have it copy-pasted twice
@@ -3633,7 +3682,13 @@ SM_UpDownMoveDrawJobCheck:
     JSR DoMapDrawJob
 
   @NoJob:
+    LDA mapflags
+    LSR A 
+    BCC @Overworld
     JMP SetSMScroll        ; set scroll and return
+    
+   @Overworld:
+    JMP SetOWScroll_PPUOn   
 
 ToggleHideSprite:    
    LDA mapspritehide
@@ -3648,6 +3703,7 @@ SM_MoveFullTileDone:
    LDA tileprop_now
    STA tileprop_last
    RTS
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
