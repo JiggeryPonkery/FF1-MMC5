@@ -915,7 +915,8 @@ OverworldMovement:
 :   RTS
 
    @Return:
-JMP EnterOverworldLoop_2
+   JSR CallMusicPlay_L
+   JMP EnterOverworldLoop_2
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
