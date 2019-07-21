@@ -335,14 +335,11 @@ EnterOverworldLoop:
    ;; THE overworld loop
    ;;
 
+EnterOverworldLoop_2:
   @Loop:  
     JSR WaitForVBlank_L        ; wait for VBlank
     LDA #>oam                  ; and do sprite DMA
     STA $4014
-
-    JSR OverworldMovement      ; do any pending movement animations and whatnot
-                               ;   also does any required map drawing and updates
-                               ;   the scroll appropriately
 
     LDA framecounter           ; increment the *two byte* frame counter
     CLC                        ;   what does this game have against the INC instruction?
@@ -351,6 +348,12 @@ EnterOverworldLoop:
     LDA framecounter+1
     ADC #0
     STA framecounter+1
+    
+    JSR OverworldMovement      ; do any pending movement animations and whatnot
+                               ;   also does any required map drawing and updates
+                               ;   the scroll appropriately
+
+
 
     JSR UnhushTriangle     
     ;; JIGS - unhush the triangle
@@ -900,7 +903,7 @@ OverworldMovement:
    
    LDA framecounter      ; check framecounter
    AND #$1               ; skip moving every other frame
-   BEQ @UpdateAttributes ; and only keep the attributes working right
+   BEQ @Return
    
  : JSR SM_MovePlayer
    ;; JIGS - SM_MovePlayer handles all the same things by changing mapflags when it needs to do overworld stuff
@@ -911,19 +914,8 @@ OverworldMovement:
       JMP MapPoisonDamage ; if they are... distribute poison damage
 :   RTS
 
-  @UpdateAttributes:
-    LDA facing          ; check to see which way we're facing
-    LSR A
-    BCS SetOWScroll_PPUOn    ; moving right
-    LSR A
-    BCS SetOWScroll_PPUOn     ; moving left
-    ;; otherwise, moving up/down...
-    JSR DrawMapAttributes ; so fix attributes
-    
-    ;; JIGS - so moving left/right works fine without adjusting attributes
-    ;; but moving up/down needs to do them or else new tiles have the same colour
-    ;; as the old tiles, and the whole screen ends up a rainbow mess
-    ;; the problem is when changing directions...?
+   @Return:
+JMP EnterOverworldLoop_2
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -15596,7 +15588,7 @@ DashButton:
     CMP #08       ; if airship, then slow speed to 1 for precision landing
     BNE @Walking  ; if not airship, then walking.
     
-    LDA #01
+    LDA #02
     STA move_speed
     RTS
     
