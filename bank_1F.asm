@@ -894,7 +894,15 @@ OverworldMovement:
     BEQ SetOWScroll_PPUOn ; if zero (we're not moving), just set the scroll and exit
 
    ; JSR OW_MovePlayer     ; otherwise... process party movement
-   JSR SM_MovePlayer
+   
+   LDA ow_slow           ; if non-zero...
+   BEQ :+
+   
+   LDA framecounter      ; check framecounter
+   AND #$1               ; skip moving every other frame
+   BEQ @UpdateAttributes ; and only keep the attributes working right
+   
+ : JSR SM_MovePlayer
    ;; JIGS - SM_MovePlayer handles all the same things by changing mapflags when it needs to do overworld stuff
 
     LDA vehicle           ; check the current vehicle
@@ -903,6 +911,20 @@ OverworldMovement:
       JMP MapPoisonDamage ; if they are... distribute poison damage
 :   RTS
 
+  @UpdateAttributes:
+    LDA facing          ; check to see which way we're facing
+    LSR A
+    BCS SetOWScroll_PPUOn    ; moving right
+    LSR A
+    BCS SetOWScroll_PPUOn     ; moving left
+    ;; otherwise, moving up/down...
+    JSR DrawMapAttributes ; so fix attributes
+    
+    ;; JIGS - so moving left/right works fine without adjusting attributes
+    ;; but moving up/down needs to do them or else new tiles have the same colour
+    ;; as the old tiles, and the whole screen ends up a rainbow mess
+    ;; the problem is when changing directions...?
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Set OW Scroll  [$C346 :: 0x3C356]
@@ -1375,34 +1397,39 @@ OWCanMove:
 
   @OnFoot:
     LDA tileprop         ; get tile properties
+    CMP #OWTP_SPEC_CARAVAN  ; is this the caravan?
+    ;BNE @Success_1          ; if not, success!
+    BEQ @Caravan
+    
     AND #OWTP_SPEC_MASK  ; mask out special bits
     BEQ @Success_1       ; if nothing special, success!
 
     CMP #OWTP_SPEC_CHIME ; is the chime necessary?
-    BEQ @NeedChime       ; if yes... check to make sure we have it
+    ;BEQ @NeedChime       ; if yes... check to make sure we have it
 
-    CMP #OWTP_SPEC_CARAVAN  ; is this the caravan?
+   ; CMP #OWTP_SPEC_CARAVAN  ; is this the caravan?
     BNE @Success_1          ; if not, success!
 
+  @NeedChime:
+    LDA item_chime       ; see if they have the chime in their inventory
+    BNE @Success_1       ; if they do -- success
+    SEC                  ; otherwise, failure
+    RTS  
+    
   @Caravan:
    ; LDA game_flags+OBJID_FAIRY
    ; AND #$01             ; check the fairy map object to see if she's visible
    ; BNE @Success_2       ; if she is (bottle has been opened already), prevent entering caravan (exit now)
 
-    LDA #$01             ; otherwise, we need to indicate the player is entering the caravan
-    STA entering_shop    ; set entering_shop to nonzero
+    ;LDA #$01             ; otherwise, we need to indicate the player is entering the caravan
+    ;STA entering_shop    ; set entering_shop to nonzero
+    INC entering_shop
     LDA #70
     STA shop_id          ; shop ID=70 ($46) = caravan's shop ID
 
     @Success_2:
       CLC
       RTS
-
-  @NeedChime:
-    LDA item_chime       ; see if they have the chime in their inventory
-    BNE @Success_1       ; if they do -- success
-    SEC                  ; otherwise, failure
-    RTS
 
   @Fighting:
     LDA #10              ; 10 / 256 chance of getting in a random encounter normally
@@ -1421,6 +1448,14 @@ OWCanMove:
 
       LDA #0             ; otherwise, no random encounter
       STA tileprop+1     ; clear tileprop+1 to indicate no battle yet
+      
+      LDA tileprop          ; get tile again
+      AND #OWTP_SPEC_SLOW   ; cut off everything but the highest bit
+      BEQ @Done             ; if 0, finish up
+      
+     @Slow:  
+      STA ow_slow        ; otherwise, store $80 in ow_slow (only needs to be non-zero to work)
+     @Done: 
       CLC                ; CLC for success
       RTS                ; and exit
 
@@ -1980,6 +2015,7 @@ PrepOverworld:
     STA joy_start
     STA joy_select
     STA mapflags        ; zeroing map flags indicates we're on the overworld map
+    STA ow_slow
 
     JSR LoadOWCHR           ; load up necessary CHR
     JSR LoadOWTilesetData   ; the tileset
@@ -3708,6 +3744,7 @@ SM_MoveFullTileDone:
    STA move_speed    
    STA move_ctr_y    
    STA move_ctr_x
+   STA ow_slow
    LDA tileprop_now
    STA tileprop_last
    RTS

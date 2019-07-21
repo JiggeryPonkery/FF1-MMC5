@@ -23,8 +23,8 @@ BANK_THIS = $12
 ; world map tile data
 ; 2 bytes per tile:
 ;  +0: bits 6-7: 01 = chime required
-;                10 = caravan required
-;                11 = use floater to raise airship
+;                10 = caravan required               ; JIGS - changing this to "slow down"
+;                11 = use floater to raise airship   ; caravan is now "EE" and is found with CMP
 ;      bit  5:   Can dock ship here
 ;      bit  4:   Forest walking effect
 ;      bit  3:   Can't land airship here
@@ -95,7 +95,7 @@ lut_OWTileset:
 .byte $0F,$00  ; Cave BR
 .byte $0E,$99  ; Enter Titan's Tunnel East
 .byte $0E,$9A  ; Enter Titan's Tunnel West
-.byte $8E,$00  ; Desert Caravan shop
+.byte $EE,$00  ; Desert Caravan shop
 .byte $CE,$00  ; Desert Raise airship 
 .byte $0E,$8C  ; Enter Castle of Ordeals Left
 .byte $0E,$8C  ; Enter Castle of Ordeals Right
@@ -126,7 +126,7 @@ lut_OWTileset:
 .byte $0E,$40  ; Desert BL
 .byte $0E,$40  ; Desert BR
 .byte $06,$40  ; Plains
-.byte $1E,$40  ; Marsh
+.byte $9E,$40  ; Marsh
 .byte $06,$00  ; Temple of Fiends grass/pavement left
 .byte $0E,$8D  ; Enter Temple of Fiends Left
 .byte $0E,$8D  ; Enter Temple of Fiends right
@@ -139,8 +139,8 @@ lut_OWTileset:
 .byte $0F,$00  ; Town wall \-less grass
 .byte $06,$40  ; Plains UL
 .byte $06,$40  ; Plains UR
-.byte $1E,$40  ; Marsh UL
-.byte $1E,$40  ; Marsh UR
+.byte $9E,$40  ; Marsh UL
+.byte $9E,$40  ; Marsh UR
 .byte $0E,$8F  ; Volcano top left  (enter)
 .byte $0E,$8F  ; Volcano top right (enter)
 .byte $0E,$91  ; Cardia Cave 2
@@ -155,8 +155,8 @@ lut_OWTileset:
 .byte $0F,$00  ; Town Wall pavement-\ right
 .byte $06,$40  ; Plains BL
 .byte $06,$40  ; Plains BR
-.byte $1E,$40  ; Marsh BL
-.byte $1E,$40  ; Marsh BR
+.byte $9E,$40  ; Marsh BL
+.byte $9E,$40  ; Marsh BR
 .byte $0E,$00  ; Volcano bottom left
 .byte $0E,$00  ; Volcano bottom right
 .byte $06,$00  ; Grass, no fight

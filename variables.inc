@@ -232,6 +232,8 @@ move_ctr_y      = $36  ; ditto but for Y axis
 
 menustall       = $37       ; see MenuCondStall in bank F for explanation
 
+ow_slow         = $38  ; shared, halves movement speed when walking (1 pixel every 2 frames)
+
 theend_x        = $38
 theend_y        = $39
 theend_src      = $62
