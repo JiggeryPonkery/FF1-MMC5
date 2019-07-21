@@ -71,7 +71,7 @@ lut_OWTileset:
 .byte $0E,$8A  ; Enter Flfland Castle
 .byte $0E,$8A  ; Enter Elfland Castle
 .byte $4E,$98  ; Enter Desert tower
-.byte $0E,$00  ; Desert Tower shadow
+.byte $8E,$00  ; Desert Tower shadow
 .byte $2E,$00  ; Docks, right side
 .byte $0F,$00  ; Cave left
 .byte $0F,$00  ; Cave middle
@@ -107,10 +107,10 @@ lut_OWTileset:
 .byte $0E,$00  ; Town wall top \-grass
 .byte $0D,$41  ; River UL
 .byte $0D,$41  ; River UR
-.byte $0E,$40  ; Desert UL
-.byte $0E,$40  ; Desert UR
+.byte $8E,$40  ; Desert UL
+.byte $8E,$40  ; Desert UR
 .byte $0D,$41  ; River
-.byte $0E,$40  ; Desert
+.byte $8E,$40  ; Desert
 .byte $0D,$93  ; Waterfall
 .byte $0F,$00  ; Temple of Fiends roof left
 .byte $0F,$00  ; Temple of Fiends roof right
@@ -123,8 +123,8 @@ lut_OWTileset:
 .byte $0F,$00  ; Town wall middle \-grass
 .byte $0D,$41  ; River BL
 .byte $0D,$41  ; River BR
-.byte $0E,$40  ; Desert BL
-.byte $0E,$40  ; Desert BR
+.byte $8E,$40  ; Desert BL
+.byte $8E,$40  ; Desert BR
 .byte $06,$40  ; Plains
 .byte $9E,$40  ; Marsh
 .byte $06,$00  ; Temple of Fiends grass/pavement left
@@ -141,24 +141,24 @@ lut_OWTileset:
 .byte $06,$40  ; Plains UR
 .byte $9E,$40  ; Marsh UL
 .byte $9E,$40  ; Marsh UR
-.byte $0E,$8F  ; Volcano top left  (enter)
-.byte $0E,$8F  ; Volcano top right (enter)
-.byte $0E,$91  ; Cardia Cave 2
-.byte $0E,$9B  ; Cardia Cave 3
-.byte $0E,$9C  ; Cardia Cave 4
-.byte $0E,$9D  ; Cardia Cave 5
-.byte $0E,$80  ; Cardia Cave 1
+.byte $8E,$8F  ; Volcano top left  (enter)
+.byte $8E,$8F  ; Volcano top right (enter)
+.byte $8E,$91  ; Cardia Cave 2
+.byte $8E,$9B  ; Cardia Cave 3
+.byte $8E,$9C  ; Cardia Cave 4
+.byte $8E,$9D  ; Cardia Cave 5
+.byte $8E,$80  ; Cardia Cave 1
 .byte $0F,$00  ; Town Wall /-pavement left
 .byte $0E,$92  ; Enter Bahamut's room
 .byte $0E,$88  ; Enter Leifen
-.byte $0E,$97  ; Enter Marsh Cave
+.byte $8E,$97  ; Enter Marsh Cave
 .byte $0F,$00  ; Town Wall pavement-\ right
 .byte $06,$40  ; Plains BL
 .byte $06,$40  ; Plains BR
 .byte $9E,$40  ; Marsh BL
 .byte $9E,$40  ; Marsh BR
-.byte $0E,$00  ; Volcano bottom left
-.byte $0E,$00  ; Volcano bottom right
+.byte $8E,$00  ; Volcano bottom left
+.byte $8E,$00  ; Volcano bottom right
 .byte $06,$00  ; Grass, no fight
 .byte $2E,$00  ; Docks, BR
 .byte $2E,$00  ; Docks, bottom

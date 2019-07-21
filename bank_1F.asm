@@ -1317,7 +1317,6 @@ DisableAPU:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
 OWCanMove:
     LSR A         ; determine which direction we're moving
     BCS @Right    ;   and branch accordingly
@@ -1395,13 +1394,13 @@ OWCanMove:
     BEQ @Caravan
     
     AND #OWTP_SPEC_MASK  ; mask out special bits
-    BEQ @Success_1       ; if nothing special, success!
+    BEQ @Success_2       ; if nothing special, success! (JIGS - but check for slowness!)
 
     CMP #OWTP_SPEC_CHIME ; is the chime necessary?
     ;BEQ @NeedChime       ; if yes... check to make sure we have it
 
    ; CMP #OWTP_SPEC_CARAVAN  ; is this the caravan?
-    BNE @Success_1          ; if not, success!
+    BNE @Success_2          ; if not, success!
 
   @NeedChime:
     LDA item_chime       ; see if they have the chime in their inventory
@@ -1421,8 +1420,9 @@ OWCanMove:
     STA shop_id          ; shop ID=70 ($46) = caravan's shop ID
 
     @Success_2:
-      CLC
-      RTS
+     JMP OWMoveSlow
+      ;CLC
+      ;RTS
 
   @Fighting:
     LDA #10              ; 10 / 256 chance of getting in a random encounter normally
@@ -1441,16 +1441,7 @@ OWCanMove:
 
       LDA #0             ; otherwise, no random encounter
       STA tileprop+1     ; clear tileprop+1 to indicate no battle yet
-      
-      LDA tileprop          ; get tile again
-      AND #OWTP_SPEC_SLOW   ; cut off everything but the highest bit
-      BEQ @Done             ; if 0, finish up
-      
-     @Slow:  
-      STA ow_slow        ; otherwise, store $80 in ow_slow (only needs to be non-zero to work)
-     @Done: 
-      CLC                ; CLC for success
-      RTS                ; and exit
+      JMP OWMoveSlow     ; see if moving onto a slow tile
 
   @DoEncounter:
     LDA tileprop+1       ; find out which type of counter we're to do
@@ -1552,7 +1543,12 @@ GetBattleFormation:
     LDA (tmp), Y         ; get the desired formation from the given domain
     STA btlformation     ; record as our battle formation
 
-    CLC                  ; CLC (to indicate success for OWCanMove -- since it JMPs here)
+OWMoveSlow:
+    LDA tileprop          ; get tile again
+    AND #OWTP_SPEC_SLOW   ; cut off everything but the highest bit
+    BEQ :+                ; if 0, finish up
+    STA ow_slow           ; otherwise, store $80 in ow_slow (only needs to be non-zero to work)
+  : CLC                  ; CLC (to indicate success for OWCanMove -- since it JMPs here)
     RTS                  ; and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
