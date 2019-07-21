@@ -10980,11 +10980,10 @@ LoadBattleBGCHRAndPalettes:
     STA tmp+4        ; put low byte in tmp+4
     LDA btlformation
     AND #$7F         ; drop the "Formation B" bit
-    ;LSR A
-    ;LSR A
-    ;LSR A
-    ;LSR A
-    JSR ShiftLeft4
+    LSR A
+    LSR A
+    LSR A
+    LSR A
     CLC
     ADC #>lut_BattleFormations   ; add to high byte of pointer
     STA tmp+5         ; and put it in $15.  (tmp+4) now points to lut_BattleFormations+(formation * 16)
