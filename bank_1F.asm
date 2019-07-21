@@ -756,7 +756,7 @@ ProcessOWInput:
 
   @MoveOnFoot:         ; otherwise we're on foot
     JSR OWCanMove      ; see if they can move in given direction
-    BCC @StartMove     ;  if yes, start the move
+    BCC @Forest        ;  if yes, start the move
 
     LDA #0
     STA tileprop+1     ; otherwise, zero tileprop+1 so no battle occurs
@@ -775,7 +775,15 @@ ProcessOWInput:
       JSR BoardShip    ; otherwise see if they can board the ship
       BCS @CantMove    ;   if not, they can't move
                        ; otherwise (can board ship), flow into @StartMove
-
+   
+   @Forest:            ; JIGS - checks to see if the forest effect is on
+    LDA tileprop
+    AND #OWTP_FOREST    
+    BEQ @StartMove
+    
+    LDA mapspritehide  ; byte is split into two: high 4 bits are active, low 4 bits are "in waiting"
+    ORA #8             ; ORA so as not to wipe out the active bits
+    STA mapspritehide  ; then the movement routine rotates the 4 active bits out to get the new bits when changing tiles
 
   @StartMove:             ; Here if move was legal
     LDA joy               ; get joy
@@ -1342,12 +1350,12 @@ OWCanMove:
 
     ASL A                  ; double it and throw it in X (2 bytes per tile properties)
     TAX
-    LDA tileset_prop, X    ; copy tile properties from tileset
-    STA tileprop
     LDA tileset_prop+1, X
     STA tileprop+1
-
-    LDA tileprop     ; get first byte of tile properties
+    LDA tileset_prop, X    ; copy tile properties from tileset
+    STA tileprop
+    
+;    LDA tileprop     ; get first byte of tile properties
     AND vehicle      ; AND with current vehicle to find out whether or not this vehicle can move there
     BEQ :+           ; if zero -- movement is allowed for this vehicle, jump ahead
 
@@ -3788,8 +3796,8 @@ SMMove_BridgeHorizontal: ; =
     BCS SMMove_OK
 
 SMMove_HideUnderBridge:
-    LDA mapspritehide
-    ORA #2
+    LDA mapspritehide  ; byte is split into two: high 4 bits are active, low 4 bits are "in waiting"
+    ORA #2             ; ORA so as not to wipe out the active bits
     BNE SMMove_SaveHideSprite
     
 SMMove_DeepWater:    
@@ -3797,7 +3805,7 @@ SMMove_DeepWater:
     ORA #8
 
 SMMove_SaveHideSprite:
-    STA mapspritehide
+    STA mapspritehide  ; then the movement routine rotates the 4 active bits out to get the new bits when changing tiles
     CLC
     RTS
     
@@ -6174,6 +6182,7 @@ ScreenWipeFrame_Prep:
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
 .byte $00
+
 
 ScreenWipeFrame:
    ; JSR CallMusicPlay            ; keep music going
@@ -9000,10 +9009,11 @@ DrawOWSprites:
 
   @OnFoot:
     JSR DrawPlayerMapmanSprite  ; draw the mapman sprite
+    JSR CheckToHideSprite
 
-    JSR GetOWTile        ; get the CURRENT tile they're standing on; "inforest" is in A when it exits
+    ;JSR GetOWTile        ; get the CURRENT tile they're standing on; "inforest" is in A when it exits
     ;LDA inforest        ; check to see if we're in the forest
-    BEQ @NotInForest     ; if not, skip ahead
+    ;BEQ @NotInForest     ; if not, skip ahead
 
    ;   LDA sprindex       ; if we are in a forest... hide the bottom half of the player by
    ;   SEC                ;   getting the sprite index
@@ -9021,7 +9031,7 @@ DrawOWSprites:
      ; LDA oam_a+8, X
      ; ORA #$20
      ; STA oam_a+8, X
-     JSR HideSpriteBottomHalf
+   ;  JSR HideSpriteBottomHalf
 
   @NotInForest:
     LDA airship_vis      ; check airship visibility
@@ -9532,6 +9542,29 @@ ConvertOWToSprite:
 DrawSMSprites:
     LDY #1
     JSR DrawPlayerMapmanSprite    ; draw the player mapman sprite (on foot -- no ship/airship/etc)
+    JSR CheckToHideSprite
+     
+;  : JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
+;    CMP #TP_SPEC_DEEPWATER
+;    BNE :+
+;      JSR HideSpriteBottomHalf
+;      BNE :+           ; always branches
+      
+;  : LDA tileset_prop, X           ; reload first byte
+;    AND #TP_HIDESPRITE            ; check the hide sprite switch
+;    BEQ :+
+;      LDX #0                      ; set X to sprite index 0 (first sprite, always player)
+;    @MaskPlayer:                  
+;      JSR HideSpriteThing
+;      INX                         ; inc X by 4 to check next sprite
+;      INX
+;      INX
+;      INX 
+;      CPX #$10                    ; if X is not yet $10 (4+4+4+4), keep looping
+;      BNE @MaskPlayer
+   JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
+
+CheckToHideSprite:   
     LDA mapspritehide
     ASL A
     BCC :+
@@ -9564,30 +9597,11 @@ DrawSMSprites:
       STA oam+$00, X   
       STA oam+$04, X
       STA oam+$08, X   
-      STA oam+$0C, X 
-     
-;  : JSR GetSMTilePropNow          ; get the tile properties for the tile they're on
-;    CMP #TP_SPEC_DEEPWATER
-;    BNE :+
-;      JSR HideSpriteBottomHalf
-;      BNE :+           ; always branches
-      
-;  : LDA tileset_prop, X           ; reload first byte
-;    AND #TP_HIDESPRITE            ; check the hide sprite switch
-;    BEQ :+
-;      LDX #0                      ; set X to sprite index 0 (first sprite, always player)
-;    @MaskPlayer:                  
-;      JSR HideSpriteThing
-;      INX                         ; inc X by 4 to check next sprite
-;      INX
-;      INX
-;      INX 
-;      CPX #$10                    ; if X is not yet $10 (4+4+4+4), keep looping
-;      BNE @MaskPlayer
+      STA oam+$0C, X    
+ 
+     @Done:  
+      RTS
    
-  @Done: 
-   JMP UpdateAndDrawMapObjects   ; then update and draw all map objects, and exit!
-
 HideSpriteBottomHalf:
     LDX #$04
     JSR HideSpriteThing
