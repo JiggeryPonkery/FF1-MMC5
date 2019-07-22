@@ -452,19 +452,22 @@ TP_SPEC_CROWN      = $0E
 TP_SPEC_BRIDGEHORZ = $0F
 TP_SPEC_BRIDGEVERT = $10
 TP_SPEC_DEEPWATER  = $11
-;                     12
+TP_SPEC_WATERACCESS = $12
 ;                     13
 ;                     14
 ;                     15
 ;                     16
 ;                     17
-TP_SPEC_TREASURE   = $18
-TP_SPEC_TREASURE_2 = $19
-TP_SPEC_HP         = $1A
-TP_SPEC_MP         = $1B
-TP_SPEC_HPMP       = $1C
-TP_SPEC_CUREDEATH  = $1D
-TP_SPEC_CUREAIL    = $1E
+;                     18
+TP_SPEC_TREASURE   = $19
+TP_SPEC_TREASURE_2 = $1A
+TP_SPEC_TREASURE_NOMOVE   = $99
+TP_SPEC_TREASURE_2_NOMOVE = $9A
+TP_SPEC_HP         = $1B
+TP_SPEC_MP         = $1C
+TP_SPEC_HPMP       = $1D
+TP_SPEC_CUREDEATH  = $1E
+TP_SPEC_CUREAIL    = $1F
 
 
 
@@ -633,12 +636,12 @@ WEP37 = $24  ; Bane Sword
 WEP38 = $25  ; Katana
 WEP39 = $26  ; Excalibur
 WEP40 = $27  ; Masamune
-WEP41 = $28
-WEP42 = $29
+WEP41 = $28  ; Chicken Knife
+WEP42 = $29  ; Brave Blade 
 WEP43 = $2A
 WEP44 = $2B
 WEP45 = $2C
-WEP46 = $2D
+WEP46 = $2D                       
 WEP47 = $2E
 WEP48 = $2F
 WEP49 = $30
@@ -657,6 +660,8 @@ WEP61 = $3C
 WEP62 = $3D
 WEP63 = $3E
 WEP64 = $3F
+CHICKEN_KNIFE = WEP41
+BRAVE_BLADE = WEP42
 
 ARM1 = $40   ; Cloth T
 ARM2 = $41   ; Wooden Armor

@@ -174,7 +174,7 @@ ch_weaponcategory = ch_stats + $2B ; effected by equipment, needs to refresh aft
 ch_numhits        = ch_stats + $2C ; effected by equipment, needs to refresh after battle
 ch_numhitsmult    = ch_stats + $2D ; effected by equipment, needs to refresh after battle
 ch_critrate       = ch_stats + $2E ; effected by equipment, needs to refresh after battle
-;nothing          = ch_stats + $2F
+ch_damagebackup   = ch_stats + $2F ; effected by equipment
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 
@@ -357,6 +357,7 @@ equipmenu_tmp       = $75 ; for unequip/reequipping
 DrawPlayerHPCounter = $76 ; counter for how many times player HP has been drawn in battle
 DialogueTable_1or2  = $77 ; important for dialogue
 tileprop_last       = $78 ; for moving when shop_id isn't needed
+wateraccess         = $79 ; for moving into water
 dlgflg_reentermap   = $7F  ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
 
 ;;

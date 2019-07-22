@@ -2814,6 +2814,17 @@ CanPlayerMoveSM:
     AND #TP_NOMOVE
     BNE @CantMove                  ; then this is a nomove tile -- can't move here
 
+    LDA tileprop_now
+    CMP #TP_SPEC_DEEPWATER
+    BNE @NormalCheck
+
+  : LDA tileprop                ; reaches here if player currently standing in water
+    CMP #TP_SPEC_BRIDGEHORZ     ; check if the tile falls in the range of bridges, deep water, and water access
+    BCC @CantMove               ; if its below, can't get out
+    CMP #TP_SPEC_WATERACCESS+1  ; 
+    BCS @CantMove               ; if its above, can't get out
+    
+   @NormalCheck: 
     LDA tileprop
     AND #TP_SPEC_MASK            ; otherwise, toss the NOMOVE bit and keep the special bits
     ASL A                        ; double it
@@ -3734,9 +3745,16 @@ SM_MoveFullTileDone:
    STA move_ctr_y    
    STA move_ctr_x
    STA ow_slow
-   LDA tileprop_now
-   STA tileprop_last
-   RTS
+   LDX tileprop_now
+   STX tileprop_last
+   LDX tileprop
+   CPX #TP_SPEC_BRIDGEHORZ     ; check if the tile falls in the range of bridges, deep water, and water access
+   BCC :+
+   CPX #TP_SPEC_WATERACCESS+1
+   BCC :++
+   
+ : STA wateraccess
+ : RTS
 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3801,6 +3819,7 @@ lut_SMMoveJmpTbl:
     .WORD SMMove_BridgeHorizontal
     .WORD SMMove_BridgeVertical
     .WORD SMMove_DeepWater ; deep water
+    .WORD SMMove_WaterAccess 
     
     ;; JIGS - this table is only for tiles without the No Move bit set. 
     ;; since the following tiles have the bit set, they've been removed
@@ -3812,7 +3831,11 @@ lut_SMMoveJmpTbl:
     ;.WORD SMMove_NoMove ; CureAilments
     ;.WORD SMMove_Norm ; Treasure
     ;.WORD SMMove_Norm ; Treasure
- 
+
+SMMove_WaterAccess:
+    INC wateraccess
+    CLC
+    RTS    
   
 SMMove_BridgeHorizontal: ; = 
     LDA facing
@@ -3822,13 +3845,17 @@ SMMove_BridgeHorizontal: ; =
     BCS SMMove_OK
 
 SMMove_HideUnderBridge:
+    INC wateraccess    ; set water access so you can get out from under bridges if in water
     LDA mapspritehide  ; byte is split into two: high 4 bits are active, low 4 bits are "in waiting"
     ORA #2             ; ORA so as not to wipe out the active bits
     BNE SMMove_SaveHideSprite
     
 SMMove_DeepWater:    
-    LDA mapspritehide
-    ORA #8
+    LDA wateraccess
+    BEQ SMMove_NoMove           
+      INC wateraccess
+      LDA mapspritehide
+      ORA #8
 
 SMMove_SaveHideSprite:
     STA mapspritehide  ; then the movement routine rotates the 4 active bits out to get the new bits when changing tiles
@@ -4271,9 +4298,9 @@ PrepStandardMap:
    
    @CheckTreasureLoop1:   
     LDA (tmp), Y            ; Load a byte of the tileset properties table
-    CMP #TP_SPEC_TREASURE   ; if it matches a chest
+    CMP #TP_SPEC_TREASURE_NOMOVE   ; if it matches a chest
     BEQ @IsChestOpen        ; check if the chest is open!
-    CMP #TP_SPEC_TREASURE_2 ; and again for chest type #2
+    CMP #TP_SPEC_TREASURE_2_NOMOVE ; and again for chest type #2
     BEQ @IsChestOpen
    
    @IncY2:   
@@ -4374,10 +4401,6 @@ PrepStandardMap:
  ;   .BYTE $47, $48, $49, $4A, $4B, $4C, $4D, $4E
  
  ;; JIGS - moving this to the bottom so I can add some code without a critical timing error...
-.byte $00
-.byte $00 ; and now fixing it again
-.byte $00
-.byte $00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7867,7 +7890,7 @@ OpenTreasureChest:
     
     LDA tileprop
     AND #TP_SPEC_TREASURE_2
-    BEQ @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
+    BNE @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
     
    @ChestTable_1: 
     BCC :+
@@ -7957,9 +7980,9 @@ OpenTreasureChest:
     INC dlgsfx               ; turn on key-item jingle 
       
    @OpenChest:
-    LDX tileprop
-    CPX #TP_SPEC_TREASURE_2
-    BEQ @FlagChest_2 
+    LDA tileprop
+    AND #TP_SPEC_TREASURE_2
+    BNE @FlagChest_2 
    
    @FlagChest_1:
     LDX tileprop+1           ; re-get the chest index

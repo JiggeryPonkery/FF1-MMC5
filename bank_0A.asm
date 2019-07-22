@@ -1423,7 +1423,9 @@ Weapon39: ; 26
 Weapon40: ; 27
 .byte $96,$A4,$B6,$B0,$B8,$B1,$A8,$FF,$00 ; Masamune
 Weapon41: ; 28
+.byte $8C,$AB,$AC,$A6,$AE,$A8,$B1,$D6,$00 ; Chicken Knife
 Weapon42: ; 29
+.byte $8B,$B5,$A4,$B9,$A8,$FF,$D4,$FF,$00 ; Brave Blade
 Weapon43: ; 2A
 Weapon44: ; 2B
 Weapon45: ; 2C
