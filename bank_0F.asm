@@ -42,54 +42,79 @@ lut_WeaponData:
 ;      v ----------------------------- Hit rate
 ;          v ------------------------- Damage
 ;              v --------------------- Critical hit rate
-;                  v ----------------- Spell
-;                      v ------------- Element
-;                          v --------- Category effectiveness
-;                              v ----- Graphic
-;                                  v - Palette
+;                  v ----------------- Ailment (used to be spell, but that's stored in the battle bank now)
+;                      v-------------- Ailment chance (1-200)
+;                          v ------------- Element
+;                              v --------- Category effectiveness
+;                                  v ----- Graphic
+;                                      v - Palette
 
-.byte $00,$0C,$0A,$00,$00,$00,$A8,$27 ; Wooden nunchucks
-.byte $0A,$05,$05,$00,$00,$00,$98,$20 ; Small knife 
-.byte $00,$06,$01,$00,$00,$00,$A0,$27 ; Wooden staff
-.byte $05,$09,$0A,$00,$00,$00,$90,$20 ; Rapier
-.byte $00,$09,$01,$00,$00,$00,$94,$27 ; Iron hammer
-.byte $0A,$0F,$05,$00,$00,$00,$80,$20 ; Short sword
-.byte $05,$10,$03,$00,$00,$00,$9C,$20 ; Hand axe
-.byte $0A,$0A,$05,$00,$00,$00,$84,$2B ; Scimitar
-.byte $00,$10,$0A,$00,$00,$00,$A8,$20 ; Iron nunchucks
-.byte $0A,$07,$05,$00,$00,$00,$98,$20 ; Large knife
-.byte $00,$0E,$01,$00,$00,$00,$A4,$20 ; Iron Staff
-.byte $05,$0D,$0A,$00,$00,$00,$90,$20 ; Sabre
-.byte $0A,$14,$05,$00,$00,$00,$8C,$20 ; Long sword
-.byte $05,$16,$03,$00,$00,$00,$9C,$25 ; Great axe
-.byte $0A,$0F,$05,$00,$00,$00,$88,$20 ; Falchion
-.byte $0F,$0A,$05,$00,$00,$00,$98,$2C ; Silver knife
-.byte $0F,$17,$05,$00,$00,$00,$8C,$2C ; Silver Sword
-.byte $05,$0C,$01,$00,$00,$00,$94,$2C ; Silver Hammer
-.byte $0A,$19,$04,$00,$00,$00,$9C,$2C ; Silver Axe
-.byte $14,$1A,$05,$00,$10,$88,$88,$26 ; Flame sword
-.byte $19,$1D,$05,$00,$20,$00,$8C,$21 ; Ice sword
-.byte $0F,$13,$0A,$00,$00,$02,$90,$2B ; Dragon sword
-.byte $14,$15,$05,$00,$00,$04,$80,$22 ; Giant sword
-.byte $1E,$20,$05,$00,$00,$08,$8C,$27 ; Sun sword
-.byte $0F,$13,$0A,$00,$00,$20,$90,$25 ; Coral sword
-.byte $0F,$12,$05,$00,$00,$10,$80,$24 ; Were sword
-.byte $0F,$12,$05,$00,$00,$41,$88,$23 ; Rune sword
-.byte $00,$0C,$01,$00,$00,$00,$A0,$2A ; Power staff
-.byte $0F,$1C,$03,$12,$00,$08,$9C,$23 ; Light axe       - casts HARM 2
-.byte $00,$06,$01,$14,$00,$00,$A4,$21 ; Heal staff      - casts HEAL
-.byte $0A,$0C,$01,$15,$00,$00,$A4,$25 ; Mage staff      - casts FIRE 2
-.byte $23,$1E,$05,$04,$00,$00,$80,$27 ; Defense swrd    - casts SHIELD
-.byte $0F,$0F,$01,$1F,$00,$00,$A4,$2C ; Wizard staff    - casts CONFUSE
-.byte $19,$18,$1E,$00,$00,$00,$88,$21 ; Vorpal sword
-.byte $23,$16,$05,$00,$00,$00,$98,$2C ; CatClaw
-.byte $0F,$12,$01,$17,$00,$00,$94,$24 ; Thor Hammer     - casts BOLT 2
-.byte $14,$16,$0A,$26,$00,$00,$90,$22 ; Bane sword      - casts BANE
-.byte $23,$21,$1E,$00,$00,$00,$98,$27 ; Katana
-.byte $23,$2D,$05,$00,$FF,$FF,$8C,$28 ; Excalibur
-.byte $32,$38,$0A,$00,$00,$00,$84,$20 ; Masamune    
-.byte $28,$00,$0A,$00,$00,$14,$98,$28 ; Chicken Knife
-.byte $20,$00,$05,$00,$00,$0A,$8C,$2A ; Brave Blade
+.byte $00,$0C,$0A,$00,$00,$00,$00,$A8,$27 ; Wooden nunchucks
+.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20 ; Small knife 
+.byte $00,$06,$01,$00,$00,$00,$00,$A0,$27 ; Wooden staff
+.byte $05,$09,$0A,$00,$00,$00,$00,$90,$20 ; Rapier
+.byte $00,$09,$01,$00,$00,$00,$00,$94,$27 ; Iron hammer
+.byte $0A,$0F,$05,$00,$00,$00,$00,$80,$20 ; Short sword
+.byte $05,$10,$03,$00,$00,$00,$00,$9C,$20 ; Hand axe
+.byte $0A,$0A,$05,$00,$00,$00,$00,$84,$2B ; Scimitar
+.byte $00,$10,$0A,$00,$00,$00,$00,$A8,$20 ; Iron nunchucks
+.byte $0A,$07,$05,$00,$00,$00,$00,$98,$20 ; Large knife
+.byte $00,$0E,$01,$10,$1E,$00,$00,$A4,$20 ; Iron Staff      - might cause STUN
+.byte $05,$0D,$0A,$00,$00,$00,$00,$90,$20 ; Sabre
+.byte $0A,$14,$05,$00,$00,$00,$00,$8C,$20 ; Long sword
+.byte $05,$16,$03,$00,$00,$00,$00,$9C,$25 ; Great axe
+.byte $0A,$0F,$05,$00,$00,$00,$00,$88,$20 ; Falchion
+.byte $0F,$0A,$05,$00,$00,$00,$00,$98,$2C ; Silver knife
+.byte $0F,$17,$05,$00,$00,$00,$00,$8C,$2C ; Silver Sword
+.byte $05,$0C,$01,$00,$00,$00,$00,$94,$2C ; Silver Hammer
+.byte $0A,$19,$04,$00,$00,$00,$00,$9C,$2C ; Silver Axe
+.byte $14,$1A,$05,$00,$00,$10,$88,$88,$26 ; Flame sword
+.byte $19,$1D,$05,$00,$00,$20,$00,$8C,$21 ; Ice sword
+.byte $0F,$13,$0A,$00,$00,$00,$02,$90,$2B ; Dragon sword
+.byte $14,$15,$05,$00,$00,$00,$04,$80,$22 ; Giant sword
+.byte $1E,$20,$05,$08,$1E,$00,$08,$8C,$27 ; Sun sword       - might cause DARK
+.byte $0F,$13,$0A,$00,$00,$00,$20,$90,$25 ; Coral sword
+.byte $0F,$12,$05,$00,$00,$00,$10,$80,$24 ; Were sword
+.byte $0F,$12,$05,$40,$1E,$00,$41,$88,$23 ; Rune sword      - might cause MUTE
+.byte $00,$0C,$01,$00,$00,$00,$00,$A0,$2A ; Power staff
+.byte $0F,$1C,$03,$08,$2F,$00,$08,$9C,$23 ; Light axe       - casts HARM 2, might cause DARK
+.byte $00,$06,$01,$00,$00,$00,$00,$A4,$21 ; Heal staff      - casts HEAL
+.byte $0A,$0C,$01,$00,$00,$00,$00,$A4,$25 ; Mage staff      - casts FIRE 2
+.byte $23,$1E,$05,$00,$00,$00,$00,$80,$27 ; Defense swrd    - casts SHIELD
+.byte $0F,$0F,$01,$00,$00,$00,$00,$A4,$2C ; Wizard staff    - casts CONFUSE
+.byte $19,$18,$1E,$00,$00,$00,$00,$88,$21 ; Vorpal sword
+.byte $23,$16,$05,$00,$00,$00,$00,$98,$2C ; CatClaw
+.byte $0F,$12,$01,$00,$00,$00,$00,$94,$24 ; Thor Hammer     - casts BOLT 2
+.byte $14,$16,$0A,$04,$14,$00,$00,$90,$22 ; Bane sword      - casts BANE, might cause POISON
+.byte $23,$21,$1E,$00,$00,$00,$00,$98,$27 ; Katana
+.byte $23,$2D,$05,$00,$00,$FF,$FF,$8C,$28 ; Excalibur
+.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20 ; Masamune    
+.byte $28,$00,$0A,$00,$FF,$00,$14,$98,$28 ; Chicken Knife
+.byte $20,$00,$05,$00,$00,$00,$0A,$8C,$2A ; Brave Blade
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+
 
 ; Here's the element and category bytes shown in binary.
 ; Good luck trying to know what setting each byte actually does.
@@ -186,6 +211,36 @@ lut_ArmorData:
 .byte $03,$06,%00000000,%00000000 ; Power Gauntlet - casts SABER
 .byte $03,$08,%00000000,%00000000 ; Opal Gauntlet
 .byte $01,$08,%00001000,%00000000 ; Protect Ring
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+.byte $00,$00,$00,$00
+
+
+
+
+
 
 ;; And for the elemental defense:
 ;  
@@ -2749,27 +2804,22 @@ lut_PtyGenBuf:
 DrawOptions:
   LDA #24
   STA dest_x
-  LDA #9
+  LDA #8
   STA dest_y
   LDX ExpGainOption
   LDA lut_LowNormalHigh, X
   JSR DrawCharMenuString
   
-  LDA #11
+  LDA #10
   STA dest_y
   LDX MoneyGainOption
   LDA lut_LowNormalHigh, X
   JSR DrawCharMenuString
   
-  LDA #13
+  LDA #12
   STA dest_y
   LDX EncRateOption
   LDA lut_LowNormalHigh, X
-  JSR DrawCharMenuString
- 
-  LDA #15
-  STA dest_y
-  LDA #13
   JSR DrawCharMenuString
  
   JSR LongCall
@@ -2777,18 +2827,18 @@ DrawOptions:
   .byte BANK_MENUS
   
   LDA $2002          ; PPU toggle... needed or not?
-  LDA #>$223A        ; Color is drawn here
+  LDA #>$221A        ; Color is drawn here
   STA $2006
-  LDA #<$223A
+  LDA #<$221A
   STA $2006
   LDA format_buf-2
   STA $2007
   LDA format_buf-1
   STA $2007
   
-  LDA #>$21FB        ; Respond rate is drawn here
+  LDA #>$21DB        ; Respond rate is drawn here
   STA $2006
-  LDA #<$21FB
+  LDA #<$21DB
   STA $2006
   LDA BattleTextSpeed ; get the current respond rate (which is zero based)
   CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
@@ -2798,22 +2848,15 @@ DrawOptions:
   STA $2005
   STA $2005
  
-  LDA #29
-  STA dest_x
-  LDA #15
-  STA dest_y
-  LDA #14
-  JSR DrawCharMenuString
-  
   LDA #24
   STA dest_x
-  LDA #19
+  LDA #18
   STA dest_y
   LDX AutoTargetOption
   LDA lut_OnOff, X
   JSR DrawCharMenuString
   
-  LDA #21
+  LDA #20
   STA dest_y
   LDX MuteSFXOption
   LDA lut_OnOff, X
@@ -2834,7 +2877,7 @@ OptionsMenu:
   
     LDA #1
     STA box_x
-    LDA #7
+    LDA #6
     STA box_y
     LDA #30
     STA box_wd
@@ -2842,7 +2885,7 @@ OptionsMenu:
     STA box_ht
     JSR DrawBox                 ; draws the options box
     
-    LDA #7            
+    LDA #7           
     STA cursor_max    
     LDA #0
     JSR DrawCharMenuString      ; draws the static list of changable things
@@ -2955,7 +2998,7 @@ ChangeOption:
     
   : INC MuteSFXOption
     RTS
-    
+   
    @JMP_BattleBackground:
    JMP BattleBackgroundColor
    
@@ -3066,7 +3109,8 @@ ChangeOption:
     
   : INC AutoTargetOption
     RTS 
-    
+
+   
 BattleBackgroundColor:
     PLA 
     BEQ @NextColor
@@ -3090,7 +3134,7 @@ BattleBackgroundColor:
   
   : INC BattleBGColor
     
-    @Return:
+   @Return:
     LDA #0
     STA $2002
     LDX BattleBGColor
@@ -3108,7 +3152,7 @@ DrawOptionsCursor:
     JMP DrawCursor               ; draw it!  and exit
     
   lut_OptionsCursor_Y:          
-   .BYTE  $48,$58,$68,$78,$88,$98,$A8        
+   .BYTE  $40,$50,$60,$70,$80,$90,$A0   
 
 OptionsMenuFrame:
     LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
@@ -3634,94 +3678,83 @@ UnadjustEquipStats:
  BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
  RTS 
  
-    @AdjustWeapon:
-      SEC
-      SBC #$01              ; subtract 1 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
-
-      ASL A
-      ASL A                 ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
-      ASL A               ; multiply by another 2  (A= weapon_id*8) -- there are 8 bytes of stats per weapon
-      STA tmp             ; this is the low byte of our source pointer
-      LDA #0
-      TAY
-      ADC #>lut_WeaponData ; include carry into high byte of source pointer
-      STA tmp+1           ; (tmp) is now a pointer to stats for this weapon
-
-     ; LDX tmp+7           ; load char index into X
-     ; LDY #0              ; zero source index Y
-
-      LDA ch_hitrate, X   ; get character's hit rate
-      SEC
-      SBC (tmp), Y        ; subtract the weapon's hit rate bonus
-      STA ch_hitrate, X   ; and write back to character's hit rate
-      ;; JIGS - some battle stat prep added in:
-      LSR A
-      LSR A
-      LSR A
-      LSR A
-      LSR A
-      CLC
-      ADC #$01
-      STA ch_numhits, X
-      ;;   
-
-      INY                 ; inc source index
-
-    @SpecialWeapons:
-      LDA ch_righthand, X
-      CMP #CHICKEN_KNIFE+1
-      BEQ @Restore
-      CMP #BRAVE_BLADE+1
-      BNE @Done
+  @AdjustWeapon:
+    JSR GetWeaponDataPointer
     
-    @Restore:
-      LDA ch_damagebackup, X
-      STA ch_damage, X
+    LDA ch_hitrate, X   ; get character's hit rate
+    SEC
+    SBC (tmp), Y        ; subtract the weapon's hit rate bonus
+    STA ch_hitrate, X   ; and write back to character's hit rate
+    ;; JIGS - some battle stat prep added in:
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    CLC
+    ADC #$01
+    STA ch_numhits, X
+    ;;   
+  
+    INY                 ; inc source index
+  
+  @SpecialWeapons:
+    LDA ch_righthand, X
+    CMP #CHICKEN_KNIFE+1
+    BEQ @Restore
+    CMP #BRAVE_BLADE+1
+    BNE @Done
+  
+  @Restore:
+    LDA ch_damagebackup, X
+    STA ch_damage, X
+  
+   @Done:
+    LDA ch_damage, X       ; get char's dmg
+    SEC
+    SBC (tmp), Y           ; subtract weapon's damage bonus
+    STA ch_damage, X       ; and write back
    
-     @Done:
-      LDA ch_damage, X       ; get char's dmg
-      SEC
-      SBC (tmp), Y           ; subtract weapon's damage bonus
-      STA ch_damage, X       ; and write back
-     
-    : LDA #00               ;; JIGS - clear these out
-      STA ch_critrate, X
-      STA ch_weaponelement, X
-      STA ch_weaponcategory, X
-      STA ch_weaponsprite, X
-      STA ch_weaponpal, X      
-      
-      LDA #$01
-      STA ch_numhitsmult, X ;; JIGS - this is always 1, weapon equipped or not.
-      
-      ;LDX equipmenu_tmp   ; restore X to the equipment source index
-      RTS
-      
-    @AdjustArmor:  
-      SEC
-      SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
-      ASL A
-      ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
-      CLC                 ; (A= armor_id*8)
-      ADC #<lut_ArmorData ; add A to desired pointer
-      STA tmp             ;  and store pointer to (tmp)
-      LDA #0
-      TAY
-      ADC #>lut_ArmorData
-      STA tmp+1           ; (tmp) is now a pointer to stats for this armor
+  : LDA #00               ;; JIGS - clear these out
+    STA ch_critrate, X
+    STA ch_weaponelement, X
+    STA ch_weaponcategory, X
+    STA ch_weaponsprite, X
+    STA ch_weaponpal, X      
+    STA ch_attackailment, X
+    STA ch_attackailproc, X
+    
+    LDA #$01
+    STA ch_numhitsmult, X ;; JIGS - this is always 1, weapon equipped or not.
+    
+    ;LDX equipmenu_tmp   ; restore X to the equipment source index
+    RTS
+    
+  @AdjustArmor:  
+    SEC
+    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
+    ASL A
+    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
+    CLC                 ; (A= armor_id*8)
+    ADC #<lut_ArmorData ; add A to desired pointer
+    STA tmp             ;  and store pointer to (tmp)
+    LDA #0
+    TAY
+    ADC #>lut_ArmorData
+    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
+  
+    ;LDX tmp+7           ; get char index in X
+    ;LDY #0              ; zero our source index Y
+  
+    LDA ch_evasion, X   ; get character's evade
+    CLC
+    ADC (tmp), Y        ; add the armor's evade penalty rate (removing the penalty)
+    STA ch_evasion, X   ; and write back
+    
+    ;LDX equipmenu_tmp   ; then restore X to equipment source index
+    RTS                 ; and exit
 
-      ;LDX tmp+7           ; get char index in X
-      ;LDY #0              ; zero our source index Y
 
-      LDA ch_evasion, X   ; get character's evade
-      CLC
-      ADC (tmp), Y        ; add the armor's evade penalty rate (removing the penalty)
-      STA ch_evasion, X   ; and write back
-      
-      ;LDX equipmenu_tmp   ; then restore X to equipment source index
-      RTS                 ; and exit
-
-      
 ;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  UnadjustBBEquipStats  [$EEB7 :: 0x3EEC7]
@@ -3810,17 +3843,8 @@ ReadjustEquipStats:
  RTS 
 
   @AdjustWeapon:
-    SEC
-    SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
-    ASL A
-    ASL A                  ; multiply by 4 
-    ASL A                  ; multiply by another 2 (A now = weapon_id * 8)
-    STA tmp                ; put in tmp as low byte of our pointer
-    LDA #0
-    TAY
-    ADC #>lut_WeaponData   ; add high byte of our pointer (including any appropriate carry)
-    STA tmp+1              ; fill tmp+1 to complete our pointer
-
+    JSR GetWeaponDataPointer
+    
     LDA ch_hitrate, X      ; get char's hit rate
     CLC
     ADC (tmp), Y           ; add to it the weapon's hit bonus
@@ -3839,6 +3863,11 @@ ReadjustEquipStats:
     LDA (tmp), Y
     STA ch_critrate, X
     INY
+    LDA (tmp), Y
+    STA ch_attackailment, X
+    INY 
+    LDA (tmp), Y
+    STA ch_attackailproc, X
     INY 
     LDA (tmp), Y
     STA ch_weaponelement, X
@@ -3910,7 +3939,29 @@ ReadjustEquipStats:
     RTS                     ; and exit
 
 
-
+GetWeaponDataPointer:    
+    SEC
+    SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
+    
+    TAY                    ; save A
+    TXA                    ; then push X to stack
+    PHA
+    TYA                    ; restore A
+    LDX #9
+    JSR MultiplyXA
+  ;  ASL A
+  ;  ASL A                  ; multiply by 4 
+  ;  ASL A                  ; multiply by another 2 (A now = weapon_id * 8)
+  
+    STA tmp                ; put in tmp as low byte of our pointer
+    LDA #0
+    TAY
+    ADC #>lut_WeaponData   ; add high byte of our pointer (including any appropriate carry)
+    STA tmp+1              ; fill tmp+1 to complete our pointer
+    
+    PLA
+    TAX                    ; then restore X
+    RTS
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -5264,6 +5315,14 @@ PlayerAttackEnemy_PhysicalZ:
     LDA (CharStatsPointer), Y
     STA btl_attacker_ailments
     
+    LDY #ch_attackailment - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_attackailment
+    
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailmentchance
+    
     JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
     ;; 2x hit rate
     ;; 1.5x crit rate (2x for thief/ninja)
@@ -5599,10 +5658,11 @@ SwapBattleSFXBytes:
 
 
     
-DrawCharMenuString:
-    LDY #$7F                ; set length to default 7F
+;DrawCharMenuString:
+;    LDY #$7F                ; set length to default 7F
 
-DrawCharMenuString_Len:
+DrawCharMenuString: ;_Len:
+    LDY #0
     ASL A                   ; double menu string ID
     TAX                     ; put in X
     LDA lut_ZMenuText, X     ; and load up the pointer into (tmp)
@@ -5621,7 +5681,7 @@ DrawCharMenuString_Len:
     BNE :+                  ;   if it equals...
       ORA submenu_targ      ;   OR with desired character ID to draw desired character's stats
 :   STA bigstr_buf, Y       ; copy the byte to the big string buffer
-    DEY                     ; then decrement Y
+    INY                     ; then decrement Y
     CPY #$FF                ; check to see if it wrapped
     BNE @Loop               ; and keep looping until it has
 
@@ -5732,8 +5792,7 @@ lut_ZMenuText:
 .word AreYouSure             ; A ; 10
 .word Deleted                ; B ; 11
 .word BattleYesNo            ; C ; 12
-.word OptionsArrows_Left     ; D ; 13
-.word OptionsArrows_Right    ; E ; 14
+
 
 OptionOn:
 .byte $98,$97,$FF,$00
@@ -5754,10 +5813,11 @@ M_OptionsMenu:   ;3A
 .byte $8E,$A1,$99,$8E,$9B,$92,$8E,$97,$8C,$8E,$FF,$90,$8A,$92,$97,$01
 .byte $96,$98,$97,$8E,$A2,$FF,$90,$8A,$92,$97,$01
 .byte $8E,$97,$8C,$98,$9E,$97,$9D,$8E,$9B,$FF,$9B,$8A,$9D,$8E,$01
-.byte $8B,$8A,$9D,$9D,$95,$8E,$FF,$96,$8E,$9C,$9C,$8A,$90,$8E,$FF,$9C,$99,$8E,$8E,$8D,$01
-.byte $8B,$8A,$9D,$9D,$95,$8E,$FF,$96,$8E,$9C,$9C,$8A,$90,$8E,$FF,$8C,$98,$95,$98,$9B,$01
+.byte $8B,$8A,$9D,$9D,$95,$8E,$FF,$96,$8E,$9C,$9C,$8A,$90,$8E,$FF,$9C,$99,$8E,$8E,$8D,$FF,$FF,$C1,$FF,$FF,$FF,$FF,$C7,$01
+.byte $8B,$8A,$9D,$9D,$95,$8E,$FF,$96,$8E,$9C,$9C,$8A,$90,$8E,$FF,$8C,$98,$95,$98,$9B,$FF,$FF,$C1,$FF,$FF,$FF,$FF,$C7,$01
 .byte $8A,$9E,$9D,$98,$C2,$9D,$8A,$9B,$90,$8E,$9D,$01
 .byte $96,$8E,$97,$9E,$FF,$9C,$8F,$A1,$00
+
     
 SoundTestInstructions:
 .byte $8B,$FF,$C2,$FF,$8E,$BB,$AC,$B7,$05,$8A,$FF,$C2,$FF,$9C,$B7,$A4,$B5,$B7,$7A,$9C,$B7,$B2,$B3,$FF,$96,$B8
@@ -5790,11 +5850,6 @@ BattleYesNo:
 .byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$FF,$FF,$FF,$01
 .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
 
-OptionsArrows_Left:
-.byte $C1,$01,$C1,$00
-
-OptionsArrows_Right:
-.byte $C7,$01,$C7,$00
 
 
 
