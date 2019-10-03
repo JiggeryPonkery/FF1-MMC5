@@ -12842,8 +12842,13 @@ lut_EraseEnemyPPUAddress_Mix_Small:
   
   
 AttackIndicator_LUT:
-  .BYTE $01, $02, $03, $02, $01, $02, $03, $00
-  
+  .BYTE $03, $02, $01, $02, $03, $00
+  ;; this is the order of indication sprites to load:
+  ;; 1 = big plus + 
+  ;; 2 = small x 
+  ;; 3 = small plus +
+  ;; 0 = original glove cursor
+  ;; when flashed in order, they make a twirling sparkle star!
 
 DisplayAttackIndicator:
   LDX btl_battletype
@@ -12852,15 +12857,18 @@ DisplayAttackIndicator:
   BEQ @Indicator_4Large          ; 4large formation
   DEX
   BEQ @Indicator_Mix             ; mix formation
-  RTS                           ; if its 3 or 4, don't bother, only one enemy!
+  RTS                            ; if its 3 or 4, don't bother, only one enemy!
   
  @Indicator_9Small:
-  LDX btl_attacker
-  LDA lut_EnemyIndex9Small, X
-  ASL A
-  TAY
+  LDX btl_attacker                     ; get enemy's ID
+  LDA lut_EnemyIndex9Small, X          ; then get their position ID
+  ASL A                                ; double it and put in Y
+  TAY                                  ; see lut_EnemyIndex9Small: for details
+ @SetSmall: 
   LDA lut_Target9SmallCursorPos, Y
-  STA tmp
+  CLC
+  ADC #$28                             ; push the sprite to the other side of the enemy
+  STA btlcursspr_x
   LDA lut_Target9SmallCursorPos+1, Y
   BNE @Begin
   
@@ -12869,7 +12877,10 @@ DisplayAttackIndicator:
   LDA lut_EnemyIndex4Large, X
   ASL A
   TAY
+ @SetLarge:
   LDA lut_Target4LargeCursorPos, Y
+  CLC
+  ADC #$40                             ; push the sprite to the other side of the enemy
   STA btlcursspr_x
   LDA lut_Target4LargeCursorPos+1, Y
   BNE @Begin
@@ -12879,21 +12890,20 @@ DisplayAttackIndicator:
   LDA lut_EnemyIndexMix, X
   ASL A
   TAY
-  LDA lut_TargetMixCursorPos, Y
+  CPY #$02                             ; if Y = 2 or 0, then enemy index is 1 or 0
+  BCC @SetLarge                        ; so they're the large ones, and use the same lut
+  LDA lut_TargetMixCursorPos, Y        ; but the small mixed ones use a different lut
+  CLC
+  ADC #$28
   STA btlcursspr_x
   LDA lut_TargetMixCursorPos+1, Y
-  BNE @Begin
  
  @Begin:
   SEC
   SBC #4
-  STA btlcursspr_y
-  LDA tmp
-  CLC
-  ADC #$28
-  STA btlcursspr_x
+  STA btlcursspr_y                ; nudge the sprite up a little bit more, but not too much
   
-  LDA btl_drawflagsA              ; set the flag to show the cursor
+  LDA btl_drawflagsA              ; set the flag to show the "cursor"
   ORA #$10
   STA btl_drawflagsA
   
@@ -12903,29 +12913,31 @@ DisplayAttackIndicator:
  @Loop: 
   STX AttackIndicator
   LDA AttackIndicator_LUT, X
-  PHA
   
-  JSR LongCall
-  .WORD UpdateBattleCursorSprite
-  .byte $0F
+  JSR @LoadNewSprite
   
-  PLA
-  BEQ @Done
-  
-  JSR UpdateSprites_BattleFrame
+  JSR UpdateSprites_TwoFrames
+  JSR UpdateSprites_TwoFrames      ; 4 frames per sprite
   LDX AttackIndicator
   INX
+  CPX #5
   BNE @Loop
   
  @Done:
-  JSR BattleClearVariableSprite
-  JMP BattleFrame
+  JSR BattleClearVariableSprite     ; clear the current sprite
+  JSR BattleFrame                   ; and do a frame to erase it from the screenproperly
   
-  ;; JIGS - this should load up a little sparkle in the place of
-  ;; the glove cursor, updating and displaying it for 2 frames...
-  ;; then end by putting the glove back in place.
+  LDA #0                            ; then load up the cursor!
+ 
+ @LoadNewSprite: 
+  JSR LongCall
+  .WORD UpdateBattleCursorSprite
+  .byte $0F
+  RTS
   
-  
+  ;; the above routine jumps to where the sprites are stored (64 bytes per sprite!)
+  ;; and loads them in place of the cursor. It waits for VBlank first, and sets scroll
+  ;; when its finished loading the new sprite.
   
   
   
