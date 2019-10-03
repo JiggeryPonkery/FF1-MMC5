@@ -127,13 +127,6 @@ item_orb_start  = keyitems + $1C
   orb_earth     = item_orb_start + 3 ; $1F
 item_stop       = item_orb_start + 4 ; $20
 
-
-Character1BattleState = ch_stats + $10 ; these will match up to ch_battlestate in ch_stats
-Character2BattleState = ch_stats + $10 + $40 ; 
-Character3BattleState = ch_stats + $10 + $80 ; 
-Character4BattleState = ch_stats + $10 + $C0 ;
-
-
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00
 ch_ailments       = ch_stats + $01

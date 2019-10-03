@@ -1210,7 +1210,7 @@ GetCharacterBattleCommand:
     
     LDY # ch_battlestate - ch_stats ; 
     LDA (CharStatsPointer), Y       ; in case they guarded then chose to re-select their command
-    AND #$7F                        ; undo the guard state
+    AND #~STATE_GUARDING            ; undo the guard state
     STA (CharStatsPointer), Y
     
     LDY # ch_ailments - ch_stats    ; See if this character has any ailment that would prevent them from inputting
@@ -1497,7 +1497,7 @@ BattleSubMenu_Guard:
   JSR PrepCharStatPointers
   LDY #ch_battlestate - ch_stats
   LDA (CharStatsPointer), Y
-  ORA #$80                  ; add the Guard status
+  ORA #STATE_GUARDING       ; add the Guard status
   STA (CharStatsPointer), Y
   PLA
   ORA #$80                  ; get character index, put in Y
@@ -2070,10 +2070,10 @@ UnhideAllCharacters:        ;; JIGS - used by the end of battle cheering and to 
    ; AND #$0F
    ; STA Character4BattleState
     LDA #0
-    STA Character1BattleState ;; - this also clears out regenerative spells and the guarding state
-    STA Character2BattleState
-    STA Character3BattleState
-    STA Character4BattleState
+    STA ch_battlestate ;; - this also clears out regenerative spells and the guarding state
+    STA ch_battlestate + $40
+    STA ch_battlestate + $80
+    STA ch_battlestate + $C0
     STA Hidden
     RTS
 
@@ -3740,10 +3740,10 @@ UnhideCharacter:
     JSR PrepCharStatPointers
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
-    AND #$10                        ; check only for Hidden state
+    AND #STATE_HIDDEN               ; check only for Hidden state
     BEQ :+                 
         LDA (CharStatsPointer), Y
-        AND #$EF                    ; keep Guard state if it exists, as well as regen potency and turns
+        AND #~STATE_HIDDEN          ; keep Guard state if it exists, as well as regen potency and turns
         STA (CharStatsPointer), Y
         LDA #01
         STA Hidden
@@ -3760,7 +3760,7 @@ HideCharacter:
         JSR PrepCharStatPointers
         LDY #ch_battlestate - ch_stats
         LDA (CharStatsPointer), Y
-        ORA #$10
+        ORA #STATE_HIDDEN
         STA (CharStatsPointer), Y
         LDA #0
         STA Hidden
@@ -5237,7 +5237,7 @@ ApplyRegenToAllEnemies:
 
 ApplyEndOfRoundEffects:
     JSR ApplyPoisonToAllEnemies ; will also check for battle end
-    JMP ApplyRegenToAllEnemies  ; apply regen to all enemies
+    JSR ApplyRegenToAllEnemies  ; apply regen to all enemies
     
     LDA #$00                    ; apply poison to all 4 players
     JSR ApplyPoisonToPlayer
@@ -5253,18 +5253,18 @@ ApplyEndOfRoundEffects:
     ;; JIGS - Updates the Battle Turn text and character sprites at the same time
     INC BattleTurn
     
-    LDA Character1BattleState 
-    AND #$7F
-    STA Character1BattleState
-    LDA Character2BattleState 
-    AND #$7F
-    STA Character2BattleState
-    LDA Character3BattleState 
-    AND #$7F
-    STA Character3BattleState
-    LDA Character4BattleState 
-    AND #$7F
-    STA Character4BattleState   ; clear Guard state for everyone
+    LDA ch_battlestate
+    AND #~STATE_GUARDING
+    STA ch_battlestate
+    LDA ch_battlestate + $40
+    AND #~STATE_GUARDING
+    STA ch_battlestate + $40
+    LDA ch_battlestate + $80 
+    AND #~STATE_GUARDING
+    STA ch_battlestate + $80
+    LDA ch_battlestate + $C0
+    AND #~STATE_GUARDING
+    STA ch_battlestate + $C0   ; clear Guard state for everyone
     
     JSR DrawCharacterStatus     
     JSR PrintBattleTurnNumber
@@ -5617,21 +5617,21 @@ ApplyRegenToPlayer:
     PHA
 
     LDA ch_battlestate, X
-    AND #$60                    ; clear out everything but potency (2, 4, or 6)    
-    CMP #$20
+    AND #STATE_REGENHIGH ; $60  ; clear out everything but potency ($20, $40, or $60)    
+    CMP #STATE_REGENLOW
     BNE :+ 
-        @20Potency:     ; 8%
+        @LowPotency:            ; 8%
         LDA #12         
         BNE @Divide
         
-  : CMP #$40
+  : CMP #STATE_REGENMIDDLE
     BNE :+    
-       @40Potency:      ; 12.5%
+       @MiddlePotency:          ; 12.5%
         LDA #8
         BNE @Divide
     
- : @60Potency:          ; 5 = almost 20%
-    LDA #6              ; 6 = 16.6 ?
+ : @HighPotency:                ; 5 = almost 20%
+    LDA #6                      ; 6 = 16.6 ?
   
   @Divide:
     JSR RegenDivision
@@ -5644,11 +5644,11 @@ ApplyRegenToPlayer:
     STA ch_curhp+1, X
     
     LDA ch_battlestate, X       ; see if they're hidden
-    AND #$10
+    AND #STATE_HIDDEN
     BEQ @NotHidden              ; if not, skip
     
     LDA ch_battlestate, X       ; if they are, remove hidden bit
-    AND #$EF
+    AND #~STATE_HIDDEN
     STA ch_battlestate, X
     
     LDA #1 
@@ -5671,7 +5671,7 @@ ApplyRegenToPlayer:
     BEQ @DecrementRegeneration
     
     LDA ch_battlestate, X
-    ORA #$10
+    ORA #STATE_HIDDEN
     STA ch_battlestate, X         ; rehide character
     DEC Hidden
    
@@ -6140,14 +6140,14 @@ Player_Hide:
   PLA
   LDY #ch_battlestate - ch_stats
   LDA (CharStatsPointer), Y
-  AND #$10
+  AND #STATE_HIDDEN
   BEQ @Hide
     LDA #$54 ; Already hidden!
     JMP @PrintStuff     
    
   @Hide:
   LDA (CharStatsPointer), Y
-  ORA #$10
+  ORA #STATE_HIDDEN
   STA (CharStatsPointer), Y
   
   ; Draw the "Slipped into hiding" combat box
@@ -6813,7 +6813,11 @@ DoPhysicalAttack:
     LDY #$02
     JSR PrepareAndDrawSimpleCombatBox
     
-    LDA #$02        ; print '03 00 00' to combat box 2
+    LDA battle_defenderisplayer
+    BEQ :+
+    JSR DisplayAttackIndicator
+    
+  : LDA #$02        ; print '03 00 00' to combat box 2
     LDY #$03        ;  (defender name in defender combat box)
     LDX #$00
     JSR PrepareAndDrawSimpleCombatBox
@@ -7556,33 +7560,34 @@ DrawCharacterStatus:
     ; 6 7 x - the tiles will be laid out like this, where 2, 5, and 7 are null terminators
 
     PHA                             ; backup ailment to use again
-    AND #$07                        ; only check these v ailments first
+    AND #AIL_DEAD | AIL_STONE | AIL_POISON ; only check these v ailments first
     JSR @FindAilment
     STA btl_unfmtcbtbox_buffer+4, X ; heavy ailment (dead, stone, poison)
     
     PLA                             ; fetch ailment
-    AND #$78                        ; remove dead, stone, poison, and $80 from ailment
+    AND #~AIL_DEAD | AIL_STONE | AIL_POISON | AIL_CONF ; #$78
+    ; remove dead, stone, poison, and $80 from ailment
     JSR @FindAilment
     STA btl_unfmtcbtbox_buffer+1, X ; light ailment (blind, sleep, stun, mute)
     
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y    
     BEQ @NoState                    ; if 0, skip changing it
-    AND #$10                        ; hidden?
+    AND #STATE_HIDDEN               ; hidden?
     BEQ :+
         LDA #$7E
         STA btl_unfmtcbtbox_buffer+6, X ; start of third string
         
   : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y            
-    AND #$80                        ; guarding?
+    AND #STATE_GUARDING              ; guarding?
     BEQ :+
         LDA #$EF
         STA btl_unfmtcbtbox_buffer+3, X ; start of second string
     
   : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
-    AND #$0F                        ; regenerating? -- ignore the potency bits and just check the turns left
+    AND #STATE_REGENLOW | STATE_REGENMIDDLE ; regenerating? 
     BEQ @NoState
         LDA #$F2
         STA btl_unfmtcbtbox_buffer, X ; start of first string
@@ -9403,8 +9408,6 @@ Battle_DoEnemyTurn:
     JMP ShowAltBattleMessage_ClearAllBoxes
 
   @EnemyActive:                         ; jumps here if enemy is active (not stunned or asleep)
-    JSR DisplayAttackIndicator
-  
     LDY #en_ailments
     LDA (EnemyRAMPointer), Y                     ; check the high bit to see if they're confused
     BPL @EnemyActive_AndNotConfused     ; if clear, jump ahead to EnemyActive_AndNotConfused.  Otherwise...
@@ -9416,10 +9419,12 @@ Battle_DoEnemyTurn:
       LDA #~AIL_CONF
       JSR ApplyEnemyAilmentMask
       JSR DrawCombatBox_Attacker
+      JSR DisplayAttackIndicator
       LDA #ALTBTLMSG_CURED_1
       BNE @PrintAndEnd
       
   : JSR DrawCombatBox_Attacker          ; otherwise, the enemy is confused....
+    JSR DisplayAttackIndicator
     LDA #MG_FIRE - MG_START             ;   cast FIRE on a random enemy  -- which is totally lame.  I would expect stronger
     STA btl_attackid                    ;   enemies to have a stronger attack.
     JSR Battle_PrepareMagic             ; Note that even though we are casting FIRE, the attack combat box is never drawn, so
@@ -9727,7 +9732,7 @@ GetRandomPlayerTarget:
      JSR PrepCharStatPointers
      LDY #ch_battlestate - ch_stats
      LDA (CharStatsPointer), Y   ; check if hidden
-     AND #$10
+     AND #STATE_HIDDEN
      BEQ :+
         ; if nonzero, do another compare to give hidden characters another chance to stay hidden?
         LDA #01
@@ -10691,11 +10696,11 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
  
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
-    AND #$10
+    AND #STATE_HIDDEN
     BEQ @NotHidden              ; if they're not hidden, skip all this 
     
     LDA (CharStatsPointer), Y ; reload to preserve low bits
-    AND #$EF ; remove hiding bit
+    AND #~STATE_HIDDEN        ; remove hiding bit
     STA (CharStatsPointer), Y   
     
     LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
@@ -10796,7 +10801,7 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     BEQ :+
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y      
-    ORA #$10
+    ORA #STATE_HIDDEN
     STA (CharStatsPointer), Y   
     LDA #0
     STA Hidden                  ; Then clear Hidden ; when Caster steps back, they won't go into hiding again anyway.
@@ -11549,7 +11554,8 @@ BtlMag_Effect_Regen:
     JSR BtlMag_MarkSpellConnected
     
     LDA btlmag_defender_battlestate
-    AND #$90                        ; clear out everything but hiding and guarding
+    AND #STATE_HIDDEN | STATE_GUARDING ; $90
+    ; clear out everything but hiding and guarding
     ORA btlmag_effectivity          ; add in heal potency (2, 4, or 6)
     ORA btlmag_hitrate              ; add in amount of turns to heal for
     STA btlmag_defender_battlestate

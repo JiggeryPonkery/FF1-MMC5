@@ -341,6 +341,14 @@ AIL_CONF            = $80
 
 
 ;;;;;;;;;;;;;;;;;;
+;;  battle states ; good ailments!
+STATE_HIDDEN       = $10
+STATE_REGENLOW     = $20
+STATE_REGENMIDDLE  = $40
+STATE_REGENHIGH    = $60
+STATE_GUARDING     = $80 
+
+;;;;;;;;;;;;;;;;;;
 ;;  map object IDs
 ;;
 
