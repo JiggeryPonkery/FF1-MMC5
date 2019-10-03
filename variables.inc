@@ -156,8 +156,8 @@ ch_evasion        = ch_stats + $1A
 ch_magicdefense   = ch_stats + $1B
 ch_elementresist  = ch_stats + $1C ; effected by equipment, needs to refresh after battle
 ch_elementweak    = ch_stats + $1D ; effected by equipment, needs to refresh after battle
-;nothing          = ch_stats + $1E
-;nothing          = ch_stats + $1F
+ch_attackailment  = ch_stats + $1E ; effected by equipment
+ch_attackailproc  = ch_stats + $1F ; effected by equipment
 
 ch_righthand      = ch_stats + $20
 ch_lefthand       = ch_stats + $21
@@ -603,6 +603,7 @@ btl_attacker_varplt          = btl_attacker + $0B ; The variable palette color u
 btl_attacker_sprite          = btl_attacker + $0C 
 btl_attacker_class           = btl_attacker + $0D
 btl_attacker_hidden          = btl_attacker + $0E
+btl_attacker_ailmentchance   = btl_attacker + $0F
 
 btlmag_spellconnected       = btl_attacker + $01
 btlmag_effect               = btl_attacker + $02
@@ -660,29 +661,42 @@ btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $68
     MATHBUF_DMGCALC             = $05
     MATHBUF_CRITCHANCE          = $06
     MATHBUF_AILMENTCHANCE       = $07
-    MATHBUF_MAGDEFENDERHP       = $08 ;$12
-    MATHBUF_DEFENDERHP          = $08 ;$13
-    MATHBUF_MAGDEFENDERMAXHP    = $09 ;$15
-    MATHBUF_DEFENDERMAXHP       = $09 ;$15
-    MATHBUF_TOTALDAMAGE         = $0A ;$16
+    MATHBUF_MAGDEFENDERHP       = $08 
+    MATHBUF_DEFENDERHP          = $08 
+    MATHBUF_MAGDEFENDERMAXHP    = $09 
+    MATHBUF_DEFENDERMAXHP       = $09 
+    MATHBUF_TOTALDAMAGE         = $0A 
+    MATHBUF_REGENHP             = $0B 
     
 btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
-    math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6040 ; 
-    math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $6042 ; 
-    math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $6044 ; 
-    math_magrandhit     = btl_mathbuf + (MATHBUF_MAGRANDHIT*2)      ; $6044 ; 
-    math_category       = btl_mathbuf + (MATHBUF_CATEGORY*2)        ; $6046 ;  not really math... but whatever
-    math_element        = btl_mathbuf + (MATHBUF_ELEMENT*2)         ; $6048 ;  not really math... but whatever
-    math_randhit        = btl_mathbuf + (MATHBUF_RANDHIT*2)         ; $6048 ; 
-    math_dmgcalc        = btl_mathbuf + (MATHBUF_DMGCALC*2)         ; $604A ; 
-    math_critchance     = btl_mathbuf + (MATHBUF_CRITCHANCE*2)      ; $604C ; 
-    math_ailmentchance  = btl_mathbuf + (MATHBUF_AILMENTCHANCE*2)   ; $604E ; 
-;btlmag_defender_hp     = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)   ; $6050 ; 
-;btl_defender_hp        = btl_mathbuf + (MATHBUF_DEFENDERHP*2)      ; $6050 ;  -- treated as part of math buffer by some code
-;btlmag_defender_hpmax  = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2); $6052 ; 
-;btl_defender_hpmax     = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)   ; $6052 ; 
-    battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6054 ;  -- treated as part of math buffer by some code
+    math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6050 ; 
+    math_basedamage     = btl_mathbuf + (MATHBUF_BASEDAMAGE*2)      ; $6052 ; 
+    math_numhits        = btl_mathbuf + (MATHBUF_NUMHITS*2)         ; $6054 ; 
+    math_magrandhit     = btl_mathbuf + (MATHBUF_MAGRANDHIT*2)      ; $6054 ; 
+    math_category       = btl_mathbuf + (MATHBUF_CATEGORY*2)        ; $6056 ;  not really math... but whatever
+    math_element        = btl_mathbuf + (MATHBUF_ELEMENT*2)         ; $6058 ;  not really math... but whatever
+    math_randhit        = btl_mathbuf + (MATHBUF_RANDHIT*2)         ; $6058 ; 
+    math_dmgcalc        = btl_mathbuf + (MATHBUF_DMGCALC*2)         ; $605A ; 
+    math_critchance     = btl_mathbuf + (MATHBUF_CRITCHANCE*2)      ; $605C ; 
+    math_ailmentchance  = btl_mathbuf + (MATHBUF_AILMENTCHANCE*2)   ; $605E ; 
+;btlmag_defender_hp     = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)   ; $6060 ; 
+;btl_defender_hp        = btl_mathbuf + (MATHBUF_DEFENDERHP*2)      ; $6060 ;  -- treated as part of math buffer by some code
+;btlmag_defender_hpmax  = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2); $6062 ; 
+;btl_defender_hpmax     = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)   ; $6062 ; 
+    battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6064 ;  -- treated as part of math buffer by some code
+    
+    btltmp_divLo        = btl_mathbuf + (MATHBUF_REGENHP*2) ; $6066 
+    btltmp_divHi        = btl_mathbuf + (MATHBUF_REGENHP*2) ; $6067 
+    btltmp_divV         = $6068 
+    btltmp_divtmp       = $6069 
 
+; anomie poison code reference    
+;btltmp_divLo = $688B ;  divV
+;btltmp_divHi = $688C ;  divLo
+;btltmp_divV  = $688D ;  divHi
+
+    
+    
 ;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
 ch_backupstats           = $60C0 ;; $10 per character, so fills up to $60FF
 ch_slotindex_backup      = ch_backupstats
@@ -796,6 +810,7 @@ btl_weird_thing = $6868 ;  LDA  btl_defender_elemresist,  AND btl_attacker_eleme
 
 battle_hitsconnected        = $686A     ; number of hits actually connected
 battle_critsconnected       = $686B
+battle_thishitconnected     = $686C
 
 
 
@@ -814,10 +829,6 @@ battle_defenderisplayer     = $6887 ; nonzero if player is defending, zero if en
 ;btl_defender_ailments       = $6889 ; important for output!
 
 btl_rngstate = $688A    ; State of RNG used for in-battle
-
-btltmp_divLo = $688B
-btltmp_divHi = $688C
-btltmp_divV  = $688D
 
 btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 
@@ -986,6 +997,7 @@ btl_responddelay    = $6BAC
 
 lvlup_levindex = $6BAD ; see LvlUp_LevelUp
 btl_weird_loopctr = $6BAD
+math_basedamage_backup = $6BAD
 
 
 btl_strikingfirst   = $6BAE ; nonzero if players are striking first.  Zero otherwise

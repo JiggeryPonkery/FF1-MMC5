@@ -114,27 +114,27 @@ lut_EquipmentSpells:
 .byte $00 ; Katana
 .byte $00 ; Excalibur
 .byte $00 ; Masamune
-.byte $00 ;     
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
+.byte $00 ; Chicken Knife    
+.byte $00 ; Brave Blade
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
+.byte $00 ;  
 .byte $00 ; 
 .byte $00 ; 
 .byte $00 ; 
@@ -4900,8 +4900,7 @@ DoBattleRound:
     CPX #$0D                   ; when X hits this, all combatants have been indexed properly!
     BNE @ThirdLoop
     
-    
-    
+   
     ;; JIGS - original code below
     
 ;    LDA #$10 + 1
@@ -5164,20 +5163,22 @@ ApplyRegenToAllEnemies:
     LDA @id
     JSR GetEnemyRAMPtr
     
-    LDY #en_category ;#ENROMSTAT_CATEGORY     ; Get the enemy category, and see if they are
-    LDA (EnemyRAMPointer), Y               ;  regenerative
+    LDY #en_category              ; Get the enemy category, and see if they are
+    LDA (EnemyRAMPointer), Y      ;  regenerative
     AND #CATEGORY_REGEN
-    BEQ @Next                   ; If not, skip them -- go to next iteration
+    BEQ @Next                     ; If not, skip them -- go to next iteration
     
-    ;LDA #en_enemyid             ; get enemy id
-	;STA btl_attacker            ; set them as attacker for the draw box
+  ; LDY #en_ailment               
+  ; LDA (EnemyRAMPointer), Y      
+  ; AND #AIL_POISON
+  ; BEQ @Next                     ; enabling this would cause it to skip regeneration if the enemy was poisoned
     
 	LDX @id
     STX btl_attacker
 	JSR DoesEnemyXExist
 	BEQ @Next
  
-    LDY #en_hpmax ;#ENROMSTAT_HPMAX
+    LDY #en_hpmax
     LDA (EnemyRAMPointer), Y
     STA math_basedamage
     STA btlmag_defender_hpmax
@@ -5186,28 +5187,9 @@ ApplyRegenToAllEnemies:
     STA math_basedamage+1
     STA btlmag_defender_hpmax+1
     
-    JSR GetNinePercent
+    LDA #12                     ; 8% of max HP
+    JSR RegenDivision
     
-    LDY #en_hp      
-    LDA (EnemyRAMPointer), Y
-    CLC
-    ADC math_basedamage
-    STA math_basedamage
-    INY			
-    LDA (EnemyRAMPointer), Y	
-    ADC math_basedamage+1
-    STA math_basedamage+1  ; math_basedamage is now 9% of max HP + current HP
-
-    LDX #$09                    ; compare max HP and base damage; X is max hp, Y is base damage
-    LDY #$01                    ; base damage contains how much HP to regen
-    JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
-    
-    BCC :+                      ; cap at Max HP
-      LDA btlmag_defender_hpmax
-      STA math_basedamage
-      LDA btlmag_defender_hpmax+1
-      STA math_basedamage+1
-
   : LDY #en_hp                  ; move HP back to RAM stats
     LDA math_basedamage
     STA (EnemyRAMPointer), Y
@@ -5215,13 +5197,13 @@ ApplyRegenToAllEnemies:
     LDA math_basedamage+1
     STA (EnemyRAMPointer), Y
     
-    @drawregenbox:
+   @drawregenbox:
 	JSR DrawCombatBox_Attacker   ; draw the attacker box
 	DEC btl_combatboxcount_alt   ; -1 to the "alt" counter
 	INC btl_combatboxcount       ; +1 to the "non-alt" counter
 	LDA #BTLMSG_REGEN             
 	JSR DrawBtlMsg_ClearCombatBoxes ; then clear all combat boxes and exit
-		
+
   @Next:
     INC @id                     ; loop until all enemies counted
     DEC @loopctr
@@ -5253,6 +5235,9 @@ ApplyRegenToAllEnemies:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ApplyEndOfRoundEffects:
+    JSR ApplyPoisonToAllEnemies ; will also check for battle end
+    JMP ApplyRegenToAllEnemies  ; apply regen to all enemies
+    
     LDA #$00                    ; apply poison to all 4 players
     JSR ApplyPoisonToPlayer
     LDA #$01
@@ -5263,7 +5248,6 @@ ApplyEndOfRoundEffects:
     JSR ApplyPoisonToPlayer
     
     ;JSR DrawCharacterStatus     ; redraw character stats to reflect post-poison HP
-    JSR ApplyRegenToAllEnemies  ; apply regen to all enemies
     
     ;; JIGS - Updates the Battle Turn text and character sprites at the same time
     INC BattleTurn
@@ -5286,7 +5270,10 @@ ApplyEndOfRoundEffects:
     JMP CheckForBattleEnd       ; poison may have killed the party -- check for battle end.
     
     
-    PrintBattleTurnNumber:
+    
+    
+    
+PrintBattleTurnNumber:
     JSR LongCall
     .word PrintBattleTurn
     .byte BANK_MENUS
@@ -5434,10 +5421,12 @@ ApplyPoisonToPlayer:
     LDA ch_curhp+1, X
     SBC math_basedamage+1
     STA ch_curhp+1, X      
-    
+    TXA
+    PHA
+
     BCC @Dead       ; if C is clear (HP is negative), they're dead
     ORA ch_curhp, X ; if high and low are 0 
-    BNE @DrawPoisonAsAttack
+    BNE :+
     
    @Dead:
     LDA #0              ; clip their HP at zero... 
@@ -5446,32 +5435,24 @@ ApplyPoisonToPlayer:
     LDA #AIL_DEAD
     STA ch_ailments, X        ; give them the DEAD ailment
     
-    @DrawPoisonAsAttack:            ; Who is getting poisoned
-    LDA btl_combatboxcount_alt      ; if a combat box is already drawn, don't draw another
-    BNE :+                          ; this is in case the character regenerated and printed their name already
-    
-    JSR DrawCombatBox_Attacker
-    
-  : LDA #$0F                        ; control code for printing a message I think
-    STA btltmp_altmsgbuffer+9
-    LDA #$14                        ; the message for poison
-    STA btltmp_altmsgbuffer+10
-    LDA #0
-    STA btltmp_altmsgbuffer+11      ; put it in RAM, where the defender usually is
-    
-    LDX #<(btltmp_altmsgbuffer + 9) 
-    LDY #>(btltmp_altmsgbuffer + 9)
-    LDA #$02                        ; print "Poisoned"
-    JSR DrawCombatBox_L  
-    INC btl_combatboxcount_alt
-    
-	JSR DrawDamageCombatBox         ; print damage
+  : JSR DrawPoisonAsAttack
     LDA #1
     JSR PlayBattleSFX   
     JSR BattleScreenShake_L
+    LDA btl_attacker
+    AND #$03
+    JSR FlashCharacterSprite        ; flash this character's graphic
     JSR RespondDelay  
+    PLA
+    TAX
+    LDA ch_ailments, X
+    AND #AIL_DEAD
+    BEQ :+
+   
+    LDA #ALTBTLMSG_SLAIN
+    JSR ShowAltBattleMessage        ; if dead, print "slain"
     
-    JSR ClearAllCombatBoxes     
+ : JSR ClearAllCombatBoxes     
     
    @Exit:
     LDA btl_combatboxcount_alt ; in case the player regenerated but wasn't poisoned
@@ -5504,8 +5485,124 @@ ApplyPoisonToPlayer:
 ;     JSR DrawCharacterStatus     ; draw hidden icon
 ;  :  RTS
 
+  
+;; this poison code is very much inspired by anomie's work - https://gamefaqs.gamespot.com/boards/522595-final-fantasy/45575058/499635691
+;; The regeneration for both players and enemies is also based off it! 
+  
+ApplyPoisonToAllEnemies:
+    LDA #08
+    STA btl_defender
+  : JSR ApplyPoisonToEnemy
+    DEC btl_defender
+    BMI :-
+  : RTS  
+
+ApplyPoisonToEnemy:
+    LDA btl_defender
+    STA btl_attacker
+    JSR GetEnemyRAMPtr
+    
+    LDY #en_ailments
+    LDA (EnemyRAMPointer), Y
+    AND #AIL_POISON
+    BEQ :- 
+    
+  ;  LDY #en_category
+  ;  LDA (EnemyRAMPointer), Y
+  ;  AND #CATEGORY_REGEN
+  ;  BNE :- 
+  ;; This would stop the enemy from being poisoned if they are regenerative
+  ;; the idea being that poison would also cancel out regeneration
+    
+    LDY #en_hpmax
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage
+    STA btlmag_defender_hpmax
+    INY
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage+1
+    STA btlmag_defender_hpmax+1
+    
+    LSR math_basedamage+1   ; divide it by 8 (12.5% of max HP)
+    ROR math_basedamage
+    LSR math_basedamage+1
+    ROR math_basedamage
+    LSR math_basedamage+1
+    ROR math_basedamage
+    
+    LDA #$2A    
+    JSR UpdateVariablePalette    ; make the explosion effect yellowy-green      
+    JSR DoExplosionEffect        ; and do enemy explosion effect      
+    JSR DrawPoisonAsAttack       ; do poison messaging      
+    JSR RespondDelay      
+
+    LDY #en_hp
+    LDA (EnemyRAMPointer), Y
+    SEC
+    SBC math_basedamage
+    STA (EnemyRAMPointer), Y
+    STA tmp
+    INY
+    LDA (EnemyRAMPointer), Y
+    SBC math_basedamage+1
+    STA (EnemyRAMPointer), Y
+    
+    BCC @Dead                 ; if C is clear (HP is negative), they're dead
+    ORA tmp                   ; if high and low are 0 
+    BNE :+
+ 
+   @Dead:
+    LDA #ALTBTLMSG_TERMINATED               
+    JSR ShowAltBattleMessage              
+    JSR ClearAllCombatBoxes     
+    JSR EnemyDiedFromPoison
+    JMP CheckForBattleEnd
+    
+  : JMP ClearAllCombatBoxes      
     
     
+DrawPoisonAsAttack:                 ; Who is getting poisoned
+    LDA btl_combatboxcount_alt      ; if a combat box is already drawn, don't draw another
+    BNE :+                          ; this is in case the character regenerated and printed their name already
+    
+    JSR DrawCombatBox_Attacker
+    
+  : LDA #$0F                        ; control code for printing a message I think
+    STA btltmp_altmsgbuffer+9
+    LDA #$14                        ; the message for poison
+    STA btltmp_altmsgbuffer+10
+    LDA #0
+    STA btltmp_altmsgbuffer+11      ; put it in RAM, where the defender usually is
+    
+    LDX #<(btltmp_altmsgbuffer + 9) 
+    LDY #>(btltmp_altmsgbuffer + 9)
+    LDA #$02                        ; print "Poisoned"
+    JSR DrawCombatBox_L  
+    INC btl_combatboxcount_alt
+    
+	JMP DrawDamageCombatBox         ; print damage    
+
+RegenDivision:    
+    LDX btlmag_defender_hpmax   ; now holds enemy's max HP low byte
+    LDY btlmag_defender_hpmax+1 ; and max HP high byte
+    JSR YXDivideA               ; divides by effectivity and puts it in A 
+    ORA btltmp_divLo            ; 
+    BNE :+                      ; I assume this puts high byte and low byte together to see if 
+    INC btltmp_divV             ; there is any HP left at all ; 
+  : LDA #MATHBUF_BASEDAMAGE
+    TAX
+    LDY #MATHBUF_REGENHP
+    JSR MathBuf_Add16
+    
+    LDX #MATHBUF_DEFENDERMAXHP          ; compare max HP and base damage
+    LDY #MATHBUF_BASEDAMAGE     ; base damage contains how much HP to regen
+    JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
+    BCC :+                      ; cap at Max HP
+      LDA btlmag_defender_hpmax
+      STA math_basedamage
+      LDA btlmag_defender_hpmax+1
+      STA math_basedamage+1
+  : RTS
     
 ApplyRegenToPlayer:
             @id    = $685A  ; local - temp to hold character ID ; math_numhits
@@ -5515,48 +5612,30 @@ ApplyRegenToPlayer:
     LDA ch_maxhp+1, X
     STA math_basedamage+1
     STA btlmag_defender_hpmax+1
+    TXA
+    PHA
 
     LDA ch_battlestate, X
     AND #$60                    ; clear out everything but potency (2, 4, or 6)    
     CMP #$20
     BNE :+ 
-       JSR GetNinePercent       
-       JMP @DoneDividing
+        @20Potency:     ; 8%
+        LDA #12         
+        BNE @Divide
+        
   : CMP #$40
     BNE :+    
-       JSR GetNineteenPercent
-       
-    ; these percentages aren't exact, but they're good enough for me 
-
-   @TwentyFivePercent:
-  : LSR math_basedamage+1   ; divide by 2
-    ROR math_basedamage
-    LSR math_basedamage+1   ; divide by 2
-    ROR math_basedamage
+       @40Potency:      ; 12.5%
+        LDA #8
+        BNE @Divide
+    
+ : @60Potency:          ; 5 = almost 20%
+    LDA #6              ; 6 = 16.6 ?
   
-   @DoneDividing:    
-    LDA ch_curhp, X
-    CLC
-    ADC math_basedamage
-    STA math_basedamage
-    LDA ch_curhp+1, X
-    ADC math_basedamage+1
-    STA math_basedamage+1      ; math_basedamage is now 9% of max HP + current HP
-    
-    TXA
-    PHA
+  @Divide:
+    JSR RegenDivision
 
-    LDX #$09                    ; compare max HP and base damage; X is max hp, Y is base damage
-    LDY #$01                    ; base damage contains how much HP to regen
-    JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
-    
-    BCC :+                      ; cap at Max HP
-      LDA btlmag_defender_hpmax
-      STA math_basedamage
-      LDA btlmag_defender_hpmax+1
-      STA math_basedamage+1
-
-  : PLA
+    PLA
     TAX                         ; move HP back to RAM stats
     LDA math_basedamage
     STA ch_curhp, X
@@ -5591,8 +5670,7 @@ ApplyRegenToPlayer:
     BEQ @DecrementRegeneration
     
     LDA ch_battlestate, X
-    CLC
-    ADC #$10
+    ORA #$10
     STA ch_battlestate, X         ; rehide character
     DEC Hidden
    
@@ -5607,36 +5685,6 @@ ApplyRegenToPlayer:
 	LDA #BTLMSG_REGEN             
     JMP DrawBtlMsg_ClearIt
 
-
-GetNinePercent:
-    LSR math_basedamage+1   ; divide by 2
-    ROR math_basedamage
-    LSR math_basedamage+1   ; divide by 2
-    ROR math_basedamage
-
-GetNineteenPercent:    
-    LDA math_basedamage
-    STA tmp
-    LDA math_basedamage+1
-    STA tmp+1               ; tmp is now 25% max HP
-    
-    LSR math_basedamage+1   ; divide by 2 again
-    ROR math_basedamage     ; math_basedamage is now 12.5% max HP | 50%
-        
-    LDA math_basedamage+1                                       ; | 150%
-    CLC
-    ADC tmp+1
-    STA math_basedamage+1
-    LDA math_basedamage
-    CLC
-    ADC tmp                 ; math_basedamage is now 37.5% max HP? 
-    STA math_basedamage
-    
-    LSR math_basedamage+1   ; divide by 2 again
-    ROR math_basedamage     ; math_basedamage is now 
-    LSR math_basedamage+1   ; divide by 2 again
-    ROR math_basedamage     ; math_basedamage is now 9.??% ?  
-    RTS
 
 
 
@@ -6744,6 +6792,20 @@ ClearMathBufHighBytes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+HitChance_Subtract40:
+    LDA math_hitchance
+    SEC
+    SBC #40
+    STA math_hitchance
+    RTS
+    
+HitChance_Add40:
+    LDA math_hitchance
+    CLC
+    ADC #40
+    STA math_hitchance
+    RTS    
+
 DoPhysicalAttack:
     LDA #$00        ; print '02 00 00' to combat box 0
     TAX             ;  (attacker name in attacker combat box)
@@ -6775,33 +6837,21 @@ DoPhysicalAttack_NoBoxes:
     LDA btl_attacker_ailments   ; if attacker has DARK status, penalty of 40 to their hit chance
     AND #AIL_DARK
     BEQ :+
-      LDA math_hitchance
-      SEC
-      SBC #40
-      STA math_hitchance
-      
+        JSR HitChance_Subtract40
+        
   : LDA btl_defender_ailments   ; if defender has DARK, bonus of 40 to attacker's hit chance
     AND #AIL_DARK
     BEQ :+
-      LDA math_hitchance
-      CLC
-      ADC #40
-      STA math_hitchance
+        JSR HitChance_Add40
       
   : LDA btl_defender_hidden    ; if defender is hidden, subtract another 40 from the attacker's hit chance
     BEQ :+
-      LDA math_hitchance
-      SEC
-      SBC #40
-      STA math_hitchance
- 
-      LDA btl_defender_class
+      JSR HitChance_Subtract40
+      
+      LDA btl_defender_class   ; thieves and ninjas get an extra 40 for hiding
       AND #CLS_TH | CLS_NJ
       BEQ :+
-      LDA math_hitchance
-      SEC
-      SBC #40
-      STA math_hitchance
+        JSR HitChance_Subtract40    ; if the enemy is blind, hitchance is #48 now
 
   : LDA btl_attacker_category       ; see if attacker category matches defender category
     AND btl_defender_category
@@ -6811,30 +6861,20 @@ DoPhysicalAttack_NoBoxes:
     AND btl_defender_elementweakness
     STA math_element
     
-    ;; JIGS - adding/moving some code here:
-    
-    LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
-    LDX btl_attacker_hitrate          ;   
-    JSR MathBuf_Add                   ;   
-    LDY math_hitchance
-    LDX math_hitchance+1
-    JSR CapXYAtFF                     ; cap at 255
-    STY math_hitchance
-    STX math_hitchance+1
-    
-    ;;;;;;;;;;;;;;;;    
-    
     LDA math_category
     ORA math_element                    ; merge categoy/element matches
     BEQ :+                              ; if any weaknesses found...
-      LDA #MATHBUF_HITCHANCE            ; +40 bonus to hit chance
-      LDX #40
-      JSR MathBuf_Add
-      LDY math_hitchance
-      LDX math_hitchance+1
-      JSR CapXYAtFF
-      STY math_hitchance
-      STX math_hitchance+1              ; maximum hit chance of 255
+     ; LDA #MATHBUF_HITCHANCE            ; +40 bonus to hit chance
+     ; LDX #40
+     ; JSR MathBuf_Add
+     ; LDY math_hitchance               ;; JIGS - this seems pointless, the max hitchance is #$F8
+     ; LDX math_hitchance+1             ;; 168 to start, blind enemy is +40, category/elemental weakness is +40
+     ; JSR CapXYAtFF
+     ; STY math_hitchance
+     ; STX math_hitchance+1              ; maximum hit chance of 255
+      
+      JSR HitChance_Add40
+      ;; JIGS ^ much simpler
       
       LDA math_basedamage               ; and +4 bonus to base damage
       CLC
@@ -6854,34 +6894,26 @@ DoPhysicalAttack_NoBoxes:
       CLC
       ADC math_basedamage
       STA math_basedamage
-      BCC :+                    ; (jump past the @DefenderMobile block)
+      BCC @DefenderMobile
         LDA #$FF
         STA math_basedamage     ; cap at 255 base damage
-        JMP :+                  ; (jump past the @DefenderMobile block)
+       ;JMP :+                  ; (jump past the @DefenderMobile block)
+       
+       ;; JIGS - this should let hit chance and hit rate be added together always
   
   @DefenderMobile:                      ; if the defender is mobile (not asleep of stunned)
-  
-      ; JIGS - the following was moved up, with a possible bug fix?
-  
-      ;LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
-      ;LDX btl_attacker_hitrate          ;   This seems strange to me.  Shouldn't this be done even if defender
-      ;JSR MathBuf_Add                   ;    is immobile?  Is this BUGGED?
-      ;LDY math_hitchance
-      ;LDX math_hitchance+1
-      ;JSR CapXYAtFF                     ; cap at 255
-      ;STY math_hitchance
-      ;STX math_hitchance+1
+      LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
+      LDX btl_attacker_hitrate          ;   This seems strange to me.  Shouldn't this be done even if defender
+      JSR MathBuf_Add                   ;    is immobile?  Is this BUGGED?
+      LDY math_hitchance
+      LDX math_hitchance+1
+      JSR CapXYAtFF                     ; cap at 255
+      STY math_hitchance
+      STX math_hitchance+1
     
       LDA #MATHBUF_HITCHANCE            ; and subtract the defender's evade rate from
       LDX btl_defender_evasion            ;  the hit chance.
       JSR MathBuf_Sub
-    ;  LDY math_hitchance
-    ;  LDX math_hitchance+1
-    ;  JSR ZeroXYIfNegative              ; cap at 0  (not necessary to do here, since
-      STY math_hitchance                ;   MathBuf_Sub already does this. Whatever)
-      STX math_hitchance+1
-    
-    ;; JIGS - might as well save a bit more space...?
     
     ;;;;;
   : LDA math_hitchance
@@ -6903,7 +6935,11 @@ DoPhysicalAttack_NoBoxes:
     BNE :+
       INC math_numhits                  ; minimum of 1 hit
       
-  : LDA btl_attacker_varplt     ; palette to use (unimportant/unused for enemy attacks)
+  : LDA battle_defenderisplayer
+    BNE @EnemyAttackingPlayer   ; jump ahead if enemy is attacking a player
+    
+  @PlayerAttackingEnemy:
+    LDA btl_attacker_varplt     ; palette to use (unimportant/unused for enemy attacks)
     LDX #$00                    ; 0 for physical/weapon attacks, nonzero for magic attacks
     JSR UpdateVariablePalette
     
@@ -6922,11 +6958,7 @@ DoPhysicalAttack_NoBoxes:
       ;; Since any sprite can be a blackbelt...
       ;; Hopefully the extra frame is harmless! There's only like 60 a second right?
        
-  : LDA battle_defenderisplayer
-    BNE @EnemyAttackingPlayer   ; jump ahead if enemy is attacking a player
-    
-  @PlayerAttackingEnemy:
-    LDX btl_attacker_graphic    ; If the graphic is zero... then we shouldn't draw it
+  : LDX btl_attacker_graphic    ; If the graphic is zero... then we shouldn't draw it
     BNE :+
       INC btlattackspr_nodraw   ; set set the 'nodraw' flag for attack sprites
       
@@ -6951,33 +6983,25 @@ DoPhysicalAttack_NoBoxes:
     JSR PlayBattleSFX           ; play the "boom bash" sound effect
     JSR BattleScreenShake_L     ; do the 'screen shake' animation
     
-  ;  LDA btl_soft2001
-  ;  AND #$DF
-  ;  STA btl_soft2001
-  ;  JSR WaitForVBlank_L         ; JIGS - turn off red emphasis and wait 
+    LDA btl_defender_index
+    AND #$03                  ; 
+    JSR FlashCharacterSprite  ; flash their character sprite (JIGS; even if dead)
     
-    LDA btl_defender_ailments
-    AND #AIL_DEAD | AIL_STONE
-    BNE :+
-      LDA btl_defender_index
-      AND #$03                  ; if the player target is not already dead or stone...
-      JSR FlashCharacterSprite  ; flash their character sprite
-    
-    ;;;;;;;
   : LDA btl_defender_ailments
     AND #AIL_DEAD | AIL_STONE
-    BEQ :+                              ; if defender is dead/stone
-      LDA #BTLMSG_INEFFECTIVE           ; draw the "Ineffective" battle message, clear all combat boxes, and exit
-      JMP DrawBtlMsg_ClearCombatBoxes
-      
+    BEQ :+ 
+        LDA #BTLMSG_INEFFECTIVE           ; draw the "Ineffective" battle message, 
+        JMP DrawBtlMsg_ClearCombatBoxes   ; clear all combat boxes, and exit
+  
   : LDA #$00
     STA battle_critsconnected
     STA battle_hitsconnected
     STA battle_totaldamage
     STA battle_totaldamage+1
+    STA battle_thishitconnected
     
     LDA math_basedamage
-    STA btl_weird_loopctr                   ; 6BAD is temp space for base damage.  Moved here because we will be writing over math_basedamage
+    STA math_basedamage_backup     ; 6BAD is temp space for base damage.  Moved here because we will be writing over math_basedamage
     
   @HitLoop:             ;  [A7DD :: 327ED]
     JSR ClearMathBufHighBytes   ; A=0
@@ -7010,17 +7034,23 @@ DoPhysicalAttack_NoBoxes:
     LDX btl_defender_defense
     JSR MathBuf_Sub                         ;   subtract defender's absorb
     
-    LDY math_dmgcalc            ; really inefficient way to set minimum of 1 damage
-    LDX math_dmgcalc+1
-    JSR ZeroXYIfNegative
-    STY math_dmgcalc
-    STX math_dmgcalc+1
+   ; LDY math_dmgcalc            ; really inefficient way to set minimum of 1 damage
+   ; LDX math_dmgcalc+1
+   ; JSR ZeroXYIfNegative
+   ; STY math_dmgcalc
+   ; STX math_dmgcalc+1
+   ; LDA math_dmgcalc
+   ; ORA math_dmgcalc+1
+   ; BNE :+
+   ;   INC math_dmgcalc
+    
     LDA math_dmgcalc
-    ORA math_dmgcalc+1
-    BNE :+
-      INC math_dmgcalc
+    ORA math_dmgcalc+1          ;; JIGS - combine high and low bites
+    BNE :+                      ;; if still 0, give 1 damage
+        INC math_dmgcalc 
       
   : INC battle_hitsconnected    ; count number of hits connected
+    INC battle_thishitconnected
   
   @Miss:                    ; jumps here if we missed, but this code runs regardless of whether or not we hit/missed
     LDA math_critchance     ; see if hit value is <= crit chance  (this will be impossible if the attack was a miss)
@@ -7036,67 +7066,73 @@ DoPhysicalAttack_NoBoxes:
     LDY #MATHBUF_DMGCALC
     JSR MathBuf_Add16               ; total damage += dmgcalc
     
-    ;;JIGS - commenting out the following code, as it is moved to fix a bug, I think...
+    LDA btl_attacker_attackailment
+    BEQ @NextHitIteration           ; we're done if no ailment to apply
+    LDA battle_thishitconnected
+    BEQ @NextHitIteration
     
-    ;LDA battle_defenderisplayer
-    ;BEQ @NextHitIteration           ; we're done if player is attacking
-    ;LDA btl_attacker_attackailment
-    ;BEQ @NextHitIteration           ; we're done if no ailment to apply
-    ;LDA battle_hitsconnected
-    ;BEQ @NextHitIteration           ; we're done if no hits connected yet
-                                    ;  This is BUGGED!  Logically you would only perform this check if
-                                    ;  THIS attack was a hit.  But instead, this will perform the check
-                                    ;  if ANY attacks up to this point were hits.  This means once an enemy
-                                    ;  connects with one of their hits, each swing afterwards will have a chance
-                                    ;  to inflict an ailment, even if they miss!
-    
-    ;LDA #100
-    ;STA math_ailmentchance          ; base chance of connecting ailment = 100
-    ;LDA btl_defender_elemresist
-    ;AND btl_attacker_element
-    ;STA $6868                       ; ?pointless sta/lda
-    ;LDA $6868
-    ;BEQ :+                          ; if defender resists attacker's element
-    ;  LDA #$00                      ; chance to connect with ailment is zero  (later will be changed to 1)
-    ;  STA math_ailmentchance
+  : LDA battle_defenderisplayer
+    BNE @DoEnemyAilmentChance
+      LDA btl_battletype           ; if battle type is 3 or 4 (fiend or chaos)
+      CMP #$03                      ; then skip trying to apply ailment
+      BCS @NextHitIteration
+        LDA btl_defender_category
+        AND $75      ; if enemy has a resistance to the attack, set chance to 1
+        BEQ :+       ; if no resistances found, jump ahead to set ailment chance to weapon's
+           LDA #1   
+           BNE :++   ; jump ahead to save it
       
-;  : LDA #MATHBUF_AILMENTCHANCE
-    ;LDX btl_defender_magdef         ; subtract defender's magdef from ailment chance
-    ;JSR MathBuf_Sub
-    ;LDY math_ailmentchance
-    ;LDX math_ailmentchance+1
-    ;JSR ZeroXYIfNegative
-    ;STY math_ailmentchance
-    ;STX math_ailmentchance+1        ; another pointless clipping at zero even though MathBuf_Sub already does it
-    
-    ;LDA #MATHBUF_AILMENTCHANCE
-    ;JSR MathBuf_NZ
-    ;BNE :+
-    ;  INC math_ailmentchance        ; minimum ailment chance of 1
+      : LDA btl_attacker_ailmentchance  ; use ailment chance from weapon
+      : STA math_ailmentchance          
+        BNE @GetAilmentRandChance  ; skip all the enemy>player stuff with elements and magic defense checks
+ 
+   @DoEnemyAilmentChance:
+    LDA #100
+    STA math_ailmentchance          ; base chance of connecting ailment = 100
+    LDA btl_defender_elementresist
+    AND btl_attacker_element
+    BEQ :+                          ; if defender resists attacker's element
+      LDA #$00                      ; chance to connect with ailment is zero  (later will be changed to 1)
+      STA math_ailmentchance
       
-  ;: LDA #$00
-  ;  LDX #200
-  ;  JSR RandAX
-  ;  STA battle_ailmentrandchance    ; random value between [0,200]
+  : LDA #MATHBUF_AILMENTCHANCE
+    LDX btl_defender_magicdefense   ; subtract defender's magdef from ailment chance
+    JSR MathBuf_Sub
     
-  ;  CMP #200
-  ;  BEQ @NextHitIteration           ; if == 200, skip ahead (no ailment)
+    LDA #MATHBUF_AILMENTCHANCE
+    JSR MathBuf_NZ
+    BNE @GetAilmentRandChance
+      INC math_ailmentchance        ; minimum ailment chance of 1
+
+  @GetAilmentRandChance:      
+    LDA #$00
+    LDX #200
+    JSR RandAX
+    STA battle_ailmentrandchance    ; random value between [0,200]
     
-  ;  LDA math_ailmentchance
-  ;  CMP battle_ailmentrandchance
-  ;  BCC @NextHitIteration           ; if ailment chance >= rand value, apply the ailment!
-  ;    LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
-  ;    EOR #$FF                      ;  the defender does not already have.
-  ;    AND btl_attacker_attackailment
-  ;    
-  ;    JSR PrintPlayerAilmentMessageFromAttack   ; print the message for those ailments
-  ;    
-  ;    LDA btl_defender_ailments     ; apply the ailment
-  ;    ORA btl_attacker_attackailment
-  ;    STA btl_defender_ailments
+    CMP #200
+    BEQ @NextHitIteration           ; if == 200, skip ahead (no ailment)
     
-    ; Jumps here if not applying any ailment
+    LDA math_ailmentchance
+    CMP battle_ailmentrandchance
+    BCC @NextHitIteration           ; if ailment chance >= rand value, apply the ailment!
+      LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
+      EOR #$FF                      ;  the defender does not already have.
+      AND btl_attacker_attackailment
+      BEQ @NextHitIteration              ; if its 0, the player already has the ailments the enemy can give them
+      ;; Note that in the case an enemy has more than 1 ailment to give,
+      ;; They will apply both ailments again if the defender only has one of them?
+      
+      JSR PrintPlayerAilmentMessageFromAttack   ; print the message for those ailments
+      
+      LDA btl_defender_ailments     ; apply the ailment
+      ORA btl_attacker_attackailment
+      STA btl_defender_ailments
+    
   @NextHitIteration:
+    LDA #0
+    STA battle_thishitconnected
+  
     DEC math_numhits
     BEQ :+
       JMP @HitLoop
@@ -7191,99 +7227,40 @@ DoPhysicalAttack_NoBoxes:
     LDX #MATHBUF_DEFENDERHP
     LDY #MATHBUF_TOTALDAMAGE
     JSR MathBuf_Sub16           ; defender_hp -= totaldamage
-    LDY btl_defender_hp
-    LDX btl_defender_hp+1
-    JSR ZeroXYIfNegative
-    STY btl_defender_hp
-    STX btl_defender_hp+1
     
     LDA #MATHBUF_DEFENDERHP
     JSR MathBuf_NZ
-    BNE EnemyDoAilment ;; JIGS - if player still alive, do ailment before exiting
-    ;BNE DoPhysicalAttack_Exit           ; done if HP is > 0
+    BNE @TryWake                ; done if HP is > 0
     
     LDA #AIL_DEAD                       ; otherwise (HP == 0)
     STA btl_defender_ailments           ; add the 'Dead' ailment
     LDA battle_defenderisplayer
     BEQ :+                              ; if this is a player
       LDA #BTLMSG_SLAIN                 ;  print "Slain" battle message
-      BNE @DeathMsg
+      BNE @DrawThisMessage
   : LDA #BTLMSG_TERMINATED              ; otherwise, print the "Terminated" battle message
-  @DeathMsg:
-    JSR DrawBattleMessageCombatBox
-    JMP RespondDelay_ClearCombatBoxes
-
-    ;; JIGS some moved/fixed code:
-     
-EnemyDoAilment:
-    LDA battle_defenderisplayer
-    BEQ @TryWake                    ; skip if player is attacker
-    LDA btl_attacker_attackailment
-    BEQ @TryWake                    ; skip if enemy doesn't do ailments
-    LDA battle_hitsconnected
-    BEQ @End                        ; skip if no hits connected
-
-    LDA #100                
-    STA math_ailmentchance          ; base chance of connecting ailment = 100
-    LDA btl_defender_elementresist
-    AND btl_attacker_element
-    BEQ :+                          ; if defender resists attacker's element
-      LDA #$00                      ; chance to connect with ailment is zero  (later will be changed to 1)
-      STA math_ailmentchance
-      
-  : LDA #MATHBUF_AILMENTCHANCE
-    LDX btl_defender_magicdefense         ; subtract defender's magdef from ailment chance
-    JSR MathBuf_Sub
-     
-    LDA #MATHBUF_AILMENTCHANCE
-    JSR MathBuf_NZ
-    BNE :+
-      INC math_ailmentchance        ; minimum ailment chance of 1
-      
-  : LDA #$00
-    LDX #200
-    JSR RandAX
-    STA battle_ailmentrandchance    ; random value between [0,200]
+    JMP @DrawThisMessage
     
-    CMP #200
-    BEQ @TryWake                    ; if == 200, skip ahead (no ailment)
-    
-    LDA math_ailmentchance
-    CMP battle_ailmentrandchance
-    BCC @TryWake                    ; if ailment chance >= rand value, apply the ailment!
-      LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
-      EOR #$FF                      ; the defender does not already have.
-      AND btl_attacker_attackailment
-      BEQ @CheckSleep               ; if its 0, the player already has the ailments the enemy can give them
-      ;; Note that in the case an enemy has more than 1 ailment to give,
-      ;; They will apply both ailments again if the defender only has one of them?
-      
-      JSR PrintPlayerAilmentMessageFromAttack   ; print the message for those ailments
-      
-      LDA btl_defender_ailments     ; apply the ailment
-      ORA btl_attacker_attackailment
-      STA btl_defender_ailments
-      JMP @End
-
-   @CheckSleep:
-    LDA btl_attacker_attackailment  ; the defender has this ailment
+  @TryWake:  
+    LDA btl_attacker_attackailment    
     AND #AIL_SLEEP                  ; is the ailment sleep?
-    BEQ @End                        ; if it is, don't wake them
-    
-   @TryWake:
+    BNE DoPhysicalAttack_Exit       ; if it is, don't wake them      
+    LDA battle_hitsconnected
+    BEQ DoPhysicalAttack_Exit       ; don't wake if no hits connected
+  
     LDA btl_defender_ailments    
     AND #AIL_SLEEP
-    BEQ @End
+    BEQ DoPhysicalAttack_Exit
+    
       LDA btl_defender_ailments
-      SEC
-      SBC #AIL_SLEEP
+      AND #~AIL_SLEEP
       STA btl_defender_ailments      ; remove sleep ailment
-      LDA #$27
+      LDA #BTLMSG_WOKEUP
+      
+     @DrawThisMessage:
       JSR DrawBattleMessageCombatBox ; print "Woke up"
-      JSR RespondDelay
-   
-    @End:
-DoPhysicalAttack_Exit:    
+    
+DoPhysicalAttack_Exit:
     JMP RespondDelay_ClearCombatBoxes
     
    
@@ -7348,18 +7325,39 @@ PrintPlayerAilmentMessageFromAttack:
   : ASL A                       ; bit 1 set = stone (removes action)
     BCC :+
       PHA
-      LDA #BTLMSG_STOPPED
-      JSR DrawBtlMsg_ClearIt
+      LDA battle_defenderisplayer
+      BNE @PlayerStone
+     
+      LDA #BTLMSG_BROKENTOPIECES
+      BNE @ResumeStone
+      
+     @PlayerStone:
       JSR @RemoveDefenderAction
+      LDA #BTLMSG_STOPPED
+      
+     @ResumeStone: 
+      JSR DrawBtlMsg_ClearIt
       PLA
+      
   : ASL A                       ; bit 1 set = dead (removes action)
     BCC :+
       LDA #$00
       STA btl_defender_hp
       STA btl_defender_hp+1
-      LDA #BTLMSG_SLAIN
-      JSR DrawBtlMsg_ClearIt
+      
+      LDA battle_defenderisplayer
+      BNE @PlayerDead
+      
+      LDA #BTLMSG_TERMINATED
+      BNE @ResumeDead
+      
+     @PlayerDead:
       JSR @RemoveDefenderAction
+      LDA #BTLMSG_SLAIN
+      
+     @ResumeDead: 
+      JSR DrawBtlMsg_ClearIt
+      
       PLA                       ; Drop the return address.  Do not return to DoPhysicalAttack, but instead return 
       PLA                       ;  to whoever called it.  This will prevent attack damage from being drawn on
                                 ;  screen (which would be pointless because the player just died)
@@ -7367,7 +7365,7 @@ PrintPlayerAilmentMessageFromAttack:
       LDA btl_defender_ailments         ; apply dead ailment
       ORA btl_attacker_attackailment
       STA btl_defender_ailments
-      JMP DoPhysicalAttack_Exit ; Then jump to erase all combat boxes
+      JMP RespondDelay_ClearCombatBoxes ; Then jump to erase all combat boxes
       
   : RTS
     
@@ -7447,7 +7445,31 @@ YXDivideA:
     LDA btltmp_divLo
     LDX btltmp_divV
     RTS
-
+    
+;   TXA                TXA                     ; backup X
+;   PHA                PHA
+;   LDA #$00           LDA #$00                ; clear temp ram (to hold remainder)
+;   STA $68B3          STA btl_various_tmp
+;   LDX #$10           LDX #16                 ; loop 16 times (each bit in HiLo)
+;                      
+;   ROL $688C          ROL btltmp_divLo
+;   ROL $688D          ROL btltmp_divHi        ; left shift 1 bit out
+; : ROL $68B3    @Loop:   ROL btl_various_tmp             ; roll the bit into remainder
+;   LDA $68B3             LDA btl_various_tmp
+;   CMP $688B             CMP btltmp_divV       ; see if it's >= divisor
+;   BCC :+ ; $06          BCC :+
+;   SBC $688B               SBC btltmp_divV     ; if yes, subtract divisor
+;   STA $68B3               STA btl_various_tmp
+;                     
+; : ROL $688C          : ROL btltmp_divLo      ; if subtracted, roll 1 into low bit, otherwise, roll 0
+;   ROL $688D            ROL btltmp_divHi      ;   this ultimately will perform the division
+;   DEX                  DEX
+;   BNE :-- ; $E6        BNE @Loop             ; loop for all 16 bits
+;   LDA $68B3          LDA btl_various_tmp
+;   STA $688B          STA btltmp_divV         ; store remainder
+;   PLA                PLA                     ; restory X
+;   TAX                TAX
+;   RTS                RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9398,6 +9420,20 @@ Battle_DoEnemyTurn:
     LDA #MG_FIRE - MG_START             ;   cast FIRE on a random enemy  -- which is totally lame.  I would expect stronger
     STA btl_attackid                    ;   enemies to have a stronger attack.
     JSR Battle_PrepareMagic             ; Note that even though we are casting FIRE, the attack combat box is never drawn, so
+   
+    ;;JIGS - altering the spell's properties to more resemble a physical attack
+   
+    LDX #0
+    STX btlmag_element           ; clear fire element
+    LDA #$20
+    JSR UpdateVariablePalette    ; and make sure its white dust cloud    
+    LDY #en_strength
+    LDA (EnemyRAMPointer), Y
+    LSR A
+    BNE :+
+        LDA #01            ; minimum damage of 1
+  : STA btlmag_effectivity ; set attack strength as half enemy's strength 
+    
     JSR Battle_CastMagicOnRandEnemy     ;   it *looks* like a physical attack.
     
     JMP Battle_EndMagicTurn
@@ -11899,9 +11935,9 @@ BtlMag_Effect_InflictAilment2:
 BtlMag_HandleAilmentChanges:
     LDA btlmag_effect
     CMP #06
-    BEQ @CheckPlayerState
+    BEQ CheckPlayerState
     CMP #13
-    BCS @CheckPlayerState ; if the magic spell that was cast was Life, Life 2, or Soft, skip all this
+    BCS CheckPlayerState ; if the magic spell that was cast was Life, Life 2, or Soft, skip all this
 
     LDX #$08                            ; loop 8 times -- once for each ailment
     LDA btlmag_defender_ailments
@@ -11962,12 +11998,14 @@ BtlMag_HandleAilmentChanges:
     ;; Once all messages for inflicted/cured ailments have been printed...
   @DoneWithAilMessages:
     LDX btl_defender                ; get defender
-    BMI @CheckPlayerState           ; if it's a player, jump ahead to player logic
+    BMI CheckPlayerState           ; if it's a player, jump ahead to player logic
     
     ; Otherwise, defender is an enemy
     LDA btlmag_defender_ailments    ; See if the enemy has been killed/stoned
     AND #(AIL_DEAD | AIL_STONE)
     BEQ :+                          ; if yes....
+
+EnemyDiedFromPoison:    
       JSR EraseEnemyGraphic         ;  Erase their graphic
       LDX btl_defender
       JSR ClearEnemyID              ;  Remove them from the battle
@@ -11981,7 +12019,7 @@ BtlMag_HandleAilmentChanges:
     STA btlmag_fakeout_defplayer
     RTS
     
-  @CheckPlayerState:
+CheckPlayerState:
     LDA btlmag_defender_ailments                        ; see if the player has been rendered immobile
     AND #(AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP)
     BEQ :+                          ; if yes...
