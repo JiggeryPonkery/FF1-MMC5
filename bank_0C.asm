@@ -10429,6 +10429,7 @@ Enemy_DoMagicEffect:
     LDA btl_attacker ;_alt                    ; get attacker slot index (why doesn't this just load btl_attacker?!?!?!)
     JSR GetEnemyRAMPtr
     JSR DrawCombatBox_Attacker
+    JSR DisplayAttackIndicator
     
     LDA #$00
     STA btlmag_magicsource                  ; set magic source as 'magic'
