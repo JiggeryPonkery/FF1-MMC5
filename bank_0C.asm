@@ -5200,6 +5200,8 @@ ApplyRegenToAllEnemies:
     
    @drawregenbox:
 	JSR DrawCombatBox_Attacker   ; draw the attacker box
+    JSR DisplayAttackIndicator
+    
 	DEC btl_combatboxcount_alt   ; -1 to the "alt" counter
 	INC btl_combatboxcount       ; +1 to the "non-alt" counter
 	LDA #BTLMSG_REGEN             
