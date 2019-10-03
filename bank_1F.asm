@@ -15526,9 +15526,9 @@ LongCall:
     JMP SwapPRG             ;
     
 @doLongCall:
-    LDA LongCall_A
     LDY LongCall_Y          ; Restore Y for use in next routine
     LDX LongCall_X
+    LDA LongCall_A
                             ; Can't restore tmp, so remember to update things to use LongCall_tmp if possible
     JMP (@jump_addr)        ;
 

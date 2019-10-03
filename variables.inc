@@ -346,6 +346,7 @@ shop_cursor_ptr = $6E ; +$6F
 enemy_load      = $70 ; all $10 bytes, 4 per enemy
 
 cursor_change       = $71 ; magic menu 
+AttackIndicator     = $71 ; battle 
 treasure_offset     = $72 ; maps
 item_box_offset     = $72 ; shops
 item_box_offset_old = $73 ; shops

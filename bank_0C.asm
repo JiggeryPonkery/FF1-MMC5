@@ -49,6 +49,7 @@
 .import StealFromEnemyZ
 .import SkillText2
 .import RestoreMapMusic
+.import UpdateBattleCursorSprite
 
 BANK_THIS = $0C
 
@@ -6887,22 +6888,22 @@ DoPhysicalAttack_NoBoxes:
         
   : LDA btl_defender_ailments
     AND #AIL_STUN | AIL_SLEEP
-    BEQ @DefenderMobile         ; if defender alseep or stunned....
+    BEQ :+         ; if defender alseep or stunned....
       LDA math_basedamage       ; apply 25% bonus to base damage
       LSR A
       LSR A
       CLC
       ADC math_basedamage
       STA math_basedamage
-      BCC @DefenderMobile
+      BCC :+
         LDA #$FF
         STA math_basedamage     ; cap at 255 base damage
        ;JMP :+                  ; (jump past the @DefenderMobile block)
        
        ;; JIGS - this should let hit chance and hit rate be added together always
   
-  @DefenderMobile:                      ; if the defender is mobile (not asleep of stunned)
-      LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
+       ; if the defender is mobile (not asleep of stunned)
+    : LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
       LDX btl_attacker_hitrate          ;   This seems strange to me.  Shouldn't this be done even if defender
       JSR MathBuf_Add                   ;    is immobile?  Is this BUGGED?
       LDY math_hitchance
@@ -9402,6 +9403,8 @@ Battle_DoEnemyTurn:
     JMP ShowAltBattleMessage_ClearAllBoxes
 
   @EnemyActive:                         ; jumps here if enemy is active (not stunned or asleep)
+    JSR DisplayAttackIndicator
+  
     LDY #en_ailments
     LDA (EnemyRAMPointer), Y                     ; check the high bit to see if they're confused
     BPL @EnemyActive_AndNotConfused     ; if clear, jump ahead to EnemyActive_AndNotConfused.  Otherwise...
@@ -12578,13 +12581,13 @@ DrawEnemyEffect_Mix:
     ASL A
     TAX
     
-    LDA @lut_ExplosionCoords_6Small, X
+    LDA lut_ExplosionCoords_6Small, X
     STA explode_min_x
     CLC
     ADC #$18
     STA explode_max_x
     
-    LDA @lut_ExplosionCoords_6Small+1, X
+    LDA lut_ExplosionCoords_6Small+1, X
     STA explode_min_y
     CLC
     ADC #$18
@@ -12614,7 +12617,7 @@ DrawEnemyEffect_Mix:
     JMP EraseSmallEnemy         ; reuse the EraseSmallEnemy routine used in the 9Small formation
     
     ;; [$BDCC :: 0x33DDC]
-  @lut_ExplosionCoords_6Small:
+lut_ExplosionCoords_6Small:
     .BYTE $50, $58
     .BYTE $58, $30
     .BYTE $48, $80
@@ -12826,6 +12829,107 @@ lut_EraseEnemyPPUAddress_Mix_Small:
   .WORD $216A, $20CB, $2209     ; Center column
   .WORD $216F, $20D0, $220E     ; right column
   
+  
+  
+  
+  
+  
+  
+AttackIndicator_LUT:
+  .BYTE $01, $02, $03, $02, $01, $02, $03, $00
+  
+
+DisplayAttackIndicator:
+  LDX btl_battletype
+  BEQ @Indicator_9Small          ; 9small formation
+  DEX
+  BEQ @Indicator_4Large          ; 4large formation
+  DEX
+  BEQ @Indicator_Mix             ; mix formation
+  RTS                           ; if its 3 or 4, don't bother, only one enemy!
+  
+ @Indicator_9Small:
+  LDX btl_attacker
+  LDA lut_EnemyIndex9Small, X
+  ASL A
+  TAY
+  LDA lut_Target9SmallCursorPos, Y
+  STA tmp
+  LDA lut_Target9SmallCursorPos+1, Y
+  BNE @Begin
+  
+ @Indicator_4Large:
+  LDX btl_attacker
+  LDA lut_EnemyIndex4Large, X
+  ASL A
+  TAY
+  LDA lut_Target4LargeCursorPos, Y
+  STA btlcursspr_x
+  LDA lut_Target4LargeCursorPos+1, Y
+  BNE @Begin
+  
+ @Indicator_Mix:
+  LDX btl_attacker
+  LDA lut_EnemyIndexMix, X
+  ASL A
+  TAY
+  LDA lut_TargetMixCursorPos, Y
+  STA btlcursspr_x
+  LDA lut_TargetMixCursorPos+1, Y
+  BNE @Begin
+ 
+ @Begin:
+  SEC
+  SBC #4
+  STA btlcursspr_y
+  LDA tmp
+  CLC
+  ADC #$28
+  STA btlcursspr_x
+  
+  LDA btl_drawflagsA              ; set the flag to show the cursor
+  ORA #$10
+  STA btl_drawflagsA
+  
+  LDY #0
+  LDX #0
+  
+ @Loop: 
+  STX AttackIndicator
+  LDA AttackIndicator_LUT, X
+  PHA
+  
+  JSR LongCall
+  .WORD UpdateBattleCursorSprite
+  .byte $0F
+  
+  PLA
+  BEQ @Done
+  
+  JSR UpdateSprites_BattleFrame
+  LDX AttackIndicator
+  INX
+  BNE @Loop
+  
+ @Done:
+  JSR BattleClearVariableSprite
+  JMP BattleFrame
+  
+  ;; JIGS - this should load up a little sparkle in the place of
+  ;; the glove cursor, updating and displaying it for 2 frames...
+  ;; then end by putting the glove back in place.
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  PlayBattleSFX  [$BEB8 :: 0x33EC8]
@@ -12890,8 +12994,7 @@ PlayBattleSFX:
     
     LDA #$0F
     STA $4015                   ; make sure channels are enabled
-    JSR SwapBattleSFXBytes      ; swap out sfx bytes
-    RTS
+    JMP SwapBattleSFXBytes      ; swap out sfx bytes
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12908,8 +13011,7 @@ UpdateBattleSFX:
       JSR UpdateBattleSFX_Square
       JSR UpdateBattleSFX_Noise
       DEC btlsfx_framectr
-  : JSR SwapBattleSFXBytes
-    RTS
+  : JMP SwapBattleSFXBytes
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12952,7 +13054,6 @@ UpdateBattleSFX_Square:
       STA btlsfxsq2_ptr+1
     
       DEC btlsfxsq2_len
-      RTS
   @Exit:
     RTS
     
@@ -12993,7 +13094,6 @@ UpdateBattleSFX_Noise:
       STA btlsfxnse_ptr+1
       
       DEC btlsfxnse_len         ; decrease the remaining data length of the sfx
-      RTS
   @Exit:
     RTS
 
