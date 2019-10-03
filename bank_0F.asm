@@ -5892,9 +5892,6 @@ AttackIndicatorSprite_3:
 .incbin "chr/enemyattackindicator_3.chr"
 
 UpdateBattleCursorSprite:
-    PHA
-    JSR WaitForVBlank_L
-    PLA
     BEQ @Cursor
     CMP #1
     BEQ @Sprite1    
@@ -5926,6 +5923,7 @@ UpdateBattleCursorSprite:
 
    @LoadSprite:
     STA tmp+1
+    JSR WaitForVBlank_L
     LDA $2002
     LDA #$1F
     STA $2006
@@ -5943,6 +5941,7 @@ UpdateBattleCursorSprite:
     LDA #$00
     STA $2005               ; reset scroll
     STA $2005
+    JSR WaitForVBlank_L
     RTS
     
 

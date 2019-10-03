@@ -12880,7 +12880,7 @@ DisplayAttackIndicator:
  @SetLarge:
   LDA lut_Target4LargeCursorPos, Y
   CLC
-  ADC #$40                             ; push the sprite to the other side of the enemy
+  ADC #$3C                             ; push the sprite to the other side of the enemy
   STA btlcursspr_x
   LDA lut_Target4LargeCursorPos+1, Y
   BNE @Begin
@@ -12925,7 +12925,7 @@ DisplayAttackIndicator:
   
  @Done:
   JSR BattleClearVariableSprite     ; clear the current sprite
-  JSR BattleFrame                   ; and do a frame to erase it from the screenproperly
+  JSR BattleFrame                   ; and do a frame to erase it from the screen properly
   
   LDA #0                            ; then load up the cursor!
  
@@ -12938,16 +12938,7 @@ DisplayAttackIndicator:
   ;; the above routine jumps to where the sprites are stored (64 bytes per sprite!)
   ;; and loads them in place of the cursor. It waits for VBlank first, and sets scroll
   ;; when its finished loading the new sprite.
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  PlayBattleSFX  [$BEB8 :: 0x33EC8]
