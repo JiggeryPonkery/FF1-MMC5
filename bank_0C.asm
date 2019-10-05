@@ -5067,165 +5067,7 @@ CheckForBattleEnd:
     RTS
     
   
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  ApplyRegenToAllEnemies  [$A232 :: 0x32242]
-;;
-;;    Enemies that belong to the Regenerative category recover 3
-;;  HP each round.  Kind of a weird thing...
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;ApplyRegenToAllEnemies:
-;            @id = $6BAD         ; local - enemy ID and loop up-counter
-;            @loopctr = $68AF    ; local - loop down-counter
-;            @ram = $88          ; local - pointer to enemy RAM stats
-;            @rom = $8A          ; local - pointer to enemy ROM stats
-            
-;    LDA #0
-;    STA @id
-;    LDA btl_enemycount
-;    STA @loopctr
-    
-;  @MainLoop:
-;    LDA @id
-;    JSR GetEnemyStatPtr
-;    STA @ram
-;    STX @ram+1              ; get the pointer to RAM stats and record it
-    
-;    LDY #en_romptr          ; use that to get the ROM pointer, and record it
-;    LDA (@ram), Y
-;    STA @rom
-;    INY
-;    LDA (@ram), Y
-;    STA @rom+1
-    
-    ; Now that we have RAM and ROM pointers for this enemy...
-;    LDY #ENROMSTAT_CATEGORY     ; Get the enemy category, and see if they are
-;    LDA (@rom), Y               ;  regenerative
-;    AND #CATEGORY_REGEN
-;    BEQ @Next                   ; If not, skip them -- go to next iteration
-    
-;    LDY #en_hp                  ; move their HP to the math buffer
-;    LDA (@ram), Y
-;    STA btl_mathbuf
-;    INY
-;    LDA (@ram), Y
-;    STA btl_mathbuf+1
-    
-;    LDA #$00
-;    LDX #$03
-;    JSR MathBuf_Add             ; regenerative enemies recover 3 HP
-    
-;    LDY #ENROMSTAT_HPMAX        ; put HP max in mathbuf2
-;    LDA (@rom), Y               ;  ... because a normal CMP would be too simple
-;    STA btl_mathbuf+2           ;  ...
-;    INY                         ;  ...
-;    LDA (@rom), Y
-;    STA btl_mathbuf+3
-    
-;    LDY #$00                    ; compare HP and MaxHP buffers
-;    LDX #$01
-;    JSR MathBuf_Compare         ; C will be set if HP >= HPMax
-    
-;    BCC :+                      ; cap at Max HP
-;      LDA btl_mathbuf+2
-;      STA btl_mathbuf+0
-;      LDA btl_mathbuf+3
-;      STA btl_mathbuf+1
-      
-;  : LDY #en_hp                  ; move HP back to RAM stats
-;    LDA btl_mathbuf
-;    STA (@ram), Y
-;    INY
-;    LDA btl_mathbuf+1
-;    STA (@ram), Y
-    
-;  @Next:
-;    INC @id                     ; loop until all enemies counted
-;    DEC @loopctr
-;    BNE @MainLoop
-    
-;    RTS
-    
-    
-;; JIGS - updated regeneration for enemies
-    
-ApplyRegenToAllEnemies:
-        @id = $6BAD         ; local - enemy ID and loop up-counter ; btl_weird_loopctr
-        @loopctr = $68AF    ; local - loop down-counter ; Rand_AX_lo -- sorta almost tmp RAM?
-            
-    LDA #0
-    STA @id
-    LDA btl_enemycount
-    STA @loopctr
-    
-  @MainLoop:
-    LDA @id
-    JSR GetEnemyRAMPtr
-    
-    LDY #en_category              ; Get the enemy category, and see if they are
-    LDA (EnemyRAMPointer), Y      ;  regenerative
-    AND #CATEGORY_REGEN
-    BEQ @Next                     ; If not, skip them -- go to next iteration
-    
-  ; LDY #en_ailment               
-  ; LDA (EnemyRAMPointer), Y      
-  ; AND #AIL_POISON
-  ; BEQ @Next                     ; enabling this would cause it to skip regeneration if the enemy was poisoned
-    
-	LDX @id
-    STX btl_attacker
-	JSR DoesEnemyXExist
-	BEQ @Next
- 
-    LDY #en_hpmax
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage
-    STA btlmag_defender_hpmax
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage+1
-    STA btlmag_defender_hpmax+1
-    
-    LDA #12                     ; 8% of max HP
-    JSR RegenDivision
-    
-  : LDY #en_hp                  ; move HP back to RAM stats
-    LDA math_basedamage
-    STA (EnemyRAMPointer), Y
-    INY
-    LDA math_basedamage+1
-    STA (EnemyRAMPointer), Y
-    
-   @drawregenbox:
-	JSR DrawCombatBox_Attacker   ; draw the attacker box
-    JSR DisplayAttackIndicator
-    
-	DEC btl_combatboxcount_alt   ; -1 to the "alt" counter
-	INC btl_combatboxcount       ; +1 to the "non-alt" counter
-	LDA #BTLMSG_REGEN             
-	JSR DrawBtlMsg_ClearCombatBoxes ; then clear all combat boxes and exit
-
-  @Next:
-    INC @id                     ; loop until all enemies counted
-    DEC @loopctr
-    BNE @MainLoop
-    RTS
-
-    
-    ; Werewolf ; 68   ;
-    ; WzOgre   ; 144  ;
-    ; Troll    ; 184  ;
-    ; SeaTroll ; 216  ;
-    ; Phantom  ; 360  ; 
-    ; Catman   ; 160  ;
-    ; Vampire  ; 156  ;
-    ; WzVamp   ; 300  ;
-    ; WarMech  ; 1000 ;
-    ; A list of all regenerative enemies and their max HP. 
-    ;; If my horrible math is right, then WarMech regenerates a little over 90 HP a turn. Ouch.
-    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  ApplyEndOfRoundEffects  [$A2A6 :: 0x322B6]
@@ -5377,9 +5219,7 @@ PrintBattleTurnNumber:
 ;; JIGS - my version:
 
 ApplyPoisonToPlayer:
-            @id    = $685A  ; local - temp to hold character ID ; math_numhits
-            @index = $6BAD  ; local - temp to hold OB stat index (00, 40, 80, C0) ; btl_weird_loopctr
-    STA @id             ; record character ID
+    STA EntityRegenID             ; record character ID
     ASL A
     ASL A
   ; STA MMC5_tmp        ; JIGS - for thieves hiding when critical
@@ -5389,9 +5229,9 @@ ApplyPoisonToPlayer:
     ASL A               ; left shift 6 to convert to index
  ;  STA MMC5_tmp+1      ; JIGS - for thieves hiding when critical
     TAX                 ; put index in X
-    STA @index          ; and back it up for later
+    STA EntityRegenCounter ; and back it up for later
     
-    LDA @id
+    LDA EntityRegenID
     ORA #$80
     STA btl_attacker
     
@@ -5466,7 +5306,6 @@ ApplyPoisonToPlayer:
     DEC btl_combatboxcount_alt
     
   : RTS  
-    
 
 ;;   JIGS - theoretically, this should make thieves and ninjas try to hide if their health is low enough to cause crouching
 ;     LDA MMC5_tmp
@@ -5487,6 +5326,86 @@ ApplyPoisonToPlayer:
 ;     JSR Player_Hide
 ;     JSR DrawCharacterStatus     ; draw hidden icon
 ;  :  RTS
+
+ApplyRegenToPlayer:
+    LDA ch_maxhp, X
+    STA math_basedamage
+    STA btlmag_defender_hpmax
+    LDA ch_maxhp+1, X
+    STA math_basedamage+1
+    STA btlmag_defender_hpmax+1
+    TXA
+    PHA
+
+    LDA ch_battlestate, X
+    AND #STATE_REGENHIGH ; $60  ; clear out everything but potency ($20, $40, or $60)    
+    CMP #STATE_REGENLOW
+    BNE :+ 
+        @LowPotency:            ; 8%
+        LDA #12         
+        BNE @Divide
+        
+  : CMP #STATE_REGENMIDDLE
+    BNE :+    
+       @MiddlePotency:          ; 12.5%
+        LDA #8
+        BNE @Divide
+    
+ : @HighPotency:                ; 5 = almost 20%
+    LDA #6                      ; 6 = 16.6 ?
+  
+  @Divide:
+    JSR RegenDivision
+
+    PLA
+    TAX                         ; move HP back to RAM stats
+    LDA math_basedamage
+    STA ch_curhp, X
+    LDA math_basedamage+1
+    STA ch_curhp+1, X
+    
+    LDA ch_battlestate, X       ; see if they're hidden
+    AND #STATE_HIDDEN
+    BEQ @NotHidden              ; if not, skip
+    
+    LDA ch_battlestate, X       ; if they are, remove hidden bit
+    AND #~STATE_HIDDEN
+    STA ch_battlestate, X
+    
+    LDA #1 
+    STA Hidden                   ; set re-hide flag
+    
+   @NotHidden: 
+    TXA
+    PHA                          ; backup X 
+   
+    LDA #0
+    JSR PlayBattleSFX            ; play heal SFX
+    JSR UpdateSprites_BattleFrame
+    LDA EntityRegenID
+    JSR FlashCharacterSprite
+    
+    PLA
+    TAX
+    
+    LDA Hidden                    ; if Hidden is 1, skip re-hiding
+    BEQ @DecrementRegeneration
+    
+    LDA ch_battlestate, X
+    ORA #STATE_HIDDEN
+    STA ch_battlestate, X         ; rehide character
+    DEC Hidden
+   
+   @DecrementRegeneration:
+    LDA ch_battlestate, X
+    SEC
+    SBC #1
+    STA ch_battlestate, X   ; subtract 1 from the regen state to mark this turn has been used up
+    
+   @drawregenbox:
+	JSR DrawCombatBox_Attacker    ; draw the attacker box
+	LDA #BTLMSG_REGEN             
+    JMP DrawBtlMsg_ClearIt
 
   
 ;; this poison code is very much inspired by anomie's work - https://gamefaqs.gamespot.com/boards/522595-final-fantasy/45575058/499635691
@@ -5585,6 +5504,167 @@ DrawPoisonAsAttack:                 ; Who is getting poisoned
     
 	JMP DrawDamageCombatBox         ; print damage    
 
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  ApplyRegenToAllEnemies  [$A232 :: 0x32242]
+;;
+;;    Enemies that belong to the Regenerative category recover 3
+;;  HP each round.  Kind of a weird thing...
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;ApplyRegenToAllEnemies:
+;            @id = $6BAD         ; local - enemy ID and loop up-counter
+;            @loopctr = $68AF    ; local - loop down-counter
+;            @ram = $88          ; local - pointer to enemy RAM stats
+;            @rom = $8A          ; local - pointer to enemy ROM stats
+            
+;    LDA #0
+;    STA @id
+;    LDA btl_enemycount
+;    STA @loopctr
+    
+;  @MainLoop:
+;    LDA @id
+;    JSR GetEnemyStatPtr
+;    STA @ram
+;    STX @ram+1              ; get the pointer to RAM stats and record it
+    
+;    LDY #en_romptr          ; use that to get the ROM pointer, and record it
+;    LDA (@ram), Y
+;    STA @rom
+;    INY
+;    LDA (@ram), Y
+;    STA @rom+1
+    
+    ; Now that we have RAM and ROM pointers for this enemy...
+;    LDY #ENROMSTAT_CATEGORY     ; Get the enemy category, and see if they are
+;    LDA (@rom), Y               ;  regenerative
+;    AND #CATEGORY_REGEN
+;    BEQ @Next                   ; If not, skip them -- go to next iteration
+    
+;    LDY #en_hp                  ; move their HP to the math buffer
+;    LDA (@ram), Y
+;    STA btl_mathbuf
+;    INY
+;    LDA (@ram), Y
+;    STA btl_mathbuf+1
+    
+;    LDA #$00
+;    LDX #$03
+;    JSR MathBuf_Add             ; regenerative enemies recover 3 HP
+    
+;    LDY #ENROMSTAT_HPMAX        ; put HP max in mathbuf2
+;    LDA (@rom), Y               ;  ... because a normal CMP would be too simple
+;    STA btl_mathbuf+2           ;  ...
+;    INY                         ;  ...
+;    LDA (@rom), Y
+;    STA btl_mathbuf+3
+    
+;    LDY #$00                    ; compare HP and MaxHP buffers
+;    LDX #$01
+;    JSR MathBuf_Compare         ; C will be set if HP >= HPMax
+    
+;    BCC :+                      ; cap at Max HP
+;      LDA btl_mathbuf+2
+;      STA btl_mathbuf+0
+;      LDA btl_mathbuf+3
+;      STA btl_mathbuf+1
+      
+;  : LDY #en_hp                  ; move HP back to RAM stats
+;    LDA btl_mathbuf
+;    STA (@ram), Y
+;    INY
+;    LDA btl_mathbuf+1
+;    STA (@ram), Y
+    
+;  @Next:
+;    INC @id                     ; loop until all enemies counted
+;    DEC @loopctr
+;    BNE @MainLoop
+    
+;    RTS
+    
+    
+;; JIGS - updated regeneration for enemies
+    
+ApplyRegenToAllEnemies:
+    LDA #0
+    STA EntityRegenID
+    LDA btl_enemycount
+    STA EntityRegenCounter
+    
+  @MainLoop:
+    LDA EntityRegenID
+    JSR GetEnemyRAMPtr
+    
+    LDY #en_category              ; Get the enemy category, and see if they are
+    LDA (EnemyRAMPointer), Y      ;  regenerative
+    AND #CATEGORY_REGEN
+    BEQ @Next                     ; If not, skip them -- go to next iteration
+    
+  ; LDY #en_ailment               
+  ; LDA (EnemyRAMPointer), Y      
+  ; AND #AIL_POISON
+  ; BEQ @Next                     ; enabling this would cause it to skip regeneration if the enemy was poisoned
+    
+	LDX EntityRegenID
+    STX btl_attacker
+	JSR DoesEnemyXExist
+	BEQ @Next
+ 
+    LDY #en_hpmax
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage
+    STA btlmag_defender_hpmax
+    INY
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage+1
+    STA btlmag_defender_hpmax+1
+    
+    LDA #12                     ; 8% of max HP
+    JSR RegenDivision
+    
+  : LDY #en_hp                  ; move HP back to RAM stats
+    LDA math_basedamage
+    STA (EnemyRAMPointer), Y
+    INY
+    LDA math_basedamage+1
+    STA (EnemyRAMPointer), Y
+    
+   @drawregenbox:
+	JSR DrawCombatBox_Attacker   ; draw the attacker box
+    JSR DisplayAttackIndicator
+    
+	DEC btl_combatboxcount_alt   ; -1 to the "alt" counter
+	INC btl_combatboxcount       ; +1 to the "non-alt" counter
+	LDA #BTLMSG_REGEN             
+	JSR DrawBtlMsg_ClearCombatBoxes ; then clear all combat boxes and exit
+
+  @Next:
+    INC EntityRegenID             ; loop until all enemies counted
+    DEC EntityRegenCounter
+    BNE @MainLoop
+    RTS
+
+    
+    ; Werewolf ; 68   ;
+    ; WzOgre   ; 144  ;
+    ; Troll    ; 184  ;
+    ; SeaTroll ; 216  ;
+    ; Phantom  ; 360  ; 
+    ; Catman   ; 160  ;
+    ; Vampire  ; 156  ;
+    ; WzVamp   ; 300  ;
+    ; WarMech  ; 1000 ;
+    ; A list of all regenerative enemies and their max HP. 
+    ;; If my horrible math is right, then WarMech regenerates a little over 90 HP a turn. Ouch.
+        
+    
+    
+    
 RegenDivision:    
     LDX btlmag_defender_hpmax   ; now holds enemy's max HP low byte
     LDY btlmag_defender_hpmax+1 ; and max HP high byte
@@ -5597,7 +5677,7 @@ RegenDivision:
     LDY #MATHBUF_REGENHP
     JSR MathBuf_Add16
     
-    LDX #MATHBUF_DEFENDERMAXHP          ; compare max HP and base damage
+    LDX #MATHBUF_DEFENDERMAXHP  ; compare max HP and base damage
     LDY #MATHBUF_BASEDAMAGE     ; base damage contains how much HP to regen
     JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
     BCC :+                      ; cap at Max HP
@@ -5607,88 +5687,6 @@ RegenDivision:
       STA math_basedamage+1
   : RTS
     
-ApplyRegenToPlayer:
-            @id    = $685A  ; local - temp to hold character ID ; math_numhits
-    LDA ch_maxhp, X
-    STA math_basedamage
-    STA btlmag_defender_hpmax
-    LDA ch_maxhp+1, X
-    STA math_basedamage+1
-    STA btlmag_defender_hpmax+1
-    TXA
-    PHA
-
-    LDA ch_battlestate, X
-    AND #STATE_REGENHIGH ; $60  ; clear out everything but potency ($20, $40, or $60)    
-    CMP #STATE_REGENLOW
-    BNE :+ 
-        @LowPotency:            ; 8%
-        LDA #12         
-        BNE @Divide
-        
-  : CMP #STATE_REGENMIDDLE
-    BNE :+    
-       @MiddlePotency:          ; 12.5%
-        LDA #8
-        BNE @Divide
-    
- : @HighPotency:                ; 5 = almost 20%
-    LDA #6                      ; 6 = 16.6 ?
-  
-  @Divide:
-    JSR RegenDivision
-
-    PLA
-    TAX                         ; move HP back to RAM stats
-    LDA math_basedamage
-    STA ch_curhp, X
-    LDA math_basedamage+1
-    STA ch_curhp+1, X
-    
-    LDA ch_battlestate, X       ; see if they're hidden
-    AND #STATE_HIDDEN
-    BEQ @NotHidden              ; if not, skip
-    
-    LDA ch_battlestate, X       ; if they are, remove hidden bit
-    AND #~STATE_HIDDEN
-    STA ch_battlestate, X
-    
-    LDA #1 
-    STA Hidden                   ; set re-hide flag
-    
-   @NotHidden: 
-    TXA
-    PHA                          ; backup X 
-   
-    LDA #0
-    JSR PlayBattleSFX            ; play heal SFX
-    JSR UpdateSprites_BattleFrame
-    LDA @id
-    JSR FlashCharacterSprite
-    
-    PLA
-    TAX
-    
-    LDA Hidden                    ; if Hidden is 1, skip re-hiding
-    BEQ @DecrementRegeneration
-    
-    LDA ch_battlestate, X
-    ORA #STATE_HIDDEN
-    STA ch_battlestate, X         ; rehide character
-    DEC Hidden
-   
-   @DecrementRegeneration:
-    LDA ch_battlestate, X
-    SEC
-    SBC #1
-    STA ch_battlestate, X   ; subtract 1 from the regen state to mark this turn has been used up
-    
-   @drawregenbox:
-	JSR DrawCombatBox_Attacker    ; draw the attacker box
-	LDA #BTLMSG_REGEN             
-    JMP DrawBtlMsg_ClearIt
-
-
 
 
 
