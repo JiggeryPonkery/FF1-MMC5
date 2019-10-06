@@ -15,7 +15,6 @@
 .export NewGamePartyGeneration
 .export StealFromEnemyZ
 .export AssignMapTileDamage_Z
-.export UpdateBattleCursorSprite
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -5882,68 +5881,7 @@ lut_SongNamesLong:
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle 2
 
-CursorSprite:
-.incbin "chr/cursor.chr"
-AttackIndicatorSprite_1:
-.incbin "chr/enemyattackindicator_1.chr"
-AttackIndicatorSprite_2:
-.incbin "chr/enemyattackindicator_2.chr"
-AttackIndicatorSprite_3:
-.incbin "chr/enemyattackindicator_3.chr"
 
-UpdateBattleCursorSprite:
-    BEQ @Cursor
-    CMP #1
-    BEQ @Sprite1    
-    CMP #2
-    BEQ @Sprite2
-    
-   @Sprite3:
-    LDA #<AttackIndicatorSprite_3
-    STA tmp
-    LDA #>AttackIndicatorSprite_3
-    BNE @LoadSprite
-   
-   @Sprite2:
-    LDA #<AttackIndicatorSprite_2
-    STA tmp
-    LDA #>AttackIndicatorSprite_2
-    BNE @LoadSprite
-  
-   @Sprite1:
-    LDA #<AttackIndicatorSprite_1
-    STA tmp
-    LDA #>AttackIndicatorSprite_1
-    BNE @LoadSprite
-  
-   @Cursor:
-    LDA #<CursorSprite
-    STA tmp
-    LDA #>CursorSprite
-
-   @LoadSprite:
-    STA tmp+1
-    JSR WaitForVBlank_L
-    LDA $2002
-    LDA #$1F
-    STA $2006
-    STY $2006
-   
-   @LoadSpriteCont:
-    LDA (tmp), Y
-    STA $2007
-    INY
-    CPY #$40
-    BNE @LoadSpriteCont
-   
-    LDA btl_soft2001
-    STA $2001               ; copy over soft2001
-    LDA #$00
-    STA $2005               ; reset scroll
-    STA $2005
-    JSR WaitForVBlank_L
-    RTS
-    
 
 lut_CharStatsPtrTable:
   .WORD ch_stats
