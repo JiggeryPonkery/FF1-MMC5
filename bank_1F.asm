@@ -88,6 +88,7 @@
 .export SkillText2
 .export lut_TilesetMusicTrack
 .export lut_VehicleMusic
+.export JIGS_RefreshAttributes
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -167,6 +168,7 @@
 .import GetDialogueString
 .import TalkToTile_BankE
 .import AssignMapTileDamage_Z
+.import WriteAttributesToPPU
 
 .segment "BANK_FIXED"
 
@@ -12137,6 +12139,11 @@ SetBattlePPUAddr:
 ;;  It will also reset the scroll.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+JIGS_RefreshAttributes:
+    LDA #$0B
+    JSR SwapPRG_L
+    JMP WriteAttributesToPPU
 
 Battle_WritePPUData_L:
 Battle_WritePPUData:

@@ -49,7 +49,7 @@
 .import StealFromEnemyZ
 .import SkillText2
 .import RestoreMapMusic
-.import UpdateBattleCursorSprite
+.import JIGS_RefreshAttributes
 
 BANK_THIS = $0C
 
@@ -7565,7 +7565,7 @@ DrawCharacterStatus:
     STA btl_unfmtcbtbox_buffer+4, X ; heavy ailment (dead, stone, poison)
     
     PLA                             ; fetch ailment
-    AND #~AIL_DEAD | AIL_STONE | AIL_POISON | AIL_CONF ; #$78
+    AND #$78 ; #~AIL_DEAD | AIL_STONE | AIL_POISON | AIL_CONF 
     ; remove dead, stone, poison, and $80 from ailment
     JSR @FindAilment
     STA btl_unfmtcbtbox_buffer+1, X ; light ailment (blind, sleep, stun, mute)
@@ -12835,21 +12835,66 @@ lut_EraseEnemyPPUAddress_4Large:
 lut_EraseEnemyPPUAddress_Mix_Small:
   .WORD $216A, $20CB, $2209     ; Center column
   .WORD $216F, $20D0, $220E     ; right column
+
   
-  
-  
-  
-  
-  
-  
-AttackIndicator_LUT:
-  .BYTE $03, $02, $01, $02, $03, $00
-  ;; this is the order of indication sprites to load:
-  ;; 1 = big plus + 
-  ;; 2 = small x 
-  ;; 3 = small plus +
-  ;; 0 = original glove cursor
-  ;; when flashed in order, they make a twirling sparkle star!
+
+
+
+
+;lut_EnemyIndex9Small:
+;  .BYTE $01, $00, $02
+;  .BYTE $04, $03, $05
+;  .BYTE $07, $06, $08
+;  
+;lut_EnemyIndex4Large:
+;  .BYTE $00, $01
+;  .BYTE $02, $03
+;  
+;lut_EnemyIndexMix:
+;  .BYTE $00, $01            ; 2 large
+;  .BYTE $03, $02, $04       ; 6 small
+;  .BYTE $06, $05, $07
+
+; can't make sense of this, since at least the mix one isn't arranged like the screen...
+
+;; sorta interleaved: 
+;; First byte is Attribute table location
+;; Second byte is Attribute to write (ORA) to flash the graphic
+
+SmallEnemyAttributes:
+.byte $CA, $F0, $CB, $C0, $D2, $0F, $D3, $0C, $00 ; ID 0 (upper middle)
+.byte $C9, $F0, $D1, $0F, $00, $00, $00, $00, $00 ; ID 1 (upper left)
+.byte $CB, $C0, $CC, $30, $D3, $0C, $D4, $03, $00 ; ID 2 (upper right)
+.byte $D2, $F0, $DA, $FF, $00, $00, $00, $00, $00 ; ID 3 (middle middle)
+.byte $D0, $C0, $D1, $F0, $D8, $CC, $D9, $FF, $00 ; ID 4 (middle left)
+.byte $D3, $F0, $D4, $30, $DB, $FF, $DC, $33, $00 ; ID 5 (middle right)
+.byte $E1, $CC, $E2, $FF, $00, $00, $00, $00, $00 ; ID 6 (bottom middle)
+.byte $E0, $CC, $E1, $33, $00, $00, $00, $00, $00 ; ID 7 (bottom left)
+.byte $E3, $FF, $00, $00, $00, $00, $00, $00, $00 ; ID 8 (bottom right)
+
+; CC ; both right boxes
+; 33 ; both left boxes
+; C0 ; bottom right box
+; 30 ; bottom left box
+; 0C ; top right box
+; 03 ; top left box
+; 0F ; both top boxes
+; F0 ; both bottom boxes
+; FF ; all boxes
+
+LargeEnemyAttributes:
+.byte $C8, $F0, $C9, $F0, $CA, $30, $D0, $CC, $D1, $FF, $D2, $33, $00 ; ID 0 (top left)
+.byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 1 (top right)
+.byte $D8, $CC, $D9, $FF, $E0, $CC, $E1, $FF, $00, $00, $00, $00, $00 ; ID 2 (bottom left)
+.byte $DA, $FF, $DB, $FF, $E2, $FF, $E3, $FF, $00, $00, $00, $00, $00 ; ID 3 (bottom right)
+
+MixedEnemyAttributes:
+.byte $CA, $C0, $CB, $F0, $D2, $0C, $D3, $0F, $00 ; ID 2 (upper middle)
+.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 3 (upper right)
+.byte $D2, $C0, $D3, $30, $DA, $CC, $DB, $33, $00 ; ID 4 (middle middle)
+.byte $D3, $C0, $D4, $F0, $DB, $CC, $DC, $FF, $00 ; ID 5 (middle right)
+.byte $E2, $FF, $E3, $33, $00, $00, $00, $00, $00 ; ID 6 (bottom middle)
+.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 7 (bottom right)
 
 DisplayAttackIndicator:
   LDX btl_battletype
@@ -12861,84 +12906,79 @@ DisplayAttackIndicator:
   RTS                            ; if its 3 or 4, don't bother, only one enemy!
   
  @Indicator_9Small:
-  LDX btl_attacker                     ; get enemy's ID
-  LDA lut_EnemyIndex9Small, X          ; then get their position ID
-  ASL A                                ; double it and put in Y
-  TAY                                  ; see lut_EnemyIndex9Small: for details
- @SetSmall: 
-  LDA lut_Target9SmallCursorPos, Y
-  CLC
-  ADC #$28                             ; push the sprite to the other side of the enemy
-  STA btlcursspr_x
-  LDA lut_Target9SmallCursorPos+1, Y
-  BNE @Begin
+  LDA #<SmallEnemyAttributes
+  STA tmp+4
+  LDA #>SmallEnemyAttributes
+  STA tmp+5
+  LDX #9
+  BNE @PrepLoop
   
  @Indicator_4Large:
-  LDX btl_attacker
-  LDA lut_EnemyIndex4Large, X
-  ASL A
-  TAY
- @SetLarge:
-  LDA lut_Target4LargeCursorPos, Y
-  CLC
-  ADC #$3C                             ; push the sprite to the other side of the enemy
-  STA btlcursspr_x
-  LDA lut_Target4LargeCursorPos+1, Y
-  BNE @Begin
-  
+  LDA #<LargeEnemyAttributes
+  STA tmp+4
+  LDA #>LargeEnemyAttributes
+  STA tmp+5
+  LDX #13
+  BNE @PrepLoop
+
  @Indicator_Mix:
-  LDX btl_attacker
-  LDA lut_EnemyIndexMix, X
-  ASL A
-  TAY
-  CPY #$02                             ; if Y = 2 or 0, then enemy index is 1 or 0
-  BCC @SetLarge                        ; so they're the large ones, and use the same lut
-  LDA lut_TargetMixCursorPos, Y        ; but the small mixed ones use a different lut
-  CLC
-  ADC #$28
-  STA btlcursspr_x
-  LDA lut_TargetMixCursorPos+1, Y
- 
+  LDA btl_attacker
+  CMP #$01                 
+  BCC @Indicator_4Large    
+  
+  LDA #<MixedEnemyAttributes
+  STA tmp+4
+  LDA #>MixedEnemyAttributes
+  STA tmp+5
+  LDX #9
+  
+ @PrepLoop:
+  LDA btl_attacker          
+  JSR MultiplyXA
+  STA tmp+7
+  LDA #04                ; frame loop = do this many frames
+  STA tmp+6
+   
  @Begin:
-  SEC
-  SBC #4
-  STA btlcursspr_y                ; nudge the sprite up a little bit more, but not too much
-  
-  LDA btl_drawflagsA              ; set the flag to show the "cursor"
-  ORA #$10
-  STA btl_drawflagsA
-  
-  LDY #0
-  LDX #0
-  
- @Loop: 
-  STX AttackIndicator
-  LDA AttackIndicator_LUT, X
-  
-  JSR @LoadNewSprite
-  
-  JSR UpdateSprites_TwoFrames
-  JSR UpdateSprites_TwoFrames      ; 4 frames per sprite
-  LDX AttackIndicator
-  INX
-  CPX #5
+  JSR WaitForVBlank_L
+  LDX #0   
+  LDY tmp+7  
+ @Loop:
+  JSR @SetAddress
+  LDA $2007          ; throw away buffered byte ? 
+  LDA $2007          ; get actual attribute byte
+  STA tmp+8          ; save
+  JSR @SetAddress    ; re-do the address 
+  INY 
+  LDA (tmp+4), Y     ; get next byte in lut
+  ORA tmp+8          ; add in any other bits          
+  STA $2007          ; then save it
+  INY 
   BNE @Loop
-  
- @Done:
-  JSR BattleClearVariableSprite     ; clear the current sprite
-  JSR BattleFrame                   ; and do a frame to erase it from the screen properly
-  
-  LDA #0                            ; then load up the cursor!
  
- @LoadNewSprite: 
-  JSR LongCall
-  .WORD UpdateBattleCursorSprite
-  .byte $0F
+ @ExitLoop:
+  STA $2006              ; better finish the write anyway...
+  PLA
+  PLA                    ; undo JSR... but still saved some space!
+  JSR BattleUpdatePPU
+  JSR BattleUpdateAudio
+  JSR DoMiniFrame
+  JSR JIGS_RefreshAttributes
+  JSR BattleUpdateAudio
+  DEC tmp+6  
+  BNE @Begin 
+  RTS
+
+ @SetAddress: 
+  LDA #$23
+  STA $2006  
+  LDA (tmp+4), Y
+  BEQ @ExitLoop
+  STA $2006 
   RTS
   
-  ;; the above routine jumps to where the sprites are stored (64 bytes per sprite!)
-  ;; and loads them in place of the cursor. It waits for VBlank first, and sets scroll
-  ;; when its finished loading the new sprite.
+  
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13199,7 +13239,6 @@ data_BattleSoundEffects:
   
   .BYTE $A0, $00, $50, $08, $10,     $00, $00, $01 
   .BYTE $8F, $00, $50, $08, $80,     $00, $00, $01 
-
 
 
  

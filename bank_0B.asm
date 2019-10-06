@@ -13,6 +13,7 @@
 .export data_BridgeNT
 .export PrintEXPToNext_B
 .export lut_Domains
+.export WriteAttributesToPPU
 
 .import Battle_ReadPPUData_L
 .import Battle_WritePPUData_L
@@ -3683,7 +3684,8 @@ FinalizeEnemyFormation_FiendChaos:
   : LDA btlform_enids       ; Just use the first enemy ID as the only enemy in this formation
   : STA btl_enemyIDs
     STA btl_enemyroster               ; ???  Duplicated to 6BC9?  Why?  I doubt this is ever used
-    JMP WriteAttributes_ClearUnusedEnStats
+    ;JMP WriteAttributes_ClearUnusedEnStats
+    JMP WriteAttributesToPPU
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4170,7 +4172,8 @@ DrawFormation_9Small:
     LDA #<lut_FormationPlacement_9Small
     JSR BattleFormation_DrawEnemies
     
-    JMP WriteAttributes_ClearUnusedEnStats
+    ;JMP WriteAttributes_ClearUnusedEnStats
+    JMP WriteAttributesToPPU
     
     
 DrawFormation_4Large:
@@ -4182,7 +4185,8 @@ DrawFormation_4Large:
     LDA #<lut_FormationPlacement_4Large
     JSR BattleFormation_DrawEnemies
     
-    JMP WriteAttributes_ClearUnusedEnStats
+    ;JMP WriteAttributes_ClearUnusedEnStats
+    JMP WriteAttributesToPPU
 
 DrawFormation_Mix:
     LDX #>lut_FormationAttributes_Mix
@@ -4193,7 +4197,8 @@ DrawFormation_Mix:
     LDA #<lut_FormationPlacement_Mix
     JSR BattleFormation_DrawEnemies
     
-    JMP WriteAttributes_ClearUnusedEnStats
+    ;JMP WriteAttributes_ClearUnusedEnStats
+    JMP WriteAttributesToPPU
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4247,8 +4252,8 @@ WriteAttributesToPPU:
     LDA #BANK_THIS          ; from this bank (although it's actually from RAM, so this
     STA btltmp+9            ;   isn't strictly necessary)
     
-    JSR Battle_WritePPUData_L   ; actually do the write, then exit
-    RTS
+    JMP Battle_WritePPUData_L   ; actually do the write, then exit
+    ;RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4485,40 +4490,42 @@ IncYBy4:
 ;;   But whatever.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; JIGS - seems pointless then...?
     
-WriteAttributes_ClearUnusedEnStats:
-    JSR WriteAttributesToPPU
-    
-    LDA #$00
-    STA btltmp+2            ; loop up-counter - the current enemy we're looking at
-    
-  @EnemyLoop:
-    LDY btltmp+2
-    LDA btl_enemyIDs, Y     ; get current enemy ID
-    CMP #$FF
-    BNE @NextEnemy          ; if it's actually being used, then skip it.  Otherwise...
-    
-    LDA btltmp+2
-    JSR GetEnemyStatPtr     ; Get the stat pointer for this enemy, put it in btltmp+0
-    STA btltmp+0
-    STX btltmp+1
-    
-    LDY #$00                ; copy $14 bytes of 0 to this enemy's stats
-    LDX #$14
-    LDA #$00
-  @Loop:
-      STA (btltmp+0), Y
-      INY
-      DEX
-      BNE @Loop
-      
-  @NextEnemy:
-    INC btltmp+2            ; increment our enemy counter
-    LDA btltmp+2
-    CMP #$09
-    BNE @EnemyLoop          ; loop until all 9 enemies processed
-    
-    RTS
+;WriteAttributes_ClearUnusedEnStats:
+;    JSR WriteAttributesToPPU
+;    
+;    LDA #$00
+;    STA btltmp+2            ; loop up-counter - the current enemy we're looking at
+;    
+;  @EnemyLoop:
+;    LDY btltmp+2
+;    LDA btl_enemyIDs, Y     ; get current enemy ID
+;    CMP #$FF
+;    BNE @NextEnemy          ; if it's actually being used, then skip it.  Otherwise...
+;    
+;    LDA btltmp+2
+;    JSR GetEnemyStatPtr     ; Get the stat pointer for this enemy, put it in btltmp+0
+;    STA btltmp+0
+;    STX btltmp+1
+;    
+;    LDY #$00                ; copy $14 bytes of 0 to this enemy's stats
+;    LDX #$14
+;    LDA #$00
+;  @Loop:
+;      STA (btltmp+0), Y
+;      INY
+;      DEX
+;      BNE @Loop
+;      
+;  @NextEnemy:
+;    INC btltmp+2            ; increment our enemy counter
+;    LDA btltmp+2
+;    CMP #$09
+;    BNE @EnemyLoop          ; loop until all 9 enemies processed
+;    
+;    RTS
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
