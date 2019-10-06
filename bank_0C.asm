@@ -9511,17 +9511,28 @@ Battle_DoEnemyTurn:
     LDA #AIL_DEAD
     STA btl_defender_ailments       ; Mark ourselves as dead (See Battle_DoTurn for why this is important)
     LDY #en_ailments
-    STA (EnemyRAMPointer), Y                 ; Give ourselves the 'DEAD' ailment
+    STA (EnemyRAMPointer), Y        ; Give ourselves the 'DEAD' ailment
+    
+    ;; JIGS - new way to clear GP and Exp rewards!
+    LDA btl_defender                ; enemy ID
+    ASL A                           ; times 4
+    ASL A 
+    TAY                             ; put into Y...
     
     LDA #$00
     STA battle_defenderisplayer     ; Fill output:  defender is an enemy
     
-    LDY #en_exp
-    : STA (EnemyRAMPointer), Y               ; erase this enemy's GP and Exp rewards
-      INY
-      CPY #en_exp+4
-      BNE :-
-      
+    STA btl_enemyrewards, Y         ; then clear 4 bytes of this enemy's reward RAM
+    STA btl_enemyrewards+1, Y
+    STA btl_enemyrewards+2, Y
+    STA btl_enemyrewards+3, Y
+    
+;    LDY #en_exp
+;  : STA (EnemyRAMPointer), Y        ; erase this enemy's GP and Exp rewards
+;      INY
+;      CPY #en_exp+4
+;      BNE :-
+    
     LDX btl_attacker
     JSR ClearEnemyID
     JMP ClearAllCombatBoxes
