@@ -12841,60 +12841,53 @@ lut_EraseEnemyPPUAddress_Mix_Small:
 
 
 
-;lut_EnemyIndex9Small:
-;  .BYTE $01, $00, $02
-;  .BYTE $04, $03, $05
-;  .BYTE $07, $06, $08
-;  
-;lut_EnemyIndex4Large:
-;  .BYTE $00, $01
-;  .BYTE $02, $03
-;  
-;lut_EnemyIndexMix:
-;  .BYTE $00, $01            ; 2 large
-;  .BYTE $03, $02, $04       ; 6 small
-;  .BYTE $06, $05, $07
 
-; can't make sense of this, since at least the mix one isn't arranged like the screen...
+
+
+;Small:
+; 1  4  7 
+; 0  3  5
+; 2  6  8
+;
+;Large:
+; 0  2
+; 1  3
+;
+;Mix:
+;    4  7
+; 0
+;    2  5
+; 1
+;    3  6
 
 ;; sorta interleaved: 
 ;; First byte is Attribute table location
 ;; Second byte is Attribute to write (ORA) to flash the graphic
 
 SmallEnemyAttributes:
-.byte $CA, $F0, $CB, $C0, $D2, $0F, $D3, $0C, $00 ; ID 0 (upper middle)  
-.byte $C9, $F0, $D1, $0F, $00, $00, $00, $00, $00 ; ID 1 (upper left) *
-.byte $D0, $C0, $D1, $F0, $D8, $CC, $D9, $FF, $00 ; ID 2 (middle left)
-.byte $CB, $C0, $CC, $30, $D3, $0C, $D4, $03, $00 ; ID 3 (upper right)
-.byte $D2, $F0, $DA, $FF, $00, $00, $00, $00, $00 ; ID 4 (middle middle)
-.byte $D3, $F0, $D4, $30, $DB, $FF, $DC, $33, $00 ; ID 5 (middle right)
-.byte $E1, $CC, $E2, $FF, $00, $00, $00, $00, $00 ; ID 6 (bottom middle)
-.byte $E0, $CC, $E1, $33, $00, $00, $00, $00, $00 ; ID 7 (bottom left)
-.byte $E3, $FF, $00, $00, $00, $00, $00, $00, $00 ; ID 8 (bottom right)
-
-; CC ; both right boxes
-; 33 ; both left boxes
-; C0 ; bottom right box
-; 30 ; bottom left box
-; 0C ; top right box
-; 03 ; top left box
-; 0F ; both top boxes
-; F0 ; both bottom boxes
-; FF ; all boxes
+.byte $D0, $C0, $D1, $F0, $D8, $CC, $D9, $FF, $00 ; ID 0 (middle left)   
+.byte $C9, $F0, $D1, $0F, $00, $00, $00, $00, $00 ; ID 1 (upper left)   
+.byte $E0, $CC, $E1, $33, $00, $00, $00, $00, $00 ; ID 2 (bottom left)   
+.byte $D2, $F0, $DA, $FF, $00, $00, $00, $00, $00 ; ID 3 (middle middle) 
+.byte $CA, $F0, $CB, $C0, $D2, $0F, $D3, $0C, $00 ; ID 4 (upper middle)  
+.byte $D3, $F0, $D4, $30, $DB, $FF, $DC, $33, $00 ; ID 5 (middle right)  
+.byte $E1, $CC, $E2, $FF, $00, $00, $00, $00, $00 ; ID 6 (bottom middle) 
+.byte $CB, $C0, $CC, $30, $D3, $0C, $D4, $03, $00 ; ID 7 (upper right)   
+.byte $E3, $FF, $00, $00, $00, $00, $00, $00, $00 ; ID 8 (bottom right)  
 
 LargeEnemyAttributes:
-.byte $C8, $F0, $C9, $F0, $CA, $30, $D0, $CC, $D1, $FF, $D2, $33, $00 ; ID 0 (top left)
-.byte $D8, $CC, $D9, $FF, $E0, $CC, $E1, $FF, $00, $00, $00, $00, $00 ; ID 1 (bottom left)
-.byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 2 (top right)
-.byte $DA, $FF, $DB, $FF, $E2, $FF, $E3, $FF, $00, $00, $00, $00, $00 ; ID 3 (bottom right)
+.byte $C8, $F0, $C9, $F0, $CA, $30, $D0, $CC, $D1, $FF, $D2, $33, $00 ; ID 0 (top left)     
+.byte $D8, $CC, $D9, $FF, $E0, $CC, $E1, $FF, $00, $00, $00, $00, $00 ; ID 1 (bottom left)  
+.byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 2 (top right)    
+.byte $DA, $FF, $DB, $FF, $E2, $FF, $E3, $FF, $00, $00, $00, $00, $00 ; ID 3 (bottom right) 
 
 MixedEnemyAttributes:
-.byte $CA, $C0, $CB, $F0, $D2, $0C, $D3, $0F, $00 ; ID 2 (upper middle)
-.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 3 (upper right)
-.byte $D2, $C0, $D3, $30, $DA, $CC, $DB, $33, $00 ; ID 4 (middle middle)
-.byte $D3, $C0, $D4, $F0, $DB, $CC, $DC, $FF, $00 ; ID 5 (middle right)
-.byte $E2, $FF, $E3, $33, $00, $00, $00, $00, $00 ; ID 6 (bottom middle)
-.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 7 (bottom right)
+.byte $D2, $C0, $D3, $30, $DA, $CC, $DB, $33, $00 ; ID 2 (middle middle) 
+.byte $E2, $FF, $E3, $33, $00, $00, $00, $00, $00 ; ID 3 (bottom middle) 
+.byte $CA, $C0, $CB, $F0, $D2, $0C, $D3, $0F, $00 ; ID 4 (upper middle)  
+.byte $D3, $C0, $D4, $F0, $DB, $CC, $DC, $FF, $00 ; ID 5 (middle right)  
+.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 6 (bottom right)  
+.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 7 (upper right)   
 
 DisplayAttackIndicator:
   LDX btl_battletype
