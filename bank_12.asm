@@ -293,7 +293,7 @@ lut_InitUnsramFirstPage:
 .byte $00 ;0A house
 .byte $00 ;0B eyedrops
 .byte $00 ;0C smokebomb
-.byte $00 ;0D party horn
+.byte $00 ;0D wakeup bell
 .byte $00 ;0E nothing
 .byte $00 ;1F nothing
 

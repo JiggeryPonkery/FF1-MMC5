@@ -49,71 +49,71 @@ lut_WeaponData:
 ;                                  v ----- Graphic
 ;                                      v - Palette
 
-.byte $00,$0C,$0A,$00,$00,$00,$00,$A8,$27 ; Wooden nunchucks
-.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20 ; Small knife 
-.byte $00,$06,$01,$00,$00,$00,$00,$A0,$27 ; Wooden staff
-.byte $05,$09,$0A,$00,$00,$00,$00,$90,$20 ; Rapier
-.byte $00,$09,$01,$00,$00,$00,$00,$94,$27 ; Iron hammer
-.byte $0A,$0F,$05,$00,$00,$00,$00,$80,$20 ; Short sword
-.byte $05,$10,$03,$00,$00,$00,$00,$9C,$20 ; Hand axe
-.byte $0A,$0A,$05,$00,$00,$00,$00,$84,$2B ; Scimitar
-.byte $00,$10,$0A,$00,$00,$00,$00,$A8,$20 ; Iron nunchucks
-.byte $0A,$07,$05,$00,$00,$00,$00,$98,$20 ; Large knife
-.byte $00,$0E,$01,$10,$1E,$00,$00,$A4,$20 ; Iron Staff      - might cause STUN
-.byte $05,$0D,$0A,$00,$00,$00,$00,$90,$20 ; Sabre
-.byte $0A,$14,$05,$00,$00,$00,$00,$8C,$20 ; Long sword
-.byte $05,$16,$03,$00,$00,$00,$00,$9C,$25 ; Great axe
-.byte $0A,$0F,$05,$00,$00,$00,$00,$88,$20 ; Falchion
-.byte $0F,$0A,$05,$00,$00,$00,$00,$98,$2C ; Silver knife
-.byte $0F,$17,$05,$00,$00,$00,$00,$8C,$2C ; Silver Sword
-.byte $05,$0C,$01,$00,$00,$00,$00,$94,$2C ; Silver Hammer
-.byte $0A,$19,$04,$00,$00,$00,$00,$9C,$2C ; Silver Axe
-.byte $14,$1A,$05,$00,$00,$10,$88,$88,$26 ; Flame sword
-.byte $19,$1D,$05,$00,$00,$20,$00,$8C,$21 ; Ice sword
-.byte $0F,$13,$0A,$00,$00,$00,$02,$90,$2B ; Dragon sword
-.byte $14,$15,$05,$00,$00,$00,$04,$80,$22 ; Giant sword
-.byte $1E,$20,$05,$08,$1E,$00,$08,$8C,$27 ; Sun sword       - might cause DARK
-.byte $0F,$13,$0A,$00,$00,$00,$20,$90,$25 ; Coral sword
-.byte $0F,$12,$05,$00,$00,$00,$10,$80,$24 ; Were sword
-.byte $0F,$12,$05,$40,$1E,$00,$41,$88,$23 ; Rune sword      - might cause MUTE
-.byte $00,$0C,$01,$00,$00,$00,$00,$A0,$2A ; Power staff
-.byte $0F,$1C,$03,$08,$2F,$00,$08,$9C,$23 ; Light axe       - casts HARM 2, might cause DARK
-.byte $00,$06,$01,$00,$00,$00,$00,$A4,$21 ; Heal staff      - casts HEAL
-.byte $0A,$0C,$01,$00,$00,$00,$00,$A4,$25 ; Mage staff      - casts FIRE 2
-.byte $23,$1E,$05,$00,$00,$00,$00,$80,$27 ; Defense swrd    - casts SHIELD
-.byte $0F,$0F,$01,$00,$00,$00,$00,$A4,$2C ; Wizard staff    - casts CONFUSE
-.byte $19,$18,$1E,$00,$00,$00,$00,$88,$21 ; Vorpal sword
-.byte $23,$16,$05,$00,$00,$00,$00,$98,$2C ; CatClaw
-.byte $0F,$12,$01,$00,$00,$00,$00,$94,$24 ; Thor Hammer     - casts BOLT 2
-.byte $14,$16,$0A,$04,$14,$00,$00,$90,$22 ; Bane sword      - casts BANE, might cause POISON
-.byte $23,$21,$1E,$00,$00,$00,$00,$98,$27 ; Katana
-.byte $23,$2D,$05,$00,$00,$FF,$FF,$8C,$28 ; Excalibur
-.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20 ; Masamune    
-.byte $28,$00,$0A,$00,$FF,$00,$14,$98,$28 ; Chicken Knife
-.byte $20,$00,$05,$00,$00,$00,$0A,$8C,$2A ; Brave Blade
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$0C,$0A,$00,$00,$00,$00,$A8,$27 ; 00  Wooden nunchucks
+.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20 ; 01  Small knife 
+.byte $00,$06,$01,$00,$00,$00,$00,$A0,$27 ; 02  Wooden staff
+.byte $05,$09,$0A,$00,$00,$00,$00,$90,$20 ; 03  Rapier
+.byte $00,$09,$01,$00,$00,$00,$00,$94,$27 ; 04  Iron hammer
+.byte $0A,$0F,$05,$00,$00,$00,$00,$80,$20 ; 05  Short sword
+.byte $05,$10,$03,$00,$00,$00,$00,$9C,$20 ; 06  Hand axe
+.byte $0A,$0A,$05,$00,$00,$00,$00,$84,$2B ; 07  Scimitar
+.byte $00,$10,$0A,$00,$00,$00,$00,$A8,$20 ; 08  Iron nunchucks
+.byte $0A,$07,$05,$00,$00,$00,$00,$98,$20 ; 09  Large knife
+.byte $00,$0E,$01,$10,$1E,$00,$00,$A4,$20 ; 0A  Iron Staff      - might cause STUN
+.byte $05,$0D,$0A,$00,$00,$00,$00,$90,$20 ; 0B  Sabre
+.byte $0A,$14,$05,$00,$00,$00,$00,$8C,$20 ; 0C  Long sword
+.byte $05,$16,$03,$00,$00,$00,$00,$9C,$25 ; 0D  Great axe
+.byte $0A,$0F,$05,$00,$00,$00,$00,$88,$20 ; 0E  Falchion
+.byte $0F,$0A,$05,$00,$00,$00,$00,$98,$2C ; 0F  Silver knife
+.byte $0F,$17,$05,$00,$00,$00,$00,$8C,$2C ; 10  Silver Sword
+.byte $05,$0C,$01,$00,$00,$00,$00,$94,$2C ; 11  Silver Hammer
+.byte $0A,$19,$04,$00,$00,$00,$00,$9C,$2C ; 12  Silver Axe
+.byte $14,$1A,$05,$00,$00,$10,$88,$88,$26 ; 13  Flame sword
+.byte $19,$1D,$05,$00,$00,$20,$00,$8C,$21 ; 14  Ice sword
+.byte $0F,$13,$0A,$00,$00,$00,$02,$90,$2B ; 15  Dragon sword
+.byte $14,$15,$05,$00,$00,$00,$04,$80,$22 ; 16  Giant sword
+.byte $1E,$20,$05,$08,$1E,$00,$08,$8C,$27 ; 17  Sun sword       - might cause DARK
+.byte $0F,$13,$0A,$00,$00,$00,$20,$90,$25 ; 18  Coral sword
+.byte $0F,$12,$05,$00,$00,$00,$10,$80,$24 ; 19  Were sword
+.byte $0F,$12,$05,$40,$1E,$00,$41,$88,$23 ; 1A  Rune sword      - might cause MUTE
+.byte $00,$0C,$01,$00,$00,$00,$00,$A0,$2A ; 1B  Power staff
+.byte $0F,$1C,$03,$08,$2F,$00,$08,$9C,$23 ; 1C  Light axe       - casts HARM 2, might cause DARK
+.byte $00,$06,$01,$00,$00,$00,$00,$A4,$21 ; 1D  Heal staff      - casts HEAL
+.byte $0A,$0C,$01,$00,$00,$00,$00,$A4,$25 ; 1E  Mage staff      - casts FIRE 2
+.byte $23,$1E,$05,$00,$00,$00,$00,$80,$27 ; 1F  Defense swrd    - casts SHIELD
+.byte $0F,$0F,$01,$00,$00,$00,$00,$A4,$2C ; 20  Wizard staff    - casts CONFUSE
+.byte $19,$18,$1E,$00,$00,$00,$00,$88,$21 ; 21  Vorpal sword
+.byte $23,$16,$05,$00,$00,$00,$00,$98,$2C ; 22  CatClaw
+.byte $0F,$12,$01,$00,$00,$00,$00,$94,$24 ; 23  Thor Hammer     - casts BOLT 2
+.byte $14,$16,$0A,$04,$14,$00,$00,$90,$22 ; 24  Bane sword      - casts BANE, might cause POISON
+.byte $23,$21,$1E,$00,$00,$00,$00,$98,$27 ; 25  Katana
+.byte $23,$2D,$05,$00,$00,$FF,$FF,$8C,$28 ; 26  Excalibur
+.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20 ; 27  Masamune    
+.byte $28,$00,$0A,$00,$FF,$00,$14,$98,$28 ; 28  Chicken Knife
+.byte $20,$00,$05,$00,$00,$00,$0A,$8C,$2A ; 29  Brave Blade
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2A  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2B  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2C  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2D  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2E  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2F  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 30  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 31  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 32  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 33  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 34  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 35  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 36  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 37  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 38  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 39  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3A  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3B  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3C  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3D  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3E  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3F  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 40  
 
 
 ; Here's the element and category bytes shown in binary.
@@ -3843,7 +3843,7 @@ ReadjustEquipStats:
  RTS 
 
   @AdjustWeapon:
-    JSR GetWeaponDataPointer
+    JSR GetWeaponDataPointer ; this sets Y to 0
     
     LDA ch_hitrate, X      ; get char's hit rate
     CLC
@@ -3940,10 +3940,11 @@ ReadjustEquipStats:
 
 
 GetWeaponDataPointer:    
-    SEC
-    SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
+   ; SEC
+   ; SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
     
     TAY                    ; save A
+    DEY                    ; NOW subtract 1 from the Equip ID!
     TXA                    ; then push X to stack
     PHA
     TYA                    ; restore A
@@ -3954,13 +3955,14 @@ GetWeaponDataPointer:
   ;  ASL A                  ; multiply by another 2 (A now = weapon_id * 8)
   
     STA tmp                ; put in tmp as low byte of our pointer
-    LDA #0
-    TAY
-    ADC #>lut_WeaponData   ; add high byte of our pointer (including any appropriate carry)
+    TXA
+    CLC
+    ADC #>lut_WeaponData   ; add high byte of our pointer 
     STA tmp+1              ; fill tmp+1 to complete our pointer
     
     PLA
     TAX                    ; then restore X
+    LDY #0                 ; and set Y to 0 for later
     RTS
 
 
