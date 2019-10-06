@@ -28,6 +28,7 @@
 .import RandAX
 .import MultiplyXA
 .import BackupMapMusic
+.import SetBattlePPUAddr
 
 .segment "BANK_0B"
 
@@ -3540,7 +3541,9 @@ PrepareEnemyFormation_Fiend:
   @RowLoop:
       LDA #$08
       STA btltmp+8              ; copy 8 bytes
-      JSR Battle_WritePPUData_L ; Do the PPU writing with the given params
+      ;JSR Battle_WritePPUData_L ; Do the PPU writing with the given params
+      JSR Battle_WritePPUData_BankB
+      JSR TurnOffScreen_SetScroll
       
       CLC
       LDA btltmp+4              ; add 8 to the source pointer to point to next row of tiles
@@ -3644,7 +3647,10 @@ PrepareEnemyFormation_Chaos:
       LDA #$0E
       STA btltmp+8              ; draw $0E tiles
       
-      JSR Battle_WritePPUData_L ; do the actual drawing for this row
+      ;JSR Battle_WritePPUData_L ; do the actual drawing for this row
+      
+      JSR Battle_WritePPUData_BankB
+      JSR TurnOffScreen_SetScroll
       
       CLC                   ; add $0E to source pointer to point to next row
       LDA btltmp+4
@@ -4249,11 +4255,63 @@ WriteAttributesToPPU:
     LDA #$40                ; copy 4 tiles
     STA btltmp+8
     
-    LDA #BANK_THIS          ; from this bank (although it's actually from RAM, so this
-    STA btltmp+9            ;   isn't strictly necessary)
+    ;LDA #BANK_THIS          ; from this bank (although it's actually from RAM, so this
+    ;STA btltmp+9            ;   isn't strictly necessary)
     
-    JMP Battle_WritePPUData_L   ; actually do the write, then exit
+    ;JMP Battle_WritePPUData_L   ; actually do the write, then exit
     ;RTS
+    
+    JSR Battle_WritePPUData_BankB
+    LDA cur_bank
+    CMP #$0C
+    BNE TurnOffScreen_SetScroll
+    RTS
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Battle_WritePPUData  [$F23E :: 0x3F24E]
+;;
+;;    Copies a block of data to PPU memory.  Note that no more than 256 bytes can be copied at a time
+;;  with this routine
+;;
+;;  input:
+;;     btltmp+4,5 = pointer to get data from
+;;     btltmp+6,7 = the PPU address to write to
+;;     btltmp+8   = the number of bytes to write
+;;     btltmp+9   = the bank to swap in
+;;
+;;  This routine will swap back to the battle_bank prior to exiting
+;;  It will also reset the scroll.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Battle_WritePPUData_BankB:
+  ;  LDA btltmp+9                ; swap in the desired bank
+  ;  JSR SwapPRG_L
+    
+    JSR WaitForVBlank_L
+    JSR SetBattlePPUAddr        ; use btltmp+6,7 to set PPU addr
+    
+    LDY #$00                    ; Y is loop up-counter
+    LDX btltmp+8                ; X is loop down-counter
+    
+  @Loop:
+      LDA (btltmp+4), Y         ; copy source data to PPU
+      STA $2007
+      INY
+      DEX
+      BNE @Loop
+    
+    RTS    
+  ;  LDA battle_bank             ; swap battle_bank back in
+  ;  JSR SwapPRG_L
+    
+TurnOffScreen_SetScroll:    
+    LDA #$00                    ; reset scroll before exiting
+    STA $2001
+    STA $2005
+    STA $2005
+    RTS    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

@@ -12862,11 +12862,11 @@ lut_EraseEnemyPPUAddress_Mix_Small:
 ;; Second byte is Attribute to write (ORA) to flash the graphic
 
 SmallEnemyAttributes:
-.byte $CA, $F0, $CB, $C0, $D2, $0F, $D3, $0C, $00 ; ID 0 (upper middle)
-.byte $C9, $F0, $D1, $0F, $00, $00, $00, $00, $00 ; ID 1 (upper left)
-.byte $CB, $C0, $CC, $30, $D3, $0C, $D4, $03, $00 ; ID 2 (upper right)
-.byte $D2, $F0, $DA, $FF, $00, $00, $00, $00, $00 ; ID 3 (middle middle)
-.byte $D0, $C0, $D1, $F0, $D8, $CC, $D9, $FF, $00 ; ID 4 (middle left)
+.byte $CA, $F0, $CB, $C0, $D2, $0F, $D3, $0C, $00 ; ID 0 (upper middle)  
+.byte $C9, $F0, $D1, $0F, $00, $00, $00, $00, $00 ; ID 1 (upper left) *
+.byte $D0, $C0, $D1, $F0, $D8, $CC, $D9, $FF, $00 ; ID 2 (middle left)
+.byte $CB, $C0, $CC, $30, $D3, $0C, $D4, $03, $00 ; ID 3 (upper right)
+.byte $D2, $F0, $DA, $FF, $00, $00, $00, $00, $00 ; ID 4 (middle middle)
 .byte $D3, $F0, $D4, $30, $DB, $FF, $DC, $33, $00 ; ID 5 (middle right)
 .byte $E1, $CC, $E2, $FF, $00, $00, $00, $00, $00 ; ID 6 (bottom middle)
 .byte $E0, $CC, $E1, $33, $00, $00, $00, $00, $00 ; ID 7 (bottom left)
@@ -12884,8 +12884,8 @@ SmallEnemyAttributes:
 
 LargeEnemyAttributes:
 .byte $C8, $F0, $C9, $F0, $CA, $30, $D0, $CC, $D1, $FF, $D2, $33, $00 ; ID 0 (top left)
-.byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 1 (top right)
-.byte $D8, $CC, $D9, $FF, $E0, $CC, $E1, $FF, $00, $00, $00, $00, $00 ; ID 2 (bottom left)
+.byte $D8, $CC, $D9, $FF, $E0, $CC, $E1, $FF, $00, $00, $00, $00, $00 ; ID 1 (bottom left)
+.byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 2 (top right)
 .byte $DA, $FF, $DB, $FF, $E2, $FF, $E3, $FF, $00, $00, $00, $00, $00 ; ID 3 (bottom right)
 
 MixedEnemyAttributes:
@@ -12936,12 +12936,11 @@ DisplayAttackIndicator:
   LDA btl_attacker          
   JSR MultiplyXA
   STA tmp+7
-  LDA #04                ; frame loop = do this many frames
+  LDA #02                ; frame loop = do this many frames
   STA tmp+6
    
  @Begin:
   JSR WaitForVBlank_L
-  LDX #0   
   LDY tmp+7  
  @Loop:
   JSR @SetAddress
@@ -12957,27 +12956,28 @@ DisplayAttackIndicator:
   BNE @Loop
  
  @ExitLoop:
-  STA $2006              ; better finish the write anyway...
-  PLA
-  PLA                    ; undo JSR... but still saved some space!
-  JSR BattleUpdatePPU
-  JSR BattleUpdateAudio
-  JSR DoMiniFrame
-  JSR JIGS_RefreshAttributes
-  JSR BattleUpdateAudio
+  PLA                         
+  PLA                         ; undo JSR... but still saved some space!
+  JSR @MiniFrame
+  JSR JIGS_RefreshAttributes   
+  JSR @MiniFrame
   DEC tmp+6  
   BNE @Begin 
   RTS
 
  @SetAddress: 
-  LDA #$23
-  STA $2006  
+  LDX #$23
   LDA (tmp+4), Y
   BEQ @ExitLoop
+  STX $2006  
   STA $2006 
   RTS
   
-  
+ @MiniFrame:
+  JSR BattleUpdatePPU         ; set scroll
+  JSR BattleUpdateAudio       ; update audio
+  JSR DoMiniFrame
+  JMP DoMiniFrame             ; wait for vblank/then do audio (2 frames)
   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

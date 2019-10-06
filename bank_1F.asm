@@ -9,7 +9,7 @@
 .export BattleScreenShake_L
 .export BattleWaitForVBlank_L
 .export Battle_ReadPPUData_L
-.export Battle_WritePPUData_L
+;.export Battle_WritePPUData_L
 .export CHRLoad
 .export CHRLoadToA
 .export CallMinimapDecompress
@@ -89,6 +89,7 @@
 .export lut_TilesetMusicTrack
 .export lut_VehicleMusic
 .export JIGS_RefreshAttributes
+.export SetBattlePPUAddr
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -12143,35 +12144,37 @@ SetBattlePPUAddr:
 JIGS_RefreshAttributes:
     LDA #$0B
     JSR SwapPRG_L
-    JMP WriteAttributesToPPU
+    JSR WriteAttributesToPPU
+    LDA #$0C
+    JMP SwapPRG_L
 
-Battle_WritePPUData_L:
-Battle_WritePPUData:
-    LDA btltmp+9                ; swap in the desired bank
-    JSR SwapPRG_L
-    
-    JSR WaitForVBlank_L
-    JSR SetBattlePPUAddr        ; use btltmp+6,7 to set PPU addr
-    
-    LDY #$00                    ; Y is loop up-counter
-    LDX btltmp+8                ; X is loop down-counter
-    
-  @Loop:
-      LDA (btltmp+4), Y         ; copy source data to PPU
-      STA $2007
-      INY
-      DEX
-      BNE @Loop
-      
-    LDA battle_bank             ; swap battle_bank back in
-    JSR SwapPRG_L
-    
-    LDA #$00                    ; reset scroll before exiting
-    STA $2001
-    STA $2005
-    STA $2005
-    RTS
-    
+;Battle_WritePPUData_L:
+;Battle_WritePPUData:
+;    LDA btltmp+9                ; swap in the desired bank
+;    JSR SwapPRG_L
+;    
+;    JSR WaitForVBlank_L
+;    JSR SetBattlePPUAddr        ; use btltmp+6,7 to set PPU addr
+;    
+;    LDY #$00                    ; Y is loop up-counter
+;    LDX btltmp+8                ; X is loop down-counter
+;    
+;  @Loop:
+;      LDA (btltmp+4), Y         ; copy source data to PPU
+;      STA $2007
+;      INY
+;      DEX
+;      BNE @Loop
+;      
+;    LDA battle_bank             ; swap battle_bank back in
+;    JSR SwapPRG_L
+;    
+;    LDA #$00                    ; reset scroll before exiting
+;    STA $2001
+;    STA $2005
+;    STA $2005
+;    RTS
+;    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
