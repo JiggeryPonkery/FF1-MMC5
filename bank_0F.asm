@@ -29,6 +29,7 @@
 .import LoadMenuCHRPal_Z
 .import AddGPToParty
 .import LoadPriceZ
+.import BattleRNG_L
 
 
 
@@ -337,7 +338,7 @@ data_EnemyStats:
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMATTACK
 ;     2   1   2   1   2   1   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  ENROMSTAT_SPEED
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   ENROMSTAT_LEVEL
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   ENROMSTAT_ITEM (1 = has item)  
+;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   ENROMSTAT_ITEM  
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   |    ENROMSTAT_BLANK
 ;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__|__ |__ |__  |__  ID Name   
 .byte $06,$00,$06,$00,$08,$00,$6A,$FF,$06,$04,$01,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$00,$01,$00 ;00 IMP	
@@ -459,16 +460,22 @@ data_EnemyStats:
 .byte $3F,$00,$0F,$00,$40,$00,$6A,$FF,$16,$02,$02,$10,$0A,$01,$00,$00,$00,$28,$00,$00,$00,$20,$00,$00,$00 ;74 MADPONY
 .byte $F8,$04,$BC,$02,$C8,$00,$C8,$1F,$84,$18,$03,$32,$1E,$01,$00,$00,$01,$64,$20,$9B,$00,$30,$00,$00,$00 ;75 NITEMARE
 .byte $00,$7D,$00,$7D,$E8,$03,$C8,$20,$60,$50,$02,$C8,$80,$01,$00,$00,$80,$C8,$00,$FB,$4A,$40,$00,$01,$00 ;76 WarMECH
-.byte $98,$08,$B8,$0B,$90,$01,$FF,$22,$18,$28,$01,$31,$28,$01,$01,$10,$49,$78,$10,$2B,$88,$18,$00,$01,$00 ;77 LICH
-.byte $D0,$07,$01,$00,$F4,$01,$FF,$23,$30,$32,$01,$40,$32,$01,$01,$10,$49,$8C,$00,$2B,$88,$28,$00,$01,$00 ;78 LICH (reprise)
-.byte $AB,$09,$B8,$0B,$58,$02,$FF,$24,$30,$32,$06,$3F,$28,$01,$00,$00,$41,$B7,$01,$72,$12,$20,$00,$01,$00 ;79 KARY
-.byte $D0,$07,$01,$00,$BC,$02,$FF,$25,$3C,$3C,$06,$3F,$3C,$01,$00,$00,$41,$B7,$00,$72,$12,$28,$00,$01,$00 ;7A KARY (reprise)
-.byte $95,$10,$88,$13,$20,$03,$FF,$26,$54,$3C,$08,$5A,$32,$01,$00,$00,$20,$A0,$40,$90,$24,$30,$00,$01,$00 ;7B KRAKEN
-.byte $D0,$07,$01,$00,$84,$03,$FF,$27,$62,$46,$08,$72,$46,$01,$00,$00,$20,$C8,$00,$90,$24,$38,$00,$01,$00 ;7C KRAKEN (reprise)
-.byte $78,$15,$70,$17,$E8,$03,$FF,$28,$48,$50,$04,$50,$31,$01,$00,$00,$02,$C8,$02,$F0,$41,$40,$00,$01,$00 ;7D TIAMAT
-.byte $D0,$07,$01,$00,$4C,$04,$FF,$29,$5A,$5A,$04,$55,$4B,$01,$00,$00,$42,$C8,$00,$F0,$41,$48,$00,$01,$00 ;7E TIAMAT (reprise)
-.byte $00,$00,$00,$00,$D0,$07,$FF,$2A,$64,$64,$02,$C8,$64,$01,$01,$10,$00,$C8,$00,$FF,$0F,$3F,$00,$01,$00 ;7F CHAOS
+.byte $98,$08,$B8,$0B,$90,$01,$FF,$22,$18,$28,$01,$31,$28,$01,$01,$10,$49,$78,$10,$2B,$88,$18,$00,$81,$00 ;77 LICH
+.byte $D0,$07,$01,$00,$F4,$01,$FF,$23,$30,$32,$01,$40,$32,$01,$01,$10,$49,$8C,$00,$2B,$88,$28,$00,$81,$00 ;78 LICH (reprise)
+.byte $AB,$09,$B8,$0B,$58,$02,$FF,$24,$30,$32,$06,$3F,$28,$01,$00,$00,$41,$B7,$01,$72,$12,$20,$00,$81,$00 ;79 KARY
+.byte $D0,$07,$01,$00,$BC,$02,$FF,$25,$3C,$3C,$06,$3F,$3C,$01,$00,$00,$41,$B7,$00,$72,$12,$28,$00,$81,$00 ;7A KARY (reprise)
+.byte $95,$10,$88,$13,$20,$03,$FF,$26,$54,$3C,$08,$5A,$32,$01,$00,$00,$20,$A0,$40,$90,$24,$30,$00,$81,$00 ;7B KRAKEN
+.byte $D0,$07,$01,$00,$84,$03,$FF,$27,$62,$46,$08,$72,$46,$01,$00,$00,$20,$C8,$00,$90,$24,$38,$00,$81,$00 ;7C KRAKEN (reprise)
+.byte $78,$15,$70,$17,$E8,$03,$FF,$28,$48,$50,$04,$50,$31,$01,$00,$00,$02,$C8,$02,$F0,$41,$40,$00,$81,$00 ;7D TIAMAT
+.byte $D0,$07,$01,$00,$4C,$04,$FF,$29,$5A,$5A,$04,$55,$4B,$01,$00,$00,$42,$C8,$00,$F0,$41,$48,$00,$81,$00 ;7E TIAMAT (reprise)
+.byte $00,$00,$00,$00,$D0,$07,$FF,$2A,$64,$64,$02,$C8,$64,$01,$01,$10,$00,$C8,$00,$FF,$0F,$3F,$00,$81,$00 ;7F CHAOS
    
+   
+;;
+;; For the enemy's ITEM byte above: 
+;; $01 = has item, $10 = has secondary item, $80 = has special item 
+;; So $91 means has all 3 items to steal
+;;   
 ;; First byte: item type  -- $00: gold, $01: consumable, $02: weapon/armor, $03: spell
 ;; almost just like treasure chests!
 ;;
@@ -476,281 +483,165 @@ data_EnemyStats:
 ;;    
 
 lut_StealList:              
-.byte $00, GOLD1       ; 10 gold                ; 00 IMP	            
-.byte $02, ARM26       ; cap                    ; 01 GrIMP	        
-.byte $00, $00         ; *                      ; 02 WOLF	        
-.byte $00, $00         ; *                      ; 03 GrWolf	        
-.byte $00, $00         ; *                      ; 04 WrWolf          
-.byte $00, $00         ; *                      ; 05 FrWOLF          
-.byte $00, $00         ; *                      ; 06 IGUANA          
-.byte $00, $00         ; *                      ; 07 AGAMA           
-.byte $00, $00         ; *                      ; 08 SAURIA          
-.byte $02, ARM11       ; Copper bracelet        ; 09 GIANT           
-.byte $02, ARM12       ; Silver bracelet        ; 0A FrGIANT         
-.byte $01, X_HEAL      ; X_Heal                 ; 0B R`GIANT         
-.byte $01, HEAL        ; Heal                   ; 0C SAHAG           
-.byte $01, PURE        ; Pure                   ; 0D R`SAHAG         
-.byte $01, X_HEAL      ; X_Heal                 ; 0E WzSAHAG         
-.byte $02, WEP8        ; Scimitar               ; 0F PIRATE          
-.byte $02, WEP15       ; Falchion               ; 10 KYZOKU          
-.byte $00, $00         ; *                      ; 11 SHARK           
-.byte $00, $00         ; *                      ; 12 GrSHARK         
-.byte $00, $00         ; *                      ; 13 OddEYE          
-.byte $00, $00         ; *                      ; 14 BigEYE          
-.byte $02, WEP3        ; Wooden staff           ; 15 BONE            
-.byte $02, WEP11       ; Iron staff             ; 16 R`BONE          
-.byte $00, $00         ; *                      ; 17 CREEP           
-.byte $00, $00         ; *                      ; 18 CRAWL           
-.byte $00, $00         ; *                      ; 19 HYENA           
-.byte $00, $00         ; *                      ; 1A CEREBUS         
-.byte $02, WEP5        ; Iron hammer            ; 1B OGRE            
-.byte $02, WEP18       ; Silver hammer          ; 1C GrOGRE          
-.byte $03, MG_ICE2     ; Ice 2 scroll           ; 1D WzOGRE          
-.byte $00, $00         ; *                      ; 1E ASP             
-.byte $00, $00         ; *                      ; 1F COBRA           
-.byte $00, $00         ; *                      ; 20 SeaSNAKE        
-.byte $00, $00         ; *                      ; 21 SCORPION        
-.byte $00, $00         ; *                      ; 22 LOBSTER         
-.byte $00, GOLD13      ; 240 gold -             ; 23 BULL            
-.byte $03, MG_AICE     ; AICE scroll            ; 24 ZomBULL         
-.byte $00, GOLD14      ; 255 gold               ; 25 TROLL           
-.byte $00, GOLD31      ; 880 gold               ; 26 SeaTROLL        
-.byte $00, $00         ; *                      ; 27 SHADOW          
-.byte $00, $00         ; *                      ; 28 IMAGE           
-.byte $00, $00         ; *                      ; 29 WRAITH          
-.byte $00, $00         ; *                      ; 2A GHOST           
-.byte $02, ARM1        ; Cloth T                ; 2B ZOMBIE          
-.byte $00, GOLD5       ; 55 gold                ; 2C GHOUL           
-.byte $00, GOLD7       ; 85 gold                ; 2D GEIST           
-.byte $00, GOLD12      ; 180 gold               ; 2E SPECTER         
-.byte $00, $00         ; *                      ; 2F WORM            
-.byte $00, $00         ; *                      ; 30 Sand W          
-.byte $00, $00         ; *                      ; 31 Grey W          
-.byte $00, $00         ; *                      ; 32 EYE             
-.byte $00, $00         ; *                      ; 33 PHANTOM         
-.byte $01, SOFT        ; Soft                   ; 34 MEDUSA          
-.byte $01, SOFT        ; Soft                   ; 35 GrMEDUSA        
-.byte $01, PURE        ; Pure                   ; 36 CATMAN          
-.byte $03, MG_FIR2     ; Fire 2 scroll          ; 37 MANCAT          
-.byte $00, $00         ; *                      ; 38 PEDE            
-.byte $00, $00         ; *                      ; 39 GrPEDE          
-.byte $00, $00         ; *                      ; 3A TIGER           
-.byte $00, $00         ; *                      ; 3B Saber T         
-.byte $01, X_HEAL      ; X_Heal                 ; 3C VAMPIRE         
-.byte $01, ETHER       ; Ether                  ; 3D WzVAMP          
-.byte $00, $00         ; *                      ; 3E GARGOYLE        
-.byte $00, $00         ; *                      ; 3F R`GOYLE         
-.byte $01, SOFT        ; Soft                   ; 40 EARTH           
-.byte $01, SMOKEBOMB   ; Smokebomb              ; 41 FIRE            
-.byte $00, GOLD39      ; 2750 gold              ; 42 Frost D         
-.byte $00, GOLD39      ; 2750 gold              ; 43 Red D           
-.byte $00, GOLD41      ; 5000 gold              ; 44 ZombieD         
-.byte $00, $00         ; *                      ; 45 SCUM            
-.byte $00, $00         ; *                      ; 46 MUCK            
-.byte $00, $00         ; *                      ; 47 OOZE            
-.byte $00, $00         ; *                      ; 48 SLIME           
-.byte $00, $00         ; *                      ; 49 SPIDER          
-.byte $00, $00         ; *                      ; 4A ARACHNID        
-.byte $00, GOLD33      ; 1250 gold              ; 4B MANTICOR        
-.byte $00, GOLD36      ; 1760 gold              ; 4C SPHINX          
-.byte $00, $00         ; *                      ; 4D R`ANKYLO        
-.byte $00, $00         ; *                      ; 4E ANKYLO          
-.byte $01, WAKEUPBELL  ; Wakeup Bell            ; 4F MUMMY           
-.byte $01, WAKEUPBELL  ; Wakeup Bell            ; 50 WzMUMMY         
-.byte $00, $00         ; *                      ; 51 COCTRICE        
-.byte $00, $00         ; *                      ; 52 PERILISK        
-.byte $00, GOLD32      ; 1020 gold              ; 53 WYVERN          
-.byte $00, GOLD33      ; 1250 gold              ; 54 WYRM            
-.byte $00, $00         ; *                      ; 55 TYRO            
-.byte $00, $00         ; *                      ; 56 T REX           
-.byte $00, $00         ; *                      ; 57 CARIBE          
-.byte $00, $00         ; *                      ; 58 R`CARIBE        
-.byte $00, $00         ; *                      ; 59 GATOR           
-.byte $00, $00         ; *                      ; 5A FrGATOR         
-.byte $00, $00         ; *                      ; 5B OCHO            
-.byte $00, $00         ; *                      ; 5C NAOCHO          
-.byte $00, $00         ; *                      ; 5D HYDRA           
-.byte $00, $00         ; *                      ; 5E R`HYDRA         
-.byte $01, SMOKEBOMB   ; Smokebomb              ; 5F GAURD           
-.byte $01, SMOKEBOMB   ; Smokebomb              ; 60 SENTRY          
-.byte $00, $00         ; *                      ; 61 WATER           
-.byte $00, $00         ; *                      ; 62 AIR             
-.byte $00, $00         ; *                      ; 63 NAGA            
-.byte $00, $00         ; *                      ; 64 GrNAGA          
-.byte $00, $00         ; *                      ; 65 CHIMERA         
-.byte $00, $00         ; *                      ; 66 JIMERA          
-.byte $03, MG_LIT      ; Bolt 2 scroll          ; 67 WIZARD          
-.byte $01, ETHER       ; Ether                  ; 68 SORCERER        
-.byte $02, WEP6        ; Short sword            ; 69 GARLAND         
-.byte $00, GOLD45      ; 6720 gold              ; 6A Gas D           
-.byte $00, GOLD47      ; 7690 gold              ; 6B Blue D          
-.byte $03, MG_FAST     ; Fast scroll            ; 6C MudGOL          
-.byte $03, MG_SLOW     ; Slow scroll            ; 6D RockGOL         
-.byte $02, ARM4        ; Iron armor             ; 6E IronGOL         
-.byte $02, ARM6        ; Silver armor           ; 6F BADMAN          
-.byte $02, WEP17       ; Silver sword           ; 70 EVILMAN         
-.byte $03, MG_RUB      ; Rub scroll             ; 71 ASTOS           
-.byte $01, ETHER       ; Ether                  ; 72 MAGE            
-.byte $03, MG_FOG2     ; Fog 2 scroll           ; 73 FIGHTER         
-.byte $00, $00         ; *                      ; 74 MADPONY         
-.byte $00, $00         ; *                      ; 75 NITEMARE        
-.byte $01, ELIXIR      ; ELIXIR                 ; 76 WarMECH         
-.byte $01, PHOENIXDOWN ; Phoenix Down           ; 77 LICH            
-.byte $02, ARM23       ; Aegis Shield           ; 78 LICH (reprise)  
-.byte $03, MG_FIR3     ; Fire 3 scroll          ; 79 KARY            
-.byte $02, ARM32       ; Ribbon                 ; 7A KARY (reprise)  
-.byte $02, ARM14       ; Opal bracelet          ; 7B KRAKEN          
-.byte $01, ETHER       ; Ether                  ; 7C KRAKEN (reprise)
-.byte $02, ARM10       ; Dragon armor           ; 7D TIAMAT          
-.byte $02, WEP40       ; Masamune               ; 7E TIAMAT (reprise)
-.byte $01, ELIXIR      ; ELIXIR                 ; 7F CHAOS           
+.byte $00, GOLD1      , $00, $00, $00, $00         ; 10 gold        ,      ,                 ; 00 IMP	            
+.byte $02, ARM26      , $00, $00, $00, $00         ; cap            ,      ,                 ; 01 GrIMP	        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 02 WOLF	        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 03 GrWolf	        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 04 WrWolf          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 05 FrWOLF          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 06 IGUANA          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 07 AGAMA           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 08 SAURIA          
+.byte $02, ARM11      , $00, $00, $00, $00         ; Copper bracelet,      ,                 ; 09 GIANT           
+.byte $02, ARM12      , $00, $00, $00, $00         ; Silver bracelet,      ,                 ; 0A FrGIANT         
+.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0B R`GIANT         
+.byte $01, HEAL       , $00, $00, $00, $00         ; Heal           ,      ,                 ; 0C SAHAG           
+.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 0D R`SAHAG         
+.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0E WzSAHAG         
+.byte $02, WEP8       , $00, $00, $00, $00         ; Scimitar       ,      ,                 ; 0F PIRATE          
+.byte $02, WEP15      , $00, $00, $00, $00         ; Falchion       ,      ,                 ; 10 KYZOKU          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 11 SHARK           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 12 GrSHARK         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 13 OddEYE          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 14 BigEYE          
+.byte $02, WEP3       , $00, $00, $00, $00         ; Wooden staff   ,      ,                 ; 15 BONE            
+.byte $02, WEP11      , $00, $00, $00, $00         ; Iron staff     ,      ,                 ; 16 R`BONE          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 17 CREEP           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 18 CRAWL           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 19 HYENA           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1A CEREBUS         
+.byte $02, WEP5       , $00, $00, $00, $00         ; Iron hammer    ,      ,                 ; 1B OGRE            
+.byte $02, WEP18      , $00, $00, $00, $00         ; Silver hammer  ,      ,                 ; 1C GrOGRE          
+.byte $03, MG_ICE2    , $00, $00, $00, $00         ; Ice 2 scroll   ,      ,                 ; 1D WzOGRE          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1E ASP             
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1F COBRA           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 20 SeaSNAKE        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 21 SCORPION        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 22 LOBSTER         
+.byte $00, GOLD13     , $00, $00, $00, $00         ; 240 gold -     ,      ,                 ; 23 BULL            
+.byte $03, MG_AICE    , $00, $00, $00, $00         ; AICE scroll    ,      ,                 ; 24 ZomBULL         
+.byte $00, GOLD14     , $00, $00, $00, $00         ; 255 gold       ,      ,                 ; 25 TROLL           
+.byte $00, GOLD31     , $00, $00, $00, $00         ; 880 gold       ,      ,                 ; 26 SeaTROLL        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 27 SHADOW          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 28 IMAGE           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 29 WRAITH          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2A GHOST           
+.byte $02, ARM1       , $00, $00, $00, $00         ; Cloth T        ,      ,                 ; 2B ZOMBIE          
+.byte $00, GOLD5      , $00, $00, $00, $00         ; 55 gold        ,      ,                 ; 2C GHOUL           
+.byte $00, GOLD7      , $00, $00, $00, $00         ; 85 gold        ,      ,                 ; 2D GEIST           
+.byte $00, GOLD12     , $00, $00, $00, $00         ; 180 gold       ,      ,                 ; 2E SPECTER         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2F WORM            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 30 Sand W          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 31 Grey W          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 32 EYE             
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 33 PHANTOM         
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA          
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA        
+.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN          
+.byte $03, MG_FIR2    , $00, $00, $00, $00         ; Fire 2 scroll  ,      ,                 ; 37 MANCAT          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 38 PEDE            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 39 GrPEDE          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3A TIGER           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3B Saber T         
+.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 3C VAMPIRE         
+.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3E GARGOYLE        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3F R`GOYLE         
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH           
+.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE            
+.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D         
+.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D           
+.byte $00, GOLD41     , $00, $00, $00, $00         ; 5000 gold      ,      ,                 ; 44 ZombieD         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 45 SCUM            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 46 MUCK            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 47 OOZE            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 48 SLIME           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 49 SPIDER          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4A ARACHNID        
+.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 4B MANTICOR        
+.byte $00, GOLD36     , $00, $00, $00, $00         ; 1760 gold      ,      ,                 ; 4C SPHINX          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4D R`ANKYLO        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4E ANKYLO          
+.byte $01, WAKEUPBELL , $00, $00, $00, $00         ; Wakeup Bell    ,      ,                 ; 4F MUMMY           
+.byte $01, WAKEUPBELL , $00, $00, $00, $00         ; Wakeup Bell    ,      ,                 ; 50 WzMUMMY         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 51 COCTRICE        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 52 PERILISK        
+.byte $00, GOLD32     , $00, $00, $00, $00         ; 1020 gold      ,      ,                 ; 53 WYVERN          
+.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 54 WYRM            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 55 TYRO            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 56 T REX           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 57 CARIBE          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 58 R`CARIBE        
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 59 GATOR           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5A FrGATOR         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5B OCHO            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5C NAOCHO          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5D HYDRA           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5E R`HYDRA         
+.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 5F GAURD           
+.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 60 SENTRY          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 61 WATER           
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 62 AIR             
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 63 NAGA            
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 64 GrNAGA          
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 65 CHIMERA         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 66 JIMERA          
+.byte $03, MG_LIT     , $00, $00, $00, $00         ; Bolt 2 scroll  ,      ,                 ; 67 WIZARD          
+.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 68 SORCERER        
+.byte $02, WEP6       , $00, $00, $00, $00         ; Short sword    ,      ,                 ; 69 GARLAND         
+.byte $00, GOLD45     , $00, $00, $00, $00         ; 6720 gold      ,      ,                 ; 6A Gas D           
+.byte $00, GOLD47     , $00, $00, $00, $00         ; 7690 gold      ,      ,                 ; 6B Blue D          
+.byte $03, MG_FAST    , $00, $00, $00, $00         ; Fast scroll    ,      ,                 ; 6C MudGOL          
+.byte $03, MG_SLOW    , $00, $00, $00, $00         ; Slow scroll    ,      ,                 ; 6D RockGOL         
+.byte $02, ARM4       , $00, $00, $00, $00         ; Iron armor     ,      ,                 ; 6E IronGOL         
+.byte $02, ARM6       , $00, $00, $00, $00         ; Silver armor   ,      ,                 ; 6F BADMAN          
+.byte $02, WEP17      , $00, $00, $00, $00         ; Silver sword   ,      ,                 ; 70 EVILMAN         
+.byte $03, MG_RUB     , $00, $00, $00, $00         ; Rub scroll     ,      ,                 ; 71 ASTOS           
+.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 72 MAGE            
+.byte $03, MG_FOG2    , $00, $00, $00, $00         ; Fog 2 scroll   ,      ,                 ; 73 FIGHTER         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 74 MADPONY         
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 75 NITEMARE        
+.byte $01, ELIXIR     , $00, $00, $00, $00         ; Elixir         ,      ,                 ; 76 WarMECH         
+.byte $01, PHOENIXDOWN, $00, $00, $03, MG_QAKE     ; Phoenix Down   ,      , Quake scroll    ; 77 LICH            
+.byte $01, PHOENIXDOWN, $00, $00, $02, ARM23       ; Phoenix Down   ,      , Aegis Shield    ; 78 LICH (reprise)  
+.byte $03, MG_FIR3    , $00, $00, $02, ARM20       ; Fire 3 scroll  ,      , Flame Shield    ; 79 KARY            
+.byte $01, SMOKEBOMB  , $00, $00, $02, ARM32       ; Smokebomb      ,      , Ribbon          ; 7A KARY (reprise)  
+.byte $02, ARM14      , $00, $00, $02, ARM25       ; Opal bracelet  ,      , Protect Cape    ; 7B KRAKEN          
+.byte $01, ETHER      , $00, $00, $02, ARM38       ; Ether          ,      , Power Gauntlet  ; 7C KRAKEN (reprise)
+.byte $01, ELIXIR     , $00, $00, $02, ARM10       ; Elixir         ,      , Dragon armor    ; 7D TIAMAT          
+.byte $01, ELIXIR     , $00, $00, $02, WEP40       ; Elixir         ,      , Masamune        ; 7E TIAMAT (reprise)
+.byte $01, ELIXIR     , $00, $00, $01, PHOENIXDOWN ; Elixir         ,      , Elixer          ; 7F CHAOS           
 
-lut_StealList_2:    
-.byte $00, GOLD1       ; 10 gold                ; 00 IMP	            
-.byte $02, ARM26       ; cap                    ; 01 GrIMP	        
-.byte $00, $00         ; *                      ; 02 WOLF	        
-.byte $00, $00         ; *                      ; 03 GrWolf	        
-.byte $00, $00         ; *                      ; 04 WrWolf          
-.byte $00, $00         ; *                      ; 05 FrWOLF          
-.byte $00, $00         ; *                      ; 06 IGUANA          
-.byte $00, $00         ; *                      ; 07 AGAMA           
-.byte $00, $00         ; *                      ; 08 SAURIA          
-.byte $02, ARM11       ; Copper bracelet        ; 09 GIANT           
-.byte $02, ARM12       ; Silver bracelet        ; 0A FrGIANT         
-.byte $01, X_HEAL      ; X_Heal                 ; 0B R`GIANT         
-.byte $01, HEAL        ; Heal                   ; 0C SAHAG           
-.byte $01, PURE        ; Pure                   ; 0D R`SAHAG         
-.byte $01, X_HEAL      ; X_Heal                 ; 0E WzSAHAG         
-.byte $02, WEP8        ; Scimitar               ; 0F PIRATE          
-.byte $02, WEP15       ; Falchion               ; 10 KYZOKU          
-.byte $00, $00         ; *                      ; 11 SHARK           
-.byte $00, $00         ; *                      ; 12 GrSHARK         
-.byte $00, $00         ; *                      ; 13 OddEYE          
-.byte $00, $00         ; *                      ; 14 BigEYE          
-.byte $02, WEP3        ; Wooden staff           ; 15 BONE            
-.byte $02, WEP11       ; Iron staff             ; 16 R`BONE          
-.byte $00, $00         ; *                      ; 17 CREEP           
-.byte $00, $00         ; *                      ; 18 CRAWL           
-.byte $00, $00         ; *                      ; 19 HYENA           
-.byte $00, $00         ; *                      ; 1A CEREBUS         
-.byte $02, WEP5        ; Iron hammer            ; 1B OGRE            
-.byte $02, WEP18       ; Silver hammer          ; 1C GrOGRE          
-.byte $03, MG_ICE2     ; Ice 2 scroll           ; 1D WzOGRE          
-.byte $00, $00         ; *                      ; 1E ASP             
-.byte $00, $00         ; *                      ; 1F COBRA           
-.byte $00, $00         ; *                      ; 20 SeaSNAKE        
-.byte $00, $00         ; *                      ; 21 SCORPION        
-.byte $00, $00         ; *                      ; 22 LOBSTER         
-.byte $00, GOLD13      ; 240 gold -             ; 23 BULL            
-.byte $03, MG_AICE     ; AICE scroll            ; 24 ZomBULL         
-.byte $00, GOLD14      ; 255 gold               ; 25 TROLL           
-.byte $00, GOLD31      ; 880 gold               ; 26 SeaTROLL        
-.byte $00, $00         ; *                      ; 27 SHADOW          
-.byte $00, $00         ; *                      ; 28 IMAGE           
-.byte $00, $00         ; *                      ; 29 WRAITH          
-.byte $00, $00         ; *                      ; 2A GHOST           
-.byte $02, ARM1        ; Cloth T                ; 2B ZOMBIE          
-.byte $00, GOLD5       ; 55 gold                ; 2C GHOUL           
-.byte $00, GOLD7       ; 85 gold                ; 2D GEIST           
-.byte $00, GOLD12      ; 180 gold               ; 2E SPECTER         
-.byte $00, $00         ; *                      ; 2F WORM            
-.byte $00, $00         ; *                      ; 30 Sand W          
-.byte $00, $00         ; *                      ; 31 Grey W          
-.byte $00, $00         ; *                      ; 32 EYE             
-.byte $00, $00         ; *                      ; 33 PHANTOM         
-.byte $01, SOFT        ; Soft                   ; 34 MEDUSA          
-.byte $01, SOFT        ; Soft                   ; 35 GrMEDUSA        
-.byte $01, PURE        ; Pure                   ; 36 CATMAN          
-.byte $03, MG_FIR2     ; Fire 2 scroll          ; 37 MANCAT          
-.byte $00, $00         ; *                      ; 38 PEDE            
-.byte $00, $00         ; *                      ; 39 GrPEDE          
-.byte $00, $00         ; *                      ; 3A TIGER           
-.byte $00, $00         ; *                      ; 3B Saber T         
-.byte $01, X_HEAL      ; X_Heal                 ; 3C VAMPIRE         
-.byte $01, ETHER       ; Ether                  ; 3D WzVAMP          
-.byte $00, $00         ; *                      ; 3E GARGOYLE        
-.byte $00, $00         ; *                      ; 3F R`GOYLE         
-.byte $01, SOFT        ; Soft                   ; 40 EARTH           
-.byte $01, SMOKEBOMB   ; Smokebomb              ; 41 FIRE            
-.byte $00, GOLD39      ; 2750 gold              ; 42 Frost D         
-.byte $00, GOLD39      ; 2750 gold              ; 43 Red D           
-.byte $00, GOLD41      ; 5000 gold              ; 44 ZombieD         
-.byte $00, $00         ; *                      ; 45 SCUM            
-.byte $00, $00         ; *                      ; 46 MUCK            
-.byte $00, $00         ; *                      ; 47 OOZE            
-.byte $00, $00         ; *                      ; 48 SLIME           
-.byte $00, $00         ; *                      ; 49 SPIDER          
-.byte $00, $00         ; *                      ; 4A ARACHNID        
-.byte $00, GOLD33      ; 1250 gold              ; 4B MANTICOR        
-.byte $00, GOLD36      ; 1760 gold              ; 4C SPHINX          
-.byte $00, $00         ; *                      ; 4D R`ANKYLO        
-.byte $00, $00         ; *                      ; 4E ANKYLO          
-.byte $01, WAKEUPBELL  ; Wakeup Bell            ; 4F MUMMY           
-.byte $01, WAKEUPBELL  ; Wakeup Bell            ; 50 WzMUMMY         
-.byte $00, $00         ; *                      ; 51 COCTRICE        
-.byte $00, $00         ; *                      ; 52 PERILISK        
-.byte $00, GOLD32      ; 1020 gold              ; 53 WYVERN          
-.byte $00, GOLD33      ; 1250 gold              ; 54 WYRM            
-.byte $00, $00         ; *                      ; 55 TYRO            
-.byte $00, $00         ; *                      ; 56 T REX           
-.byte $00, $00         ; *                      ; 57 CARIBE          
-.byte $00, $00         ; *                      ; 58 R`CARIBE        
-.byte $00, $00         ; *                      ; 59 GATOR           
-.byte $00, $00         ; *                      ; 5A FrGATOR         
-.byte $00, $00         ; *                      ; 5B OCHO            
-.byte $00, $00         ; *                      ; 5C NAOCHO          
-.byte $00, $00         ; *                      ; 5D HYDRA           
-.byte $00, $00         ; *                      ; 5E R`HYDRA         
-.byte $01, SMOKEBOMB   ; Smokebomb              ; 5F GAURD           
-.byte $01, SMOKEBOMB   ; Smokebomb              ; 60 SENTRY          
-.byte $00, $00         ; *                      ; 61 WATER           
-.byte $00, $00         ; *                      ; 62 AIR             
-.byte $00, $00         ; *                      ; 63 NAGA            
-.byte $00, $00         ; *                      ; 64 GrNAGA          
-.byte $00, $00         ; *                      ; 65 CHIMERA         
-.byte $00, $00         ; *                      ; 66 JIMERA          
-.byte $03, MG_LIT      ; Bolt 2 scroll          ; 67 WIZARD          
-.byte $01, ETHER       ; Ether                  ; 68 SORCERER        
-.byte $02, WEP6        ; Short sword            ; 69 GARLAND         
-.byte $00, GOLD45      ; 6720 gold              ; 6A Gas D           
-.byte $00, GOLD47      ; 7690 gold              ; 6B Blue D          
-.byte $03, MG_FAST     ; Fast scroll            ; 6C MudGOL          
-.byte $03, MG_SLOW     ; Slow scroll            ; 6D RockGOL         
-.byte $02, ARM4        ; Iron armor             ; 6E IronGOL         
-.byte $02, ARM6        ; Silver armor           ; 6F BADMAN          
-.byte $02, WEP17       ; Silver sword           ; 70 EVILMAN         
-.byte $03, MG_RUB      ; Rub scroll             ; 71 ASTOS           
-.byte $01, ETHER       ; Ether                  ; 72 MAGE            
-.byte $03, MG_FOG2     ; Fog 2 scroll           ; 73 FIGHTER         
-.byte $00, $00         ; *                      ; 74 MADPONY         
-.byte $00, $00         ; *                      ; 75 NITEMARE        
-.byte $01, ELIXIR      ; ELIXIR                 ; 76 WarMECH         
-.byte $01, PHOENIXDOWN ; Phoenix Down           ; 77 LICH            
-.byte $02, ARM23       ; Aegis Shield           ; 78 LICH (reprise)  
-.byte $03, MG_FIR3     ; Fire 3 scroll          ; 79 KARY            
-.byte $02, ARM32       ; Ribbon                 ; 7A KARY (reprise)  
-.byte $02, ARM14       ; Opal bracelet          ; 7B KRAKEN          
-.byte $01, ETHER       ; Ether                  ; 7C KRAKEN (reprise)
-.byte $02, ARM10       ; Dragon armor           ; 7D TIAMAT          
-.byte $02, WEP40       ; Masamune               ; 7E TIAMAT (reprise)
-.byte $01, ELIXIR      ; ELIXIR                 ; 7F CHAOS           
+;
+; JIGS - tried to copy the stealing algorithm from FF6, as seen in MasterZed's faq:
+; https://gamefaqs.gamespot.com/ps/562865-final-fantasy-vi/faqs/11114
+;
 
-
-
-StealProbability_LUT:
-.byte $62, $5A, $4B, $32, $19, $05, $01
-   ;;  #98: 1 level higher
-   ;;  #90: same level
-   ;;  #75: 1 level lower
-   ;;  #50: 2 levels lower
-   ;;  #25: 3 levels lower
-   ;;   #5: 4 levels lower
-   ;;   #1: 5 levels lower
-
+;1. If the monster has no items, then you automatically fail to steal.
+;
+;2. If your level is >= 205 (hacks only), you automatically steal.
+;   (Skip steps 3 through 7)
+;
+;3. StealValue = Your Level + 50 - Monster's level
+;
+;4. If StealValue < 0 then you fail to steal.
+;
+;5. If StealValue >=128 then you automatically steal.  (Skip steps 6 and 7)
+;
+;6. If you have a Sneak Ring equipped:
+;      StealValue = StealValue * 2
+;
+;7. If StealValue <= [0..99] then you fail to steal.
+;
+;8. You have 1 in 8 chance of getting a rare item; otherwise, you get a common
+;   item.
+;
+;9. If the monster doesn't have an item to steal in that slot, then you fail to
+;   steal; otherwise, you successfully steal that item.
+;   
+   
+   
 StealFromEnemyZ:
-    INC MMC5_tmp
-    INC MMC5_tmp                    ; add 2 to the thief's level
-
     LDA btl_defender
     JSR GetEnemyRAMPtr    
     
@@ -758,32 +649,29 @@ StealFromEnemyZ:
     LDA (EnemyRAMPointer), Y        ; get their "has item" byte
     BEQ @Nothing                    ; battle_stealsuccess remains 0
     
+    PHA                             ; backup their "has item" byte
     LDY #en_level
     LDA (EnemyRAMPointer), Y        ; get their level
-    SEC
-    SBC MMC5_tmp                    ; subtract thief level from enemy level
-    BMI @Success                    ; negative flag set if thief is +2 over the enemy level
-    
-    LDA MMC5_tmp                    ; next, subtract enemy level from thief level
-    SEC
-    SBC (EnemyRAMPointer), Y
-    CMP #7                          ; if the enemy is 7 levels higher, automatically fail
-    BCS @Fail                        
-    
-    TAX
-    LDA StealProbability_LUT, X     ; get the probability based on the level difference
-    STA MMC5_tmp
+    STA MMC5_tmp+1
+    LDA MMC5_tmp
+    CLC
+    ADC #50
+    SEC 
+    SBC MMC5_tmp+1
+    STA MMC5_tmp                    ; StealValue = Level + 50 - Enemy's level
+    BCC @Fail                       ; Carry clear = StealValue is less than 0 
+    CMP #100
+    BCS @Success                     ; StealValue is maxed
     
     LDA #0
-    LDX #100
+    LDX #99                         ; get 1-99 
     JSR RandAX
-    
-    CMP MMC5_tmp                    ; if A is less than the probability, success
-    BCC @Success                    
+    CMP MMC5_tmp                    ; Carry set on fail: StealValue is higher than the roll
+    BCC @Success
    
   @Fail:
-    LDA #2
-    STA battle_stealsuccess
+    PLA                             ; undo the push
+    DEC battle_stealsuccess
     
   @Nothing:
     RTS
@@ -793,26 +681,57 @@ StealFromEnemyZ:
     LDA #$0E
     STA btltmp_altmsgbuffer+2       ; put the item name code into the message buffer
     
-    LDA #0                          ; then clear it out so it can't be stolen from again
-    LDY #en_item
-    STA (EnemyRAMPointer), Y
-    
     LDY #en_enemyid
-    LDA (EnemyRAMPointer), Y        ; get their item byte
-    ASL A
-    ASL A
-    TAY                             ; hold in Y
+    LDA (EnemyRAMPointer), Y        ; get the enemy's index
+    LDX #6
+    JSR MultiplyXA                  ; multiply by 6 (6 bytes in the steal list)
+    CLC
+    ADC #<lut_StealList
+    STA tmp
+    TXA
+    ADC #>lut_StealList
+    STA tmp+1                       ; (tmp) now points to the first byte in their inventory
     
-    LDA #0
-    LDX #100
-    JSR RandAX
-    CMP #5
-    BCS StealNormal
+    PLA                             ; get the enemy's backed up "Has Item" byte
+    PHA
+    BPL @StealNormal                ; if the high bit was NOT set, they have no special items
+    
+    JSR BattleRNG_L
+    AND #$07                        ; 1 in 8 chance that it pulls a 0 now
+    BEQ @StealSpecial
+  
+   @StealNormal:  
+    LDY #en_item
+    LDA (EnemyRAMPointer), Y
+    AND #~$11
+    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
+    
+    PLA
+    AND #$10
+    BEQ @StealNormal_1              ; they have no secondary item to steal 
+    
+    JSR BattleRNG_L
+    AND #01
+    BNE @StealNormal_2
    
+   @StealNormal_1:
+    LDY #0
+    BEQ @FindItem
+   
+   @StealNormal_2:
+    LDY #2
+    BNE @FindItem
+    
    @StealSpecial:
-    TYA
-    TAX
-    LDA lut_StealList_2, X            ; get the first byte, to see what kind of thing we're stealing
+    PLA                             ; toss backed up byte
+    LDY #en_item
+    LDA (EnemyRAMPointer), Y
+    AND #~$80
+    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
+    LDY #4
+    
+   @FindItem:
+    LDA (tmp), Y
     BEQ @StealGold
     
     CMP #1
@@ -822,7 +741,8 @@ StealFromEnemyZ:
     BEQ @StealEquipment
     
    @StealMagic:                     ; do all the different ways of putting items in your inventory
-    LDA lut_StealList_2+1, X
+    INY 
+    LDA (tmp), Y
     STA btltmp_altmsgbuffer+3       ; put the item name next in the message buffer
     SEC
     SBC #ITEM_MAGICSTART
@@ -837,14 +757,16 @@ StealFromEnemyZ:
    @StealEquipment:
     LDA #$0D
     STA btltmp_altmsgbuffer+2       ; here, re-write the item name byte with equipment name byte
-    LDA lut_StealList_2+1, X
+    INY 
+    LDA (tmp), Y
     TAX
     STX btltmp_altmsgbuffer+3
     INC inv_weapon, X
     RTS
 
    @StealItem:
-    LDA lut_StealList_2+1, X
+    INY 
+    LDA (tmp), Y
     STA btltmp_altmsgbuffer+3
     TAX
     INC items, X
@@ -854,64 +776,13 @@ StealFromEnemyZ:
     LDA #3
     STA shop_type            ; needed to make sure LoadPrice works right
    
-    LDA lut_StealList_2+1, X
+    INY 
+    LDA (tmp), Y
     STA btltmp_altmsgbuffer+3
     JSR LoadPriceZ           ; get the price of the item (the amount of gold stolen)
     JSR AddGPToParty         ; add that to the party's GP
     RTS
     
-StealNormal: 
-    TYA
-    TAX
-    LDA lut_StealList, X            ; get the first byte, to see what kind of thing we're stealing
-    BEQ @StealGold
-    
-    CMP #1
-    BEQ @StealItem
-    
-    CMP #2
-    BEQ @StealEquipment
-    
-   @StealMagic:                     ; do all the different ways of putting items in your inventory
-    LDA lut_StealList+1, X
-    STA btltmp_altmsgbuffer+3       ; put the item name next in the message buffer
-    SEC
-    SBC #ITEM_MAGICSTART
-    TAX
-    INC inv_magic, X
-    LDA #$0F
-    STA btltmp_altmsgbuffer+4
-    LDA #BTLMSG_SCROLL
-    STA btltmp_altmsgbuffer+5       ; and put _scroll at the end of the message
-    RTS
-    
-   @StealEquipment:
-    LDA #$0D
-    STA btltmp_altmsgbuffer+2       ; here, re-write the item name byte with equipment name byte
-    LDA lut_StealList+1, X
-    TAX
-    STX btltmp_altmsgbuffer+3
-    INC inv_weapon, X
-    RTS
-
-   @StealItem:
-    LDA lut_StealList+1, X
-    STA btltmp_altmsgbuffer+3
-    TAX
-    INC items, X
-    RTS
-
-   @StealGold:
-    LDA #3
-    STA shop_type            ; needed to make sure LoadPrice works right
-   
-    LDA lut_StealList+1, X
-    STA btltmp_altmsgbuffer+3
-    JSR LoadPriceZ           ; get the price of the item (the amount of gold stolen)
-    JSR AddGPToParty         ; add that to the party's GP
-    RTS
-
-
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

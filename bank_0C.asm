@@ -5401,6 +5401,12 @@ ApplyRegenToPlayer:
     SEC
     SBC #1
     STA ch_battlestate, X   ; subtract 1 from the regen state to mark this turn has been used up
+    AND #$0F
+    BNE @drawregenbox
+    
+    LDA ch_battlestate, X
+    AND #STATE_HIDDEN | STATE_GUARDING
+    STA ch_battlestate, X
     
    @drawregenbox:
 	JSR DrawCombatBox_Attacker    ; draw the attacker box
@@ -5940,6 +5946,7 @@ StealFromEnemy:
     LDA #BTLMSG_STEALING
     STA btltmp_damageblockbuffer+1
     LDA #0
+    STA battle_stealsuccess           ; confirm that this is 0 
     STA btltmp_damageblockbuffer+2
     LDA #$03                          ; draw it in combat box 3
     LDX #<(btltmp_damageblockbuffer)
@@ -6003,10 +6010,8 @@ StealFromEnemy:
     .byte BANK_ENEMYSTATS
     
     LDA battle_stealsuccess
-    CMP #2
-    BEQ @StealMissed
-    CMP #1
-    BEQ @StealHit
+    BMI @StealMissed              ; $FF = steal missed
+    BNE @StealHit                 ; #01 = steal hit
         JSR DoNothingMessageBox
         JMP ClearAllCombatBoxes        
 
@@ -6026,7 +6031,7 @@ StealFromEnemy:
     INC btl_combatboxcount_alt
     
     LDA #0
-    STA battle_stealsuccess
+    STA battle_stealsuccess       ; this can be taken out now that its set to 0 above
     
     @InputLoop:                   ; Wait for the player to provide
        JSR DoFrame_WithInput      ;   ANY input
