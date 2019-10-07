@@ -652,21 +652,21 @@ StealFromEnemyZ:
     PHA                             ; backup their "has item" byte
     LDY #en_level
     LDA (EnemyRAMPointer), Y        ; get their level
-    STA MMC5_tmp+1
-    LDA MMC5_tmp
+    STA tmp+1
+    LDA tmp
     CLC
     ADC #50
     SEC 
-    SBC MMC5_tmp+1
-    STA MMC5_tmp                    ; StealValue = Level + 50 - Enemy's level
+    SBC tmp+1
+    STA tmp                         ; StealValue = Level + 50 - Enemy's level
     BCC @Fail                       ; Carry clear = StealValue is less than 0 
     CMP #100
-    BCS @Success                     ; StealValue is maxed
+    BCS @Success                    ; StealValue is maxed
     
     LDA #0
     LDX #99                         ; get 1-99 
     JSR RandAX
-    CMP MMC5_tmp                    ; Carry set on fail: StealValue is higher than the roll
+    CMP tmp                         ; Carry set on fail: StealValue is higher than the roll
     BCC @Success
    
   @Fail:

@@ -12870,11 +12870,11 @@ lut_EraseEnemyPPUAddress_Mix_Small:
 ; 1  3
 ;
 ;Mix:
-;    4  7
+;    3  7
 ; 0
 ;    2  5
 ; 1
-;    3  6
+;    4  6
 
 ;; sorta interleaved: 
 ;; First byte is Attribute table location
@@ -12888,8 +12888,21 @@ SmallEnemyAttributes:
 .byte $CA, $F0, $CB, $C0, $D2, $0F, $D3, $0C, $00 ; ID 4 (upper middle)  
 .byte $D3, $F0, $D4, $30, $DB, $FF, $DC, $33, $00 ; ID 5 (middle right)  
 .byte $E1, $CC, $E2, $FF, $00, $00, $00, $00, $00 ; ID 6 (bottom middle) 
+
+MixedEnemyAttributes: ;; these next two belong to SmallEnemyAttributes
+;; but because of... things... if we don't pad out MixedEnemyAttributes
+;; with 9*2 bytes then it won't get the right IDs for Enemy 2 and 3
 .byte $CB, $C0, $CC, $30, $D3, $0C, $D4, $03, $00 ; ID 7 (upper right)   
 .byte $E3, $FF, $00, $00, $00, $00, $00, $00, $00 ; ID 8 (bottom right)  
+
+;; MixedEnemyAttributes_Real:
+.byte $D2, $C0, $D3, $30, $DA, $CC, $DB, $33, $00 ; ID 2 (middle left) 
+.byte $CA, $C0, $CB, $F0, $D2, $0C, $D3, $0F, $00 ; ID 3 (upper left)  
+.byte $E2, $FF, $E3, $33, $00, $00, $00, $00, $00 ; ID 4 (bottom left) 
+.byte $D3, $C0, $D4, $F0, $DB, $CC, $DC, $FF, $00 ; ID 5 (middle right)  
+.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 6 (bottom right)  
+.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 7 (upper right)   
+
 
 LargeEnemyAttributes:
 .byte $C8, $F0, $C9, $F0, $CA, $30, $D0, $CC, $D1, $FF, $D2, $33, $00 ; ID 0 (top left)     
@@ -12897,13 +12910,7 @@ LargeEnemyAttributes:
 .byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 2 (top right)    
 .byte $DA, $FF, $DB, $FF, $E2, $FF, $E3, $FF, $00, $00, $00, $00, $00 ; ID 3 (bottom right) 
 
-MixedEnemyAttributes:
-.byte $D2, $C0, $D3, $30, $DA, $CC, $DB, $33, $00 ; ID 2 (middle middle) 
-.byte $E2, $FF, $E3, $33, $00, $00, $00, $00, $00 ; ID 3 (bottom middle) 
-.byte $CA, $C0, $CB, $F0, $D2, $0C, $D3, $0F, $00 ; ID 4 (upper middle)  
-.byte $D3, $C0, $D4, $F0, $DB, $CC, $DC, $FF, $00 ; ID 5 (middle right)  
-.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 6 (bottom right)  
-.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 7 (upper right)   
+
 
 DisplayAttackIndicator:
   LDX btl_battletype
@@ -12932,7 +12939,7 @@ DisplayAttackIndicator:
 
  @Indicator_Mix:
   LDA btl_attacker
-  CMP #$01                 
+  CMP #2
   BCC @Indicator_4Large    
   
   LDA #<MixedEnemyAttributes
