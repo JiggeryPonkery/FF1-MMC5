@@ -549,70 +549,70 @@ lut_ItemNamePtrTbl:
 .word ORB3              ; 2E
 .word ORB4              ; 2F
 
-.word SPELL1       ; 30
-.word SPELL2       ; 31
-.word SPELL3       ; 32
-.word SPELL4       ; 33
-.word SPELL5       ; 34
-.word SPELL6       ; 35
-.word SPELL7       ; 36
-.word SPELL8       ; 37
-.word SPELL9       ; 38
-.word SPELL10      ; 39
-.word SPELL11      ; 3A
-.word SPELL12      ; 3B
-.word SPELL13      ; 3C
-.word SPELL14      ; 3D
-.word SPELL15      ; 3E
-.word SPELL16      ; 3F
-.word SPELL17      ; 40
-.word SPELL18      ; 41
-.word SPELL19      ; 42
-.word SPELL20      ; 43
-.word SPELL21      ; 44
-.word SPELL22      ; 45
-.word SPELL23      ; 46
-.word SPELL24      ; 47
-.word SPELL25      ; 48
-.word SPELL26      ; 49
-.word SPELL27      ; 4A
-.word SPELL28      ; 4B
-.word SPELL29      ; 4C
-.word SPELL30      ; 4D
-.word SPELL31      ; 4E
-.word SPELL32      ; 4F
-.word SPELL33      ; 50
-.word SPELL34      ; 51
-.word SPELL35      ; 52
-.word SPELL36      ; 53
-.word SPELL37      ; 54
-.word SPELL38      ; 55
-.word SPELL39      ; 56
-.word SPELL40      ; 57
-.word SPELL41      ; 58
-.word SPELL42      ; 59
-.word SPELL43      ; 5A
-.word SPELL44      ; 5B
-.word SPELL45      ; 5C
-.word SPELL46      ; 5D
-.word SPELL47      ; 5E
-.word SPELL48      ; 5F
-.word SPELL49      ; 60
-.word SPELL50      ; 61
-.word SPELL51      ; 62
-.word SPELL52      ; 63
-.word SPELL53      ; 64
-.word SPELL54      ; 65
-.word SPELL55      ; 66
-.word SPELL56      ; 67
-.word SPELL57      ; 68
-.word SPELL58      ; 69
-.word SPELL59      ; 6A
-.word SPELL60      ; 6B
-.word SPELL61      ; 6C
-.word SPELL62      ; 6D
-.word SPELL63      ; 6E
-.word SPELL64      ; 6F
+.word SPELL1       ; 30 ;  MG_CURE  
+.word SPELL2       ; 31 ;  MG_HARM 
+.word SPELL3       ; 32 ;  MG_FOG  
+.word SPELL4       ; 33 ;  MG_RUSE 
+.word SPELL5       ; 34 ;  MG_FIRE 
+.word SPELL6       ; 35 ;  MG_SLEP 
+.word SPELL7       ; 36 ;  MG_LOCK 
+.word SPELL8       ; 37 ;  MG_LIT  
+.word SPELL9       ; 38 ;  MG_LAMP 
+.word SPELL10      ; 39 ;  MG_MUTE 
+.word SPELL11      ; 3A ;  MG_ALIT 
+.word SPELL12      ; 3B ;  MG_INVS 
+.word SPELL13      ; 3C ;  MG_ICE  
+.word SPELL14      ; 3D ;  MG_DARK 
+.word SPELL15      ; 3E ;  MG_TMPR 
+.word SPELL16      ; 3F ;  MG_SLOW 
+.word SPELL17      ; 40 ;  MG_CUR2 
+.word SPELL18      ; 41 ;  MG_HRM2 
+.word SPELL19      ; 42 ;  MG_AFIR 
+.word SPELL20      ; 43 ;  MG_HEAL 
+.word SPELL21      ; 44 ;  MG_FIR2 
+.word SPELL22      ; 45 ;  MG_HOLD 
+.word SPELL23      ; 46 ;  MG_LIT2 
+.word SPELL24      ; 47 ;  MG_LOK2 
+.word SPELL25      ; 48 ;  MG_PURE 
+.word SPELL26      ; 49 ;  MG_FEAR 
+.word SPELL27      ; 4A ;  MG_AICE 
+.word SPELL28      ; 4B ;  MG_AMUT 
+.word SPELL29      ; 4C ;  MG_SLP2 
+.word SPELL30      ; 4D ;  MG_FAST 
+.word SPELL31      ; 4E ;  MG_CONF 
+.word SPELL32      ; 4F ;  MG_ICE2 
+.word SPELL33      ; 50 ;  MG_CUR3 
+.word SPELL34      ; 51 ;  MG_LIFE 
+.word SPELL35      ; 52 ;  MG_HRM3 
+.word SPELL36      ; 53 ;  MG_HEL2 
+.word SPELL37      ; 54 ;  MG_FIR3 
+.word SPELL38      ; 55 ;  MG_BANE 
+.word SPELL39      ; 56 ;  MG_WARP 
+.word SPELL40      ; 57 ;  MG_SLO2 
+.word SPELL41      ; 58 ;  MG_SOFT 
+.word SPELL42      ; 59 ;  MG_EXIT 
+.word SPELL43      ; 5A ;  MG_FOG2 
+.word SPELL44      ; 5B ;  MG_INV2 
+.word SPELL45      ; 5C ;  MG_LIT3 
+.word SPELL46      ; 5D ;  MG_RUB  
+.word SPELL47      ; 5E ;  MG_QAKE 
+.word SPELL48      ; 5F ;  MG_STUN 
+.word SPELL49      ; 60 ;  MG_CUR4 
+.word SPELL50      ; 61 ;  MG_HRM4 
+.word SPELL51      ; 62 ;  MG_ARUB 
+.word SPELL52      ; 63 ;  MG_HEL3 
+.word SPELL53      ; 64 ;  MG_ICE3 
+.word SPELL54      ; 65 ;  MG_BRAK 
+.word SPELL55      ; 66 ;  MG_SABR 
+.word SPELL56      ; 67 ;  MG_BLND 
+.word SPELL57      ; 68 ;  MG_LIF2 
+.word SPELL58      ; 69 ;  MG_FADE 
+.word SPELL59      ; 6A ;  MG_WALL 
+.word SPELL60      ; 6B ;  MG_XFER 
+.word SPELL61      ; 6C ;  MG_NUKE 
+.word SPELL62      ; 6D ;  MG_STOP 
+.word SPELL63      ; 6E ;  MG_ZAP  
+.word SPELL64      ; 6F ;  MG_XXXX 
 
 .word MoneyChest1  ; 70
 .word MoneyChest2  ; 71
@@ -1834,7 +1834,6 @@ BTL_MESSAGE89:
 .byte $B6,$A6,$B5,$B2,$AF,$AF,$00  ; _scroll
 BTL_MESSAGE90:
 .byte $8B,$A8,$AA,$1F,$1E,$1D,$5F,$1F,$47,$B6,$AF,$46,$AF,$BC,$00 ; Begins healing slowly
-
 
 
  ;; You can use normal numbers to set the price if you use .word, as exampled by Heal and Pure below
