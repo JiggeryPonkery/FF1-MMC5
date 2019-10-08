@@ -7885,15 +7885,14 @@ OpenTreasureChest:
     LDA #BANK_TREASURE       ; swap to bank containing treasure chest info
     JSR SwapPRG_L
 
-    LDA tileprop+1           ; double chest index and put in X
-    ASL A                    ; this might set carry
-    TAX
-    
     LDA tileprop
-    AND #TP_SPEC_TREASURE_2
-    BNE @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
+    LSR A                    ; shift the low bit into carry
+    BCC @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
     
    @ChestTable_1: 
+    LDA tileprop+1           ; double chest index and put in X
+    ASL A                    ; carry set if its over $7F
+    TAX
     BCC :+
     
     LDA lut_Treasure+$101, X ; if treasure chest is over $7F, check the second half of the LUT
@@ -7909,6 +7908,9 @@ OpenTreasureChest:
     JMP @CheckTreasure
     
    @ChestTable_2: 
+    LDA tileprop+1           ; double chest index and put in X
+    ASL A                    ; this might set carry
+    TAX
     BCC :+
     
     LDA lut_Treasure_2+$101, X ; if treasure chest is over $7F, check the second half of the LUT
@@ -7982,8 +7984,8 @@ OpenTreasureChest:
       
    @OpenChest:
     LDA tileprop
-    AND #TP_SPEC_TREASURE_2
-    BNE @FlagChest_2 
+    LSR A 
+    BCC @FlagChest_2 
    
    @FlagChest_1:
     LDX tileprop+1           ; re-get the chest index
@@ -8052,7 +8054,7 @@ IsThisAChest:
    LDA tmp+10                ; get backed-up Y
    LSR A                     ; halve it
    TAY                       ; put it back in Y
-   LDA tsa_ul, X             ; use it to index the upper left chest tile
+   LDA tsa_ul, Y             ; use it to index the upper left chest tile
    CMP #$2A                  ; if its not $2A, its not using the chest graphic
    RTS
 
