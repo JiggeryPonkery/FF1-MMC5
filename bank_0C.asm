@@ -34,6 +34,7 @@
 .import Magic_ConvertBitsToBytes
 .import MultiplyXA
 .import PlayerAttackEnemy_PhysicalZ
+.import PlayerAttackPlayer_PhysicalZ
 .import PrintBattleTurn
 .import RandAX
 .import ShiftSpriteHightoLow
@@ -923,7 +924,7 @@ UndoCharacterBattleCommand:
     LDY #ch_ailments - ch_stats
     
     LDA (CharStatsPointer), Y        ; see if they have ailments that would stop them from doing anything
-    AND #AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP
+    AND #AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP | AIL_CONF
     ;BEQ @UndoPrevCharItem              ; if they are able to input a command
     BEQ @Done
     
@@ -1234,7 +1235,7 @@ GetCharacterBattleCommand:
     
     LDY # ch_ailments - ch_stats    ; See if this character has any ailment that would prevent them from inputting
     LDA (CharStatsPointer), Y    ;   any commands
-    AND # AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP
+    AND # AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP | AIL_CONF
     BEQ InputCharacterBattleCommand ; If they can, jump to routine to get input from menus
     
       AND # AIL_DEAD | AIL_STONE    ; if they are unable to input commands.. then isolate the Dead/Stone bits
@@ -5921,6 +5922,13 @@ IsCommandPlayerValid:
       CLC
       RTS
     
+  : LDA @ail
+    AND #AIL_CONF           ; are they confused?
+    BEQ :+
+      JSR PlayerAttackPlayer_Confused    ; if yes, do physical attack (will try to un-confuse too)
+      CLC
+      RTS
+  
   : SEC    
     RTS 
    
@@ -6450,12 +6458,47 @@ ZeroXYIfNegative:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-PlayerAttackEnemy_Physical:
 
+PlayerAttackPlayer_Confused:
+    LDA $88
+    PHA
+    PHA
+    JSR DrawPlayerAttackerCombatBox     ; draw the attacker box
+    PLA
+    JSR PrepCharStatPointers            ; Get pointers to stats
+    
+    JSR BattleRNG_L
+    AND #$03                            ; random [0,1]
+    BEQ :+                              ; smarten up if 0 (25% chance)
+        
+        LDA #BTLMSG_CONFUSED            ; print "Sleeping" message, and exit
+        JSR DrawBtlMsg_ClearIt
+        PLA
+        JMP @Attack
+    
+  : LDY #ch_ailments - ch_stats     ; and OB stats
+    LDA (CharStatsPointer), Y
+    AND #~AIL_CONF
+    STA (CharStatsPointer), Y
+    PLA
+    LDA #BTLMSG_CONFUSECURED              ; print "Woke up" message and exit
+    JMP DrawBtlMsg_ClearCombatBoxes
+
+   @Attack:
+    JSR LongCall
+    .word PlayerAttackPlayer_PhysicalZ
+    .byte BANK_ENEMYSTATS
+    
+    JSR DoPhysicalAttack_NoAttackerBox
+    JMP SavePlayerDefender    
+
+;; JIGS - hopefully DoPhysicalAttack is updated enough to handle this!
+
+PlayerAttackEnemy_Physical:
     JSR LongCall
     .word PlayerAttackEnemy_PhysicalZ
     .byte BANK_ENEMYSTATS
-    
+   
     ;; JIGS - whew, alright so...
     ;;        This whole bit was moved to Bank Z, which also contains a check to see if
     ;;        the auto-target option is on or off. If auto-target is on, it will still attack
@@ -6701,7 +6744,7 @@ EnemyAttackPlayer_Physical:
 ;    LDA btl_defender_index           ; fill btl_defender
 ;    ORA #$80
 ;    STA btl_defender
-    
+
     ;;;;;;;;;;;;;;;;;;;;;;
     JSR DoPhysicalAttack                ; Do the freaking attack!!!!
     ;;;;;;;;;;;;;;;;;;;;;;
@@ -6728,7 +6771,7 @@ EnemyAttackPlayer_Physical:
 ;    PLA
 ;    STA (CharStatsPointer), Y
 
-
+SavePlayerDefender:
     LDY #ch_curhp - ch_stats
     LDA btl_defender_hp
     STA (CharStatsPointer), Y
@@ -6824,16 +6867,16 @@ DoPhysicalAttack:
     LDY #$02
     JSR PrepareAndDrawSimpleCombatBox
     
-    LDA battle_defenderisplayer
-    BEQ :+
+    LDA battle_attackerisplayer
+    BNE :+
     JSR DisplayAttackIndicator
-    
+
+DoPhysicalAttack_NoAttackerBox:      
   : LDA #$02        ; print '03 00 00' to combat box 2
     LDY #$03        ;  (defender name in defender combat box)
     LDX #$00
     JSR PrepareAndDrawSimpleCombatBox
     
-DoPhysicalAttack_NoBoxes:    
     JSR ClearMathBufHighBytes   ; zero high bytes of math buffers
     
     LDA #168                    ; base hit chance of 168
@@ -6951,16 +6994,17 @@ DoPhysicalAttack_NoBoxes:
     BNE :+
       INC math_numhits                  ; minimum of 1 hit
       
-  : LDA battle_defenderisplayer
-    BNE @EnemyAttackingPlayer   ; jump ahead if enemy is attacking a player
+  : LDA battle_attackerisplayer
+    BEQ @EnemyAttackingPlayer   ; jump ahead if enemy is attacking a player
     
   @PlayerAttackingEnemy:
     LDA btl_attacker_varplt     ; palette to use (unimportant/unused for enemy attacks)
     LDX #$00                    ; 0 for physical/weapon attacks, nonzero for magic attacks
     JSR UpdateVariablePalette
     
-    LDY #ch_weaponsprite - ch_stats
-    LDA (CharStatsPointer), Y 
+    ;LDY #ch_weaponsprite - ch_stats
+    ;LDA (CharStatsPointer), Y 
+    LDA btl_attacker_graphic
     BEQ :+  ; JIGS - only do this longcall if no weapon equipped
     CMP #$AC
     BNE :++ ; or if using fists    
@@ -6972,18 +7016,20 @@ DoPhysicalAttack_NoBoxes:
     JSR DoFrame_UpdatePalette
       ;; JIGS - Check character class and sprite to decide what colour fists to use...
       ;; Since any sprite can be a blackbelt...
-      ;; Hopefully the extra frame is harmless! There's only like 60 a second right?
        
   : LDX btl_attacker_graphic    ; If the graphic is zero... then we shouldn't draw it
     BNE :+
       INC btlattackspr_nodraw   ; set set the 'nodraw' flag for attack sprites
       
-  : LDX btl_attacker_graphic    ; weapon graphic
+  : ;LDX btl_attacker_graphic    ; weapon graphic
     LDY #$00                    ; 0 to indicate swinging a weapon
     ;LDA battle_attacker_index   ; the attacker (0-3)
     LDA btl_attacker
     AND #$03
     JSR WalkForwardAndStrike    ; Do the animation to walk the character forward, swing their weapon, and walk back
+    
+    LDA battle_defenderisplayer
+    BNE :+
     
     LDA btl_defender_ailments
     AND #AIL_DEAD | AIL_STONE
@@ -6992,7 +7038,9 @@ DoPhysicalAttack_NoBoxes:
       
   : LDA #$00
     STA btlattackspr_nodraw     ; clear the 'nodraw' flag for the attack sprites
-    BEQ :+                      ; (always branch to just after @EnemyAttackingPlayer block)
+    
+    LDA battle_defenderisplayer ; 1 if player, 0 if enemy
+    BEQ :+                      ; branch to just after @EnemyAttackingPlayer block
     
   @EnemyAttackingPlayer:
     LDA #$01
@@ -7087,12 +7135,14 @@ DoPhysicalAttack_NoBoxes:
     LDA battle_thishitconnected
     BEQ @NextHitIteration
     
-  : LDA battle_defenderisplayer
-    BNE @DoEnemyAilmentChance
-      LDA btl_battletype           ; if battle type is 3 or 4 (fiend or chaos)
+  : LDA battle_attackerisplayer    ; 1 if player, 0 if enemy
+    BEQ @DoEnemyAilmentChance
+      LDA battle_defenderisplayer  ; 1 if player, 0 if enemy
+      BNE :+
+      LDA btl_battletype            ; if battle type is 3 or 4 (fiend or chaos)
       CMP #$03                      ; then skip trying to apply ailment
       BCS @NextHitIteration
-        LDA btl_defender_category
+      : LDA btl_defender_category
         AND $75      ; if enemy has a resistance to the attack, set chance to 1
         BEQ :+       ; if no resistances found, jump ahead to set ailment chance to weapon's
            LDA #1   
@@ -7226,8 +7276,8 @@ DoPhysicalAttack_NoBoxes:
       JSR DrawBattleMessageCombatBox
       JSR RespondDelay
         
-        LDA battle_defenderisplayer
-        BNE :+
+        LDA battle_attackerisplayer
+        BEQ :+
          JSR LongCall                     ; JIGS - critical hit checker! 
         .WORD CritCheck
         .byte BANK_ENEMYSTATS                                                 
@@ -7258,23 +7308,39 @@ DoPhysicalAttack_NoBoxes:
     JMP @DrawThisMessage
     
   @TryWake:  
-    LDA btl_attacker_attackailment    
-    AND #AIL_SLEEP                  ; is the ailment sleep?
-    BNE DoPhysicalAttack_Exit       ; if it is, don't wake them      
     LDA battle_hitsconnected
     BEQ DoPhysicalAttack_Exit       ; don't wake if no hits connected
-  
+    
     LDA btl_defender_ailments    
     AND #AIL_SLEEP
-    BEQ DoPhysicalAttack_Exit
-    
-      LDA btl_defender_ailments
-      AND #~AIL_SLEEP
-      STA btl_defender_ailments      ; remove sleep ailment
-      LDA #BTLMSG_WOKEUP
+    BEQ @CheckConfusion             ; skip waking up if they're not asleep
+
+    LDA btl_attacker_attackailment    
+    AND #AIL_SLEEP                  ; is the ailment sleep?
+    BNE @CheckConfusion             ; if yes, check for confusion
+        LDA btl_defender_ailments   ; otherwise, wake 'em up
+        AND #~AIL_SLEEP
+        STA btl_defender_ailments      ; remove sleep ailment
+        LDA #BTLMSG_WOKEUP
+        JSR DrawBattleMessageCombatBox ; print "Woke up"
+   
+   @CheckConfusion: 
+    LDA btl_defender_ailments    
+    AND #AIL_CONF
+    BEQ DoPhysicalAttack_Exit       ; skip getting sorted out if they're not confused
+   
+    LDA btl_attacker_attackailment    
+    AND #AIL_CONF                   ; is the ailment confuse?
+    BNE DoPhysicalAttack_Exit       ; if it is, don't wake them      
+
+   @WakeUp:
+    LDA btl_defender_ailments
+    AND #~AIL_CONF
+    STA btl_defender_ailments      ; remove sleep ailment
+    LDA #BTLMSG_CONFUSECURED
       
-     @DrawThisMessage:
-      JSR DrawBattleMessageCombatBox ; print "Woke up"
+   @DrawThisMessage:
+    JSR DrawBattleMessageCombatBox ; print "Woke up"
     
 DoPhysicalAttack_Exit:
     JMP RespondDelay_ClearCombatBoxes
@@ -7571,6 +7637,7 @@ DrawCharacterStatus:
     ; 6 7 x - the tiles will be laid out like this, where 2, 5, and 7 are null terminators
 
     PHA                             ; backup ailment to use again
+    PHA
     AND #AIL_DEAD | AIL_STONE | AIL_POISON ; only check these v ailments first
     JSR @FindAilment
     STA btl_unfmtcbtbox_buffer+4, X ; heavy ailment (dead, stone, poison)
@@ -7580,6 +7647,11 @@ DrawCharacterStatus:
     ; remove dead, stone, poison, and $80 from ailment
     JSR @FindAilment
     STA btl_unfmtcbtbox_buffer+1, X ; light ailment (blind, sleep, stun, mute)
+
+    PLA
+    AND #AIL_CONF
+    JSR @FindAilment
+    STA btl_unfmtcbtbox_buffer+1, X ; overwrite light ailment with confusion
     
     LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y    
@@ -7695,6 +7767,11 @@ DrawCharacterStatus:
     BCC :+    
       LDA #$EE  ; mute
       RTS
+  : ROR A
+    BCC :+    
+      LDA #$F3  ; Confused
+      RTS  
+      
   : LDA #$00    ; no ailment found, use invisible character
     RTS
 
@@ -9321,7 +9398,7 @@ AilmentCured_MessageLut:
 .BYTE BTLMSG_CURED          ; stun
 .BYTE BTLMSG_WOKEUP         ; sleep
 .BYTE BTLMSG_BREAKSILENCE   ; mute
-.BYTE BTLMSG_NOTHINGHAPPENS ; confuse    
+.BYTE BTLMSG_CONFUSECURED   ; confuse    
     
     
     
@@ -9451,7 +9528,7 @@ Battle_DoEnemyTurn:
       JSR ApplyEnemyAilmentMask
       JSR DrawCombatBox_Attacker
       JSR DisplayAttackIndicator
-      LDA #BTLMSG_CURED
+      LDA #BTLMSG_CONFUSECURED
       BNE @PrintAndEnd
       
   : JSR DrawCombatBox_Attacker          ; otherwise, the enemy is confused....

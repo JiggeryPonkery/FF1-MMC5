@@ -2,6 +2,7 @@
 .include "variables.inc"
 
 .export EnemyAttackPlayer_PhysicalZ, PlayerAttackEnemy_PhysicalZ
+.export PlayerAttackPlayer_PhysicalZ
 .export ClericCheck, CritCheck, HandPalette
 .export SoundTestZ
 .export OptionsMenu, DrawSaveScreenNames, DrawSaveScreenSprites
@@ -4175,9 +4176,6 @@ ThiefHiddenCheck:
     ;; JIGS : Loads the class to see if the character is a black belt or master, then loads sprite to decide what palette to use for the li'l fisties
       
 HandPalette:
-    LDA battle_defenderisplayer       ; gotta make sure its a player attacking, first. If not, skip all this.
-    BNE @Done
-    
     ;LDY #ch_class - ch_stats        
     ;LDA (CharStatsPointer), Y    ; Check the class
     ;CMP #$02
@@ -5184,6 +5182,8 @@ PlayerAttackEnemy_PhysicalZ:
     ;; Attacker/PLAYER stats
     LDA #$00                        ; clear this value to zero to indicate the defender
     STA battle_defenderisplayer     ;   is an enemy
+    LDA #1
+    STA battle_attackerisplayer
     
     LDY #ch_class - ch_stats
     LDA (CharStatsPointer), Y
@@ -5286,6 +5286,104 @@ PlayerAttackEnemy_PhysicalZ:
     STA btl_defender_hidden   
     RTS
     
+
+
+PlayerAttackPlayer_PhysicalZ:
+    ORA #$80
+    STA btl_attacker
+    
+   ; AND #$03
+   ; JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Attacker/PLAYER stats
+
+    LDA #1
+    STA battle_attackerisplayer
+    STA battle_defenderisplayer 
+    
+    LDY #ch_class - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #$0F                        ;; cut off high bits to get class
+    STA btl_attacker_class
+    LDA (CharStatsPointer), Y
+    AND #$F0                        ;; JIGS cut off low bits to get sprite
+    JSR ShiftSpriteHightoLow
+    STA btl_attacker_sprite
+    
+    LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #$10                        ;; get hidden state
+    STA btl_attacker_hidden
+    
+    LDY #ch_damage - ch_stats
+    LDA (CharStatsPointer), Y
+    LSR A                           ;; damage for player > player is half
+    STA btl_attacker_damage
+    
+    INY ; ch_hitrate
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_hitrate
+    
+    LDY #ch_weaponsprite - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_graphic
+    
+    INY ; ch_weaponpal
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_varplt
+    
+    INY ; ch_weaponelement
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_element
+    
+    INY ; ch_weaponcategory
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_category
+    
+    INY ; ch_numhits
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_numhits
+    
+    INY ; ch_numhitsmult          
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_numhitsmult
+    
+    INY ; ch_critrate             
+    LDA (CharStatsPointer), Y
+    LSR A                           ;; crit rate for player > player is half
+    STA btl_attacker_critrate
+    
+    LDY #ch_ailments - ch_stats   
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailments
+    
+    LDY #ch_attackailment - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_attackailment
+    
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailmentchance
+    
+    JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
+    ;; 2x hit rate
+    ;; 1.5x crit rate (2x for thief/ninja)
+    ;; 1.5x damage for thief/ninja
+   
+   @Loop:    
+    JSR BattleRNG_L
+    AND #$03    
+    STA btl_defender_index
+    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
+    
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_DEAD | AIL_STONE
+    BNE @Loop
+    
+    JMP PlayerDefenderStats    
+    
     
     
     
@@ -5315,10 +5413,11 @@ PlayerAttackEnemy_PhysicalZ:
     
     LDA #$01                    ; mark that the defender is a player and not an enemy
     STA battle_defenderisplayer
-    
+
     LDA #0
     STA btl_attacker_class
     STA btl_attacker_hidden  
+    STA battle_attackerisplayer
     
     LDY #en_strength          
     LDA (EnemyRAMPointer), Y
@@ -5360,6 +5459,8 @@ PlayerAttackEnemy_PhysicalZ:
     ; Defender PLAYER CHARACTER stats
     
     ;; JIGS - first two are always 0, so saving space...
+
+PlayerDefenderStats:    
     LDA #$00
     STA btl_defender_category
     STA GuardDefense
@@ -5375,10 +5476,10 @@ PlayerAttackEnemy_PhysicalZ:
     
     LDY #(ch_battlestate - ch_stats)
     LDA (CharStatsPointer), Y     ; check battlestate for Hiding
-    AND #$10
+    AND #STATE_HIDDEN
     STA btl_defender_hidden
     LDA (CharStatsPointer), Y     ; check battlestate for Guarding
-    AND #$80                      ; if not guarding, resume as normal
+    AND #STATE_GUARDING           ; if not guarding, resume as normal
     BEQ :+
 
     LDY #(ch_level - ch_stats)

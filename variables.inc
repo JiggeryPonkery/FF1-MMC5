@@ -818,8 +818,10 @@ battle_thishitconnected     = $686C
 ;battle_attacker_index       = $6884 ; ?? redundant??  why not just use btl_attacker?
 ;btl_defender_index       = $6885 ; same... but this is necessary for output!  See Battle_DoTurn in bank C!!
 
-battle_defenderisplayer     = $6887 ; nonzero if player is defending, zero if enemy is defending 
+battle_attackerisplayer     = $6886 ; 1 if player is attacking, 0 if enemy is attacking
+battle_defenderisplayer     = $6887 ; 1 if player is defending, 0 if enemy is defending 
                                     ;   important for output!  See Battle_DoTurn in bank C
+
 
 ;btl_attacker_ailments       = $6888
 ;btl_defender_ailments       = $6889 ; important for output!

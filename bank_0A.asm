@@ -1655,6 +1655,7 @@ data_BattleMessages:
 .word BTL_MESSAGE90
 .word BTL_MESSAGE91
 .word BTL_MESSAGE92
+.word BTL_MESSAGE93
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1842,6 +1843,10 @@ BTL_MESSAGE91:
 .byte $91,$A4,$32,$B1,$BE,$21,$AA,$B2,$21,$22,$4B,$B0,$35,$A8,$C4,$00 ; Haven't got any more!
 BTL_MESSAGE92:
 .byte $8C,$49,$1F,$47,$B6,$B2,$3C,$C3,$C5,$00 ; Coming soon...?
+BTL_MESSAGE93:
+.byte $8C,$A4,$34,$1B,$2E,$1C,$A8,$AC,$44,$3E,$B1,$3E,$B6,$00 ; Came to their senses
+
+
 
 
 

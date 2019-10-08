@@ -289,6 +289,7 @@ BTLMSG_SCROLL           = $59 ; _scroll
 BTLMSG_REGENERATING     = $5A ; Begins healing slowly
 BTLMSG_OUTOFITEM        = $5B ; Haven't got any more!
 BTLMSG_NOSKILL          = $5C ; Coming soon...?
+BTLMSG_CONFUSECURED     = $5D ; Came to their senses
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
