@@ -6974,15 +6974,17 @@ DoPhysicalAttack_NoAttackerBox:
     : LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
       LDX btl_attacker_hitrate          ;   This seems strange to me.  Shouldn't this be done even if defender
       JSR MathBuf_Add                   ;    is immobile?  Is this BUGGED?
+    
+      LDA #MATHBUF_HITCHANCE            ; and subtract the defender's evade rate from
+      LDX btl_defender_evasion            ;  the hit chance.
+      JSR MathBuf_Sub
+      
       LDY math_hitchance
       LDX math_hitchance+1
       JSR CapXYAtFF                     ; cap at 255
       STY math_hitchance
       STX math_hitchance+1
-    
-      LDA #MATHBUF_HITCHANCE            ; and subtract the defender's evade rate from
-      LDX btl_defender_evasion            ;  the hit chance.
-      JSR MathBuf_Sub
+      ;; JIGS - fixed the bug noted by Anomie as well
     
     ;;;;;
   : LDA math_hitchance
