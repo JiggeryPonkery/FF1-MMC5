@@ -4981,13 +4981,29 @@ ChecksumFail:
 
 
 BattleConfirmation:
-  LDA #21
+  LDA #22
   STA dest_y
   LDA #03
   STA dest_x
   LDA #01
   STA menustall
+  
+  LDA battle_autoswitch
+  BMI @Charge
+  BNE @Flee
+  
+ @Ready:
   LDA #12
+  BNE @Draw
+  
+ @Charge:
+  LDA #13
+  BNE @Draw
+  
+ @Flee:
+  LDA #14
+
+ @Draw:
   JMP DrawCharMenuString
 
 
@@ -5816,7 +5832,9 @@ lut_ZMenuText:
 .word Saved                  ; 9
 .word AreYouSure             ; A ; 10
 .word Deleted                ; B ; 11
-.word BattleYesNo            ; C ; 12
+.word BattleReady            ; C ; 12
+.word BattleCharge           ; D ; 13
+.word BattleFlee             ; E ; 14
 
 
 OptionOn:
@@ -5868,13 +5886,17 @@ AreYouSure:
 Deleted:
 .byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00
 
-BattleYesNo:
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05
-.byte $FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$FF,$05
-.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01
-.byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$FF,$FF,$FF,$01
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00
+BattleReady:
+.byte $FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$05,$01 ;   Ready? 
+.byte $A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$00 ; Yes    No
 
+BattleCharge:
+.byte $FF,$8C,$AB,$A4,$B5,$AA,$A8,$C5,$C4,$05,$01 ;  Charge?!
+.byte $A2,$A8,$B6,$C4,$FF,$FF,$FF,$97,$B2,$C4,$00 ; Yes!   No!
+
+BattleFlee:
+.byte $FF,$9B,$B8,$B1,$FF,$A4,$BA,$A4,$BC,$C5,$05,$01 ;  Run away?
+.byte $A2,$A8,$B6,$C3,$C0,$FF,$FF,$97,$B2,$C3,$C0,$00 ; Yes... No...
 
 
 

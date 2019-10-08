@@ -978,6 +978,7 @@ Battle_AfterFadeIn:
     STA btl_combatboxcount
     STA btl_strikingfirst
     STA btl_attackid
+    STA battle_autoswitch
     
     LDA btlform_norun
     AND #$01                ; see if "no run" bit is set.  If it is, there is no strike first/surprised check
@@ -1119,6 +1120,7 @@ ReadyToFight:
     
     LDA #0
     STA gettingcommand    
+    STA battle_autoswitch
     LDY #$10
     : LDA lut_ReadyCursorPos-1, Y
       STA btlcurs_positions-1, Y   
@@ -1533,6 +1535,7 @@ SetAutoBattle:
     
     LDA #0
     STA AutoTargetOption        ; turn on AutoTarget
+    DEC battle_autoswitch
   
    @FirstChar:
     LDA btlcmd_curchar
@@ -1563,6 +1566,7 @@ SetAutoBattle:
 
 
 SetAutoRun:
+    INC battle_autoswitch
     LDA btlcmd_curchar
     STA MMC5_tmp+1
     JSR CharWalkAnimationRight     ; walk this character back to the right
@@ -1592,6 +1596,8 @@ SetAutoRun:
     RTS
     
 AutoSet_Ready: 
+    JSR BattleClearVariableSprite
+    JSR BattleFrame
     LDA #01
     JSR UndrawNBattleBlocks_L       ; undraw the command box
     INC MMC5_tmp+1
@@ -1599,8 +1605,8 @@ AutoSet_Ready:
     STA btlcmd_curchar
     PLA 
     PLA
-    ;PLA
-    ;PLA ; two JSRs to undo 
+    PLA
+    PLA ; two JSRs to undo 
     JMP ReadyToFight
     
 

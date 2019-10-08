@@ -466,6 +466,7 @@ Asleep          = $0377 ; for sleeping! ...in battle. And save game music things
 BattleTurn      = $0378 ; Keeps track of battle turns and displays them above the character's names ; shared
 battle_class    = $0380 ; for doing skills in battle
 soundtesthelper = $0381 ; Something to do with the sound test screen
+battle_autoswitch          = $0381 ; $FF if auto-battle, $01 if auto-run, $00 normal
 battle_stealsuccess        = $0382
 RomRamMapping_lut_index    = $0383
 btl_loadenemystats_counter = $0384
