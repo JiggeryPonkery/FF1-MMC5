@@ -1456,34 +1456,6 @@ BattleSubMenu_Skill:
     LDA #$FD
     JMP SetCharacterBattleCommand  ; like magic spells
 
-SetAutoRun:
-    LDA btlcmd_curchar
-    STA MMC5_tmp+1
-    JSR CharWalkAnimationRight     ; walk this character back to the right
-    JSR HideCharacter              ;; JIGS - rehide them if previously hidden
-   
-   @Loop:
-    JSR @AutoRunSet   
-    INC btlcmd_curchar
-    LDA btlcmd_curchar
-    CMP #4
-    BNE @Loop
-    JMP AutoSet_Ready
-
- @AutoRunSet:
-    LDA btlcmd_curchar         
-    ASL A
-    ASL A
-    TAY
-    LDA #0
-    STA btl_charcmdbuf+1, Y     ; [1] = X
-    STA btl_charcmdbuf+3, Y     ; only used for ethers (so far)
-    LDA #$20
-    STA btl_charcmdbuf, Y       ; [0] = A
-    LDA btlcmd_curchar          ; see what character to start from
-    ORA #$80
-    STA btl_charcmdbuf+2, Y     ; [2] = Y
-    RTS
   
   
   ;; JIGS - this is new!
@@ -1588,15 +1560,47 @@ SetAutoBattle:
     LDA #04
     STA btl_charcmdbuf, Y       ; [0] = A
     RTS
+
+
+SetAutoRun:
+    LDA btlcmd_curchar
+    STA MMC5_tmp+1
+    JSR CharWalkAnimationRight     ; walk this character back to the right
+    JSR HideCharacter              ;; JIGS - rehide them if previously hidden
+   
+   @Loop:
+    JSR @AutoRunSet   
+    INC btlcmd_curchar
+    LDA btlcmd_curchar
+    CMP #4
+    BNE @Loop
+    JMP AutoSet_Ready
+
+ @AutoRunSet:
+    LDA btlcmd_curchar         
+    ASL A
+    ASL A
+    TAY
+    LDA #0
+    STA btl_charcmdbuf+1, Y     ; [1] = X
+    STA btl_charcmdbuf+3, Y     ; only used for ethers (so far)
+    LDA #$20
+    STA btl_charcmdbuf, Y       ; [0] = A
+    LDA btlcmd_curchar          ; see what character to start from
+    ORA #$80
+    STA btl_charcmdbuf+2, Y     ; [2] = Y
+    RTS
     
 AutoSet_Ready: 
+    LDA #01
+    JSR UndrawNBattleBlocks_L       ; undraw the command box
     INC MMC5_tmp+1
     LDA MMC5_tmp+1
     STA btlcmd_curchar
     PLA 
     PLA
-    PLA
-    PLA ; two JSRs to undo 
+    ;PLA
+    ;PLA ; two JSRs to undo 
     JMP ReadyToFight
     
 

@@ -268,7 +268,7 @@ BTLMSG_STUN             = $45 ; Stun
 BTLMSG_SLEEPTEXT        = $46 ; A {EA}{C8}{C9} (sl eep) ;; JIGS - the squished text doesn't exist anymore...
 BTLMSG_MUTE             = $47 ; Mute
 BTLMSG_HP               = $48 ; HP__
-BTLMSG_EXPUP            = $49 ; EXP up
+BTLMSG_EXPUP            = $49 ; Exp earned..
 BTLMSG_INEFFECTIVENOW   = $4A ; Ineffective now
 BTLMSG_SILENCE          = $4B ; Silence
 BTLMSG_GOMAD            = $4C ; Go mad
@@ -290,6 +290,7 @@ BTLMSG_REGENERATING     = $5A ; Begins healing slowly
 BTLMSG_OUTOFITEM        = $5B ; Haven't got any more!
 BTLMSG_NOSKILL          = $5C ; Coming soon...?
 BTLMSG_CONFUSECURED     = $5D ; Came to their senses
+BTLMSG_GOLDFOUND        = $5E ; Gold found..
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs

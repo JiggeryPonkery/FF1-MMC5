@@ -1656,6 +1656,7 @@ data_BattleMessages:
 .word BTL_MESSAGE91
 .word BTL_MESSAGE92
 .word BTL_MESSAGE93
+.word BTL_MESSAGE94
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1804,7 +1805,7 @@ BTL_MESSAGE71:
 BTL_MESSAGE72:
 .byte $91,$99,$FF,$FF,$00 ; HP__
 BTL_MESSAGE73:
-.byte $8E,$A1,$99,$FF,$B8,$B3,$00 ; EXP up
+.byte $8E,$BB,$B3,$FF,$A8,$A4,$B5,$B1,$A8,$A7,$C3,$00 ; Exp earned..
 BTL_MESSAGE74:
 .byte $92,$B1,$A8,$A9,$A9,$A8,$A6,$B7,$AC,$B9,$A8,$FF,$B1,$B2,$BA,$00 ; Ineffective now
 BTL_MESSAGE75:
@@ -1845,10 +1846,8 @@ BTL_MESSAGE92:
 .byte $8C,$49,$1F,$47,$B6,$B2,$3C,$C3,$C5,$00 ; Coming soon...?
 BTL_MESSAGE93:
 .byte $8C,$A4,$34,$1B,$2E,$1C,$A8,$AC,$44,$3E,$B1,$3E,$B6,$00 ; Came to their senses
-
-
-
-
+BTL_MESSAGE94:
+.byte $90,$B2,$AF,$A7,$FF,$A9,$B2,$B8,$B1,$A7,$C3,$00 ; Gold found..
 
 
  ;; You can use normal numbers to set the price if you use .word, as exampled by Heal and Pure below

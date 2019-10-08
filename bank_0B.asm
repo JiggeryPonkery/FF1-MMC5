@@ -2950,17 +2950,15 @@ lut_EOBText:
   .WORD @eobtext_Npts           ; 8
   .WORD @eobtext_PartyPerished  ; 9
   
-  @MnstPrsh: .BYTE $0F,$3D,$0F,$3C,$00      ; "Monsters perished" (says enemies now)
-  @ExpUp:    .BYTE $0F,$49,$00              ; "EXP up"
+  @MnstPrsh: .BYTE $0F,$3D,$0F,$3C,$00      ; "Enemies perished" 
+  @ExpUp:    .BYTE $0F,$49,$00              ; "Exp earned.."
   @ExpVal:   .BYTE $0C
-             .WORD eob_exp_reward
-             ;.BYTE $99, $00                ; "##P"  where ## is the experience reward
-             .BYTE $FF,$8E,$A1,$99,$00      ; "_EXP"
+             .WORD eob_exp_reward           ; "## Exp"  where ## is the experience reward
+             .BYTE $FF,$8E,$BB,$B3,$00      
   @GoldVal:  .BYTE $0C
-             .WORD eob_gp_reward
-  ;           .BYTE $90, $00, $00           ; "##G"   where ## is the GP reward
-             .BYTE $FF                      ; "_"             
-  @Gold:     .BYTE $90,$98,$95,$8D,$00      ; "GOLD"
+             .WORD eob_gp_reward            ; "## Gold"   where ## is the GP reward
+             .BYTE $FF,$90,$B2,$AF,$A7,$00  
+  @Gold:     .BYTE $0F,$5E,$00              ; "Gold found.."
   @LevUp:    .BYTE $0F,$30,$00              ; "Lev. up!"
 
   @eobtext_NameLN:
