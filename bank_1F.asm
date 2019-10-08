@@ -3407,7 +3407,7 @@ StandardMapMovement:
 
     JSR RedrawDoor        ; redraw an opening/closing door if necessary
 
-    LDA $2002             ; reset PPU toggle (seems unnecessary, here)
+    ;LDA $2002             ; reset PPU toggle (seems unnecessary, here)
 
     LDA move_speed        ; see if the player is moving
     BEQ SetSMScroll       ; if not, just skip ahead and set the scroll
@@ -4026,6 +4026,7 @@ SMMove_CloseRoom:
     ; Another possible fix is to rebuild doorppuaddr here to point to 1 row above where the player
     ;  is moving to (since close door graphics are generally 1 tile below the door they're closing)
 
+    ;; JIGS - this is fixed! 
 
  ;; SMMove_Door  [$CE53 :: 0x3CE63]
  ;;  Called for TP_SPEC_DOOR and TP_SPEC_LOCKED
@@ -4383,10 +4384,12 @@ PrepStandardMap:
     CLC                     ; and record that position
     ADC #7
     STA sm_player_x
+    STA doorppuaddr
     LDA sm_scroll_y
     CLC
     ADC #7
     STA sm_player_y
+    STA doorppuaddr+1      ;; JIGS - this fixes the phantom door bug
 
     LDA #BANK_BTLDATA           ; swap to page containging battle rates
     JSR SwapPRG_L
