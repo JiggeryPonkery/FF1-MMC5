@@ -100,7 +100,7 @@ EnemyAttack24:
 EnemyAttack25:
 .byte $9C,$A0,$92,$9B,$95,$00             ; SWIRL
 EnemyAttack26:
-.byte $9D,$98,$9B,$97,$8A,$8D,$98,$00    ; TORNADO
+.byte $9D,$98,$9B,$97,$8A,$8D,$98,$00     ; TORNADO
 
 ;.byte $8B,$AD,$95,$A2,$8F,$59,$9D,$00 ; BjLY ... yeah this is leftover garbage
 ;.byte $F1,$6F,$F6,$FF,$FF,$FF,$FF,$00 ; 
@@ -1653,6 +1653,8 @@ data_BattleMessages:
 .word BTL_MESSAGE88
 .word BTL_MESSAGE89
 .word BTL_MESSAGE90
+.word BTL_MESSAGE91
+.word BTL_MESSAGE92
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1723,7 +1725,8 @@ BTL_MESSAGE33:
 BTL_MESSAGE34:
 .byte $8C,$AB,$A4,$B1,$A6,$A8,$FF,$B7,$B2,$FF,$B6,$B7,$B5,$AC,$AE,$A8,$FF,$A9,$AC,$B5,$B6,$B7,$00 ; Chance to strike first
 BTL_MESSAGE35:
-.byte $96,$B2,$B1,$B6,$B7,$A8,$B5,$B6,$FF,$B6,$B7,$B5,$AC,$AE,$A8,$FF,$A9,$AC,$B5,$B6,$B7,$00 ; Monsters strike first
+.byte $8E,$B1,$A8,$B0,$AC,$A8,$B6,$FF,$B6,$B7,$B5,$AC,$AE,$A8,$FF,$A9,$AC,$B5,$B6,$B7,$00 ; Enemies strike first
+;.byte $96,$B2,$B1,$B6,$B7,$A8,$B5,$B6,$FF,$B6,$B7,$B5,$AC,$AE,$A8,$FF,$A9,$AC,$B5,$B6,$B7,$00 ; Monsters strike first
 BTL_MESSAGE36:
 .byte $8C,$A4,$B1,$BE,$B7,$FF,$B5,$B8,$B1,$00 ; Can't run
 BTL_MESSAGE37:
@@ -1763,7 +1766,8 @@ BTL_MESSAGE53:
 BTL_MESSAGE54:
 .byte $9F,$AC,$B7,$C0,$00 ; Vit.
 BTL_MESSAGE55:
-.byte $95,$B8,$A6,$AE,$00 ; Luck
+;.byte $95,$B8,$A6,$AE,$00 ; Luck
+.byte $9C,$B3,$A8,$A8,$A7,$00 ; Speed
 BTL_MESSAGE56:
 .byte $FF,$B8,$B3,$00 ;  up
 BTL_MESSAGE57:
@@ -1775,7 +1779,7 @@ BTL_MESSAGE59:
 BTL_MESSAGE60:
 .byte $B3,$A8,$B5,$AC,$B6,$AB,$A8,$A7,$00 ; perished
 BTL_MESSAGE61:
-.byte $96,$B2,$B1,$B6,$B7,$A8,$B5,$B6,$FF,$00 ; Monsters_
+.byte $8E,$B1,$A8,$B0,$AC,$A8,$B6,$FF,$00 ; Enemies_ ; $96,$B2,$B1,$B6,$B7,$A8,$B5,$B6,$FF,$00 ; Monsters_
 BTL_MESSAGE62:
 .byte $FF,$B3,$A4,$B5,$B7,$BC,$FF,$00 ; _party_
 BTL_MESSAGE63:
@@ -1819,7 +1823,7 @@ BTL_MESSAGE81:
 BTL_MESSAGE82:
 .BYTE $9C,$AF,$AC,$B3,$B3,$A8,$A7,$FF,$AC,$B1,$B7,$B2,$FF,$AB,$AC,$A7,$AC,$B1,$AA,$C3,$C0,$00 ; Slipped into hiding...
 BTL_MESSAGE83:
-.byte $8C,$A4,$B1,$BE,$B7,$FF,$B6,$A8,$A8,$FF,$B7,$B2,$FF,$B6,$A8,$A8,$C4,$00 ; Can't see to hide!
+.byte $8C,$A4,$B1,$BE,$B7,$FF,$B6,$A8,$A8,$FF,$B7,$B2,$FF,$AB,$AC,$A7,$A8,$C4,$00 ; Can't see to hide!
 BTL_MESSAGE84:
 .byte $8A,$AF,$B5,$A8,$A4,$A7,$BC,$FF,$AB,$AC,$A7,$A7,$A8,$B1,$C4,$00 ; Already hidden!
 BTL_MESSAGE85:
@@ -1834,6 +1838,12 @@ BTL_MESSAGE89:
 .byte $B6,$A6,$B5,$B2,$AF,$AF,$00  ; _scroll
 BTL_MESSAGE90:
 .byte $8B,$A8,$AA,$1F,$1E,$1D,$5F,$1F,$47,$B6,$AF,$46,$AF,$BC,$00 ; Begins healing slowly
+BTL_MESSAGE91:
+.byte $91,$A4,$32,$B1,$BE,$21,$AA,$B2,$21,$22,$4B,$B0,$35,$A8,$C4,$00 ; Haven't got any more!
+BTL_MESSAGE92:
+.byte $8C,$49,$1F,$47,$B6,$B2,$3C,$C3,$C5,$00 ; Coming soon...?
+
+
 
 
  ;; You can use normal numbers to set the price if you use .word, as exampled by Heal and Pure below

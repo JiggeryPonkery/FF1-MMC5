@@ -1369,27 +1369,7 @@ data_ChaosTSA:
 
   
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;  Misc End-Of-Battle text [$9950 :: 0x2D960]
-;;
-;;    I don't know why these strings are stored here and not with the rest of the
-;;  end of battle strings at $A00E.  Whatever.
 
-       ; eobtext_print_level = $687A
-       ; eobtext_print_hp    = $687C
-
-eobtext_NameLN:
-  .BYTE $02, $FF, $95, $0C
-  .WORD eobtext_print_level
-  .BYTE $00                                 ; "<Name> L##", where <Name> is btl_attacker's name and ## is value at $687A
-eobtext_HPMax:
-  .BYTE $0F, $31, $00                       ; "HP max"
-eobtext_Npts:
-  .BYTE $0C
-  .WORD eobtext_print_hp
-  .BYTE $0F, $32, $00                       ; "##pts." where ## is value at $687C
-eobtext_PartyPerished:
-  .BYTE $04, $0F, $3E, $0F, $3C, $00        ; "<Name> party perished", where <Name> is the party leader's name
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2965,23 +2945,37 @@ lut_EOBText:
   .WORD @Gold                   ; 3
   .WORD @GoldVal                ; 4
   .WORD @LevUp                  ; 5
-  .WORD eobtext_NameLN          ; 6
-  .WORD eobtext_HPMax           ; 7
-  .WORD eobtext_Npts            ; 8
-  .WORD eobtext_PartyPerished   ; 9
+  .WORD @eobtext_NameLN         ; 6
+  .WORD @eobtext_HPMax          ; 7
+  .WORD @eobtext_Npts           ; 8
+  .WORD @eobtext_PartyPerished  ; 9
   
-  @MnstPrsh: .BYTE $0F, $3D, $0F, $3C, $00      ; "Monsters perished"
-  @ExpUp:    .BYTE $0F, $49, $00                ; "EXP up"
+  @MnstPrsh: .BYTE $0F,$3D,$0F,$3C,$00      ; "Monsters perished" (says enemies now)
+  @ExpUp:    .BYTE $0F,$49,$00              ; "EXP up"
   @ExpVal:   .BYTE $0C
              .WORD eob_exp_reward
-             .BYTE $99, $00                     ; "##P"  where ## is the experience reward
-  @Gold:     .BYTE $90, $98, $95, $8D, $00      ; "GOLD"
+             ;.BYTE $99, $00                ; "##P"  where ## is the experience reward
+             .BYTE $FF,$8E,$A1,$99,$00      ; "_EXP"
   @GoldVal:  .BYTE $0C
              .WORD eob_gp_reward
-             .BYTE $90, $00, $00                ; "##G"   where ## is the GP reward
-  @LevUp:    .BYTE $0F, $30, $00                ; "Lev. up!"
+  ;           .BYTE $90, $00, $00           ; "##G"   where ## is the GP reward
+             .BYTE $FF                      ; "_"             
+  @Gold:     .BYTE $90,$98,$95,$8D,$00      ; "GOLD"
+  @LevUp:    .BYTE $0F,$30,$00              ; "Lev. up!"
 
-
+  @eobtext_NameLN:
+  .BYTE $02, $FF, $95, $0C
+  .WORD eobtext_print_level
+  .BYTE $00                                 ; "<Name> L##", where <Name> is btl_attacker's name and ## is value at $687A
+  @eobtext_HPMax:
+  .BYTE $0F, $31, $00                       ; "HP max"
+  @eobtext_Npts:
+  .BYTE $0C
+  .WORD eobtext_print_hp
+  .BYTE $0F, $32, $00                       ; "##pts." where ## is value at $687C
+  @eobtext_PartyPerished:
+  .BYTE $04, $0F, $3E, $0F, $3C, $00        ; "<Name> party perished", where <Name> is the party leader's name
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  ChaosDeath_FadeNoise  [$A03D :: 0x3204D]

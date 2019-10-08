@@ -287,6 +287,8 @@ BTLMSG_STEALING         = $57 ; Stealing...
 BTLMSG_STOLE            = $58 ; Stole_
 BTLMSG_SCROLL           = $59 ; _scroll
 BTLMSG_REGENERATING     = $5A ; Begins healing slowly
+BTLMSG_OUTOFITEM        = $5B ; Haven't got any more!
+BTLMSG_NOSKILL          = $5C ; Coming soon...?
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs

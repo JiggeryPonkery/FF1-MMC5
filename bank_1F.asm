@@ -78,14 +78,12 @@
 .export lut_NTRowStartLo
 .export lut_RNG
 .export PlayDoorSFX
-.export DrawManaBox
 .export DrawPlayerBox
 .export ShiftLeft6
 .export BattleBackgroundColor_LUT
 .export LoadMenuCHRPal_Z
-.export DrawBattleSkillBox_L
 .export LoadPriceZ
-.export SkillText2
+.export SkillText_BBelt
 .export lut_TilesetMusicTrack
 .export lut_VehicleMusic
 .export JIGS_RefreshAttributes
@@ -13365,17 +13363,39 @@ DrawCommandBox:
     LDY #$00
     LDX #$00
   @Loop:
-    LDA lut_BattleCommandBoxInfo, Y           ; copy 6*5 bytes (6 blocks)
-    STA btl_msgdraw_hdr, X
+    LDA lut_BattleCommandBoxInfo, Y    ; copy 6*5 bytes (6 blocks)
+    CPY #15                            ; when Y = 15, A is a dummy byte
+    BEQ @DrawSkill                     ; and it goes to draw the skill
+    STA btl_msgdraw_hdr, X             ; based on "battle_class" set earlier
     INX
     CPX #$05
-    BNE :+                                    ; every 5 bytes, add the block to the
-      JSR BattleDraw_AddBlockToBuffer         ;  output buffer
-      LDX #$00
+    BNE :++                             ; every 5 bytes, add the block to the
+      JSR BattleDraw_AddBlockToBuffer  ;  output buffer
+   :  LDX #$00
   : INY
-    CPY #9*5
+    CPY #41 ; 45
     BNE @Loop
-    JMP DrawBlockBuffer            ; then finally draw it
+    JMP DrawBlockBuffer                ; then finally draw it
+    
+   @DrawSkill:
+    TYA
+    PHA                                ; backup Y
+    LDA battle_class
+    LDX #5
+    JSR MultiplyXA
+    TAY
+    
+    LDX #$00 
+  : LDA lut_CombatSkillBox, Y          ; this gets the skill text to put up!
+    STA btl_msgdraw_hdr, X
+    INX
+    INY
+    CPX #5
+    BNE :-
+    JSR BattleDraw_AddBlockToBuffer    ; add it to the block buffer
+    PLA
+    TAY
+    JMP :---
     
     
 
@@ -13397,32 +13417,6 @@ DrawPlayerBox:
       
     JMP DrawBlockBuffer            ; then finally draw it
     
-    
-    
-DrawBattleSkillBox_L:
-    LDY #$05                                ; prep the block for the magic/item box
-    : LDA lut_CombatSkillBox-1, Y
-      STA btl_msgdraw_hdr-1, Y
-      DEY
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
-    
-    LDA battle_class
-    LDX #5
-    JSR MultiplyXA                      ; then multiply by 5
-    TAY
-    
-    LDX #$00 
-    : LDA lut_CombatSkillBox+5, Y        ; this gets the skill text to put up!
-      STA btl_msgdraw_hdr, X
-      INX
-      INY
-      CPX #5
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
-  
-
-    JMP DrawBlockBuffer            ; then finally draw it    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13457,6 +13451,7 @@ DrawCombatBox:
     
     LDX #$00
     : LDA lut_CombatBoxes, Y    ; copy 3 more bytes (Text data)
+      BMI :+                    ; if high bit is set, skip text
       STA btl_msgdraw_hdr, X
       INX
       INY
@@ -13469,7 +13464,7 @@ DrawCombatBox:
     STA btl_msgdraw_srcptr+1
     
     JSR BattleDraw_AddBlockToBuffer ; add this text block
-    JMP DrawBlockBuffer             ; then draw it.
+  : JMP DrawBlockBuffer             ; then draw it.
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14003,18 +13998,6 @@ FillItemBox_BankC:   ;; JIGS - just enough changes from the menu version to make
     CLC    ; C clear on exit indicates there was at least 1 item in inventory
     RTS
     
-    
-    
-DrawManaBox:
-    LDY #$05
-    : LDA lut_CombatEtherBox-1, Y       ; load the specs for the Item box
-      STA btl_msgdraw_hdr-1, Y          ; -1 because Y is 1-based
-      DEY
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer     ; add the box to the block buffer
-    JMP DrawBlockBuffer     
-    
-    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -14079,10 +14062,18 @@ lut_CombatBoxes:
   .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 old attack/new EOB box
   .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
   .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 4old damage/new EOB box
-  .BYTE $00, $00, $06, $1F, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
+  .BYTE $00, $00, $06, $20, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
   .BYTE $00, $0D, $03, $0A, $03,    $01, $0E, $03       ; 5 damage
   .BYTE $00, $0D, $00, $0A, $03,    $01, $0E, $00       ; 6 their attack ("FROST", "2Hits!" etc)
-
+  
+  .BYTE $00, $00, $00, $10, $09,    $FF, $00, $00       ; 7 Ready? box
+  
+  lut_CombatEtherBox:                                   ; 8 Ether/MP box
+;       hdr    X    Y   wd   ht 
+  .BYTE $00, $00, $00, $11, $09 ; MP list 
+  .BYTE $FF, $00, $00
+  
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Combat Item/Magic Box lut    [$FA11 :: 0x3FA21]
@@ -14092,11 +14083,7 @@ lut_CombatBoxes:
 lut_CombatItemMagicBox:
 ;       hdr    X    Y   wd   ht 
   .BYTE $00, $00, $00, $20, $09 ; magic
-  
-  lut_CombatEtherBox:
-;       hdr    X    Y   wd   ht 
-  .BYTE $00, $00, $00, $11, $09 ; MP list
-  
+ 
 lut_CombatEquipmentBox:
   .BYTE $00, $00, $00, $17, $09 ; weapons / armor
 
@@ -14117,7 +14104,8 @@ lut_BattleCommandBoxInfo:
 ;       hdr,  X    Y    ptr
   .BYTE $01, $03, $00, <@txt0, >@txt0   ; text
   .BYTE $01, $03, $02, <@txt1, >@txt1
-  .BYTE $01, $03, $04, <@txt2, >@txt2
+  .BYTE $00
+  ;.BYTE $01, $03, $04, <@txt2, >@txt2
   .BYTE $01, $03, $06, <@txt3, >@txt3
   .BYTE $01, $0A, $00, <@txt4, >@txt4
   .BYTE $01, $0A, $02, <@txt5, >@txt5 
@@ -14126,8 +14114,8 @@ lut_BattleCommandBoxInfo:
   
   
   @txt0:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
-  @txt1:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
-  @txt2:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
+  @txt1:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
+ ; @txt2:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
   @txt3:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
 
   @txt4:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
@@ -14138,29 +14126,29 @@ lut_BattleCommandBoxInfo:
  ;
 
 lut_CombatSkillBox:
-;       hdr   X    Y  width  height
-  .BYTE $00, $02, $05, $0C, $03 ; skills
 ;       hdr,  X    Y    ptr
-  .BYTE $01, $03, $05, <SkillText0, >SkillText0   ; 00 ; these match the class
-  .BYTE $01, $03, $05, <SkillText1, >SkillText1   ; 01
-  .BYTE $01, $03, $05, <SkillText2, >SkillText2   ; 02
-  .BYTE $01, $03, $05, <SkillText3, >SkillText3   ; 03
-  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 04
-  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 05
-  .BYTE $01, $03, $05, <SkillText0, >SkillText0   ; 06
-  .BYTE $01, $03, $05, <SkillText1, >SkillText1   ; 07
-  .BYTE $01, $03, $05, <SkillText2, >SkillText2   ; 08
-  .BYTE $01, $03, $05, <SkillText3, >SkillText3   ; 09
-  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 0A
-  .BYTE $01, $03, $05, <SkillText4, >SkillText4   ; 0B 
+  .BYTE $01, $03, $04, <SkillText_Fighter, >SkillText_Fighter ; 00 Fighter
+  .BYTE $01, $03, $04, <SkillText_Thief,   >SkillText_Thief   ; 01 Thief 
+  .BYTE $01, $03, $04, <SkillText_BBelt,   >SkillText_BBelt   ; 02 Black Belt
+  .BYTE $01, $03, $04, <SkillText_RMage,   >SkillText_RMage   ; 03 Red Mage
+  .BYTE $01, $03, $04, <SkillText_WBMage,  >SkillText_WBMage  ; 04 White Mage
+  .BYTE $01, $03, $04, <SkillText_WBMage,  >SkillText_WBMage  ; 05 Black Mage
+; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 06 Knight
+; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 07 Ninja
+; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 08 Master
+; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 09 Red Wizard
+; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 0A White Wizard
+; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 0B Black Wizard
 
-SkillText0:  .BYTE $8D, $A8, $A9, $A8, $B1, $A7, $00       ; Defend
-SkillText1:  .BYTE $9C, $B7, $A8, $A4, $AF, $00            ; Steal
-  ;@txt2:  .BYTE $8C, $B2, $B8, $B1, $B7, $A8, $B5, $00  ; Counter
-SkillText2:  .BYTE $94, $AC, $A6, $AE, $00                 ; Kick
-SkillText3:  .BYTE $9B, $B8, $B1, $AC, $A6, $00            ; Runic
-SkillText4:  .BYTE $8C, $AB, $A4, $B1, $B7, $00            ; Chant
+;; This list is halved until needed. GetBattleClass in Bank C will  
+;; subtract 6 from itself if the character's class is over #CLS_KN--knight
 
+SkillText_Fighter:   .BYTE $A0, $A4, $B5, $A7, $00         ; Ward
+SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
+SkillText_BBelt:     .BYTE $94, $AC, $A6, $AE, $00         ; Kick
+SkillText_RMage:     .BYTE $9B, $B8, $B1, $AC, $A6, $00    ; Runic
+SkillText_WBMage:    .BYTE $8C, $AB, $A4, $B1, $B7, $00    ; Chant
+SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; ______
  
 
 lut_PlayerBoxInfo:
