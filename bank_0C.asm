@@ -259,6 +259,11 @@ lut_MagicData:
 ; JIGS - I highly recommend using FFHackster to design your magic, then copy-paste the data into the .bin above
 ;        and comment out the stuff below. For weapons and armours, too.
 ;
+;; JIGS note - When loading up magic data, about #90 bytes can be saved by changing the bit-shifting to:
+;; A = magic ID
+;; LDX #7
+;; JSR MultiplyXA
+;; ...then deleting the unused byte from all of these.
    
 ;      ╒ Hit Rate
 ;      |   ╒ Effectivity
@@ -3673,9 +3678,16 @@ SetNaturalPose:
     LDA ch_ailments, Y  ; check this character's ailment
     AND #AIL_DEAD
     BEQ :+              ; if they're dead
+      STA ch_ailments, Y ;; JIGS - if they're dead, it should be their ONLY ailment!
       LDA #$00          ; zero their hit points (seems strange to do this here, but whatever)
       STA ch_curhp, Y
       STA ch_curhp+1, Y
+      
+  : LDA ch_ailments, Y ;; JIGS - same goes for stone!
+    AND #AIL_STONE        
+    BEQ :+ 
+       STA ch_ailments, Y        
+      
   : LDA ch_ailments, Y  ; get ailments again
     ;AND #(AIL_POISON | AIL_STUN | AIL_SLEEP)    ; see if they are poisoned, stunned, or asleep
     AND #(AIL_POISON | AIL_STUN )
@@ -5262,6 +5274,10 @@ ApplyPoisonToPlayer:
     AND #AIL_POISON
     BEQ @Exit           ; if poison = no, then z = 1
     
+    LDA ch_ailments, X
+    AND # AIL_DEAD | AIL_STONE
+    BEQ @Exit           ; do not poison someone who is stone... or dead
+    
 	LDA ch_maxhp, X     ; move max HP to math_basedamage 
     STA math_basedamage
     LDA ch_maxhp+1, X
@@ -6412,7 +6428,7 @@ Battle_PlayerTryUnstun:
     JSR BattleRNG_L
     AND #$03                            ; random [0,3]
     BEQ :+                              ; unstun if 0 (25% chance)
-      LDA #BTLMSG_PARALYZED_B               ; otherwise, if nonzero, stay stunned
+      LDA #BTLMSG_PARALYZED               ; otherwise, if nonzero, stay stunned
       JMP DrawBtlMsg_ClearCombatBoxes       ; print "Paralyzed" message, then clear boxes and end turn.
       
   : LDY #ch_ailments - ch_stats         ; ... and also from OB ailments
@@ -7400,7 +7416,7 @@ PrintPlayerAilmentMessageFromAttack:
   : ASL A                       ; bit 4 set = stun (removes action)
     BCC :+
       PHA
-      LDA #BTLMSG_PARALYZED_A
+      LDA #BTLMSG_PARALYZED
       JSR DrawBtlMsg_ClearIt
       JSR @RemoveDefenderAction
       PLA
@@ -7639,6 +7655,9 @@ DrawCharacterStatus:
     STA btl_unfmtcbtbox_buffer+3, X ; start of second string, invisible tile
     STA btl_unfmtcbtbox_buffer+6, X ; start of third string, invisible tile
     
+    STA btl_unfmtcbtbox_buffer+1, X   ; clear out heavy ailment
+    STA btl_unfmtcbtbox_buffer+4, X ; clear out light ailment
+    
     LDA CharacterIndexBackup
     JSR PrepCharStatPointers
     LDY #ch_ailments - ch_stats
@@ -7647,25 +7666,38 @@ DrawCharacterStatus:
     ; 0 1 2
     ; 3 4 5
     ; 6 7 x - the tiles will be laid out like this, where 2, 5, and 7 are null terminators
-
-    PHA                             ; backup ailment to use again
-    PHA
-    AND #AIL_DEAD | AIL_STONE | AIL_POISON ; only check these v ailments first
-    JSR @FindAilment
-    STA btl_unfmtcbtbox_buffer+4, X ; heavy ailment (dead, stone, poison)
     
-    PLA                             ; fetch ailment
-    AND #$78 ; #~AIL_DEAD | AIL_STONE | AIL_POISON | AIL_CONF 
-    ; remove dead, stone, poison, and $80 from ailment
-    JSR @FindAilment
-    STA btl_unfmtcbtbox_buffer+1, X ; light ailment (blind, sleep, stun, mute)
-
-    PLA
-    AND #AIL_CONF
-    JSR @FindAilment
-    STA btl_unfmtcbtbox_buffer+1, X ; overwrite light ailment with confusion
+    ; 0 = regenerating
+    ; 3 = guarding
+    ; 6 = hidden
+    ; 1 = heavy ailment
+    ; 4 = light ailment
     
-    LDY #ch_battlestate - ch_stats
+  ;  PHA                             ; backup ailment to use again
+  ;  PHA
+  ;  AND #AIL_DEAD | AIL_STONE | AIL_POISON ; only check these v ailments first
+  ;  JSR @FindAilment
+  ;  STA btl_unfmtcbtbox_buffer+4, X ; heavy ailment (dead, stone, poison)
+  ;  
+  ;  PLA                             ; fetch ailment
+  ;  AND #$78 ; #~AIL_DEAD | AIL_STONE | AIL_POISON | AIL_CONF 
+  ;  ; remove dead, stone, poison, and $80 from ailment
+  ;  JSR @FindAilment
+  ;  STA btl_unfmtcbtbox_buffer+1, X ; light ailment (blind, sleep, stun, mute)
+  ;
+  ;  PLA
+  ;  AND #AIL_CONF
+  ;  BEQ :+
+  ;  STA btl_unfmtcbtbox_buffer+1, X ; overwrite light ailment with confusion
+  ;; JIGS - according to my counting, this is 78 bytes of code, counting the @FindAilment bit below.
+  ;; And for just 77 bytes, we can have more control over what icons are printed...!
+    
+    STA tmp+1
+    LDY #$FF 
+
+    JSR @DoAilments
+    
+  : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y    
     BEQ @NoState                    ; if 0, skip changing it
     AND #STATE_HIDDEN               ; hidden?
@@ -7698,10 +7730,8 @@ DrawCharacterStatus:
     ADC #8                          ; add 8 to X to move forward in the buffer
     TAX
     
+    INC CharacterIndexBackup        ; add 1 to character index to process next character
     LDA CharacterIndexBackup
-    CLC
-    ADC #1                          ; add 1 to character index to process next character
-    STA CharacterIndexBackup
     CMP #4                          ; when all 4 are done, finish
     BNE @CharacterLoop
     
@@ -7748,44 +7778,87 @@ DrawCharacterStatus:
     JSR BattleUpdatePPU                 ; reset scroll 
     JSR BattleUpdateAudio               ; update audio for the frame we just waited for
     
-    RTS    
+  : RTS    
+    
+   @DoAilments:
+    
+   @HeavyAilment:
+	INY
+	CPY #3
+    BEQ @LightAilment
+	LDA @AilmentLUT, Y 
+    STA tmp
+	LDA tmp+1
+    AND tmp
+    BEQ @HeavyAilment
+	LDA @AilmentIconLUT, Y
+	STA btl_unfmtcbtbox_buffer+4, X
+    BNE @HeavyAilment
 
-   @FindAilment:
-    ROR A
-    BCC :+
-      LDA #$7B  ; dead
-      RTS      
-  : ROR A
-    BCC :+    
-      LDA #$7C  ; stone
-      RTS
-  : ROR A
-    BCC :+    
-      LDA #$7D  ; poison
-      RTS
-  : ROR A
-    BCC :+    
-      LDA #$EC  ; blind
-      RTS
-  : ROR A
-    BCC :+    
-      LDA #$ED  ; stun
-      RTS
-  : ROR A
-    BCC :+    
-      LDA #$7F  ; sleep
-      RTS
-  : ROR A
-    BCC :+    
-      LDA #$EE  ; mute
-      RTS
-  : ROR A
-    BCC :+    
-      LDA #$F3  ; Confused
-      RTS  
-      
-  : LDA #$00    ; no ailment found, use invisible character
-    RTS
+   @LightAilment: 
+	INY
+	CPY #8
+    BEQ :-
+	LDA @AilmentLUT, Y
+    STA tmp
+    LDA tmp+1
+    AND tmp
+    BEQ @LightAilment
+	LDA @AilmentIconLUT, Y
+	STA btl_unfmtcbtbox_buffer+1, X
+    BNE @LightAilment    
+
+    
+@AilmentLUT: 
+.byte AIL_POISON
+.byte AIL_STONE
+.byte AIL_DEAD   ; heavy ailments, with dead overwriting the other two
+
+.byte AIL_SLEEP  ; everything overwrites Sleep, since Sleep has the sprite change to fallen down pose
+.byte AIL_MUTE   ; mute stops you from using battle commands, so it gets messaging to remind you who is muted
+.byte AIL_DARK   ; whereas blind only stops you from hiding, so if mute and blind, show blind!
+.byte AIL_CONF   ; confuse is the most dangerous of them ; it means they can act, and act against you
+.byte AIL_STUN   ; but if they're stunned they can't act, so show that instead
+
+@AilmentIconLUT:
+.byte $7D, $7C, $7B, $7F, $EE, $EC, $F3, $ED
+
+;   @FindAilment:
+;    ROR A
+;    BCC :+
+;      LDA #$7B  ; dead
+;      RTS      
+;  : ROR A
+;    BCC :+    
+;      LDA #$7C  ; stone
+;      RTS
+;  : ROR A
+;    BCC :+    
+;      LDA #$7D  ; poison
+;      RTS
+;  : ROR A
+;    BCC :+    
+;      LDA #$EC  ; blind
+;      RTS
+;  : ROR A
+;    BCC :+    
+;      LDA #$ED  ; stun
+;      RTS
+;  : ROR A
+;    BCC :+    
+;      LDA #$7F  ; sleep
+;      RTS
+;  : ROR A
+;    BCC :+    
+;      LDA #$EE  ; mute
+;      RTS
+;  : ROR A
+;    BCC :+    
+;      LDA #$F3  ; Confused
+;      RTS  
+;      
+;  : LDA #$00    ; no ailment found, use invisible character
+;    RTS
 
     
 
@@ -9397,7 +9470,7 @@ AilmentAdded_MessageLut:
 .BYTE BTLMSG_BROKENTOPIECES
 .BYTE BTLMSG_POISONED
 .BYTE BTLMSG_DARKNESS
-.BYTE BTLMSG_PARALYZED_A   
+.BYTE BTLMSG_PARALYZED 
 .BYTE BTLMSG_ASLEEP
 .BYTE BTLMSG_SILENCED
 .BYTE BTLMSG_CONFUSED
@@ -9407,19 +9480,13 @@ AilmentCured_MessageLut:
 .BYTE BTLMSG_CURED          ; stone
 .BYTE BTLMSG_NEUTRALIZED    ; poison
 .BYTE BTLMSG_SIGHTRECOVERED ; blind
-.BYTE BTLMSG_CURED          ; stun
+.BYTE BTLMSG_PARALYZEDCURED ; stun
 .BYTE BTLMSG_WOKEUP         ; sleep
 .BYTE BTLMSG_BREAKSILENCE   ; mute
 .BYTE BTLMSG_CONFUSECURED   ; confuse    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9485,7 +9552,7 @@ Battle_DoEnemyTurn:
       JSR ApplyEnemyAilmentMask     ; remove STUN ailment mask
       LDA #BTLMSG_CURED             ; display "Cured!" message and end their turn
       BNE @PrintAndEnd
-  : LDA #BTLMSG_PARALYZED_B
+  : LDA #BTLMSG_PARALYZED
     BNE @PrintAndEnd
     
   @Asleep:                  ; If the enemy is asleep
@@ -12128,14 +12195,14 @@ BtlMag_HandleAilmentChanges:
     JMP @DoneWithAilMessages     ; And exit this loop (no point in checking other ailments)
     
   @AilmentAdded:
-    LDA AilmentAdded_MessageLut, X
+    LDA AilmentAdded_MessageLut+1, X
     
   @PrintMessageAndNext:
     JSR ShowBattleMessage        ; Show the message
     JMP @NextAilment             ; And continue looping through ailments.
     
   @AilmentCured:
-    LDA AilmentCured_MessageLut, X
+    LDA AilmentCured_MessageLut+1, X
     BNE @PrintMessageAndNext     ; print it and keep looping
 
     
