@@ -247,7 +247,7 @@ ShopWhoToRevive:
 .byte $FF,$42,$4B,$A5,$45,$B6,$B6,$1F,$AA,$B6,$C0,$00 ; For a tithe I can grant your friend my blessings.
 ShopReturnToLife:
 .byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$01
-.byte $68,$AA,$AB,$B7,$69,$FF,$A0,$2F,$5C,$35,$B6,$C4,$01
+.byte $68,$AA,$AB,$B7,$69,$FF,$A0,$2F,$5C,$35,$C4,$01
 .byte $9B,$A8,$B7,$55,$29,$28,$65,$AC,$A9,$A8,$C4,$00 ; By the grace of light... Warrior! Return to life!
 
 ShopHowMany_Sell:
@@ -3058,20 +3058,21 @@ EnterClinic:
 
     JSR InnClinic_CanAfford    ; otherwise, they selected "Yes".  Make sure they can afford the charge
 
-    LDA shop_curitem           ; code only reaches here if they can afford it.
-    CLC
-    ADC shop_curitem           ; add their original selection to itself twice (ie:  *3)
-    ADC shop_curitem
-    TAX                        ; cursor*3 in X
-    LDA str_buf+$10, X         ; use that to get the char ID from the previously compiled string
-                               ;  (see ClinicBuildNameString for how this string is built and why this works)
+  ;  LDA shop_curitem           ; code only reaches here if they can afford it.
+  ;  CLC
+  ;  ADC shop_curitem           ; add their original selection to itself twice (ie:  *3)
+  ;  ADC shop_curitem
+  ;  TAX                        ; cursor*3 in X
+  ;  LDA str_buf+$10, X         ; use that to get the char ID from the previously compiled string
+  ;                             ;  (see ClinicBuildNameString for how this string is built and why this works)
+  ;
+  ;  ROR A                      ; A is currently $10-$13
+  ;  ROR A                      ; convert this number into a usable char index ($00,$40,$80, or $C0)
+  ;  ROR A                      ;   by shifting it
+  ;  AND #$C0                   ; and masking out desired bits
+  ;  TAX                        ; put the char index in X.  This is the car we are to revive.
 
-    ROR A                      ; A is currently $10-$13
-    ROR A                      ; convert this number into a usable char index ($00,$40,$80, or $C0)
-    ROR A                      ;   by shifting it
-    AND #$C0                   ; and masking out desired bits
-    TAX                        ; put the char index in X.  This is the car we are to revive.
-
+    LDX shop_curitem           ;; JIGS ^ the new price stuff did all this work
     LDA #$00
     STA ch_ailments, X         ; erase this character's ailments (curing his "death" ailment)
     STA joy_a
@@ -4721,13 +4722,86 @@ DrawInnClinicConfirm:
     LDA #$09
     JSR DrawShopDialogueBox   ; draw "Gold  OK?" -- all the non-price text
 
-    LDA item_box              ; copy the inn price (first two bytes in item_box)
-    STA tmp                   ;  to tmp  (for PrintNumber)
-    LDA item_box+1
+    LDA #0
+    STA tmp
     STA tmp+1
+
+    LDA shop_type
+    CMP #4
+    BEQ @CalculateClinicPrice
+    
+   @CalculateInnPrice:    ;; JIGS - Each character's level x 5 added up
+    LDX #05
+    LDA ch_level
+    CLC
+    ADC ch_level+$40
+    ADC ch_level+$80
+    ADC ch_level+$C0
+    STA tmp
+    CMP #64              ;; if the part's level is 4*16, then double the price
+    BCC :+
+    
+    LDX #10
+    CMP #100             ;; if the party's level is 4*25 then triple the price
+    BCC :+
+    
+    LDX #15
+    CMP #140             ;; if the party's level is 4*35 then price gouge those 
+    BCC :+               ;; foolishly rich light warriors!
+    
+    LDX #25
+    
+  : JSR MultiplyXA
+    STA tmp
+    STX tmp+1
+    
+    JMP @DrawNumber
+    
+   @CalculateClinicPrice: 
+    LDA shop_curitem           ; code only reaches here if they can afford it.
+    CLC
+    ADC shop_curitem           ; add their original selection to itself twice (ie:  *3)
+    ADC shop_curitem
+    TAX                        ; cursor*3 in X
+    LDA str_buf+$10, X         ; use that to get the char ID from the previously compiled string
+                               ;  (see ClinicBuildNameString for how this string is built and why this works)
+    ROR A                      ; A is currently $10-$13
+    ROR A                      ; convert this number into a usable char index ($00,$40,$80, or $C0)
+    ROR A                      ;   by shifting it
+    AND #$C0                   ; and masking out desired bits
+    TAX                        ; put the char index in X.  This is the car we are to revive.
+    STX shop_curitem    
+    
+    LDA ch_level, X
+    LDX #50         ;; JIGS - price for clinic is level * 50
+    STA tmp
+    AND #$F0
+    BEQ :+
+    
+    LDX #75        ;; except past level 16, it is level * 75   
+    LDA tmp         
+    CMP #25
+    BCC :+
+    
+    LDX #125       ;; and past level 25, it is level * 125
+    LDA tmp
+    CMP #35
+    BCC :+
+    
+    LDX #200       ;; and past level 35, it is level * 200
+    
+  : LDA tmp          
+    JSR MultiplyXA
+    STA tmp
+    STX tmp+1
+
+   @DrawNumber: 
+   ; LDA item_box              ; copy the inn price (first dtwo bytes in item_box)
+   ; STA tmp                   ;  to tmp  (for PrintNumdber)
+   ; LDA item_box+1
+   ; STA tmp+1
     LDA #0
     STA tmp+2                 ; 5digit print number needs 3 bytes... so just set high byte to zero
-
     INC dest_y
     INC dest_y
     LDA #04
@@ -4736,6 +4810,14 @@ DrawInnClinicConfirm:
     
     JSR PrintNumber_5Digit    ; print it
     JMP DrawShopComplexString ; and draw it
+    
+    
+
+    
+    
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
