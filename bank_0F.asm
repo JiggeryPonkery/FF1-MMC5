@@ -4108,7 +4108,7 @@ CritCheck:
        STA MMC5_tmp 
        RTS
 
-  : LDA #BTLMSG_PARALYZED_A
+  : LDA #BTLMSG_PARALYZED
     STA MMC5_tmp
 
    @noailment:

@@ -1742,7 +1742,7 @@ BTL_MESSAGE40:
 BTL_MESSAGE41:
 .byte $8C,$B8,$B5,$A8,$A7,$C4,$00 ; Cured!
 BTL_MESSAGE42:
-.byte $99,$A4,$B5,$A4,$AF,$BC,$BD,$A8,$A7,$00 ; Paralyzed
+.byte $99,$A4,$B5,$A4,$AF,$BC,$B6,$AC,$B6,$FF,$BA,$B2,$B5,$A8,$FF,$B2,$A9,$A9,$00 ; Paralysis wore off
 BTL_MESSAGE43:
 .byte $FF,$91,$AC,$B7,$B6,$C4,$00 ; _Hits!
 BTL_MESSAGE44:
