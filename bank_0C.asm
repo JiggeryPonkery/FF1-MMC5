@@ -702,6 +702,9 @@ lut_EnemyAi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ExitBattle:
+    LDA AutoTargetOptionBackup      ;; JIGS - restore option for future battles
+    STA AutoTargetOption            ;; in case it was overwritten in the last round
+
     LDA btl_result                  ; if running, skip to fade out, don't animate them walking
     CMP #$03
     BEQ :+
@@ -1069,6 +1072,9 @@ BattleLogicLoop_DoCombat_Surprised:     ; alternative entry point for when the p
     JSR CheckForEndOfBattle
 
 BattleLogicLoop:
+    LDA AutoTargetOptionBackup      ;; JIGS - restore AutoTargetOption if auto battle (start button)
+    STA AutoTargetOption            ;;  was used last round
+    
     JSR RebuildEnemyRoster          ; Rebuild the roster in case some enemies died
     JSR DrawRosterBox_L             ; Draw the roster box
     
@@ -1082,9 +1088,6 @@ BattleLogicLoop:
 BattleLogicLoop_ReEntry:    
     ;JSR DrawCommandBox_L            ; draw the command box
     ;JSR UpdateSprites_BattleFrame   ; then do a frame with updated battle sprites
-    
-    LDA autobattle
-    STA AutoTargetOption
     
     LDY #$1C
     LDA #$00
@@ -1534,10 +1537,6 @@ BattleSubMenu_Hide:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SetAutoBattle:
-    ;LDA AutoTargetOption
-    ;STA autobattle              ; back up AutoTarget preference
-    ;; done during battle var prep
-    
     LDA #0
     STA AutoTargetOption        ; turn on AutoTarget
     DEC battle_autoswitch
@@ -5951,7 +5950,7 @@ IsCommandPlayerValid:
   : LDA @ail
     AND #AIL_CONF           ; are they confused?
     BEQ :+
-      JSR PlayerAttackPlayer_Confused    ; if yes, do physical attack (will try to un-confuse too)
+      JSR Player_Confused    ; if yes, do physical attack (will try to un-confuse too)
       CLC
       RTS
   
@@ -6485,7 +6484,7 @@ ZeroXYIfNegative:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-PlayerAttackPlayer_Confused:
+Player_Confused:
     LDA $88
     PHA
     PHA
