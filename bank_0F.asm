@@ -705,12 +705,12 @@ StealFromEnemyZ:
     LDY #en_level
     LDA (EnemyRAMPointer), Y        ; get their level
     STA tmp+1
-    LDA tmp
+    LDA MMC5_tmp
     CLC
     ADC #50
     SEC 
     SBC tmp+1
-    STA tmp                         ; StealValue = Level + 50 - Enemy's level
+    STA MMC5_tmp                    ; StealValue = Level + 50 - Enemy's level
     BCC @Fail                       ; Carry clear = StealValue is less than 0 
     CMP #100
     BCS @Success                    ; StealValue is maxed
@@ -718,7 +718,7 @@ StealFromEnemyZ:
     LDA #0
     LDX #99                         ; get 1-99 
     JSR RandAX
-    CMP tmp                         ; Carry set on fail: StealValue is higher than the roll
+    CMP MMC5_tmp                    ; Carry set on fail: StealValue is higher than the roll
     BCC @Success
    
   @Fail:
@@ -5305,6 +5305,7 @@ PlayerAttackEnemy_PhysicalZ:
 
 
 PlayerAttackPlayer_PhysicalZ:
+   ; LDA BattleCharID
     ORA #$80
     STA btl_attacker
     
