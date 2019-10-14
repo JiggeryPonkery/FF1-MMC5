@@ -3152,7 +3152,7 @@ MenuSelection_Magic:
       STA inputdelaycounter         ; otherwise, reset the counter and proceed to process it
       JMP :+
   @InputChanged:    ;; JIGS - 5 was just too slow for me...
-      LDA #$03 ;05                  ; if input changed, reset the counter to a higher value
+      LDA #$04 ;05                  ; if input changed, reset the counter to a higher value
       STA inputdelaycounter         ;   then process the input
       
   : LDA btl_input                   ; set prev state
@@ -4235,6 +4235,7 @@ Delay_UndrawOneBox:
     
 UndrawOneBox:
     JSR SaveAXY
+UndrawOneBox_NoSave:    
     LDA #01
     BNE UndrawBoxes
 
@@ -4275,14 +4276,14 @@ UndrawBoxes:
    
  : LDA tmp
    JSR UndrawNBattleBlocks_L
-   JSR RespondDelay
+   ;JSR RespondDelay
    JMP RestoreAXY
    
 UndrawAllButTwoBoxes:
    JSR SaveAXY
-   JSR RespondDelay
+   ;JSR RespondDelay
   @Loop:
-    JSR UndrawOneBox
+    JSR UndrawOneBox_NoSave
     LDA btl_boxcount
     CMP #$02
     BNE @Loop
@@ -4295,7 +4296,7 @@ UndrawAllKnownBoxes_NoSave:
    JSR UndrawNBattleBlocks_L
    LDA #0
    STA btl_boxcount
-   JSR RespondDelay
+   ;JSR RespondDelay
     
 RestoreAXY:
     LDA MMC5_tmp+5
@@ -4312,12 +4313,11 @@ SaveAXY:
 DrawCharacterNameAttackerBox:
     ORA #$80
     STA btl_attacker
-    LDA btl_boxcount            ; only draw the attacker name 
-    BEQ DrawAttackerBox         ; if there are no boxes already drawn
-    RTS
     
 DrawAttackerBox:
     JSR SaveAXY
+    LDA btl_boxcount            ; only draw the attacker name 
+    BNE RestoreAXY              ; if there are no boxes already drawn
     LDA #$02                    ; $02 is the code for the attacker
     STA btltmp_attackerbuffer   ; put that in buffer to hold attacker name
     LDX #<btltmp_attackerbuffer ; set XY to point to that buffer
@@ -4408,7 +4408,8 @@ DrawDamageBox:
     LDX #<btltmp_damageblockbuffer  ; YX is a a pointer to our text buffer in RAM
     LDY #>btltmp_damageblockbuffer
     LDA #$03                        ; combat box ID 3
-    JMP DrawCombatBox
+    JSR DrawCombatBox
+    JMP RespondDelay
     
    @Data:                          ; data for "###DMG"
     .BYTE $0C                     ; format number
@@ -4458,7 +4459,7 @@ DrawMagicMessage:
     BCS RespondDelay
     
   : LDA lut_MagicBattleMessages, X  ; Get the desired message to print
-    BEQ RespondDelay                ; if 0, don't print anything.  Instead, just delay and exit
+    BEQ MessageRTS                  ; if 0, don't print anything.  Instead, just delay and exit
     BNE DrawMessageBoxDelay_ThenClearIt
 
 DrawIneffective:
@@ -4477,6 +4478,7 @@ SetMessageBuffer:
     LDA lut_UnformattedCombatBoxBuffer+1, Y
     STA $89                     ; put in $88,89
     PLA
+MessageRTS:
     RTS
 
 DrawCombatBox:
@@ -4551,7 +4553,7 @@ ClearAltMessageBuffer:
     PHA
     LDX #0 ; #$04            ; index starts at 4
     LDA #$00
-    STA btl_boxcount
+    ; STA btl_boxcount
     : ;STA btltmp_altmsgbuffer-5, X  ; but -5?  (also clears explode_count)
       STA btltmp_altmsgbuffer, X
       INX
@@ -4935,9 +4937,10 @@ ApplyEndOfRoundEffects:
     STA EntityRegenID             ; record character ID
    @Loop: 
     STA CharacterIndexBackup
+    LDA EntityRegenID
     JSR PrepCharStatPointers
-    JSR ApplyRegenPoisonToPlayer
     JSR ClearGuardState
+    JSR ApplyRegenPoisonToPlayer
     INC EntityRegenID
     LDA CharacterIndexBackup
     CLC
@@ -5230,12 +5233,8 @@ ApplyPoisonToEnemy:
   : JMP UndrawAllKnownBoxes
     
 DrawPoisonAsAttack:                 ; Who is getting poisoned
-    LDA btl_boxcount                ; if a combat box is already drawn, don't draw another
-    BNE :+                          ; this is in case the character regenerated and printed their name already
-    
     JSR DrawAttackerBox
-    
-  : LDA #BTLMSG_POISONED            ; the message for poison
+    LDA #BTLMSG_POISONED            ; the message for poison
     JSR DrawMessageBox
 	JMP DrawDamageBox               ; print damage    
 
@@ -5243,13 +5242,16 @@ DrawPoisonAsAttack:                 ; Who is getting poisoned
 ;; JIGS - updated regeneration for enemies
     
 ApplyRegenToAllEnemies:
-    LDA #0
+    LDA #8
     STA EntityRegenID
-    LDA btl_enemycount
-    STA EntityRegenCounter
     
   @MainLoop:
-    LDA EntityRegenID
+    LDX EntityRegenID
+    STX btl_attacker
+	JSR DoesEnemyXExist
+	BEQ @Next
+    
+    TXA
     JSR GetEnemyRAMPtr
     
     LDY #en_category              ; Get the enemy category, and see if they are
@@ -5261,11 +5263,6 @@ ApplyRegenToAllEnemies:
   ; LDA (EnemyRAMPointer), Y      
   ; AND #AIL_POISON
   ; BEQ @Next                     ; enabling this would cause it to skip regeneration if the enemy was poisoned
-    
-	LDX EntityRegenID
-    STX btl_attacker
-	JSR DoesEnemyXExist
-	BEQ @Next
  
     LDY #en_hpmax
     LDA (EnemyRAMPointer), Y
@@ -5294,9 +5291,8 @@ ApplyRegenToAllEnemies:
     JSR DrawMessageBoxDelay_ThenClearAll
 
   @Next:
-    INC EntityRegenID             ; loop until all enemies counted
-    DEC EntityRegenCounter
-    BNE @MainLoop
+    DEC EntityRegenID             ; loop until all enemies counted
+    BPL @MainLoop
     RTS
 
    
@@ -6106,7 +6102,7 @@ EnemyAttackPlayer_Physical:
 
     ;; JIGS - again, moved to Bank Z to make space here for other changes, and to try and fix some bugs
     
-    JSR DoPhysicalAttack       
+    JSR DoPhysicalAttack_NoAttackerBox ; DoPhysicalAttack       
 
     SavePlayerDefender:
     LDY #ch_curhp - ch_stats
@@ -6578,25 +6574,29 @@ DoPhysicalAttack_NoAttackerBox:
       STA btl_unfmtcbtbox_buffer + $31
       LDA #$00
       STA btl_unfmtcbtbox_buffer + $32
-      BEQ @OutputDamageBox              ; (always branch)
+      LDA #$03                          ; output either damage or "Missed!"
+      JSR DrawMessageBox_Prebuilt
+      JMP DoPhysicalAttack_Exit
+      ;BEQ @OutputDamageBox              ; (always branch) 
       
-  : LDA #$11                            ; if there is nonzero damage...
-    STA btl_unfmtcbtbox_buffer + $30    ; print:  '11 xx xx 0F 2E 00'
+  : ;LDA #$11                            ; if there is nonzero damage...
+    ;STA btl_unfmtcbtbox_buffer + $30    ; print:  '11 xx xx 0F 2E 00'
     LDA battle_totaldamage              ;  where '11 xx xx' prints the damage
-
-    STA MMC5_tmp+6  ;; JIGS - for special critical hits
+    STA MMC5_tmp+6                      ;; JIGS - for special critical hits
+    STA math_basedamage
     
-    STA btl_unfmtcbtbox_buffer + $31    ;  and '0F 2E' prints "DMG"
+    ;STA btl_unfmtcbtbox_buffer + $31    ;  and '0F 2E' prints "DMG"
     LDA battle_totaldamage+1
+    STA MMC5_tmp+7                      ;; JIGS - for special critical hits (thief gold stealing)
+    STA math_basedamage+1
     
-    STA MMC5_tmp+7  ;; JIGS - for special critical hits (thief gold stealing)
-    STA btl_unfmtcbtbox_buffer + $32
-    LDA #$0F
-    STA btl_unfmtcbtbox_buffer + $33
-    LDA #BTLMSG_DMG
-    STA btl_unfmtcbtbox_buffer + $34
-    LDA #$00
-    STA btl_unfmtcbtbox_buffer + $35
+   ; STA btl_unfmtcbtbox_buffer + $32
+   ; LDA #$0F
+   ; STA btl_unfmtcbtbox_buffer + $33
+   ; LDA #BTLMSG_DMG
+   ; STA btl_unfmtcbtbox_buffer + $34
+   ; LDA #$00
+   ; STA btl_unfmtcbtbox_buffer + $35
     
     ;; JIGS - adding one more thing...
     
@@ -6609,11 +6609,12 @@ DoPhysicalAttack_NoAttackerBox:
     STA Hidden                   ; though depending on the logic, this may not be necessary... better safe than buggy though
   
   @OutputDamageBox:
-    LDA #$03                            ; output either damage or "Missed!"
+  ;  LDA #$03                            ; output either damage or "Missed!"
     ;LDX #<(btl_unfmtcbtbox_buffer + $30);  to the #3 combat box
     ;LDY #>(btl_unfmtcbtbox_buffer + $30)
-    JSR DrawMessageBox_Prebuilt
-    
+  ;  JSR DrawMessageBox_Prebuilt
+   JSR DrawDamageBox 
+  
     LDA battle_critsconnected
     BEQ :+                              ; if any criticals connected...
       LDA #BTLMSG_CRITICALHIT           ; print the Critical Hit!! combat message box
@@ -6630,7 +6631,7 @@ DoPhysicalAttack_NoAttackerBox:
         
         JSR DrawMessageBoxDelay_ThenClearIt
         ;; back to original battle code...
-  
+
  :  LDA #MATHBUF_DEFENDERHP
     LDX #MATHBUF_DEFENDERHP
     LDY #MATHBUF_TOTALDAMAGE
@@ -8235,7 +8236,7 @@ Enemy_DoAi:
     JSR @IncrementAiPos             ; increment magic position
     ADC #$02                        ; position+2 is the index to the spell to cast
     TAY
-    LDA (EnemyAIPointer), Y                 ; get the spell to cast
+    LDA (EnemyAIPointer), Y         ; get the spell to cast
     CMP #$FF                        ; if $FF (empty slot)...
     BNE :+
       LDA #$00                      ; ...reset position, and start over
@@ -8251,13 +8252,13 @@ Enemy_DoAi:
     PHA                             ; backup position
     CLC
     ADC #$01                        ; +1
-    STA (EnemyRAMPointer), Y                    ; and write it back
+    STA (EnemyRAMPointer), Y        ; and write it back
     PLA                             ; restore backup
     RTS
   
   @CheckSpecialAttack:
     LDY #$01
-    LDA (EnemyAIPointer), Y                 ; get special attack rate
+    LDA (EnemyAIPointer), Y         ; get special attack rate
     JSR EnemyAi_ShouldPerformAction ; see if we should do it
     BCS ChooseAndAttackPlayer       ; if not, just do a normal attack
     
@@ -9009,11 +9010,9 @@ Enemy_DoMagicEffect:
             @enram =    $9A     ; input - points to this enemy's stats in RAM
             
     STA btl_attackid                        ; store spell/attack we're using
-    JSR ClearAltMessageBuffer
+    ;JSR ClearAltMessageBuffer
     LDA btl_attacker
     JSR GetEnemyRAMPtr
-    ;JSR DrawAttackerBox
-    ;JSR DisplayAttackIndicator
     
     LDA #$00
     STA btlmag_magicsource                  ; set magic source as 'magic'
@@ -10759,6 +10758,7 @@ DoExplosionEffect:
     BEQ :+
        LDA #0
        JSR PlayBattleSFX
+       JSR DisplayAttackIndicator
        JMP DisplayAttackIndicator
     
   : LDA #$02
