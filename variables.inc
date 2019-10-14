@@ -338,8 +338,9 @@ shop_cursor_ptr = $6E ; +$6F
 
 enemy_load      = $70 ; all $10 bytes, 4 per enemy
 
+PlayMagicSound      = $70 ; battle
+ailment_backup      = $71 ; battle
 cursor_change       = $71 ; magic menu 
-AttackIndicator     = $71 ; battle 
 treasure_offset     = $72 ; maps
 EntityRegenID       = $72 ; battle
 item_box_offset     = $72 ; shops
@@ -351,6 +352,7 @@ inv_canequipinshop  = $74 ; shops
 battleitemslot      = $74 ; equip menu
 equipmenu_tmp       = $75 ; for unequip/reequipping
 DrawPlayerHPCounter = $76 ; counter for how many times player HP has been drawn in battle
+BattleCharID        = $77 ; for battle 
 DialogueTable_1or2  = $77 ; important for dialogue
 tileprop_last       = $78 ; for moving when shop_id isn't needed
 wateraccess         = $79 ; for moving into water
@@ -361,6 +363,7 @@ dlgflg_reentermap   = $7F  ; flag to indicate the map needs re-entering due to d
 ;;
 btl_drawflags_tmp1   = $80 ; tmp storage for drawing sleep/dead character sprites
 btl_drawflags_tmp2   = $81 ; immediately written over by CharStatsPointer
+btl_drawflags_tmp3   = $82 ; 
 
 ;; leveling up
 lvlup_curexp        = $80  ; 2 byte pointer to character's current EXP
@@ -462,13 +465,15 @@ BlankItem       = $0374 ; Necessary for shops to display correctly
 AutoTargetOptionBackup = $0374 ; for battling fast
 Hidden          = $0375 ; for hiding in battle 
 HiddenMagic     = $0376 ; for hiding in battle 
-Asleep          = $0377 ; for sleeping! ...in battle. And save game music things.
+btl_drawflagsC  = $0377 ; for sleeping! ...in battle. And save game music things.
+SaveGameMusic   = $0377
 BattleTurn      = $0378 ; Keeps track of battle turns and displays them above the character's names ; shared
 battle_class    = $0380 ; for doing skills in battle
 soundtesthelper = $0381 ; Something to do with the sound test screen
 battle_autoswitch          = $0381 ; $FF if auto-battle, $01 if auto-run, $00 normal
 battle_stealsuccess        = $0382
 RomRamMapping_lut_index    = $0383
+ConfusedMagic              = $0383 ; confused magic stuff for battle
 btl_loadenemystats_counter = $0384
 btl_loadenemystats_index   = $0385
 LongCall_A      = $0386 ; The LongCall routine restores them after it swaps banks
@@ -578,13 +583,6 @@ shop_x_price      = $64AF
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
 
 
-btl_turnorder       = $6000 ; $D entries (9 enemies + 4 characters)
-GuardDefense        = $600F ; amount to add to a players btl_defender_defense stat
-battle_item         = $600F ; handles item box scrolling and item use
-btl_turnorderBackup = $6010 ; 13 bytes
-btl_turnorderSpeed  = $6020 ; 13 bytes
-
-
 btl_attacker                 = $6030
 btl_attacker_damage          = btl_attacker + $01
 btl_attacker_hitrate         = btl_attacker + $02
@@ -692,6 +690,12 @@ btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathemati
 ;btltmp_divHi = $688C ;  divLo
 ;btltmp_divV  = $688D ;  divHi
 
+btl_turnorder       = $6070 ; $D entries (9 enemies + 4 characters)
+indicator_index     = $607D ; tmp byte for flashing enemies if they're defender or attacker
+GuardDefense        = $607F ; amount to add to a players btl_defender_defense stat
+battle_item         = $607F ; handles item box scrolling and item use
+btl_turnorderBackup = $6080 ; 13 bytes
+btl_turnorderSpeed  = $6090 ; 13 bytes
     
     
 ;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
@@ -775,8 +779,7 @@ btl_msgdraw_srcptr      = $6643  ; shared -- needs to match btl_msgdraw_width?
 ;                                ; $0544    above +1
 btl_msgdraw_blockcount         = $6645 ; the number of blocks drawn
 btl_msgdraw_blockcount_backup  = $6646
-btl_combatboxcount             = $6647 ; the number of combat boxes that have been drawn
-btl_combatboxcount_alt         = $6648 ; ANOTHER combatbox counter... this is totally redundant
+btl_boxcount                   = $6647 ; the number of combat boxes that have been drawn
 DrawBattleMagicBox_loopctr     = $6649
 UndrawNBattleBlocks_loopctr    = $664A
 btl_drawbox_loopctr            = $664B

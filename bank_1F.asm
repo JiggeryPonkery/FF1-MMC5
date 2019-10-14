@@ -14063,17 +14063,23 @@ DrawBattleString:
 lut_CombatBoxes:
 ;             BOX                      TEXT
 ;       hdr    X    Y   wd   ht     hdr    X    Y
+; .BYTE $00, $00, $00, $0D, $03,    $01, $01, $00       ; 0 attacker name
+; .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 old attack/new EOB box
+; .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
+; .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 old damage/new EOB box
+; .BYTE $00, $00, $06, $20, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
+; .BYTE $00, $0D, $03, $0A, $03,    $01, $0E, $03       ; 5 damage
+; .BYTE $00, $0D, $00, $0A, $03,    $01, $0E, $00       ; 6 their attack ("FROST", "2Hits!" etc)
+  
   .BYTE $00, $00, $00, $0D, $03,    $01, $01, $00       ; 0 attacker name
-  .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 old attack/new EOB box
+  .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 attack
   .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
-  .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 4old damage/new EOB box
+  .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 damage
   .BYTE $00, $00, $06, $20, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
-  .BYTE $00, $0D, $03, $0A, $03,    $01, $0E, $03       ; 5 damage
-  .BYTE $00, $0D, $00, $0A, $03,    $01, $0E, $00       ; 6 their attack ("FROST", "2Hits!" etc)
   
-  .BYTE $00, $00, $00, $10, $09,    $FF, $00, $00       ; 7 Ready? box
+  .BYTE $00, $00, $00, $10, $09,    $FF, $00, $00       ; 5 Ready? box
   
-  lut_CombatEtherBox:                                   ; 8 Ether/MP box
+  lut_CombatEtherBox:                                   ; 6 Ether/MP box
 ;       hdr    X    Y   wd   ht 
   .BYTE $00, $00, $00, $11, $09 ; MP list 
   .BYTE $FF, $00, $00

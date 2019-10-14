@@ -694,6 +694,11 @@ lut_StealList:
    
    
 StealFromEnemyZ:
+    LDA #$0F
+    STA btl_unfmtcbtbox_buffer+$40
+    LDA #BTLMSG_STOLE
+    STA btl_unfmtcbtbox_buffer+$41
+
     LDA btl_defender
     JSR GetEnemyRAMPtr    
     
@@ -731,7 +736,7 @@ StealFromEnemyZ:
   @Success:  
     INC battle_stealsuccess
     LDA #$0E
-    STA btltmp_altmsgbuffer+2       ; put the item name code into the message buffer
+    STA btl_unfmtcbtbox_buffer+$42       ; put the item name code into the message buffer
     
     LDY #en_enemyid
     LDA (EnemyRAMPointer), Y        ; get the enemy's index
@@ -795,31 +800,31 @@ StealFromEnemyZ:
    @StealMagic:                     ; do all the different ways of putting items in your inventory
     INY 
     LDA (tmp), Y
-    STA btltmp_altmsgbuffer+3       ; put the item name next in the message buffer
+    STA btl_unfmtcbtbox_buffer+$43       ; put the item name next in the message buffer
     SEC
     SBC #ITEM_MAGICSTART
     TAX
     INC inv_magic, X
     LDA #$0F
-    STA btltmp_altmsgbuffer+4
+    STA btl_unfmtcbtbox_buffer+$44
     LDA #BTLMSG_SCROLL
-    STA btltmp_altmsgbuffer+5       ; and put _scroll at the end of the message
+    STA btl_unfmtcbtbox_buffer+$45       ; and put _scroll at the end of the message
     RTS
     
    @StealEquipment:
     LDA #$0D
-    STA btltmp_altmsgbuffer+2       ; here, re-write the item name byte with equipment name byte
+    STA btl_unfmtcbtbox_buffer+$42       ; here, re-write the item name byte with equipment name byte
     INY 
     LDA (tmp), Y
     TAX
-    STX btltmp_altmsgbuffer+3
+    STX btl_unfmtcbtbox_buffer+$43
     INC inv_weapon, X
     RTS
 
    @StealItem:
     INY 
     LDA (tmp), Y
-    STA btltmp_altmsgbuffer+3
+    STA btl_unfmtcbtbox_buffer+$43
     TAX
     INC items, X
     RTS
@@ -830,7 +835,7 @@ StealFromEnemyZ:
    
     INY 
     LDA (tmp), Y
-    STA btltmp_altmsgbuffer+3
+    STA btl_unfmtcbtbox_buffer+$43
     JSR LoadPriceZ           ; get the price of the item (the amount of gold stolen)
     JSR AddGPToParty         ; add that to the party's GP
     RTS
@@ -4235,7 +4240,7 @@ SaveScreen:
   STA joy_prevdir
   STA $2001               ; turn off the PPU
   STA menustall           ; disable menu stalling
-  STA Asleep           ; clear this variable, which will help reset music later
+  STA SaveGameMusic           ; clear this variable, which will help reset music later
   JSR ClearNT             ; clear the NT
   LDA #1
   STA $5113                ; swap battery-backed PRG RAM into $8000 page   
@@ -4415,7 +4420,7 @@ SaveScreen:
   GameSaved:
   LDA #$56
   STA music_track      
-  STA Asleep
+  STA SaveGameMusic
   LDY cursor
   LDA SavedTextYLUT, Y
   STA dest_y
@@ -5173,9 +5178,7 @@ LoadEnemyStats:
     RTS                            
 
 PlayerAttackEnemy_PhysicalZ:
-  ;  LDA $88         ; JIGS - reload this from Battle_DoPlayerTurn in Bank C
-                    ; Which is weird, because that already did an AND #$03 to the $88 thing, then saved it? Oh well.
-    
+    LDA BattleCharID
     ORA #$80
     STA btl_attacker
     
@@ -5305,9 +5308,10 @@ PlayerAttackEnemy_PhysicalZ:
 
 
 PlayerAttackPlayer_PhysicalZ:
-   ; LDA BattleCharID
+    LDA BattleCharID
     ORA #$80
     STA btl_attacker
+    ;; ^ this might not be necessary, as the attacker drawing box sets it when confused
     
    ; AND #$03
    ; JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats

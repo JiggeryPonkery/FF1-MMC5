@@ -4886,7 +4886,7 @@ SaveGame:
   LDA music_track             ; check the music track
   CMP #$81                    ; if $81 (no music currently playing)...
   BEQ :+
-  LDA Asleep                  ; will be 0 if saving didn't happen
+  LDA SaveGameMusic                  ; will be 0 if saving didn't happen
   CMP #$56                    ; if save music still playing
   BNE :++
 : LDA dlgmusic_backup         ; pre-emptively end the save music

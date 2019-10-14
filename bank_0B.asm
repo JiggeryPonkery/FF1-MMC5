@@ -1502,6 +1502,7 @@ PrepBattleVarsAndEnterBattle:
     STA btl_soft2000            ; clear soft PPU regs
     STA btl_soft2001
     
+    STA ConfusedMagic          
     STA DrawPlayerHPCounter    ; make sure this is 0
    ; LDA #$50
    ; STA music_track           ; set music track and followup
@@ -1711,7 +1712,7 @@ GameOver:
     STA btl_followupmusic
     
     LDA #$00
-    STA btl_combatboxcount      ; reset combat box count
+    STA btl_boxcount          ; reset combat box count
     
     LDA #$04                    ; draw the "Party Perished" text
     LDX #$09                    ;  in combat box 4 (bottom/wide one)
@@ -1734,7 +1735,7 @@ GameOver:
 
 EndOfBattleWrapUp:
     LDA #$00
-    STA btl_combatboxcount          ; clear combat box count
+    STA btl_boxcount          ; clear combat box count
     
     TAX
     LDA #$04
@@ -2744,7 +2745,7 @@ DrawEOBCombatBox:
     LDA EOBCombatBox_tmp    ; restore combo box ID in A
     JSR DrawCombatBox_L     ; A = box ID, YX = pointer to string
     
-    INC btl_combatboxcount  ; count this combat box
+    INC btl_boxcount  ; count this combat box
     RTS                     ; and exit!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2757,10 +2758,10 @@ DrawEOBCombatBox:
 
 RespondDelay_UndrawAllCombatBoxes:
     JSR RespondDelay                ; this is all self explanitory...
-    LDA btl_combatboxcount
+    LDA btl_boxcount
     JSR UndrawNBattleBlocks_L
     LDA #$00
-    STA btl_combatboxcount
+    STA btl_boxcount
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
