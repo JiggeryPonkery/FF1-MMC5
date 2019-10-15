@@ -4044,12 +4044,13 @@ SMMove_Door:
     LDX #0                    ; otherwise (door is locked)
     STX tileprop+1            ; erase the secondary attribute byte (prevent it from being a locked shop)
     LDX item_mystickey        ; check to see if the player has the key
-    BNE @OpenDoor        ; if they do, open the door
+    BNE @LockedDoor        ; if they do, open the door
       SEC                ; otherwise (no key, locked door), SEC to indicate player can't move here
       RTS                ; and exit
-    
+  @LockedDoor:    
+    LDA #01
   @OpenDoor:
-    ASL inroom           ; shift the inroom flag (high bit) into C
+    ;ASL inroom           ; shift the inroom flag (high bit) into C
     STA inroom           ; then write the door bits to inroom to mark that we're opening a door (or locked door)
     BCS :+               ; if the inroom flag was previously cleared (coming from outside a room)...
       JSR PlayDoorSFX    ;  ... play the door sound effect
@@ -4135,9 +4136,9 @@ RedrawDoor:
 
     AND #$07                   ; mask out the low bits
     CMP #$01
-    BEQ @NormalOpen            ; if $01 -> opening a normal door
+    BEQ @LockedOpen            ; if $01 -> opening a normal door
     CMP #$02
-    BEQ @LockedOpen            ; $02 -> opening a locked door
+    BEQ @NormalOpen            ; $02 -> opening a locked door
     CMP #$05
     BEQ @NormalClose           ; $05 -> closing a normal door
                                ; else ($06) -> closing a locked door
