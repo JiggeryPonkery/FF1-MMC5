@@ -4005,8 +4005,8 @@ ReadjustBBEquipStats:
 CritCheck:
     LDA #0
     STA MMC5_tmp
-    LDA battle_defenderisplayer
-    BNE @CritReturn
+    LDA battle_attackerisplayer
+    BEQ @CritReturn
     
     LDA btl_attacker
     JSR PrepCharStatPointers
