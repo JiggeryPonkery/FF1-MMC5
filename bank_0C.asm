@@ -1390,10 +1390,11 @@ SetAutoBattle:
     
    @AutoBattleSet:
     LDA btlcmd_curchar          
-    JSR RemoveCharacterAction   ; clear out the buffer
+    JSR ConfirmCharacterCanAct
+    BCS :+
     LDA #01
     STA btl_charcmdbuf, Y       ; [0] = A
-    RTS
+  : RTS
 
 SetAutoFirstChar:    
     LDA btlcmd_curchar           ; see what character to start from
@@ -1415,13 +1416,28 @@ SetAutoRun:
 
  @AutoRunSet:
     LDA btlcmd_curchar         
-    JSR RemoveCharacterAction   ; clear out the buffer
+    JSR ConfirmCharacterCanAct
+    BCS :+
     LDA #$80
     STA btl_charcmdbuf, Y       ; [0] = A
     LDA btlcmd_curchar          
     ORA #$80
     STA btl_charcmdbuf+2, Y     ; [2] = Y
-    RTS
+  : RTS
+
+ConfirmCharacterCanAct:
+    PHA
+    JSR RemoveCharacterAction   ; clear out the buffer
+    PLA
+    AND #03
+    JSR PrepCharStatPointers
+    LDY #ch_ailments - ch_stats
+    CLC
+    LDA (CharStatsPointer), Y
+    AND #AIL_DEAD | AIL_STONE | AIL_SLEEP | AIL_CONF
+    BEQ :+
+    SEC
+  : RTS
     
 AutoSet_Ready: 
     JSR BattleClearVariableSprite
@@ -5545,7 +5561,7 @@ IsCommandPlayerValid:
   : LDA ailment_backup
     AND #AIL_CONF                   ; are they confused?
     BEQ :+
-      JMP Player_Confused           ; if yes, do physical attack (will try to un-confuse too)
+      JSR Player_Confused           ; if yes, do physical attack (will try to un-confuse too)
     
   : SEC
     RTS 
@@ -5883,8 +5899,6 @@ PlayerTurn_PrintAndSetC:
 
 
 Player_Confused:
-    PLA
-    PLA ;; don't want to return to the DoPlayerTurn / IsCommandPlayerValid point
     LDA BattleCharID
     JSR DrawCharacterNameAttackerBox
     
@@ -5901,7 +5915,8 @@ Player_Confused:
     AND #~AIL_CONF
     STA (CharStatsPointer), Y
     LDA #BTLMSG_CONFUSECURED              ; print "Came to their senses" message and exit
-    JMP DrawMessageBoxDelay_ThenClearIt   ; should jump back to DoPlayerTurn? 
+    JSR DrawMessageBoxDelay_ThenClearIt   ; should jump back to DoPlayerTurn? 
+    RTS
     
    
 PlayerRandomSpell:
@@ -5980,6 +5995,9 @@ ConfusedMagicTarget:
     AND #01              ;; 50% chance to cast the spell normally.
     BEQ @RTS
     
+    DEC ConfusedMagic
+    DEC ConfusedMagic  ;; set to $FF 
+    
     LDY #MAGDATA_TARGET
     LDA (MagicPointer), Y
     
@@ -6023,6 +6041,10 @@ ConfusedMagicTarget:
     ;;(01 = All enemies, 02 = One Enemy, 04 = Spell Caster, 08 = Whole Party, 10 = One party member)
 
 PlayerConfusedAttack:
+    PLA
+    PLA
+    PLA
+    PLA    ;; don't want to return to the DoPlayerTurn / IsCommandPlayerValid point
     JSR BattleRNG_L
     AND #$03
     BEQ ConfusedPlayerAttackEnemy_Physical     ; 25% chance to attack enemy
@@ -8809,6 +8831,7 @@ Player_DoMagicEffect:
     LDA (CharStatsPointer), Y    ; Magic (makes sense), items (weird), and Item (no sense at all)
     AND #AIL_MUTE                ; You could argue this is BUGGED
     BEQ :+
+      JSR ClearSpecialMagicVariables
       LDA #BTLMSG_SILENCED                   ; if muted, just print "Silenced" message
       JMP DrawMessageBoxDelay_ThenClearAll   ; clear all boxes, and exit (don't actually do the spell effect)
       
@@ -8819,6 +8842,11 @@ Player_DoMagicEffect:
     JSR Battle_PlayerMagic_CastOnTarget     ; And actually cast the spell
     JMP Battle_EndMagicTurn                 ; End the turn
 
+ClearSpecialMagicVariables:
+    LDA #0
+    STA HiddenMagic
+    STA ConfusedMagic
+    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9054,10 +9082,7 @@ Battle_EndMagicTurn:
     LDA btlmag_fakeout_defplayer
     STA battle_defenderisplayer
     
-    LDA #0
-    STA HiddenMagic
-    STA ConfusedMagic
-    RTS
+    JMP ClearSpecialMagicVariables ;; Clear Hidden and Confused variables
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10755,7 +10780,7 @@ EraseEnemyGraphic:
 
 DoExplosionEffect:
     LDA ConfusedMagic
-    BEQ :+
+    BPL :+
        LDA #0
        JSR PlayBattleSFX
        JSR DisplayAttackIndicator
