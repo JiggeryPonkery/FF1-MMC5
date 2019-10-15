@@ -11491,9 +11491,9 @@ DisplayAttackIndicator:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PlayBattleSFX:
-    PHA                             ; backup the desired sfx
-    JSR SwapBattleSFXBytes          ; swap in sound effect data
-    PLA
+   ; PHA                             ; backup the desired sfx
+   ; JSR SwapBattleSFXBytes          ; swap in sound effect data
+   ; PLA
     ASL A                           ; double sfx ID and use as index to pointer table lut
     TAX
     
@@ -11541,7 +11541,8 @@ PlayBattleSFX:
     
     LDA #$0F
     STA $4015                   ; make sure channels are enabled
-    JMP SwapBattleSFXBytes      ; swap out sfx bytes
+    RTS 
+    ;JMP SwapBattleSFXBytes      ; swap out sfx bytes
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11552,13 +11553,13 @@ PlayBattleSFX:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 UpdateBattleSFX:
-    JSR SwapBattleSFXBytes
+    ;JSR SwapBattleSFXBytes
     LDA btlsfx_framectr
     BEQ :+
       JSR UpdateBattleSFX_Square
       JSR UpdateBattleSFX_Noise
       DEC btlsfx_framectr
-  : JMP SwapBattleSFXBytes
+  : RTS ;JMP SwapBattleSFXBytes
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11655,22 +11656,22 @@ UpdateBattleSFX_Noise:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-SwapBattleSFXBytes:
-    LDX #$00                    ; loop up-counter
-    LDY #$10                    ; loop down-counter (copy $10 bytes)
-  @Loop:
-      LDA btlsfx_frontseat, X   ; swap front and back bytes
-      PHA
-      LDA btlsfx_backseat, X
-      STA btlsfx_frontseat, X
-      PLA
-      STA btlsfx_backseat, X
-      
-      INX                       ; update loop counter and keep looping until all bytes swapped
-      DEY
-      BNE @Loop
-    RTS
-    
+;SwapBattleSFXBytes:
+;    LDX #$00                    ; loop up-counter
+;    LDY #$10                    ; loop down-counter (copy $10 bytes)
+;  @Loop:
+;      LDA btlsfx_frontseat, X   ; swap front and back bytes
+;      PHA
+;      LDA btlsfx_backseat, X
+;      STA btlsfx_frontseat, X
+;      PLA
+;      STA btlsfx_backseat, X
+;      
+;      INX                       ; update loop counter and keep looping until all bytes swapped
+;      DEY
+;      BNE @Loop
+;    RTS
+;    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  data_BattleSoundEffects  [$BFA4 :: 0x33FB4]

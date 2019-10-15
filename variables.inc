@@ -180,7 +180,17 @@ game_flags        = unsram + $0300  ; must be on page bound
 
 
  
+btlsfx_frontseat    = $00   ; where battle sfx data is stored in zero page
+btlsfx_backseat     = $6D97 ; where it is stored when not in zero page (it swaps between the two)
 
+btlsfx_framectr     = $00 ; 4   ; The total frame counter for the entire sound effect
+btlsfxsq2_len       = $01 ; 8
+btlsfxnse_len       = $02 ; 9
+btlsfxsq2_framectr  = $03 ; A
+btlsfxnse_framectr  = $04 ; B
+btlsfxsq2_ptr       = $05 ; + 6 C
+btlsfxnse_ptr       = $07 ; + 8 E
+ 
 story_dropinput = $07
 inroom          = $0D ; bit 7 is the actual inroom flag.  $x1=entering room, $x2=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
 doorppuaddr     = $0E ; 2 bytes, PPU address of door drawing work
@@ -404,16 +414,6 @@ btldraw_subsrc  = $94   ; source pointer of substring
 btldraw_max     = $9F   ; maximum characters to draw
 
 
-btlsfx_frontseat    = $90   ; where battle sfx data is stored in zero page
-btlsfx_backseat     = $6D97 ; where it is stored when not in zero page (it swaps between the two)
-
-btlsfx_framectr     = $94   ; The total frame counter for the entire sound effect
-btlsfxsq2_len       = $98
-btlsfxnse_len       = $99
-btlsfxsq2_framectr  = $9A
-btlsfxnse_framectr  = $9B
-btlsfxsq2_ptr       = $9C
-btlsfxnse_ptr       = $9E
 
 
 

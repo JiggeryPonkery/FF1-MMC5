@@ -5612,13 +5612,13 @@ BattleUpdateAudio:
     ;JMP UpdateBattleSFX     ; and update sound effects to keep them playing    
     
 UpdateBattleSFX:
-    JSR SwapBattleSFXBytes
+    ;JSR SwapBattleSFXBytes
     LDA btlsfx_framectr
     BEQ :+
       JSR UpdateBattleSFX_Square
       JSR UpdateBattleSFX_Noise
       DEC btlsfx_framectr
-  : JSR SwapBattleSFXBytes
+  : ;JSR SwapBattleSFXBytes
     RTS
 
 UpdateBattleSFX_Square:
@@ -5686,21 +5686,21 @@ UpdateBattleSFX_Noise:
   @Exit:
     RTS
 
-SwapBattleSFXBytes:
-    LDX #$00                    ; loop up-counter
-    LDY #$10                    ; loop down-counter (copy $10 bytes)
-  @Loop:
-      LDA btlsfx_frontseat, X   ; swap front and back bytes
-      PHA
-      LDA btlsfx_backseat, X
-      STA btlsfx_frontseat, X
-      PLA
-      STA btlsfx_backseat, X
-      
-      INX                       ; update loop counter and keep looping until all bytes swapped
-      DEY
-      BNE @Loop
-    RTS    
+;SwapBattleSFXBytes:
+;    LDX #$00                    ; loop up-counter
+;    LDY #$10                    ; loop down-counter (copy $10 bytes)
+;  @Loop:
+;      LDA btlsfx_frontseat, X   ; swap front and back bytes
+;      PHA
+;      LDA btlsfx_backseat, X
+;      STA btlsfx_frontseat, X
+;      PLA
+;      STA btlsfx_backseat, X
+;      
+;      INX                       ; update loop counter and keep looping until all bytes swapped
+;      DEY
+;      BNE @Loop
+;    RTS    
 
 
     

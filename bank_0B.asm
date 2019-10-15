@@ -1502,6 +1502,9 @@ PrepBattleVarsAndEnterBattle:
     STA btl_soft2000            ; clear soft PPU regs
     STA btl_soft2001
     
+    STA CHAN_SQ2+ch_envptr
+    STA CHAN_SQ2+ch_envptr+1
+    
     STA ConfusedMagic          
     STA DrawPlayerHPCounter    ; make sure this is 0
    ; LDA #$50
