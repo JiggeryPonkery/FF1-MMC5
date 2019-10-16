@@ -1727,12 +1727,14 @@ TREASURE_TRI:
    .byte $FC,$F8,$08,$E0,$C9,$C9,$C9,$C9,$C9,$FF
 
 BLANK:   ; For songs that need to loop
-;.BYTE $E8 ; silent envelopt pattern
-;.BYTE $FC ; note length LUT with shortest note
-;.byte $CB ; shortest note, so SQ2 FX stuff ends and plays the next note faster
-.BYTE $F9,$C0
-.BYTE $D0
-.WORD BLANK
+.byte $F6 ; silencer on
+BLANK_LOOP:
+.BYTE $EF ; envelope pattern that starts with the quietest note
+.BYTE $FE ; note length LUT with shortest note - tempo
+.byte $F8, $0F ; fastest envelope speed
+.byte $CE ; play a 1 frame long silence 
+.BYTE $D0 ; loop forever
+.WORD BLANK_LOOP
 
 ;BLANK2: ; For songs that need to end. (note that using this will cause a song to end prematurely once it hits the FF. So... useless. Oops.)
 ;.BYTE $F9,$CA,$FF

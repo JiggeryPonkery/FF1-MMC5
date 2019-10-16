@@ -1502,15 +1502,6 @@ PrepBattleVarsAndEnterBattle:
     STA btl_soft2000            ; clear soft PPU regs
     STA btl_soft2001
 
-    STA CHAN_SQ1+ch_envptr     ;; JIGS - usually its Square 2 that shrieks
-    STA CHAN_SQ1+ch_envptr+1   ;; since its usually not playing anything
-    STA CHAN_SQ2+ch_envptr     ;; until SFX happens in battle, then it starts wailing
-    STA CHAN_SQ2+ch_envptr+1    
-    STA CHAN_SQ3+ch_envptr     ;; but there's a case where Square 1 will emit a high 
-    STA CHAN_SQ3+ch_envptr+1   ;; pitched tone until the melody starts up 
-    STA CHAN_SQ4+ch_envptr     ;; in the new fiend battle music...
-    STA CHAN_SQ4+ch_envptr+1   ;; so I figure just clear all of these
-    
     STA ConfusedMagic          
     STA DrawPlayerHPCounter    ; make sure this is 0
    ; LDA #$50
