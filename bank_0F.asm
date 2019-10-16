@@ -5189,8 +5189,13 @@ PlayerAttackEnemy_PhysicalZ:
     
     AND #$03
     JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_CONF
+    BEQ :+
+       JSR EnemyExistLoop
     
-    LDA AutoTargetOption
+  : LDA AutoTargetOption
     BNE @SkipAutoTarget
     
     JSR CheckTargetLoop             ; JIGS - doublecheck the enemy you're attacking exists!

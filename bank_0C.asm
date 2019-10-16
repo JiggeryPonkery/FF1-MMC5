@@ -5419,15 +5419,15 @@ Battle_DoTurn:
 
 
 Battle_DoPlayerTurn:
+    JSR ClearAltMessageBuffer   ; Clear alt message buffer
+    ;; JIGS - do this here instead of when it gets to items/magic 
+    ;; maybe it'll be used for skill stuff too! It clears btl_boxcount to 0
+    
     AND #$03                    ; mask off the high bit to get the player ID
     STA BattleCharID            ;  and record it for future use
     
     JSR IsCommandPlayerValid  
     BCC @Return                 ; exit if carry clear
-    
-    JSR ClearAltMessageBuffer   ; Clear alt message buffer
-    ;; JIGS - do this here instead of when it gets to items/magic 
-    ;; maybe it'll be used for skill stuff too! It clears btl_boxcount to 0
     
     LDA BattleCharID
     ASL A
@@ -5453,7 +5453,7 @@ Battle_DoPlayerTurn:
     BCS @Flee
     
    @Return:
-    RTS
+    JMP UndrawAllKnownBoxes
     
     ;;  Code reaches here if the player had no command, which would only happen if they are
     ;;  immobilized or dead.
@@ -8065,7 +8065,7 @@ Battle_DoEnemyTurn:
     LDA (EnemyRAMPointer), Y                     ; check the high bit to see if they're confused
     BPL @EnemyActive_AndNotConfused     ; if clear, jump ahead to EnemyActive_AndNotConfused.  Otherwise...
     
-    ; If enemy is confused:
+    ; If enemy is confused
     JSR BattleRNG_L                     ; random [0,$FF]
     AND #03
     BNE :+                              ; cured if 0 (25% chance)
@@ -11388,7 +11388,11 @@ LargeEnemyAttributes:
 .byte $CA, $C0, $CB, $F0, $D2, $CC, $D3, $FF, $00, $00, $00, $00, $00 ; ID 2 (top right)    
 .byte $DA, $FF, $DB, $FF, $E2, $FF, $E3, $FF, $00, $00, $00, $00, $00 ; ID 3 (bottom right) 
 
-
+FiendChaosAttributes:
+.byte $C8, $F0, $C9, $F0, $CA, $F0, $CB, $F0 
+.byte $D0, $FF, $D1, $FF, $D2, $FF, $D3, $FF 
+.byte $D8, $FF, $D9, $FF, $DA, $FF, $DB, $FF 
+.byte $E0, $FF, $E1, $FF, $E2, $FF, $E3, $FF, $00 
 
 DisplayAttackIndicator:
   LDA btl_attacker
@@ -11405,13 +11409,18 @@ DisplayAttackIndicator:
   BEQ @Indicator_4Large          ; 4large formation
   DEX
   BEQ @Indicator_Mix             ; mix formation
-  RTS                            ; if its 3 or 4, don't bother, only one enemy!
+  
+ @Indicator_Fiend:
+  LDA #<FiendChaosAttributes
+  STA tmp+4
+  LDA #>FiendChaosAttributes
+  LDX #0
+  BEQ @PrepLoop
   
  @Indicator_9Small:
   LDA #<SmallEnemyAttributes
   STA tmp+4
   LDA #>SmallEnemyAttributes
-  STA tmp+5
   LDX #9
   BNE @PrepLoop
   
@@ -11419,7 +11428,6 @@ DisplayAttackIndicator:
   LDA #<LargeEnemyAttributes
   STA tmp+4
   LDA #>LargeEnemyAttributes
-  STA tmp+5
   LDX #13
   BNE @PrepLoop
 
@@ -11431,10 +11439,10 @@ DisplayAttackIndicator:
   LDA #<MixedEnemyAttributes
   STA tmp+4
   LDA #>MixedEnemyAttributes
-  STA tmp+5
   LDX #9
   
  @PrepLoop:
+  STA tmp+5
   LDA indicator_index   
   JSR MultiplyXA
   STA tmp+7
