@@ -1657,6 +1657,7 @@ data_BattleMessages:
 .word BTL_MESSAGE92
 .word BTL_MESSAGE93
 .word BTL_MESSAGE94
+.word BTL_MESSAGE95
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1848,6 +1849,9 @@ BTL_MESSAGE93:
 .byte $8C,$A4,$34,$1B,$2E,$1C,$A8,$AC,$44,$3E,$B1,$3E,$B6,$00 ; Came to their senses
 BTL_MESSAGE94:
 .byte $90,$B2,$AF,$A7,$FF,$A9,$B2,$B8,$B1,$A7,$C3,$00 ; Gold found..
+BTL_MESSAGE95:
+.byte $97,$B2,$B7,$AB,$AC,$B1,$AA,$00 ; Nothing
+
 
 
  ;; You can use normal numbers to set the price if you use .word, as exampled by Heal and Pure below

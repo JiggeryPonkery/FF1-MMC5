@@ -43,6 +43,16 @@ SaveScreenChar10 = sram3+$140
 SaveScreenChar11 = sram3+$180
 SaveScreenChar12 = sram3+$1C0
 
+;;;;;;;;;;;;;;;;;;
+;; battle actions
+ACTION_FIGHT      = $01
+ACTION_MAGIC      = $02
+ACTION_SKILL      = $04
+ACTION_GEAR       = $08
+ACTION_GUARD      = $10
+ACTION_ITEM       = $20
+ACTION_HIDE       = $40
+ACTION_FLEE       = $80
 
 ;;;;;;;;;;;;;;;;;;
 ;;  elements
@@ -291,6 +301,7 @@ BTLMSG_OUTOFITEM        = $5B ; Haven't got any more!
 BTLMSG_NOSKILL          = $5C ; Coming soon...?
 BTLMSG_CONFUSECURED     = $5D ; Came to their senses
 BTLMSG_GOLDFOUND        = $5E ; Gold found..
+BTLMSG_NOTHING          = $5F ; Nothing
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
