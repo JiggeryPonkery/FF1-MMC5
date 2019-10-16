@@ -758,7 +758,7 @@ btl_enemyrewards  = $6200
 ;; $6400 is used by the Item option
 btl_stringoutputbuf_anchor = $6400  ; JIGS - only needs to be $20 before btl_stringoutputbuf? 
 btl_enemyIDs               = $6410  ; 9 entries of enemy IDs
-btl_enemyroster            = $641A  ; $6BC9  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
+btl_enemyroster            = $6419  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
 btl_enemyamount            = $641E  ; JIGS - tmp byte for number of enemies, for battle printing
 btl_stringoutputbuf        = $641F  ; output buffer where decoded strings are printed
 btl_unfmtcbtbox_buffer     = $6440  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.

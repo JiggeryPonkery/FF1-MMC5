@@ -88,6 +88,7 @@
 .export lut_VehicleMusic
 .export JIGS_RefreshAttributes
 .export SetBattlePPUAddr
+.export ClearUnformattedCombatBoxBuffer
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -13482,13 +13483,11 @@ DrawCombatBox:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ClearUnformattedCombatBoxBuffer:
-    LDY #$00                ; pretty self explanitory routine
+    LDY #$80                ; pretty self explanitory routine
     LDA #$FF
-    : STA btl_unfmtcbtbox_buffer, Y    ; fill buffer ($80 bytes) with $FF
-      INY
-      CPY #$80
+    : STA btl_unfmtcbtbox_buffer-1, Y    ; fill buffer ($80 bytes) with $FF
+      DEY
       BNE :-
-      
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

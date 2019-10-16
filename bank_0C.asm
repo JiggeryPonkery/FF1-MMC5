@@ -849,6 +849,15 @@ BattleFadeOutAndRestartGame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+ClearCommandBuffer:
+    LDY #$1C
+    LDA #$00
+    STA btl_attackid                ; clear attack id?  This seems very strange to do here...
+    : STA btl_charcmdbuf-1, Y       ; clear the character battle command buffer
+      DEY
+      BNE :-
+    RTS
+
 Battle_AfterFadeIn:
   ;  LDY #$1C
   ;  LDA #$00
@@ -943,14 +952,12 @@ Battle_AfterFadeIn:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleLogicLoop_DoCombat_Surprised:     ; alternative entry point for when the party is surprised
+    JSR ClearCommandBuffer
     JSR DoBattleRound
     JSR CheckForEndOfBattle
 
 BattleLogicLoop:
-    LDA AutoTargetOptionBackup      ;; JIGS - restore AutoTargetOption if auto battle (start button)
-    STA AutoTargetOption            ;;  was used last round
-    
-    JSR RebuildEnemyRoster          ; Rebuild the roster in case some enemies died
+    JSR RebuildEnemyRoster          ; Rebuild the roster in case some enemies died/ran away
     JSR DrawRosterBox_L             ; Draw the roster box
     INC btl_boxcount
    @FrameLoop: 
@@ -959,13 +966,10 @@ BattleLogicLoop:
     JSR UndrawOneBox
     
 BattleLogicLoop_ReEntry:    
-    LDY #$1C
-    LDA #$00
-    STA btl_attackid                ; clear attack id?  This seems very strange to do here...
-    : STA btl_charcmdbuf-1, Y       ; clear the character battle command buffer
-      DEY
-      BNE :-
-      
+    LDA AutoTargetOptionBackup      ;; JIGS - restore AutoTargetOption if auto battle (start button)
+    STA AutoTargetOption            ;;  was used last round
+    JSR ClearCommandBuffer
+
     ;;   Get input commands for each of the 4 characters.  This is done kind of confusingly,
     ;; since the player can undo/backtrack by pressing B.  This code does not necessarily
     ;; flow linearly.
@@ -1134,8 +1138,8 @@ SetCharacterBattleCommand:
     STA btl_charcmdbuf+2, Y     ; [2] = Y
     PLA
     STA btl_charcmdbuf, Y       ; [0] = A
-    LDA tmp
-    STA btl_charcmdbuf+3, Y     ; only used for ethers (so far)
+    LDA battle_class
+    STA btl_charcmdbuf+3, Y     ; for ethers and skill use
     
     LDA ConfusedMagic
     BEQ :+                      ; resume as normal
@@ -1304,7 +1308,7 @@ BattleSubMenu_Skill:
       JSR DrawCommandBox
       JMP CancelBattleAction        ; ... cancel
   
-  : LDA #$03
+  : LDA #ACTION_SKILL
     JMP SetCharacterBattleCommand   ; command 'FE ?? TT'; FE is "steal", TT is enemy target, ?? is not used
   
    @DoNothing:
@@ -1318,7 +1322,7 @@ BattleSubMenu_Run:
     LDA btlcmd_curchar
     ORA #$80                  ; get character index, put in Y
     TAY
-    LDA #$80
+    LDA #ACTION_FLEE
     JMP SetCharacterBattleCommand     ; command '20 ?? TT' for running, where 'TT' is character running and ?? is unused.  
  
 
@@ -1334,7 +1338,7 @@ BattleSubMenu_Guard:
     PLA
     ORA #$80                  ; get character index, put in Y
     TAY
-    LDA #$10
+    LDA #ACTION_GUARD
     JMP SetCharacterBattleCommand
 
 
@@ -1363,7 +1367,7 @@ BattleSubMenu_Hide:
     PLA                          
     ORA #$80                     
     TAY                          
-    LDA #$40                       ; bit 8 set ; JIGS - new hiding bit for battle commands!
+    LDA #ACTION_HIDE              ; bit 8 set ; JIGS - new hiding bit for battle commands!
     JMP SetCharacterBattleCommand
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1392,8 +1396,8 @@ SetAutoBattle:
     LDA btlcmd_curchar          
     JSR ConfirmCharacterCanAct
     BCS :+
-    LDA #01
-    STA btl_charcmdbuf, Y       ; [0] = A
+    LDA #ACTION_FIGHT
+    STA btl_charcmdbuf, X       ; [0] = A
   : RTS
 
 SetAutoFirstChar:    
@@ -1418,18 +1422,20 @@ SetAutoRun:
     LDA btlcmd_curchar         
     JSR ConfirmCharacterCanAct
     BCS :+
-    LDA #$80
-    STA btl_charcmdbuf, Y       ; [0] = A
+    LDA #ACTION_FLEE
+    STA btl_charcmdbuf, X       ; [0] = A
     LDA btlcmd_curchar          
     ORA #$80
-    STA btl_charcmdbuf+2, Y     ; [2] = Y
+    STA btl_charcmdbuf+2, X     ; [2] = Y
   : RTS
 
 ConfirmCharacterCanAct:
+    AND #03
     PHA
     JSR RemoveCharacterAction   ; clear out the buffer
+    TYA
+    TAX
     PLA
-    AND #03
     JSR PrepCharStatPointers
     LDY #ch_ailments - ch_stats
     CLC
@@ -1459,7 +1465,7 @@ BattleSubMenu_Fight:
     CMP #$02                              
     BNE :+                                  ; If they pressed B....
       JMP CancelBattleAction_RedrawCommand  ; ... cancel
-  : LDA #$01                                ; If they pressed A, record the command
+  : LDA #ACTION_FIGHT                       ; If they pressed A, record the command
     JMP SetCharacterBattleCommand           ; Command:   04 xx TT    attack enemy slot TT (xx appears to be unused)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1568,7 +1574,7 @@ ConfusedMagicLoadPoint:
     LSR A                           ; shift out low bit
     BCC @CheckTarget_02             ; if set (target=01 -- target all enemies)...
       LDY #$FF
-      LDA #$02                      ;  command = 40 xx FF  (where xx = spell index)
+      LDA #ACTION_MAGIC             ;  command = 02 xx FF  (where xx = spell index)
       LDX btlcmd_spellindex
       JMP SetCharacterBattleCommand ; set command and exit
   
@@ -1590,9 +1596,9 @@ ConfusedMagicLoadPoint:
       CMP #$02
       BNE :+                        ; if they pressed B to exit
         JMP BattleSubMenu_Magic_NoUndraw     ; redo magic submenu from the beginnning
-    : LDA #$02
+    : LDA #ACTION_MAGIC
       LDX btlcmd_spellindex
-      JMP SetCharacterBattleCommand ; command = 40 xx TT  (xx = spell, TT = enemy target)
+      JMP SetCharacterBattleCommand ; command = 02 xx TT  (xx = spell, TT = enemy target)
     
   @CheckTarget_04:                  ; target 04 = target self
     LSR A
@@ -1600,17 +1606,17 @@ ConfusedMagicLoadPoint:
       LDA btlcmd_curchar            ; use cur char
       ORA #$80                      ; OR with 80 to indicate targetting a player character
       TAY
-      LDA #$02
+      LDA #ACTION_MAGIC
       LDX btlcmd_spellindex
       JMP SetCharacterBattleCommand
     
   @CheckTarget_08:                  ; target 08 = target whole party
     LSR A
     BCC @Target_10
-      LDA #$02
+      LDA #ACTION_MAGIC
       LDY #$FE                      ; 'FE' targets party
       LDX btlcmd_spellindex
-      JMP SetCharacterBattleCommand ; 40 xx FE
+      JMP SetCharacterBattleCommand ; 02 xx FE
 
   @Target_10:                       ; target 10 = target one player
     LDA ConfusedMagic
@@ -1628,9 +1634,9 @@ ConfusedMagicLoadPoint:
   : AND #$03
     ORA #$80                        ; otherwise, put the player target in Y
     TAY
-    LDA #$02
+    LDA #ACTION_MAGIC
     LDX btlcmd_spellindex
-    JMP SetCharacterBattleCommand   ; 40 xx TT
+    JMP SetCharacterBattleCommand   ; 02 xx TT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1721,7 +1727,7 @@ BattleSubMenu_Item_NoUndraw:
     ASL A
     ASL A                       ; x = 0 or 1, times 4
     ADC btlcurs_y               ;   + 0, 1, 2, or 3
-    STA tmp                     ; = spell level chosen
+    STA battle_class            ; = spell level chosen (is also used for skills)
     JSR Ether_IsThereMP         ; check that character for mana
     BNE @SkipTarget             ; if they have a high byte, do it
         JSR DoNothingMessageBox ; otherwise, print "Nothing" and jump back
@@ -1737,7 +1743,7 @@ BattleSubMenu_Item_NoUndraw:
     PLA                     ; get last character selection
     TAY                     ; put in Y (for SetCharacterBattleCommand)
     LDX btlcmd_spellindex   ; get the item ID 
-    LDA #$20
+    LDA #ACTION_ITEM
     JMP SetCharacterBattleCommand
     
     ;; SetCharacterBattleCommand saves the following:
@@ -1854,29 +1860,9 @@ BattleSubMenu_Equipment:
     TAX                             ; put it in X
     DEX                             ; DEX to make it 0-based (FF becomes "no spell")
     LDY btlcmd_curchar              ; Y=cur char -- default to targetting yourself
-    LDA #$08
+    LDA #ACTION_GEAR
     JMP SetCharacterBattleCommand
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DoNothingMessageBox  [$96FE :: 0x3170E]
-;;
-;;    Draw the "Nothing" message box that appears when you select an empty
-;;  menu.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DoNothingMessageBox:
-    LDA #$04                    ; Draw the "Nothing" combat box
-    LDX #<data_NothingText
-    LDY #>data_NothingText
-    JSR DrawCombatBox_NoRestore
-   @FrameLoop: 
-    JSR DoFrame_WithInput        
-    BEQ @FrameLoop
-    JMP UndrawOneBox
-    
+   
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1930,7 +1916,7 @@ EnterBattlePrepareSprites:
     JSR BattleUpdatePPU     ; reset scroll and stuffs
     
     LDA #$00
-    STA btl_msgdraw_blockcount  ; clear the block count
+    STA btl_msgdraw_blockcount  ; clear the block count (important for undrawing in fixed bank code)
     STA btl_boxcount               
     STA btlattackspr_nodraw              
     
@@ -4175,17 +4161,6 @@ lut_InBattleCharPaletteAssign:
   .BYTE 1, 0, 0, 1, 1, 0
   .BYTE 1, 1, 0, 1, 1, 0
   
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  data_NothingText  [$A048 :: 0x32058]
-;;
-;;    A strange place to store the "Nothing" text that appears when you select
-;;  an empty menu.
-
-data_NothingText:
-  .BYTE $97, $B2, $B7, $AB, $AC, $B1, $AA, $00, $00
-  ;       N    o    t    h    i    n    g   <terminator>
-  
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4253,7 +4228,7 @@ UndrawOneBox:
     JSR SaveAXY
 UndrawOneBox_NoSave:    
     LDA #01
-    BNE UndrawBoxes
+;   BNE UndrawBoxes
 
 ;Delay_UndrawTwoBoxes:
 ;    JSR RespondDelay    
@@ -4338,7 +4313,7 @@ DrawAttackerBox:
     STA btltmp_attackerbuffer   ; put that in buffer to hold attacker name
     LDX #<btltmp_attackerbuffer ; set XY to point to that buffer
     LDY #>btltmp_attackerbuffer
-    LDA #$00                ; combat box 0 = attacker box
+    LDA #0
     JMP DrawCombatBox
 
 DrawDefenderBox:
@@ -4371,7 +4346,7 @@ DrawAttackBox:
     CMP #$01                ; if source=1, it's a Item
     BNE @Equipment                  ; for Items....
       LDA btl_attackid              ; ... get the item ID for heal/pure potions
-    : STA btl_attackbox_itemid+1    ; write item ID
+    : TAX
       LDA #$0E                      ; preface it with 0E, the command to draw an attack (item) name
       BNE @Print                    ; (always branch)
       
@@ -4381,20 +4356,19 @@ DrawAttackBox:
     BNE @Skill
       LDA btl_attacker
       AND #$03
-      TAX
-      LDA btl_charcmditem, X          ; get the item ID from the cmd buffer
-      STA btl_attackbox_itemid+1      ; write item ID
+      TAY
+      LDX btl_charcmditem, Y          ; get the item ID from the cmd buffer
       LDA #$0D                        ; use control code for weapon/armor names
       BNE @Print
 
   @Skill:
-    LDX battle_class
-    LDA @skillname_lut, X
-    STA btl_attackbox_itemid+1      ; write item ID
+    LDY battle_class
+    LDX @skillname_lut, Y
     LDA #$0F
 
   @Print:
-    STA btl_attackbox_itemid                       
+    STA btl_attackbox_itemid
+    STX btl_attackbox_itemid+1                       
     LDX #<btl_attackbox_itemid
     LDY #>btl_attackbox_itemid      ; get pointer to that string in YX
 
@@ -4427,7 +4401,7 @@ DrawDamageBox:
     JSR DrawCombatBox
     JMP RespondDelay
     
-   @Data:                          ; data for "###DMG"
+   @Data:                         ; data for "###DMG"
     .BYTE $0C                     ; format number
     .WORD math_basedamage         ; pointer to number to print
     .BYTE $0F, BTLMSG_DMG         ; "DMG" battle message
@@ -4437,22 +4411,21 @@ DrawMessageBoxDelay_ThenClearAll:
     JSR DrawMessageBox
     JSR RespondDelay
     JMP UndrawAllKnownBoxes_NoSave
+
+DoNothingMessageBox:
+    LDA #BTLMSG_NOTHING           ; Draw the "Nothing" combat box
+    JSR DrawMessageBox
+   @FrameLoop: 
+    JSR DoFrame_WithInput        
+    BEQ @FrameLoop
+    JMP UndrawOneBox
     
 DrawMessageBox:    
-    STA tmp
-    JSR SaveAXY
-    LDX tmp
+    TAX
     LDA #$04
-    LDY #$0F
-    
-DrawCombatBox_Message:  
-   ;;  input:   A = ID of combat box to draw  (0-5)
-   ;;         Y,X = format codes to draw in that box
-    STY btl_weird_tmp           ; backup Y (control code)
     JSR SetMessageBuffer
-    PHA
     LDY #$00
-    LDA btl_weird_tmp           ; get the control code
+    LDA #$0F                    ; get the control code
     STA ($88), Y                ; write it to pos 0
     INY
     TXA
@@ -4460,7 +4433,7 @@ DrawCombatBox_Message:
     INY
     LDA #$00
     STA ($88), Y                ; write terminator to pos 2
-    PLA
+    LDA #$04
     JMP DrawMessageBox_Prebuilt
     
 DrawMagicMessage:
@@ -5571,6 +5544,9 @@ StealFromEnemy:
     STX btl_defender
     ORA #$80
     STA btl_attacker
+    
+    LDX btl_charcmdbuf+3, Y
+    STX battle_class
    
     JSR DrawAttackerBox
     JSR DrawDefenderBox
@@ -5641,6 +5617,7 @@ StealFromEnemy:
     JSR DrawMessageBox_Prebuilt
     
   : JSR DoFrame_WithInput     
+    BEQ :-
     JMP UndrawAllKnownBoxes
   
 
@@ -6126,7 +6103,10 @@ EnemyAttackPlayer_Physical:
     
     JSR DoPhysicalAttack_NoAttackerBox ; DoPhysicalAttack       
 
-    SavePlayerDefender:
+SavePlayerDefender:
+    LDA btl_defender
+    JSR PrepCharStatPointers
+    
     LDY #ch_curhp - ch_stats
     LDA btl_defender_hp
     STA (CharStatsPointer), Y
@@ -6932,12 +6912,12 @@ DrawCharacterStatus:
     
 @CharacterLoop:
     LDA #$00                        
-    STA btl_unfmtcbtbox_buffer, X   ; start of first string, invisible tile
-    STA btl_unfmtcbtbox_buffer+3, X ; start of second string, invisible tile
-    STA btl_unfmtcbtbox_buffer+6, X ; start of third string, invisible tile
+    STA btl_unfmtcbtbox_buffer+$50, X   ; start of first string, invisible tile
+    STA btl_unfmtcbtbox_buffer+$53, X ; start of second string, invisible tile
+    STA btl_unfmtcbtbox_buffer+$56, X ; start of third string, invisible tile
     
-    STA btl_unfmtcbtbox_buffer+1, X   ; clear out heavy ailment
-    STA btl_unfmtcbtbox_buffer+4, X ; clear out light ailment
+    STA btl_unfmtcbtbox_buffer+$51, X   ; clear out heavy ailment
+    STA btl_unfmtcbtbox_buffer+$54, X ; clear out light ailment
     
     LDA CharacterIndexBackup
     JSR PrepCharStatPointers
@@ -6965,27 +6945,27 @@ DrawCharacterStatus:
     AND #STATE_HIDDEN               ; hidden?
     BEQ :+
         LDA #$7E
-        STA btl_unfmtcbtbox_buffer+6, X ; start of third string
+        STA btl_unfmtcbtbox_buffer+$56, X ; start of third string
         
   : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y            
     AND #STATE_GUARDING              ; guarding?
     BEQ :+
         LDA #$EF
-        STA btl_unfmtcbtbox_buffer+3, X ; start of second string
+        STA btl_unfmtcbtbox_buffer+$53, X ; start of second string
     
   : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
     AND #STATE_REGENLOW | STATE_REGENMIDDLE ; regenerating? 
     BEQ @NoState
         LDA #$F2
-        STA btl_unfmtcbtbox_buffer, X ; start of first string
+        STA btl_unfmtcbtbox_buffer+$50, X ; start of first string
     
    @NoState: 
     LDA #$FF
-    STA btl_unfmtcbtbox_buffer+2, X
-    STA btl_unfmtcbtbox_buffer+5, X ; null terminate each bit
-    STA btl_unfmtcbtbox_buffer+7, X ; and create a blank third line
+    STA btl_unfmtcbtbox_buffer+$52, X
+    STA btl_unfmtcbtbox_buffer+$55, X ; null terminate each bit
+    STA btl_unfmtcbtbox_buffer+$57, X ; and create a blank third line
     
     TXA
     CLC
@@ -7017,7 +6997,7 @@ DrawCharacterStatus:
     STA $2006
     
   @DrawLoop:  
-    LDA btl_unfmtcbtbox_buffer, Y ; (using Y to index)
+    LDA btl_unfmtcbtbox_buffer+$50, Y ; (using Y to index)
     CMP #$FF                      ; use $FF as null terminator for this routine 
     BEQ @NextRow
     STA $2007
@@ -7054,7 +7034,7 @@ DrawCharacterStatus:
     AND tmp
     BEQ @HeavyAilment
 	LDA @AilmentIconLUT, Y
-	STA btl_unfmtcbtbox_buffer+4, X
+	STA btl_unfmtcbtbox_buffer+$54, X
     BNE @HeavyAilment
 
    @LightAilment: 
@@ -7067,7 +7047,7 @@ DrawCharacterStatus:
     AND tmp
     BEQ @LightAilment
 	LDA @AilmentIconLUT, Y
-	STA btl_unfmtcbtbox_buffer+1, X
+	STA btl_unfmtcbtbox_buffer+$51, X
     BNE @LightAilment    
 
     
