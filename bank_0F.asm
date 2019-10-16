@@ -698,6 +698,9 @@ StealFromEnemyZ:
     STA btl_unfmtcbtbox_buffer+$40
     LDA #BTLMSG_STOLE
     STA btl_unfmtcbtbox_buffer+$41
+    LDA #0
+    STA btl_unfmtcbtbox_buffer+$44 ; 44 must be 0'd if its a normal item
+    STA btl_unfmtcbtbox_buffer+$46 ; if its a scroll, 44 and 45 are written over, so end at 46    
 
     LDA btl_defender
     JSR GetEnemyRAMPtr    
@@ -758,8 +761,10 @@ StealFromEnemyZ:
     BEQ @StealSpecial
   
    @StealNormal:  
-    LDY #en_item
-    LDA (EnemyRAMPointer), Y
+    ;LDY #en_item
+    ;LDA (EnemyRAMPointer), Y
+    PLA
+    PHA                             ; get the item byte and push it AGAIN!
     AND #~$11
     STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
     
@@ -780,9 +785,9 @@ StealFromEnemyZ:
     BNE @FindItem
     
    @StealSpecial:
-    PLA                             ; toss backed up byte
-    LDY #en_item
-    LDA (EnemyRAMPointer), Y
+    PLA                             ; get backed up byte
+    ;LDY #en_item
+    ;LDA (EnemyRAMPointer), Y
     AND #~$80
     STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
     LDY #4
