@@ -731,15 +731,19 @@ StealFromEnemyZ:
    
   @Fail:
     PLA                             ; undo the push
-    DEC battle_stealsuccess
+  : DEC battle_stealsuccess
     
   @Nothing:
     RTS
+    
+  @NoCommonItems:
+    DEC battle_stealsuccess         ; back to 0
+    BEQ :-
    
   @Success:  
     INC battle_stealsuccess
     LDA #$0E
-    STA btl_unfmtcbtbox_buffer+$42       ; put the item name code into the message buffer
+    STA btl_unfmtcbtbox_buffer+$42  ; put the item name code into the message buffer
     
     LDY #en_enemyid
     LDA (EnemyRAMPointer), Y        ; get the enemy's index
@@ -762,10 +766,15 @@ StealFromEnemyZ:
    @StealNormal:  
     LDY #en_item
     LDA (EnemyRAMPointer), Y
+    AND #$80
+    BEQ @NoCommonItems
+    
+    LDA (EnemyRAMPointer), Y
+    PHA                             ; push it again... 
     AND #~$11
     STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
     
-    PLA
+    PLA                             ; and pull to see if they ever had a secondary item
     AND #$10
     BEQ @StealNormal_1              ; they have no secondary item to steal 
     
@@ -801,7 +810,7 @@ StealFromEnemyZ:
    @StealMagic:                     ; do all the different ways of putting items in your inventory
     INY 
     LDA (tmp), Y
-    STA btl_unfmtcbtbox_buffer+$43       ; put the item name next in the message buffer
+    STA btl_unfmtcbtbox_buffer+$43  ; put the item name next in the message buffer
     SEC
     SBC #ITEM_MAGICSTART
     TAX
@@ -809,12 +818,12 @@ StealFromEnemyZ:
     LDA #$0F
     STA btl_unfmtcbtbox_buffer+$44
     LDA #BTLMSG_SCROLL
-    STA btl_unfmtcbtbox_buffer+$45       ; and put _scroll at the end of the message
+    STA btl_unfmtcbtbox_buffer+$45  ; and put _scroll at the end of the message
     RTS
     
    @StealEquipment:
     LDA #$0D
-    STA btl_unfmtcbtbox_buffer+$42       ; here, re-write the item name byte with equipment name byte
+    STA btl_unfmtcbtbox_buffer+$42   ; here, re-write the item name byte with equipment name byte
     INY 
     LDA (tmp), Y
     TAX
@@ -832,13 +841,13 @@ StealFromEnemyZ:
 
    @StealGold:
     LDA #3
-    STA shop_type            ; needed to make sure LoadPrice works right
+    STA shop_type                    ; needed to make sure LoadPrice works right
    
     INY 
     LDA (tmp), Y
     STA btl_unfmtcbtbox_buffer+$43
-    JSR LoadPriceZ           ; get the price of the item (the amount of gold stolen)
-    JSR AddGPToParty         ; add that to the party's GP
+    JSR LoadPriceZ                   ; get the price of the item (the amount of gold stolen)
+    JSR AddGPToParty                 ; add that to the party's GP
     RTS
     
     
