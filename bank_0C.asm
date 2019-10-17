@@ -5644,9 +5644,9 @@ Player_Hide:
   
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
-    AND #AIL_DARK
+    AND #AIL_DARK | AIL_STUN
     BEQ @CheckHide
-      LDA #BTLMSG_CANTHIDE ; Can't see to hide
+      LDA #BTLMSG_CANTHIDE ; Can't hide now!
       JMP @PrintStuff   
      
    @CheckHide: 
@@ -6217,15 +6217,15 @@ DoPhysicalAttack:
 DoPhysicalAttack_NoAttackerBox:      
     JSR DrawDefenderBox
     
-    JSR ClearMathBufHighBytes   ; zero high bytes of math buffers
+    JSR ClearMathBufHighBytes       ; zero high bytes of math buffers
     
-    LDA #168                    ; base hit chance of 168
+    LDA #168                        ; base hit chance of 168
     STA math_hitchance
     
-    LDA btl_attacker_damage   ; base damage of attacker's strength value
+    LDA btl_attacker_damage         ; base damage of attacker's strength value
     STA math_basedamage
     
-    LDA btl_attacker_critrate   ; base crit chance of attacker's crit rate
+    LDA btl_attacker_critrate       ; base crit chance of attacker's crit rate
     STA math_critchance
     
     ;JSR LongCall                
@@ -6233,29 +6233,24 @@ DoPhysicalAttack_NoAttackerBox:
     ;    .byte $0F
     ;; See Bank Z file for more info. Despite the name, if a player is hidden, subtracts 40 from the enemy's hit chance.
     
-    LDA btl_attacker_ailments   ; if attacker has DARK status, penalty of 40 to their hit chance
+    LDA btl_attacker_ailments       ; if attacker has DARK status, penalty of 40 to their hit chance
     AND #AIL_DARK
     BEQ :+
         JSR HitChance_Subtract40
         
-  : LDA btl_defender_ailments   ; if defender has DARK, bonus of 40 to attacker's hit chance
-    AND #AIL_DARK
-    BEQ :+
-        JSR HitChance_Add40
-        
   : LDA btl_defender_ailments
     AND #AIL_STUN  
     BEQ :+
-        JSR BattleRNG_L         ; 50% chance the defender is too stunned to evade more
+        JSR BattleRNG_L             ; 50% chance the defender is too stunned to evade more
         AND #01
         BEQ :+
         JSR HitChance_Add40
       
-  : LDA btl_defender_hidden    ; if defender is hidden, subtract another 40 from the attacker's hit chance
+  : LDA btl_defender_hidden         ; if defender is hidden, subtract another 40 from the attacker's hit chance
     BEQ :+
       JSR HitChance_Subtract40
       
-      LDA btl_defender_class   ; thieves and ninjas get an extra 40 for hiding
+      LDA btl_defender_class        ; thieves and ninjas get an extra 40 for hiding
       AND #CLS_TH | CLS_NJ
       BEQ :+
         JSR HitChance_Subtract40    ; if the enemy is blind, hitchance is #48 now
@@ -6271,14 +6266,14 @@ DoPhysicalAttack_NoAttackerBox:
     LDA math_category
     ORA math_element                    ; merge categoy/element matches
     BEQ :+                              ; if any weaknesses found...
-     ; LDA #MATHBUF_HITCHANCE            ; +40 bonus to hit chance
+     ; LDA #MATHBUF_HITCHANCE           ; +40 bonus to hit chance
      ; LDX #40
      ; JSR MathBuf_Add
      ; LDY math_hitchance               ;; JIGS - this seems pointless in vanilla: the max hitchance is #$F8
      ; LDX math_hitchance+1             ;; 168 to start, blind enemy is +40, category/elemental weakness is +40
      ; JSR CapXYAtFF                    
      ; STY math_hitchance
-     ; STX math_hitchance+1              ; maximum hit chance of 255
+     ; STX math_hitchance+1             ; maximum hit chance of 255
       
       JSR HitChance_Add40
       ;; JIGS ^ much simpler
@@ -6297,11 +6292,17 @@ DoPhysicalAttack_NoAttackerBox:
     BEQ :+      
         LDA #0
         STA btl_defender_evasion        ;; JIGS - sleep is scary!
+        BEQ :++                         ;; skip the DARK check if defender is asleep
+        
+  : LDA btl_defender_ailments           ; if defender has DARK, bonus of 40 to attacker's hit chance
+    AND #AIL_DARK
+    BEQ :+
+        JSR HitChance_Add40
         
   : LDA btl_defender_ailments
     AND #AIL_STUN | AIL_SLEEP
-    BEQ :+         ; if defender alseep or stunned....
-      LDA math_basedamage       ; apply 25% bonus to base damage
+    BEQ :+                              ; if defender alseep or stunned....
+      LDA math_basedamage               ; apply 25% bonus to base damage
       LSR A
       LSR A
       CLC
@@ -6309,15 +6310,15 @@ DoPhysicalAttack_NoAttackerBox:
       STA math_basedamage
       BCC :+
         LDA #$FF
-        STA math_basedamage     ; cap at 255 base damage
-       ;JMP :+                  ; (jump past the @DefenderMobile block)
-       
+        STA math_basedamage             ; cap at 255 base damage
+       ;JMP :+                          ; (jump past the @DefenderMobile block)
+     
        ;; JIGS - this should let hit chance and hit rate be added together always
   
        ; if the defender is mobile (not asleep of stunned)
     : LDA #MATHBUF_HITCHANCE            ; add their hit rate to their hit chance
-      LDX btl_attacker_hitrate          ;   This seems strange to me.  Shouldn't this be done even if defender
-      JSR MathBuf_Add                   ;    is immobile?  Is this BUGGED?
+      LDX btl_attacker_hitrate          ;
+      JSR MathBuf_Add                   ;
     
       LDA #MATHBUF_HITCHANCE            ; and subtract the defender's evade rate from
       LDX btl_defender_evasion            ;  the hit chance.
@@ -6328,7 +6329,7 @@ DoPhysicalAttack_NoAttackerBox:
       JSR CapXYAtFF                     ; cap at 255
       STY math_hitchance
       STX math_hitchance+1
-      ;; JIGS - fixed the bug noted by Anomie as well
+      ;; JIGS - fixed the bug noted by Anomie as well, so this is capped AFTER all the equations
     
     ;;;;;
   : LDA math_hitchance
@@ -6351,11 +6352,11 @@ DoPhysicalAttack_NoAttackerBox:
       INC math_numhits                  ; minimum of 1 hit
       
   : LDA battle_attackerisplayer
-    BEQ @EnemyAttackingPlayer   ; jump ahead if enemy is attacking a player
+    BEQ @EnemyAttackingPlayer           ; jump ahead if enemy is attacking a player
     
   @PlayerAttackingEnemy:
-    LDA btl_attacker_varplt     ; palette to use (unimportant/unused for enemy attacks)
-    LDX #$00                    ; 0 for physical/weapon attacks, nonzero for magic attacks
+    LDA btl_attacker_varplt             ; palette to use (unimportant/unused for enemy attacks)
+    LDX #$00                            ; 0 for physical/weapon attacks, nonzero for magic attacks
     JSR UpdateVariablePalette
     
     ;LDY #ch_weaponsprite - ch_stats
