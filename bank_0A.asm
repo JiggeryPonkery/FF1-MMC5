@@ -1826,7 +1826,7 @@ BTL_MESSAGE81:
 BTL_MESSAGE82:
 .BYTE $9C,$AF,$AC,$B3,$B3,$A8,$A7,$FF,$AC,$B1,$B7,$B2,$FF,$AB,$AC,$A7,$AC,$B1,$AA,$C3,$C0,$00 ; Slipped into hiding...
 BTL_MESSAGE83:
-.byte $8C,$A4,$B1,$BE,$B7,$FF,$B6,$A8,$A8,$FF,$B7,$B2,$FF,$AB,$AC,$A7,$A8,$C4,$00 ; Can't see to hide!
+.byte $8C,$A4,$B1,$BE,$B7,$FF,$AB,$AC,$A7,$A8,$FF,$B1,$B2,$BA,$C4,$00 ; Can't hide now!
 BTL_MESSAGE84:
 .byte $8A,$AF,$B5,$A8,$A4,$A7,$BC,$FF,$AB,$AC,$A7,$A7,$A8,$B1,$C4,$00 ; Already hidden!
 BTL_MESSAGE85:

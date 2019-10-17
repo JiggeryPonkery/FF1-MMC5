@@ -748,8 +748,6 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes
     en_hp           = $19 ; $1A ; 2 bytes               26 27
     en_enemyid      = $1B ;                             28
     
-    ;; JIGS - I am NOT AT ALL convinced I haven't screwed up elemental weakness/resistance bug fixing.
-
 btl_enemyrewards  = $6200
     en_exp          = $00 ; 2 bytes                     1 2
     en_gp           = $02 ; 2 bytes                     2 3 
