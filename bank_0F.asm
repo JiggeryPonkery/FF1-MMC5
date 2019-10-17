@@ -753,7 +753,6 @@ StealFromEnemyZ:
     STA tmp+1                       ; (tmp) now points to the first byte in their inventory
     
     PLA                             ; get the enemy's backed up "Has Item" byte
-    PHA
     BPL @StealNormal                ; if the high bit was NOT set, they have no special items
     
     JSR BattleRNG_L
@@ -761,10 +760,8 @@ StealFromEnemyZ:
     BEQ @StealSpecial
   
    @StealNormal:  
-    ;LDY #en_item
-    ;LDA (EnemyRAMPointer), Y
-    PLA
-    PHA                             ; get the item byte and push it AGAIN!
+    LDY #en_item
+    LDA (EnemyRAMPointer), Y
     AND #~$11
     STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
     
@@ -785,9 +782,8 @@ StealFromEnemyZ:
     BNE @FindItem
     
    @StealSpecial:
-    PLA                             ; get backed up byte
-    ;LDY #en_item
-    ;LDA (EnemyRAMPointer), Y
+    LDY #en_item
+    LDA (EnemyRAMPointer), Y
     AND #~$80
     STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
     LDY #4

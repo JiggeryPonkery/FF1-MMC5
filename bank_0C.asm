@@ -5074,15 +5074,14 @@ ApplyRegenPoisonToPlayer:
     TAX
     LDA ch_ailments, X
     AND #AIL_DEAD
-    BEQ :+
+    BEQ @Exit
    
     LDA #BTLMSG_SLAIN
     JMP DrawMessageBoxDelay_ThenClearAll  ; if dead, print "slain"
     
- : JSR UndrawAllKnownBoxes
-    
    @Exit:
-    RTS  
+    JMP UndrawAllKnownBoxes
+   
 
 ApplyRegenToPlayer:
     LDA ch_maxhp, X
