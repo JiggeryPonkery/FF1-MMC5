@@ -341,7 +341,7 @@ NORMTELE_SAVEDPRINCESS = $3F
 ;;;;;;;;;;;;;;;;;;
 ;;  misc crap
 
-WPNID_XCALBUR      = $27
+WPNID_XCALBUR      = $26 ; originally 27, but this comes pre-DEC
 
 ;;;;;;;;;;;;;;;;;;
 ;;  ailments
