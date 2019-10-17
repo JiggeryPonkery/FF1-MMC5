@@ -3485,6 +3485,7 @@ UnhideCharacter:
     RTS    
 
 UnhideCharacter_Save:    
+    LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
     AND #~STATE_HIDDEN          ; keep Guard state if it exists, as well as regen potency and turns
     STA (CharStatsPointer), Y
@@ -5205,6 +5206,7 @@ ApplyPoisonToEnemy:
     ROR math_basedamage
     
     LDA #$2A    
+    LDX #01                      ; pretend its magic
     JSR UpdateVariablePalette    ; make the explosion effect yellowy-green      
     JSR DoExplosionEffect        ; and do enemy explosion effect      
     JSR DrawPoisonAsAttack       ; do poison messaging      
