@@ -3973,19 +3973,19 @@ SMMove_EarthOrb:
     LDA orb_earth          ; see if orb already lit
     BNE SMMove_OK          ; if it is, just have player move normally
     INC orb_earth          ; otherwise, light up the orb
-    JMP SMMove_AltarEffect ; and do the altar effect (always branches)
+    BNE SMMove_AltarEffect ; and do the altar effect (always branches)
 
 SMMove_FireOrb:
     LDA orb_fire
     BNE SMMove_OK
     INC orb_fire
-    JMP SMMove_AltarEffect
+    BNE SMMove_AltarEffect
 
 SMMove_WaterOrb:
     LDA orb_water
     BNE SMMove_OK
     INC orb_water
-    JMP SMMove_AltarEffect
+    BNE SMMove_AltarEffect
 
 SMMove_AirOrb:
     LDA orb_air

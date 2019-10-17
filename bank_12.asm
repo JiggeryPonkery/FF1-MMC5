@@ -771,7 +771,7 @@ lut_SMTilesetProp:
 .byte $00,$00 ; Cave floor
 .byte $00,$00 ; In room, useless corner piece thing
 .byte $80,$00 ; In room, candlestick
-.byte $12,$F3 ; In room, Earth orb
+.byte $4B,$F3 ; In room, Earth orb
 .byte $03,$05 ; In room, Exit Earth Cave teleport
 .byte $80,$00 ; In room, altar statue left
 .byte $80,$00 ; In room, altar statue right
@@ -780,7 +780,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; In room, spiky stalagwossits alternate
 .byte $03,$00 ; Stairs up - exit Titan cave east
 .byte $03,$01 ; Stairs up - exit Titan cave west
-.byte $12,$F4 ; in room, Fire orb - $1A,$F4
+.byte $4B,$F4 ; in room, Fire orb - $1A,$F4
 .byte $01,$00 ; Stairs up - Return floor
 .byte $02,$0C ; Stairs up - Volcano 4
 .byte $00,$00 ; Blank floor
@@ -1166,7 +1166,7 @@ lut_SMTilesetProp:
 .byte $80,$00 ; In room, Shrine statue left
 .byte $80,$00 ; In room, Shrine statue right
 .byte $80,$00 ; In room, Water Altar statue left
-.byte $12,$F5 ; In room, Water orb altar
+.byte $4B,$F5 ; In room, Water orb altar
 .byte $80,$00 ; In room, Water Altar statue right
 .byte $80,$00 ; In room, casket
 .byte $00,$00 ; In room, chair
@@ -1290,7 +1290,7 @@ lut_SMTilesetProp:
 .byte $03,$08 ; In room, Teleport - Exit Sky Castle to Overworld
 .byte $00,$00 ; In room, Floor arrow
 .byte $80,$00 ; In room, Air Orb altar statue left
-.byte $12,$F6 ; In room, Air Orb altar
+.byte $4B,$F6 ; In room, Air Orb altar
 .byte $80,$00 ; In room, Air Orb altar statue right
 .byte $80,$00 ; In room, broken robot
 .byte $C0,$F8 ; In room, machinery "Tiamat is the fiend of wind..."
