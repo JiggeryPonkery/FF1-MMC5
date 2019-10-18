@@ -4102,6 +4102,7 @@ SetChestAddr:
     BEQ :+               ; enterance
       STA shop_id        ;   so if it's nonzero, write the byte to the shop id to enter
       INC entering_shop  ;   and set the entering_shop flag
+      JSR PlayDoorSFX
 
 :   CLC                  ; CLC to indicate the player can move here
     RTS                  ; and exit!
