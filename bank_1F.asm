@@ -4045,15 +4045,17 @@ SMMove_Door:
     LDX #0                    ; otherwise (door is locked)
     STX tileprop+1            ; erase the secondary attribute byte (prevent it from being a locked shop)
     LDX item_mystickey        ; check to see if the player has the key
-    BNE @LockedDoor        ; if they do, open the door
+    BNE @OpenDoor ;@LockedDoor        ; if they do, open the door
       SEC                ; otherwise (no key, locked door), SEC to indicate player can't move here
       RTS                ; and exit
-  @LockedDoor:    
-    LDA #01
+ ; @LockedDoor:    
+ ;   TXA                 ; X = 1 at this point, whereas the double LSR A for normal doors has A = 2
   @OpenDoor:
-    ;ASL inroom           ; shift the inroom flag (high bit) into C
+    LDA #01              ; JIGS - always use 1 to make sprites visible outside of rooms, locked or not
+    
+    ORA inroom
     STA inroom           ; then write the door bits to inroom to mark that we're opening a door (or locked door)
-    BCS :+               ; if the inroom flag was previously cleared (coming from outside a room)...
+    BMI :+               ; if the inroom flag was previously cleared (coming from outside a room)...
       JSR PlayDoorSFX    ;  ... play the door sound effect
 
 SetChestAddr:      
@@ -4136,31 +4138,34 @@ RedrawDoor:
     BMI RedrawDoor_Exit        ; if already inroom, no redrawing required (redraw only needed for the transition)
 
     AND #$07                   ; mask out the low bits
-    CMP #$01
-    BEQ @LockedOpen            ; if $01 -> opening a normal door
-    CMP #$02
-    BEQ @NormalOpen            ; $02 -> opening a locked door
+    ;CMP #$01
+    ;BEQ @LockedOpen            ; if $01 -> opening a normal door
+    ;CMP #$02
+    ;BEQ @NormalOpen            ; $02 -> opening a locked door
     CMP #$05
     BEQ @NormalClose           ; $05 -> closing a normal door
                                ; else ($06) -> closing a locked door
+    BCC @NormalOpen            ;; JIGS - if its UNDER $05, then normal open door stuff
 
   @LockedClose:
     LDA #$00                   ; new inroom status ($00 because we're leaving rooms)
     LDX #MAPTILE_LOCKEDDOOR    ; tile we're to draw
-    JMP @Redraw                ; redraw it
+    BNE @Redraw                ; redraw it
 
   @NormalClose:
     LDA #$00                   ; same...
     LDX #MAPTILE_CLOSEDDOOR    ; but use normal closed door tile instead of the locked door tile
-    JMP @Redraw
+    BNE @Redraw
 
-  @LockedOpen:
-    LDA #$82                   ; $82 indicates inroom, but shows outroom sprites (locked rooms)
-    LDX #MAPTILE_OPENDOOR
-    JMP @Redraw
-
+ ; @LockedOpen:
+ ;   LDA #$82                   ; $82 indicates inroom, but shows outroom sprites (locked rooms)
+ ;   LDX #MAPTILE_OPENDOOR
+ ;   BNE @Redraw
+    ;; JIGS - this is kinda weird, why hide inside sprites when inside a locked room? 
+    ;; I'm making it so people can be in locked rooms! For whatever reason! 
+    
   @NormalOpen:
-    LDA #$81                   ; $81 indicates inroom and shows inroom sprites (normal rooms)
+    LDA #$81                    ; $81 indicates inroom and shows inroom sprites (normal rooms)
     LDX #MAPTILE_OPENDOOR
 
   @Redraw:
@@ -6236,7 +6241,8 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-.byte $00
+NOP
+NOP
 
 
 ScreenWipeFrame:
@@ -10195,12 +10201,12 @@ AnimateAndDrawMapObject:
 DrawMapObject:
     LDA inroom           ; check inroom flag
     AND #1               ;   specifically the low bit (in normal rooms, but not locked rooms)
-    BEQ @OutRoom
+    BEQ @OutRoom         
 
   @InRoom:
      LDA mapobj_flgs, X   ; check flags for this object
      BMI @DoDraw          ; if the sprite's inroom flag is set, draw it
-     BPL @DontDraw        ;  otherwise, don't (hide it) -- always branches
+    ; BPL @DontDraw        ;  otherwise, don't (hide it) -- always branches
 
   @OutRoom:
      LDA mapobj_flgs, X   ; same deal if the player is out of rooms -- check the object's flag

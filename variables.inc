@@ -192,7 +192,7 @@ btlsfxsq2_ptr       = $05 ; + 6 C
 btlsfxnse_ptr       = $07 ; + 8 E
  
 story_dropinput = $07
-inroom          = $0D ; bit 7 is the actual inroom flag.  $x1=entering room, $x2=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
+inroom          = $0D ; bit 7 is the actual inroom flag.  $x2=entering room, $x1=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
 doorppuaddr     = $0E ; 2 bytes, PPU address of door drawing work
 
 tmp             = $10 ; 16 bytes
