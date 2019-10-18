@@ -3174,7 +3174,6 @@ GetSMTileProperties:
     STA tileprop
     LDA tileset_data+1, Y
     STA tileprop+1
-
     RTS                   ;then exit!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4034,29 +4033,22 @@ SMMove_CloseRoom:
 
 SMMove_Door:
     LSR A                                       ; downshift to get the door bits into the low 2 bits
-    ;AND #(TP_SPEC_DOOR | TP_SPEC_LOCKED) >> 1   ; mask out the door bits
-
-    ;CMP #TP_SPEC_LOCKED >> 1  ; see if the door is locked
-    ;BNE @OpenDoor             ; if not.. open the door
     LSR A  ; downshift again to return to actual tileprop id
     BCC @OpenDoor
-    ;; JIGS - locked door is %xxxxx101 and normal door is $xxxxx100, so shifting the 1 to check carry is good enough
 
     LDX #0                    ; otherwise (door is locked)
     STX tileprop+1            ; erase the secondary attribute byte (prevent it from being a locked shop)
     LDX item_mystickey        ; check to see if the player has the key
-    BNE @OpenDoor ;@LockedDoor        ; if they do, open the door
+    BNE @OpenDoor             ; if they do, open the door
       SEC                ; otherwise (no key, locked door), SEC to indicate player can't move here
       RTS                ; and exit
- ; @LockedDoor:    
- ;   TXA                 ; X = 1 at this point, whereas the double LSR A for normal doors has A = 2
-  @OpenDoor:
+
+   @OpenDoor:
+    ;ASL inroom
     LDA #01              ; JIGS - always use 1 to make sprites visible outside of rooms, locked or not
-    
-    ORA inroom
     STA inroom           ; then write the door bits to inroom to mark that we're opening a door (or locked door)
-    BMI :+               ; if the inroom flag was previously cleared (coming from outside a room)...
-      JSR PlayDoorSFX    ;  ... play the door sound effect
+    ;BCS :+ 
+    ;  JSR PlayDoorSFX    ;  ... play the door sound effect
 
 SetChestAddr:      
 :   LDA scroll_y         ; get the Y scroll for drawing
@@ -4105,7 +4097,6 @@ SetChestAddr:
     ORA #$04                   ; and OR the high byte of the address with $04 ($2400 -- instead of $2000)
     STA doorppuaddr+1
 
-
   @CheckShop:
     LDA tileprop+1       ; check the second byte of properties for the tile.  If nonzero, this is a shop
     BEQ :+               ; enterance
@@ -4137,7 +4128,7 @@ RedrawDoor:
     BEQ RedrawDoor_Exit        ; if not inroom, no redrawing required
     BMI RedrawDoor_Exit        ; if already inroom, no redrawing required (redraw only needed for the transition)
 
-    AND #$07                   ; mask out the low bits
+    ;AND #$07                   ; mask out the low bits
     ;CMP #$01
     ;BEQ @LockedOpen            ; if $01 -> opening a normal door
     ;CMP #$02
@@ -4147,10 +4138,12 @@ RedrawDoor:
                                ; else ($06) -> closing a locked door
     BCC @NormalOpen            ;; JIGS - if its UNDER $05, then normal open door stuff
 
-  @LockedClose:
-    LDA #$00                   ; new inroom status ($00 because we're leaving rooms)
-    LDX #MAPTILE_LOCKEDDOOR    ; tile we're to draw
-    BNE @Redraw                ; redraw it
+  ;@LockedClose:
+  ;  LDA #$00                   ; new inroom status ($00 because we're leaving rooms)
+  ;  LDX #MAPTILE_LOCKEDDOOR    ; tile we're to draw
+  ;  BNE @Redraw                ; redraw it
+  ;; JIGS - ... why put a locked door back? The light warriors lock it behind them???
+  ;; Well... reloading the map will do that, but at this point its 6 bytes to take out.
 
   @NormalClose:
     LDA #$00                   ; same...
@@ -4169,14 +4162,24 @@ RedrawDoor:
     LDX #MAPTILE_OPENDOOR
 
   @Redraw:
+    LDY $2002              ; reset PPU toggle
+    LDY inroom             ; put old status in Y
     STA inroom             ; record new inroom status (previously stuffed in A)
+    BEQ @SFX               ; if 0, we're outside the room; so always play the opening door sound
     
-    LDA $2002              ; reset PPU toggle
-
-    LDA doorppuaddr+1      ; load the target PPU address
-    STA $2006
-    LDA doorppuaddr
-    STA $2006
+    ; else, we're inside the room: how to check if its already opened? 
+    
+   @INROOM: 
+    JSR SetDoorAddress     ; get the address
+    LDA $2007
+    LDA $2007              ; load up the upper left tile
+    CMP #$24 
+    BEQ :+                 ; 0 if door is open ... so don't play the door SFX!
+   
+   @SFX:     
+    JSR PlayDoorSFX
+    
+  : JSR SetDoorAddress
     LDA tsa_ul, X          ; and redraw upper two TSA tiles using the current tileset tsa data in RAM
     STA $2007
     LDA tsa_ur, X
@@ -4195,8 +4198,13 @@ RedrawDoor:
     JMP DrawMapPalette     ; then redraw the map palette (since inroom changed, so did the palette)
                            ;  and exit
 
-
-
+SetDoorAddress:           
+    LDA doorppuaddr+1      ; load the target PPU address
+    STA $2006
+    LDA doorppuaddr
+    STA $2006              
+    RTS    
+                           
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Play Door SFX  [$CF1E :: 0x3CF2E]
@@ -6243,6 +6251,10 @@ ScreenWipeFrame_Prep:
 
 NOP
 NOP
+NOP
+NOP
+NOP
+
 
 
 ScreenWipeFrame:
