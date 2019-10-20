@@ -408,6 +408,8 @@ TalkToObject:
     LDA mapobj_id, X    ; get the ID of the object they're talking to
     STA tmp+6           ; back the ID up for later
 
+    STX tmp+7
+    
     LDX #5
     JSR MultiplyXA
     STA tmp+4
@@ -426,6 +428,8 @@ TalkToObject:
     LDA #>lut_MapObjTalkData
     ADC tmp+5
     STA tmp+5                  ; (tmp+4) now points to the talk data for this object
+    
+    LDX tmp+7
 
     LDY #0              ; copy the 4 bytes of talk data to the first 4 bytes of temp RAM
     LDA (tmp+4), Y
