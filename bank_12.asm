@@ -1031,7 +1031,14 @@ lut_SMTilesetAttr:
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
-
+;.byte $55,$55,$55,$55,$55,$55,$55,$55,$55,$00,$00,$00,$00,$00,$00,$00 ; Inside Town
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$FF,$FF,$FF,$FF,$FF,$00,$00,$00
+;.byte $AA,$AA,$AA,$AA,$AA,$AA,$FF,$FF,$FF,$AA,$AA,$FF,$AA,$AA,$00,$00
+;.byte $55,$55,$55,$55,$55,$55,$55,$55,$55,$AA,$00,$00,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
 ;; $8800 ;; 
 ;; Map tile data, 0x100 bytes per tileset
@@ -2058,7 +2065,7 @@ lut_SMTilesetProp:
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
-.byte $0B,LUTE ; In room, Use Lute here
+.byte $09,LUTE ; In room, Use Lute here
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
@@ -2119,14 +2126,14 @@ lut_SMTilesetProp:
 .byte $08,$76 ; Temple floor, battle
 .byte $08,$00 ; Temple floor, battle
 .byte $08,$80 ; Temple floor, random encounters
-.byte $89,$F8 ; In room, Treasure
-.byte $89,$F9 ; In room, Treasure
-.byte $89,$FA ; In room, Treasure
-.byte $89,$FB ; In room, Treasure
-.byte $89,$FC ; In room, Treasure
-.byte $89,$FD ; In room, Treasure
-.byte $89,$FE ; In room, Treasure
-.byte $89,$FF ; In room, Treasure
+.byte $99,$F8 ; In room, Treasure
+.byte $99,$F9 ; In room, Treasure
+.byte $99,$FA ; In room, Treasure
+.byte $99,$FB ; In room, Treasure
+.byte $99,$FC ; In room, Treasure
+.byte $99,$FD ; In room, Treasure
+.byte $99,$FE ; In room, Treasure
+.byte $99,$FF ; In room, Treasure
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
@@ -2155,6 +2162,135 @@ lut_SMTilesetProp:
 .byte $00,$00 ; blank floor
 .byte $00,$00 ; blank floor
 
+; Inside Town  ; 
+;.byte $80,$00 ; In room, upper left corner 
+;.byte $90,$00 ; In room, back wall
+;.byte $80,$00 ; In room, upper right corner
+;.byte $80,$00 ; In room, left wall
+;.byte $00,$00 ; In room, middle floor
+;.byte $80,$00 ; In room, right wall 
+;.byte $80,$00 ; In room, lower left corner
+;.byte $00,$00 ; In room, bottom wall
+;.byte $80,$00 ; In room, lower right corner
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; In room, Ladder bottom
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; In room, useless corner piece thing
+;.byte $80,$00 ; In room, candlestick
+;.byte $40,$B3 ; In room, Sword
+;.byte $00,$00 ; In room, Chair
+;.byte $80,$00 ; In room, Table
+;.byte $80,$00 ; In room, Fireplace
+;.byte $80,$00 ; In room, small, large urns
+;.byte $00,$00 ; In room, Skull
+;.byte $00,$00 ; In room, bed top
+;.byte $00,$00 ; In room, bed body
+;.byte $80,$00 ; In room, anvil
+;.byte $80,$00 ; In room, hammer
+;.byte $01,$00 ; Stairs up - warp to last map
+;.byte $02,$11 ; Stairs up - Ice Cave 3
+;.byte $02,$13 ; Stairs up - Ice Cave 5
+;.byte $03,$02 ; Stairs up - Exit Ice Cave
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $01,$00 ; Stairs down - warp to last map
+;.byte $02,$0F ; Stairs down - Ice Cave 1
+;.byte $02,$10 ; Stairs down - Ice Cave 2
+;.byte $02,$14 ; Stairs down - Ice Cave 6
+;.byte $02,$19 ; Stairs down - Bahamut's Room
+;.byte $02,$12 ; In room, Hole - Ice Cave 4
+;.byte $02,$15 ; In room, Hole - Ice Cave 7
+;.byte $00,$00 ; Blank floor
+;.byte $80,$00 ; Back Wall
+;.byte $00,$00 ; Cave floor
+;.byte $80,$00 ; Wall left side
+;.byte $80,$00 ; Wall right side
+;.byte $80,$00 ; Back wall left side
+;.byte $80,$00 ; Back wall right side
+;.byte $04,$00 ; Closed door, opens rooms
+;.byte $00,$00 ; Open door
+;.byte $80,$00 ; Well
+;.byte $07,$00 ; Damage tile, Ice
+;.byte $06,$00 ; Cave floor, closes doors
+;.byte $45,$BF ; Closed door (locked)
+;.byte $00,$00 ; Blank floor
+;.byte $80,$00 ; Cave filler
+;.byte $00,$00 ; Blank floor
+;.byte $00,$00 ; Blank floor
+;.byte $08,$2C ; In room, bottom wall, Battle 
+;.byte $08,$2D ; In room, Battle 
+;.byte $08,$2E ; In room, Battle 
+;.byte $08,$2F ; In room, Battle 
+;.byte $08,$30 ; In room, bottom wall, Battle 
+;.byte $08,$69 ; In room, Battle 
+;.byte $08,$80 ; In room, Random encounters
+;.byte $08,$00 ; In room, Battle 
+;.byte $08,$4A ; In room, bottom wall, Battle 
+;.byte $08,$80 ; Cave floor, Random encounters
+;.byte $00,$00 ; Blank floor
+;.byte $99,$21 ; In room, Treasure
+;.byte $99,$22 ; In room, Treasure
+;.byte $99,$23 ; In room, Treasure
+;.byte $99,$24 ; In room, Treasure
+;.byte $99,$25 ; In room, Treasure
+;.byte $99,$26 ; In room, Treasure
+;.byte $99,$27 ; In room, Treasure
+;.byte $99,$28 ; In room, Treasure
+;.byte $99,$29 ; In room, Treasure
+;.byte $99,$2A ; In room, Treasure
+;.byte $99,$2B ; In room, Treasure
+;.byte $99,$2C ; In room, Treasure
+;.byte $99,$2D ; In room, Treasure
+;.byte $99,$6B ; In room, Treasure
+;.byte $99,$6C ; In room, Treasure
+;.byte $99,$6D ; In room, Treasure
+;.byte $99,$6E ; In room, Treasure
+;.byte $99,$6F ; In room, Treasure
+;.byte $99,$70 ; In room, Treasure
+;.byte $99,$71 ; In room, Treasure
+;.byte $99,$72 ; In room, Treasure
+;.byte $99,$73 ; In room, Treasure
+;.byte $99,$74 ; In room, Treasure
+;.byte $99,$75 ; In room, Treasure
+;.byte $99,$76 ; In room, Treasure
+;.byte $99,$77 ; In room, Treasure
+;.byte $99,$78 ; In room, Treasure
+;.byte $99,$79 ; In room, Treasure
+;.byte $99,$7A ; In room, Treasure
+;.byte $99,$84 ; In room, Treasure
+;.byte $99,$85 ; In room, Treasure
+;.byte $99,$86 ; In room, Treasure
+;.byte $99,$87 ; In room, Treasure
+;.byte $99,$88 ; In room, Treasure
+;.byte $99,$89 ; In room, Treasure
+;.byte $99,$8A ; In room, Treasure
+;.byte $99,$8B ; In room, Treasure
+;.byte $99,$8C ; In room, Treasure
+;.byte $99,$8D ; In room, Treasure
+;.byte $99,$8E ; In room, Treasure
+;.byte $99,$8F ; In room, Treasure
+;.byte $99,$90 ; In room, Treasure
+;.byte $99,$91 ; In room, Treasure
+;.byte $99,$92 ; In room, Treasure
+;.byte $99,$93 ; In room, Treasure
+;.byte $99,$94 ; In room, Treasure
+;.byte $99,$B5 ; In room, Treasure
+;.byte $99,$B6 ; In room, Treasure
+;.byte $99,$B7 ; In room, Treasure
+;.byte $99,$B8 ; In room, Treasure
+;.byte $99,$B9 ; In room, Treasure
+;.byte $99,$BA ; In room, Treasure
+;.byte $00,$00 ; Blank floor
 
 ;; $9000 ;;
 
@@ -2436,6 +2572,39 @@ lut_SMTilesetTSA:
 .byte $3B,$3B,$3B,$3B,$3B,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
+;.byte $03,$05,$05,$07,$09,$09,$07,$09,$09,$00,$2E,$00,$60,$40,$42,$44 ; Inside Town
+;.byte $46,$48,$2C,$4A,$62,$64,$6A,$0F,$26,$26,$26,$26,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$28,$28,$28,$28,$28,$4C,$4C,$00
+;.byte $01,$0B,$0D,$0B,$20,$01,$22,$24,$66,$68,$0B,$22,$61,$4E,$00,$00
+;.byte $09,$09,$09,$09,$09,$09,$09,$09,$09,$0B,$00,$2A,$2A,$2A,$2A,$2A
+;.byte $2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A
+;.byte $2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A
+;.byte $2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$00
+;.byte $06,$06,$04,$09,$09,$08,$09,$09,$08,$00,$2F,$00,$0F,$41,$43,$45
+;.byte $47,$49,$2D,$4B,$63,$65,$6B,$0F,$27,$27,$27,$27,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$29,$29,$29,$29,$29,$4D,$4D,$00
+;.byte $02,$0C,$0C,$0E,$02,$21,$23,$25,$67,$69,$0C,$23,$61,$4F,$00,$00
+;.byte $09,$09,$09,$09,$09,$09,$09,$09,$09,$0C,$00,$2B,$2B,$2B,$2B,$2B
+;.byte $2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B
+;.byte $2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B
+;.byte $2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$2B,$00
+;.byte $13,$15,$15,$17,$09,$09,$19,$0A,$0A,$00,$3E,$00,$70,$50,$52,$54
+;.byte $56,$58,$3C,$5A,$72,$74,$6C,$6E,$36,$36,$36,$36,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$38,$38,$38,$38,$38,$5C,$5C,$00
+;.byte $11,$1B,$1D,$1B,$30,$11,$32,$34,$76,$78,$1B,$32,$61,$5E,$00,$00
+;.byte $0A,$09,$09,$09,$0A,$09,$09,$09,$0A,$1B,$00,$3A,$3A,$3A,$3A,$3A
+;.byte $3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A
+;.byte $3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A
+;.byte $3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$3A,$00
+;.byte $16,$16,$14,$09,$09,$18,$0A,$0A,$1A,$00,$3F,$00,$71,$51,$53,$55
+;.byte $57,$59,$3D,$5B,$73,$75,$6D,$6F,$37,$37,$37,$37,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$39,$39,$39,$39,$39,$5D,$5D,$00
+;.byte $12,$1C,$1C,$1E,$12,$31,$33,$35,$77,$79,$1C,$33,$61,$5F,$00,$00
+;.byte $0A,$09,$09,$09,$0A,$09,$09,$09,$0A,$1C,$00,$3B,$3B,$3B,$3B,$3B
+;.byte $3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B
+;.byte $3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B
+;.byte $3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$00
+
 
 
 ;; $A000 ;; - $1000 byte bound
@@ -2689,7 +2858,7 @@ lut_SMPalettes:
 .byte $0F,$0F,$12,$36,$0F,$0F,$27,$36,$0F,$3C,$2C,$17,$0F,$3C,$2C,$17 
 .byte $0F,$10,$17,$0F,$0F,$0F,$02,$02,$0F,$0F,$02,$12,$0F,$00,$01,$30 
 
-.byte $0F,$3B,$3B,$3B,$0F,$3B,$3B,$2B,$0F,$1B,$2B,$3B,$0F,$00,$01,$30 ; 3D ; 
+.byte $0F,$3B,$3B,$3B,$0F,$3B,$3B,$2B,$0F,$1B,$2B,$3B,$0F,$00,$01,$30 ; 3D ; Inside Town
 .byte $0F,$0F,$12,$36,$0F,$0F,$27,$36,$60,$FF,$5E,$00,$BC,$00,$00,$00 
 .byte $0F,$10,$00,$0F,$0F,$0F,$0B,$1B,$0F,$0B,$1B,$2B,$0F,$00,$01,$30 
 

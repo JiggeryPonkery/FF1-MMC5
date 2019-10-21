@@ -6866,7 +6866,7 @@ UseItem_Rod:
     BNE @CantUse              ; if not... can't use the rod here
 
     LDA tileprop_now+1        ; get the second byte
-    CMP item_rod              ; see if its the rod
+    CMP #ROD                  ; see if its the rod
     BNE @CantUse              ; if not, can't use it here
     
     LDY #OBJID_RODPLATE       ; check the rod plate object, to see if
@@ -6904,7 +6904,7 @@ UseItem_Lute:
     BNE @CantUse                ; if not... can't use
     
     LDA tileprop_now+1        ; get the second byte
-    CMP item_lute             ; see if its the rod
+    CMP #LUTE                 ; see if its the rod
     BNE @CantUse              ; if not, can't use it here
 
     LDY #OBJID_LUTEPLATE        ; check the lute plate object, to see if
@@ -6912,7 +6912,7 @@ UseItem_Lute:
     LSR A                       ;   shift the flag into C
     BCC @CantUse                ;   if clear, lute plate is gone, so lute was already used.  Can't use it again
 
-    ASL A                       ; completely pointless shift (undoes above LSR, but has no real effect)
+    ;ASL A                       ; completely pointless shift (undoes above LSR, but has no real effect)
     JSR LongCall
     .word HideMapObject
     .byte BANK_TALKTOOBJ

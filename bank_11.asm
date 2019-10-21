@@ -265,7 +265,7 @@ lut_DialoguePtrTbl:
 .WORD KRAKEN            ; FC ; The FIEND's ball is shattered, evaporating all the water. Ho, Ho, Ho.... How foolhardy to dare challenge me, KRAKEN the FIEND of the Water.
 .WORD TIAMAT            ; FD ; Lightning erupts from the FIEND's ball.... So, you have come this far.... I, TIAMAT the FIEND of the Wind will now put an end to your adventure!!
 .WORD GAIA2_2           ; FE ; What?? You can speak Lefeinish?
-.WORD EMPTY             ; FF ; Nothing here.
+.WORD STONEPLATE        ; FF ; There is a stone plate on the floor.... You sense something.... Evil?....
 
 
 ;; THIS MUST BE HERE, DO NOT MOVE IT.
@@ -1008,6 +1008,8 @@ TIAMAT:
 GAIA2_2: 
 .byte $A0,$AB,$39,$C5,$C5,$05,$A2,$B2,$B8,$38,$22,$24,$B3,$2B,$AE,$FF,$95,$A8,$A9,$A8,$1F,$30,$AB,$C5,$00
 
+STONEPLATE: 
+.byte $9D,$AB,$25,$1A,$AC,$1E,$A4,$24,$28,$B1,$1A,$B3,$AF,$39,$A8,$05,$B2,$B1,$1B,$AB,$1A,$A9,$AF,$B2,$35,$69,$05,$A2,$B2,$B8,$24,$3A,$B6,$1A,$B6,$B2,$34,$1C,$1F,$AA,$69,$05,$8E,$B9,$61,$C5,$69,$00
 
 
 

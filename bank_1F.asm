@@ -1330,17 +1330,17 @@ OWCanMove:
   @Up:
     LDX #7        ; for each direction, put x-coord add in X, and y-coord add in Y
     LDY #7-1      ; these will be added to the map scroll to determine player position.
-    JMP @Calc     ; Player is always 7 tiles from left, and 7 tiles from top of screen
+    BNE @Calc     ; Player is always 7 tiles from left, and 7 tiles from top of screen
                   ; -- so base is 7.  For up, you'd add one less to Y (to move up one tile)
   @Down:          ;  and so on for each directon.
     LDX #7
     LDY #7+1
-    JMP @Calc
+    BNE @Calc
 
   @Right:
     LDX #7+1
     LDY #7
-    JMP @Calc
+    BNE @Calc
 
   @Left:
     LDX #7-1
@@ -1464,16 +1464,17 @@ OWCanMove:
    ;;  tmp+3 -- so it could just load those and not do any math.
 
   @RiverDomain:
-    LDA ow_scroll_y      ; get OW Y scroll
-    CLC
-    ADC #7               ; add 7 to get player position
+    ;LDA ow_scroll_y      ; get OW Y scroll
+    ;CLC
+    ;ADC #7               ; add 7 to get player position
+    LDA tmp+3
 
     ASL A                ; rotate bit 7 ($80) into bit 0 ($01)
     ROL A
 
     AND #$01             ; isolate bit 1
     ORA #$40             ; and add $40 to it  (ie:  domain $40 for upper half of map, $41 for lower half)
-    JMP GetBattleFormation
+    BNE GetBattleFormation
 
   @SeaDomain:
     LDA #$42                ; all of the world's sea uses the same domain:  $42
@@ -1483,9 +1484,10 @@ OWCanMove:
    ;; For land domains... the entire map is divided into an 8x8 grid.  Each element in this
    ;;  grid has it's own domain -- and consists of 32x32 map tiles
   @LandDomain:
-    LDA ow_scroll_x    ; get X scroll
-    CLC
-    ADC #$07           ; add 7 to get player X coord
+    ;LDA ow_scroll_x    ; get X scroll
+    ;CLC
+    ;ADC #$07           ; add 7 to get player X coord
+    LDA tmp+2
     ROL A              ; rotate left by 4
     ROL A              ;   which ultimately is just a shorter way
     ROL A              ;   of right-shifting by 5 (high 3 bits become the low 3 bits)
@@ -1493,9 +1495,10 @@ OWCanMove:
     AND #%00000111     ; mask out the low 3 bits
     STA tmp            ; and write to tmp.  This is the column of the domain grid
 
-    LDA ow_scroll_y    ; get Y scroll
-    CLC
-    ADC #$07           ; add 7 to get player Y coord
+    ;LDA ow_scroll_y    ; get Y scroll
+    ;CLC
+    ;ADC #$07           ; add 7 to get player Y coord
+    LDA tmp+3
     LSR A              ; right shift by 2
     LSR A
     AND #%00111000     ; and mask out the high bits -- this is the row of the domain grid
@@ -9504,7 +9507,7 @@ DrawOWObj_BridgeCanal:
     JSR ConvertOWToSprite
     BCS @Canal              ; if out of bounds, skip to canal
 
-    LDA #$08                ; otherwise, draw with table offset $08 (bridge)
+    LDA #$14                ; otherwise, draw with table offset $08 (bridge)
     JSR @Draw               ;  then proceed to canal
 
   @Canal:
@@ -9516,18 +9519,21 @@ DrawOWObj_BridgeCanal:
     JSR ConvertOWToSprite
     BCS DrawOWObj_Exit      ; if coords are out of bounds, exit
 
-    LDA #$10                ; otherwise, draw iwth table offset $10 (canal)
+    LDA #$18                ; otherwise, draw iwth table offset $10 (canal)
 
+    
   @Draw:
-    CLC
-    ADC #<lut_OWObjectSprTbl  ; add table offset (in A) to low byte of table
+    STA tmp+2
+    ;CLC
+    ;ADC #<lut_OWObjectSprTbl
+    LDA #<lut_OWObjectSprTbl  ; add table offset (in A) to low byte of table
     STA tmp                   ; and store in our pointer
     LDA #>lut_OWObjectSprTbl
-    ADC #0
+    ;ADC #0
     STA tmp+1                 ; include carry in high byte of pointer
 
-    LDA #$10                  ; set the tile additive to $10
-    STA tmp+2
+   ; LDA #$10                  ; set the tile additive to $10
+   ; STA tmp+2
 
     JMP Draw2x2Sprite         ; draw the sprite, and return
 
@@ -9778,10 +9784,10 @@ lut_VehicleSprTbl:
 
 lut_OWObjectSprTbl:
   .BYTE $00,$03, $02,$03, $01,$03, $03,$03     ; airship shadow
-  .BYTE $04,$03, $06,$03, $05,$03, $07,$03     ; bridge
-  .BYTE $08,$03, $0A,$03, $09,$03, $0B,$03     ; canal
-
-  .BYTE $00,$00, $00,$00, $00,$00, $00,$00     ; unused
+ ; .BYTE $04,$03, $06,$03, $05,$03, $07,$03     ; bridge
+ ; .BYTE $08,$03, $0A,$03, $09,$03, $0B,$03     ; canal
+ ;
+ ; .BYTE $00,$00, $00,$00, $00,$00, $00,$00     ; unused
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10098,7 +10104,7 @@ CanMapObjMove:             ; first thing to check is the map
     ASL A                  ; double the tile number (2 bytes of properties per tile)
     TAY                    ; throw in Y for indexing
     LDA tileset_data, Y    ; fetch the first byte of properties for this tile
-    AND #TP_TELE_MASK | TP_NOMOVE | TP_HIDESPRITE ; see if this tile is a teleport tile, or a tile you can't move on
+    AND #TP_TELE_MASK | TP_NOMOVE | TP_HIDESPRITE | TP_SPEC_DOOR ; see if this tile is a teleport tile, or a tile you can't move on
     BEQ :+                 ; if either teleport or nomove, NPCs can't walk here, so 
       SEC                  ;  SEC to indicate failure (can't move)
       RTS                  ; and exit
