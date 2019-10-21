@@ -29,6 +29,7 @@
 .import MultiplyXA
 .import BackupMapMusic
 .import SetBattlePPUAddr
+.import SetPPUAddr_XA
 
 .segment "BANK_0B"
 
@@ -1356,7 +1357,7 @@ data_ChaosTSA:
 .byte $70,$71,$00,$00,$00,$72,$73,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$75,$00,$00,$00
 
-.byte $B3,$A0,$90,$A0
+.byte $A0,$A0,$90,$A0
 .byte $BB,$AA,$AA,$AA ; attributes
 .byte $77,$55,$56,$55
 .byte $F7,$F5,$F5,$F5
@@ -3016,9 +3017,49 @@ ChaosDeath_FadeNoise:
 ;;  when Chaos is defeated.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BackDropLut:
+.byte 1,2,1,2,5,6,5,6,5,6,5,6
+
+DrawBackdropThing:
+    LDX #$20
+    JSR SetPPUAddr_XA
+
+    LDX #04
+   @DrawBackdropLoop:   
+    LDA BackDropLut, Y
+    STA $2007
+    INY
+    DEX
+    BNE @DrawBackdropLoop
+    RTS
     
 ChaosDeath:
-    LDA #110
+    JSR WaitForVBlank_L
+    LDA $2002
+    ;; JIGS - find a way to clear ailment icons from the screen as well
+    
+    LDY #0
+    LDA #$3C                 
+    JSR DrawBackdropThing
+    LDA #$5C
+    JSR DrawBackdropThing
+    LDA #$7C                ; draw over the battle turn box
+    JSR DrawBackdropThing
+    
+    LDX #$23
+    LDA #$C7                ; and set the attribute to the rest of the backdrop
+    JSR SetPPUAddr_XA    
+    LDA #$00
+    STA $2007
+    
+    LDA #$00       ; reset scroll to 0
+    STA $2005
+    STA $2005
+    
+    JSR MusicPlay
+
+    LDA #115
     STA EOBCombatBox_tmp           ;   loop down counter
   @WaitLoop:                ; wait for 110 frames (wait for the fanfare music to get 
       JSR WaitForVBlank_L   ;   through the main jingle part)
@@ -3143,7 +3184,7 @@ ChaosDeath:
     ;
     ; Wait 2 seconds for dramatic effect
     
-    LDA #120
+    LDA #240                
     STA $9E                 ; 120 frames = 2 seconds
   @Wait2SecondLoop:
       JSR WaitForVBlank_L
@@ -3156,7 +3197,6 @@ ChaosDeath:
     
     LDA #$00                ; then finally make the noise shut the hell up
     STA $4015
-    
     RTS                     ; and exit!
  
 

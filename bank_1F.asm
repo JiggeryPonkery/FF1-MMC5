@@ -89,6 +89,7 @@
 .export JIGS_RefreshAttributes
 .export SetBattlePPUAddr
 .export ClearUnformattedCombatBoxBuffer
+.export SetPPUAddr_XA
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -12427,7 +12428,7 @@ EnterBattle:
     LDA #28              ; box at 1,1
     STA box_x         ; with dims 16,18
     LDA #1
-    LDX #4             ;  this is the box housing the enemies (big box on the left)
+    LDX #4             ;  this draws the battle turn box
     LDY #3
     JSR BattleBox_vAXY
 
@@ -12464,23 +12465,6 @@ EnterBattle:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawBattleBackdropRow:
-;    LDX #$20
-;    JSR SetPPUAddr_XA    ; set PPU address to $20nn where A=nn
-
-;    STY btltmp+10        ; record tile additive for future use
-;    LDY #14
-;    STY btltmp+11        ; do 14 columns in the first section of the backdrop (btltmp+11 is column count)
-;    JSR @Section         ; draw first section
-
-;    LDA $2007            ; inc the PPU address by 2 to skip over those two bars of
-;    LDA $2007            ;  the box boundaries.
-
-;    LDY #6               ; do 6 columns for the second section
-;    STY btltmp+11
-;    JMP @Section         ; draw second section and exit
-
-;; JIGS - shortening this, no need to split it into two
-
     LDX #$20
     JSR SetPPUAddr_XA    ; set PPU address to $20nn where A=nn
 
@@ -12503,8 +12487,8 @@ DrawBattleBackdropRow:
   ;; the layout of the battle backdrop -- the way the columns are arranged
 
 @lut_BackdropLayout:
-  .byte 3,4,3,4,1,2,3,4,1,2
-  .byte 3,4,1,2,3,4,3,4,1,2
+  .byte 3,4,3,4,1,2,3,4,1,2;,1,2
+  .byte 3,4,1,2,3,4,3,4,1,2;,1,2
   .byte 1,2,3,4,1,2,3,4,1,2,1,2
   
   ;; JIGS ^ is a neat layout I guess!

@@ -701,17 +701,14 @@ lut_EnemyAi:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ExitBattle:
-    LDA AutoTargetOptionBackup      ;; JIGS - restore option for future battles
-    STA AutoTargetOption            ;; in case it was overwritten in the last round
-
-    LDA btl_result                  ; if running, skip to fade out, don't animate them walking
-    CMP #$03
-    BEQ :+
+    LDA btl_result                  ; if its 2, they won the battle, so walk forward
+    CMP #$02
+    BNE :+
     JSR ResetUsePalette
     JSR PartyWalkAnimation          ; JIGS - makes them all walk to the left
     JMP :++                         ; does its own fadeout, so skip this one
     
-  : JSR BattleFadeOut
+  : JSR BattleFadeOut               ; else, just fade out
     
   : JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
     LDA btl_result                  ; check battle result
@@ -722,7 +719,10 @@ ExitBattle:
     .word RestoreMapMusic
     .byte BANK_MUSIC
     
-    JMP WaitFrames_BattleResult_RTS
+    ;JMP WaitFrames_BattleResult_RTS
+    NOP
+    NOP
+   : RTS
    
    @ChaosWait:
     LDA #120                        ; otherwise, wait 120 frames (2 seconds)
@@ -817,7 +817,10 @@ CheckForEndOfBattle:
     BNE :+
       RTS                       ; if battle result is zero, do nothing -- keep battling!
       
-  : CMP #$02                    ; if battle result == 2, the party is victorious
+  : LDX AutoTargetOptionBackup      ;; JIGS - restore option for future battles
+    STX AutoTargetOption            ;; in case it was overwritten in the last round 
+  
+    CMP #$02                    ; if battle result == 2, the party is victorious
     BNE :+
       JSR PlayFanfareAndCheer   ; play fanfare music and do cheering animation
       
@@ -8452,17 +8455,7 @@ Battle_PrepareMagic:
     
     
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Player_DoEquipment [$B3B5 :: 0x333C5]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Player_DoEquipment:
-    STA btl_attackid        ; record the attack ID
-    LDA #$02                ; source = item
-    JMP Player_DoMagicEffect
-    
+   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Player_DoItem [$B3BD :: 0x333CD]
@@ -8762,6 +8755,17 @@ UseItem_CommonCode:
     JMP BtlMag_SavePlayerDefenderStats ; save the cured ailment
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Player_DoEquipment [$B3B5 :: 0x333C5]
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Player_DoEquipment:
+    STA btl_attackid        ; record the attack ID
+    LDA #$02                ; source = item
+    BNE Player_DoMagicEffect
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8811,12 +8815,12 @@ Player_DoMagicEffect:
     ; This may be a point of contention, if the Silent status is meant to act more like berserk, in that it only allows to attack...?
     ; But rather than re-write it so you randomly attack enemies and have no control...
     ; this is easier.    
-    
-    LDA btlmag_magicsource      ; if its magic, it will be 0
-    BNE :+                      ; if its not 0, skip over checking for silence.    
 
     LDA btl_attacker            ; Load attacker's stat pointer
     JSR PrepCharStatPointers
+    
+    LDA btlmag_magicsource      ; if its magic, it will be 0
+    BNE :+                      ; if its not 0, skip over checking for silence.    
     
     ;; back to original code
         
@@ -10609,6 +10613,7 @@ AilmentCured_MessageLut:
 .BYTE BTLMSG_CURED          ; stone
 .BYTE BTLMSG_LIFE           ; cure message for death
     
+;; JIGS - bugged, need to confirm messages are picked right    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11391,8 +11396,9 @@ MixedEnemyAttributes: ;; these next two belong to SmallEnemyAttributes
 .byte $CA, $C0, $CB, $F0, $D2, $0C, $D3, $0F, $00 ; ID 3 (upper left)  
 .byte $E2, $FF, $E3, $33, $00, $00, $00, $00, $00 ; ID 4 (bottom left) 
 .byte $D3, $C0, $D4, $F0, $DB, $CC, $DC, $FF, $00 ; ID 5 (middle right)  
-.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 6 (bottom right)  
-.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 7 (upper right)   
+.byte $CC, $F0, $D4, $0F, $00, $00, $00, $00, $00 ; ID 6 (upper right)   
+.byte $E3, $CC, $E4, $33, $00, $00, $00, $00, $00 ; ID 7 (bottom right)  
+
 
 
 LargeEnemyAttributes:
