@@ -5533,9 +5533,23 @@ PlayerDefenderStats:
     STA btl_defender_hidden
     LDA (CharStatsPointer), Y     ; check battlestate for Guarding
     AND #STATE_GUARDING           ; if not guarding, resume as normal
-    BEQ :+
+    BEQ :++
 
-    LDY #(ch_level - ch_stats)
+    LDY #(ch_ailments - ch_stats) ; check if stunned
+    LDA (CharStatsPointer), Y
+    AND #AIL_STUN
+    BEQ :+
+    
+    JSR BattleRNG_L               ; 50/50 chance for guarding to fail
+    AND #01                       ; if stunned
+    BEQ :+
+    
+    LDY #(ch_battlestate - ch_stats)
+    LDA (CharStatsPointer), Y 
+    AND #~STATE_GUARDING
+    STA (CharStatsPointer), Y 
+    
+  : LDY #(ch_level - ch_stats)
     LDA (CharStatsPointer), Y     ; guard defense is level * 2
     ASL A
     STA GuardDefense
