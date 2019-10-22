@@ -3402,6 +3402,7 @@ SetNaturalPose:
       LDA #$00                  ; zero their hit points (seems strange to do this here, but whatever)
       STA ch_curhp, Y
       STA ch_curhp+1, Y
+      STA ch_battlestate, Y
       
   : LDA ch_ailments, Y          ;; JIGS - same goes for stone! But leave their HP alone
     AND #AIL_STONE        
@@ -3410,6 +3411,10 @@ SetNaturalPose:
       
   : LDA ch_ailments, Y          ; get ailments again
     AND #(AIL_POISON | AIL_STUN )
+    BEQ :+
+    
+  : LDA ch_battlestate, Y
+    AND #STATE_HIDDEN
     BEQ @CheckHP                ; if they are... then they are crouching
     
   @DoCrouching:
@@ -3419,6 +3424,9 @@ SetNaturalPose:
 
     
 @CheckHP:                       ; if they don't have poison/stun/sleep, we need to check their HP
+    LDA ch_curhp+1, Y           ; if the high byte of their HP is nonzero, they have over 256, which is
+    BNE @DoStanding             ;   definitely more than 25% max, so DoStanding
+
     LDA ch_maxhp, Y             ; move max HP to $68B3,4
     STA btl_various_tmp
     LDA ch_maxhp+1, Y
@@ -3428,9 +3436,6 @@ SetNaturalPose:
     ROR btl_various_tmp
     LSR btl_various_tmp+1
     ROR btl_various_tmp
-    
-    LDA ch_curhp+1, Y           ; if the high byte of their HP is nonzero, they have over 256, which is
-    BNE @DoStanding             ;   definitely more than 25% max, so DoStanding
 
     LDA ch_curhp, Y             ; otherwise, compare low byte of HP to low byte of 25%
     CMP btl_various_tmp        
@@ -4937,16 +4942,22 @@ CheckForBattleEnd:
 
 ApplyEndOfRoundEffects:
     JSR ApplyPoisonToAllEnemies ; will also check for battle end
-    JSR ApplyRegenToAllEnemies  ; apply regen to all enemies
+    ;JSR ApplyRegenToAllEnemies  ; apply regen to all enemies 
+    ;; poison will flow into doing regen for enemies
+    ;; enemies get poisoned first, then regen, while players get regen, then poisoned
     
     LDA #0
     STA EntityRegenID             ; record character ID
    @Loop: 
     STA CharacterIndexBackup
     LDA EntityRegenID
+    ORA #$80
+    STA btl_attacker
+    AND #$03
     JSR PrepCharStatPointers
     JSR ClearGuardState
-    JSR ApplyRegenPoisonToPlayer
+    JSR ApplyRegenToPlayer
+    JSR ApplyPoisonToPlayer
     INC EntityRegenID
     LDA CharacterIndexBackup
     CLC
@@ -5012,117 +5023,66 @@ PrintBattleTurnNumber:
 
 
 
-
-ApplyRegenPoisonToPlayer:
-    LDA EntityRegenID
-    ORA #$80
-    STA btl_attacker
-
-    LDX CharacterIndexBackup    
-    LDA ch_battlestate, X
-    AND #$0F            ; get regen state
-    BEQ :+
-    
-    JSR ApplyRegenToPlayer
-
-  : LDA ch_ailments, X  ; get this character's ailments
-    AND #AIL_POISON
-    BEQ @Exit           ; if poison = no, then z = 1
-    
-    LDA ch_ailments, X
-    AND # AIL_DEAD | AIL_STONE
-    BEQ @Exit           ; do not poison someone who is stone... or dead
-    
-	LDA ch_maxhp, X     ; move max HP to math_basedamage 
-    STA math_basedamage
-    LDA ch_maxhp+1, X
-    STA math_basedamage+1
-    
-    LSR math_basedamage+1   ; divide it by 8 (12.5% of max HP)
-    ROR math_basedamage
-    LSR math_basedamage+1
-    ROR math_basedamage
-    LSR math_basedamage+1
-    ROR math_basedamage
-    
-    LDA ch_curhp, X
-    SEC
-    SBC math_basedamage
-    STA ch_curhp, X
-    LDA ch_curhp+1, X
-    SBC math_basedamage+1
-    STA ch_curhp+1, X      
-    TXA
-    PHA
-
-    BCC @Dead       ; if C is clear (HP is negative), they're dead
-    ORA ch_curhp, X ; if high and low are 0 
-    BNE :+
-    
-   @Dead:
-    LDA #0              ; clip their HP at zero... 
-    STA ch_curhp, X          
-    STA ch_curhp+1, X                  
-    LDA #AIL_DEAD
-    STA ch_ailments, X        ; give them the DEAD ailment
-    
-  : JSR DrawPoisonAsAttack
-    LDA #1
-    JSR PlayBattleSFX   
-    JSR BattleScreenShake_L
-    LDA btl_attacker
-    AND #$03
-    JSR FlashCharacterSprite        ; flash this character's graphic
-    JSR RespondDelay  
-    PLA
-    TAX
-    LDA ch_ailments, X
-    AND #AIL_DEAD
-    BEQ @Exit
-   
-    LDA #BTLMSG_SLAIN
-    JMP DrawMessageBoxDelay_ThenClearAll  ; if dead, print "slain"
-    
-   @Exit:
-    JMP UndrawAllKnownBoxes
-   
-
 ApplyRegenToPlayer:
-    LDA ch_maxhp, X
-    STA math_basedamage
-    STA btlmag_defender_hpmax
-    LDA ch_maxhp+1, X
-    STA math_basedamage+1
-    STA btlmag_defender_hpmax+1
-    TXA
-    PHA
+    LDX CharacterIndexBackup
+   ; LDA ch_ailments, X
+   ; AND #AIL_DEAD
+   ; BEQ :+
+   ; JMP ApplyPoisonToPlayer
+   ;; JIGS - being dead should clear battlestate and other ailments in SetNaturalPose
+    
+  : LDA ch_battlestate, X           ; JIGS - not using $F here because that bit can be used for something else later!
+    AND #$07                        ;        which means regenerating spells can't last more than 7 turns (that's a lot still!)
+    BNE :+                          ; if regenerating, jump ahead
+    
+    LDA ch_head, X                  ; if not, check helmet
+    CMP #ARM31+1                    ; (Heal Helm)
+    BEQ @HealHelmPotency            ; if helmet doesn't = Heal Helm, jump to poison stuff
+    JMP ApplyPoisonToPlayer
 
-    LDA ch_battlestate, X
+  : LDA ch_battlestate, X
     AND #STATE_REGENHIGH ; $60  ; clear out everything but potency ($20, $40, or $60)    
     CMP #STATE_REGENLOW
     BNE :+ 
         @LowPotency:            ; 8%
-        LDA #12         
+        LDY #12         
         BNE @Divide
         
   : CMP #STATE_REGENMIDDLE
     BNE :+    
-       @MiddlePotency:          ; 12.5%
-        LDA #8
+       @MiddlePotency:          ; 12.5%, or 12%
+        LDY #8
         BNE @Divide
     
  : @HighPotency:                ; 5 = almost 20%
-    LDA #6                      ; 6 = 16.6 ?
+    LDY #6                      ; 6 = 16.6 ... or 16%
+    BNE @Divide
+    
+  @HealHelmPotency:
+    LDA #07
+    STA ch_battlestate, X        ; as long a the helm is equipped, they have eternal regen!
+    LDY #20                      ; 5%  
   
   @Divide:
+    LDA ch_maxhp, X
+    STA btlmag_defender_hpmax
+    LDA ch_maxhp+1, X           
+    STA btlmag_defender_hpmax+1     ; btlmag_defender_hpmax is also part of math_buf ($09)
+    LDA ch_curhp, X
+    STA math_basedamage  
+    LDA ch_curhp+1, X
+    STA math_basedamage+1
+    TYA
+    
     JSR RegenDivision
 
-    PLA
-    TAX                         ; move HP back to RAM stats
+    LDX CharacterIndexBackup     ; move HP back to RAM stats
     LDA math_basedamage
     STA ch_curhp, X
     LDA math_basedamage+1
     STA ch_curhp+1, X
+    
+    JSR DrawAttackerBox        ; draw the attacker box
     
     LDA ch_battlestate, X       ; see if they're hidden
     AND #STATE_HIDDEN
@@ -5159,10 +5119,80 @@ ApplyRegenToPlayer:
     STA ch_battlestate, X
     
    @drawregenbox:
-	JSR DrawAttackerBox        ; draw the attacker box
 	LDA #BTLMSG_REGEN             
-    JMP DrawMessageBoxDelay_ThenClearIt
-  
+    JSR DrawMessageBoxDelay_ThenClearIt
+
+ApplyPoisonToPlayer:
+    ;LDX CharacterIndexBackup
+    LDA ch_ailments, X  ; get this character's ailments
+    AND #AIL_POISON
+    BEQ @Exit           ; if poison = no, then z = 1
+    
+    LDA ch_ailments, X
+    AND # AIL_DEAD | AIL_STONE
+    BEQ @Exit           ; do not poison someone who is stone... or dead
+    
+	LDA ch_maxhp, X     ; move max HP to math_basedamage 
+    STA math_basedamage
+    LDA ch_maxhp+1, X
+    STA math_basedamage+1
+    
+    LSR math_basedamage+1   ; divide it by 8 (12.5% of max HP)
+    ROR math_basedamage
+    LSR math_basedamage+1
+    ROR math_basedamage
+    LSR math_basedamage+1
+    ROR math_basedamage
+    
+    LDA ch_curhp, X
+    SEC
+    SBC math_basedamage
+    STA ch_curhp, X
+    LDA ch_curhp+1, X
+    SBC math_basedamage+1
+    STA ch_curhp+1, X      
+
+    BCC @Dead       ; if C is clear (HP is negative), they're dead
+    ORA ch_curhp, X ; if high and low are 0 
+    BNE :+
+    
+   @Dead:
+    LDA #0              ; clip their HP at zero... 
+    STA ch_curhp, X          
+    STA ch_curhp+1, X                  
+    LDA #AIL_DEAD
+    STA ch_ailments, X        ; give them the DEAD ailment
+    
+  : JSR DrawPoisonAsAttack
+    LDA #1
+    JSR PlayBattleSFX   
+    JSR BattleScreenShake_L
+    LDA btl_attacker
+    AND #$03
+    JSR FlashCharacterSprite        ; flash this character's graphic
+    JSR RespondDelay  
+    LDX CharacterIndexBackup
+    LDA ch_ailments, X
+    AND #AIL_DEAD
+    BEQ @Exit
+   
+    LDA #BTLMSG_SLAIN
+    JMP DrawMessageBoxDelay_ThenClearAll  ; if dead, print "slain"
+    
+   @Exit:
+    JMP UndrawAllKnownBoxes
+   
+
+DrawPoisonAsAttack:                 ; Who is getting poisoned
+    JSR DrawAttackerBox
+    LDA #$0F
+    STA btltmp_altmsgbuffer + 9
+    LDA #BTLMSG_POISONED            ; the message for poison
+    STA btltmp_altmsgbuffer + 10
+    LDA #02
+    JSR DrawMessageBox_Prebuilt
+	JMP DrawDamageBox               ; print damage    
+   
 ;; this poison code is very much inspired by anomie's work 
 ;; https://gamefaqs.gamespot.com/boards/522595-final-fantasy/45575058/499635691
 ;; The regeneration for both players and enemies is also based off it! 
@@ -5183,7 +5213,7 @@ ApplyPoisonToEnemy:
     LDY #en_ailments
     LDA (EnemyRAMPointer), Y
     AND #AIL_POISON
-    BEQ :- 
+    BEQ ApplyRegenToEnemy
     
   ;  LDY #en_category
   ;  LDA (EnemyRAMPointer), Y
@@ -5231,35 +5261,33 @@ ApplyPoisonToEnemy:
     BNE :+
  
    @Dead:
+    LDA #AIL_DEAD
+    LDY #en_ailments
+    STA (EnemyRAMPointer), Y
+   
     LDA #BTLMSG_TERMINATED               
     JSR DrawMessageBoxDelay_ThenClearAll
     JSR EnemyDiedFromPoison
     JMP CheckForBattleEnd
     
-  : JMP UndrawAllKnownBoxes
-    
-DrawPoisonAsAttack:                 ; Who is getting poisoned
-    JSR DrawAttackerBox
-    LDA #BTLMSG_POISONED            ; the message for poison
-    JSR DrawMessageBox
-	JMP DrawDamageBox               ; print damage    
-
+  : JSR UndrawAllButTwoBoxes ; undraw damage and "poisoned", but leave name up
    
 ;; JIGS - updated regeneration for enemies
     
-ApplyRegenToAllEnemies:
-    LDA #8
-    STA EntityRegenID
-    
-  @MainLoop:
-    LDX EntityRegenID
-    STX btl_attacker
-	JSR DoesEnemyXExist
-	BEQ @Next
-    
-    TXA
-    JSR GetEnemyRAMPtr
-    
+;ApplyRegenToAllEnemies:
+;    LDA #8
+;    STA EntityRegenID
+;    
+;  @MainLoop:
+;    LDX EntityRegenID
+;    STX btl_attacker
+;	JSR DoesEnemyXExist
+;	BEQ @Next
+;    
+;    TXA
+;    JSR GetEnemyRAMPtr
+
+ApplyRegenToEnemy:    
     LDY #en_category              ; Get the enemy category, and see if they are
     LDA (EnemyRAMPointer), Y      ;  regenerative
     AND #CATEGORY_REGEN
@@ -5272,12 +5300,17 @@ ApplyRegenToAllEnemies:
  
     LDY #en_hpmax
     LDA (EnemyRAMPointer), Y
-    STA math_basedamage
     STA btlmag_defender_hpmax
     INY
     LDA (EnemyRAMPointer), Y
-    STA math_basedamage+1
     STA btlmag_defender_hpmax+1
+
+    LDY #en_hp
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage
+    INY
+    LDA (EnemyRAMPointer), Y
+    STA math_basedamage+1
     
     LDA #12                     ; 8% of max HP
     JSR RegenDivision
@@ -5293,28 +5326,28 @@ ApplyRegenToAllEnemies:
 	JSR DrawAttackerBox          ; draw the attacker box
     JSR DisplayAttackIndicator
 
-	LDA #BTLMSG_REGEN             
-    JSR DrawMessageBoxDelay_ThenClearAll
+	LDA #BTLMSG_REGEN      
+    JMP DrawMessageBoxDelay_ThenClearAll
+  
+   @Next:  
+    JMP UndrawAllKnownBoxes
 
-  @Next:
-    DEC EntityRegenID             ; loop until all enemies counted
-    BPL @MainLoop
-    RTS
+; @Next:
+;   DEC EntityRegenID             ; loop until all enemies counted
+;   BPL @MainLoop
+;   RTS
 
-   
-    
-    
 RegenDivision:    
     LDX btlmag_defender_hpmax   ; now holds enemy's max HP low byte
     LDY btlmag_defender_hpmax+1 ; and max HP high byte
     JSR YXDivideA               ; divides by effectivity and puts it in A 
     ORA btltmp_divLo            ; 
     BNE :+                      ; I assume this puts high byte and low byte together to see if 
-    INC btltmp_divV             ; there is any HP left at all ; 
+    INC btltmp_divV             ; there is any HP left at all 
   : LDA #MATHBUF_BASEDAMAGE
     TAX
-    LDY #MATHBUF_REGENHP
-    JSR MathBuf_Add16
+    LDY #MATHBUF_REGENHP        ; REGENHP = btltmp_divLo + Hi 
+    JSR MathBuf_Add16           ; add 
     
     LDX #MATHBUF_DEFENDERMAXHP  ; compare max HP and base damage
     LDY #MATHBUF_BASEDAMAGE     ; base damage contains how much HP to regen
@@ -6927,11 +6960,11 @@ DrawCharacterStatus:
     
 @CharacterLoop:
     LDA #$00                        
-    STA btl_unfmtcbtbox_buffer+$50, X   ; start of first string, invisible tile
+    STA btl_unfmtcbtbox_buffer+$50, X ; start of first string, invisible tile
     STA btl_unfmtcbtbox_buffer+$53, X ; start of second string, invisible tile
     STA btl_unfmtcbtbox_buffer+$56, X ; start of third string, invisible tile
     
-    STA btl_unfmtcbtbox_buffer+$51, X   ; clear out heavy ailment
+    STA btl_unfmtcbtbox_buffer+$51, X ; clear out heavy ailment
     STA btl_unfmtcbtbox_buffer+$54, X ; clear out light ailment
     
     LDA CharacterIndexBackup
@@ -6956,25 +6989,30 @@ DrawCharacterStatus:
     
   : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y    
-    BEQ @NoState                    ; if 0, skip changing it
-    AND #STATE_HIDDEN               ; hidden?
+    AND #STATE_HIDDEN                       ; hidden?
     BEQ :+
         LDA #$7E
-        STA btl_unfmtcbtbox_buffer+$56, X ; start of third string
+        STA btl_unfmtcbtbox_buffer+$56, X   ; start of third string
         
   : LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y            
-    AND #STATE_GUARDING              ; guarding?
+    AND #STATE_GUARDING                     ; guarding?
     BEQ :+
         LDA #$EF
-        STA btl_unfmtcbtbox_buffer+$53, X ; start of second string
+        STA btl_unfmtcbtbox_buffer+$53, X   ; start of second string
     
-  : LDY #ch_battlestate - ch_stats
+  : LDY #ch_head - ch_stats
+    LDA (CharStatsPointer), Y
+    CMP #ARM31+1                            ; check for heal helm
+    BEQ @Regen
+  
+    LDY #ch_battlestate - ch_stats
     LDA (CharStatsPointer), Y
     AND #STATE_REGENLOW | STATE_REGENMIDDLE ; regenerating? 
     BEQ @NoState
+       @Regen:
         LDA #$F2
-        STA btl_unfmtcbtbox_buffer+$50, X ; start of first string
+        STA btl_unfmtcbtbox_buffer+$50, X   ; start of first string
     
    @NoState: 
     LDA #$FF
@@ -6984,43 +7022,43 @@ DrawCharacterStatus:
     
     TXA
     CLC
-    ADC #8                          ; add 8 to X to move forward in the buffer
+    ADC #8                            ; add 8 to X to move forward in the buffer
     TAX
     
-    INC CharacterIndexBackup        ; add 1 to character index to process next character
+    INC CharacterIndexBackup          ; add 1 to character index to process next character
     LDA CharacterIndexBackup
-    CMP #4                          ; when all 4 are done, finish
+    CMP #4                            ; when all 4 are done, finish
     BNE @CharacterLoop
     
     ;; btl_unfmtcbtbox_buffer should now be $1C bytes long, with two $00s at the end.
 
-    LDA #<$20DD                     ; position to begin printing
+    LDA #<$20DD                       ; position to begin printing
     STA AilmentPrintingPointer
     LDA #>$20DD
     STA AilmentPrintingPointer+1
     
-    JSR WaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
-    LDA $2002                   ; clear toggle
+    JSR WaitForVBlank_L               ; since we're about to do some drawing, wait for VBlank
+    LDA $2002                         ; clear toggle
     
     LDX #0
     LDY #0
 
   @ResetLocation:
-    LDA AilmentPrintingPointer+1     ; set PPU addr
+    LDA AilmentPrintingPointer+1      ; set PPU addr
     STA $2006
     LDA AilmentPrintingPointer
     STA $2006
     
   @DrawLoop:  
     LDA btl_unfmtcbtbox_buffer+$50, Y ; (using Y to index)
-    CMP #$FF                      ; use $FF as null terminator for this routine 
+    CMP #$FF                          ; use $FF as null terminator for this routine 
     BEQ @NextRow
     STA $2007
     INY
     JMP @DrawLoop
   
   @NextRow:  
-    LDA AilmentPrintingPointer     ; then add $20 to dest pointer to move to next row
+    LDA AilmentPrintingPointer        ; then add $20 to dest pointer to move to next row
     CLC
     ADC #$20
     STA AilmentPrintingPointer
@@ -7029,11 +7067,11 @@ DrawCharacterStatus:
     STA AilmentPrintingPointer+1
     INY
     INX 
-    CPX #12                        ; three lines per character, so count 4*3 $00s
-    BNE @ResetLocation             ; minus 1, because the last one doesn't need to be three lines
+    CPX #12                           ; three lines per character, so count 4*3 $00s
+    BNE @ResetLocation                ; minus 1, because the last one doesn't need to be three lines
     
-    JSR BattleUpdatePPU                 ; reset scroll 
-    JSR BattleUpdateAudio               ; update audio for the frame we just waited for
+    JSR BattleUpdatePPU               ; reset scroll 
+    JSR BattleUpdateAudio             ; update audio for the frame we just waited for
     
   : RTS    
     
@@ -9706,7 +9744,7 @@ BtlMag_PerformSpellEffect:
         .WORD BtlMag_Effect_Life2           ; 13   
         .WORD BtlMag_Effect_CureAilment     ; 14   ; for Soft
         .WORD BtlMag_Effect_Regen           ; 15
-        
+        ;.WORD BtlMag_Effect_Drain           ; 16
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
