@@ -718,11 +718,7 @@ ExitBattle:
     JSR LongCall
     .word RestoreMapMusic
     .byte BANK_MUSIC
-    
-    ;JMP WaitFrames_BattleResult_RTS
-    NOP
-    NOP
-   : RTS
+    RTS
    
    @ChaosWait:
     LDA #120                        ; otherwise, wait 120 frames (2 seconds)
@@ -3518,7 +3514,11 @@ HideCharacter:
   : PLA
     RTS    
 
-    
+AttackerToAnimatedChar:    
+    LDA btl_attacker
+    AND #$03
+    STA btl_animatingchar  
+    RTS
     
     
     
@@ -5571,11 +5571,7 @@ StealFromEnemy:
     LDA #03
     STA btlmag_magicsource      ; set magicsource to 3 to print skill names
     JSR DrawAttackBox           ; it uses battle_class to get the correct skill from a lut
-    
-    LDA btl_attacker
-    AND #$03
-    STA btl_animatingchar  
-    
+    JSR AttackerToAnimatedChar   
     JSR UnhideCharacter
     
     LDY #ch_level - ch_stats
@@ -5611,7 +5607,8 @@ StealFromEnemy:
     DEC btl_walkloopctr
     BNE @Loop                 ; keep looping
 
-    JSR SetNaturalPose      
+    JSR SetNaturalPose    
+    JSR AttackerToAnimatedChar    
     JSR HideCharacter
     
     JSR LongCall
@@ -5621,7 +5618,7 @@ StealFromEnemy:
     LDA battle_stealsuccess
     BMI @StealMissed              ; $FF = steal missed
     BNE @StealHit                 ; #01 = steal hit
-        JSR DoNothingMessageBox
+        JSR DoNothingMessageBox   ; #00 = has nothing to steal
         JMP UndrawAllKnownBoxes
 
    @StealMissed:

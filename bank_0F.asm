@@ -695,12 +695,18 @@ lut_StealList:
    
 StealFromEnemyZ:
     LDA #$0F
-    STA btl_unfmtcbtbox_buffer+$40
+    STA btl_unfmtcbtbox_buffer+$40 ; message code
     LDA #BTLMSG_STOLE
-    STA btl_unfmtcbtbox_buffer+$41
+    STA btl_unfmtcbtbox_buffer+$41 ; message "Stole"
+    LDA #$0E
+    STA btl_unfmtcbtbox_buffer+$42 ; put the item name code into the message buffer
+    
     LDA #0
     STA btl_unfmtcbtbox_buffer+$44 ; 44 must be 0'd if its a normal item
     STA btl_unfmtcbtbox_buffer+$46 ; if its a scroll, 44 and 45 are written over, so end at 46    
+    STA MMC5_tmp+2
+    STA MMC5_tmp+1
+    STA battle_stealsuccess
 
     LDA btl_defender
     JSR GetEnemyRAMPtr    
@@ -710,15 +716,32 @@ StealFromEnemyZ:
     BEQ @Nothing                    ; battle_stealsuccess remains 0
     
     PHA                             ; backup their "has item" byte
-    LDY #en_level
+    LDA btl_attacker
+    AND #03
+    JSR PrepCharStatPointers
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_DARK
+    BEQ :+
+        LDA #30
+        STA MMC5_tmp+1
+  : LDY #ch_battlestate - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #STATE_HIDDEN
+    BEQ :+
+        LDA #15
+        STA MMC5_tmp+2
+  : LDY #en_level
     LDA (EnemyRAMPointer), Y        ; get their level
     STA tmp+1
     LDA MMC5_tmp
     CLC
     ADC #50
+    ADC MMC5_tmp+2                  ; add 15 if hidden
     SEC 
-    SBC tmp+1
-    STA MMC5_tmp                    ; StealValue = Level + 50 - Enemy's level
+    SBC tmp+1 
+    SBC MMC5_tmp+1                  ; subtract 30 if blind
+    STA MMC5_tmp                    ; if neither hidden or blind, then StealValue = Level + 50 - Enemy's level
     BCC @Fail                       ; Carry clear = StealValue is less than 0 
     CMP #100
     BCS @Success                    ; StealValue is maxed
@@ -731,20 +754,13 @@ StealFromEnemyZ:
    
   @Fail:
     PLA                             ; undo the push
+  @Fail_NoPush:  
   : DEC battle_stealsuccess
     
   @Nothing:
     RTS
-    
-  @NoCommonItems:
-    DEC battle_stealsuccess         ; back to 0
-    BEQ :-
-   
+
   @Success:  
-    INC battle_stealsuccess
-    LDA #$0E
-    STA btl_unfmtcbtbox_buffer+$42  ; put the item name code into the message buffer
-    
     LDY #en_enemyid
     LDA (EnemyRAMPointer), Y        ; get the enemy's index
     LDX #6
@@ -766,8 +782,8 @@ StealFromEnemyZ:
    @StealNormal:  
     LDY #en_item
     LDA (EnemyRAMPointer), Y
-    AND #$80
-    BEQ @NoCommonItems
+    AND #$11
+    BEQ @Fail_NoPush
     
     LDA (EnemyRAMPointer), Y
     PHA                             ; push it again... 
@@ -798,6 +814,7 @@ StealFromEnemyZ:
     LDY #4
     
    @FindItem:
+    INC battle_stealsuccess
     LDA (tmp), Y
     BEQ @StealGold
     
