@@ -7131,25 +7131,32 @@ DrawHealMenu:
     BCS @UseItem_Exit           ; if B was pressed (C set), exit this menu
 
     JSR Cursor_to_Index
-    LDA ch_ailments, X         ; check their OB ailments
-    CMP #$01
-    BEQ @UseItem_Heal_CantUse  ; if dead... can't use
-    CMP #$02
-    BEQ @UseItem_Heal_CantUse  ; if stone... can't use
+   ; LDA ch_ailments, X         ; check their OB ailments
+   ; CMP #$01
+   ; BEQ @UseItem_Heal_CantUse  ; if dead... can't use
+   ; CMP #$02
+   ; BEQ @UseItem_Heal_CantUse  ; if stone... can't use
+   ;; checked by MenuRecoverHP_Potion
     
     LDA tmp+3
     CMP #HEAL_POTENCY
     BNE :+ 
+        LDA item_heal
+        BEQ @UseItemExit
         DEC item_heal          ; then remove a heal potion from the inventory
-        BEQ @UseItem_Exit                  ; stop if there's no more to use!
         JMP @DoHeal
- : DEC item_x_heal
+ : LDA item_x_heal
    BEQ @UseItem_Exit                  ; stop if there's no more to use!
+   DEC item_x_heal
     
    @DoHeal: 
     LDA tmp+3                  ; otherwise.. can use!
-    JSR MenuRecoverHP_Abs      ;   recover 30 HP for target (index is still in X).  Can use _Abs version
-    JMP DrawHealMenu
+    JSR MenuRecoverHP_Potion   ;   recover 30 HP for target (index is still in X). 
+    LDA #1
+    STA menustall
+    JSR WaitForVBlank_L
+    JSR DrawItemTargetMenu_Loop
+    JMP @UseItem_Heal_Loop
 
   @UseItem_Exit:
     JMP EnterItemMenu          ; re-enter item menu (item menu needs to be redrawn)
@@ -7254,8 +7261,11 @@ UseItem_Elixir:
     
   @Loop:
     JSR ItemTargetMenuLoop     ; do the target menu loop
-    BCS @Exit                  ; if they pressed B (C set), exit
+    BCS @Exit                  ; if they pressed B (C set), exit 
 
+    LDA item_elixir            ; if 
+    BEQ @Exit
+    
     JSR Cursor_to_Index
     
     LDA ch_ailments, X         ; check their OB ailments
@@ -7274,8 +7284,12 @@ UseItem_Elixir:
     JSR PlayHealSFX
     
     DEC item_elixir            ; if we could... remove one from the inventory
-    BEQ @Exit                  ; stop if there's no more to use!
-    JMP UseItem_Elixir
+    LDA #1
+    STA menustall
+    JSR WaitForVBlank_L
+    JSR DrawItemTargetMenu_Elixir_Loop
+    JMP @Loop
+    
     ;JSR DrawItemTargetMenu_Elixir  ; redraw the target menu to reflect the changes
     ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button (sprite version!)
   @Exit:  
@@ -7747,6 +7761,11 @@ DrawItemTargetMenu:
     LDA #$0A 
     JSR DrawMainItemBox
 
+    JSR DrawItemTargetMenu_Loop
+   
+    JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
+
+DrawItemTargetMenu_Loop:    
     LDA #$08
     STA dest_x
     LDA #$05
@@ -7767,15 +7786,20 @@ DrawItemTargetMenu:
     ADC #$1             ; increase submenu_targ by 1 per loop
     CMP #4              ; stopping after the 4th character (0, 1, 2, 3)
     BNE @Loop
-   
-    JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
-
+    RTS
+    
 DrawItemTargetMenu_Elixir:
     JSR ScreenOff_ClearNT
 
     LDA #$10 
     JSR DrawMainItemBox
 
+    ;; JIGS - this extra JSR is for re-printing without turning the screen off and on
+    JSR DrawItemTargetMenu_Elixir_Loop
+   
+    JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
+
+DrawItemTargetMenu_Elixir_Loop: 
     LDA #$08
     STA dest_x
     LDA #$03
@@ -7804,9 +7828,7 @@ DrawItemTargetMenu_Elixir:
     ADC #$1             ; increase submenu_targ by 1 per loop
     CMP #4              ; stopping after the 4th character (0, 1, 2, 3)
     BNE @Loop
-   
-    JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
-
+    RTS
 
 DrawMPTargetMenu:
     JSR ScreenOff_ClearNT
@@ -7985,12 +8007,19 @@ MenuRecoverPartyHP:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+MenuRecoverHP_Potion:
+    LDY ch_ailments, X
+    CPY #$02
+    BEQ _MenuRecoverHP_Exit
+    ;; JIGS - can't shove potion down a stoned person's throats though
+
 MenuRecoverHP:
     LDY ch_ailments, X          ; get out of battle ailments for this character
     CPY #$01
     BEQ _MenuRecoverHP_Exit     ; if dead... skip to exit (can't recover HP when dead)
-    CPY #$02
-    BEQ _MenuRecoverHP_Exit     ; if stone... skip to exit
+   ; CPY #$02
+   ; BEQ _MenuRecoverHP_Exit     ; if stone... skip to exit
+  ;; JIGS - healing stone people with magic is allowed, since its allowed in battle
 
 MenuRecoverHP_Abs:
     STA tmp                     ; back up HP to recover by stuffing it in tmp
