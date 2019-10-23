@@ -7142,7 +7142,7 @@ DrawHealMenu:
     CMP #HEAL_POTENCY
     BNE :+ 
         LDA item_heal
-        BEQ @UseItemExit
+        BEQ @UseItem_Exit
         DEC item_heal          ; then remove a heal potion from the inventory
         JMP @DoHeal
  : LDA item_x_heal
