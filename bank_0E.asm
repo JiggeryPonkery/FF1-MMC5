@@ -66,6 +66,7 @@
 .import HideMapObject
 .import ShowMapObject
 .import PlayDoorSFX
+.import BattleRNG_L
 
 .segment "BANK_0E"
 
@@ -555,7 +556,7 @@ lut_MenuText:
 .word M_MagicMenuSpellLevel78 ; 4B ; 75
 .word M_MagicMenuOrbs         ; 4C ; 76
 .word M_MagicNameLearned      ; 4D ; 77
-.word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again...
+.word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
 .word Battle_Ether_MPList     ; 4F ; 79 ; for battle... easier to do it here than copy buncha code over
 .word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
 .word M_EquipStats_Blank      ; 51 ; 81 ; 
@@ -563,6 +564,7 @@ lut_MenuText:
 .word M_EquipInventoryArmor   ; 53 ; 83 ; 
 .word M_EquipInventorySelect  ; 54 ; 84 ; 
 .word M_KeyItem18_Desc        ; 55 ; 85 ; 
+.word M_LampMagic             ; 56 ; 86 ; LAMP magic
 
 M_Gold: 
 .byte $04,$FF,$90,$00 ; _G - for gold on menu
@@ -933,6 +935,9 @@ M_EquipInventoryArmor:
 M_EquipInventorySelect:
 .byte $9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$35,$FF,$9C,$B7,$2F,$21,$28,$24,$BA,$5B,$A6,$AB,$01
 .byte $FF,$31,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Select or Start to switch between weapons and armor.
+
+M_LampMagic:
+.byte $8A,$24,$B3,$A8,$4E,$1B,$2E,$23,$37,$35,$1A,$B6,$AC,$AA,$AB,$B7,$C4,$00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5780,6 +5785,9 @@ MagicMenu_Loop:
 :   CMP #MG_EXIT
     BNE :+
       JMP UseMagic_EXIT
+:   CMP #MG_LAMP
+    BNE :+
+      JMP UseMagic_LAMP
 
 :   PLA
     LDA #64                 ; gets here if no match found.
@@ -5788,54 +5796,91 @@ MagicMenu_Loop:
 
 ;;;;;;;;;;;;;;;
 
-UseMagic_CURE:
+CureSpellPotency:    
     LDA framecounter        ; use the frame counter as a make-shift pRNG
     AND #$0F                ; mask out the low bits
     ORA #$10                ; and ORA (effective range:  16-31)
-    BNE UseMagic_CureFamily ; and do the cure family of spells (always branches)
+    RTS
 
-UseMagic_CUR2:
+Cure2SpellPotency:
     LDA framecounter        ; same deal, but double the recovery
     AND #$1F
     ORA #$20                ; (effective range:  32-63)
-    BNE UseMagic_CureFamily ; always branches
+    RTS
 
-UseMagic_CUR3:
+Cure3SpellPotency:
     LDA framecounter        ; same deal -- but double it again
     AND #$3F
     ORA #$40                ; (effective range:  64-127)
-                            ; flow right into UseMagic_CureFamily
+    RTS
+
+UseMagic_CURE:
+    LDA #1
+    BNE UseMagic_CureFamily
+    
+UseMagic_CUR2:
+    LDA #2
+    BNE UseMagic_CureFamily
+
+UseMagic_CUR3:
+    LDA #4
+    BNE UseMagic_CureFamily
+    
+UseMagic_CUR4:
+    LDA #8
 
 UseMagic_CureFamily:
-    STA hp_recovery         ; store the HP to be recovered for future use
+    STA MMC5_tmp+2
     JSR DrawItemTargetMenu  ; draw the item target menu (gotta choose who to target with this spell)
     LDA #44 
     JSR DrawItemDescBox     ; load up the relevent description text
 
- CureFamily_Loop:
+CureFamily_Loop:
     JSR ItemTargetMenuLoop  ; handle the item target menu loop
     BCS CureFamily_Exit     ; if they pressed B, just exit
 
-   ; LDA cursor              ; otherwise... get cursor
-   ; ROR A
-   ; ROR A
-   ; ROR A
-   ; AND #$C0                ; shift it to get a usable index
-   ; TAX                     ; and put in X
-   JSR Cursor_to_Index
-
-    LDA ch_ailments, X      ; get target's OB ailments
-    CMP #$01
-    BEQ CureFamily_CantUse  ; if dead... can't target
-    CMP #$02
-    BEQ CureFamily_CantUse  ; can't target if stone, either
-
+    JSR UseMagic_CheckMP
+    BEQ CureFamily_Exit
+    
+    LDA MMC5_tmp+2
+    LSR A
+    BCC :+
+        JSR CureSpellPotency
+        BNE @DoCureSpell
+  : LSR A
+    BCC :+
+        JSR Cure2SpellPotency
+        BNE @DoCureSpell
+  : LSR A
+    BCC :+
+        JSR Cure3SpellPotency
+        BNE @DoCureSpell
+  : LDA #$FF    
+        
+   @DoCureSpell:     
+    STA hp_recovery         ; store the HP to be recovered for future use
+    JSR Cursor_to_Index
+    LDA hp_recovery
+    JSR MenuRecoverHP       ; will check if target is dead and set C if so
+    BCS CureFamily_CantUse  ; for Cure 4, will do 256 HP, but cap it--and will copy max to current next anyway
+    
     LDA hp_recovery         ; otherwise, we can target.  Get the HP to recover
-    JSR MenuRecoverHP_Abs   ; and recover it
-    JSR DrawItemTargetMenu  ; then redraw the target menu screen to reflect changes
-    JSR UseMagic_SpendMP ; JIGS
-
-    JSR MenuWaitForBtn_SFX  ; Then just wait for the player to press a button.  Then exit by re-entering magic menu
+    CMP #$FF                ; check if its Cure 4
+    BNE :+
+    
+    LDA ch_maxhp+1, X      
+    STA ch_curhp+1, X      
+    LDA ch_maxhp, X        
+    STA ch_curhp, X        
+    LDA ch_ailments, X
+    AND #AIL_DEAD | AIL_STONE
+    STA ch_ailments, X      ; JIGS - also now does the battle effect of fixing most ailments (poison and blind here)
+    
+  : JSR PlayHealSFX
+    JSR SetStallAndWait
+    JSR DrawItemTargetMenu_OneChar  ; then update the healed character's info
+    JSR UseMagic_SpendMP    ; JIGS
+    JMP CureFamily_Loop
 
   CureFamily_Exit:
     JMP EnterMagicMenu_Redraw      ; to exit, re-enter (redraw) magic menu
@@ -5846,72 +5891,87 @@ UseMagic_CureFamily:
 
 ;;;;;;;;;;;;;;
 
-UseMagic_CUR4:
-    JSR DrawItemTargetMenu  ; draw item target menu
-    LDA #44
-    JSR DrawItemDescBox     ; and appropriate description text
-    JSR ItemTargetMenuLoop  ; do the item target menu loop
-    BCS CureFamily_Exit     ; if they pressed B to escape.. just exit
-
-    ;LDA cursor              ; otherwise, get cursor (target character ID)
-    ;ROR A
-    ;ROR A
-    ;ROR A
-    ;AND #$C0                ; shift to get a usable charater index
-    ;TAX                     ; and put in X
-    JSR Cursor_to_Index
-
-    LDA ch_maxhp+1, X       ; and copy max HP to cur HP
-    STA ch_curhp+1, X       ; BUGGED:  game does not check ailments.  So you can cast
-    LDA ch_maxhp, X         ;  this on a stoned or even a dead character!
-    STA ch_curhp, X         ;  but while it will refill a dead character's HP, he will stay dead
-                            ;  because he'll still have the "dead" ailment.
-
-    JSR DrawItemTargetMenu  ; redraw target menu to reflect changes
-    JSR UseMagic_SpendMP ; JIGS 
-
-    JSR MenuWaitForBtn_SFX  ; then just wait for the player to press a button
-    JMP EnterMagicMenu_Redraw      ; and re-enter (redraw) the magic menu
-
-;;;;;;;;;;;;;;
-
-UseMagic_HEAL:
-    LDA framecounter        ; use the framecounter as a makeshift pRNG
+HealSpellPotency:
+    JSR BattleRNG_L         ; use the framecounter as a makeshift pRNG
     AND #$07                ;  get low bits
     CLC
     ADC #$10                ; and ADD $10 (not ORA)  (effective range:  16-23)
-    BNE UseMagic_HealFamily ; and do the heal family of spells (always branches)
+    RTS
 
-UseMagic_HEL2:
-    LDA framecounter        ; same deal as HEAL, only different number
+Heal2SpellPotency:
+    JSR BattleRNG_L         ; same deal as HEAL, only different number
     AND #$0F
     CLC
     ADC #$20                ; (effective range:  32-47)
-    BNE UseMagic_HealFamily ; always branches
+    RTS
 
-UseMagic_HEL3:
-    LDA framecounter        ; same deal....
+Heal3SpellPotency:
+    JSR BattleRNG_L         ; same deal....
     AND #$1F
     CLC
     ADC #$40                ; (effective range:  64-95)
-                            ; flow into UseMagic_HealFamily
+    RTS
+
+    ;; JIGS - these use BattleRNG_L instead of the framecounter, to more randomize the healing between characters
+    ;; since it is now called for each character instead of the whole spell... the way it does it in battle, I think.
+    
+UseMagic_HEAL:
+    LDA #1
+    BNE UseMagic_HealFamily
+    
+UseMagic_HEL2:
+    LDA #2
+    BNE UseMagic_HealFamily
+    
+UseMagic_HEL3:
+    LDA #4
 
 UseMagic_HealFamily: 
-    STA hp_recovery         ; store HP recovery for future use
+    STA MMC5_tmp+2
+    JSR DrawItemTargetMenu 
     LDA #53
     JSR DrawItemDescBox     ; draw the relevent description text
+   
+   @HealMenuLoop:
     JSR ClearOAM            ; clear OAM (no sprites)
     JSR MenuWaitForBtn      ; wait for the user to press a button
 
     LDA joy                 ; see whether the user pressed A or B
     AND #$80                ; check A
     BEQ HealFamily_Exit     ; if not A, they pressed B... so exit
+    
+    JSR UseMagic_CheckMP
+    BEQ HealFamily_Exit
 
-    LDA hp_recovery         ; otherwise (pressed A), get HP recovery
-    JSR MenuRecoverPartyHP  ; and give it to the entire party (also redraws the target menu for us)
-    JSR UseMagic_SpendMP ; JIGS 
-        
-    JSR MenuWaitForBtn_SFX  ; then just wait for the player to press a button before exiting
+    LDA #0
+    STA cursor    
+   @HealLoop:
+    LDA MMC5_tmp+2
+    LSR A
+    BCC :+
+        JSR HealSpellPotency
+        BNE @DoHealSpell
+  : LSR A
+    BCC :+
+        JSR Heal2SpellPotency
+        BNE @DoHealSpell
+  : JSR Cure3SpellPotency
+
+   @DoHealSpell:
+    STA hp_recovery         ; otherwise (pressed A), get HP recovery
+    JSR Cursor_to_Index
+    LDA hp_recovery
+    JSR MenuRecoverHP       ; recover one 
+    JSR SetStallAndWait
+    JSR DrawItemTargetMenu_OneChar
+    INC cursor
+    LDA cursor
+    CMP #4
+    BNE @HealLoop
+    
+    JSR PlayHealSFX
+    JSR UseMagic_SpendMP    ; JIGS 
+    JMP @HealMenuLoop
 
  HealFamily_Exit:
     JMP EnterMagicMenu_Redraw      ; to exit, just re-enter magic menu
@@ -5919,104 +5979,85 @@ UseMagic_HealFamily:
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 UseMagic_LIFE:
-    JSR DrawItemTargetMenu  ; draw the target menu
     LDA #49
-    JSR DrawItemDescBox     ; and relevent description text
-  @Loop:
-    JSR ItemTargetMenuLoop  ; do the target loop
-    BCS HealFamily_Exit     ; if they pressed B to exit, exit (hijack the HealFamily exit, whynot)
+    PHA
+    LDA #1
+    BNE UseMagicCureAilment
 
-    LDA #$01                ; mark the ailment-to-cure as "death" ($01)
-    STA tmp                 ; put it in tmp for 'CureOBAilment' routine
-    JSR CureOBAilment       ; attempt to cure death!
-    BCS @CantUse            ; if the char didn't have the death ailment... can't use this spell on him
+UseMagic_SOFT:
+    LDA #48
+    PHA
+    LDA #2
+    BNE UseMagicCureAilment
 
-    LDA #1                  ; otherwise it worked.  Give them 1 HP now that they're alive
-    STA ch_curhp, X
+UseMagic_PURE:
+    LDA #47
+    PHA
+    LDA #4
+    BNE UseMagicCureAilment
 
-    JSR UseMagic_SpendMP ; JIGS 
-
-    JSR DrawItemTargetMenu  ; redraw target menu to reflect changes
-    JSR MenuWaitForBtn_SFX  ; then wait for the user to press a button
-    JMP EnterMagicMenu_Redraw      ; and exit by re-entering magic menu
-
-  @CantUse:
-    JSR PlaySFX_Error       ; if you can't use it, play the error sound
-    JMP @Loop               ;  and loop!
-
+UseMagic_LAMP:
+    LDA #56
+    PHA
+    LDA #8
+    BNE UseMagicCureAilment
 
 UseMagic_LIF2:
-    JSR DrawItemTargetMenu  ; Exactly the same as LIFE, except...
     LDA #49
-    JSR DrawItemDescBox
-  @Loop:
-    JSR ItemTargetMenuLoop
-    BCS HealFamily_Exit
+    PHA
+    LDA #$10
 
-    LDA #$01
-    STA tmp
-    JSR CureOBAilment
-    BCS @CantUse
+UseMagicCureAilment:
+    STA hp_recovery
+    JSR DrawItemTargetMenu  ; draw the target menu
+    PLA
+    JSR DrawItemDescBox     ; and relevent description text
+    
+   @Loop:
+    JSR ItemTargetMenuLoop  ; do the target loop
+    BCS @CureAilment_Exit
+    
+    JSR UseMagic_CheckMP
+    BEQ @CureAilment_Exit
 
-    LDA ch_maxhp, X         ; refill their HP to max, instead of just giving them 1 HP
+    LDA hp_recovery
+    CMP #$10
+    BNE :+
+     LDA #1
+  : STA tmp                 ; put it in tmp for 'CureOBAilment' routine
+    JSR CureOBAilment       ; attempt to cure death!
+    BCS @CantUse            ; if the char didn't have the death ailment... can't use this spell on him
+    
+    LDA hp_recovery
+    LSR A
+    BCC :+
+        LDA #1              ; otherwise it worked.  Give them 1 HP now that they're alive
+        STA ch_curhp, X
+        BNE @Success
+  : LSR A ; Soft in C        
+    LSR A ; Pure in C
+    LSR A ; Lamp in C
+    LSR A ; Life 2 in C
+    BCC @Success
+    
+    LDA ch_maxhp, X         ; for Life 2, refill their HP to max, instead of just giving them 1 HP
     STA ch_curhp, X
     LDA ch_maxhp+1, X
     STA ch_curhp+1, X
 
-    JSR UseMagic_SpendMP ; JIGS 
-
-    JSR DrawItemTargetMenu
-    JSR MenuWaitForBtn_SFX
-    JMP EnterMagicMenu_Redraw
-
-  @CantUse:
-    JSR PlaySFX_Error
+   @Success:
+    JSR PlayHealSFX
+    JSR SetStallAndWait
+    JSR DrawItemTargetMenu_OneChar
+    JSR UseMagic_SpendMP    ; JIGS 
     JMP @Loop
-
-UseMagic_PURE:
-    JSR DrawItemTargetMenu  ; Exactly the same as LIFE, except...
-    LDA #47
-    JSR DrawItemDescBox     ; different description text
-  UseMagic_PURE_Loop:
-    JSR ItemTargetMenuLoop
-    BCS UseMagic_PURE_Exit
-
-    LDA #04                     ; JIGS - cure "poison" ailment instead of "death"
-    STA tmp
-    JSR CureOBAilment
-    BCS UseMagic_PURE_CantUse
-
-    JSR UseMagic_SpendMP ; JIGS 
     
-    JSR DrawItemTargetMenu
-    JSR MenuWaitForBtn_SFX
+   @CureAilment_Exit:
+    JMP EnterMagicMenu_Redraw ; and exit by re-entering magic menu
 
- UseMagic_PURE_Exit:
-    JMP EnterMagicMenu_Redraw
-
- UseMagic_PURE_CantUse:
-    JSR PlaySFX_Error
-    JMP UseMagic_PURE_Loop
-
-UseMagic_SOFT:
-    JSR DrawItemTargetMenu     ; again... more of the same
-    LDA #48
-    JSR DrawItemDescBox        ; but different description text
-  @Loop:
-    JSR ItemTargetMenuLoop
-    BCS UseMagic_PURE_Exit
-    LDA #$02                   ; and cure stone instead of death or poison
-    STA tmp
-    JSR CureOBAilment
-    BCS @CantUse
-    JSR UseMagic_SpendMP ; JIGS 
-    
-    JSR DrawItemTargetMenu
-    JSR MenuWaitForBtn_SFX
-    JMP EnterMagicMenu_Redraw
-  @CantUse:
-    JSR PlaySFX_Error
-    JMP @Loop
+   @CantUse:
+    JSR PlaySFX_Error       ; if you can't use it, play the error sound
+    JMP @Loop               ;  and loop!
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -6151,8 +6192,11 @@ UseMagic_SpendMP:
     SBC #$10
     STA ch_stats, X
     RTS 
-
-
+UseMagic_CheckMP:
+    LDX mp_required
+    LDA ch_stats, X
+    AND #$F0
+    RTS             ; JIGS - BEQ to CantUse after calling this
     
 MagicMenu_ForgetSpell:
     LDX cursor
@@ -7108,12 +7152,12 @@ MenuSaveConfirm:
 
 UseItem_Heal:
     LDA #HEAL_POTENCY
-    STA MMC5_tmp+2
+    STA hp_recovery
     BNE DrawHealMenu
 
 UseItem_XHeal:    
     LDA #XHEAL_POTENCY
-    STA MMC5_tmp+2
+    STA hp_recovery
     
 DrawHealMenu:
     JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
@@ -7135,7 +7179,7 @@ DrawHealMenu:
        CMP ch_maxhp+1, X
        BEQ @CantUse            ; if those are also equal, there's no point in using a potion
        
-  : LDA MMC5_tmp+2
+  : LDA hp_recovery
     CMP #HEAL_POTENCY
     BNE :+ 
         LDA item_heal
@@ -7147,8 +7191,9 @@ DrawHealMenu:
     DEC item_x_heal
     
    @DoHeal: 
-    LDA MMC5_tmp+2             ; otherwise.. can use!
+    LDA hp_recovery            ; otherwise.. can use!
     JSR MenuRecoverHP_Abs      ; recover 30 HP for target (index is still in X). 
+    JSR PlayHealSFX
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
     JMP @UseItem_Heal_Loop
@@ -7288,28 +7333,28 @@ UseItem_Elixir:
 
 UseItem_Pure:
     LDA #AIL_POISON
-    STA MMC5_tmp+2
+    STA hp_recovery
     LDA #47 
     PHA
     BNE :+
 
 UseItem_Soft:
     LDA #AIL_STONE
-    STA MMC5_tmp+2
+    STA hp_recovery
     LDA #48 
     PHA
     BNE :+
 
 UseItem_PhoenixDown:
     LDA #AIL_DEAD
-    STA MMC5_tmp+2
+    STA hp_recovery
     LDA #49
     PHA
     BNE :+    
 
 UseItem_Eyedrop:    
     LDA #AIL_DARK
-    STA MMC5_tmp+2
+    STA hp_recovery            ; uses this as safe tmp storage
     LDA #51
     PHA
 
@@ -7322,7 +7367,7 @@ UseAilmentCuringItem:
     JSR ItemTargetMenuLoop     ; do the target menu loop
     BCS @Exit                  ; if they pressed B (C set), exit
     
-    LDX MMC5_tmp+2             ; use the ailment to cure to get the item ID from a lut
+    LDX hp_recovery            ; use the ailment to cure to get the item ID from a lut
     LDY UseAilmentCuringItemLUT, X
     LDA items, Y               
     BEQ @Exit                  ; exit if you ran out
@@ -7334,7 +7379,7 @@ UseAilmentCuringItem:
 
     JSR PlayHealSFX
 
-    LDX MMC5_tmp+2             ; do this little thing again
+    LDX hp_recovery            ; do this little thing again
     LDY UseAilmentCuringItemLUT, X
     LDA items, Y
     SEC
@@ -7932,8 +7977,9 @@ MenuRecoverPartyHP:
     LDX #$80
     JSR MenuRecoverHP
     LDX #$C0
-    JSR MenuRecoverHP
-    JMP DrawItemTargetMenu   ; then draw item target menu, and exit
+    ;JMP MenuRecoverHP
+    
+    ;JMP DrawItemTargetMenu   ; then draw item target menu, and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7955,16 +8001,10 @@ MenuRecoverPartyHP:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-MenuRecoverHP_Potion:
-    LDY ch_ailments, X
-    CPY #$02
-    BEQ _MenuRecoverHP_Exit
-    ;; JIGS - can't shove potion down a stoned person's throats though
-
 MenuRecoverHP:
     LDY ch_ailments, X          ; get out of battle ailments for this character
     CPY #$01
-    BEQ _MenuRecoverHP_Exit     ; if dead... skip to exit (can't recover HP when dead)
+    BEQ _MenuRecoverHP_BadExit     ; if dead... skip to exit (can't recover HP when dead)
    ; CPY #$02
    ; BEQ _MenuRecoverHP_Exit     ; if stone... skip to exit
   ;; JIGS - healing stone people with magic is allowed, since its allowed in battle
@@ -7996,12 +8036,16 @@ MenuRecoverHP_Abs:
                                 ;  that should happen...
                                 
     ;; JIGS - just use a neat little SFX with square2 instead:
-    JSR PlayHealSFX
+    ;JSR PlayHealSFX
 
     LDA tmp                     ; restore the HP recovery ammount in A, before exiting
   _MenuRecoverHP_Exit:
+    CLC
     RTS
 
+  _MenuRecoverHP_BadExit:
+    SEC
+    RTS
 
   _MenuRecoverHP_CheckLow:
     LDA ch_curhp, X             ; check low byte of HP against low byte of max
@@ -10036,7 +10080,7 @@ DrawEquipInventory:
     LDA battleitemslot  ; if equipoffset is 6 or 7 (battle item)
     BEQ @Loop           ; check this variable to see if weapon or armor
     
-    @ArmorOffset:
+   @ArmorOffset:
     LDA MMC5_tmp+2
     CLC
     ADC #ARMORSTART
@@ -10071,7 +10115,7 @@ DrawEquipInventory:
     ADC #6
     TAY
    
-    @ResumeLoop:
+   @ResumeLoop:
     INC MMC5_tmp
     LDA MMC5_tmp
     CMP #8             ; if item counter is over 8, end inner loop and reset to 0
@@ -10091,7 +10135,7 @@ DrawEquipInventory:
     CMP #2
     BEQ @DrawRightSide
     
-    @DrawLeftSide:
+   @DrawLeftSide:
     LDA #04 
     STA dest_x 
     LDA #05
@@ -10107,7 +10151,7 @@ DrawEquipInventory:
     STA dest_x 
     JMP DrawComplexString  ; Draw all the item names
         
-    @SkipOne:
+   @SkipOne:
     INX  ; skip this item
     STX MMC5_tmp+2
     LDA #$C2  
