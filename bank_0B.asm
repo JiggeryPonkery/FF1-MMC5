@@ -3047,7 +3047,7 @@ ChaosDeath:
     DEX
     BNE @DrawBackdropLoop
     JSR Add20toTmp
-    CMP #9C
+    CMP #$9C
     BNE @DrawBackdropThing
 
     LDA #$DD                ; now draw a column of blank spaces from $20DD down, 12 rows
