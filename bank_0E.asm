@@ -804,7 +804,7 @@ M_ItemHorn:
 .byte $A9,$4D,$B0,$24,$45,$A8,$B3,$2D,$29,$A5,$39,$B7,$45,$C0,$00 ; Use to rouse the party[ENTER]from sleep in battle.[END]
 
 M_ItemEyedrop:
-.byte $9E,$3E,$1B,$2E,$23,$AA,$A4,$1F,$FF,$B6,$AC,$AA,$AB,$21,$1F,$31,$39,$B7,$45,$C0,$00 ; Use to regain sight in battle.[END]
+.byte $9E,$3E,$1B,$2E,$23,$AA,$A4,$1F,$FF,$B6,$AC,$AA,$AB,$B7,$C0,$00 ; Use to regain sight.[END]
 
 M_ItemSmokebomb:
 .byte $9E,$3E,$1B,$2E,$3D,$A7,$1A,$A8,$32,$B5,$56,$5A,$2D,$29,$A5,$39,$B7,$45,$05
@@ -4946,7 +4946,7 @@ MenuRecoverPartyMP:
     
     TXA             ; move index into A to do some math
     SEC
-    SBC #$38         ; JIGS - undo the +$30 and +8 added to X
+    SBC #$38        ; JIGS - undo the +$30 and +8 added to X
     CLC
     ADC #$40        ; add $40 (next character in part
     TAX             ; put back in X
@@ -4954,37 +4954,31 @@ MenuRecoverPartyMP:
     RTS             ; then exit
 
 MenuRecoverSingleMP:    
-    LDA ch_ailments, X     ; check OB ailments
-    CMP #$01
-    BEQ @Skip              ; if dead... skip
-    CMP #$02
-    BEQ @Skip              ; if stone... skip
+    JSR CheckDeadStone
+    BCS @Skip
     
-   LDY #0 
-   TXA          ; $0, $40, $80, or $C0
-   CLC
-   ADC #ch_mp - ch_stats    ; +$30
-   TAX
-       
-    @InnerLoop:
+    LDY #0 
+    TXA             ; $0, $40, $80, or $C0
+    CLC
+    ADC #ch_mp - ch_stats    ; +$30
+    TAX
+
+   @InnerLoop:
     LDA ch_stats, X ; X is pointer to level 1 MP 
-    AND #$0F     ; clear current mp entirely, leaving only max mp
-    STA tmp+1    ; back it up
-    ASL A        ; shift by 4
+    AND #$0F        ; clear current mp entirely, leaving only max mp
+    STA tmp+1       ; back it up
+    ASL A           ; shift by 4
     ASL A
     ASL A
-    ASL A        ; to put max mp into high bits--current mp
-    ORA tmp+1    ; add max mp back in
+    ASL A           ; to put max mp into high bits--current mp
+    ORA tmp+1       ; add max mp back in
     STA ch_stats, X ; and save it
     INY
-    TXA          
-    CLC
-    ADC #1       ; +1 for each spell level
-    TAX
+    INX             ; +1 for each spell level
     CPY #08
     BNE @InnerLoop
     
-    @Skip:
+   @Skip:
     RTS    
     
 
@@ -7114,12 +7108,12 @@ MenuSaveConfirm:
 
 UseItem_Heal:
     LDA #HEAL_POTENCY
-    STA tmp+3
-    JMP DrawHealMenu
+    STA MMC5_tmp+2
+    BNE DrawHealMenu
 
 UseItem_XHeal:    
     LDA #XHEAL_POTENCY
-    STA tmp+3
+    STA MMC5_tmp+2
     
 DrawHealMenu:
     JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
@@ -7128,40 +7122,41 @@ DrawHealMenu:
 
    @UseItem_Heal_Loop:
     JSR ItemTargetMenuLoop     ; run the item target loop.
-    BCS @UseItem_Exit           ; if B was pressed (C set), exit this menu
+    BCS @UseItem_Exit          ; if B was pressed (C set), exit this menu
 
     JSR Cursor_to_Index
-   ; LDA ch_ailments, X         ; check their OB ailments
-   ; CMP #$01
-   ; BEQ @UseItem_Heal_CantUse  ; if dead... can't use
-   ; CMP #$02
-   ; BEQ @UseItem_Heal_CantUse  ; if stone... can't use
-   ;; checked by MenuRecoverHP_Potion
+    JSR CheckDeadStone
+    BCS @CantUse
     
-    LDA tmp+3
+    LDA ch_curhp, X            ; make sure not to waste potions!
+    CMP ch_maxhp, X            ; if not equal, then either the character has MORE current HP than max... or less. 
+    BNE :+                     ; going to assume LESS, so go use the potion
+       LDA ch_curhp+1, X       ; otherwise, its equal, so check high bytes
+       CMP ch_maxhp+1, X
+       BEQ @CantUse            ; if those are also equal, there's no point in using a potion
+       
+  : LDA MMC5_tmp+2
     CMP #HEAL_POTENCY
     BNE :+ 
         LDA item_heal
         BEQ @UseItem_Exit
         DEC item_heal          ; then remove a heal potion from the inventory
         JMP @DoHeal
- : LDA item_x_heal
-   BEQ @UseItem_Exit                  ; stop if there's no more to use!
-   DEC item_x_heal
+  : LDA item_x_heal
+    BEQ @UseItem_Exit          ; stop if there's no more to use!
+    DEC item_x_heal
     
    @DoHeal: 
-    LDA tmp+3                  ; otherwise.. can use!
-    JSR MenuRecoverHP_Potion   ;   recover 30 HP for target (index is still in X). 
-    LDA #1
-    STA menustall
-    JSR WaitForVBlank_L
-    JSR DrawItemTargetMenu_Loop
+    LDA MMC5_tmp+2             ; otherwise.. can use!
+    JSR MenuRecoverHP_Abs      ; recover 30 HP for target (index is still in X). 
+    JSR SetStallAndWait
+    JSR DrawItemTargetMenu_OneChar
     JMP @UseItem_Heal_Loop
 
   @UseItem_Exit:
     JMP EnterItemMenu          ; re-enter item menu (item menu needs to be redrawn)
 
-  @UseItem_Heal_CantUse:       ; can't make this local because of stupid UseItem_Pure hijacking the above label
+  @CantUse:
     JSR PlaySFX_Error          ; play the error sound effect
     JMP @UseItem_Heal_Loop     ; and keep looping until they select a legal target or escape with B
     
@@ -7188,13 +7183,12 @@ UseItem_Ether_2:
     JSR MPTargetMenuLoop       ; do the target menu loop
     BCS @Exit                  ; if they pressed B (C set), exit
 
-    JSR Cursor_to_Index        ; cursor is 0, 1, 2, 3
+    LDA item_ether
+    BEQ @Exit
     
-    LDA ch_ailments, X         ; check OB ailments
-    CMP #$01
-    BEQ @CantUse               ; if dead... skip
-    CMP #$02
-    BEQ @CantUse               ; if stone... skip
+    JSR Cursor_to_Index        ; cursor is 0, 1, 2, 3
+    JSR CheckDeadStone
+    BCS @CantUse
     
     TXA                        ; put index back into A
     CLC
@@ -7208,6 +7202,10 @@ UseItem_Ether_2:
     STA tmp                    ; store max MP
     LDA ch_stats, X            
     AND #$F0                   ; get current MP
+    LSR A
+    LSR A
+    LSR A
+    LSR A
     CMP tmp                    ; if its the same...
     BEQ @CantUse               ; no need to use an ether... so don't
     
@@ -7222,21 +7220,9 @@ UseItem_Ether_2:
     JSR PlayHealSFX
     
     DEC item_ether             ; if we could... remove one from the inventory
-    BEQ @Exit                  ; stop if there's no more to use!
-    JMP UseItem_Ether_2
-    ;JSR DrawMPTargetMenu       ; redraw the target menu to reflect the changes
-    
-    ;@EndLoop:                  ; this is basically MenuWaitForBtn_SFX but it draws sprites...
-    ;    JSR ClearOAM
-    ;    JSR DrawMPTargetSprites
-    ;    JSR MenuFrame 
-    ;    LDA joy_a
-    ;    ORA joy_b
-    ;    BEQ @EndLoop
-    ;    JSR PlaySFX_MenuSel
-    ;    LDA #0
-    ;    STA joy_a
-    ;    STA joy_b
+    JSR SetStallAndWait
+    JSR DrawMPTargetMenu_Elixir_OneChar
+    JMP @Loop
     
   @Exit: 
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
@@ -7263,35 +7249,27 @@ UseItem_Elixir:
     JSR ItemTargetMenuLoop     ; do the target menu loop
     BCS @Exit                  ; if they pressed B (C set), exit 
 
-    LDA item_elixir            ; if 
+    LDA item_elixir            ; if no more elixers, exit
     BEQ @Exit
     
     JSR Cursor_to_Index
-    
-    LDA ch_ailments, X         ; check their OB ailments
-    CMP #$01
-    BEQ @CantUse               ; if dead... can't use
-    CMP #$02
-    BEQ @CantUse               ; if stone... can't use
-    
-    JSR MenuRecoverSingleMP
+    JSR CheckDeadStone
+    BCS @CantUse
     
     LDA ch_maxhp+1, X     
     STA ch_curhp+1, X     
     LDA ch_maxhp, X       
     STA ch_curhp, X       
     
+    JSR MenuRecoverSingleMP
+    
     JSR PlayHealSFX
     
     DEC item_elixir            ; if we could... remove one from the inventory
-    LDA #1
-    STA menustall
-    JSR WaitForVBlank_L
-    JSR DrawItemTargetMenu_Elixir_Loop
+    JSR SetStallAndWait
+    JSR DrawItemTargetMenu_Elixir_OneChar
     JMP @Loop
     
-    ;JSR DrawItemTargetMenu_Elixir  ; redraw the target menu to reflect the changes
-    ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button (sprite version!)
   @Exit:  
     LDA #0
     STA item_pageswap
@@ -7309,25 +7287,68 @@ UseItem_Elixir:
 ;;;;;;;;;;;;;;;;;;;;
 
 UseItem_Pure:
-    JSR DrawItemTargetMenu     ; draw target menu
+    LDA #AIL_POISON
+    STA MMC5_tmp+2
     LDA #47 
-    JSR DrawItemDescBox        ; print relevent description text (ID=$21)
+    PHA
+    BNE :+
+
+UseItem_Soft:
+    LDA #AIL_STONE
+    STA MMC5_tmp+2
+    LDA #48 
+    PHA
+    BNE :+
+
+UseItem_PhoenixDown:
+    LDA #AIL_DEAD
+    STA MMC5_tmp+2
+    LDA #49
+    PHA
+    BNE :+    
+
+UseItem_Eyedrop:    
+    LDA #AIL_DARK
+    STA MMC5_tmp+2
+    LDA #51
+    PHA
+
+UseAilmentCuringItem:    
+  : JSR DrawItemTargetMenu     ; draw target menu
+    PLA
+    JSR DrawItemDescBox        
+
   @Loop:
     JSR ItemTargetMenuLoop     ; do the target menu loop
     BCS @Exit                  ; if they pressed B (C set), exit
-
-    LDA #04                    ; otherwise, put "poison" OB ailment
-    STA tmp                    ;   in tmp as our ailment to cure
+    
+    LDX MMC5_tmp+2             ; use the ailment to cure to get the item ID from a lut
+    LDY UseAilmentCuringItemLUT, X
+    LDA items, Y               
+    BEQ @Exit                  ; exit if you ran out
+   
+   @TryUse:  
+    STX tmp
     JSR CureOBAilment          ; then try to cure it
     BCS @CantUse               ; if we couldn't... can't use this item
-    
+
     JSR PlayHealSFX
 
-    DEC item_pure               ; if we could... remove one from the inventory
-    BEQ @Exit                  ; stop if there's no more to use!
-    ;JSR DrawItemTargetMenu     ; redraw the target menu to reflect the changes
-    ;JSR MenuWaitForBtn_SFX     ; then wait for the player to press a button
-    JMP UseItem_Pure
+    LDX MMC5_tmp+2             ; do this little thing again
+    LDY UseAilmentCuringItemLUT, X
+    LDA items, Y
+    SEC
+    SBC #1
+    STA items, Y               ; and this time decrease the amount of the item
+    CPY #PHOENIXDOWN           ; then check if it was a phoenix down
+    BNE :+                     ; if not, skip this
+      JSR Cursor_to_Index        
+      LDA #1      
+      STA ch_curhp, X          ; give the character 1 HP
+        
+  : JSR SetStallAndWait
+    JSR DrawItemTargetMenu_OneChar
+    JMP @Loop
     
    @Exit: 
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
@@ -7336,79 +7357,9 @@ UseItem_Pure:
     JSR PlaySFX_Error          ; if can't use... give the error sound effect
     JMP @Loop                  ;  and keep looping
 
-
-;;;;;;;;;;;;;;;;;;;;
-;;
-;;  UseItem_Soft  [$B360 :: 0x3B370]
-;;
-;;;;;;;;;;;;;;;;;;;;
-
-UseItem_Soft:
-    JSR DrawItemTargetMenu     ; this is all EXACTLY the same as UseItem_Pure.  Except...
-    LDA #48 
-    JSR DrawItemDescBox        ; different description text ID
-  @Loop:
-    JSR ItemTargetMenuLoop
-    BCS @Exit
-
-    LDA #$02                   ; cure "stone" ailment
-    STA tmp
-    JSR CureOBAilment
-    BCS @CantUse
-    
-    JSR PlayHealSFX
-
-    DEC item_soft              ; remove soft from inventory
-    BEQ @Exit                  ; stop if there's no more to use!
-    ;JSR DrawItemTargetMenu
-    ;JSR MenuWaitForBtn_SFX
-    JMP UseItem_Soft
-    
-   @Exit:     
-    JMP EnterItemMenu
-
-  @CantUse:
-    JSR PlaySFX_Error
-    JMP @Loop
-    
-
-;;;;;;;;;;;;;;;;;;;;
-;;
-;;  UseItem_PhoenixDown
-;;
-;;;;;;;;;;;;;;;;;;;;
-
-UseItem_PhoenixDown:
-    JSR DrawItemTargetMenu     ; this is all EXACTLY the same as UseItem_Pure.  Except...
-    LDA #49
-    JSR DrawItemDescBox        ; different description text ID
-  @Loop:
-    JSR ItemTargetMenuLoop
-    BCS @Exit
-
-    LDA #$01                   ; cure "dead" ailment
-    STA tmp
-    JSR CureOBAilment
-    BCS @CantUse
-    
-    LDA #1                  ; otherwise it worked.  Give them 1 HP now that they're alive
-    STA ch_curhp, X
-    
-    JSR PlayHealSFX
-
-    DEC item_down              ; remove phoenix down from inventory
-    BEQ @Exit                  ; stop if there's no more to use!
-    ;JSR DrawItemTargetMenu
-    ;JSR MenuWaitForBtn_SFX
-    JMP UseItem_PhoenixDown
-    
-  @Exit: 
-    JMP EnterItemMenu
-
-  @CantUse:
-    JSR PlaySFX_Error
-    JMP @Loop    
-
+UseAilmentCuringItemLUT:
+    .byte 0, PHOENIXDOWN, SOFT, 0, PURE, 0, 0, 0, EYEDROPS
+    ;     0, 1,         , 2   , 3, 4,  , 5, 6, 7, 8
 
 
 UseItem_Bell:
@@ -7441,11 +7392,7 @@ UseItem_Smokebomb:
     LDA #59                 ; "cannot use that here"
     JMP :+
 
-UseItem_Eyedrop:    
-    LDA #51
-  : JSR DrawItemDescBox    
-    JSR MenuWaitForBtn_SFX
-    JMP EnterItemMenu
+
 
 
 
@@ -7673,6 +7620,27 @@ Cursor_to_Index:
     AND #$C0                ; shift it to get a usable index
     TAX                     ; and put in X    
     RTS
+
+    ;; JIGS - also used a ton. C set if dead or stone, clear if not, so use BCS to cancel use.
+CheckDeadStone:    
+    LDA ch_ailments, X         ; check their OB ailments
+    CMP #$01
+    BEQ @No
+    CMP #$02
+    BEQ @No
+    CLC
+    RTS
+   @No:    
+    SEC
+    RTS
+    
+SetStallAndWait:
+    LDA #1
+    STA menustall
+    JSR WaitForVBlank_L
+    LDA cursor
+    STA submenu_targ
+    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7757,115 +7725,95 @@ CheckForMP:
     
 DrawItemTargetMenu:
     JSR ScreenOff_ClearNT
-
     LDA #$0A 
     JSR DrawMainItemBox
-
-    JSR DrawItemTargetMenu_Loop
-   
+    LDA #3
+    STA submenu_targ
+   @Loop: 
+    JSR DrawItemTargetMenu_OneChar
+    DEC submenu_targ
+    BPL @Loop
     JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
 
-DrawItemTargetMenu_Loop:    
-    LDA #$08
-    STA dest_x
-    LDA #$05
-    STA dest_y
-
-    LDA #0
-   @Loop:
-    STA submenu_targ    ; set this to 0 
-    INC dest_y
-    INC dest_y
-    INC dest_y
-   
-    LDA #17
-    JSR DrawCharMenuString  ; draw Name, ailment, HP for each character
+HealStringPositionLut:
+    .byte 8, 11, 14, 17    
     
+DrawItemTargetMenu_OneChar:    
     LDA submenu_targ
-    CLC
-    ADC #$1             ; increase submenu_targ by 1 per loop
-    CMP #4              ; stopping after the 4th character (0, 1, 2, 3)
-    BNE @Loop
-    RTS
+    TAX
+    LDA HealStringPositionLut, X
+    STA dest_y
+    LDA #08
+    STA dest_x
+    LDA #17
+    JMP DrawCharMenuString         ; draw Name, ailment, HP for each character
     
 DrawItemTargetMenu_Elixir:
     JSR ScreenOff_ClearNT
-
     LDA #$10 
     JSR DrawMainItemBox
-
-    ;; JIGS - this extra JSR is for re-printing without turning the screen off and on
-    JSR DrawItemTargetMenu_Elixir_Loop
-   
+    LDA #3
+    STA submenu_targ
+   @Loop:
+    JSR DrawItemTargetMenu_Elixir_OneChar
+    DEC submenu_targ
+    BPL @Loop
     JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
 
-DrawItemTargetMenu_Elixir_Loop: 
-    LDA #$08
-    STA dest_x
-    LDA #$03
+ElixirStringPositionLut:
+    .byte 5, 9, 13, 17
+    
+DrawItemTargetMenu_Elixir_OneChar:
+    LDA submenu_targ
+    TAX
+    LDA ElixirStringPositionLut, X
     STA dest_y
- 
-    LDA #0
-   @Loop:
-    STA submenu_targ    ; set this to 0 
-    INC dest_y
-    INC dest_y
-    
+    LDA #08
+    STA dest_x
     LDA #17
-    JSR DrawCharMenuString  ; draw Name, ailment, HP for each character
-    
+    JSR DrawCharMenuString          ; draw Name, ailment, HP for each character
     INC dest_y
     INC dest_y
-    
     JSR CheckForMP
     BEQ :+
-    
     LDA #16
-    JSR DrawCharMenuString ; draw MP for each character
+    JSR DrawCharMenuString          ; draw MP for each character
+  : RTS                             ; or just skip it if they have none
     
-  : LDA submenu_targ
-    CLC
-    ADC #$1             ; increase submenu_targ by 1 per loop
-    CMP #4              ; stopping after the 4th character (0, 1, 2, 3)
-    BNE @Loop
-    RTS
-
 DrawMPTargetMenu:
     JSR ScreenOff_ClearNT
-        
     LDA #$0B
-    JSR DrawMainItemBox ; draw main box for all character's MP
-    
-    INC dest_x
-    INC dest_y
-    INC dest_y          ; arrange the text over a bit, and down enough to make room for sprites
-    LDA #14
-    JSR DrawMenuString  ; Draw spell levels on the left
-    
-    DEC dest_x          ; further arrange the mp, since the level is 2 tiles, but the mp is 3 tiles per character
-    
-    LDA #0
-    @Loop:
-    STA submenu_targ    ; set this to 0 
-    LDA dest_x
-    CLC
-    ADC #$05            ; increase dest_x by 5 tiles per loop
-    STA dest_x
-    
-    JSR CheckForMP
-    BEQ :+
-    
-    LDA #15
-    JSR DrawCharMenuString ; draw MP for each character
-    
-  : LDA submenu_targ
-    CLC
-    ADC #$1             ; increase submenu_targ by 1 per loop
-    CMP #4              ; stopping after the 4th character (0, 1, 2, 3)
-    BNE @Loop
-    
+    JSR DrawMainItemBox             ; draw main box for all character's MP
+    INC dest_x                      
+    INC dest_y                      
+    INC dest_y                      ; arrange the text over a bit, and down enough to make room for sprites
+    LDA #14                         
+    JSR DrawMenuString              ; Draw spell levels on the left
+    LDA #3
+    STA submenu_targ
+   @Loop:                           
+    JSR DrawMPTargetMenu_Elixir_OneChar
+    DEC submenu_targ
+    BPL @Loop
     JMP TurnMenuScreenOn_ClearOAM
 
+EtherStringPositionLut:
+    .byte 9, 14, 19, 24    
+
+DrawMPTargetMenu_Elixir_OneChar:    
+    LDA submenu_targ
+    TAX
+    LDA EtherStringPositionLut, X
+    STA dest_x
+    LDA #5
+    STA dest_y
+    JSR CheckForMP
+    BEQ :+
+    LDA #15
+    JSR DrawCharMenuString          ; draw MP for each character
+  : RTS
+    
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  EnterStatusMenu    [$B4AD :: 0x3B4BD]

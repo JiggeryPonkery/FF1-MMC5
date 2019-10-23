@@ -7464,21 +7464,19 @@ PlaySFX_Error:
 ;;    STA $400F
     RTS
        
-    @ErrorSFXLoop:
+   @ErrorSFXLoop:
     LDY #3
-    @Loop:
+    STY tmp+6
+   @Loop:
        JSR @Frame
-       DEY
-       BPL @Loop
-       RTS
+       DEC tmp+6
+       BNE @Loop  ; do 3 frames, then a fourth
        
-    @Frame:
+   @Frame:
     JSR WaitForVBlank_L
-    
-    @Done:
-    RTS
-    
-    @Muted:
+    JMP CallMusicPlay
+
+   @Muted:
     JMP BattleScreenShake
     
    ;; JIGS - note for this screen shake thing, I had to include another routine that
@@ -8543,19 +8541,23 @@ DrawComplexString:
  
  @DrawStatIcon:
     BEQ @Healthy
-    ROR A
+    LSR A
     BCC :+
       LDA #$E9  ; dead -- note, different tile than the battle version of this code uses
       RTS       ; since battles use a black backdrop and menus use a coloured one
-  : ROR A
+  : LSR A
     BCC :+    
       LDA #$EA  ; stone
       RTS
-  : ROR A
-    BCC @Healthy
+  : LSR A
+    BCC :+
       LDA #$EB  ; poison
       RTS
- 
+  : LSR A  
+    BCC @Healthy
+      LDA #$F4  ; blind
+      RTS
+
  @Healthy:
    LDA #$E8
    RTS
@@ -11564,22 +11566,24 @@ DrawOBSprite:
     LDA ch_ailments, X    ; get out of battle ailment byte
     CMP #$80
     BCS @SwapReady        ;; JIGS - if high bit set, character is primed for swapping
-    CMP #0
-    BEQ @Standing         ;  if zero, no ailments... draw normal stance (standing upright)
-    CMP #01              ; if 1, character is dead
-    BEQ DrawOBSprite_Exit ;  so don't draw any sprite, just exit
-    CMP #04               ;; JIGS - poison is 4 in battle, it should be 4 out of battle too!
-    BEQ @Crouched         ;  draw in crouched position
-    LDA #$03              ; otherwise (ailment byte = 2), character is stoned
-    STA tmp+1             ;  change palette byte to 3 (stoned palette)
-;    BNE @Crouched         ;  always branches -- draw in crouched position
-    BNE @Standing
-    ;; JIGS - how could they crouch once stoned? Standing statues are more interesting.
-
+    AND #$0F
+    BEQ @Standing         ;; no ailments, draw standing
+    LSR A
+    BCS DrawOBSprite_Exit ;; dead, don't draw anything
+    LSR A
+    BCS @Stoned           ;; stone, so use the cheer pose, but change palette first
+    ;; otherwise, poisoned or blind, so draw crouched, because drawing cool glasses is too hard right now
+    ;; ...they're just looking for their contacts...
+    
   @Crouched:              ; to draw sprite as crouched... at #$14 to the
     LDA #$14              ;   tile number to draw.
-    JMP @Standing
+    BNE @Standing
     
+  @Stoned: 
+    LDA #$03              ; otherwise (ailment byte = 2), character is stoned
+    STA tmp+1             ;  change palette byte to 3 (stoned palette)
+    ;; JIGS - how could they crouch once stoned? Standing statues are more interesting.  
+  
   @SwapReady:
     LDA #$0E              ; draw cheering  
 
