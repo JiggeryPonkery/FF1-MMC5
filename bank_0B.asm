@@ -3021,52 +3021,70 @@ ChaosDeath_FadeNoise:
 BackDropLut:
 .byte 1,2,1,2,5,6,5,6,5,6,5,6
 
-DrawBackdropThing:
-    LDX #$20
-    JSR SetPPUAddr_XA
+Add20toTmp:
+    LDA tmp
+    CLC
+    ADC #$20
+    STA tmp
+    RTS
 
-    LDX #04
-   @DrawBackdropLoop:   
+ChaosDeath:
+    JSR WaitForVBlank_L
+    LDA $2002
+    
+    LDY #0
+    LDA #$3C              
+    STA tmp    
+   @DrawBackdropThing:
+    LDA tmp
+    LDX #$20
+    JSR SetPPUAddr_XA       ; set the address to $203C/5C/7C
+    LDX #04                 ; draw 4 tiles from the above LUT
+   @DrawBackdropLoop:       ; thus making the pillars fill inthe battle turn box
     LDA BackDropLut, Y
     STA $2007
     INY
     DEX
     BNE @DrawBackdropLoop
-    RTS
-    
-ChaosDeath:
-    JSR WaitForVBlank_L
-    LDA $2002
-    ;; JIGS - find a way to clear ailment icons from the screen as well
-    
-    LDY #0
-    LDA #$3C                 
-    JSR DrawBackdropThing
-    LDA #$5C
-    JSR DrawBackdropThing
-    LDA #$7C                ; draw over the battle turn box
-    JSR DrawBackdropThing
-    
-    LDX #$23
-    LDA #$C7                ; and set the attribute to the rest of the backdrop
-    JSR SetPPUAddr_XA    
-    LDA #$00
-    STA $2007
-    
-    LDA #$00       ; reset scroll to 0
-    STA $2005
-    STA $2005
-    
-    JSR MusicPlay
+    JSR Add20toTmp
+    CMP #9C
+    BNE @DrawBackdropThing
 
-    LDA #115
-    STA EOBCombatBox_tmp           ;   loop down counter
+    LDA #$DD                ; now draw a column of blank spaces from $20DD down, 12 rows
+    STA tmp                 
+    LDX #$20                
+    LDY #11                 ; Y is rows
+   @ClearIconLoop:
+    LDA tmp
+    JSR SetPPUAddr_XA       
+    LDA #0                  
+    STA $2007               
+    STA $2007               
+    DEY                     
+    BEQ :+                  
+    JSR Add20toTmp          
+    BCC @ClearIconLoop      
+      INX                   
+      BNE @ClearIconLoop    
+
+  : LDX #$23                
+    LDA #$C7                ; and set the attribute to the rest of the backdrop
+    JSR SetPPUAddr_XA       
+    LDA #$00                
+    STA $2007               
+    STA $2005               ; reset scroll to 0
+    STA $2005               
+
+    JSR MusicPlay           
+
+    LDA #115                
+    STA EOBCombatBox_tmp    ;   loop down counter
   @WaitLoop:                ; wait for 110 frames (wait for the fanfare music to get 
       JSR WaitForVBlank_L   ;   through the main jingle part)
-      JSR MusicPlay
-      DEC EOBCombatBox_tmp
-      BNE @WaitLoop
-      
+      JSR MusicPlay         
+      DEC EOBCombatBox_tmp  
+      BNE @WaitLoop         
+
     LDA #$80                ; stop music playback
     STA music_track
     STA btl_followupmusic
