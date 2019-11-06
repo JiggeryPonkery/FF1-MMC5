@@ -1442,10 +1442,10 @@ LvlUp_AdjustBBSubStats:
 SubtractOneFromVal:
     LDY #$00            ; self explanitory
     
-    LDA ($80), Y
+    LDA (LevelUp_Pointer), Y
     SEC
     SBC #$01
-    STA ($80), Y
+    STA (LevelUp_Pointer), Y
     
     RTS
     
@@ -1500,11 +1500,20 @@ PrepBattleVarsAndEnterBattle:
     .byte BANK_MUSIC
     
     LDA #$00
-    STA btl_soft2000            ; clear soft PPU regs
-    STA btl_soft2001
+    ;STA btl_soft2000            ; clear soft PPU regs
+    ;STA btl_soft2001
+    
+    LDY #$0C
+    @miniloop:
+     STA $0300, Y
+     INY
+     CPY #$8A           ;; JIGS - stop at btltmp_smallslotpos, don't want to overwrite those 
+     BNE @miniloop    
+     ;; make sure all these are set to 0 prior to battle!
+    
 
-    STA ConfusedMagic          
-    STA DrawPlayerHPCounter    ; make sure this is 0
+   ; STA ConfusedMagic          
+   ; STA DrawPlayerHPCounter    ; make sure this is 0
    ; LDA #$50
    ; STA music_track           ; set music track and followup
    ; STA btl_followupmusic
@@ -1766,9 +1775,9 @@ EndOfBattleWrapUp:
     STA eob_gp_reward+1         ;   a bug as much as it's just a limitation.
     
     LDA #<gold
-    STA $80
+    STA LevelUp_Pointer
     LDA #>gold
-    STA $81
+    STA LevelUp_Pointer+1
     
     JSR GiveRewardToParty
     
@@ -1896,7 +1905,7 @@ LvlUp_AwardExp:
     STA lvlup_chstats+1
      
     LDY #ch_ailments - ch_stats     ; check their ailments
-    LDA ($86), Y
+    LDA (lvlup_chstats), Y
     AND #$03                        ; isolate bit 1 and 2 = dead and stone
     BEQ :+                          ; no ailments = reward
       RTS                           ; anything else (stone or dead) = exit without getting a reward
@@ -2117,10 +2126,10 @@ LvlUp_LevelUp:
       JMP :++
   : LDA #$00                ; for non-strong levels, no extra bonus
   
-  : STA btltmp_multA               ; store strong bonus in scratch ram
+  : STA tmp+6               ; store strong bonus in scratch ram
     PLA                     ; pull base HP gain
     CLC
-    ADC btltmp_multA               ; add with strong bonus
+    ADC tmp+6               ; add with strong bonus
     STA battlereward        ; record HP bonus as battle reward
     LDA #$00
     STA battlereward+1      ; (zero high byte of battle reward)
@@ -2129,10 +2138,10 @@ LvlUp_LevelUp:
     LDA lvlup_chstats       ; set $80 to point to character's Max HP
     CLC
     ADC #ch_maxhp - ch_stats
-    STA $80
+    STA CharStatsPointer
     LDA lvlup_chstats+1
     ADC #$00
-    STA $81
+    STA CharStatsPointer+1
     
     JSR GiveHpBonusToChar   ; Finally, apply the HP bonus!
     
@@ -2421,9 +2430,9 @@ GiveRewardToParty:
     JSR AddBattleRewardToVal        ; add reward to target buffer
     
     LDA #<data_MaxRewardPlusOne     ; set $82 to point to reward max+1 (1000000)
-    STA $82
+    STA CharBackupStatsPointer
     LDA #>data_MaxRewardPlusOne
-    STA $83
+    STA CharBackupStatsPointer+1
     
     LDY #3 - 1                      ; compare 3 bytes
     JSR MultiByteCmp                ;  current value compared to max
@@ -2433,8 +2442,8 @@ GiveRewardToParty:
     ; Otherwise, current >= max
     
     LDY #$00                ; loop to copy 3 bytes of data
-    : LDA ($82), Y          ; copy max to dest
-      STA ($80), Y
+    : LDA (CharBackupStatsPointer), Y          ; copy max to dest
+      STA (CharStatsPointer), Y
       INY
       CPY #$03
       BNE :-
@@ -2463,17 +2472,17 @@ GiveHpBonusToChar:
     JSR AddBattleRewardToVal    ; add reward (which is the HP bonus)
     
     LDA #<data_MaxHPPlusOne     ; copy HP cap to $82,83
-    STA $82
+    STA CharBackupStatsPointer
     LDA #>data_MaxHPPlusOne
-    STA $83
+    STA CharBackupStatsPointer+1
     
     LDY #2 - 1                  ; compare 2 byte value (char max HP to HP cap)
     JSR MultiByteCmp
     BCC @Done                   ; if max HP < cap, jump ahead to @Done
     
     LDY #$00                    ; copy the cap over to the max HP
-    : LDA ($82), Y
-      STA ($80), Y
+    : LDA (CharBackupStatsPointer), Y
+      STA (CharStatsPointer), Y
       INY
       CPY #$02
       BNE :-
@@ -2482,10 +2491,10 @@ GiveHpBonusToChar:
  
   @Done:
     LDY #$00                    ; finally, copy the new max HP to eobtext_print_hp so
-    LDA ($80), Y                ;   it can be printed to the user!
+    LDA (CharStatsPointer), Y  ;   it can be printed to the user!
     STA eobtext_print_hp
     INY
-    LDA ($80), Y
+    LDA (CharStatsPointer), Y
     STA eobtext_print_hp+1
     RTS
 
@@ -2498,24 +2507,24 @@ GiveHpBonusToChar:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 AddBattleRewardToVal:
-            @loopctr = $8B          ; local
+            @loopctr = BattleBoxString+1 ; local
     LDA #$03
-    STA @loopctr                ; loop 3 times (adding 3 bytes)
-    LDA #$00
-    TAY                     ; A, X, Y all zero'd
-    TAX                     ; Y = dest index, X = source index
-    STA $8A                 ;  ??? $8A also zero'd?
+    STA @loopctr                 ; loop 3 times (adding 3 bytes)
+    LDA #$00  
+    TAY                          ; A, X, Y all zero'd
+    TAX                          ; Y = dest index, X = source index
+    STA BattleBoxString          ;  ??? $8A also zero'd?
     
-    CLC                     ; CLC at the start of the addition
+    CLC                          ; CLC at the start of the addition
   @Loop:
-      LDA ($80), Y          ; read dest byte
-      ADC battlereward, X   ; sum with source/reward byte
-      STA ($80), Y          ; write back to dest
+      LDA (CharStatsPointer), Y  ; read dest byte
+      ADC battlereward, X        ; sum with source/reward byte
+      STA (CharStatsPointer), Y  ; write back to dest
       
-      INX                   ; inc indexes to do next byte
+      INX                        ; inc indexes to do next byte
       INY
       
-      DEC @loopctr          ; loop 3 times, for each byte
+      DEC @loopctr               ; loop 3 times, for each byte
       BNE @Loop
       
     RTS
@@ -2537,9 +2546,9 @@ AddBattleRewardToVal:
 
 MultiByteCmp:
   @Loop:
-    LDA ($80), Y            ; load value
-    CMP ($82), Y            ; compare to target value
-    BEQ @NextByte           ; if equal, do next byte
+    LDA (CharStatsPointer), Y ; load value
+    CMP (EnemyRAMPointer), Y  ; compare to target value
+    BEQ @NextByte             ; if equal, do next byte
     
       PHP                     ; if not equal...
       PLA
@@ -2549,12 +2558,12 @@ MultiByteCmp:
       RTS                     ; and exit
     
   @NextByte:
-    DEY                     ; decrease byte counter to move to next byte
-    BNE @Loop               ; loop if more bytes to compare
+    DEY                       ; decrease byte counter to move to next byte
+    BNE @Loop                 ; loop if more bytes to compare
     
-    LDA ($80), Y            ; otherwise, if this is the last byte
-    CMP ($82), Y            ; simply do the CMP
-    RTS                     ; the 'Z' result will be preserved on this CMP
+    LDA (CharStatsPointer), Y ; otherwise, if this is the last byte
+    CMP (EnemyRAMPointer), Y  ; simply do the CMP
+    RTS                       ; the 'Z' result will be preserved on this CMP
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2587,8 +2596,8 @@ DivideRewardBySurvivors:
     ;;    strangely, this only divides a 16-bit value, when the experience itself
     ;;    is tallied into a 24-bit value.  I wouldn't say this is bugged, but it's
     ;;    a curiosity.
-          @divisor =    $84
-          @remainder =  $85
+          @divisor =    BattleTmpPointer
+          @remainder =  BattleTmpPointer+1
       
     STY @divisor                ; Y (the number of surviving party members) is the divisor
     LDA #$00
@@ -2835,12 +2844,12 @@ MusicPlay:
 
 Battle_FlipAllChars:
     LDA #$10                ; put a pointer to first character's OAM data in $8A
-    STA $8A                 ;  start at $10 because the first 4 sprites are for the battle
+    STA BattleBoxString     ;  start at $10 because the first 4 sprites are for the battle
     LDA #>oam               ;  cursor/weapon/magic sprite.
-    STA $8B
+    STA BattleBoxString+1
     
     LDA #$00                ; loop up-counter and character index
-    STA $88
+    STA BattleTmpPointer2
   @Loop:
       JSR Battle_FlipCharSprite ; flip this character sprite
       
@@ -2853,8 +2862,8 @@ Battle_FlipAllChars:
       STA btl_responddelay      ; change respond delay to 15 (battle is over, so respond rate doesn't matter anymore)
       JSR RespondDelay          ; wait 15 frames
       
-      INC $88                   ; Inc counter and loop until all 4 characters flipped.
-      LDA $88
+      INC BattleTmpPointer2     ; Inc counter and loop until all 4 characters flipped.
+      LDA BattleTmpPointer2
       CMP #$04
       
       BNE @Loop
@@ -2891,15 +2900,15 @@ Battle_FlipCharSprite:
                             ;   2 tiles per row
   @Loop:
     LDY #<oam_x              ; swap X coordinates for the tiles
-    LDA ($8A), Y
+    LDA (BattleBoxString), Y
     PHA
     LDY #<oam_x+4
-    LDA ($8A), Y
+    LDA (BattleBoxString), Y
     LDY #<oam_x
-    STA ($8A), Y
+    STA (BattleBoxString), Y
     PLA
     LDY #<oam_x+4
-    STA ($8A), Y
+    STA (BattleBoxString), Y
     
     LDY #<oam_a              ; Then set the "flip-X" attribute bit for each tile
     JSR @FlipTile
@@ -2919,17 +2928,17 @@ Battle_FlipCharSprite:
                             ;   6 tiles per character)
   @AddToPtr:
     CLC                     ; Add A to the pointer at $8A
-    ADC $8A
-    STA $8A
+    ADC BattleBoxString
+    STA BattleBoxString
     LDA #$00                ; (adding carry to high byte is unnecessary, as OAM will never cross a page)
-    ADC $8B
-    STA $8B
+    ADC BattleBoxString+1
+    STA BattleBoxString+1
     RTS
     
   @FlipTile:
-    LDA ($8A), Y            ; get attribute byte
-    ORA #$40                ; set the 'flip-X' bit
-    STA ($8A), Y            ; write it back
+    LDA (BattleBoxString), Y ; get attribute byte
+    ORA #$40                 ; set the 'flip-X' bit
+    STA (BattleBoxString), Y ; write it back
     RTS
     
 
@@ -2996,9 +3005,9 @@ lut_EOBText:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ChaosDeath_FadeNoise:
-    DEC $9C             ; DEC noise setting
+    DEC ChaosNoise      ; DEC noise setting
     
-    LDA $9C
+    LDA ChaosNoise
     STA $400C           ; write it to noise volume control
     LDA #$FF
     STA $400D           ; (no effect)
@@ -3095,11 +3104,11 @@ ChaosDeath:
     STA $5015               ; JIGS - MMC5 audio
     
     ; a bunch of local vars
-            @rvalprev       = $82   ; "previous" random value
-            @rval           = $83   ; a random value
-            @ppuaddr        = $88   ; 2 bytes
-            @outerctr       = $9A
-            @innerctr       = $9B
+            @rvalprev       = EnemyRAMPointer   ; "previous" random value
+            @rval           = EnemyRAMPointer+1 ; a random value
+            @ppuaddr        = EnemyROMPointer   ; 2 bytes
+            @outerctr       = WeaponPointer
+            @innerctr       = WeaponPointer+1
             @tilerowtbl     = btl_msgbuffer ; a table of 256 entries which says which row to erase for each tile
                                             ;   note that the table is 256 entries but it only NEEDS to be 128.
                                             ;   The last 128 entries are not used.

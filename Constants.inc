@@ -13,7 +13,7 @@ BTN_START         = $10
 ;; JIGS - moving this up $10 bytes to fit 2 more channels of data in.
 ;; Further channel variables are stores in MMC5 exram... somehow
 
-CHAN_START        = $A0 ; originally $B0
+CHAN_START        = $B0
 CHAN_BYTES        = $10 
 
 CHAN_SQ1          = CHAN_START
@@ -22,8 +22,8 @@ CHAN_TRI          = CHAN_START + (2 * CHAN_BYTES)
 ;; JIGS - for the MMC5 square channels
 CHAN_SQ3          = CHAN_START + (3 * CHAN_BYTES)
 CHAN_SQ4          = CHAN_START + (4 * CHAN_BYTES)
-CHAN_STOP         = CHAN_START + (5 * CHAN_BYTES)
-EXTRA_CHAN_START  = ch_loop_marker + $A0
+CHAN_STOP         = $0 ; CHAN_START + (5 * CHAN_BYTES)
+EXTRA_CHAN_START  = $0300
 
 
 
@@ -76,6 +76,16 @@ CATEGORY_WERE        = $10
 CATEGORY_WATER       = $20
 CATEGORY_MAGE        = $40
 CATEGORY_REGEN       = $80
+
+;; and for single category listing:
+TYPE_UNKNOWN     = $01
+TYPE_DRAGON      = $02
+TYPE_GIANT       = $03
+TYPE_UNDEAD      = $04
+TYPE_WERE        = $05
+TYPE_WATER       = $06
+TYPE_MAGE        = $07
+TYPE_REGEN       = $08
 
 ;;;;;;;;;;;;;;;;;;
 ;;  enemy stats in ROM
@@ -219,7 +229,7 @@ BTLMSG_WEAPONSSTRONGER  = $0A ; Weapons stronger
 BTLMSG_LOSTINTELLIGENCE = $0B ; Lost intelligence
 BTLMSG_DEFENDFIRE       = $0C ; Defend fire
 BTLMSG_ATTACKHALTED     = $0D ; Attack halted
-BTLMSG_NEUTRALIZED      = $0E ; Neutralized
+BTLMSG_NEUTRALIZED      = $0E ; Poison neutralized
 BTLMSG_BECAMETERRIFIED  = $0F ; Became terrified
 BTLMSG_DEFENDCOLD       = $10 ; Defend cold
 BTLMSG_BREAKSILENCE     = $11 ; Break the silence
@@ -248,14 +258,14 @@ BTLMSG_WOKEUP           = $27 ; Woke up
 BTLMSG_SLEEPING         = $28 ; Sleeping
 BTLMSG_CURED            = $29 ; Cured!
 BTLMSG_PARALYZEDCURED   = $2A ; Paralysis wore off
-BTLMSG_HITS             = $2B ; Hits!___
+BTLMSG_HITS             = $2B ; _Hits!
 BTLMSG_CRITICALHIT      = $2C ; Critical hit!!
 BTLMSG_MAGICBLOCKED     = $2D ; Magic blocked
 BTLMSG_DMG              = $2E ; DMG
 BTLMSG_STOPPED          = $2F ; Stopped
 BTLMSG_LEVUP            = $30 ; Lev. up!
 BTLMSG_HPMAX_2          = $31 ; HP max
-BTLMSG_PTS              = $32 ; pts.
+BTLMSG_PTS              = $32 ; _pts.
 BTLMSG_STR              = $33 ; Str.
 BTLMSG_AGI              = $34 ; Agi.
 BTLMSG_INT              = $35 ; Int.
@@ -298,10 +308,12 @@ BTLMSG_STOLE            = $58 ; Stole_
 BTLMSG_SCROLL           = $59 ; _scroll
 BTLMSG_REGENERATING     = $5A ; Begins healing slowly
 BTLMSG_OUTOFITEM        = $5B ; Haven't got any more!
-BTLMSG_NOSKILL          = $5C ; Coming soon...?
+BTLMSG_CANNOTDEFEND     = $5C ; Cannot cover yourself!
 BTLMSG_CONFUSECURED     = $5D ; Came to their senses
 BTLMSG_GOLDFOUND        = $5E ; Gold found..
 BTLMSG_NOTHING          = $5F ; Nothing
+BTLMSG_SCANNING         = $60 ; Scanning...
+BTLMSG_ATTACKBLOCKED    = $61 ; _covered the attack!
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
@@ -357,11 +369,13 @@ AIL_CONF            = $80
 
 ;;;;;;;;;;;;;;;;;;
 ;;  battle states ; good ailments!
-STATE_HIDDEN       = $10
-STATE_REGENLOW     = $20
-STATE_REGENMIDDLE  = $40
-STATE_REGENHIGH    = $60
-STATE_GUARDING     = $80 
+STATE_REGENLOW     = $10
+STATE_REGENMIDDLE  = $20
+STATE_REGENHIGH    = $40
+STATE_REGENALL     = $70 ; all the above
+STATE_REFLECT      = $80 
+STATE_REGENERATING = $07
+;; low 3 bits are used for how many turns left to regenerate
 
 ;;;;;;;;;;;;;;;;;;
 ;;  map object IDs

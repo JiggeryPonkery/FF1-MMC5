@@ -16,6 +16,7 @@
 .export DrawManaString_ForBattle
 .export BattleBGColorDigits
 .export TalkToTile_BankE
+.export ConvertBattleNumber
 
 .import AddGPToParty
 .import CallMusicPlay
@@ -271,7 +272,7 @@ ShopHowMany_Sell:
 
 lut_ShopData:
 .word UnusedShop        ; 00 
-.word ConeriaWeapon    ; 01 
+.word ConeriaWeapon     ; 01 
 .word ProvokaWeapon     ; 02 
 .word ElflandWeapon     ; 03 
 .word MelmondWeapon     ; 04 
@@ -281,7 +282,7 @@ lut_ShopData:
 .word UnusedShop        ; 08 
 .word UnusedShop        ; 09 
 .word UnusedShop        ; 0A 
-.word ConeriaArmor     ; 0B 
+.word ConeriaArmor      ; 0B 
 .word ProvokaArmor      ; 0C 
 .word ElflandArmor      ; 0D 
 .word MelmondArmor      ; 0E 
@@ -291,7 +292,7 @@ lut_ShopData:
 .word UnusedShop        ; 12
 .word UnusedShop        ; 13
 .word UnusedShop        ; 14
-.word ConeriaWMagic    ; 15
+.word ConeriaWMagic     ; 15
 .word ProvokaWMagic     ; 16
 .word ElflandWMagic     ; 17
 .word MelmondWMagic     ; 18
@@ -301,7 +302,7 @@ lut_ShopData:
 .word GaiaWMagic2       ; 1C
 .word OnracWMagic       ; 1D
 .word LeifenWMagic      ; 1E
-.word ConeriaBMagic    ; 1F
+.word ConeriaBMagic     ; 1F
 .word ProvokaBMagic     ; 20
 .word ElflandBMagic     ; 21
 .word MelmondBMagic     ; 22
@@ -311,7 +312,7 @@ lut_ShopData:
 .word GaiaBMagic2       ; 26
 .word OnracBMagic       ; 27
 .word LeifenBMagic      ; 28
-.word ConeriaTemple    ; 29
+.word ConeriaTemple     ; 29
 .word ElflandTemple     ; 2A
 .word LakeTemple        ; 2B
 .word GaiaTemple        ; 2C
@@ -321,7 +322,7 @@ lut_ShopData:
 .word UnusedShop        ; 30
 .word UnusedShop        ; 31
 .word UnusedShop        ; 32
-.word ConeriaInn       ; 33
+.word ConeriaInn        ; 33
 .word ProvokaInn        ; 34
 .word ElflandInn        ; 35
 .word MelmondInn        ; 36
@@ -331,7 +332,7 @@ lut_ShopData:
 .word UnusedShop        ; 3A
 .word UnusedShop        ; 3B
 .word UnusedShop        ; 3C
-.word ConeriaItem      ; 3D
+.word ConeriaItem       ; 3D
 .word ProvokaItem       ; 3E
 .word ElflandItem       ; 3F
 .word LakeItem          ; 40
@@ -676,9 +677,9 @@ M_MagicList:
 M_CharLevelStats: 
 .byte $10,$00,$01                                     ; NAME
 .byte $10,$01,$01                                     ; Class
-.byte $95,$A8,$32,$AF,$09,$05,$10,$03,$01 ; Level ##
+.byte $95,$A8,$32,$AF,$09,$05,$10,$03,$01             ; Level ##
 .byte $8E,$BB,$B3,$C0,$FF,$FF,$10,$04,$01             ; Exp.  ## 
-.byte $97,$A8,$BB,$B7,$09,$03,$10,$42,$00         ; Next  ##
+.byte $97,$A8,$BB,$B7,$09,$03,$10,$42,$00             ; Next  ##
 
 M_CharMainStats: 
 .byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$01         ; Strength 
@@ -1167,6 +1168,18 @@ PrintGold:
 ;;       text_ptr   = pointer to start of buffer
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ConvertBattleNumber:
+    LDA MMC5_tmp
+    STA tmp
+    LDA MMC5_tmp+1
+    STA tmp+1
+    LDA MMC5_tmp+2
+    LSR A
+    BCS PrintNumber_2Digit
+    LSR A
+    BCS PrintNumber_3Digit
+    JMP PrintNumber_4Digit
 
 BattleBGColorDigits:
     LDA BattleBGColor
@@ -3847,7 +3860,7 @@ ShopSelectItem:
     STA shop_cursorchange  
     JMP CommonShopLoop_List  ; everything's ready!  Just run the common loop from here, then return
 
-FillBlankItem:         
+Fillblank_item:         
     LDA cursor_max      ; if cursor_max didn't increase yet, this is the first item...
     BNE :+              ; if this is the first item, there are no items! 
        LDA item_box_offset
@@ -3879,7 +3892,7 @@ FillBlankItem:
     STA str_buf+$46, Y  
     LDA #$01            
     STA str_buf+$49, Y     
-    INC BlankItem
+    INC blank_item
     
     TYA
     CLC
@@ -3895,7 +3908,7 @@ FillBlankItem:
 UpdateShopList:
     LDY #0            ; zero Y... this will be our string building index
     STY cursor_max    ; up counter
-    STY BlankItem
+    STY blank_item
     
 UpdateShopList_Loop:
     LDA item_box_offset ; 0 always, except when selling items, then it moves to scroll the list!
@@ -3906,7 +3919,7 @@ UpdateShopList_Loop:
     LDA item_box, X      ; use it to get the next shop item
     BNE @ItemExists
     
-    JMP FillBlankItem
+    JMP Fillblank_item
     
    @ItemExists:
     STA str_buf+$42, Y   ; put item ID
@@ -3994,7 +4007,7 @@ UpdateShopList_Loop:
 
 UpdateShopList_Done:
     SEC
-    SBC BlankItem
+    SBC blank_item
     STA cursor_max
    
     DEY
@@ -4891,7 +4904,7 @@ SaveGame:
   LDA music_track             ; check the music track
   CMP #$81                    ; if $81 (no music currently playing)...
   BEQ :+
-  LDA SaveGameMusic                  ; will be 0 if saving didn't happen
+  LDA SaveGameMusic           ; will be 0 if saving didn't happen
   CMP #$56                    ; if save music still playing
   BNE :++
 : LDA dlgmusic_backup         ; pre-emptively end the save music
@@ -7021,6 +7034,7 @@ UseItem_Tent:
     DEC item_tent           ; otherwise... remove 1 tent from the inventory
     LDA #30
     JSR MenuRecoverPartyHP  ; give 30 HP to the whole party
+    JSR PlayHealSFX
     LDA #54 
     JSR MenuSaveConfirm     ; and bring up confirm save screen (with description text $1A)
   : JMP EnterItemMenu       ; then re-enter item menu (need to re-enter, because screen needs full redrawing)
@@ -7057,6 +7071,7 @@ UseItem_Cabin:
     DEC item_cabin          ; remove cabins from inventory instead of tents
     LDA #60                 ;  recover 60 HP instead of 30
     JSR MenuRecoverPartyHP
+    JSR PlayHealSFX
     LDA #54    
     JSR MenuSaveConfirm
   : JMP EnterItemMenu
@@ -7093,6 +7108,7 @@ UseItem_House:
     LDA #120
     JSR MenuRecoverPartyHP  ; give the whole party 120 HP
     JSR MenuRecoverPartyMP  ; JIGS - recover MP before saving
+    JSR PlayHealSFX
     
     LDA #55
     JSR MenuSaveConfirm     ; bring up the save confirmation screen.  (description text $1E)

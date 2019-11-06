@@ -393,9 +393,9 @@ data_EnemyStats:
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   ENROMSTAT_ITEM  
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   |    ENROMSTAT_BLANK
 ;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__|__ |__ |__  |__  ID Name   
-.byte $06,$00,$06,$00,$08,$00,$6A,$FF,$06,$04,$01,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$00,$01,$00 ;00 IMP	
-.byte $12,$00,$12,$00,$10,$00,$78,$FF,$09,$06,$01,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00,$08,$01,$01,$00 ;01 GrIMP	
-.byte $18,$00,$06,$00,$14,$00,$69,$FF,$24,$00,$01,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00,$07,$00,$00,$00 ;02 WOLF	
+.byte $06,$00,$06,$00,$08,$00,$6A,$FF,$06,$04,$01,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$01,$01,$00 ;00 IMP	
+.byte $12,$00,$12,$00,$10,$00,$78,$FF,$09,$06,$01,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00,$08,$02,$01,$00 ;01 GrIMP	
+.byte $18,$00,$06,$00,$14,$00,$69,$FF,$24,$00,$01,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00,$07,$01,$00,$00 ;02 WOLF	
 .byte $5D,$00,$16,$00,$48,$00,$6C,$FF,$36,$00,$01,$12,$0E,$01,$00,$00,$00,$2E,$00,$00,$00,$09,$02,$00,$00 ;03 GrWolf	
 .byte $87,$00,$43,$00,$44,$00,$78,$FF,$2A,$06,$01,$11,$0E,$01,$02,$04,$91,$2D,$00,$00,$04,$0C,$04,$00,$00 ;04 WrWolf 
 .byte $92,$01,$C8,$00,$5C,$00,$C8,$00,$36,$00,$01,$17,$19,$01,$00,$00,$00,$37,$10,$20,$20,$10,$0C,$00,$00 ;05 FrWOLF 
@@ -718,16 +718,15 @@ StealFromEnemyZ:
     PHA                             ; backup their "has item" byte
     LDA btl_attacker
     AND #03
-    JSR PrepCharStatPointers
+    TAX
+   ; JSR PrepCharStatPointers
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
     AND #AIL_DARK
     BEQ :+
         LDA #30
         STA MMC5_tmp+1
-  : LDY #ch_battlestate - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #STATE_HIDDEN
+  : LDA btl_charhidden, X
     BEQ :+
         LDA #15
         STA MMC5_tmp+2
@@ -4033,7 +4032,7 @@ CritCheck:
     LDA #0
     STA MMC5_tmp
     LDA battle_attackerisplayer
-    BEQ @CritReturn
+    BEQ @CritReturn                 ; don't do any of these if confusedly attacking another character
     
     LDA btl_attacker
     JSR PrepCharStatPointers
@@ -4077,7 +4076,7 @@ CritCheck:
     RTS                             ; cancel specialty
   : LDA #$10                        ; Stun ailment as used by STUN's effectivity in original game
     JMP @CritAddAilment
-                
+
    @CritConfuse:
     LDA btl_defender_elementresist
     AND #$08
@@ -4085,7 +4084,7 @@ CritCheck:
     RTS                             ; cancel specialty
   : LDA #$80                        ; Confuse ailment as used by CONF's effectivity in original game
     JMP @CritAddAilment
-         
+
    @CritSlow:
     LDA btl_defender
     LDY #en_numhitsmult  
@@ -4261,77 +4260,77 @@ HandPalette:
 
 
 SaveScreen:
-  LDA #0
-  STA cursor                      ; flush cursor, joypad, and prev joy directions
-  STA joy
-  STA joy_prevdir
-  STA $2001               ; turn off the PPU
-  STA menustall           ; disable menu stalling
-  STA SaveGameMusic           ; clear this variable, which will help reset music later
-  JSR ClearNT             ; clear the NT
-  LDA #1
-  STA $5113                ; swap battery-backed PRG RAM into $8000 page   
-  JSR SaveScreenHelper  
- 
- LDA #1
- STA box_x
- LDA #4
- STA box_y
- LDA #30
- STA box_wd
- LDA #8
- STA box_ht
- JSR DrawBox             ; Draw Save Slot Box 1
- LDA #12
- STA box_y
- JSR DrawBox             ; Draw Save Slot Box 2
- LDA #20
- STA box_y
- JSR DrawBox             ; Draw Save Slot Box 3
- LDA #8
- STA box_x
- LDA #1
- STA box_y
- LDA #16
- STA box_wd
- LDA #3
- STA box_ht
- JSR DrawBox             ; Draw Save/Load title box
-   
- LDA #07
- STA dest_y
- LDA #04
- STA dest_x
- LDA #02
- STA cursor_max          ; and Cursor max!
- LDA #$06
- JSR DrawCharMenuString ; Draw Save slot text: SAVE 1, SAVE 2, SAVE 3
- JSR DrawSaveScreenNames 
- LDA weasels
- BNE SaveGameStuff
+    LDA #0
+    STA cursor                      ; flush cursor, joypad, and prev joy directions
+    STA joy
+    STA joy_prevdir
+    STA $2001               ; turn off the PPU
+    STA menustall           ; disable menu stalling
+    STA SaveGameMusic           ; clear this variable, which will help reset music later
+    JSR ClearNT             ; clear the NT
+    LDA #1
+    STA $5113                ; swap battery-backed PRG RAM into $8000 page   
+    JSR SaveScreenHelper  
+    
+    LDA #1
+    STA box_x
+    LDA #4
+    STA box_y
+    LDA #30
+    STA box_wd
+    LDA #8
+    STA box_ht
+    JSR DrawBox             ; Draw Save Slot Box 1
+    LDA #12
+    STA box_y
+    JSR DrawBox             ; Draw Save Slot Box 2
+    LDA #20
+    STA box_y
+    JSR DrawBox             ; Draw Save Slot Box 3
+    LDA #8
+    STA box_x
+    LDA #1
+    STA box_y
+    LDA #16
+    STA box_wd
+    LDA #3
+    STA box_ht
+    JSR DrawBox             ; Draw Save/Load title box
+    
+    LDA #07
+    STA dest_y
+    LDA #04
+    STA dest_x
+    LDA #02
+    STA cursor_max          ; and Cursor max!
+    LDA #$06
+    JSR DrawCharMenuString ; Draw Save slot text: SAVE 1, SAVE 2, SAVE 3
+    JSR DrawSaveScreenNames 
+    LDA weasels
+    BNE SaveGameStuff
   
- LoadGameStuff:
- JSR SaveScreenTitleTextPosition
- LDA #$07
- JSR DrawCharMenuString
- JSR TurnMenuScreenOn_ClearOAM 
- JMP SaveScreenLoop
-
- SaveGameStuff: 
- JSR SaveScreenTitleTextPosition
- LDA #$08
- JSR DrawCharMenuString
- JSR TurnMenuScreenOn_ClearOAM 
- JSR SaveScreenLoop
- LDA #0
- STA weasels
- RTS
+LoadGameStuff:
+    JSR SaveScreenTitleTextPosition
+    LDA #$07
+    JSR DrawCharMenuString
+    JSR TurnMenuScreenOn_ClearOAM 
+    JMP SaveScreenLoop
+    
+SaveGameStuff: 
+    JSR SaveScreenTitleTextPosition
+    LDA #$08
+    JSR DrawCharMenuString
+    JSR TurnMenuScreenOn_ClearOAM 
+    JSR SaveScreenLoop
+    LDA #0
+    STA weasels
+    RTS
   
- SaveScreenLoop:
- JSR ClearOAM
- JSR DrawSaveScreenCursor
- JSR DrawSaveScreenSprites
- JSR SaveScreenFrame
+SaveScreenLoop:
+    JSR ClearOAM
+    JSR DrawSaveScreenCursor
+    JSR DrawSaveScreenSprites
+    JSR SaveScreenFrame
     LDA joy_b
     BNE @B_Pressed       ; check to see if A or B have been pressed
     LDA joy_a
@@ -4366,17 +4365,17 @@ SaveScreen:
     BNE @MoveDone        ; if it hasn't gone below 0, that's all -- continue loop
     LDA cursor_max       ; otherwise (below 0), wrap to max
     
-  @MoveDone:             ; code reaches here when A is to be the new amount to buy
+   @MoveDone:             ; code reaches here when A is to be the new amount to buy
     STA cursor
     JMP SaveScreenLoop   ; and continue loop
 
-  @B_Pressed:            ; if B pressed....
+   @B_Pressed:            ; if B pressed....
     LDA #0
     STA $5113            ; swap battery-backed PRG RAM into $6000 page   
     SEC                  ; set C to tell the title screen we didn't load a game
     RTS                  ; 
  
-  @A_Pressed:            ; if A pressed...
+   @A_Pressed:            ; if A pressed...
     LDA cursor
     CMP #02
     BEQ @ThirdSaveSlot
@@ -4384,53 +4383,53 @@ SaveScreen:
     BEQ @SecondSaveSlot
     LDA weasels
     BEQ :+    
-      JSR SaveFirstSlot
-      JMP GameSaved
-    : JMP LoadFirstSlot    
+    JSR SaveFirstSlot
+    JMP GameSaved
+  : JMP LoadFirstSlot    
     
-    @ThirdSaveSlot:
+   @ThirdSaveSlot:
     LDA weasels
     BEQ :+    
-      JSR SaveThirdSlot
-      JMP GameSaved
-    : JMP LoadThirdSlot    
+    JSR SaveThirdSlot
+    JMP GameSaved
+  : JMP LoadThirdSlot    
     
-    @SecondSaveSlot:
+   @SecondSaveSlot:
     LDA weasels
     BEQ :+    
-      JSR SaveSecondSlot
-      JMP GameSaved
-    : JMP LoadSecondSlot        
+    JSR SaveSecondSlot
+    JMP GameSaved
+  : JMP LoadSecondSlot        
     
-    @Select_Pressed:
-     LDA #02
-     STA dest_y
-     LDA #04 ; 10
-     STA dest_x
-     LDA #01
-     STA menustall
-     LDA #10
-     JSR DrawCharMenuString
-     JSR ConfirmDelete
-     BCS JumpSaveScreen ; if B pressed, redraw screen
-    
+   @Select_Pressed:
+    LDA #02
+    STA dest_y
+    LDA #04 ; 10
+    STA dest_x
+    LDA #01
+    STA menustall
+    LDA #10
+    JSR DrawCharMenuString
+    JSR ConfirmDelete
+    BCS JumpSaveScreen ; if B pressed, redraw screen
+
     LDA cursor
     CMP #02
     BEQ @DeleteThirdSaveSlot
     CMP #01
     BEQ @DeleteSecondSaveSlot
-      JMP DeleteFirstSave
+    JMP DeleteFirstSave
     
-    @DeleteThirdSaveSlot:
-      JMP DeleteThirdSave
+   @DeleteThirdSaveSlot:
+    JMP DeleteThirdSave
     
-    @DeleteSecondSaveSlot:
-      JMP DeleteSecondSave
+   @DeleteSecondSaveSlot:
+    JMP DeleteSecondSave
     
-    JumpSaveScreen:
+JumpSaveScreen:
     JMP SaveScreen
     
-    ConfirmDelete:
+ConfirmDelete:
     JSR SaveScreenFrame
     LDA joy_a
     BNE @DoDelete
@@ -4439,32 +4438,32 @@ SaveScreen:
     SEC
     RTS
     
-    @DoDelete:
+   @DoDelete:
     CLC
     RTS
     
     
-  GameSaved:
-  LDA #$56
-  STA music_track      
-  STA SaveGameMusic
-  LDY cursor
-  LDA SavedTextYLUT, Y
-  STA dest_y
-  LDA #04
-  STA dest_x
-  LDA #01
-  STA menustall
-  LDA #09
-  JSR DrawCharMenuString
-  JSR DrawSaveScreenNames
-  JMP SaveScreenLoop
+GameSaved:
+    LDA #$56
+    STA music_track      
+    STA SaveGameMusic
+    LDY cursor
+    LDA SavedTextYLUT, Y
+    STA dest_y
+    LDA #04
+    STA dest_x
+    LDA #01
+    STA menustall
+    LDA #09
+    JSR DrawCharMenuString
+    JSR DrawSaveScreenNames
+    JMP SaveScreenLoop
   
-  SavedTextYLUT:
+SavedTextYLUT:
   .byte $09,$11,$19
     
     
-  SaveOverworldInfo:
+SaveOverworldInfo:
     LDX #0            ; zero X for upcoming loop
     LDA ow_scroll_x           ; copy over OW information
     STA unsram_ow_scroll_x
@@ -4474,7 +4473,7 @@ SaveScreen:
     STA unsram_vehicle  
     RTS    
     
-  SaveFirstSlot:
+SaveFirstSlot:
     JSR SaveOverworldInfo
 
   @CopyLoop:
@@ -4511,7 +4510,7 @@ SaveScreen:
     RTS
 
     
-  SaveSecondSlot:
+SaveSecondSlot:
     JSR SaveOverworldInfo
 
   @CopyLoop:
@@ -4639,10 +4638,10 @@ SaveScreen:
     STA MenuHush
     JMP GameLoaded
     
-    UhOhNewGame:
+UhOhNewGame:
     JMP StartNewGame
     
-    LoadThirdSlot:
+LoadThirdSlot:
     LDA sram3_assert_55              ; check sram assertion values to make sure
     CMP #$55                        ;  sram is not corrupt.  If they are not what are expected...
     BNE UhOhNewGame                    ;  then do a new game.
@@ -4669,9 +4668,7 @@ SaveScreen:
     STA MenuHush
     JMP GameLoaded
     
-    
-    
-    DeleteFirstSave:
+DeleteFirstSave:
     LDA #0
     TAX
     : STA sram, X
@@ -4682,7 +4679,7 @@ SaveScreen:
       BNE :-
       JMP GameDeleted
       
-    DeleteSecondSave:
+DeleteSecondSave:
     LDA #0
     TAX
     : STA sram2, X
@@ -4693,7 +4690,7 @@ SaveScreen:
       BNE :-
       JMP GameDeleted  
       
-    DeleteThirdSave:
+DeleteThirdSave:
     LDA #0
     TAX
     : STA sram3, X
@@ -4703,29 +4700,29 @@ SaveScreen:
       INX
       BNE :-
         
-  GameDeleted:
-  ;LDA #02
-  ;STA dest_y
-  LDA #10
-  STA dest_x
-  LDA #01
-  STA menustall
-  LDA #11
-  JSR DrawCharMenuString
-  JSR DrawSaveScreenNames
-  JSR PlaySFX_Error
-  JSR WaitForButton
-  JMP SaveScreen
+GameDeleted:
+    ;LDA #02
+    ;STA dest_y
+    LDA #10
+    STA dest_x
+    LDA #01
+    STA menustall
+    LDA #11
+    JSR DrawCharMenuString
+    JSR DrawSaveScreenNames
+    JSR PlaySFX_Error
+    JSR WaitForButton
+    JMP SaveScreen
     
-  WaitForButton:
-  JSR SaveScreenFrame
-  LDA joy_a
-  ORA joy_b
-  BEQ WaitForButton
-  RTS
+WaitForButton:
+    JSR SaveScreenFrame
+    LDA joy_a
+    ORA joy_b
+    BEQ WaitForButton
+    RTS
     
     
-    SaveScreenFrame:
+SaveScreenFrame:
     LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
     BEQ :+                    ; otherwise, in Inn or Loading screen
     JSR HushTriangle
@@ -4755,114 +4752,108 @@ SaveScreen:
     
     
     
- DrawSaveScreenCursor:
-  LDX cursor            
-  LDA @lut, X           
-  STA spr_y             
-  LDA #$10
-  STA spr_x             
-  JMP DrawCursor        
+DrawSaveScreenCursor:
+    LDX cursor            
+    LDA @lut, X           
+    STA spr_y             
+    LDA #$10
+    STA spr_x             
+    JMP DrawCursor        
 
   @lut:
-    .BYTE $38,$78,$B8
+  .BYTE $38,$78,$B8
 
   
- SaveScreenTitleTextPosition:
- LDA #02
- STA dest_y
- LDA #11
- STA dest_x
- RTS
-      
-      
-      
-      
-      
-      
+SaveScreenTitleTextPosition:
+    LDA #02
+    STA dest_y
+    LDA #11
+    STA dest_x
+    RTS
+
  
 DrawSaveScreenNames:
-LDX #0
-STX MMC5_tmp
-LDA MMC5_tmp
-
-@LoopStart:
-JSR SaveScreenCharPointer
-LDY #2 ; 0 is class, 1 is ailments, 2 is start of name 
-
-@Loop:
-LDA (CharacterStatPointer), Y  ; get name byte
-CMP #0
-BNE :+
-LDA #$FF
-:  
-STA SaveScreenCharBuf, X  ; put in string buffer
-INY
-INX
-CPY #9 ; name is 7 letters
-BNE @Loop
-
-INX ; make a space for control codes and ... spaces!
-INX 
-INX ; inc X until its 10, 10 bytes per character = 120 bytes
-INC MMC5_tmp
-LDA MMC5_tmp  ; 12 characters yet?
-CMP #12
-BNE @LoopStart
+    LDX #0
+    STX MMC5_tmp
+    LDA MMC5_tmp
+    
+   @LoopStart:
+    JSR SaveScreenCharPointer
+    LDY #2 ; 0 is class, 1 is ailments, 2 is start of name 
+    
+   @Loop:
+    LDA (CharStatsPointer), Y  ; get name byte
+    CMP #0
+    BNE :+
+    LDA #$FF
+  : STA SaveScreenCharBuf, X  ; put in string buffer
+    INY
+    INX
+    CPY #9 ; name is 7 letters
+    BNE @Loop
+    
+    INX ; make a space for control codes and ... spaces!
+    INX 
+    INX ; inc X until its 10, 10 bytes per character = 120 bytes
+    INC MMC5_tmp
+    LDA MMC5_tmp  ; 12 characters yet?
+    CMP #12
+    BNE @LoopStart
 
 ;; JIGS - I DON'T CARE, IT WORKS. >:(
 
-LDA #$FF ; spaces to put between names on the same line, or just to fill blank space
-         ; because every character has 10 letters in this
-STA SaveScreenCharBuf+7   ; character 1 
-STA SaveScreenCharBuf+8
-STA SaveScreenCharBuf+9
-STA SaveScreenCharBuf+27  ; character 3
-STA SaveScreenCharBuf+28
-STA SaveScreenCharBuf+29
-STA SaveScreenCharBuf+47 ; character 5
-STA SaveScreenCharBuf+48
-STA SaveScreenCharBuf+49
-STA SaveScreenCharBuf+67 ; character 7
-STA SaveScreenCharBuf+68
-STA SaveScreenCharBuf+69
-STA SaveScreenCharBuf+87 ; character 9
-STA SaveScreenCharBuf+88
-STA SaveScreenCharBuf+89
-STA SaveScreenCharBuf+107 ; character 11
-STA SaveScreenCharBuf+108
-STA SaveScreenCharBuf+109
-
-LDA #01 ; two lines breaks
-STA SaveScreenCharBuf+37 ; character 4
-STA SaveScreenCharBuf+38 
-STA SaveScreenCharBuf+77 ; character 8
-STA SaveScreenCharBuf+78 
-
-LDA #05 ; one line break
-STA SaveScreenCharBuf+17 ; character 2 
-STA SaveScreenCharBuf+18 ; character 2 
-STA SaveScreenCharBuf+19 ; character 2 
-STA SaveScreenCharBuf+39 ; character 4
-STA SaveScreenCharBuf+57 ; character 6 
-STA SaveScreenCharBuf+58 ; character 6 
-STA SaveScreenCharBuf+59 ; character 6
-STA SaveScreenCharBuf+79 ; character 8
-STA SaveScreenCharBuf+97 ; character 10 
-STA SaveScreenCharBuf+98 ; character 10 
-STA SaveScreenCharBuf+99 ; character 10 
-
-LDA #0 ; end 
-STA SaveScreenCharBuf+117 ; character 12
-
-LDA #13
-STA dest_x
-LDA #06
-STA dest_y
-LDA #<SaveScreenCharBuf
-STA text_ptr
-LDA #>SaveScreenCharBuf
-STA text_ptr+1
-JMP DrawComplexString 
+    LDA #$FF ; spaces to put between names on the same line, or just to fill blank space
+    ; because every character has 10 letters in this
+    STA SaveScreenCharBuf+7   ; character 1 
+    STA SaveScreenCharBuf+8
+    STA SaveScreenCharBuf+9
+    STA SaveScreenCharBuf+27  ; character 3
+    STA SaveScreenCharBuf+28
+    STA SaveScreenCharBuf+29
+    STA SaveScreenCharBuf+47 ; character 5
+    STA SaveScreenCharBuf+48
+    STA SaveScreenCharBuf+49
+    STA SaveScreenCharBuf+67 ; character 7
+    STA SaveScreenCharBuf+68
+    STA SaveScreenCharBuf+69
+    STA SaveScreenCharBuf+87 ; character 9
+    STA SaveScreenCharBuf+88
+    STA SaveScreenCharBuf+89
+    STA SaveScreenCharBuf+107 ; character 11
+    STA SaveScreenCharBuf+108
+    STA SaveScreenCharBuf+109
+    
+    LDA #01 ; two lines breaks
+    STA SaveScreenCharBuf+37 ; character 4
+    STA SaveScreenCharBuf+38 
+    STA SaveScreenCharBuf+77 ; character 8
+    STA SaveScreenCharBuf+78 
+    
+    LDA #05 ; one line break
+    STA SaveScreenCharBuf+17 ; character 2 
+    STA SaveScreenCharBuf+18 ; character 2 
+    STA SaveScreenCharBuf+19 ; character 2 
+    STA SaveScreenCharBuf+39 ; character 4
+    STA SaveScreenCharBuf+57 ; character 6 
+    STA SaveScreenCharBuf+58 ; character 6 
+    STA SaveScreenCharBuf+59 ; character 6
+    STA SaveScreenCharBuf+79 ; character 8
+    STA SaveScreenCharBuf+97 ; character 10 
+    STA SaveScreenCharBuf+98 ; character 10 
+    STA SaveScreenCharBuf+99 ; character 10 
+    
+    LDA #0 ; end 
+    STA SaveScreenCharBuf+117 ; character 12
+    
+    LDA #13
+    STA dest_x
+    LDA #06
+    STA dest_y
+    LDA #<SaveScreenCharBuf
+    STA text_ptr
+    LDA #>SaveScreenCharBuf
+    STA text_ptr+1
+    JMP DrawComplexString 
 
 
 SaveScreenChar_LUT:
@@ -4883,54 +4874,54 @@ SaveScreenCharPointer:
     ASL A
     TAY
     LDA SaveScreenChar_LUT, Y         
-    STA CharacterStatPointer
+    STA CharStatsPointer
     LDA SaveScreenChar_LUT+1, Y
-    STA CharacterStatPointer+1
+    STA CharStatsPointer+1
     RTS     
     
 DrawSaveScreenSprites:
-LDA #0
-STA MMC5_tmp               ; loop counter
-
-LDA cursor
-LDX #8
-JSR MultiplyXA
-STA MMC5_tmp+1 ; slot 1 = 0, slot 2 = 8, slot 3 = 16
-LSR A
-STA MMC5_tmp+2 ; slot 1 = 0, slot 2 = 4, slot 3 = 8
+    LDA #0
+    STA MMC5_tmp               ; loop counter
+    LDA cursor
+    LDX #8
+    JSR MultiplyXA
+    STA MMC5_tmp+1 ; slot 1 = 0, slot 2 = 8, slot 3 = 16
+    LSR A
+    STA MMC5_tmp+2 ; slot 1 = 0, slot 2 = 4, slot 3 = 8
 
 @LoopStart:
-LDA MMC5_tmp+2
-JSR SaveScreenCharPointer
-LDY #2
-LDA (CharacterStatPointer), Y  ; get first letter of first character's name in this save slot
-BEQ @RTS                  ; if its 0, this save slot must be empty, so skip drawing sprites
-LDX MMC5_tmp+1
-LDA SaveScreenCharSprite_LUT, X ; MMC5_tmp+1 just gets the position to draw the sprite on the screen.
-STA spr_x
-INX
-LDA SaveScreenCharSprite_LUT, X
-STA spr_y
-INX
-STX MMC5_tmp+1
-
-LDY #0
-LDA (CharacterStatPointer), Y  ; get sprite from different save slots
-AND #$F0                  ; knock off class bits
-JSR ShiftSpriteHightoLow
-TAY                       
-LDA lutClassBatSprPalette, Y ; get sprite palette
-STA tmp+1
-LDA lutClassBatSpriteID, Y ; get tile ID in CHR
-STA tmp
-JSR DrawSimple2x3Sprite
-INC MMC5_tmp               ; loop counter
-INC MMC5_tmp+2             ; thing that gets the right character
-LDA MMC5_tmp
-CMP #4                     ; only draw 4 sprites
-BNE @LoopStart
-@RTS:
-RTS
+    LDA MMC5_tmp+2
+    JSR SaveScreenCharPointer
+    LDY #2
+    LDA (CharStatsPointer), Y  ; get first letter of first character's name in this save slot
+    BEQ @RTS                  ; if its 0, this save slot must be empty, so skip drawing sprites
+    LDX MMC5_tmp+1
+    LDA SaveScreenCharSprite_LUT, X ; MMC5_tmp+1 just gets the position to draw the sprite on the screen.
+    STA spr_x
+    INX
+    LDA SaveScreenCharSprite_LUT, X
+    STA spr_y
+    INX
+    STX MMC5_tmp+1
+    
+    LDY #0
+    LDA (CharStatsPointer), Y  ; get sprite from different save slots
+    AND #$F0                  ; knock off class bits
+    JSR ShiftSpriteHightoLow
+    TAY                       
+    LDA lutClassBatSprPalette, Y ; get sprite palette
+    STA tmp+1
+    LDA lutClassBatSpriteID, Y ; get tile ID in CHR
+    STA tmp
+    JSR DrawSimple2x3Sprite
+    INC MMC5_tmp               ; loop counter
+    INC MMC5_tmp+2             ; thing that gets the right character
+    LDA MMC5_tmp
+    CMP #4                     ; only draw 4 sprites
+    BNE @LoopStart
+    
+   @RTS:
+    RTS
 
 
 lutClassBatSpriteID:
@@ -5052,18 +5043,18 @@ LoadEnemyStats:
     BNE @ClearLoop
     
     LDA #$09
-    STA btl_loadenemystats_counter              ; loop down-counter
+    STA btl_loadenstats_count              ; loop down-counter
     LDA #$00
-    STA btl_loadenemystats_index               ; loop up-counter / enemy index
+    STA btl_loadenstats_index               ; loop up-counter / enemy index
     
     LDA #0
     STA tmp
     STA tmp+1
    @EnemyLoop:
-    LDA btl_loadenemystats_index               ; Put a pointer to the current enemy's stat RAM
+    LDA btl_loadenstats_index               ; Put a pointer to the current enemy's stat RAM
     JSR GetEnemyRAMPtr                         ;    in btltmp+A
     
-    LDX btl_loadenemystats_index              ; Check to see if this enemy even exists
+    LDX btl_loadenstats_index              ; Check to see if this enemy even exists
     JSR DoesEnemyXExist
     BNE :+
       
@@ -5104,7 +5095,7 @@ LoadEnemyStats:
     STA btl_enemystats, X
     INX
     INY
-    CPY #25               ; copy the next 23 bytes of ROM data into RAM.
+    CPY #25               ; copy the next 21 bytes of ROM data into RAM.
     BNE @Loop
     
     TXA
@@ -5141,7 +5132,7 @@ LoadEnemyStats:
     DEY
     STA (EnemyRAMPointer), Y ; save as current HP low byte
     
-    LDX btl_loadenemystats_index   ; get the enemy ID
+    LDX btl_loadenstats_index   ; get the enemy ID
     LDA btl_enemyIDs, X
     LDY #en_enemyid
     STA (EnemyRAMPointer), Y    
@@ -5174,8 +5165,8 @@ LoadEnemyStats:
     STA (EnemyROMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
 
   @NextEnemy:
-    INC btl_loadenemystats_index           ; inc up-counter to look at next enemy
-    DEC btl_loadenemystats_counter           ; dec down-counter
+    INC btl_loadenstats_index           ; inc up-counter to look at next enemy
+    DEC btl_loadenstats_count           ; dec down-counter
     BEQ :+
       JMP @EnemyLoop    ; loop until all 9 enemies processed
       
@@ -5208,8 +5199,7 @@ PlayerAttackEnemy_PhysicalZ:
     LDA BattleCharID
     ORA #$80
     STA btl_attacker
-    
-    AND #$03
+
     JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
@@ -5244,10 +5234,11 @@ PlayerAttackEnemy_PhysicalZ:
     AND #$F0                        ;; JIGS cut off low bits to get sprite
     JSR ShiftSpriteHightoLow
     STA btl_attacker_sprite
-    
-    LDY #ch_battlestate - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #$10                        ;; get hidden state
+
+    LDA btl_attacker
+    AND #$03
+    TAX
+    LDA btl_charhidden, X          ;; get hidden state
     STA btl_attacker_hidden
     
     LDY #ch_damage - ch_stats
@@ -5364,9 +5355,10 @@ PlayerAttackPlayer_PhysicalZ:
     JSR ShiftSpriteHightoLow
     STA btl_attacker_sprite
     
-    LDY #ch_battlestate - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #$10                        ;; get hidden state
+    LDA btl_attacker
+    AND #$03
+    TAX
+    LDA btl_charhidden, X          ;; get hidden state
     STA btl_attacker_hidden
     
     LDY #ch_damage - ch_stats
@@ -5435,29 +5427,62 @@ PlayerAttackPlayer_PhysicalZ:
     AND #AIL_DEAD | AIL_STONE
     BNE @Loop
     
+    LDA btl_defender_index       ; record the defender index
+    TAX
+    ORA #$80
+    STA btl_defender
+    
+    JSR CoverStuff
     JMP PlayerDefenderStats    
     
     
+CoverStuff:
+    LDA btl_charcover, X
+    BEQ @NoCover
     
+    LDA btl_charcover+4, X         ; get the knight doing the covering
+    JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_DEAD | AIL_STONE | AIL_SLEEP
+    BNE @NoCover                   ; the knight is immobile and can't help!
+    LDA (CharStatsPointer), Y
+    AND #AIL_STUN
+    BEQ @Cover
+        JSR BattleRNG_L
+        AND #01
+        BEQ @NoCover               ; the knight is stunned, 50/50 chance to perform action
     
+   @Cover: 
+    INC attackblocked              ; set to 1 
+    LDA btl_defender_index         ; get the original target
+    ORA #$80                       ; convert to ID
+    STA btl_defender               
+    ;; important to note: this is used by the DefenderBox drawing thing, but not really used for players otherwise!
+    ;; everything else uses btl_defender_index... so btl_defender is now the ORIGINAL target
+    LDA btl_charcover+4, X         ; get the knight doing the covering
+    STA btl_defender_index         ; and set as the new defender    
+
+   @NoCover:   
+    LDA btl_defender_index
+    RTS
+
     
 ;;  input:
 ;;    A = defending player index
 ;;    X = attacking enemy slot index    
   
  EnemyAttackPlayer_PhysicalZ:
-   ; STX btl_attacker
     LDA btl_randomplayer
-    
-    ;LDX btl_attacker
     
     AND #$03
     STA btl_defender_index       ; record the defender index
-                                    ; btl_defender is set later
+    TAX
+    ORA #$80
+    STA btl_defender
+   
+    JSR CoverStuff
     JSR PrepCharStatPointers        ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
-    
-    ;STX battle_attacker_index       ; record attacker index
-        
     LDA btl_attacker
     JSR GetEnemyRAMPtr     
     
@@ -5527,13 +5552,12 @@ PlayerDefenderStats:
     LDA (CharStatsPointer), Y
     STA btl_defender_evasion
     
-    LDY #(ch_battlestate - ch_stats)
-    LDA (CharStatsPointer), Y     ; check battlestate for Hiding
-    AND #STATE_HIDDEN
+    LDX btl_defender_index
+    LDA btl_charhidden, X
     STA btl_defender_hidden
-    LDA (CharStatsPointer), Y     ; check battlestate for Guarding
-    AND #STATE_GUARDING           ; if not guarding, resume as normal
-    BEQ :++
+    
+    LDA btl_charguard, X          ; check battlestate for Guarding
+    BEQ :++                       ; if not guarding, resume as normal
 
     LDY #(ch_ailments - ch_stats) ; check if stunned
     LDA (CharStatsPointer), Y
@@ -5544,10 +5568,8 @@ PlayerDefenderStats:
     AND #01                       ; if stunned
     BEQ :+
     
-    LDY #(ch_battlestate - ch_stats)
-    LDA (CharStatsPointer), Y 
-    AND #~STATE_GUARDING
-    STA (CharStatsPointer), Y 
+    LDX btl_defender_index
+    DEC btl_charguard, X
     
   : LDY #(ch_level - ch_stats)
     LDA (CharStatsPointer), Y     ; guard defense is level * 2
@@ -5582,11 +5604,6 @@ PlayerDefenderStats:
     LDY #(ch_ailments - ch_stats)    
     LDA (CharStatsPointer), Y        
     STA btl_defender_ailments
-    
-    LDA btl_defender_index        
-    ORA #$80
-    STA btl_defender
-
     RTS
   
   

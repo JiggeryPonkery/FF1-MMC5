@@ -2,28 +2,6 @@
 ; All data that is saved to each game slot is in "work RAM" at $5C00
 ; Saving temporarily wipes RAM from $6000 to $7FFF so make sure nothing important is there that needs to be constant while on the save screen.
 
-; for sound channels (between Bx-Dx)
-;  see Constants.inc
-ch_scoreptr   = $0
-ch_envptr     = $2  ; ptr to start of env data
-ch_envpos     = $4  ; pos in env data (00-1F)
-ch_lenctr     = $5  ; counter for score data (note length)
-ch_frqtblptr  = $6  ; pointer to freq table (changes per octave)
-ch_lentblptr  = $8  ; pointer to length table (changes per tempo)
-ch_envrate    = $A  ; rate/speed of env table traversal
-ch_envrem     = $B  ; remaining "fraction" of env data (3 bits of fraction)
-ch_vol        = $C  ; output volume
-ch_loopctr    = $D  ; remaining loop counter
-ch_freq       = $E  ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
-;                   ; these are added in for the music system!
-ch_loop_marker   = $02D9 ; somehow this will end up at $0379, $0389, $0399, $03A9, and $03B9
-ch_return        = $02DA ; +B
-ch_duty          = $02DC ; so $0300 has $121 bytes before it interferes
-ch_octave        = $02DD ; and $0370, $0380, $0390, $03A0, $03B0 all have 9 bytes at the front free
-ch_quiet         = $02DE ; (though they're almost all used up already!)
-ch_extraquiet    = $02DF
-
-
 ;; JIGS - this is the new area for all save-game related things...
 
 unsram          = $5C00  ; $400 bytes
@@ -134,7 +112,7 @@ ch_name           = ch_stats + $02 ; 03, 04, 05, 06, 07, 08 - 7 bytes
 ch_exp            = ch_stats + $09 ; 0A, 0B - 3 bytes
 ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
 ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
-ch_battlestate    = ch_stats + $10 ; JIGS - for hiding and regeneration and guarding and all that
+ch_battlestate    = ch_stats + $10 ;
 ch_level          = ch_stats + $11 ; OB this is 0 based, IB this is 1 based
 ch_strength       = ch_stats + $12
 ch_agility        = ch_stats + $13
@@ -179,312 +157,391 @@ inv_magic         = unsram + $280 ; 64 bytes, 1 per spell
 game_flags        = unsram + $0300  ; must be on page bound
 
 
- 
-btlsfx_frontseat    = $00   ; where battle sfx data is stored in zero page
-btlsfx_backseat     = $6D97 ; where it is stored when not in zero page (it swaps between the two)
 
-btlsfx_framectr     = $00 ; 4   ; The total frame counter for the entire sound effect
-btlsfxsq2_len       = $01 ; 8
-btlsfxnse_len       = $02 ; 9
-btlsfxsq2_framectr  = $03 ; A
-btlsfxnse_framectr  = $04 ; B
-btlsfxsq2_ptr       = $05 ; + 6 C
-btlsfxnse_ptr       = $07 ; + 8 E
- 
-story_dropinput = $07
-inroom          = $0D ; bit 7 is the actual inroom flag.  $x2=entering room, $x1=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
-doorppuaddr     = $0E ; 2 bytes, PPU address of door drawing work
+;; Temporary RAM 
+tmp                     = $00 ; 16 bytes
 
-tmp             = $10 ; 16 bytes
+;; Controls & Movement  
+joy                     = $10
+joy_ignore              = $11
+joy_select              = $12
+joy_start               = $13
+joy_a                   = $14
+joy_b                   = $15
+joy_prevdir             = $16
+facing                  = $17 ; 1=R  2=L  4=D  8=U
+move_speed              = $18 ; pixels to move per frame (map)
+ow_slow                 = $19 ; halves movement speed when walking (1 pixel every 2 frames)
+move_ctr_x              = $1A ; pixels between tiles (map movement -- 00-0F)
+move_ctr_y              = $1B ; ditto but for Y axis (JIGS - can these be combined?)
+battlestep              = $1C
+vehicle_next            = $1D ; vehicle player is walking onto ; must be 1 when entering overworld from a map, if set to 8, will load characters onto airship and position airship where player is!
+vehicle                 = $1E ; 1 = walking, 2 = canoe, 4 = ship, 8 = airship ; set automaticly on OW, unused in SM
+vehchgpause             = $1F ; forced pause when changing vehicles ; all Vehicle things can be shared
 
-mu_scoreptr     = tmp+8  ;2 bytes, shared tmp
+;; Map Things           
+mapflags                = $20 ; bit 0 set when in standard map.  bit 1 set to indicate column drawing instead of row drawing
+ow_scroll_x             = $21 ; X scroll of OW in tiles
+ow_scroll_y             = $22 ; Y scroll in tiles
+sm_scroll_x             = $23 ; ditto, but for standard maps
+sm_scroll_y             = $24
+mapdraw_x               = $25
+mapdraw_y               = $26
+mapdraw_nty             = $27
+mapdraw_ntx             = $28
+scroll_y                = $29 ; Y scroll in tiles (16x16).  range=0-E
+mapspritehide           = $2A ; nonzero if in forest
+mapdraw_job             = $2B ; 0 = no job, 1 = draw attribs, 2 = draw tiles
+cur_map                 = $2C
+cur_tileset             = $2D
+cur_mapobj              = $2E ; counter for updating which map object
+battlestep_sign         = $2F ; controls whether or not battlestep goes up or down
 
-dlgbox_row      = tmp+$C  ; shared tmp
-palcyc_mode     = tmp+$C  ; shared tmp
+;; Standard Map Things  
+tileprop                = $30 ; 2 bytes
+tileprop_now            = $32 ; 2 bytes special tile properties that we're on (tileprop isn't necessarily what we're standing on)
+tileprop_last           = $34 ; 1 byte
 
-joy             = $20
-joy_ignore      = $21
-joy_select      = $22
-joy_start       = $23
-joy_a           = $24
-joy_b           = $25
+;; v shared v           
+wateraccess             = $35 ; for moving into water
+sm_player_x             = $36 ; player X/Y position on standard map.  Only used for NPC collision detection
+sm_player_y             = $37
+talkobj                 = $38 ; shared -- object you're talking to on SM
+dlg_itemid              = $39 ; shared
+DialogueTable_1or2      = $3A ; important for dialogue
+treasure_offset         = $3B ; stores the chest's item name printing code (weapons and armor use a different code)
+battlerate              = $3C ; X/256 chance of a random encounter occuring (SM only apparently)
+inroom                  = $3D ; bit 7 is the actual inroom flag.  $x2=entering room, $x1=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
+doorppuaddr             = $3E ; 2 bytes, PPU address of door drawing work
 
-sprindex        = $26
+;; Story Things - Shared ; Story stuff happens on overworld or end of the game
+story_page              = $35 
+story_timer             = $36 
+shutter_a               = $37 
+shutter_b               = $38 
+story_dropinput         = $39 
+story_credits           = $3A 
+theend_x                = $3B
+theend_y                = $3C
+theend_src              = $3D
 
-ow_scroll_x     = $27  ; X scroll of OW in tiles
-ow_scroll_y     = $28  ; Y scroll in tiles
+;; Minimap - Shared     
+mm_bplo                 = $35 
+mm_bphi                 = $36 
+mm_pixrow               = $37 
+mm_maprow               = $38 
+minimap_ptr             = $39 ; + A 
 
-sm_scroll_x     = $29  ; ditto, but for standard maps
-sm_scroll_y     = $2A
+;; Minigame - Shared    
+mg_slidespr             = $35 ; + 6, 7 
+mg_slidedir             = $38 
 
-mapdraw_x       = $2B
-mapdraw_y       = $2C
-mapflags        = $2D  ; bit 0 set when in standard map.  bit 1 set to indicate column drawing instead of row drawing
+;; Box Drawing Things   
+box_x                   = $40
+box_y                   = $41
+box_wd                  = $42 ; shared
+box_ht                  = $43 ; shared
+dest_wd                 = $42 ; for drawing image rectangles
+dest_ht                 = $43 
+dest_x                  = $44
+dest_y                  = $45
+spaceruns               = $46 ; see drawcomplexstring; amount of spaces to draw
+btldraw_max             = $46 ; maximum characters to draw
+image_ptr               = $47 ; + 8 - for images
+text_ptr                = $47 ; + 8 - for text
+format_buf              = $50 ; 7 bytes, goes in reverse (4A-50) -- must not cross page bound
+;; $50 must stay 0 to null-terminator the format_buf
 
-scroll_y        = $2F  ; Y scroll in tiles (16x16).  range=0-E
+;; Cursor               
+cursor                  = $51
+cursor_max              = $52
+cursor2                 = $52 ; shared (ether menu/ old equip menu secondary cursor)
+shopcurs_x              = $53 ; shared
+shopcurs_y              = $54 ; shared
+namecurs_x              = $53 ; for naming characters at game start
+namecurs_y              = $54 
+btlcurs                 = $51
+btlcurs_max             = $52 ; highest value for the cursor
+btlcurs_x               = $53 ; battle cursor X position (menu position, not pixel position)
+btlcurs_y               = $54 ; battle cursor Y position (menu position, not pixel position)
+cursor_change           = $55 ; magic menu 
+backup_cursor           = $56 ; shops, menus
+backup_cursor_targ      = $57 ; for item menus, to not reset the cursor when exiting a sub-menu
+shop_cursor_ptr         = $56 ; + 7 ; used in shops only
+submenu_targ            = $58 ; also used in battle for the ether menu
 
-mapdraw_nty     = $30
-mapdraw_ntx     = $31
-mapdraw_job     = $32  ; 0=no job, 1=draw attribs, 2=draw tiles
+;; Menu Things - Shared 
+equipoffset             = $59 ; menus
+hp_recovery             = $5A ; tmp byte for amount of HP to heal with potions and spells
+mp_required             = $5B ; offset for spell level to decrease when casting (menus only)
+descboxopen             = $5C ; marks the description box is open
+battleitemslot          = $5D ; equip menu, swaps between weapons/armour
+equipmenu_tmp           = $5E ; for unequip/reequipping
+weasels                 = $5F ; Important for saving/loading, and sound test menu
 
-mg_slidedir     = $33  ; shared
-facing          = $33  ; 1=R  2=L  4=D  8=U
-move_speed      = $34  ; pixels to move per frame (map)
-move_ctr_x      = $35  ; pixels between tiles (map movement -- 00-0F)
-move_ctr_y      = $36  ; ditto but for Y axis
+;; Shop Things - Shared 
+shop_id                 = $59
+shop_type               = $5A
+item_box_offset         = $5B 
+item_box_offset_old     = $5C 
+inv_canequipinshop      = $5D 
+blank_item              = $5E
 
-menustall       = $37       ; see MenuCondStall in bank F for explanation
+;; Battle Things        
+; submenu_targ - shared  ; $58
+btlformation            = $59 ; don't write over, is used to check for Chaos fight
+ow_tile                 = $5A ; only used for getting battle backdrop from overworld tile
+btl_drawflags_tmp1      = $5A ; tmp storage for drawing sleep/stone/dead character sprites
+btl_drawflags_tmp2      = $5B  
+btl_drawflags_tmp3      = $5C  
+btldraw_src             = $5A ; + B, source data
+btldraw_dst             = $5C ; + D, destination pointer
+btldraw_subsrc          = $5E ; + F, source pointer of substring
 
-ow_slow         = $38  ; shared, halves movement speed when walking (1 pixel every 2 frames)
+BattleCharID            = $60 ; Character ID (0, 1, 2, 3) for currently acting character
+EntityRegenID           = $60 ; Temp ID of character or enemy being poisoned/regenerated
+btl_loadenstats_index   = $60 ; Temp index of enemy whose stats are being loaded before battle
+btl_loadenstats_count   = $61 ; Temp counter for loading enemy stats before battle
+battle_class            = $61 ; Temp storage of clas for doing skills in battle
+ailment_backup          = $61 ; Temp storage of ailment while doing a character's turn
+EntityRegenCounter      = $61 ; Temp counter for poisoning/regenerating enemies between turns
+PlayMagicSound          = $62 ; ID of magic sound effect to play in battle
+Woosh                   = $63 ; counter for animating magic
+BattleTurn              = $64 ; Keeps track of battle turns and displays them above the character's names ; shared
+AutoTargetOptionBackup  = $65 ; for battling fast
 
-theend_x        = $38
-theend_y        = $39
-theend_src      = $62
-theend_drawbuf  = $6800     ; $700 bytes!
+btlsfx_framectr         = $66 ; The total frame counter for the entire sound effect
+btlsfxsq2_len           = $67 ; 
+btlsfxnse_len           = $68 ; 
+btlsfxsq2_framectr      = $69 ; 
+btlsfxnse_framectr      = $6A ; 
+btlsfxsq2_ptr           = $6B ; + C 
+btlsfxnse_ptr           = $6D ; + E 
+char_index              = $6F ; for printing character stats, mostly out of battle
 
-box_x           = $38
-box_y           = $39
-box_wd          = $3C ; shared
-box_ht          = $3D ; shared
+;; Battle Temp          
+btltmp                  = $70 ; 16 bytes
 
-dest_x          = $3A
-dest_y          = $3B
-dest_wd         = $3C
-dest_ht         = $3D
-
-
-image_ptr       = $3E ; shared
-text_ptr        = $3E ; 2 bytes
-
-spr_x           = $40
-spr_y           = $41
-
-mm_maprow       = $41 ; shared
-
-vehicle         = $42 ;1=walking, 2=canoe, 4=ship, 8=airship
-
-mapspritehide   = $43 ; nonzero if in forest
-
-tileprop        = $44 ; 2 bytes
-
-vehicle_next    = $46 ; vehicle we're walking onto
-
-vehchgpause     = $47 ; forced pause when changing vehicles
-cur_map         = $48
-cur_tileset     = $49
-
-cur_mapobj      = $4A ; counter for updating which map object
-
-music_track     = $4B
-mu_chanprimer   = $4C
-mu_chan         = $4D
-
-entering_shop   = $50 ; nonzero = about to enter shop
-shop_id         = $51
-
-tileprop_now    = $52 ; 2 bytes special tile properties that we're on (tileprop isn't necessarily what we're standing on)
-
-ow_tile         = $54
-
-ppu_dest        = $55  ; 2 bytes
-
-cur_bank        = $57
-ret_bank        = $58
-
-descboxopen     = $59
-noise_sfx       = $59  ; for opening chests
-
-format_buf      = $60  ; 7 bytes (5A-60) -- must not cross page bound
-
-shutter_a       = $61  ; shared
-shutter_b       = $62  ; shared
-
-mm_bplo         = $61  ; shared
-mm_bphi         = $62  ; shared
-
-intro_ataddr    = $62  ; shared
-intro_atbyte    = $63  ; shared
-intro_color     = $64  ; shared
-
-dlg_itemid      = $61  ; shared
-joy_prevdir     = $61
-cursor          = $62
-cursor_max      = $63
-cursor2         = $63  ; shared (secondary cursor)
-
-mg_slidespr     = $64  ; shared, 3 bytes
-
-namecurs_x      = $64
-shopcurs_x      = $64  ; shared
-hp_recovery     = $64
-mp_required     = $65
-namecurs_y      = $65
-shopcurs_y      = $65  ; shared
-story_credits   = $65  ; shared
-
-minimap_ptr     = $64  ; shared, 2 bytes
-
-submenu_targ    = $66  ; shared with shop_type
-shop_type       = $66
-story_page      = $66  ; shared
-
-story_timer     = $67  ; shared
-draweq_stradd   = $67  ; shared
-char_index      = $67
-mm_pixrow       = $67  ; shared
-talkobj         = $67  ; shared -- object you're talking to on SM
-
-sm_player_x     = $68  ; player X/Y position on standard map.  Only used for NPC collision detection
-sm_player_y     = $69
-
-btlformation    = $6A
-enCHRpage       = $6B
-
-altareffect     = $6C  ; flag to indicate altar effect is to occur (screen shaking, monochrome diagonal window thing)
-
-sq2_sfx         = $6D
-
-shop_cursor_ptr = $6E ; +$6F
-
-enemy_load      = $70 ; all $10 bytes, 4 per enemy
-
-PlayMagicSound      = $70 ; battle
-ailment_backup      = $71 ; battle
-cursor_change       = $71 ; magic menu 
-treasure_offset     = $72 ; maps
-EntityRegenID       = $72 ; battle
-item_box_offset     = $72 ; shops
-item_box_offset_old = $73 ; shops
-backup_cursor       = $73 ; shops, menus
-EntityRegenCounter  = $73 ; battle
-backup_cursor_targ  = $74 ; item menus
-inv_canequipinshop  = $74 ; shops
-battleitemslot      = $74 ; equip menu
-equipmenu_tmp       = $75 ; for unequip/reequipping
-DrawPlayerHPCounter = $76 ; counter for how many times player HP has been drawn in battle
-BattleCharID        = $77 ; for battle 
-DialogueTable_1or2  = $77 ; important for dialogue
-tileprop_last       = $78 ; for moving when shop_id isn't needed
-wateraccess         = $79 ; for moving into water
-dlgflg_reentermap   = $7F  ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
 
 ;;
-;; Pointers
+;; Pointers - these are all 2 bytes each unless otherwise specified
 ;;
-btl_drawflags_tmp1   = $80 ; tmp storage for drawing sleep/dead character sprites
-btl_drawflags_tmp2   = $81 ; immediately written over by CharStatsPointer
-btl_drawflags_tmp3   = $82 ; 
+;; IMPORTANT - several places in the code specifiy $88 and $89 instead of a named variable
+;; ...and I haven't been bothered to do anything about it. Some may also use $8A and $8B?
 
 ;; leveling up
-lvlup_curexp        = $80  ; 2 byte pointer to character's current EXP
-lvlup_exptoadv      = $82  ; 2 byte pointer to EXP needed to advance
-lvlup_chstats       = $86  ; 2 byte pointer to character's OB stats
-battlereward        = $88  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
-;                          ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
-;                          ;  will never receive more than 65535 XP/GP in any one battle.
-;; physical and magical attacks
-CharacterStatPointer   = $4E ; $4F ; far as I can tell these are unused by the game...?
-CharStatsPointer       = $80 ; another one!
-CharBackupStatsPointer = $82
-AilmentPrintingPointer = $82
-EnemyRAMPointer        = $84  ; 2 byte pointer to enemy's adjustable stats
-EnemyROMPointer        = $86  ; 2 byte pointer to enemy's hard stats
-BattleMenuPointer      = $88  
-WeaponPointer          = $88  ; 2 byte pointer to weapon data
-MagicPointer           = $8A  ; MagicPointer
-EnemyAIPointer         = $8A
-BattleBoxString        = $8A
+LevelUp_Pointer         = $80
+lvlup_curexp            = $82  ; 2 byte pointer to character's current EXP
+lvlup_exptoadv          = $84  ; 2 byte pointer to EXP needed to advance
+lvlup_chstats           = $86  ; 2 byte pointer to character's OB stats
+battlereward            = $8C  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
+;                              ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
+;                              ;  will never receive more than 65535 XP/GP in any one battle.
 
-;btl_entityptr_ibram     = $90
-;btl_entityptr_obrom     = $92
+CharStatsPointer        = $80 
+CharBackupStatsPointer  = $82 ; these get loaded up at the same time
+EnemyRAMPointer         = $84 ; pointer to enemy's adjustable stats
+EnemyROMPointer         = $86 ; pointer to enemy's hard stats
+BattleTmpPointer        = $86 
+WeaponPointer           = $86 ; pointer to weapon data
+BattleTmpPointer2       = $88 ; this pointer is often used by things 
+MagicPointer            = $8A ; MagicPointer
+EnemyAIPointer          = $8A
+BattleBoxString         = $8A 
+btldraw_blockptrstart   = $8C
+btldraw_blockptrend     = $8E
 
-
-
-
-
-btldraw_blockptrstart = $8C
-btldraw_blockptrend   = $8E
-
-btltmp          = $90  ; 16 bytes ?
-
-
-btldraw_src     = $90   ; source data
-btldraw_dst     = $92   ; destination pointer
-btldraw_subsrc  = $94   ; source pointer of substring
-btldraw_max     = $9F   ; maximum characters to draw
-
-
+;;General NES things    
+framecounter            = $90 ; 2 bytes!
+ppu_dest                = $92 ; 2 bytes
+cur_bank                = $94
+ret_bank                = $95
+actual_bank             = $96
+sprindex                = $97
+spr_x                   = $98
+spr_y                   = $99
+NTsoft2000              = $9A ; same as soft2000, but used to track coarse NT scroll
+soft2000                = $9B
+menustall               = $9C ; see MenuCondStall in bank $1F for explanation
+ScreenShakeCounter      = $9D ; used in battle and silent errors
+dlgbox_row              = $9D ; counts down from 7 when drawing dialogue box; nothing else 
+npcdir_seed             = $9E ; RNG seed for determining direction for NPCs to walk
 
 
+;; Music stuff          
+;                       = $A0
+ChaosNoise              = $A1 ; only used at the end of the game
+SaveGameMusic           = $A2 
+soundtesthelper         = $A3 ; Something to do with the sound test screen
+soundtest               = $A4 ; Something to do with the sound test screen
+SFX_ErrorTime           = $A5 ; might have to do with using the noise channel for error SFX
+TriangleHush            = $A6 ; Slowly raises and lowers a DMC thing to quiet the triangle channel
+MenuHush                = $A7 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
+noise_sfx               = $A8 ; loop counter, for opening chests (play noise this long)
+sq2_sfx                 = $A9 ; triggers square 2 being used for SFX
+dlgmusic_backup         = $AA ; backup music track for restoring music after the dialogue/saving box changes it
+music_track             = $AB
+mu_chanprimer           = $AC
+mu_chan                 = $AD
+mu_scoreptr             = $AE ; + F
+
+;; $B0, $C0, $D0, $E0, and $F0 are the 5 tracks
+
+; for sound channels (between Bx-Fx)
+;  see Constants.inc
+ch_scoreptr             = $0
+ch_envptr               = $2  ; ptr to start of env data
+ch_envpos               = $4  ; pos in env data (00-1F)
+ch_lenctr               = $5  ; counter for score data (note length)
+ch_frqtblptr            = $6  ; pointer to freq table (changes per octave)
+ch_lentblptr            = $8  ; pointer to length table (changes per tempo)
+ch_envrate              = $A  ; rate/speed of env table traversal
+ch_envrem               = $B  ; remaining "fraction" of env data (3 bits of fraction)
+ch_vol                  = $C  ; output volume
+ch_loopctr              = $D  ; remaining loop counter
+ch_freq                 = $E  ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
+;                             ; these are added in for the music system!
+ch_loop_marker          = $0250 ; somehow this will end up at $0300, $0310, $0320 $0330, and $0340
+ch_return               = $0251 ; + 2
+ch_duty                 = $0253 ; 
+ch_octave               = $0254 ; 
+ch_quiet                = $0255 ; 
+ch_extraquiet           = $0256 ; 
+
+text_ptr_backup         = $010D ; + E, F
+stack                   = $0100 
+oam                     = $0200  ; 256 bytes -- must be on page bound
+oam_y                   = oam
+oam_t                   = oam+1
+oam_a                   = oam+2
+oam_x                   = oam+3
+
+;; Flags                
+startintrocheck         = $0307 ;
+altareffect             = $0308 ; flag to indicate altar effect is to occur (screen shaking, monochrome diagonal window thing)
+dlgflg_reentermap       = $0309 ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
+entering_shop           = $030A ; nonzero = about to enter shop
+dlgsfx                  = $030B ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
+Hidden                  = $030C ; for hiding in battle 
+HiddenMagic             = $030D ; for hiding in battle 
+ConfusedMagic           = $030E ; confused magic stuff for battle
+battle_autoswitch       = $030F ; $FF if auto-battle, $01 if auto-run, $00 normal
+
+gettingcommand          = $0317 ; flag for allowing start to trigger auto-fight or auto-run
+btl_drawflagsA          = $0318 ; bits 0-3 = set to indicate character should be drawn as dead
+;                               ; bit    4 = set to draw battle cursor
+;                               ; bit    5 = set to draw weapon attack graphic
+;                               ; bit    6 = set to draw magic graphic & flash BG.
+btl_drawflagsB          = $0319 ; bits 0-4 = set to indicate character should be drawn as stone
+btl_drawflagsC          = $031A ; for sleeping! ...in battle. And save game music things.
+battle_attackerisplayer = $031B ; 1 if player is attacking, 0 if enemy is attacking
+battle_defenderisplayer = $031C ; 1 if player is defending, 0 if enemy is defending 
+LongCall_A              = $031D ; The LongCall routine restores them after it swaps banks
+LongCall_Y              = $031E
+LongCall_X              = $031F
+
+btltmp_targetlist       = $0327 ; temporary buffer (9 entries) containing possible targets
+
+; These next 5 vars (7 bytes) are all in temp memory, and are mostly just used for passing into BattleDraw8x8Sprite
+btl8x8spr_x             = $0337 ; + 8, X coord ; +1 used in drawing code as original position
+btl8x8spr_y             = $0339 ; + A, Y coord ;  +1 used in drawing code as original position
+btl8x8spr_a             = $033B ; attribute
+btl8x8spr_t             = $033C ; tile ID
+btl8x8spr_i             = $033D ; slot to draw to (00-3F)
+battle_ailmentrandchance= $033E
+eob_gp_reward           = $033E ; + F
+battle_hitsconnected    = $033F     ; number of hits actually connected
+battle_critsconnected   = $0347
+eob_exp_reward          = $0347 ; + 8
+battle_thishitconnected = $0348
+btl_curturn             = $0349      ; current turn (index for btl_turnorder)
+eobtext_print_level     = $0449 ; + A 
+btl_walkdirection       = $034A
+DrawCharTmp             = $034B
+btl_weird_tmp           = $034B
+eobtext_print_hp        = $034B ; + C
+Rand_AX_lo              = $034D
+Rand_AX_high            = $034E
+Rand_AX_range           = $034F
+
+;; MISC BATTLE STUFF
+btl_rngstate            = $0350 ; State of RNG used for in-battle
+btl_various_tmp         = $0351 ; + 2
+btl_tmpindex            = $0353 ; temporary holder for a current index
+btl_tmpchar             = $0354 ; temporary holder for a 0-based character index
+btl_another_loopctr     = $0354 
+btl_input               = $0353 
+btl_soft2000            = $0357 ; soft copy of $2000 used in battles
+btl_soft2001            = $0358 ; soft copy of $2001 used in battles
+eobbox_slotid           = $0359 
+eobbox_textid           = $035A 
+btlinput_prevstate      = $0359 ; prev state for input
+inputdelaycounter       = $035A ; counter to delay multiple-input processing when holding a direction
+btl_walkloopctr         = $035B 
+btl_animatingchar       = $035C ; the character currently being animated (0-3)
+btl_flashsprite1        = $035D 
+;                       = $035E
+btl_respondrate_tmp     = $035F                                
+btlcursspr_x            = $0360 
+btlcursspr_y            = $0361 
+btlattackspr_x          = $0362 
+btlattackspr_y          = $0363 
+btlattackspr_t          = $0364 ; indicate which tile to draw for the weapon graphic
+btlattackspr_pose       = $0365 ; for weapons, 0 or 8 to indicate whether or not to flip it ; for magic, 0 or ?4? to indicate which frame to draw
+btlattackspr_gfx        = $0366 ; copied to 't' prior to drawing.  Indicates which graphic to use
+btlattackspr_wepmag     = $0367 ; 0 for drawing the weapon, 1 for drawing the magic
+btlattackspr_hidell     = $0368 ; nonzero to hide the lower-left tile of the attack graphic for the "behind the back" frame of weapon swing animation.
+btlattackspr_nodraw     = $0369 ; nonzero to hide the weapon/magic sprite entirely. When a non-BB player attacks without any weapon equipped
+;                               ; Also used when using ITEMs to supress the magic flashing effect.
+btlcmd_curchar          = $036A ; the current character inputting battle commands (0-3)
+btlcmd_target           = $036B ; the current enemy slot that is being targetted
+btlcmd_spellindex       = $036D
+btl_result              = $036E ; 0 = keep battling, 1 = party defeated, 2 = all enemies defeated, 3 = party ran
+;                               ; $FF = wait for 2 seconds after fadeout before exiting (chaos defeated?)
+btl_followupmusic       = $036F ; song to play in battle after current song finishes.  Moved to music_track
+;                               ; once music_track has its high bit set  (does this ever happen?)
+btl_responddelay        = $0370 
+lvlup_levindex          = $0371 ; see LvlUp_LevelUp
+btl_weird_loopctr       = $0371 
+math_basedamage_backup  = $0371 
+btl_strikingfirst       = $0372 ; nonzero if players are striking first.  Zero otherwise
+btl_enemyeffect         = $0373 ; 0 to draw expolosion graphics as the effect, nonzero to erase the enemy as the effect
+btl_targetall_tmp       = $0374 
+btl_drawformationtmp    = $0375 
+btl_randomplayer        = $0375 ; set by GetRandomPlayerTarget  (0-3)
+btl_mathbufadd16tmp1    = $0375 
+btl_drawformationtmp2   = $0376 
+btl_mathbufadd16tmp2    = $0376 
+btl_tmppltassign        = $0377 ; temporary value to assign palette to enemies in a formation
+btl_attackid            = $0378 ; >= $40 for enemy attacks
+btlmag_magicsource      = $0379 ; 0=magic, 1=Item, 2=item
+btlmag_ailment_orig     = $037A ; A backup of 
+btl_drawformationindex  = $037B 
+btlmag_playerhitsfx     = $037C ; sound effect to play when magic hits player
+btltmp_attackerbuffer   = $037D 
+btl_backgroundflash     = $037E
+battle_stealsuccess     = $037F ; $FF if miss, $00 if no item, $01 if success
+explode_min_x           = $0380 
+explode_min_y           = $0381 
+explode_max_x           = $0382 
+explode_max_y           = $0383 
+explode_count           = $0384 
+btl_spriteflash         = $0384
+attackblocked           = $0385 
+
+btltmp_smallslotpos     = $038A 
+btltmp_buildroster      = $038A 
+btl_battletype          = $038B ; 0=9 small, 1=4 large, 2=mix, 3=fiend, 4=chaos
+btl_smallslots          = $038C ; Number of small enemy slots available
+btl_largeslots          = $038D ; btl_smallslots+1  ; Number of large slots available.  Must immediately follow smallslots
+battle_bank             = $038E ; The bank to jump back to for setting up battles
+btl_enemycount          = $038F ; count of the number of enemies being generated for a battle
 
 
-framecounter    = $F0  ; 2 bytes!
-
-equipoffset     = $F2 ; menus
-Woosh           = $F3 ; battle
-
-npcdir_seed     = $F4  ; RNG seed for determining direction for NPCs to walk
-
-battlestep      = $F5
-battlestep_sign = $F6
-battlecounter   = $F7
-battlerate      = $F8  ; X/256 chance of a random encounter occuring (SM only apparently)
-
-startintrocheck = $F9
-spaceruns       = $FA ; drawcomplexstring
-
-dlgmusic_backup = $FB  ; backup music track for restoring music after the dialogue box changes it
-dlgsfx          = $FC  ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
-
-NTsoft2000      = $FD  ; same as soft2000, but used to track coarse NT scroll
-unk_FE          = $FE
-soft2000        = $FF
-
-unk_0100        = $0100 ; stack? 
-
-tmp_hi          = $0110  ; 3? bytes
-
-oam             = $0200  ; 256 bytes -- must be on page bound
-oam_y           = oam
-oam_t           = oam+1
-oam_a           = oam+2
-oam_x           = oam+3
-
-MMC5_tmp        = $0360 ; 16 bytes, tmp ram not used by the original game
+MMC5_tmp                = $0390 ; 16 bytes, tmp ram not used by the original game
 ;; ^ battle turn order uses up $0D of this ^ 
 
-;; some random Jiggers variables ; these can't go past $03x8
-
-actual_bank     = $0370 ; necessary for Disch's longcall routine!
-weasels         = $0371 ; Important for saving/loading
-SFX_ErrorTime   = $0371 ; might have to do with using the noise channel for error SFX
-TriangleHush    = $0372 ; Slowly raises and lowers a DMC thing to quiet the triangle channel
-MenuHush        = $0373 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
-soundtest       = $0374 ; Something to do with the sound test screen
-BlankItem       = $0374 ; Necessary for shops to display correctly
-AutoTargetOptionBackup = $0374 ; for battling fast
-Hidden          = $0375 ; for hiding in battle 
-HiddenMagic     = $0376 ; for hiding in battle 
-btl_drawflagsC  = $0377 ; for sleeping! ...in battle. And save game music things.
-SaveGameMusic   = $0377
-BattleTurn      = $0378 ; Keeps track of battle turns and displays them above the character's names ; shared
-battle_class    = $0380 ; for doing skills in battle
-soundtesthelper = $0381 ; Something to do with the sound test screen
-battle_autoswitch          = $0381 ; $FF if auto-battle, $01 if auto-run, $00 normal
-battle_stealsuccess        = $0382
-RomRamMapping_lut_index    = $0383
-ConfusedMagic              = $0383 ; confused magic stuff for battle
-btl_loadenemystats_counter = $0384
-btl_loadenemystats_index   = $0385
-LongCall_A      = $0386 ; The LongCall routine restores them after it swaps banks
-LongCall_Y      = $0387
-LongCall_X      = $0388
-gettingcommand  = $0390
-
-
-
-;; back to original variables
-
+btl_usepalette  = $03A0 ; $20 bytes - the palette that is actually displayed (after fade effects)
 cur_pal         = $03C0       ; 32 bytes
 inroom_pal      = cur_pal+$20 ; 16 bytes
 tmp_pal         = $03F0       ; 16 bytes
@@ -540,7 +597,6 @@ CharStats_TmpSwap2 = $6040 ; temporarily holds 64 bytes of character data while 
 
 lutmp_ch_stats  = $6000 ; temporarily holds 64 bytes of each character data while switching in the lineup menu, 256 total
 
-LevelUp_Pointer     = $82
 LevelUp_LoopCounter = $6000
 LevelUp_ClassID     = $6001
 LevelUp_StatByte    = $6002
@@ -557,7 +613,7 @@ CharacterEquipBackup = $601B
 bigstr_buf        = $6300 ; 128 bytes
 SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
 
-puzzle           = $6400  ; used 
+puzzle           = $6400  ; used in minigame
 str_buf          = $6400  ; $39 bytes at least -- buffer must not cross page
 item_box         = $6400  ; used in shops
 btl_screenbackup = $6400  ; used in battle
@@ -717,8 +773,6 @@ ch_numhitsmult_backup    = ch_backupstats + $0D
 ch_critrate_backup       = ch_backupstats + $0E    
     
 btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes 
-;    en_exp          = $00 ; 2 bytes                     1 2
-;    en_gp           = $02 ; 2 bytes                     2 3 
     en_hpmax        = $00 ; 2 bytes                     1 2 
     en_morale       = $02 ; can be changed with magic   3
     en_ai           = $03 ;                             4
@@ -748,17 +802,30 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes
     en_hp           = $19 ; $1A ; 2 bytes               26 27
     en_enemyid      = $1B ;                             28
     
-btl_enemyrewards  = $6200
+btl_enemyrewards    = $6200 ; up to $6224 (9*4)
     en_exp          = $00 ; 2 bytes                     1 2
     en_gp           = $02 ; 2 bytes                     2 3 
 
+btl_enemygfxplt     = $6227 ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
+    
+btl_formdata        = $6230 ; $10 bytes (formation data as appears in ROM)
+    btlform_type    = btl_formdata+$0   ; battle type (high 4 bits) -- low 4 bits are pattern table
+    btlform_engfx   = btl_formdata+$1   ; graphic assignment (2 bits per enemy)
+    btlform_enids   = btl_formdata+$2   ; enemy IDs (4 bytes)
+    btlform_enqty   = btl_formdata+$6   ; enemy quantities (4 bytes)
+    btlform_plts    = btl_formdata+$A   ; palettes for this battle (2 bytes)
+    btlform_surprise= btl_formdata+$C   ; surprise rate
+    btlform_enplt   = btl_formdata+$D   ; enemy palette assign (in high 4 bits)
+    btlform_norun   = btlform_enplt     ; no run flag (in low bit)
+    btlform_enqtyB  = btl_formdata+$E   ; enemy quantities for B formation (2 bytes)    
+   
+    
 ;; $6300 is used by bigstr_buf, which prints the "Ready now?" box and maybe something else
 ;; $6400 is used by the Item option
-btl_stringoutputbuf_anchor = $6400  ; JIGS - only needs to be $20 before btl_stringoutputbuf? 
-btl_enemyIDs               = $6410  ; 9 entries of enemy IDs
-btl_enemyroster            = $6419  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
-btl_enemyamount            = $641E  ; JIGS - tmp byte for number of enemies, for battle printing
-btl_stringoutputbuf        = $641F  ; output buffer where decoded strings are printed
+btl_enemyIDs               = $6400  ; 9 entries of enemy IDs
+btl_enemyroster            = $6409  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
+btl_enemyamount            = $640E  ; JIGS - tmp byte for number of enemies, for battle printing
+btl_stringoutputbuf        = $6410  ; output buffer where decoded strings are printed
 btl_unfmtcbtbox_buffer     = $6440  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
                                     ; houses the unformatted text for each combat box.
                                     ; Additional bytes are used for other areas
@@ -795,62 +862,29 @@ btl_stringbuf                  = $66A0  ; $21 byte buffer to contain string data
 btl_attackbox_itemid           = $66C0  ; 
 btlbox_blockdata               = $6700  ; at least #91 bytes (Gear option is the biggest so far)
 
+theend_drawbuf                 = $6800     ; $700 bytes!
 
 
-eob_gp_reward               = $6876
-eob_exp_reward              = $6878
-eobtext_print_level = $687A
-eobtext_print_hp    = $687C
-
-battle_ailmentrandchance    = $6866
-
-btl_weird_thing = $6868 ;  LDA  btl_defender_elemresist,  AND btl_attacker_element, STA to this...
-
-battle_hitsconnected        = $686A     ; number of hits actually connected
-battle_critsconnected       = $686B
-battle_thishitconnected     = $686C
-
-
-
-;; Battle stuff for magical attacks
-
-
-                            
-                                    ; These two are kind of redundant
-;battle_attacker_index       = $6884 ; ?? redundant??  why not just use btl_attacker?
-;btl_defender_index       = $6885 ; same... but this is necessary for output!  See Battle_DoTurn in bank C!!
-
-battle_attackerisplayer     = $6886 ; 1 if player is attacking, 0 if enemy is attacking
-battle_defenderisplayer     = $6887 ; 1 if player is defending, 0 if enemy is defending 
-                                    ;   important for output!  See Battle_DoTurn in bank C
-
-
-;btl_attacker_ailments       = $6888
-;btl_defender_ailments       = $6889 ; important for output!
-
-btl_rngstate = $688A    ; State of RNG used for in-battle
-
-btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 
 ;  Buffers to hold character commands for battle.  These must be contiguious in memory
 ;  due to the way memory is cleared.  These buffers also contain a bit of redundant data.
 ;
 ;  btl_charcmdbuf contains 3 bytes (padded to 4) per character:
 ;    byte 0 = command
-;    byte 1 = spell effect ID  (used for Item/MAGIC/ITEM).  FF if no effect
+;    byte 1 = spell effect ID  (used for Item/Magic/Gear).  FF if no effect
 ;    byte 2 = target.  8x are player targets 0x are enemy targets.  FF=target all enemies, FE=target all players.
+;    byte 3 = character class, for skills, or the level of magic to use an Ether on
 ;
 ;  Commands can be the following:
-;    00 = no command -- if surprised/asleep/stunned
-;    01 = no command -- if dead
-;    02 = no command -- if stone
-;    04 = attack
-;    08 = Item potion
-;    10 = use item
-;    20 = run   ('target' would be the actual character running)
-;    40 = magic
-;    80 = hide
-;    FF = guard
+;    00 = no command -- if surprised/asleep/dead/stone
+;    01 = fight
+;    02 = magic
+;    04 = skill
+;    08 = gear
+;    10 = guard
+;    20 = item 
+;    40 = hide
+;    80 = flee    ('target' would be the actual character running)
 ; 
 ;  btl_charcmditem contains 1 byte per character:  the ID of the item they're using.
 ;    This is only used when the command is '10'
@@ -861,225 +895,51 @@ btl_curturn         = $688E         ; current turn (index for btl_turnorder)
 ;  btl_charcmdconsumeid contains 1 byte per character.  If will be the potion index
 ;       for Item, or the spell level for magic
 
-btl_charcmdbuf          = $688F
-btl_charcmditem         = btl_charcmdbuf+$10        ; $689F
-btl_charcmdconsumetype  = btl_charcmditem+4         ; $68A3
-btl_charcmdconsumeid    = btl_charcmdconsumetype+4  ; $68A7
-
-btl_walkdirection = $68AB
-
-char_order_buf = $689F ; 4 bytes
-
-Rand_AX_lo    = $68AF
-Rand_AX_high  = $68B0
-Rand_AX_range = $68B6
-
-DrawCharTmp = $68B6
-
-btl_weird_tmp = $68B1
-btl_various_tmp = $68B3 ; + B4
-
-
-
-; These next 5 vars are all in temp memory, and are mostly just used for 
-;  passing into BattleDraw8x8Sprite
-btl8x8spr_x = $68AF ; X coord
-                    ;  +1 used in drawing code as original position
-btl8x8spr_y = $68B1 ; Y coord
-                    ;  +1 used in drawing code as original position
-btl8x8spr_a = $68B3 ; attribute
-btl8x8spr_t = $68B4 ; tile ID
-btl8x8spr_i = $68B5 ; slot to draw to (00-3F)
-
-
-  
-btl_tmpindex = $68B3    ; temporary holder for a current index
-btl_tmpchar =  $68B4    ; temporary holder for a 0-based character index
-
-btltmp_multA = $68B3    ; shared
-btltmp_multB = $68B4    ; shared
-btltmp_multC = $68B5
-
-btl_another_loopctr = $68B4
-
-
-
-btl_input        = $68B3
-
-btl_soft2000 = $68B7    ; soft copy of $2000 used in battles
-btl_soft2001 = $68B8    ; soft copy of $2001 used in battles
-
-
-
-eobbox_slotid       = $6AA6
-eobbox_textid       = $6AA7
-
-btlinput_prevstate  = $6AA6     ; prev state for input
-inputdelaycounter   = $6AA7     ; counter to delay multiple-input processing when holding a direction
-
-btl_walkloopctr     = $6AA8
-
-btl_animatingchar   = $6AA9     ; the character currently being animated (0-3)
-
-btlcurs_x           = $6AAA     ; battle cursor X position (menu position, not pixel position)
-btlcurs_y           = $6AAB     ; battle cursor Y position (menu position, not pixel position)
-btlcurs             = $6AAA
-btlcurs_max         = $6AAB     ; highest value for the cursor
-btlcurs_positions   = $6AAC     ; ?? bytes, 2 bytes per entry, each entry is the pixel coord of where the
-                                ;   cursor should be drawn when its item is selected.
-
-btl_flashsprite1     = $6AAA 
-btl_flashsprite2     = $6AAC 
-                                
-                                
-btl_respondrate_tmp = $6AD0                                
-                                
-btl_drawflagsA = $6AD1  ; bits 0-3 = set to indicate character should be drawn as dead
-                        ; bit    4 = set to draw battle cursor
-                        ; bit    5 = set to draw weapon attack graphic
-                        ; bit    6 = set to draw magic graphic & flash BG.
-
-btl_drawflagsB = $6AD2  ; bits 0-4 = set to indicate character should be drawn as stone
-
-btl_chardrawinfo = $6AD3        ;$10 bytes, 4 bytes for each character
+btl_charcmdbuf          = $6800 ; 4 bytes per character
+btl_charcmditem         = $6810 ; 1 byte per character for the rest
+btl_charcmdconsumetype  = $6814 ; 
+btl_charcmdconsumeid    = $6818 ; 
+btl_charparry           = $681C ; 
+btl_charcover           = $6820 ; 8 bytes ; first 4 =  who is being covered, second 4 = by whom
+btl_charregen           = $6828 ; 
+btl_charguard           = $682C ; 
+btl_charhidden          = $6830 ; 
+btl_charreflect         = $6834 ; 
+char_order_buf          = $6838 ; 
+btl_chardrawinfo        = $6840 ; $10 bytes, 4 bytes for each character
     btl_chardraw_x      = btl_chardrawinfo+0
     btl_chardraw_y      = btl_chardrawinfo+1
     btl_chardraw_gfxset = btl_chardrawinfo+2
     btl_chardraw_pose   = btl_chardrawinfo+3
-    
-btlcursspr_x        = $6AE3
-btlcursspr_y        = $6AE4
-btlattackspr_x      = $6AE5
-btlattackspr_y      = $6AE6
 
-btlattackspr_t      = $6AE7     ; indicate which tile to draw for the weapon graphic
-btlattackspr_pose   = $6AE8     ; for weapons, 0 or 8 to indicate whether or not to flip it
-                                ; for magic, 0 or ?4? to indicate which frame to draw
-btlattackspr_gfx    = $6AE9     ; copied to 't' prior to drawing.  Indicates which graphic to use
-btlattackspr_wepmag = $6AEA     ; 0 for drawing the weapon, 1 for drawing the magic
-
-btlattackspr_hidell = $6AED     ; nonzero to hide the lower-left tile of the attack graphic
-                                ;   This is done for the "behind the back" frame of weapon swing animation.
-btlattackspr_nodraw = $6AEE     ; nonzero to hide the weapon/magic sprite entirely.  This is
-                                ;   Used when a non-BB player attacks without any weapon equipped
-                                ;   Also used when using ITEMs to supress the magic flashing effect.
-
-btltmp_targetlist   = $6AEF     ; temporary buffer (9 entries) containing possible targets
+btl_flashsprite2        = $6850 ; $18 bytes, tmp storage of sprite data
+btl_flashsprite3        = $6868 ; $18 bytes, tmp storage of sprite data
+btl_charattrib          = $6880 ; attributes to use when drawing charcters in battle  (4 bytes, 1 for each)
+btlcmd_magicgfx         = $6884 ; 2 bytes per character.  [0] = graphic to draw, [1] = palette to use    
+btl_coverspritebackup   = $688A ; 4 bytes
+btl_palettes            = $6890 ; $20 bytes
+btltmp_attr             = $68B0 ; $40 bytes of attribute data for the battle setup ; NOT temporary! Needed for flashing enemies. 
+btlcurs_positions       = $68F8 ; $18 bytes, 2 bytes per entry, each entry is the pixel coord of where the
+;                               ; cursor should be drawn when its item is selected. lut_MagicCursorPos has the most
+btltmp_backseat         = $6910 ; $10 byte buffer -- backup of btltmp
 
 
 
-btl_targetbacketup  = $6AF9     ; the number of combat boxes that have been drawn
-
-
-                                
-btlcmd_curchar      = $6B7A     ; the current character inputting battle commands (0-3)
-btlcmd_target       = $6B7B     ; the current enemy slot that is being targetted
-
-btlcmd_spellindex   = $6B7D
-
-btlcmd_magicgfx     = $6B7E     ; 2 bytes per character.  [0] = graphic to draw, [1] = palette to use
-
-btl_result          = $6B86 ;   0 = keep battling
-                            ;   1 = party defeated
-                            ;   2 = all enemies defeated
-                            ;   3 = party ran
-                            ; $FF = wait for 2 seconds after fadeout before exiting (chaos defeated?)
-
-btl_usepalette      = $6B87 ; $20 bytes - the palette that is actually displayed (after fade effects)
-
-btl_followupmusic   = $6BA7 ; song to play in battle after current song finishes.  Moved to music_track
-                            ;    once music_track has its high bit set  (does this ever happen?)
-
-btl_charattrib      = $6BA8 ; attributes to use when drawing charcters in battle  (4 bytes, 1 for each)
-
-btl_responddelay    = $6BAC
-
-
-lvlup_levindex = $6BAD ; see LvlUp_LevelUp
-btl_weird_loopctr = $6BAD
-math_basedamage_backup = $6BAD
-
-
-btl_strikingfirst   = $6BAE ; nonzero if players are striking first.  Zero otherwise
-
-
-battle_bank     = $6BB1  ; The bank to jump back to for setting up battles
-btl_smallslots  = $6BB2             ; Number of small enemy slots available
-btl_largeslots  = btl_smallslots+1  ; Number of large slots available.  Must immediately follow smallslots
-
-btl_enemyeffect = $6BB6     ; 0 to draw expolosion graphics as the effect
-                            ;   nonzero to erase the enemy as the effect
-
-btl_enemygfxplt = $6BC0  ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
-
-
-btl_targetall_tmp = $6BCE
-
-btl_drawformationtmp = $6BCF
-btl_randomplayer    = $6BCF ; set by GetRandomPlayerTarget  (0-3)
-btl_mathbufadd16tmp1 = $6BCF
-
-btl_drawformationtmp2 = $6BD0
-btl_mathbufadd16tmp2 = $6BD0
 
 
 
-btl_tmppltassign = $6C88    ; temporary value to assign palette to enemies in a formation
-
-
-btl_attackid            = $6C8C ; >= $40 for enemy attacks
 
 
 
-btlmag_magicsource      = $6C8F ; 0=magic, 1=Item, 2=item
-btlmag_ailment_orig     = $6C90 ; A backup of 
-
-btl_drawformationindex = $6C91
-
-btl_battletype  = $6C92     ; 0=9 small, 1=4 large, 2=mix, 3=fiend, 4=chaos
-btl_enemycount  = $6C93     ; count of the number of enemies being generated for a battle
-btltmp_attr     = $6C94     ; $40 bytes of attribute data for the battle setup
-
-explode_min_x   = $6D14
-explode_min_y   = $6D15
-explode_max_x   = $6D16
-explode_max_y   = $6D17
-explode_count   = $6D18
 
 
 
-btltmp_attackerbuffer   = $6D2C
-
-ScreenShakeCounter = $6D14
-btl_backgroundflash = $6D16
-; ????          = $6D14   ; action buffer?  $20 bytes?  contents for combat boxes are placed here?
 
 
 
-btl_palettes    = $6D34   ; $20 bytes
 
 
-
-btltmp_backseat = $6D74   ; $10 byte buffer -- backup of btltmp
-
-
-btl_formdata    = $6D84   ; $10 bytes (formation data as appears in ROM)
-    btlform_type    = btl_formdata+$0   ; battle type (high 4 bits) -- low 4 bits are pattern table
-    btlform_engfx   = btl_formdata+$1   ; graphic assignment (2 bits per enemy)
-    btlform_enids   = btl_formdata+$2   ; enemy IDs (4 bytes)
-    btlform_enqty   = btl_formdata+$6   ; enemy quantities (4 bytes)
-    btlform_plts    = btl_formdata+$A   ; palettes for this battle (2 bytes)
-    btlform_surprise= btl_formdata+$C   ; surprise rate
-    btlform_enplt   = btl_formdata+$D   ; enemy palette assign (in high 4 bits)
-    btlform_norun   = btlform_enplt     ; no run flag (in low bit)
-    btlform_enqtyB  = btl_formdata+$E   ; enemy quantities for B formation (2 bytes)
-
-
-btlmag_playerhitsfx = $6DA7     ; sound effect to play when magic hits player
-btltmp_smallslotpos = $6DB0
-btltmp_buildroster = $6DB0
-
-mapobj          = $6F00   ; $100 bytes -- page
+mapobj          = $6F00         ; $100 bytes -- page
  mapobj_id      = mapobj + $00  ; rearranging these is ill advised
  mapobj_flgs    = mapobj + $01  ;  because the loader is pretty rigid
  mapobj_physX   = mapobj + $02  ;  flags:  $80=inroom $40=don't move

@@ -11,8 +11,11 @@
 .export lut_EnemyAttack
 .export DumbBottleThing
 .export data_EnemyNames
+.export ScanEnemyString
 
+.import ConvertBattleNumber
 .import MultiplyXA
+.import LongCall
 
 BANK_THIS = $0A
 
@@ -1658,6 +1661,8 @@ data_BattleMessages:
 .word BTL_MESSAGE93
 .word BTL_MESSAGE94
 .word BTL_MESSAGE95
+.word BTL_MESSAGE96
+.word BTL_MESSAGE97
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1686,7 +1691,7 @@ BTL_MESSAGE12:
 BTL_MESSAGE13:
 .byte $8A,$B7,$B7,$A4,$A6,$AE,$FF,$AB,$A4,$AF,$B7,$A8,$A7,$00 ; Attack halted
 BTL_MESSAGE14:
-.byte $97,$A8,$B8,$B7,$B5,$A4,$AF,$AC,$BD,$A8,$A7,$00 ; Neutralized
+.byte $99,$B2,$AC,$B6,$B2,$B1,$FF,$B1,$A8,$B8,$B7,$B5,$A4,$AF,$AC,$BD,$A8,$A7,$00 ; Poison neutralized
 BTL_MESSAGE15:
 .byte $8B,$A8,$A6,$A4,$B0,$A8,$FF,$B7,$A8,$B5,$B5,$AC,$A9,$AC,$A8,$A7,$00 ; Became terrified
 BTL_MESSAGE16:
@@ -1759,7 +1764,7 @@ BTL_MESSAGE48:
 BTL_MESSAGE49:
 .byte $91,$99,$FF,$B0,$A4,$BB,$00 ; HP max
 BTL_MESSAGE50:
-.byte $B3,$B7,$B6,$C0,$00 ; pts.
+.byte $FF,$B3,$B7,$B6,$C0,$00 ; _pts.
 BTL_MESSAGE51:
 .byte $9C,$B7,$B5,$C0,$00 ; Str.
 BTL_MESSAGE52:
@@ -1844,13 +1849,24 @@ BTL_MESSAGE90:
 BTL_MESSAGE91:
 .byte $91,$A4,$32,$B1,$BE,$21,$AA,$B2,$21,$22,$4B,$B0,$35,$A8,$C4,$00 ; Haven't got any more!
 BTL_MESSAGE92:
-.byte $8C,$49,$1F,$47,$B6,$B2,$3C,$C3,$C5,$00 ; Coming soon...?
+.byte $8C,$22,$B1,$B2,$21,$A6,$B2,$32,$44,$56,$55,$3E,$AF,$A9,$C4,$00 ; Cannot cover yourself!
 BTL_MESSAGE93:
 .byte $8C,$A4,$34,$1B,$2E,$1C,$A8,$AC,$44,$3E,$B1,$3E,$B6,$00 ; Came to their senses
 BTL_MESSAGE94:
 .byte $90,$B2,$AF,$A7,$FF,$A9,$B2,$B8,$B1,$A7,$C3,$00 ; Gold found..
 BTL_MESSAGE95:
 .byte $97,$B2,$B7,$AB,$AC,$B1,$AA,$00 ; Nothing
+BTL_MESSAGE96:
+.byte $9C,$51,$B1,$B1,$1F,$AA,$69,$00,$3A,$27,$56,$55,$3E,$AF,$A9,$C4,$00 ; Scanning...
+BTL_MESSAGE97:
+.byte $FF,$38,$B2,$32,$23,$27,$1C,$1A,$39,$B7,$5E,$AE,$C4,$00 ; _covered the attack!
+
+
+
+
+
+
+
 
 
 
@@ -2218,5 +2234,514 @@ DumbBottleThing:
     LDX #LEWDS_ALT
     RTS
   
+  
+  
+  
+;Example message: 
+;[Enemy  Name    HP-####/####   ]
+;[Lvl-## Defense-### Attack-### ] 
+;[Type-Mending   Affliction-@@  ]
+;[Weak-@@@@@@@@  Defy-@@@@@@@@  ]
+  
+  
+ScanEnemyString:
+    LDX #0
+    
+    LDA #0
+    STA tmp+8
+    ;; tmp+9 is index for the ShortStringList
+    
+    LDY #120
+   @FillString:
+    LDA #$FF   
+    STA bigstr_buf, Y
+    DEY
+    BNE @FillString
+    ;; fill the string with blank spaces to start with
+    
+    LDY #en_enemyid
+    LDA (EnemyRAMPointer), Y 
+    ASL A
+    TAY
+    LDA data_EnemyNames, Y
+    STA tmp
+    LDA data_EnemyNames+1, Y
+    STA tmp+1
+    LDA #11
+    JSR @AddToString
+    ;; draw enemy name into the string
+    
+    INX
+    INX
+
+    JSR @GetNextShortString ; Lvl- 
+    LDA #1
+    STA MMC5_tmp+2          ; MMC5_tmp+2 is kind of a brancher for later. 
+    LDY #en_level             ; bit 1 set = 2 numbers, bit 2 = 3 numbers, bit 4 = 4 numbers
+    LDA (EnemyRAMPointer), Y 
+    LDY #0
+    JSR @ConvertNumber
+    ;; print Lvl- ##
+    
+    DEX
+   
+    JSR @GetNextShortString ; Attack-
+    LDA #2
+    STA MMC5_tmp+2
+    LDA btlmag_defender_damage
+    LDY #0
+    JSR @ConvertNumber
+    ;; print Attack- ###
+    
+    JSR @GetNextShortString ; HP-
+    LDA #4
+    STA MMC5_tmp+2
+    LDA btlmag_defender_hp
+    LDY btlmag_defender_hp+1
+    JSR @ConvertNumber
+    LDA #$7A                 ; / 
+    STA bigstr_buf, X
+    INX
+    LDA btlmag_defender_hpmax
+    LDY btlmag_defender_hpmax+1
+    JSR @ConvertNumber
+    ; print HP- ####/####
+    
+    INX
+    
+    JSR @GetNextShortString ; Hit-
+    LDA #1
+    STA MMC5_tmp+2
+    LDA btlmag_defender_numhitsmult
+    LDY #0
+    JSR @ConvertNumber
+    
+    LDX #51  
+    
+    JSR @GetNextShortString ; Defend-
+    LDA #2
+    STA MMC5_tmp+2
+    LDA btlmag_defender_defense
+    LDY #0
+    JSR @ConvertNumber
+    ;; print Defense- ###
+    
+    LDX #62
+    
+    JSR @GetNextShortString ; Type-
+    ;; Now because each enemy can have more than one category
+    ;; but Categories can't be represented by icons
+    ;; then we need to choose ONE category that most accurately represents an enemy
+    ;; So there's a list further below of just ONE category per enemy ID
+    ;; which is then doubled into an index for the word to print
+    
+    LDY #en_enemyid
+    LDA (EnemyRAMPointer), Y 
+    TAY
+    LDA @SingleCategory, Y 
+    ASL A                   ; multiply by 2
+    TAY
+    LDA @CategoryName_LUT, Y
+    STA tmp
+    LDA @CategoryName_LUT+1, Y
+    STA tmp+1
+    LDA #8
+    JSR @AddToString    
+    
+    LDX #77
+    
+    JSR @GetNextShortString ; Caution-
+    LDY #en_attackail
+    LDA (EnemyRAMPointer), Y
+    LDY #$FF
+    DEX
+    JSR @UnrollStatByte
+    ;; this only supports 4 ailments, which is already too damn much. 2 is too damn much!
+    
+    LDX #91
+    
+    JSR @GetNextShortString ; Weak-
+    LDA btlmag_defender_elementweakness
+    LDY #$CA
+    JSR @UnrollElementByte
+    
+    LDX #106
+    
+    JSR @GetNextShortString ; Defy-
+    LDA btlmag_defender_elementresist
+    LDY #$CA
+    JSR @UnrollElementByte
+   
+   @EndString:
+    LDA #$05
+    STA bigstr_buf+30
+    STA bigstr_buf+61
+    STA bigstr_buf+90
+    LDA #$00
+    STA bigstr_buf+120
+    LDA #>(bigstr_buf)
+    STA text_ptr+1
+    LDA #<(bigstr_buf)
+    STA text_ptr
+    LDA #1
+    STA menustall
+    STA dest_x
+    LDA #24
+    STA dest_y    
+    RTS
+    
+   @UnrollStatByte:   
+    LSR A 
+    BCC :+
+      LDY #$CD ; death
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$D1 ; stone
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$CC ; poison
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$EB ; darkness
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$D2 ; sleep
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$CB ; stun
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$D3 ; mute
+      JSR @PrintStatBitIcon
+      INX
+  : LSR A
+    BCC :+
+      LDY #$CA ; confusion
+      JSR @PrintStatBitIcon
+  : RTS  
+  
+  @UnrollElementByte:  
+    LSR A 
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY  
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : RTS  
+   
+   @PrintStatBitIcon:
+    INX
+    JSR @PrintElementBitIcon
+    LDY #$C4
+    INX
+    
+   @PrintElementBitIcon:
+    PHA
+    TYA
+    STA bigstr_buf, X
+    PLA
+    RTS    
+    
+   @GetNextShortString: 
+    LDA tmp+8
+    ASL A
+    TAY
+    LDA @ShortStringList, Y
+    STA tmp
+    LDA @ShortStringList+1, Y
+    STA tmp+1
+    INC tmp+8
+    LDA #9                  ; set tmp+8 to 9, the longest ShortString
+    BNE @AddToString
+    ;; this gets the next ShortString and prints it to the Big string
+    
+   @ConvertNumber:
+    STA MMC5_tmp
+    STY MMC5_tmp+1
+    TXA
+    PHA
+   
+    JSR LongCall
+    .word ConvertBattleNumber
+    .byte $0E
+    
+    PLA
+    TAX    
+    LDA text_ptr
+    STA tmp
+    LDA text_ptr+1
+    STA tmp+1
+    LDA #4
+    ;; this converts hex numbers (enemy stats) into decimal, and prints it
+    
+   @AddToString:
+    STA tmp+2
+    LDY #0
+   @AddToString_Loop: 
+    LDA (tmp), Y
+    BEQ @FinishOffName      ; when it gets to the end of an enemy name, move the X pointer to the end of #11
+    CMP #$FE                ; when it gets to the end of a ShortString
+    BEQ :+
+    STA bigstr_buf, X
+    INX
+    INY
+    DEC tmp+2
+    BNE @AddToString_Loop
+  : RTS
+   
+   @FinishOffName:
+    INX
+    DEC tmp+2
+    BNE @FinishOffName
+    RTS
+   
+   @MoveXOver: 
+    INX
+    DEY
+    BNE @MoveXOver
+    RTS
+
+@ShortStringList:    
+.word @Level
+.word @Attack
+.word @HP
+.word @Hit
+.word @Defend
+.word @Type
+.word @Caution
+.word @Weak
+.word @Defy
+    
+@Level:    
+.byte $95,$B9,$AF,$C2,$FE 
+
+@HP:
+.byte $91,$99,$C2,$FE 
+
+@Hit:
+.byte $91,$AC,$B7,$C2,$FE 
+
+@Defend:
+.byte $8D,$A8,$A9,$A8,$B1,$A7,$C2,$FE
+
+@Attack:
+.byte $8A,$B7,$B7,$A4,$A6,$AE,$C2,$FE
+
+@Type:
+.byte $9D,$BC,$B3,$A8,$C2,$FE
+
+@Caution:
+.byte $8C,$A4,$B8,$B7,$AC,$B2,$B1,$C2,$FE
+
+@Weak:
+.byte $A0,$A8,$A4,$AE,$C2,$FE
+
+@Defy:
+.byte $8D,$A8,$A9,$BC,$C2,$FE
+
+
+@CategoryName_LUT:
+.word @TYPE_NOTHING
+.word @TYPE_UNKNOWN
+.word @TYPE_DRAGON
+.word @TYPE_GIANT
+.word @TYPE_UNDEAD
+.word @TYPE_BEASTLY
+.word @TYPE_AQUATIC
+.word @TYPE_MAGICAL
+.word @TYPE_MENDING
+
+@TYPE_NOTHING:
+.byte $97,$B2,$B7,$AB,$AC,$B1,$AA,$FE ; Nothing
+@TYPE_UNKNOWN:
+.byte $9E,$B1,$AE,$B1,$B2,$BA,$B1,$FE ; Unknown 
+@TYPE_DRAGON:
+.byte $8D,$B5,$A4,$AA,$B2,$B1,$FE,$00 ; Dragon 
+@TYPE_GIANT:
+.byte $90,$AC,$A4,$B1,$B7,$FE,$00,$00 ; Giant
+@TYPE_UNDEAD:
+.byte $9E,$B1,$A7,$A8,$A4,$A7,$FE,$00 ; Undead 
+@TYPE_BEASTLY:
+.byte $8B,$A8,$A4,$B6,$B7,$AF,$BC,$FE ; Beastly 
+@TYPE_AQUATIC:
+.byte $8A,$B4,$B8,$A4,$B7,$AC,$A6,$FE ; Aquatic 
+@TYPE_MAGICAL:
+.byte $96,$A4,$AA,$AC,$A6,$A4,$AF,$FE ; Magical 
+@TYPE_MENDING:
+.byte $96,$A8,$B1,$A7,$AC,$B1,$AA,$FE ; Mending
+
+@SingleCategory:
+.byte TYPE_GIANT ;00 IMP	
+.byte TYPE_GIANT ;01 GrIMP	
+.byte $00 ;02 WOLF	
+.byte $00 ;03 GrWolf	
+.byte TYPE_WERE ;04 WrWolf 
+.byte $00 ;05 FrWOLF 
+.byte TYPE_DRAGON ;06 IGUANA 
+.byte TYPE_DRAGON ;07 AGAMA
+.byte TYPE_DRAGON ;08 SAURIA
+.byte TYPE_GIANT ;09 GIANT  
+.byte TYPE_GIANT ;0A FrGIANT  
+.byte TYPE_GIANT ;0B R`GIANT  
+.byte TYPE_WATER ;0C SAHAG  
+.byte TYPE_WATER ;0D R`SAHAG  
+.byte TYPE_WATER ;0E WzSAHAG  
+.byte $00 ;0F PIRATE  
+.byte $00 ;10 KYZOKU  
+.byte TYPE_WATER ;11 SHARK  
+.byte TYPE_WATER ;12 GrSHARK  
+.byte $00 ;13 OddEYE  
+.byte TYPE_WATER ;14 BigEYE  
+.byte TYPE_UNDEAD ;15 BONE  
+.byte TYPE_UNDEAD ;16 R`BONE  
+.byte $00 ;17 CREEP  
+.byte $00 ;18 CRAWL  
+.byte $00 ;19 HYENA  
+.byte $00 ;1A CEREBUS  
+.byte TYPE_GIANT ;1B OGRE  
+.byte TYPE_GIANT ;1C GrOGRE  
+.byte TYPE_GIANT ;1D WzOGRE
+.byte TYPE_DRAGON ;1E ASP
+.byte TYPE_DRAGON ;1F COBRA
+.byte TYPE_WATER ;20 SeaSNAKE
+.byte $00 ;21 SCORPION
+.byte TYPE_WATER ;22 LOBSTER
+.byte $00 ;23 BULL
+.byte TYPE_UNDEAD ;24 ZomBULL
+.byte TYPE_REGEN ;25 TROLL
+.byte TYPE_REGEN ;26 SeaTROLL
+.byte TYPE_UNDEAD ;27 SHADOW
+.byte TYPE_UNDEAD ;28 IMAGE
+.byte TYPE_UNDEAD ;29 WRAITH
+.byte TYPE_UNDEAD ;2A GHOST
+.byte TYPE_UNDEAD ;2B ZOMBIE
+.byte TYPE_UNDEAD ;2C GHOUL 
+.byte TYPE_UNDEAD ;2D GEIST
+.byte TYPE_UNDEAD ;2E SPECTER
+.byte $00 ;2F WORM
+.byte $00 ;30 Sand W
+.byte $00 ;31 Grey W
+.byte TYPE_MAGE ;32 EYE
+.byte TYPE_UNDEAD ;33 PHANTOM
+.byte $00 ;34 MEDUSA
+.byte TYPE_UNKNOWN ;35 GrMEDUSA
+.byte TYPE_WERE ;36 CATMAN
+.byte TYPE_MAGE ;37 MANCAT
+.byte $00 ;38 PEDE
+.byte $00 ;39 GrPEDE
+.byte $00 ;3A TIGER
+.byte $00 ;3B Saber T
+.byte TYPE_UNDEAD ;3C VAMPIRE
+.byte TYPE_UNDEAD ;3D WzVAMP
+.byte TYPE_UNKNOWN ;3E GARGOYLE
+.byte TYPE_UNKNOWN ;3F R`GOYLE
+.byte TYPE_UNKNOWN ;40 EARTH
+.byte TYPE_UNKNOWN ;41 FIRE
+.byte TYPE_DRAGON ;42 Frost D
+.byte TYPE_DRAGON ;43 Red D
+.byte TYPE_UNDEAD ;44 ZombieD
+.byte $00 ;45 SCUM
+.byte $00 ;46 MUCK
+.byte $00 ;47 OOZE
+.byte $00 ;48 SLIME
+.byte $00 ;49 SPIDER
+.byte $00 ;4A ARACHNID
+.byte $00 ;4B MATICOR
+.byte $00 ;4C SPHINX
+.byte $00 ;4D R`ANKYLO
+.byte $00 ;4E ANKYLO
+.byte TYPE_UNDEAD ;4F MUMMY
+.byte TYPE_UNDEAD ;50 WzMUMMY
+.byte $00 ;51 COCTRICE
+.byte $00 ;52 PERILISK
+.byte TYPE_DRAGON ;53 WYVERN
+.byte TYPE_DRAGON ;54 WYRM
+.byte TYPE_DRAGON ;55 TYRO
+.byte TYPE_DRAGON ;56 T REX
+.byte $00 ;57 CARIBE
+.byte $00 ;58 R`CARIBE
+.byte $00 ;59 GATOR
+.byte TYPE_DRAGON ;5A FrGATOR
+.byte $00 ;5B OCHO
+.byte $00 ;5C NAOCHO
+.byte TYPE_DRAGON ;5D HYDRA
+.byte TYPE_DRAGON ;5E R`HYDRA
+.byte $00 ;5F GAURD
+.byte $00 ;60 SENTRY
+.byte TYPE_UNKNOWN ;61 WATER
+.byte TYPE_UNKNOWN ;62 AIR
+.byte TYPE_MAGE ;63 NAGA
+.byte TYPE_MAGE ;64 GrNAGA
+.byte TYPE_DRAGON ;65 CHIMERA
+.byte TYPE_DRAGON ;66 JIMERA
+.byte TYPE_WATER ;67 WIZARD  ;; very weird
+.byte $00 ;68 SORCERER
+.byte $00 ;69 GARLAND
+.byte TYPE_DRAGON ;6A Gas D
+.byte TYPE_DRAGON ;6B Blue D
+.byte TYPE_MAGE ;6C MudGOL
+.byte TYPE_MAGE ;6D RockGOL
+.byte TYPE_UNKNOWN ;6E IronGOL
+.byte $00 ;6F BADMAN
+.byte TYPE_MAGE ;70 EVILMAN
+.byte $00 ;71 ASTOS
+.byte TYPE_MAGE ;72 MAGE
+.byte TYPE_MAGE ;73 FIGHTER
+.byte $00 ;74 MADPONY
+.byte TYPE_UNKNOWN ;75 NITEMARE
+.byte TYPE_REGEN ;76 WarMECH
+.byte TYPE_UNDEAD ;77 LICH
+.byte TYPE_UNDEAD ;78 LICH (reprise)
+.byte TYPE_MAGE ;79 KARY
+.byte TYPE_MAGE ;7A KARY (reprise)
+.byte TYPE_WATER ;7B KRAKEN
+.byte TYPE_WATER ;7C KRAKEN (reprise)
+.byte TYPE_DRAGON ;7D TIAMAT
+.byte TYPE_DRAGON ;7E TIAMAT (reprise)
+.byte TYPE_UNKNOWN ;7F CHAOS
 
 .byte "END OF BANK A"

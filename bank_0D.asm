@@ -2674,7 +2674,8 @@ MusicPlay:
     ADC #CHAN_BYTES
     STA mu_chan
 
-    CMP #CHAN_STOP         ; and keep looping until all channels processed
+   ;; JIGS - this basically ends when mu_chan is #$F0 and #CHAN_BYTES is added to it (#$10) resulting in 0, with carry set
+    ; CMP #CHAN_STOP         ; and keep looping until all channels processed
     BCC @UpdateLoop
 
     RTS                    ; then we're done!  exit!
