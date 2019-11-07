@@ -14187,8 +14187,8 @@ lut_CombatSkillBox:
   .BYTE $01, $03, $04, <SkillText_Thief,   >SkillText_Thief   ; 01 Thief 
   .BYTE $01, $03, $04, <SkillText_BBelt,   >SkillText_BBelt   ; 02 Black Belt
   .BYTE $01, $03, $04, <SkillText_RMage,   >SkillText_RMage   ; 03 Red Mage
-  .BYTE $01, $03, $04, <SkillText_Blank,  >SkillText_Blank    ; 04 White Mage
-  .BYTE $01, $03, $04, <SkillText_Blank,  >SkillText_Blank    ; 05 Black Mage
+  .BYTE $01, $03, $04, <SkillText_Blank,   >SkillText_Blank   ; 04 White Mage
+  .BYTE $01, $03, $04, <SkillText_Blank,   >SkillText_Blank   ; 05 Black Mage
 ; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 06 Knight
 ; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 07 Ninja
 ; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 08 Master
@@ -14201,7 +14201,7 @@ lut_CombatSkillBox:
 
 SkillText_Fighter:   .BYTE $8C, $B2, $B9, $A8, $B5, $00    ; Cover
 SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
-SkillText_BBelt:     .BYTE $99, $A4, $B5, $B4, $BC, $00    ; Parry
+SkillText_BBelt:     .BYTE $99, $A4, $B5, $B5, $BC, $00    ; Parry
 SkillText_RMage:     .BYTE $9C, $A6, $A4, $B1, $00         ; Scan
 SkillText_WBMage:    .BYTE $8C, $AB, $A4, $B1, $B7, $00    ; Chant
 SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; ______

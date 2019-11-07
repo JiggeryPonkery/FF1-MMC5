@@ -528,6 +528,7 @@ explode_max_y           = $0383
 explode_count           = $0384 
 btl_spriteflash         = $0384
 attackblocked           = $0385 
+btl_retaliate           = $0386 
 
 btltmp_smallslotpos     = $038A 
 btltmp_buildroster      = $038A 
@@ -718,6 +719,7 @@ btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $68
     MATHBUF_DEFENDERMAXHP       = $09 
     MATHBUF_TOTALDAMAGE         = $0A 
     MATHBUF_REGENHP             = $0B 
+    PARRY_DAMAGE                = $1F
     
 btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathematical routines
     math_hitchance      = btl_mathbuf + (MATHBUF_HITCHANCE*2)       ; $6050 ; 
@@ -736,10 +738,12 @@ btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathemati
 ;btl_defender_hpmax     = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)   ; $6062 ; 
     battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6064 ;  -- treated as part of math buffer by some code
     
-    btltmp_divLo        = btl_mathbuf + (MATHBUF_REGENHP*2) ; $6066 
-    btltmp_divHi        = btl_mathbuf + (MATHBUF_REGENHP*2) + 1 ; $6067 
+    btltmp_divLo        = btl_mathbuf + (MATHBUF_REGENHP*2)         ; $6066 
+    btltmp_divHi        = btl_mathbuf + (MATHBUF_REGENHP*2) + 1     ; $6067 
     btltmp_divV         = $6068 
     btltmp_divtmp       = $6069 
+    
+    btl_parrydamage     = btl_mathbuf + (PARRY_DAMAGE*2)            ; $608E ; 2 bytes
 
 ; anomie poison code reference    
 ;btltmp_divLo = $688B ;  divV
@@ -792,7 +796,7 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes
     en_speed        = $11 ;                             18
     en_level        = $12 ;                             19  
     en_item         = $13 ; can be changed by stealing  20
-    en_blank        = $14 ;                             21
+    en_extraAI      = $14 ;                             21
     ;; this block matches enemy ROM layout
     
     en_aimagpos     = $15 ;                             22

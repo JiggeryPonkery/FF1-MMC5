@@ -55,6 +55,11 @@ ACTION_HIDE       = $40
 ACTION_FLEE       = $80
 
 ;;;;;;;;;;;;;;;;;;
+;;  Enemy AI extras
+ENEMYAI_COUNTER   = $01
+ENEMYAI_REFLECT   = $80
+
+;;;;;;;;;;;;;;;;;;
 ;;  elements
 ELEMENT_TIME      = $01
 ELEMENT_STUN      = $02
@@ -314,6 +319,7 @@ BTLMSG_GOLDFOUND        = $5E ; Gold found..
 BTLMSG_NOTHING          = $5F ; Nothing
 BTLMSG_SCANNING         = $60 ; Scanning...
 BTLMSG_ATTACKBLOCKED    = $61 ; _covered the attack!
+BTLMSG_COUNTER          = $62 ; Counter attack!
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs

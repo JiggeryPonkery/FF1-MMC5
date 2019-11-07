@@ -4861,11 +4861,16 @@ DoBattleRound:
     LDA tmp
   
   : JSR Battle_DoTurn                       ; do their turn
-    JSR DrawPlayerBox                       ; draw the player box overtop the current player box
+  : JSR DrawPlayerBox                       ; draw the player box overtop the current player box
     JSR DrawCharacterStatus                 ; update character on-screen stats
     INC btl_boxcount
     JSR UndrawOneBox                        ; then undraw it; effectively updates HP
     JSR BattleTurnEnd_CheckForBattleEnd     ; wrap up / see if battle is over (will double-RTS if battle is over)
+    LDA btl_retaliate
+    BEQ @NextTurn
+        JSR Retaliate
+        JMP :-
+    
   @NextTurn:
     INC btl_curturn
     LDA btl_curturn
@@ -5714,6 +5719,7 @@ ScanEnemy:
     STX btl_defender_index
     STX btl_defender
     PHA
+    PHA
     ORA #$80
     STA btl_attacker
     TXA
@@ -6153,7 +6159,7 @@ PlayerAttackPlayer_Physical:   ;; this LongCall part makes sure the player being
     .word PlayerAttackPlayer_PhysicalZ
     .byte BANK_ENEMYSTATS
     
-    JSR DoPhysicalAttack_NoAttackerBox
+    JSR DoPhysicalAttack
     JMP SavePlayerDefender    
     
 ;; JIGS - hopefully DoPhysicalAttack is updated enough to handle this!
@@ -6196,8 +6202,53 @@ PlayerAttackEnemy_Physical:
     INY
     LDA btl_defender_hp+1
     STA (EnemyRAMPointer), Y
+    
+    LDA btl_retaliate               ; see if this was a counter attack
+    BEQ :+               
+        DEC btl_retaliate           ; if so, just turn off the flag and exit
+        RTS
+        
+  : LDY #en_extraAI                 ; otherwise, check if the enemy is set to counter
+    LDA (EnemyRAMPointer), Y
+    AND #ENEMYAI_COUNTER
+    BEQ :+
+       INC btl_retaliate 
+  : RTS
 
-    RTS
+
+Retaliate:  
+    LDA battle_totaldamage
+    STA btl_parrydamage
+    LDA battle_totaldamage+1        ; save total damage in btl_parrydamage
+    STA btl_parrydamage+1
+    LDA btl_attacker
+    BMI @PlayerWasAttacker
+    
+    PHA
+    LDA btl_defender
+    STA BattleCharID
+    TAX
+    DEC btl_charparry, X
+    PLA
+    TAX
+    JMP PlayerAttackEnemy_Physical
+    
+   @PlayerWasAttacker:          ;; Don't counter if its friendly fire... 
+    LDA btl_defender            ;; partly because I don't want to code for that, and partly because if you're
+    BMI @DontRetaliate          ;; getting beat up by your own guys you have enough trouble without losing your buff attack
+    
+    STA btl_attacker
+    LDX btl_defender_index
+    JSR DoesEnemyXExist
+    BEQ @DontRetaliate          ;; Don't counter if enemy was killed in the last turn
+    
+    JSR DrawAttackerBox         ; draw the attacker box
+    JSR DisplayAttackIndicator  ; flash the enemy
+    JMP ChooseAndAttackPlayer
+   
+   @DontRetaliate:               
+    DEC btl_retaliate                
+    RTS                          
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -6220,10 +6271,11 @@ EnemyAttackPlayer_Physical:
 
     ;; JIGS - again, moved to Bank Z to make space here for other changes, and to try and fix some bugs
     
-    JSR DoPhysicalAttack_NoAttackerBox ; DoPhysicalAttack       
+    JSR DoPhysicalAttack
 
 SavePlayerDefender:
     LDA btl_defender_index
+    TAX
     JSR PrepCharStatPointers
     
     LDY #ch_curhp - ch_stats
@@ -6233,11 +6285,24 @@ SavePlayerDefender:
     LDA btl_defender_hp+1
     STA (CharStatsPointer), Y
     
-    LDY #ch_ailments - ch_stats             ; update both IB and OB ailments
+    LDY #ch_ailments - ch_stats   ; update both IB and OB ailments
     LDA btl_defender_ailments
     STA (CharStatsPointer), Y
-    RTS                             ; done!
+    
+    LDA btl_retaliate             ; see if this was a counter attack
+    BEQ :+                        
+       DEC btl_retaliate          ; if so, just turn off the flag and exit
+       RTS
+    
+    ;; JIGS - since X is btl_defender_index, and not btl_defender
+    ;; retaliation won't trigger if the bb/master was covered! Which makes sense, right?
+  : LDA btl_charparry, X
+    BEQ :+
+        INC btl_retaliate    
+  : RTS
 
+
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  ClearMathBufHighBytes  [$A65A :: 0x3266A]
@@ -6710,6 +6775,16 @@ DoPhysicalAttack_NoAttackerBox:
       ;LDY #>(btl_unfmtcbtbox_buffer + $10)
       JSR DrawMessageBox_Prebuilt
       
+  : LDA btl_retaliate
+    BEQ :+
+  
+    LDA #MATHBUF_TOTALDAMAGE
+    LDX #MATHBUF_TOTALDAMAGE
+    LDY #PARRY_DAMAGE
+    JSR MathBuf_Add16                  ; add parry damage to total damage
+    LDA #BTLMSG_COUNTER
+    JSR DrawMessageBoxDelay_ThenClearIt
+    
   : LDA battle_totaldamage
     ORA battle_totaldamage+1
     BNE :+                              ; if there is zero damage....
@@ -8447,8 +8522,8 @@ ChooseAndAttackPlayer:
 ;; A doesn't need to be backed up here?! Its not really carrying anything important.
 
 GetRandomPlayerTarget:
-    TXA
-    PHA
+  ;  TXA
+  ;  PHA
     
   @GetTargetLoop:
       LDA #$00
@@ -8488,8 +8563,8 @@ GetRandomPlayerTarget:
        JSR RandAX
        CMP #03
        BNE @GetTargetLoop  ; if it rolls a 1 or a 2, loop. If it rolls a 3, tough luck, hidden character
- :  PLA                    ; restore A,X
-    TAX
+ :  ;PLA                    ; restore A,X
+    ;TAX
     RTS
     
     

@@ -1663,6 +1663,7 @@ data_BattleMessages:
 .word BTL_MESSAGE95
 .word BTL_MESSAGE96
 .word BTL_MESSAGE97
+.word BTL_MESSAGE98
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1860,6 +1861,18 @@ BTL_MESSAGE96:
 .byte $9C,$51,$B1,$B1,$1F,$AA,$69,$00,$3A,$27,$56,$55,$3E,$AF,$A9,$C4,$00 ; Scanning...
 BTL_MESSAGE97:
 .byte $FF,$38,$B2,$32,$23,$27,$1C,$1A,$39,$B7,$5E,$AE,$C4,$00 ; _covered the attack!
+BTL_MESSAGE98:
+.byte $8C,$26,$B1,$53,$44,$39,$B7,$5E,$AE,$C4,$00 ; Counter attack!
+
+
+
+
+
+
+
+
+
+
 
 
 
