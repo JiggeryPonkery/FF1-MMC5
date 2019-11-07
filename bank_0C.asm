@@ -6205,13 +6205,19 @@ PlayerAttackEnemy_Physical:
     
     LDA btl_retaliate               ; see if this was a counter attack
     BEQ :+               
-        DEC btl_retaliate           ; if so, just turn off the flag and exit
+        DEC btl_retaliate           ; if so, turn off the flag and turn off the enemy's AI
+        LDY #en_extraAI         
+        LDA (EnemyRAMPointer), Y
+        AND #~ENEMYAI_COUNTER
+        STA (EnemyRAMPointer), Y
         RTS
         
   : LDY #en_extraAI                 ; otherwise, check if the enemy is set to counter
     LDA (EnemyRAMPointer), Y
     AND #ENEMYAI_COUNTER
     BEQ :+
+       LDA battle_hitsconnected
+       BEQ :+
        INC btl_retaliate 
   : RTS
 
@@ -6226,6 +6232,7 @@ Retaliate:
     
     PHA
     LDA btl_defender
+    AND #$03
     STA BattleCharID
     TAX
     DEC btl_charparry, X
@@ -6298,6 +6305,8 @@ SavePlayerDefender:
     ;; retaliation won't trigger if the bb/master was covered! Which makes sense, right?
   : LDA btl_charparry, X
     BEQ :+
+        LDA battle_hitsconnected
+        BEQ :+
         INC btl_retaliate    
   : RTS
 

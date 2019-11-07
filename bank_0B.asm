@@ -1781,8 +1781,8 @@ EndOfBattleWrapUp:
     
     JSR GiveRewardToParty
     
-    LDA #$00                    ; Draw 4 EoB boxes.
-    STA eobbox_slotid           ;  Exp Up  |  ####P
+   ; LDA #$00                    ; Draw 4 EoB boxes.
+   ; STA eobbox_slotid           ;  Exp Up  |  ####P
     LDA #$01                    ;  Gold    |  ####G
     STA eobbox_textid
     JSR Draw4EobBoxes
@@ -2238,8 +2238,8 @@ LvlUp_LevelUp:
   
     ;;---- Display the actual ... display to indicate to the user that they levelled up
     
-    LDA #$00                    ; draw 4 EOB Boxes:
-    STA eobbox_slotid           ;   Level Up | <Name> L##
+    ;LDA #$00                    ; draw 4 EOB Boxes:
+    ;STA eobbox_slotid           ;   Level Up | <Name> L##
     LDA #$05                    ;   HP Max   | ### pts.
     STA eobbox_textid
     JSR Draw4EobBoxes
