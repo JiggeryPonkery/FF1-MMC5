@@ -1,0 +1,580 @@
+Modules list:
+-------------
+bank_00.o:
+    BANK_00           Offs = 000000   Size = 004000
+bank_01.o:
+    BANK_01           Offs = 000000   Size = 004000
+bank_02.o:
+    BANK_02           Offs = 000000   Size = 004000
+bank_03.o:
+    BANK_03           Offs = 000000   Size = 00106E
+bank_04.o:
+    BANK_04           Offs = 000000   Size = 003E7D
+bank_05.o:
+    BANK_05           Offs = 000000   Size = 00180E
+bank_06.o:
+    BANK_06           Offs = 000000   Size = 004000
+bank_07.o:
+    BANK_07           Offs = 000000   Size = 004000
+bank_08.o:
+    BANK_08           Offs = 000000   Size = 000828
+bank_09.o:
+    BANK_09           Offs = 000000   Size = 00189E
+bank_0A.o:
+    BANK_0A           Offs = 000000   Size = 001C27
+bank_0B.o:
+    BANK_0B           Offs = 000000   Size = 003A38
+bank_0C.o:
+    BANK_0C           Offs = 000000   Size = 003EE4
+bank_0D.o:
+    BANK_0D           Offs = 000000   Size = 002E26
+bank_0E.o:
+    BANK_0E           Offs = 000000   Size = 003E82
+bank_0F.o:
+    BANK_0F           Offs = 000000   Size = 00387A
+bank_10.o:
+    BANK_10           Offs = 000000   Size = 000F71
+bank_11.o:
+    BANK_11           Offs = 000000   Size = 003297
+bank_12.o:
+    BANK_12           Offs = 000000   Size = 002C0E
+bank_13.o:
+    BANK_13           Offs = 000000   Size = 00142E
+bank_14.o:
+    BANK_14           Offs = 000000   Size = 004000
+bank_15.o:
+    BANK_15           Offs = 000000   Size = 00000E
+bank_16.o:
+    BANK_16           Offs = 000000   Size = 003F0C
+bank_17.o:
+    BANK_17           Offs = 000000   Size = 003B14
+bank_18.o:
+    BANK_18           Offs = 000000   Size = 0032B3
+bank_19.o:
+    BANK_19           Offs = 000000   Size = 00000E
+bank_1A.o:
+    BANK_1A           Offs = 000000   Size = 00000E
+bank_1B.o:
+    BANK_1B           Offs = 000000   Size = 00000E
+bank_1C.o:
+    BANK_1C           Offs = 000000   Size = 00000E
+bank_1D.o:
+    BANK_1D           Offs = 000000   Size = 00000E
+bank_1E.o:
+    BANK_1E           Offs = 000000   Size = 003FF7
+bank_1F.o:
+    BANK_FIXED        Offs = 000000   Size = 003EED
+    VECTORS           Offs = 000000   Size = 000006
+
+
+Segment list:
+-------------
+Name                  Start   End     Size
+--------------------------------------------
+BANK_00               008000  00BFFF  004000
+BANK_01               008000  00BFFF  004000
+BANK_02               008000  00BFFF  004000
+BANK_03               008000  00906D  00106E
+BANK_04               008000  00BE7C  003E7D
+BANK_05               008000  00980D  00180E
+BANK_06               008000  00BFFF  004000
+BANK_07               008000  00BFFF  004000
+BANK_08               008000  008827  000828
+BANK_09               008000  00989D  00189E
+BANK_0A               008000  009C26  001C27
+BANK_0B               008000  00BA37  003A38
+BANK_0C               008000  00BEE3  003EE4
+BANK_0D               008000  00AE25  002E26
+BANK_0E               008000  00BE81  003E82
+BANK_0F               008000  00B879  00387A
+BANK_10               008000  008F70  000F71
+BANK_11               008000  00B296  003297
+BANK_12               008000  00AC0D  002C0E
+BANK_13               008000  00942D  00142E
+BANK_14               008000  00BFFF  004000
+BANK_15               008000  00800D  00000E
+BANK_16               008000  00BF0B  003F0C
+BANK_17               008000  00BB13  003B14
+BANK_18               008000  00B2B2  0032B3
+BANK_19               008000  00800D  00000E
+BANK_1A               008000  00800D  00000E
+BANK_1B               008000  00800D  00000E
+BANK_1C               008000  00800D  00000E
+BANK_1D               008000  00800D  00000E
+BANK_1E               008000  00BFF6  003FF7
+BANK_FIXED            00C000  00FEEC  003EED
+VECTORS               00FFFA  00FFFF  000006
+
+
+Exports list:
+-------------
+AddGPToParty              00DD64 RLA    AssignMapTileDamage_Z     009723 RLA    
+BackupMapMusic            00AD66 RLA    BankC_CrossBankJumpList   00882B RLA    
+BattleBGColorDigits       008F9C RLA    BattleBackgroundColor_LUT 00FDBA RLA    
+BattleConfirmation        00AF34 RLA    BattleCrossPageJump_L     00EFA2 RLA    
+BattleOver_ProcessResult_L 009425 RLA    BattleRNG_L               00FB02 RLA    
+BattleScreenShake_L       00F122 RLA    BattleWaitForVBlank_L     00F196 RLA    
+Battle_ReadPPUData_L      00EF86 RLA    CHRLoad                   00E8C0 RLA    
+CallMinimapDecompress     00FC62 RLA    CallMusicPlay             00C5FE RLA    
+CallMusicPlay_L           00C5FE RLA    CancelNewGame             00C06E RLA    
+ClearBattleMessageBuffer_L 00F304 RLA    ClearMenuOtherNametables  00FD1A RLA    
+ClearOAM                  00C3B0 RLA    ConvertBattleNumber       008F86 RLA    
+CoordToNTAddr             00DBC7 RLA    CritCheck                 00A8A3 RLA    
+DimBatSprPalettes         00FBE0 RLA    DoOverworld               00C0A7 RLA    
+Draw2x2Sprite             00E251 RLA    DrawBattleEquipmentBox_L  00F596 RLA    
+DrawBattleMagicBox_L      00F475 RLA    DrawBox                   00DFC7 RLA    
+DrawBox_L                 00DFC7 RLA    DrawCombatBox_L           00F42D RLA    
+DrawCommandBox_L          00F3D1 RLA    DrawComplexString         00DDB4 RLA    
+DrawComplexString_L       00DDB4 RLA    DrawCursor                00EC18 RLA    
+DrawEquipMenuStrings      00EC7B RLA    DrawImageRect             00DBD8 RLA    
+DrawItemBox_L             00F61E RLA    DrawManaString_ForBattle  00BE64 RLA    
+DrawOBSprite              00EB75 RLA    DrawPalette               00D865 RLA    
+DrawPalette_L             00D865 RLA    DrawPlayerBox             00F411 RLA    
+DrawRosterBox_L           00F38D RLA    DrawSimple2x3Sprite       00EBA7 RLA    
+DumbBottleThing           009900 RLA    EnemyAttackPlayer_PhysicalZ 00B1E7 RLA    
+EnterBridgeScene_L        0093E3 RLA    EnterEndingScene          0093E6 RLA    
+EnterMainMenu             00A2C1 RLA    EnterMiniGame             008FF3 RLA    
+EnterMinimap              00BA57 RLA    EnterShop                 0092FE RLA    
+EnterTitleScreenNew       009A66 RLA    EraseBox                  00E0AA RLA    
+FadeInBatSprPalettes      00FC51 RLA    FadeOutBatSprPalettes     00FC3D RLA    
+FillItemBox               00ED0B RLA    GameLoaded                00C093 RLA    
+GameStart2                00C073 RLA    GameStart_L               00C000 RLA    
+GetDialogueString         008200 RLA    HandPalette               00A9B9 RLA    
+HideMapObject             0087D7 RLA    HushTriangle              00FD6F RLA    
+IntroTitlePrepare         0092EF RLA    JIGS_RefreshAttributes    00EF79 RLA    
+JigsIntro                 009882 RLA    LoadBattleSpritesForBank_Z 00BE01 RLA    
+LoadBattleTextChr         00800E RLA    LoadBridgeSceneGFX_Menu   00E821 RLA    
+LoadEnemyStats            00AF54 RLA    LoadMenuCHRPal            00E853 RLA    
+LoadMenuCHRPal_Z          00E87B RLA    LoadPrice                 00EC43 RLA    
+LoadPriceZ                00EC3B RLA    LoadShopCHRForBank_Z      00BDDA RLA    
+LoadShopCHRPal            00E859 RLA    LongCall                  00FCCA RLA    
+Magic_ConvertBitsToBytes  00FDC8 RLA    MenuCondStall             00E092 RLA    
+MinimapDecompress         00BF40 RLA    MultiplyXA                00FCBD RLA    
+MusicPlay_L               00A600 RLA    NewGamePartyGeneration    009BB6 RLA    
+OptionsMenu               00A14E RLA    PlayDoorSFX               00CF82 RLA    
+PlaySFX_Error             00DA23 RLA    PlayerAttackEnemy_PhysicalZ 00B034 RLA    
+PlayerAttackPlayer_PhysicalZ 00B10C RLA    PrepBattleVarsAndEnterBattle_L 009422 RLA    
+PrintBattleTurn           008FA4 RLA    PrintCharStat             008E87 RLA    
+PrintEXPToNext_B          009521 RLA    PrintGold                 008F74 RLA    
+PrintNumber_2Digit        008FB5 RLA    PrintPrice                008F6E RLA    
+RandAX                    00FC9F RLA    ReadjustEquipStats        00A753 RLA    
+RestoreMapMusic           00ADA3 RLA    SaveScreen                00A9F3 RLA    
+SaveScreenHelper          00FDAA RLA    ScanEnemyString           00991B RLA    
+SetBattlePPUAddr          00EF6E RLA    SetPPUAddr_XA             00F0C4 RLA    
+ShiftLeft6                00F58F RLA    ShiftSpriteHightoLow      00EA96 RLA    
+ShowMapObject             008608 RLA    SoundTestZ                00A3E8 RLA    
+StartNewGame              00C080 RLA    StealFromEnemyZ           00960D RLA    
+SwapBtlTmpBytes_L         00FAEA RLA    TalkToObject              008586 RLA    
+TalkToTile_BankE          00917A RLA    UnadjustEquipStats        00A687 RLA    
+UndrawNBattleBlocks_L     00F37D RLA    UpdateJoy                 00D7D7 RLA    
+UpdateJoy_L               00D7D7 RLA    WaitForVBlank_L           00FB7F RLA    
+WeaponArmorPrices         009800 RLA    WriteAttributesToPPU      00A0A8 RLA    
+data_BattleMessages       0090A4 RLA    data_BridgeCHR            00AE2B REA    
+data_BridgeNT             00B62B REA    data_EnemyNames           0080E5 RLA    
+data_EpilogueCHR          00A22B RLA    data_EpilogueNT           00AA2B REA    
+lut_BackdropPal           008D00 RLA    lut_BattleFormations      008400 RLA    
+lut_BattlePalettes        0083B7 RLA    lut_BattleRates           008C00 RLA    
+lut_BtlBackdrops          008D60 RLA    lut_ClassStartingStats    008DE0 RLA    
+lut_Domains               008000 RLA    lut_EnemyAttack           008000 RLA    
+lut_EntrTele_Map          008EE0 RLA    lut_EntrTele_X            008EA0 RLA    
+lut_EntrTele_Y            008EC0 RLA    lut_ExitTele_X            008F00 RLA    
+lut_ExitTele_Y            008F10 RLA    lut_InitUnsramFirstPage   0083B8 RLA    
+lut_ItemNamePtrTbl        008534 RLA    lut_ItemPrices            009600 RLA    
+lut_MapObjGfx             008000 RLA    lut_MapObjects            008100 RLA    
+lut_MapmanPalettes        0083A0 RLA    lut_MinimapBGPal          00FC8F RLA    
+lut_MinimapSprCHR         00FC6F RLA    lut_NormTele_Map          008FE0 RLA    
+lut_NormTele_X            008F60 RLA    lut_NormTele_Y            008FA0 RLA    
+lut_OWPtrTbl              008000 RLA    lut_OWTileset             008000 RLA    
+lut_OrbCHR                0091E3 RLA    lut_RNG                   00EE6E RLA    
+lut_SMPalettes            00A000 RLA    lut_SMTilesetAttr         008400 RLA    
+lut_SMTilesetProp         008800 RLA    lut_SMTilesetTSA          009000 RLA    
+lut_ShopCHR               008000 RLA    lut_TilesetMusicTrack     00FD12 RLA    
+lut_Tilesets              008F20 RLA    lut_Treasure              009020 RLA    
+lut_Treasure_2            009220 RLA    lut_VehicleMusic          00C6DE RLA    
+lut_WeaponArmorNamePtrTbl 0086CC RLA    
+
+
+Imports list:
+-------------
+AddGPToParty (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(21)
+AssignMapTileDamage_Z (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(171)
+BackupMapMusic (bank_0D.o):
+    bank_0B.o                 bank_0B.asm(30)
+BankC_CrossBankJumpList (bank_0C.o):
+    bank_0B.o                 bank_0B.asm(26)
+BattleBGColorDigits (bank_0E.o):
+    bank_0F.o                 bank_0F.asm(27)
+BattleBackgroundColor_LUT (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(26)
+BattleConfirmation (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(10)
+BattleCrossPageJump_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(11)
+    bank_0B.o                 bank_0B.asm(25)
+BattleOver_ProcessResult_L (bank_0B.o):
+    bank_0C.o                 bank_0C.asm(12)
+BattleRNG_L (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(33)
+    bank_0E.o                 bank_0E.asm(70)
+    bank_0C.o                 bank_0C.asm(13)
+    bank_0B.o                 bank_0B.asm(24)
+BattleScreenShake_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(14)
+BattleWaitForVBlank_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(15)
+Battle_ReadPPUData_L (bank_1F.o):
+    bank_0B.o                 bank_0B.asm(18)
+CHRLoad (bank_1F.o):
+    bank_08.o                 bank_08.asm(6)
+    bank_04.o                 bank_04.asm(12)
+CallMinimapDecompress (bank_1F.o):
+    bank_04.o                 bank_04.asm(9)
+CallMusicPlay (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+    bank_0E.o                 bank_0E.asm(22)
+CallMusicPlay_L (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(21)
+    bank_0C.o                 bank_0C.asm(16)
+    bank_0B.o                 bank_0B.asm(20)
+    bank_09.o                 bank_09.asm(11)
+    bank_04.o                 bank_04.asm(9)
+CancelNewGame (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(29)
+ClearBattleMessageBuffer_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(17)
+ClearMenuOtherNametables (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(23)
+ClearOAM (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+    bank_0E.o                 bank_0E.asm(24)
+ConvertBattleNumber (bank_0E.o):
+    bank_0A.o                 bank_0A.asm(16)
+CoordToNTAddr (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(24)
+CritCheck (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(19)
+DimBatSprPalettes (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(26)
+DoOverworld (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(27)
+Draw2x2Sprite (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+DrawBattleEquipmentBox_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(20)
+DrawBattleMagicBox_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(21)
+DrawBox (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(24)
+    bank_0E.o                 bank_0E.asm(28)
+DrawBox_L (bank_1F.o):
+    bank_09.o                 bank_09.asm(9)
+DrawCombatBox_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(22)
+    bank_0B.o                 bank_0B.asm(23)
+DrawCommandBox_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(23)
+DrawComplexString (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+    bank_0E.o                 bank_0E.asm(29)
+    bank_0C.o                 bank_0C.asm(24)
+DrawComplexString_L (bank_1F.o):
+    bank_09.o                 bank_09.asm(9)
+DrawCursor (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(24)
+    bank_0E.o                 bank_0E.asm(30)
+DrawEquipMenuStrings (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(31)
+DrawImageRect (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(32)
+DrawItemBox_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(25)
+DrawManaString_ForBattle (bank_0E.o):
+    bank_0C.o                 bank_0C.asm(44)
+DrawOBSprite (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(34)
+DrawPalette (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+    bank_0E.o                 bank_0E.asm(35)
+DrawPalette_L (bank_1F.o):
+    bank_09.o                 bank_09.asm(9)
+    bank_04.o                 bank_04.asm(9)
+DrawPlayerBox (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(45)
+DrawRosterBox_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(26)
+DrawSimple2x3Sprite (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+DumbBottleThing (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(165)
+EnemyAttackPlayer_PhysicalZ (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(27)
+EnterBridgeScene_L (bank_09.o):
+    bank_1F.o                 bank_1F.asm(95)
+EnterEndingScene (bank_09.o):
+    bank_1F.o                 bank_1F.asm(96)
+EnterMainMenu (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(98)
+EnterMiniGame (bank_09.o):
+    bank_1F.o                 bank_1F.asm(99)
+EnterMinimap (bank_04.o):
+    bank_1F.o                 bank_1F.asm(100)
+EnterShop (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(101)
+EnterTitleScreenNew (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(103)
+EraseBox (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(38)
+FadeInBatSprPalettes (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(40)
+FadeOutBatSprPalettes (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(41)
+FillItemBox (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(33)
+GameLoaded (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(20)
+GameStart2 (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(22)
+GameStart_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(29)
+GetDialogueString (bank_10.o):
+    bank_1F.o                 bank_1F.asm(169)
+HandPalette (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(30)
+HideMapObject (bank_10.o):
+    bank_0E.o                 bank_0E.asm(67)
+HushTriangle (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(22)
+    bank_0E.o                 bank_0E.asm(43)
+IntroTitlePrepare (bank_0E.o):
+    bank_0F.o                 bank_0F.asm(22)
+JIGS_RefreshAttributes (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(50)
+JigsIntro (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(104)
+LoadBattleSpritesForBank_Z (bank_04.o):
+    bank_1F.o                 bank_1F.asm(105)
+LoadBattleTextChr (bank_08.o):
+    bank_1F.o                 bank_1F.asm(173)
+LoadBridgeSceneGFX_Menu (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(45)
+LoadEnemyStats (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(31)
+LoadMenuCHRPal (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(46)
+LoadMenuCHRPal_Z (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(30)
+LoadPrice (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(47)
+LoadPriceZ (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(32)
+LoadShopCHRForBank_Z (bank_04.o):
+    bank_0F.o                 bank_0F.asm(21)
+LoadShopCHRPal (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(48)
+LongCall (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(21)
+    bank_0E.o                 bank_0E.asm(50)
+    bank_0C.o                 bank_0C.asm(32)
+    bank_0B.o                 bank_0B.asm(27)
+    bank_0A.o                 bank_0A.asm(18)
+Magic_ConvertBitsToBytes (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(51)
+    bank_0C.o                 bank_0C.asm(33)
+MenuCondStall (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(24)
+MinimapDecompress (bank_1E.o):
+    bank_1F.o                 bank_1F.asm(106)
+MultiplyXA (bank_1F.o):
+    bank_10.o                 bank_10.asm(10)
+    bank_0F.o                 bank_0F.asm(21)
+    bank_0E.o                 bank_0E.asm(53)
+    bank_0D.o                 bank_0D.asm(8)
+    bank_0C.o                 bank_0C.asm(34)
+    bank_0B.o                 bank_0B.asm(29)
+MusicPlay_L (bank_0D.o):
+    bank_1F.o                 bank_1F.asm(107)
+NewGamePartyGeneration (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(108)
+OptionsMenu (bank_0F.o):
+    bank_0E.o                 bank_0E.asm(54)
+PlayDoorSFX (bank_1F.o):
+    bank_0E.o                 bank_0E.asm(69)
+    bank_0C.o                 bank_0C.asm(43)
+PlaySFX_Error (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(25)
+    bank_0E.o                 bank_0E.asm(56)
+PlayerAttackEnemy_PhysicalZ (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(35)
+PlayerAttackPlayer_PhysicalZ (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(36)
+PrepBattleVarsAndEnterBattle_L (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(109)
+PrintBattleTurn (bank_0E.o):
+    bank_0C.o                 bank_0C.asm(37)
+PrintCharStat (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(111)
+PrintEXPToNext_B (bank_0B.o):
+    bank_0E.o                 bank_0E.asm(57)
+PrintGold (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(112)
+PrintNumber_2Digit (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(113)
+PrintPrice (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(114)
+RandAX (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(22)
+    bank_0E.o                 bank_0E.asm(58)
+    bank_0C.o                 bank_0C.asm(38)
+    bank_0B.o                 bank_0B.asm(28)
+ReadjustEquipStats (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(115)
+    bank_0E.o                 bank_0E.asm(65)
+RestoreMapMusic (bank_0D.o):
+    bank_0C.o                 bank_0C.asm(49)
+SaveScreen (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(116)
+    bank_0E.o                 bank_0E.asm(59)
+SaveScreenHelper (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(20)
+ScanEnemyString (bank_0A.o):
+    bank_0C.o                 bank_0C.asm(51)
+SetBattlePPUAddr (bank_1F.o):
+    bank_0B.o                 bank_0B.asm(31)
+SetPPUAddr_XA (bank_1F.o):
+    bank_0B.o                 bank_0B.asm(32)
+ShiftLeft6 (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(46)
+ShiftSpriteHightoLow (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(25)
+    bank_0C.o                 bank_0C.asm(39)
+ShowMapObject (bank_10.o):
+    bank_0E.o                 bank_0E.asm(68)
+SoundTestZ (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(117)
+StartNewGame (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(20)
+StealFromEnemyZ (bank_0F.o):
+    bank_0C.o                 bank_0C.asm(47)
+SwapBtlTmpBytes_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(40)
+TalkToObject (bank_10.o):
+    bank_1F.o                 bank_1F.asm(118)
+TalkToTile_BankE (bank_0E.o):
+    bank_1F.o                 bank_1F.asm(170)
+UnadjustEquipStats (bank_0F.o):
+    bank_1F.o                 bank_1F.asm(134)
+    bank_0E.o                 bank_0E.asm(66)
+UndrawNBattleBlocks_L (bank_1F.o):
+    bank_0C.o                 bank_0C.asm(41)
+    bank_0B.o                 bank_0B.asm(22)
+UpdateJoy (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(23)
+    bank_0E.o                 bank_0E.asm(60)
+UpdateJoy_L (bank_1F.o):
+    bank_09.o                 bank_09.asm(9)
+    bank_04.o                 bank_04.asm(9)
+WaitForVBlank_L (bank_1F.o):
+    bank_0F.o                 bank_0F.asm(21)
+    bank_0E.o                 bank_0E.asm(61)
+    bank_0D.o                 bank_0D.asm(9)
+    bank_0C.o                 bank_0C.asm(42)
+    bank_0B.o                 bank_0B.asm(21)
+    bank_09.o                 bank_09.asm(10)
+    bank_04.o                 bank_04.asm(9)
+WeaponArmorPrices (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(161)
+WriteAttributesToPPU (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(172)
+data_BattleMessages (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(122)
+data_BridgeCHR (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(123)
+data_BridgeNT (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(124)
+data_EnemyNames (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(125)
+data_EpilogueCHR (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(126)
+data_EpilogueNT (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(127)
+lut_BackdropPal (bank_13.o):
+    bank_1F.o                 bank_1F.asm(156)
+lut_BattleFormations (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(128)
+lut_BattlePalettes (bank_0C.o):
+    bank_1F.o                 bank_1F.asm(129)
+lut_BattleRates (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(130)
+lut_BtlBackdrops (bank_13.o):
+    bank_1F.o                 bank_1F.asm(157)
+lut_ClassStartingStats (bank_13.o):
+    bank_1F.o                 bank_1F.asm(153)
+lut_Domains (bank_0B.o):
+    bank_1F.o                 bank_1F.asm(166)
+lut_EnemyAttack (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(162)
+lut_EntrTele_Map (bank_13.o):
+    bank_1F.o                 bank_1F.asm(143)
+lut_EntrTele_X (bank_13.o):
+    bank_1F.o                 bank_1F.asm(141)
+lut_EntrTele_Y (bank_13.o):
+    bank_1F.o                 bank_1F.asm(142)
+lut_ExitTele_X (bank_13.o):
+    bank_1F.o                 bank_1F.asm(144)
+lut_ExitTele_Y (bank_13.o):
+    bank_1F.o                 bank_1F.asm(145)
+lut_InitUnsramFirstPage (bank_12.o):
+    bank_1F.o                 bank_1F.asm(152)
+lut_ItemNamePtrTbl (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(159)
+lut_ItemPrices (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(131)
+lut_MapObjGfx (bank_13.o):
+    bank_1F.o                 bank_1F.asm(150)
+lut_MapObjects (bank_13.o):
+    bank_1F.o                 bank_1F.asm(158)
+lut_MapmanPalettes (bank_12.o):
+    bank_1F.o                 bank_1F.asm(138)
+lut_MinimapBGPal (bank_1F.o):
+    bank_04.o                 bank_04.asm(12)
+lut_MinimapSprCHR (bank_1F.o):
+    bank_04.o                 bank_04.asm(12)
+lut_NormTele_Map (bank_13.o):
+    bank_1F.o                 bank_1F.asm(149)
+lut_NormTele_X (bank_13.o):
+    bank_1F.o                 bank_1F.asm(147)
+lut_NormTele_Y (bank_13.o):
+    bank_1F.o                 bank_1F.asm(148)
+lut_OWPtrTbl (bank_1E.o):
+    bank_1F.o                 bank_1F.asm(167)
+lut_OWTileset (bank_12.o):
+    bank_1F.o                 bank_1F.asm(135)
+lut_OrbCHR (bank_09.o):
+    bank_1F.o                 bank_1F.asm(132)
+lut_RNG (bank_1F.o):
+    bank_09.o                 bank_09.asm(10)
+lut_SMPalettes (bank_12.o):
+    bank_1F.o                 bank_1F.asm(140)
+lut_SMTilesetAttr (bank_12.o):
+    bank_1F.o                 bank_1F.asm(136)
+lut_SMTilesetProp (bank_12.o):
+    bank_1F.o                 bank_1F.asm(137)
+lut_SMTilesetTSA (bank_12.o):
+    bank_1F.o                 bank_1F.asm(139)
+lut_ShopCHR (bank_04.o):
+    bank_1F.o                 bank_1F.asm(133)
+lut_TilesetMusicTrack (bank_1F.o):
+    bank_0D.o                 bank_0D.asm(6)
+lut_Tilesets (bank_13.o):
+    bank_1F.o                 bank_1F.asm(146)
+lut_Treasure (bank_13.o):
+    bank_1F.o                 bank_1F.asm(154)
+lut_Treasure_2 (bank_13.o):
+    bank_1F.o                 bank_1F.asm(155)
+lut_VehicleMusic (bank_1F.o):
+    bank_0D.o                 bank_0D.asm(7)
+lut_WeaponArmorNamePtrTbl (bank_0A.o):
+    bank_1F.o                 bank_1F.asm(160)
+

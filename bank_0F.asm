@@ -5441,6 +5441,9 @@ CoverStuff:
     BEQ @NoCover
     
     LDA btl_charcover+4, X         ; get the knight doing the covering
+    CMP btl_attacker
+    BEQ @NoCover                   ; skip if the knight is confused and doing the attacking!
+    
     JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y

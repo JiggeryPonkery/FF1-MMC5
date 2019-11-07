@@ -6830,11 +6830,7 @@ DoPhysicalAttack_NoAttackerBox:
   @OutputDamageBox:
     LDA #0                       ; and set the backup variable to 0 since they're not re-hiding after this
     STA Hidden                   ; (either the attacker or the defender)
-  ;  LDA #$03                            ; output damage
-    ;LDX #<(btl_unfmtcbtbox_buffer + $30);  to the #3 combat box
-    ;LDY #>(btl_unfmtcbtbox_buffer + $30)
-  ;  JSR DrawMessageBox_Prebuilt
-   JSR DrawDamageBox 
+    JSR DrawDamageBox 
   
     LDA battle_critsconnected
     BEQ :+                              ; if any criticals connected...
