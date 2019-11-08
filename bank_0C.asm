@@ -254,134 +254,139 @@ lut_EquipmentSpells:
 ;;
 ;;    see MAGDATA constants in Constants.inc for layout description
 
-lut_MagicData:
+;lut_MagicData:
+;;
+;; JIGS - I highly recommend using FFHackster to design your magic, then copy-paste the data into the .bin above
+;;        and comment out the stuff below. For weapons and armours, too.
+;;
+;;; JIGS note - When loading up magic data, about #90 bytes can be saved by changing the bit-shifting to:
+;;; A = magic ID
+;;; LDX #7
+;;; JSR MultiplyXA
+;;; ...then deleting the unused byte from all of these.
+;   
+;;      ╒ Hit Rate
+;;      |   ╒ Effectivity
+;;      |   |   ╒ Element
+;;      |   |   |   ╒ Target
+;;      |   |   |   |   ╒ Effect
+;;      |   |   |   |   |   ╒ Graphic
+;;      |   |   |   |   |   |   ╒ Palette
+;;      |   |   |   |   |   |   |   ╒ Unused
+;;      v   v   v   v   v   v   v   v  
+;.byte $00,$10,$00,$10,$07,$C0,$29,$00 ; 00 CURE 
+;.byte $18,$14,$00,$01,$02,$C8,$21,$00 ; 01 HARM   
+;.byte $00,$08,$00,$10,$09,$B0,$29,$00 ; 02 SHIELD
+;.byte $00,$50,$00,$04,$10,$B0,$22,$00 ; 03 BLINK 
+;.byte $18,$0A,$10,$02,$01,$D0,$26,$00 ; 04 FIRE   
+;.byte $18,$20,$01,$01,$03,$E8,$2B,$00 ; 05 SLEEP  
+;.byte $40,$14,$00,$02,$0E,$B8,$28,$00 ; 06 LOCK  
+;.byte $18,$0A,$40,$02,$01,$C8,$28,$00 ; 07 BOLT   
+;.byte $00,$08,$00,$10,$08,$E0,$27,$00 ; 08 LAMP   
+;.byte $40,$40,$01,$01,$03,$E8,$2C,$00 ; 09 MUTE   
+;.byte $00,$40,$00,$08,$0A,$B0,$28,$00 ; 0A BOLT (Shield)
+;.byte $00,$28,$00,$10,$10,$B0,$23,$00 ; 0B INVISBL 
+;.byte $18,$14,$20,$02,$01,$D0,$21,$00 ; 0C ICE    
+;.byte $18,$08,$01,$01,$03,$E8,$23,$00 ; 0D DARK   
+;.byte $00,$0E,$00,$10,$0B,$B8,$2B,$00 ; 0E TEMPER  
+;.byte $40,$00,$01,$01,$04,$E8,$2A,$00 ; 0F SLOW    
+;.byte $00,$21,$00,$10,$07,$C0,$2B,$00 ; 10 CURE 2  
+;.byte $18,$28,$00,$01,$02,$C8,$23,$00 ; 11 HARM 2 
+;.byte $00,$10,$00,$08,$0A,$B0,$26,$00 ; 12 FIRE (shield)
+;.byte $03,$20,$00,$08,$15,$C0,$28,$00 ; 13 HEAL    ;; JIGS - Heal spells now apply regen
+;;.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ; 14 HEAL     ;; backup of original spell
+;.byte $18,$1E,$10,$01,$01,$D0,$27,$00 ; 15 FIRE 2 
+;.byte $40,$10,$01,$02,$03,$E8,$27,$00 ; 16 HOLD    
+;.byte $18,$1E,$40,$01,$01,$C8,$27,$00 ; 17 BOLT 2 
+;.byte $40,$14,$00,$01,$0E,$B8,$27,$00 ; 18 LOCK 2  
+;.byte $00,$04,$00,$10,$08,$E0,$2A,$00 ; 19 PURE   
+;.byte $18,$28,$01,$01,$05,$E8,$25,$00 ; 1A FEAR        
+;.byte $00,$20,$00,$08,$0A,$B0,$21,$00 ; 1B ICE (shield)
+;.byte $00,$40,$00,$10,$08,$E0,$2C,$00 ; 1C VOICE  
+;.byte $40,$20,$00,$02,$03,$E8,$21,$00 ; 1D SLEEP 2
+;.byte $00,$00,$00,$10,$0C,$B8,$2A,$00 ; 1E FAST
+;.byte $40,$80,$01,$01,$03,$E8,$26,$00 ; 1F CONFUSE
+;.byte $18,$28,$20,$01,$01,$D0,$22,$00 ; 20 ICE 2  
+;.byte $00,$42,$00,$10,$07,$C0,$2C,$00 ; 21 CURE 3
+;.byte $00,$01,$00,$10,$06,$E0,$21,$00 ; 22 LIFE     ; JIGS - will now cure death, then heal some HP
+;.byte $18,$3C,$00,$01,$02,$C8,$25,$00 ; 23 HARM 3 
+;.byte $04,$40,$00,$08,$15,$C0,$27,$00 ; 24 HEAL 2
+;;.byte $00,$18,$00,$08,$07,$C0,$27,$00 ; 25 HEAL 2
+;.byte $18,$32,$10,$01,$01,$D0,$25,$00 ; 26 FIRE 3    
+;.byte $28,$01,$02,$01,$03,$E8,$22,$00 ; 27 BANE  
+;.byte $FF,$00,$00,$08,$00,$00,$00,$00 ; 28 WARP  
+;.byte $40,$00,$00,$02,$04,$E8,$29,$00 ; 29 SLOW 2
+;.byte $00,$02,$00,$10,$14,$E0,$20,$00 ; 2A SOFT    ; JIGS - will now cure stone
+;.byte $FF,$00,$00,$08,$00,$00,$00,$00 ; 2B EXIT   
+;.byte $00,$0C,$00,$08,$09,$B0,$2A,$00 ; 2C SHIELD2
+;.byte $00,$28,$00,$08,$10,$B0,$24,$00 ; 2D INVIS 2
+;.byte $18,$3C,$40,$01,$01,$C8,$22,$00 ; 2E BOLT 3 
+;.byte $18,$01,$08,$02,$03,$D8,$20,$00 ; 2F RUB    
+;.byte $28,$01,$80,$01,$03,$B8,$26,$00 ; 30 QUAKE  
+;.byte $00,$10,$01,$02,$12,$E8,$28,$00 ; 31 STUN   
+;.byte $00,$00,$00,$10,$0F,$C0,$21,$00 ; 32 CURE 4 
+;.byte $30,$50,$00,$01,$02,$C8,$2C,$00 ; 33 HARM 4    
+;.byte $00,$89,$00,$08,$0A,$B0,$25,$00 ; 34 RUB (shield)
+;.byte $05,$60,$00,$08,$15,$C0,$25,$00 ; 35 HEAL 3
+;;.byte $30,$30,$00,$08,$07,$C0,$25,$00 ; 36 HEAL 3
+;.byte $18,$46,$20,$01,$01,$D0,$2B,$00 ; 37 ICE 3  
+;.byte $40,$02,$02,$02,$03,$C8,$20,$00 ; 38 BREAK  
+;.byte $00,$10,$00,$04,$0D,$B0,$20,$00 ; 39 SABER 
+;.byte $00,$08,$01,$02,$12,$E8,$24,$00 ; 3A BLIND  
+;.byte $00,$01,$00,$10,$13,$D8,$21,$00 ; 3B LIFE 2  ; JIGS - will now cure death, then max HP
+;.byte $6B,$50,$00,$01,$01,$C8,$24,$00 ; 3C HOLY   
+;.byte $00,$FF,$00,$10,$0A,$B0,$20,$00 ; 3D WALL          
+;.byte $6B,$00,$00,$02,$11,$B8,$20,$00 ; 3E DISPEL        
+;.byte $6B,$64,$00,$01,$01,$D0,$28,$00 ; 3F FLARE  
+;.byte $30,$10,$04,$01,$03,$E8,$20,$00 ; 40 STOP           
+;.byte $20,$01,$04,$01,$03,$D8,$2B,$00 ; 41 BANISH         
+;.byte $00,$01,$08,$02,$12,$D8,$28,$00 ; 42 DOOM      
 ;
-; JIGS - I highly recommend using FFHackster to design your magic, then copy-paste the data into the .bin above
-;        and comment out the stuff below. For weapons and armours, too.
-;
-;; JIGS note - When loading up magic data, about #90 bytes can be saved by changing the bit-shifting to:
-;; A = magic ID
-;; LDX #7
-;; JSR MultiplyXA
-;; ...then deleting the unused byte from all of these.
-   
-;      ╒ Hit Rate
-;      |   ╒ Effectivity
-;      |   |   ╒ Element
-;      |   |   |   ╒ Target
-;      |   |   |   |   ╒ Effect
-;      |   |   |   |   |   ╒ Graphic
-;      |   |   |   |   |   |   ╒ Palette
-;      |   |   |   |   |   |   |   ╒ Unused
-;      v   v   v   v   v   v   v   v  
-.byte $00,$10,$00,$10,$07,$C0,$29,$00 ; 00 CURE 
-.byte $18,$14,$00,$01,$02,$C8,$21,$00 ; 01 HARM   
-.byte $00,$08,$00,$10,$09,$B0,$29,$00 ; 02 SHIELD
-.byte $00,$50,$00,$04,$10,$B0,$22,$00 ; 03 BLINK 
-.byte $18,$0A,$10,$02,$01,$D0,$26,$00 ; 04 FIRE   
-.byte $18,$20,$01,$01,$03,$E8,$2B,$00 ; 05 SLEEP  
-.byte $40,$14,$00,$02,$0E,$B8,$28,$00 ; 06 LOCK  
-.byte $18,$0A,$40,$02,$01,$C8,$28,$00 ; 07 BOLT   
-.byte $00,$08,$00,$10,$08,$E0,$27,$00 ; 08 LAMP   
-.byte $40,$40,$01,$01,$03,$E8,$2C,$00 ; 09 MUTE   
-.byte $00,$40,$00,$08,$0A,$B0,$28,$00 ; 0A BOLT (Shield)
-.byte $00,$28,$00,$10,$10,$B0,$23,$00 ; 0B INVISBL 
-.byte $18,$14,$20,$02,$01,$D0,$21,$00 ; 0C ICE    
-.byte $18,$08,$01,$01,$03,$E8,$23,$00 ; 0D DARK   
-.byte $00,$0E,$00,$10,$0B,$B8,$2B,$00 ; 0E TEMPER  
-.byte $40,$00,$01,$01,$04,$E8,$2A,$00 ; 0F SLOW    
-.byte $00,$21,$00,$10,$07,$C0,$2B,$00 ; 10 CURE 2  
-.byte $18,$28,$00,$01,$02,$C8,$23,$00 ; 11 HARM 2 
-.byte $00,$10,$00,$08,$0A,$B0,$26,$00 ; 12 FIRE (shield)
-.byte $03,$20,$00,$08,$15,$C0,$28,$00 ; 13 HEAL    ;; JIGS - Heal spells now apply regen
-;.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ; 14 HEAL     ;; backup of original spell
-.byte $18,$1E,$10,$01,$01,$D0,$27,$00 ; 15 FIRE 2 
-.byte $40,$10,$01,$02,$03,$E8,$27,$00 ; 16 HOLD    
-.byte $18,$1E,$40,$01,$01,$C8,$27,$00 ; 17 BOLT 2 
-.byte $40,$14,$00,$01,$0E,$B8,$27,$00 ; 18 LOCK 2  
-.byte $00,$04,$00,$10,$08,$E0,$2A,$00 ; 19 PURE   
-.byte $18,$28,$01,$01,$05,$E8,$25,$00 ; 1A FEAR        
-.byte $00,$20,$00,$08,$0A,$B0,$21,$00 ; 1B ICE (shield)
-.byte $00,$40,$00,$10,$08,$E0,$2C,$00 ; 1C VOICE  
-.byte $40,$20,$00,$02,$03,$E8,$21,$00 ; 1D SLEEP 2
-.byte $00,$00,$00,$10,$0C,$B8,$2A,$00 ; 1E FAST
-.byte $40,$80,$01,$01,$03,$E8,$26,$00 ; 1F CONFUSE
-.byte $18,$28,$20,$01,$01,$D0,$22,$00 ; 20 ICE 2  
-.byte $00,$42,$00,$10,$07,$C0,$2C,$00 ; 21 CURE 3
-.byte $00,$01,$00,$10,$06,$E0,$21,$00 ; 22 LIFE     ; JIGS - will now cure death, then heal some HP
-.byte $18,$3C,$00,$01,$02,$C8,$25,$00 ; 23 HARM 3 
-.byte $04,$40,$00,$08,$15,$C0,$27,$00 ; 24 HEAL 2
+;;      ╒ Hit Rate
+;;      |   ╒ Effectivity
+;;      |   |   ╒ Element
+;;      |   |   |   ╒ Target
+;;      |   |   |   |   ╒ Effect
+;;      |   |   |   |   |   ╒ Graphic
+;;      |   |   |   |   |   |   ╒ Palette
+;;      |   |   |   |   |   |   |   ╒ Unused
+;;      v   v   v   v   v   v   v   v  
+;.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ; 14 HEAL  
 ;.byte $00,$18,$00,$08,$07,$C0,$27,$00 ; 25 HEAL 2
-.byte $18,$32,$10,$01,$01,$D0,$25,$00 ; 26 FIRE 3    
-.byte $28,$01,$02,$01,$03,$E8,$22,$00 ; 27 BANE  
-.byte $FF,$00,$00,$08,$00,$00,$00,$00 ; 28 WARP  
-.byte $40,$00,$00,$02,$04,$E8,$29,$00 ; 29 SLOW 2
-.byte $00,$02,$00,$10,$14,$E0,$20,$00 ; 2A SOFT    ; JIGS - will now cure stone
-.byte $FF,$00,$00,$08,$00,$00,$00,$00 ; 2B EXIT   
-.byte $00,$0C,$00,$08,$09,$B0,$2A,$00 ; 2C SHIELD2
-.byte $00,$28,$00,$08,$10,$B0,$24,$00 ; 2D INVIS 2
-.byte $18,$3C,$40,$01,$01,$C8,$22,$00 ; 2E BOLT 3 
-.byte $18,$01,$08,$02,$03,$D8,$20,$00 ; 2F RUB    
-.byte $28,$01,$80,$01,$03,$B8,$26,$00 ; 30 QUAKE  
-.byte $00,$10,$01,$02,$12,$E8,$28,$00 ; 31 STUN   
-.byte $00,$00,$00,$10,$0F,$C0,$21,$00 ; 32 CURE 4 
-.byte $30,$50,$00,$01,$02,$C8,$2C,$00 ; 33 HARM 4    
-.byte $00,$89,$00,$08,$0A,$B0,$25,$00 ; 34 RUB (shield)
-.byte $05,$60,$00,$08,$15,$C0,$25,$00 ; 35 HEAL 3
 ;.byte $30,$30,$00,$08,$07,$C0,$25,$00 ; 36 HEAL 3
-.byte $18,$46,$20,$01,$01,$D0,$2B,$00 ; 37 ICE 3  
-.byte $40,$02,$02,$02,$03,$C8,$20,$00 ; 38 BREAK  
-.byte $00,$10,$00,$04,$0D,$B0,$20,$00 ; 39 SABER 
-.byte $00,$08,$01,$02,$12,$E8,$24,$00 ; 3A BLIND  
-.byte $00,$01,$00,$10,$13,$D8,$21,$00 ; 3B LIFE 2  ; JIGS - will now cure death, then max HP
-.byte $6B,$50,$00,$01,$01,$C8,$24,$00 ; 3C HOLY   
-.byte $00,$FF,$00,$10,$0A,$B0,$20,$00 ; 3D WALL          
-.byte $6B,$00,$00,$02,$11,$B8,$20,$00 ; 3E DISPEL        
-.byte $6B,$64,$00,$01,$01,$D0,$28,$00 ; 3F FLARE  
-.byte $30,$10,$04,$01,$03,$E8,$20,$00 ; 40 STOP           
-.byte $20,$01,$04,$01,$03,$D8,$2B,$00 ; 41 BANISH         
-.byte $00,$01,$08,$02,$12,$D8,$28,$00 ; 42 DOOM      
-
-;      ╒ Hit Rate
-;      |   ╒ Effectivity
-;      |   |   ╒ Element
-;      |   |   |   ╒ Target
-;      |   |   |   |   ╒ Effect
-;      |   |   |   |   |   ╒ Graphic
-;      |   |   |   |   |   |   ╒ Palette
-;      |   |   |   |   |   |   |   ╒ Unused
-;      v   v   v   v   v   v   v   v  
-.byte $18,$00,$00,$01,$01,$E8,$20,$00 ; Kick
-
-;; removed heal and pure data
-
-;; Enemy attacks
-.byte $20,$18,$20,$01,$01,$00,$00,$00 ; FROST      
-.byte $20,$0C,$10,$01,$01,$00,$00,$00 ; HEAT       
-.byte $05,$02,$02,$02,$03,$00,$00,$00 ; GLANCE     
-.byte $00,$10,$01,$02,$03,$00,$00,$00 ; GAZE       
-.byte $18,$08,$01,$01,$03,$00,$00,$00 ; FLASH      
-.byte $20,$07,$10,$01,$01,$00,$00,$00 ; SCORCH     
-.byte $10,$01,$80,$01,$03,$00,$00,$00 ; CRACK      
-.byte $00,$01,$08,$02,$03,$00,$00,$00 ; SQUINT     
-.byte $18,$11,$00,$02,$01,$00,$00,$00 ; STARE      
-.byte $10,$01,$04,$02,$03,$00,$00,$00 ; GLARE      
-.byte $20,$32,$20,$01,$01,$00,$00,$00 ; BLIZZARD   
-.byte $20,$40,$10,$01,$01,$00,$00,$00 ; BLAZE      
-.byte $20,$60,$10,$01,$01,$00,$00,$00 ; INFERNO    
-.byte $20,$18,$10,$01,$01,$00,$00,$00 ; CREMATE    
-.byte $05,$02,$02,$01,$03,$00,$00,$00 ; POISON     
-.byte $00,$10,$00,$01,$03,$00,$00,$00 ; TRANCE     
-.byte $20,$44,$02,$01,$01,$00,$00,$00 ; POISON     
-.byte $20,$4C,$40,$01,$01,$00,$00,$00 ; THUNDER    
-.byte $00,$01,$08,$01,$03,$00,$00,$00 ; TOXIC      
-.byte $18,$08,$01,$02,$03,$00,$00,$00 ; SNORTING   
-.byte $30,$50,$00,$01,$01,$00,$00,$00 ; NUCLEAR    
-.byte $18,$08,$01,$01,$03,$00,$00,$00 ; INK        
-.byte $00,$04,$02,$01,$03,$00,$00,$00 ; STINGER    
-.byte $20,$10,$01,$02,$03,$00,$00,$00 ; DAZZLE     
-.byte $20,$40,$00,$01,$01,$00,$00,$00 ; SWIRL      
-.byte $20,$40,$00,$01,$01,$00,$00,$00 ; TORNADO    
+;.byte $00,$00,$00,$04,$17,$00,$00,$00 ; Counter
+;.byte $00,$05,$00,$04,$18,$B0,$2C,$00 ; Reflect
+;
+;
+;;; removed heal and pure data
+;
+;;; Enemy attacks
+;.byte $20,$18,$20,$01,$01,$00,$00,$00 ; FROST      
+;.byte $20,$0C,$10,$01,$01,$00,$00,$00 ; HEAT       
+;.byte $05,$02,$02,$02,$03,$00,$00,$00 ; GLANCE     
+;.byte $00,$10,$01,$02,$03,$00,$00,$00 ; GAZE       
+;.byte $18,$08,$01,$01,$03,$00,$00,$00 ; FLASH      
+;.byte $20,$07,$10,$01,$01,$00,$00,$00 ; SCORCH     
+;.byte $10,$01,$80,$01,$03,$00,$00,$00 ; CRACK      
+;.byte $00,$01,$08,$02,$03,$00,$00,$00 ; SQUINT     
+;.byte $18,$11,$00,$02,$01,$00,$00,$00 ; STARE      
+;.byte $10,$01,$04,$02,$03,$00,$00,$00 ; GLARE      
+;.byte $20,$32,$20,$01,$01,$00,$00,$00 ; BLIZZARD   
+;.byte $20,$40,$10,$01,$01,$00,$00,$00 ; BLAZE      
+;.byte $20,$60,$10,$01,$01,$00,$00,$00 ; INFERNO    
+;.byte $20,$18,$10,$01,$01,$00,$00,$00 ; CREMATE    
+;.byte $05,$02,$02,$01,$03,$00,$00,$00 ; POISON     
+;.byte $00,$10,$00,$01,$03,$00,$00,$00 ; TRANCE     
+;.byte $20,$44,$02,$01,$01,$00,$00,$00 ; POISON     
+;.byte $20,$4C,$40,$01,$01,$00,$00,$00 ; THUNDER    
+;.byte $00,$01,$08,$01,$03,$00,$00,$00 ; TOXIC      
+;.byte $18,$08,$01,$02,$03,$00,$00,$00 ; SNORTING   
+;.byte $30,$50,$00,$01,$01,$00,$00,$00 ; NUCLEAR    
+;.byte $18,$08,$01,$01,$03,$00,$00,$00 ; INK        
+;.byte $00,$04,$02,$01,$03,$00,$00,$00 ; STINGER    
+;.byte $20,$10,$01,$02,$03,$00,$00,$00 ; DAZZLE     
+;.byte $20,$40,$00,$01,$01,$00,$00,$00 ; SWIRL      
+;.byte $20,$40,$00,$01,$01,$00,$00,$00 ; TORNADO    
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -463,7 +468,11 @@ lut_MagicBattleMessages:
   .BYTE $1F ; BANISH        ; Exile to 4th dimension
   .BYTE $15 ; DOOM          ; Erased
   
-  .BYTE $00 ; kick 
+  .BYTE $01               ; Heal   - HP up!
+  .BYTE $01               ; Heal 2
+  .BYTE $01               ; Heal 3
+  .BYTE BTLMSG_QUICKSHOT  ; Counter
+  .BYTE BTLMSG_DEFENDALL  ; Reflect 
   
   ; enemy attacks
   .BYTE $00 ; FROST     ; 
@@ -492,10 +501,6 @@ lut_MagicBattleMessages:
   .BYTE $00 ; DAZZLE    ; 
   .BYTE $00 ; SWIRL     ; 
   .BYTE $00 ; TORNADO   ; 
-  .BYTE $00 ; unused
-  .BYTE $00 ; unused
-  .BYTE $00 ; unused
-  .BYTE $00 ; unused
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1898,7 +1903,7 @@ BattleSubMenu_Equipment:
   @GetSpellCast:
     DEC tmp
     LDX tmp                         ; put it in X
-    ;DEX                             ; DEX to make it 0-based (FF becomes "no spell")
+    ;DEX                            ; DEX to make it 0-based (FF becomes "no spell")
     LDY btlcmd_curchar              ; Y=cur char -- default to targetting yourself
     LDA #ACTION_GEAR
     JMP SetCharacterBattleCommand
@@ -4341,9 +4346,9 @@ DrawAttackBox:
     
     ; source = magic
     LDA btl_attackid        ; see if the attack type is magic or a special attack
-    CMP #$40
+    CMP #ENEMY_ATTACK_START
     BCS :+                  ; if its an enemy attack, skip changing the ID
-      CLC
+     ; CLC
       ADC #MG_START         ; add MG_START to the index to convert from a magic index to an item index.
       BNE :+
       
@@ -8325,7 +8330,7 @@ Battle_DoEnemyTurn:
   @EnemyActive_AndNotConfused:
     LDA ch_level
     ASL A
-    STA $9E             ; $9E = 2*level of party leader
+    STA btltmp+$E ; $9E             ; $9E = 2*level of party leader
     
     ; Check the enemy's morale and see if they are going to run away.
     ; The formula for this is:
@@ -8342,14 +8347,14 @@ Battle_DoEnemyTurn:
     LDY #en_morale
     LDA (EnemyRAMPointer), Y     ; morale
     SEC
-    SBC $9E
+    SBC btltmp+$E ; $9E
     BCC @RunAway        ; run if morale < 2*level_of_leader
-    STA $9E             ; store Morale-L in 9E
+    STA btltmp+$E ; $9E             ; store Morale-L in 9E
     LDA #$00
     LDX #$32
     JSR RandAX          ; random between [$00-$32]
     CLC
-    ADC $9E             ; A is now 'V' above... X+Morale-L
+    ADC btltmp+$E ; $9E             ; A is now 'V' above... X+Morale-L
     BCS Enemy_DoAi      ; if > 255, do not run
     CMP #$50
     BCS Enemy_DoAi      ; if >= $50, do not run
@@ -9237,8 +9242,13 @@ Battle_PlMag_TargetAllEnemies:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
 Enemy_DoMagicEffect:
-            @enram =    $9A     ; input - points to this enemy's stats in RAM
-            
+;            @enram =   btltmp+$A ; $9A     ; input - points to this enemy's stats in RAM
+
+    CLC
+    ADC #06
+    ;; JIGS - I moved magic stuff to $7000 in RAM
+    ;; there are 6 new slots before enemy attacks??
+    
     STA btl_attackid                        ; store spell/attack we're using
     ;JSR ClearAltMessageBuffer
     LDA btl_attacker
@@ -9254,7 +9264,7 @@ Enemy_DoMagicEffect:
     JSR Battle_PrepareMagic                 ; load magic's stats
     
     LDY #en_ailments
-    LDA (@enram), Y                         ; get this enemy's ailments
+    LDA (EnemyRAMPointer),Y  ; (@enram), Y                         ; get this enemy's ailments
     AND #AIL_MUTE                           ; are they muted?
     BEQ :+
       ;JSR DrawCombatBox_Attack             ; if yes, draw their attack name
@@ -9922,6 +9932,7 @@ BtlMag_PerformSpellEffect:
         .WORD BtlMag_Effect_CureAilment     ; 14   ; for Soft
         .WORD BtlMag_Effect_Regen           ; 15
         ;.WORD BtlMag_Effect_Drain           ; 16
+        ;.WORD BtlMag_Effect_Counter         ; 17
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

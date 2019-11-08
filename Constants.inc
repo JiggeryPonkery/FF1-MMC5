@@ -59,6 +59,8 @@ ACTION_FLEE       = $80
 ENEMYAI_COUNTER   = $01
 ENEMYAI_REFLECT   = $80
 
+ENEMY_ATTACK_START = $45 ; this is the offset for enemy magic data
+
 ;;;;;;;;;;;;;;;;;;
 ;;  elements
 ELEMENT_TIME      = $01
@@ -926,8 +928,8 @@ MG_START = $30
   MG_STOP = MG_START + $3D
   MG_ZAP  = MG_START + $3E
   MG_XXXX = MG_START + $3F
-
-
+BATTLESPELLS = MG_START + $40
+BATTLESPELLS_START = BATTLESPELLS + $5C
   
   
 ;;;;;;;;;;;;;;;;;;

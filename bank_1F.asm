@@ -8251,8 +8251,8 @@ DrawComplexString:
     JSR CoordToNTAddr
 
   @StallAndDraw:
-    LDA menustall     ; check to see if we need to stall
-    BEQ @Draw_NoStall ; if not, skip over stall call
+   ; LDA menustall     ; check to see if we need to stall
+   ; BEQ @Draw_NoStall ; if not, skip over stall call
     JSR MenuCondStall ;   this isn't really necessary, since MenuCondStall checks menustall already
 
   @Draw_NoStall:
@@ -8274,7 +8274,7 @@ DrawComplexString:
     LDX ppu_dest
     STX $2006
 
-    CMP #$7A          ; see if this is a DTE character
+    CMP #$6A          ; see if this is a DTE character
     BCS @noDTE        ;  if < #$7A, it is DTE  (even though it probably should be #$6A)
 
       SEC             ;  characters 1A-69 are valid DTE characters.  6A-79 are treated as DTE, but will draw crap
@@ -14640,17 +14640,17 @@ DrawBattleString_ControlCode:
     BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
     
     LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
-    CMP #$41                        ; if it's >= 42, then it's a special enemy attack
+    CMP #ENEMY_ATTACK_START         ; if it's >= 42, then it's a special enemy attack
     BCC @PrintAttackName_AsItem     ; but less than 42, print it as an item (magic spell)
     
-    LDA #>(lut_EnemyAttack - $41*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
-    LDX #<(lut_EnemyAttack - $41*2) ;   index starts at $41
+    CMP #BATTLESPELLS
+    BCS :+
+        ADC #BATTLESPELLS_START
+        BNE @PrintAttackName_AsItem
     
-    ; JIGS - if bugged, use this instead: since lut_EnemyAttack is removed from Dialogue Data...
-    ;LDA #>(lut_EnemyAttack) ; 
-    ;LDX #<(lut_EnemyAttack) ; 
-        
-    JMP :+
+  : LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
+    LDX #<lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ;   index starts at $41
+    BEQ :+ ;; low byte is 0 since its at the start of the bank?
     
   @PrintAttackName_AsItem: ; attack is less than $42
     LDA #>lut_ItemNamePtrTbl
@@ -14774,16 +14774,11 @@ DrawEntityName:
     LDY #$00
     @Nameloop:
       LDA (btldraw_subsrc), Y           ; draw each character in the character's name
-      BEQ :++                           ; if its $00, replace with $FF
       JSR DrawBattleString_ExpandChar
     : INY
       CPY #$07                          ; JIGS - 7 letter names!
       BNE @Nameloop
       RTS
-      
-    : LDA #$FF  
-      JSR DrawBattleString_ExpandChar
-      JMP :--
     
   @Enemy:
     LDX #28

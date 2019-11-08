@@ -105,11 +105,6 @@ EnemyAttack25:
 EnemyAttack26:
 .byte $9D,$98,$9B,$97,$8A,$8D,$98,$00     ; TORNADO
 
-;.byte $8B,$AD,$95,$A2,$8F,$59,$9D,$00 ; BjLY ... yeah this is leftover garbage
-;.byte $F1,$6F,$F6,$FF,$FF,$FF,$FF,$00 ; 
-;.byte $8F,$B5,$9C,$59,$91,$B4,$FF,$00 ; 
-;.byte $97,$8B,$56
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Enemy names [$94E0 :: 0x2D4F0]
 data_EnemyNames:
@@ -617,7 +612,7 @@ lut_ItemNamePtrTbl:
 .word SPELL63      ; 6E ;  MG_ZAP  
 .word SPELL64      ; 6F ;  MG_XXXX 
 
-.word MoneyChest1  ; 70
+.word MoneyChest1  ; 70 
 .word MoneyChest2  ; 71
 .word MoneyChest3  ; 72
 .word MoneyChest4  ; 73
@@ -711,6 +706,12 @@ lut_ItemNamePtrTbl:
 .word CLASS11      ; CA
 .word CLASS12      ; CB
 
+.word BATTLESPELL1 ; CC
+.word BATTLESPELL2 ; CD
+.word BATTLESPELL3 ; CE
+.word BATTLESPELL4 ; CF
+.word BATTLESPELL5 ; D0
+.word BATTLESPELL6 ; D1
 
 lut_WeaponArmorNamePtrTbl:
 .word Weapon1      ; 0  ; Wooden Nunchuck
@@ -1140,6 +1141,18 @@ SPELL64:
 .byte $8D,$98,$98,$96,$FF,$FF,$FF,$00  ;  DOOM___
 
 
+BATTLESPELL1: ; CC
+.byte $91,$8E,$8A,$95,$FF,$FF,$FF,$00  ;  HEAL
+BATTLESPELL2: ; CD
+.byte $91,$8E,$8A,$95,$FF,$82,$FF,$00  ;  HEAL_2_
+BATTLESPELL3: ; CE
+.byte $91,$8E,$8A,$95,$FF,$83,$FF,$00  ;  HEAL_3_
+BATTLESPELL4: ; CF
+.BYTE $8C,$98,$9E,$97,$9D,$8E,$9B,$00  ;  COUNTER
+BATTLESPELL5: ; D0
+.BYTE $9B,$8E,$8F,$95,$8E,$8C,$9D,$00  ;  REFLECT 
+BATTLESPELL6: ; D0
+.BYTE $9B,$8E,$8F,$95,$8C,$9D,$82,$00  ;  REFLCT2 
 
 ;gold in chests
 ;; Note this is only the text data. Actual amount given is in the price list at the start of Bank 9

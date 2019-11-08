@@ -244,126 +244,6 @@ lut_ArmorData:
 
 
 
-;; And for the elemental defense:
-;  
-;
-;  ╒-Earth
-;  |╒-Lightning
-;  ||╒-Ice
-;  |||╒-Fire
-;  |||| ╒-Rub (instant death)
-;  |||| |╒-Poison
-;  |||| ||╒-Stun
-;  |||| |||╒-Time
-;  vvvv vvvv
-;; 0000,0000
-
-lut_MagicData: ;; JIGS - do I need a copy of this here still...?
-;; things didn't break when I added more weapon and armour data bytes... hm.
-.byte $00,$10,$00,$10,$07,$C0,$29,$00 ;  MG_CURE
-.byte $18,$14,$00,$01,$02,$C8,$21,$00 ;  MG_HARM
-.byte $00,$08,$00,$10,$09,$B0,$29,$00 ;  MG_FOG 
-.byte $00,$50,$00,$04,$10,$B0,$22,$00 ;  MG_RUSE
-.byte $18,$0A,$10,$02,$01,$D0,$26,$00 ;  MG_FIRE
-.byte $18,$20,$01,$01,$03,$E8,$2B,$00 ;  MG_SLEP
-.byte $40,$14,$00,$02,$0E,$B8,$28,$00 ;  MG_LOCK
-.byte $18,$0A,$40,$02,$01,$C8,$28,$00 ;  MG_LIT 
-.byte $00,$08,$00,$10,$08,$E0,$27,$00 ;  MG_LAMP
-.byte $40,$40,$01,$01,$03,$E8,$2C,$00 ;  MG_MUTE
-.byte $00,$40,$00,$08,$0A,$B0,$28,$00 ;  MG_ALIT
-.byte $00,$28,$00,$10,$10,$B0,$23,$00 ;  MG_INVS
-.byte $18,$14,$20,$02,$01,$D0,$21,$00 ;  MG_ICE 
-.byte $18,$08,$01,$01,$03,$E8,$23,$00 ;  MG_DARK
-.byte $00,$0E,$00,$10,$0D,$B8,$2B,$00 ;  MG_TMPR
-.byte $40,$00,$01,$01,$04,$E8,$2A,$00 ;  MG_SLOW
-.byte $00,$21,$00,$10,$07,$C0,$2B,$00 ;  MG_CUR2
-.byte $18,$28,$00,$01,$02,$C8,$23,$00 ;  MG_HRM2
-.byte $00,$10,$00,$08,$0A,$B0,$26,$00 ;  MG_AFIR
-.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ;  MG_HEAL
-.byte $18,$1E,$10,$01,$01,$D0,$27,$00 ;  MG_FIR2
-.byte $40,$10,$01,$02,$03,$E8,$27,$00 ;  MG_HOLD
-.byte $18,$1E,$40,$01,$01,$C8,$27,$00 ;  MG_LIT2
-.byte $40,$14,$00,$01,$10,$B8,$27,$00 ;  MG_LOK2
-.byte $00,$04,$00,$10,$08,$E0,$2A,$00 ;  MG_PURE
-.byte $18,$28,$01,$01,$05,$E8,$25,$00 ;  MG_FEAR
-.byte $00,$20,$00,$08,$0A,$B0,$21,$00 ;  MG_AICE
-.byte $00,$40,$00,$10,$08,$E0,$2C,$00 ;  MG_AMUT
-.byte $40,$20,$00,$02,$03,$E8,$21,$00 ;  MG_SLP2
-.byte $00,$00,$00,$10,$0C,$B8,$2A,$00 ;  MG_FAST
-.byte $40,$80,$01,$01,$03,$E8,$26,$00 ;  MG_CONF
-.byte $18,$28,$20,$01,$01,$D0,$22,$00 ;  MG_ICE2
-.byte $00,$42,$00,$10,$07,$C0,$2C,$00 ;  MG_CUR3
-.byte $FF,$00,$00,$10,$00,$00,$00,$00 ;  MG_LIFE
-.byte $18,$3C,$00,$01,$02,$C8,$25,$00 ;  MG_HRM3
-.byte $00,$30,$00,$08,$07,$C0,$27,$00 ;  MG_HEL2
-.byte $18,$32,$10,$01,$01,$D0,$25,$00 ;  MG_FIR3
-.byte $28,$01,$02,$01,$03,$E8,$22,$00 ;  MG_BANE
-.byte $FF,$00,$00,$08,$00,$00,$00,$00 ;  MG_WARP
-.byte $40,$00,$00,$02,$04,$E8,$29,$00 ;  MG_SLO2
-.byte $FF,$00,$00,$10,$00,$00,$00,$00 ;  MG_SOFT
-.byte $FF,$00,$00,$08,$00,$00,$00,$00 ;  MG_EXIT
-.byte $00,$0C,$00,$08,$09,$B0,$2A,$00 ;  MG_FOG2
-.byte $00,$28,$00,$08,$10,$B0,$24,$00 ;  MG_INV2
-.byte $18,$3C,$40,$01,$01,$C8,$22,$00 ;  MG_LIT3
-.byte $18,$01,$08,$02,$03,$D8,$20,$00 ;  MG_RUB 
-.byte $28,$01,$80,$01,$03,$B8,$26,$00 ;  MG_QAKE
-.byte $00,$10,$01,$02,$12,$E8,$28,$00 ;  MG_STUN
-.byte $00,$00,$00,$10,$0F,$C0,$21,$00 ;  MG_CUR4
-.byte $30,$50,$00,$01,$02,$C8,$2C,$00 ;  MG_HRM4
-.byte $00,$89,$00,$08,$0A,$B0,$25,$00 ;  MG_ARUB
-.byte $30,$30,$00,$08,$07,$C0,$25,$00 ;  MG_HEL3
-.byte $18,$46,$20,$01,$01,$D0,$2B,$00 ;  MG_ICE3
-.byte $40,$02,$02,$02,$03,$C8,$20,$00 ;  MG_BRAK
-.byte $00,$10,$00,$04,$0D,$B0,$20,$00 ;  MG_SABR
-.byte $00,$08,$01,$02,$12,$E8,$24,$00 ;  MG_BLND
-.byte $FF,$00,$00,$10,$00,$00,$00,$00 ;  MG_LIF2
-.byte $6B,$50,$00,$01,$01,$C8,$24,$00 ;  MG_FADE
-.byte $00,$FF,$00,$10,$0A,$B0,$20,$00 ;  MG_WALL
-.byte $6B,$00,$00,$02,$11,$B8,$20,$00 ;  MG_XFER
-.byte $6B,$64,$00,$01,$01,$D0,$28,$00 ;  MG_NUKE
-.byte $30,$10,$04,$01,$03,$E8,$20,$00 ;  MG_STOP
-.byte $20,$01,$04,$01,$03,$D8,$2B,$00 ;  MG_ZAP 
-.byte $00,$01,$08,$02,$12,$D8,$28,$00 ;  MG_XXXX
-
-; pointless potion stuff
-.byte $00,$10,$00,$10,$07,$00,$00,$00 
-.byte $00,$04,$00,$10,$08,$00,$00,$00 
-
-; enemy attacks
-.byte $20,$18,$20,$01,$01,$00,$00,$00 ; FROST
-.byte $20,$0C,$10,$01,$01,$00,$00,$00 ; HEAT
-.byte $05,$02,$02,$02,$03,$00,$00,$00 ; GLANCE
-.byte $00,$10,$01,$02,$03,$00,$00,$00 ; GAZE
-.byte $18,$08,$01,$01,$03,$00,$00,$00 ; FLASH
-.byte $20,$07,$10,$01,$01,$00,$00,$00 ; SCORCH
-.byte $10,$01,$80,$01,$03,$00,$00,$00 ; CRACK
-.byte $00,$01,$08,$02,$03,$00,$00,$00 ; SQUINT
-.byte $18,$11,$00,$02,$01,$00,$00,$00 ; STARE
-.byte $10,$01,$04,$02,$03,$00,$00,$00 ; GLARE
-.byte $20,$32,$20,$01,$01,$00,$00,$00 ; BLIZZARD
-.byte $20,$40,$10,$01,$01,$00,$00,$00 ; BLAZE
-.byte $20,$60,$10,$01,$01,$00,$00,$00 ; INFERNO
-.byte $20,$18,$10,$01,$01,$00,$00,$00 ; CREMATE
-.byte $05,$02,$02,$01,$03,$00,$00,$00 ; POISON
-.byte $00,$10,$00,$01,$03,$00,$00,$00 ; TRANCE
-.byte $20,$44,$02,$01,$01,$00,$00,$00 ; POISON
-.byte $20,$4C,$40,$01,$01,$00,$00,$00 ; THUNDER
-.byte $00,$01,$08,$01,$03,$00,$00,$00 ; TOXIC
-.byte $18,$08,$01,$02,$03,$00,$00,$00 ; SNORTING
-.byte $30,$50,$00,$01,$01,$00,$00,$00 ; NUCLEAR
-.byte $18,$08,$01,$01,$03,$00,$00,$00 ; INK
-.byte $00,$04,$02,$01,$03,$00,$00,$00 ; STINGER
-.byte $20,$10,$01,$02,$03,$00,$00,$00 ; DAZZLE
-.byte $20,$40,$00,$01,$01,$00,$00,$00 ; SWIRL
-.byte $20,$40,$00,$01,$01,$00,$00,$00 ; TORNADO
-
-lut_MagicBattleMessages:
-  .BYTE $01, $00, $02, $03,  $00, $00, $05, $00,    $00, $00, $08, $03,  $00, $00, $0A, $0B     ; spells
-  .BYTE $01, $00, $0C, $01,  $00, $0D, $00, $05,    $00, $0F, $10, $00,  $00, $12, $00, $00
-  .BYTE $01, $4A, $00, $01,  $00, $4D, $4A, $0B,    $4A, $4A, $02, $03,  $00, $15, $16, $00
-  .BYTE $18, $00, $19, $01,  $00, $00, $1B, $00,    $4A, $00, $1C, $1D,  $00, $1E, $1F, $15
-  .BYTE $00, $00, $00, $00,  $00, $00, $00, $00,    $16, $15, $00, $1F,  $00, $00, $00, $00 
-  .BYTE $4D, $00, $00, $00,  $15, $00, $00, $00,    $00, $00, $00, $00,  $00, $00, $00, $00
 
   
 data_EnemyStats:
@@ -1816,11 +1696,11 @@ NewGamePartyGeneration:
       DEX
       BPL :-
       
-    LDA #$00        ; This null-terminates the draw buffer for when the character's
-    STA $60         ;   name is drawn on the name input screen.  Why this is done here
-                    ;   and not with the actual drawing makes no sense to me.
+  ;  LDA #$00        ; This null-terminates the draw buffer for when the character's
+  ;  STA $50         ;   name is drawn on the name input screen.  Why this is done here
+                     ;   and not with the actual drawing makes no sense to me.
     
-    
+
   @Char_0:                      ; To Character generation for each of the 4 characters
     LDA #$00                    ;   branching back to the previous char if the user
     STA char_index              ;   cancelled by pressing B
@@ -1888,23 +1768,16 @@ NewGamePartyGeneration:
     ORA ptygen_class, X  ; combine with class bits
     STA ch_class, Y      ; and save!
     
-    LDA ptygen_name+0, X ; then save name!
-    STA ch_name    +0, Y
-    LDA ptygen_name+1, X
-    STA ch_name    +1, Y
-    LDA ptygen_name+2, X
-    STA ch_name    +2, Y
-    LDA ptygen_name+3, X
-    STA ch_name    +3, Y
-    LDA ptygen_name+4, X
-    STA ch_name    +4, Y
-    LDA ptygen_name+5, X
-    STA ch_name    +5, Y
-    LDA ptygen_name+6, X
-    STA ch_name    +6, Y
+    LDA #8
+    STA tmp
     
-    ;; JIGS - LONGER NAMES
-    
+   @NameLoop: 
+    LDA ptygen_name, X ; then save name!
+    STA ch_name, Y
+    INY
+    INX
+    DEC tmp
+    BNE @NameLoop
     RTS
     
 
@@ -1927,17 +1800,10 @@ PtyGen_DrawScreen:
     STA joy
     STA joy_prevdir
 
-    ;JSR TitleScreenBGColour         ; Change the colour of the Title Screen
     JSR ClearNT ;_FillBackground      ; Fill the background with colour instead of boxes
     JSR PtyGen_DrawBoxes    
     JSR PtyGen_DrawText     
     JMP TurnMenuScreenOn_ClearOAM
-    
-    ;TitleScreenBGColour:
-    ;LDA #$01
-    ;STA cur_pal+1
-    ;STA cur_pal+13
-    ;RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1959,80 +1825,79 @@ DoPartyGen_OnCharacter:
     
     ; Then enter the main logic loop
   @MainLoop:
-      JSR PtyGen_Frame              ; Do a frame and update joypad input
-      LDA joy_a
-      BNE DoNameInput               ; if A was pressed, do name input
-      LDA joy_b
-      BEQ :+
-        ; if B pressed -- just SEC and exit
-        SEC
-        RTS
-      
-      ; Code reaches here if A/B were not pressed
-    : LDA joy
-      AND #$0F
-      CMP joy_prevdir
-      BEQ @MainLoop             ; if there was no change in directional input, loop to another frame
-      
-      STA joy_prevdir           ; otherwise, record new directional input as prevdir
-      CMP #$00                  ; if directional input released (rather than pressed)
-      BEQ @MainLoop             ;   loop to another frame.
-      
-      ;; JIGS-- Left/Right now change the class, Up/Down change the sprite.
-      CMP #$02  ; if left is pressed
-        BEQ @ReverseCharThing
-      CMP #$04  ; or if down is pressed
-        BEQ @ReverseCharSpriteThing
-      CMP #$08  ; or if up is pressed
-        BEQ @CharSpriteThing
+    JSR PtyGen_Frame              ; Do a frame and update joypad input
+    LDA joy_a
+    BNE DoNameInput               ; if A was pressed, do name input
+    LDA joy_b
+    BEQ :+
+      ; if B pressed -- just SEC and exit
+      SEC
+      RTS
     
-     ; Otherwise, if any direction was pressed:
-      LDX char_index
-      CLC
-      LDA ptygen_class, X       ; Add 1 to the class ID of the current character.
-      ADC #1
-      CMP #6                    ; JIGS - change this to 12 for all classes
-      BCC :+
-        LDA #0                  ; wrap 5->0
-    : STA ptygen_class, X
+    ; Code reaches here if A/B were not pressed
+  : LDA joy
+    AND #$0F
+    CMP joy_prevdir
+    BEQ @MainLoop             ; if there was no change in directional input, loop to another frame
+    
+    STA joy_prevdir           ; otherwise, record new directional input as prevdir
+    CMP #$00                  ; if directional input released (rather than pressed)
+    BEQ @MainLoop             ;   loop to another frame.
+    
+    ;; JIGS-- Left/Right now change the class, Up/Down change the sprite.
+    CMP #$02  ; if left is pressed
+      BEQ @ReverseCharThing
+    CMP #$04  ; or if down is pressed
+      BEQ @ReverseCharSpriteThing
+    CMP #$08  ; or if up is pressed
+      BEQ @CharSpriteThing
   
-      LDA #$01                  ; set menustall (drawing while PPU is on)
-      STA menustall
-      LDX char_index            ; then update the on-screen class name
-      JSR PtyGen_DrawOneText
-      JMP @MainLoop
-      
-      @ReverseCharThing:
-      LDX char_index
-      LDA ptygen_class, X       ; Subtract 1 from the class ID of the current character.
-      SEC 
-      SBC #1
-      CMP #6                    ; JIGS - change this to 12 for all classes 
-      BCC :-
-        LDA #5                  ; JIGS - and then change this to 11
-      JMP :-
+   ; Otherwise, if any direction was pressed:
+    LDX char_index
+    CLC
+    LDA ptygen_class, X       ; Add 1 to the class ID of the current character.
+    ADC #1
+    CMP #6                    ; JIGS - change this to 12 for all classes
+    BCC :+
+      LDA #0                  ; wrap 5->0
+  : STA ptygen_class, X
+ 
+    LDA #$01                  ; set menustall (drawing while PPU is on)
+    STA menustall
+    LDX char_index            ; then update the on-screen class name
+    JSR PtyGen_DrawOneText
+    JMP @MainLoop
+
+   @ReverseCharThing:
+    LDX char_index
+    LDA ptygen_class, X       ; Subtract 1 from the class ID of the current character.
+    SEC 
+    SBC #1
+    CMP #6                    ; JIGS - change this to 12 for all classes 
+    BCC :-
+    LDA #5                    ; JIGS - and then change this to 11
+    BNE :-
   
-      @CharSpriteThing:
-      LDX char_index
-      LDA ptygen_sprite, X 
-      CLC
-      ADC #1
-      CMP #6                    ; JIGS - change this to 12 for all classes 
-      BCC :+
-         LDA #0
-    : STA ptygen_sprite, X    
-      JMP @MainLoop
+   @CharSpriteThing:
+    LDX char_index
+    LDA ptygen_sprite, X 
+    CLC
+    ADC #1
+    CMP #6                    ; JIGS - change this to 12 for all classes 
+    BCC :+
+       LDA #0
+  : STA ptygen_sprite, X    
+    JMP @MainLoop
       
-      @ReverseCharSpriteThing:
-      LDX char_index
-      LDA ptygen_sprite, X    ; Subtract 1 from the sprite ID of the current character.
-      SEC 
-      SBC #1
-      CMP #6                  ; JIGS - change this to 12 for all classes   
-      BCC :-
-        LDA #5                ; JIGS - and then change this to 11  
-      STA ptygen_sprite, X  
-      JMP :-  
+   @ReverseCharSpriteThing:
+    LDX char_index
+    LDA ptygen_sprite, X      ; Subtract 1 from the sprite ID of the current character.
+    SEC 
+    SBC #1
+    CMP #6                    ; JIGS - change this to 12 for all classes   
+    BCC :-
+    LDA #5                    ; JIGS - and then change this to 11  
+    BNE :-  
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2058,42 +1923,55 @@ DoNameInput:
     STA joy
     STA joy_prevdir
     
-    STA cursor              ; letter of the name we're inputting (0-3)
+   ; STA cursor              ; letter of the name we're inputting (0-3)
     STA namecurs_x          ; X position of letter selection cursor (0-9)
     STA namecurs_y          ; Y position (0-6)
     
     ; Some local temp vars
-                @cursoradd      = $63
-                @selectedtile   = $10
+    @selectedtile   = tmp
     
     JSR ClearNT ;_FillBackground
     JSR DrawNameInputScreen
+    JSR NameInput_DrawName
+    
+    ;Write $00 to $1C97
+    LDY $2002
+    LDX #$1C
+    STX $2006
+    LDY #$97
+    STY $2006
+    LDA #0
+    STA $2007
+    ;; JIGS - this turns part of the beam spell graphic into a white _ 
     
     JSR TurnMenuScreenOn_ClearOAM   ; now that everything is drawn, turn the screen on
+
+    LDX char_index    
+    LDY #0
+   @FindCursorLoop:
+    LDA ptygen_name, X
+    CMP #$FF
+    BEQ :+
+    INX
+    INY
+    CPX #7    
+    BNE @FindCursorLoop
+  : STY cursor
     
-    LDA #$01                ; Set menustall, as future drawing will
-    STA menustall           ;  be with the PPU on
+    INC menustall
+    ;LDA #$01                ; Set menustall, as future drawing will
+    ;STA menustall           ;  be with the PPU on
     JMP @MainLoop
     
-      ;;;;;;;;;;;;;;;;;;
-   @StartDone:
-    CLC
-    RTS      
-      
+    ;;;;;;;;;;;;;;;;;;
+
+
   @Start_Pressed:
     JSR PlaySFX_MenuSel
     LDY #0
     STY joy_start
-   @Start_Pressed_Loop:
-    LDX char_index
-    LDA ptygen_name, X  ; get byte of name
-    BEQ :+              ; if its 0, keep checking
-    CMP #$FF
-    BNE @StartDone      ; if its NOT $FF, then name is ok
-  : INX                 ; inc X to check next letter of name?
-    INY
-    CPY #7              ; check 7 bytes
-    BNE @Start_Pressed_Loop
+    CLC                 ; CLC to indicate name was successfully input
+    RTS
     
   @MainLoop:
     JSR CharName_Frame      ; Do a frame & get input
@@ -2111,7 +1989,7 @@ DoNameInput:
     BEQ @MainLoop           ; no change?  Jump back
     STA joy_prevdir
     
-       ; D-pad state has changed, see what it changed to
+    ; D-pad state has changed, see what it changed to
     CMP #$00
     BEQ @MainLoop           ; if released, do nothing and loop
     
@@ -2121,14 +1999,14 @@ DoNameInput:
     CMP #$08                ; otherwise, if == 8, Up pressed
     BNE @Down               ; otherwise, if != 8, Down pressed
     
-  @Up:
+   @Up:
     DEC namecurs_y          ; DEC cursor Y position
     BPL @MainLoop
     LDA #$06                ; wrap 0->6
     STA namecurs_y
     JMP @MainLoop
     
-  @Down:
+   @Down:
     INC namecurs_y          ; INC cursor Y position
     LDA namecurs_y
     CMP #$07                ; wrap 6->0
@@ -2137,18 +2015,18 @@ DoNameInput:
     STA namecurs_y
     JMP @MainLoop
     
-  @Left_Or_Right:
+   @Left_Or_Right:
     CMP #$02                ; if D-pad state == 2, Left pressed
     BNE @Right              ; else, Right pressed
     
-  @Left:
+   @Left:
     DEC namecurs_x          ; DEC cursor X position
     BPL @MainLoop
     LDA #$09                ; wrap 0->9
     STA namecurs_x
     JMP @MainLoop
     
-  @Right:
+   @Right:
     INC namecurs_x          ; INC cursor X position
     LDA namecurs_x
     CMP #$0A                ; wrap 9->0
@@ -2157,30 +2035,27 @@ DoNameInput:
     STA namecurs_x
     JMP @MainLoop
     
-
-    
- @B_Pressed:
+   @B_Pressed:
     LDA #$FF                ; if B was pressed, erase the previous tile
     STA @selectedtile       ;   by setting selectedtile to be a space
     
     LDA cursor              ; then by pre-emptively moving the cursor back
     SEC                     ;   so @SetTile will overwrite the prev char
     SBC #$01                ;   instead of the next one
-    ;BMI :+                  ; (clip at 0)
       STA cursor
       CMP #$FF
       BEQ @B_RTS
         
     LDA #$00                ; set cursoradd to 0 so @SetTile doesn't change
-    STA @cursoradd          ; the cursor
+    STA cursoradd           ; the cursor
     STA joy_b               ; clear joy_b as well
     BEQ @SetTile            ; (always branches)
     
-    @B_RTS:
+   @B_RTS:
     JMP DoPartyGen_OnCharacter      
     
     ;;;;;;;;;;;;;;;;;;
-  @A_Pressed:
+   @A_Pressed:
     LDX namecurs_y                  ; when A is pressed, clear joy_a
     LDA #$00
     STA joy_a                       ; Then get the tile they selected by first
@@ -2189,21 +2064,17 @@ DoNameInput:
     ADC namecurs_x                  ; add X cursor
     ASL A                           ; and multiply by 2 -- since there are spaces between tiles
     TAX                             ; use that value as an index to the lut_NameInput
-  ;  BCC :+                          ; This will always branch, as C will always be clear
-  ;      LDA lut_NameInput+$100, X       ; I can only guess this was used in the Japanese version, where the NameInput table might have been bigger than 
-  ;      JMP :++                         ; 256 bytes -- even though that seems very unlikely.
-        
-  : LDA lut_NameInput, X
-  : STA @selectedtile               ; record selected tile
+    LDA lut_NameInput, X
+    STA @selectedtile               ; record selected tile
     LDA #$01
-    STA @cursoradd                  ; set cursoradd to 1 to indicate we want @SetTile to move the cursor forward
+    STA cursoradd                   ; set cursoradd to 1 to indicate we want @SetTile to move the cursor forward
     
     LDA cursor                      ; check current cursor position
-    CMP #$07                       ;  If we've already input 7 letters for this name....
+    CMP #$07                        ;  If we've already input 7 letters for this name....
     BCS @Done                       ;  .. then we're done.  Branch ahead
                                     ; Otherwise, fall through to SetTile
 
-  @SetTile:
+   @SetTile:
     LDA cursor                  ; use cursor and char_index to access the appropriate
     CLC                         ;   letter in this character's name
     ADC char_index
@@ -2215,15 +2086,12 @@ DoNameInput:
     
     LDA cursor                  ; Then add to our cursor
     CLC
-    ADC @cursoradd
- ;   BPL :+                      ; clipping at 0 (if subtracting -- although this never happens)
- ;     LDA #$00
-  : STA cursor
-  
+    ADC cursoradd
+    STA cursor
+ 
     JMP @MainLoop               ; And keep going!
-  
     
-  @Done:
+   @Done:
     CLC                 ; CLC to indicate name was successfully input
     RTS
 
@@ -2252,7 +2120,7 @@ PtyGen_Frame:
 
     JMP PtyGen_Joy         ; and update joy data!
 
-
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  CharName_Frame  [$9E4E :: 0x39E5E]
@@ -2261,11 +2129,36 @@ PtyGen_Frame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+Blinker_LUT:
+.byte $60, $68, $70, $78, $80, $88, $90, $90
+
 CharName_Frame:
     JSR ClearOAM           ; wipe OAM then draw the cursor
     JSR CharName_DrawCursor
+    
+    INC framecounter       ; set up framecounter 
+    LDA framecounter       ; game is at at 60 frames a second...
+    CMP #60                ; if it hits 60, reset it to 0
+    BNE :+
+      LDA #0
+      STA framecounter
+    
+  : CMP #30                ; depending on if its the first or second half of the second, skip displaying the blinker
+    BCC :+
 
-    JSR WaitForVBlank_L    ; VBlank and DMA
+    LDX cursor
+    LDA Blinker_LUT, X
+    
+    LDX sprindex
+    STA oam+$3, X          ; upper left horizontal coordinate
+    LDA #$22
+    STA oam+$0, X          ; upper left vertical coordinate
+    LDA #$C9
+    STA oam+$1, X          ; graphic: _ 
+    LDA #$01
+    STA oam+$2, X          ; attribute
+
+  : JSR WaitForVBlank_L    ; VBlank and DMA
     LDA #>oam
     STA $4014
 

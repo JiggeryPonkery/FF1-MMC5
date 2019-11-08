@@ -264,6 +264,7 @@ btlcurs                 = $51
 btlcurs_max             = $52 ; highest value for the cursor
 btlcurs_x               = $53 ; battle cursor X position (menu position, not pixel position)
 btlcurs_y               = $54 ; battle cursor Y position (menu position, not pixel position)
+cursoradd               = $55 ; naming characters
 cursor_change           = $55 ; magic menu 
 backup_cursor           = $56 ; shops, menus
 backup_cursor_targ      = $57 ; for item menus, to not reset the cursor when exiting a sub-menu
@@ -280,14 +281,33 @@ equipmenu_tmp           = $5E ; for unequip/reequipping
 weasels                 = $5F ; Important for saving/loading, and sound test menu
 
 ;; Shop Things - Shared 
-shop_id                 = $59
-shop_type               = $5A
-item_box_offset         = $5B 
-item_box_offset_old     = $5C 
-inv_canequipinshop      = $5D 
-blank_item              = $5E
+shop_id                 = $5A
+shop_type               = $5B
+item_box_offset         = $5C 
+item_box_offset_old     = $5D 
+inv_canequipinshop      = $5E 
+blank_item              = $5F
+shop_curprice           = $60 ; + 1, 2, 3 - 4 bytes ; will mess up buying things if shared
+shop_curitem            = $54
+shop_amount             = $65
+shop_amount_high        = $66
+shop_amount_buy         = $67
+shop_amount_max         = $68
+shop_charindex          = $69
+shop_spell              = $6A
+shop_selling            = $6B
+shop_cursorchange       = $6C
+shop_listdrawn          = $6D
+shop_listactive         = $6E
+; char_index might not be shared 
+ItemToUnequip           = $70
+ItemToEquip             = $71
+slotcheck               = $72
+equip_impossible        = $73
+shop_x_price            = $74
+shop_drawmarks          = $75
 
-;; Battle Things        
+;; Battle Things - Shared
 ; submenu_targ - shared  ; $58
 btlformation            = $59 ; don't write over, is used to check for Chaos fight
 ow_tile                 = $5A ; only used for getting battle backdrop from overworld tile
@@ -619,23 +639,6 @@ str_buf          = $6400  ; $39 bytes at least -- buffer must not cross page
 item_box         = $6400  ; used in shops
 btl_screenbackup = $6400  ; used in battle
 
-shop_curprice     = $649C ; 9D, 9E, 9F - 4 bytes ; will mess up buying things if shared
-shop_curitem      = $64A0
-shop_amount       = $64A1
-shop_amount_high  = $64A2
-shop_amount_buy   = $64A3
-shop_amount_max   = $64A4
-shop_charindex    = $64A5
-shop_spell        = $64A6
-shop_selling      = $64A7
-shop_cursorchange = $64A8
-shop_listdrawn    = $64A9
-shop_listactive   = $64AA
-ItemToUnequip     = $64AC
-ItemToEquip       = $64AD
-slotcheck         = $64AE
-equip_impossible  = $64AF
-shop_x_price      = $64AF
 
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
 
@@ -931,18 +934,6 @@ btltmp_backseat         = $6910 ; $10 byte buffer -- backup of btltmp
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 mapobj          = $6F00         ; $100 bytes -- page
  mapobj_id      = mapobj + $00  ; rearranging these is ill advised
  mapobj_flgs    = mapobj + $01  ;  because the loader is pretty rigid
@@ -960,9 +951,11 @@ mapobj          = $6F00         ; $100 bytes -- page
  mapobj_pl      = mapobj + $0D   ; bit 7 = talking to player (changes facing), other bits = being shoved by player
  mapobj_tsaptr  = mapobj + $0E
 
+lut_MagicData   = $7000  ; 
+ 
 enemy_ROM       = $7000  ; $B00 bytes, but on swapped page
  
-mapdata         = $7000   ; must be on $1000 byte bound (ie:  pretty much unmovable)
+mapdata         = $7000  ; must be on $1000 byte bound (ie:  pretty much unmovable)
 
-mm_decorchr     = $7000   ; $300 bytes -- should be on page bound, shared
-mm_titlechr     = $7300   ; $280 bytes -- should be on page bound, shared
+mm_decorchr     = $7000  ; $300 bytes -- should be on page bound, shared
+mm_titlechr     = $7300  ; $280 bytes -- should be on page bound, shared

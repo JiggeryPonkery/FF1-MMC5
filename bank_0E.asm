@@ -3304,7 +3304,7 @@ Shop_CharacterStopDancing:
     LDA #$91
     JMP :+
     
-    @Armor:
+   @Armor:
     LDA #$92
   : STA cursor
     JSR Shop_CharacterCanEquip
@@ -3328,15 +3328,15 @@ Shop_CharacterCanEquip:
     BNE @Armor
     
     LDA item_box, X
-    STA MMC5_tmp+2
-    JMP :+
+    STA tmp+8
+    BNE :+
 
    @Armor:
     LDA item_box, X
-    STA MMC5_tmp+2
+    STA tmp+8
     SEC
     SBC #ARMORSTART
-  : STA MMC5_tmp+3
+  : STA tmp+9
     
     LDA #0
    @Loop:
@@ -3345,18 +3345,18 @@ Shop_CharacterCanEquip:
     TAX
     JSR @DrawEquipped
     
-    LDA MMC5_tmp+3
+    LDA tmp+9
     JSR IsEquipLegal
     BCS @CannotEquip
     
-    LDX CharacterIndexBackup
+    LDX CharacterIndexBackup ; this sets the high bit, which tells the sprite drawing routine to do the "Cheer" pose
     LDA ch_ailments, X
     ORA #$80
     STA ch_ailments, X
     JMP @NextCharacter
     
    @CannotEquip:
-    LDX CharacterIndexBackup
+    LDX CharacterIndexBackup ; this will set them to stop dancing if they were before
     LDA ch_ailments, X
     AND #$0F
     STA ch_ailments, X
@@ -3371,8 +3371,8 @@ Shop_CharacterCanEquip:
     
    @DrawEquipped:
     LDA ch_righthand, X
-    CMP MMC5_tmp+2
-    BEQ @ItsEquipped
+    CMP tmp+8
+    BEQ @Do_DrawMark
     
     INX
     TXA
@@ -3380,100 +3380,86 @@ Shop_CharacterCanEquip:
     CMP #8
     BNE @DrawEquipped    
    
-   @ClearEquipped:
-    JSR @SharedCode
-    LDA #<(str_buf+$95)    ; load up the pointer to blankness
-    STA text_ptr
-    LDA #>(str_buf+$95)
-    JMP @DrawTheThing
-   
-   @ItsEquipped:
-    JSR @SharedCode
-    LDA #<(str_buf+$93)    ; load up the pointer to !
-    STA text_ptr
-    LDA #>(str_buf+$93)
+   @Undo_DrawMark:
+    JSR @DrawMark
+    EOR #$0F
+    AND shop_drawmarks
+    JMP :+
     
-   @DrawTheThing: 
-    STA text_ptr+1
-    LDA #1
-    STA menustall
-    JSR DrawComplexString
+   @Do_DrawMark:
+    JSR @DrawMark
+    ORA shop_drawmarks
+  : STA shop_drawmarks
     LDX CharacterIndexBackup
     RTS
    
-   @SharedCode:  
+   @DrawMark:  
     LDA CharacterIndexBackup
-    LSR A
-    LSR A
-    LSR A 
-    LSR A
-    LSR A
-    LSR A ; convert to 0, 1, 2, 3
+    ASL A                     ;  convert it from $40 base to $1 base (ie:  $03 is character 3 instead of $C0)
+    ROL A
+    ROL A
+    AND #$03                  ; mask out low 2 bits 
     TAX
     LDA @Equipped_LUT, X
-    STA dest_y
-    LDA #$12
-    STA dest_x
-    RTS
+    RTS 
    
    @Equipped_LUT:
-    .byte $06
-    .byte $09
-    .byte $0C
-    .byte $0F
+    .byte $01  
+    .byte $02 
+    .byte $04 
+    .byte $08 
 
     
 ChangeInventoryList_Color:
     JSR ResetShopListAttributes
-    JSR ShopListGreenBar
-    JMP ResetScroll
+    JSR ShopListActiveBar
+    BNE ResetScroll
 
-ResetShopList_Color:
+ResetShopList_Color:              ; turns off the shop_listactive variable
     LDA #0
     STA shop_listactive
     JSR ResetShopListAttributes    
 
 ResetScroll:        
-    LDA soft2000           ; reset scroll and PPU data
+    LDA soft2000                  ; reset scroll and PPU data
     STA $2000
     LDA #0
     STA $2005
     STA $2005
     RTS
     
-ResetShopListAttributes:    
+ResetShopListAttributes:          ; clears the highlighted colour 
     JSR WaitForVBlank_L
     
     LDY #0
    @Loop: 
-    LDA ShopListAttribute_LUT, Y
-    LDX #$23
-    STX $2006
-    STA $2006
-    
-    LDA #$FF              ; draw 3 attribute bytes
-    STA $2007
-    STA $2007
-    STA $2007
+    JSR SetAttributeBarLocation    
+    LDA #$FF             
+    JSR DrawAttributeBar    
     INY
     CPY #5
     BNE @Loop
     RTS
 
-ShopListGreenBar:    
+ShopListActiveBar:                ; set the highlighted colour
     LDY cursor
-    LDA ShopListAttribute_LUT, Y
-    LDX #$23
-    STX $2006
-    STA $2006
-    
-    LDA #$FA              ; draw 3 attribute bytes
+    JSR SetAttributeBarLocation
+    LDA #$FA             
+
+DrawAttributeBar:                 ; draw all 3 attribute bytes
     STA $2007
     STA $2007
     STA $2007
     RTS
+    
+SetAttributeBarLocation:          ; gets the location to draw attribyte bytes
+    LDA ShopListAttribute_LUT, Y
+    LDX #$23
+    STX $2006
+    STA $2006
+    RTS
 
-ShopListAttribute_LUT:
+ShopListAttribute_LUT:         
     .byte $CD
     .byte $D5
     .byte $DD 
@@ -3511,10 +3497,66 @@ ShopListAttribute_LUT:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+DrawEquipMarks:
+    LDA shop_drawmarks   ; each bit set = draw the ! for that character
+    LSR A 
+    BCC :+
+     LDX #0              ; put character index in X
+     JSR @DoMark
+  : LSR A
+    BCC :+
+     LDX #1
+     JSR @DoMark
+  : LSR A
+    BCC :+
+     LDX #2
+     JSR @DoMark    
+  : LSR A
+    BCC :+
+     LDX #3 
+     JSR @DoMark    
+  : RTS   
+    
+   @DoMark: 
+    PHA
+    LDA @Equipped_LUT, X    
+    LDX sprindex
+    STA oam+$0, X          ; upper left vertical coordinate
+    LDA #$95
+    STA oam+$3, X          ; upper left horizontal coordinate
+    LDA #$FF
+    STA oam+$1, X          ; graphic: !
+    LDA #$03
+    STA oam+$2, X          ; attribute
+    LDA sprindex     
+    CLC                    ;  increment the sprite index by 4 (1 sprite)
+    ADC #4
+    STA sprindex
+    PLA
+    RTS
+   
+   @Equipped_LUT:
+    .byte $2E  
+    .byte $46 
+    .byte $5E 
+    .byte $76 
+
+
 ShopFrame:
     JSR ClearOAM               ; clear OAM
-    JSR DrawShopPartySprites   ; draw the party sprites
+    LDA shop_listactive        ; is the inventory list the box the cursor is on?
+    BEQ :+    
+    LDA shop_cursorchange      ; did the cursor change since the last frame?
+    BEQ :+
+    JSR ChangeInventoryList_Color ; change the position of the green highlight
+    DEC shop_cursorchange
+    LDA inv_canequipinshop     ; then do the thing to update character poses and ! equipped things
+    BEQ :+
+    JSR Shop_CharacterCanEquip ; JIGS - if its weapon or armor shops, check the cursor for the highlighted item
+                               ; then apply a high bit to ailments that tells the sprite-drawing routine to do them in cheer pose! oof
+  : JSR DrawShopPartySprites   ; draw the party sprites
     JSR DrawShopCursor         ; and the cursor
+    JSR DrawEquipMarks
     JMP _ShopFrame_WaitForVBlank
 
 ShopFrameNoCursor:
@@ -3568,27 +3610,35 @@ ShopFrameNoCursor:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+EquippedMark_LUT:  
+.byte $60,$00,$60,$60,$60,$60,$60,$00  ; reversed
+
+LoadEquippedMark:
+    LDA #>$1FF0
+    STA $2006
+    LDA #<$1FF0
+    STA $2006
+    
+    LDX #8
+   @Loop:   
+    LDA EquippedMark_LUT-1, X
+    STA $2007
+    DEX
+    BNE @Loop
+
+    TXA
+    LDX #8
+   @0_Loop:
+    STA $2007
+    DEX
+    BNE @0_Loop
+    RTS
+    ;; this all draws a ! to the sprite CHR at tile $FF
 
 DrawShop:
     JSR LoadShopInventory      ; load up this shop's inventory into the item box
     JSR ClearNT                ; clear the nametable
-
-              ; Fill attribute tables
     LDA $2002                  ; reset the PPU toggle
- ;   LDA #>$2300                ; set the ppu addr to $23C0  (attribute tables)
- ;   STA $2006
- ;   LDA #<$23C0
- ;   STA $2006
-
- 
- 
- ;   LDX #$00                     ; loop $40 time to copy our attribute LUT to the on-screen attribute tables
- ; @AttribLoop:
- ;     LDA lut_ShopAttributes, X  ; fetch a byte from the lut
- ;     STA $2007                  ; draw it
- ;     INX
- ;     CPX #$40                   ; repeat until X=$40 
- ;     BCC @AttribLoop
 
     LDA #>$23D3
     STA $2006
@@ -3596,13 +3646,14 @@ DrawShop:
     STA $2006
     LDA #0
     STA $2007
-    LDX #>$23D3
+    LDX #>$23DB
     STX $2006
     LDX #<$23DB
     STX $2006
-    STA $2007     ; JIGS - only fill these two attribute bytes!
+    STA $2007                  ; JIGS - only fill these two attribute bytes!
+    JSR LoadEquippedMark
  
-              ; Draw the shopkeeper
+    ; Draw the shopkeeper
     LDX shop_type                ; get the shop type in X
     LDA lut_ShopkeepAdditive, X  ; use it to fetch the image additive from our LUT
     STA tmp+2                    ; tmp+2 is the image additive (see DrawImageRect)
@@ -4277,17 +4328,6 @@ CommonShopLoop_List:
     LDA (shop_cursor_ptr), Y    ; read it
     STA shopcurs_y       ; and record it
 
-    LDA shop_listactive    ; is the inventory list the box the cursor is on?
-    BEQ :+    
-        LDA shop_cursorchange  ; did the cursor change since the last frame?
-        BEQ :+
-        
-        JSR ChangeInventoryList_Color ; change the position of the green highlight
-        DEC shop_cursorchange
-        LDA inv_canequipinshop ; then do the thing to update character poses and ! equipped things
-        BEQ :+
-        JSR Shop_CharacterCanEquip ; JIGS - if its weapon or armor shops, check the cursor for the highlighted item
-                               ; then apply a high bit to ailments that tells the sprite-drawing routine to do them in cheer pose! oof
   : JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
     LDA joy_b
