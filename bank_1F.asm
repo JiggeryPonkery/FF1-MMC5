@@ -338,20 +338,25 @@ EnterOverworldLoop:
    ;;
    ;; THE overworld loop
    ;;
+OverworldLoop_2:   
 
-EnterOverworldLoop_2:
   @Loop:  
     JSR WaitForVBlank_L        ; wait for VBlank
     LDA #>oam                  ; and do sprite DMA
     STA $4014
 
-    LDA framecounter           ; increment the *two byte* frame counter
-    CLC                        ;   what does this game have against the INC instruction?
-    ADC #1
-    STA framecounter
-    LDA framecounter+1
-    ADC #0
-    STA framecounter+1
+    INC framecounter
+    BNE :+
+        INC framecounter+1
+  :     
+    
+   ; LDA framecounter           ; increment the *two byte* frame counter
+   ; CLC                        ;   what does this game have against the INC instruction?
+   ; ADC #1
+   ; STA framecounter
+   ; LDA framecounter+1
+   ; ADC #0
+   ; STA framecounter+1
     
     JSR OverworldMovement      ; do any pending movement animations and whatnot
                                ;   also does any required map drawing and updates
@@ -908,7 +913,7 @@ OverworldMovement:
    
    LDA framecounter      ; check framecounter
    AND #$1               ; skip moving every other frame
-   BEQ @Return
+   BEQ @SlowMove
    
  : JSR SM_MovePlayer
    ;; JIGS - SM_MovePlayer handles all the same things by changing mapflags when it needs to do overworld stuff
@@ -919,9 +924,11 @@ OverworldMovement:
       JMP MapPoisonDamage ; if they are... distribute poison damage
 :   RTS
 
-   @Return:
-   JSR CallMusicPlay_L
-   JMP EnterOverworldLoop_2
+   @SlowMove:
+    PLA
+    PLA
+    JSR CallMusicPlay_NoSwap
+    JMP OverworldLoop_2
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4624,9 +4631,7 @@ StartMapMove:
     STA move_speed       ;  which works out to:  canoe=1   ship=2   airship=4
 
   @Exit:
-    JSR DashButton
-  
-    RTS
+    JMP DashButton
 
   @Left:
     LDA sm_scroll_x      ; exactly the same as @Right... except..
@@ -4638,7 +4643,6 @@ StartMapMove:
     LDA mapdraw_x
     SEC
     SBC #1               ; and subtract 1 from the mapdraw column (one tile left of screen)
-
     JMP @Horizontal
 
 
@@ -6267,7 +6271,6 @@ ScreenWipeFrame_Prep:
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
 
-NOP
 NOP
 NOP
 
@@ -12727,13 +12730,18 @@ LoadBattlePalette:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+ :  LDA #$00            ; reset scroll
+    STA $2005
+    STA $2005
+    RTS
+
 Battle_UpdatePPU_UpdateAudio_FixedBank:
     LDA MenuHush     ;; JIGS - if in main menu, don't tint screen!
-    BNE :+
+    BNE :-
     
     LDA btl_soft2001
     STA $2001
- :  LDA #$00            ; reset scroll
+    LDA #$00            ; reset scroll
     STA $2005
     STA $2005
   ; JMP BattleUpdateAudio_FixedBank  ; <- flow continues to this routine
