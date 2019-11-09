@@ -1864,15 +1864,18 @@ EnterShop:
     STA joy_b              ; erase joypad A and B buttons
     STA joy_a
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
-    STA item_box_offset
-    STA inv_canequipinshop
     
-    LDX #0
+    LDX #$B0
    @ClearLoop:
-    STA item_box, X
-    INX
-    CPX #$B0
+    STA item_box-1, X
+    DEX
     BNE @ClearLoop    
+    
+   @ClearShopVars:
+    STA item_box_offset, X    
+    INX
+    CPX #$23
+    BNE @ClearShopVars
 
     JSR LoadShopCHRPal     ; load up the CHR and palettes (and the shop type)
     JSR DrawShop           ; draw the shop
@@ -2526,7 +2529,7 @@ CheckArmor:
     
     TAX
     DEX
-    INC inv_weapon, X
+    INC inv_weapon, X       ; put their old gear into inventory
     
    @EquipArmor_NoSwap:
     LDX CharacterIndexBackup
