@@ -1,6 +1,6 @@
 .include "Constants.inc"
 .include "variables.inc"
-
+.feature force_range
 
 .export EnterMinimap
 .export lut_ShopCHR, LoadShopCHRForBank_Z, LoadBattleSpritesForBank_Z

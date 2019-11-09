@@ -1,6 +1,7 @@
 .include "variables.inc"
 .include "macros.inc"
 .include "Constants.inc"
+.feature force_range
 
 .export ClearNT
 .export EnterMainMenu

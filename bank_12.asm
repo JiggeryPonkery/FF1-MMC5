@@ -1,6 +1,7 @@
 .include "Constants.inc"
 .include "variables.inc"
 .include "macros.inc"
+.feature force_range
 
 .export lut_OWTileset
 .export lut_SMTilesetAttr

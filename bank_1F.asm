@@ -1,7 +1,7 @@
 .include "Constants.inc"
 .include "variables.inc"
 .include "macros.inc"
-
+.feature force_range
 
 .export AddGPToParty
 .export BattleCrossPageJump_L

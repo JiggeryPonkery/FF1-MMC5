@@ -1,6 +1,7 @@
 .include "Constants.inc"
 .include "variables.inc"
 .include "macros.inc"
+.feature force_range
 
 .export lut_EntrTele_X
 .export lut_EntrTele_Y

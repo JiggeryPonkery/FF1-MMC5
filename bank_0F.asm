@@ -1,5 +1,6 @@
 .include "Constants.inc"
 .include "variables.inc"
+.feature force_range
 
 .export EnemyAttackPlayer_PhysicalZ, PlayerAttackEnemy_PhysicalZ
 .export PlayerAttackPlayer_PhysicalZ

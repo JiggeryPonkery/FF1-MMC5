@@ -1,7 +1,7 @@
 .include "variables.inc"
 .include "macros.inc"
 .include "Constants.inc"
-
+.feature force_range
 
 .export PrepBattleVarsAndEnterBattle_L
 .export lut_BattleRates
@@ -2742,7 +2742,7 @@ DrawEOBCombatBox:
     STA EOBCombatBox_tmp               ; backup the combo box ID
     
     LDA #BANK_THIS          ; set the current bank for the music driver
-    STA cur_bank          ; seems weird to do this here...
+    STA cur_bank            ; seems weird to do this here...
     
     TXA                     ; Get the EOB string ID to print
     ASL A                   ; x2 to use as index
@@ -2755,7 +2755,7 @@ DrawEOBCombatBox:
     LDA EOBCombatBox_tmp    ; restore combo box ID in A
     JSR DrawCombatBox_L     ; A = box ID, YX = pointer to string
     
-    INC btl_boxcount  ; count this combat box
+    INC btl_boxcount        ; count this combat box
     RTS                     ; and exit!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

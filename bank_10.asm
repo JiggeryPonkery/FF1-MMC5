@@ -1,5 +1,6 @@
 .include "Constants.inc"
 .include "variables.inc"
+.feature force_range
 
 .export lut_DialoguePtrTbl
 .export TalkToObject

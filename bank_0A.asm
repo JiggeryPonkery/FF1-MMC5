@@ -1,5 +1,6 @@
 .include "Constants.inc"
 .include "variables.inc"
+.feature force_range
 
 .segment "BANK_0A"
 

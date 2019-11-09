@@ -1,6 +1,7 @@
 .include "variables.inc"
 .include "macros.inc"
 .include "Constants.inc"
+.feature force_range
 
 .export BankC_CrossBankJumpList
 .export PrepCharStatPointers
@@ -1662,7 +1663,7 @@ ConfusedMagicLoadPoint:
       ;JMP BattleSubMenu_Magic       ; if yes, jump back to magic submenu
       JMP BattleSubMenu_Magic_NoUndraw
   : LDA btlcurs_y
-  : AND #$03
+    AND #$03
     ORA #$80                        ; otherwise, put the player target in Y
     TAY
     LDA #ACTION_MAGIC

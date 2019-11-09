@@ -1,6 +1,6 @@
 .include "Constants.inc"
 .include "variables.inc"
-
+.feature force_range
 
 BANK_THIS = $11
 

@@ -10,7 +10,7 @@
 
 .include "variables.inc"
 .include "Constants.inc"
-
+.feature force_range
 
 BANK_THIS = $0D
 
