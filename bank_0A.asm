@@ -1877,7 +1877,10 @@ BTL_MESSAGE97:
 .byte $FF,$38,$B2,$32,$23,$27,$1C,$1A,$39,$B7,$5E,$AE,$C4,$00 ; _covered the attack!
 BTL_MESSAGE98:
 .byte $8C,$26,$B1,$53,$44,$39,$B7,$5E,$AE,$C4,$00 ; Counter attack!
-
+BTL_MESSAGE99:
+; Praying
+BTL_MESSAGE100:
+; Focus
 
 
 

@@ -7643,6 +7643,18 @@ DrawDialogueString:
       STA format_buf-2
       LDA ch_name+6       
       STA format_buf-1      
+      
+      LDX #7
+     @FixNameLoop:
+      LDA format_buf-7, X ;; JIGS - this goes backwards through the name, finding the $FFs at the end
+      CMP #$FF
+      BNE :+
+      
+     @ReplaceFF:          ;; then replaces with a 0, so a 4 letter name doesn't print 4 spaces after it.
+      LDA #0              ;; you should still plan your dialogue for 7 letter names though!
+      STA format_buf-7, X
+    : DEX
+      BNE @FixNameLoop      
 
       LDA #<(format_buf-7) ; make text_ptr point to the format buffer
       STA text_ptr
@@ -12512,9 +12524,7 @@ DrawBattleBackdropRow:
   ;; the layout of the battle backdrop -- the way the columns are arranged
 
 @lut_BackdropLayout:
-  .byte 3,4,3,4,1,2,3,4,1,2;,1,2
-  .byte 3,4,1,2,3,4,3,4,1,2;,1,2
-  .byte 1,2,3,4,1,2,3,4,1,2,1,2
+  .byte 3,4,3,4,1,2,3,4,1,2,3,4,1,2,3,4,3,4,1,2,1,2,3,4,1,2,3,4,1,2,1,2
   
   ;; JIGS ^ is a neat layout I guess!
   ;.BYTE 1,2,3,4,3,4,1,2,1,2,3,4,3,4
@@ -12800,14 +12810,14 @@ BattleDrawMessageBuffer:
     LDA #>btl_msgbuffer
     STA BattleTmpPointer2+1
     
-    LDA #$0A ; 0A
+    LDA #$09 ; 0A
     STA btl_msgbuffer_loopctr ; loop down-counter ($0C rows)
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
       
       LDA BattleTmpPointer2   ; add $20 to the source pointer to draw next row
       CLC
-      ADC #$20 ; 20 
+      ADC #$20
       STA BattleTmpPointer2
       LDA BattleTmpPointer2+1
       ADC #$00
@@ -12815,7 +12825,7 @@ BattleDrawMessageBuffer:
       
       LDA BattleBoxString           ; add $20 to the target PPU address
       CLC
-      ADC #$20 ; 20 
+      ADC #$20
       STA BattleBoxString
       LDA BattleBoxString+1
       ADC #$00
@@ -12853,7 +12863,6 @@ Battle_DrawMessageRow:
       LDA (BattleTmpPointer2), Y      ; read $19 bytes from source pointer
       STA $2007         ;  and draw them
       INY
-      ;CPY #$19
       CPY #$20 ; 20 ;; JIGS - RAWR
       ;; WHAT A PAIN; this tells the game to stop drawing boxes so they don't cover up the character names...
       ;; instead of just having the programmers not make boxes that are so big they cover up the names...
@@ -12874,34 +12883,25 @@ Battle_DrawMessageRow:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleDrawMessageBuffer_Reverse:
-    LDA #<$23A0         ; start drawing at the bottom row
+    LDA #<$2380 ; A0         ; start drawing at the bottom row
     STA BattleBoxString
-    LDA #>$23A0
+    LDA #>$2380 ; A0
     STA BattleBoxString+1
     
-    LDA #<(btl_msgbuffer + $9*$20)  ; start with the last row of source data
+    LDA #<(btl_msgbuffer + $8*$20)  ; start with the last row of source data
     STA BattleTmpPointer2
-    LDA #>(btl_msgbuffer + $9*$20)
+    LDA #>(btl_msgbuffer + $8*$20)
     STA BattleTmpPointer2+1
     
-    LDA #$0A ; 05               ; loop down counter.  6 iterations, 2 rows per iterations
-    STA btl_msgbuffer_loopctr               ;    = $C rows
+    LDA #$09 ; 0A               ; loop down counter.  
+    STA btl_msgbuffer_loopctr  
     
-  @Loop:
-      JSR Battle_DrawMessageRow_VBlank  ; draw a row
-      JSR @AdjustPointers               ; move ptrs to prev row
-      ;JSR Battle_DrawMessageRow         ; draw another one
-      ;JSR @AdjustPointers               ; move ptrs again
-      JSR Battle_UpdatePPU_UpdateAudio_FixedBank    ; update audio and stuffs
-      
-      DEC btl_msgbuffer_loopctr
-      BNE @Loop         ; loop until all rows drawn
-    RTS
-
-  @AdjustPointers:
+   @Loop:
+    JSR Battle_DrawMessageRow_VBlank  ; draw a row
+    
     LDA BattleTmpPointer2     ; subtract $20 from the source pointer
     SEC
-    SBC #$20 ; 20
+    SBC #$20 
     STA BattleTmpPointer2
     LDA BattleTmpPointer2+1
     SBC #$00
@@ -12909,13 +12909,18 @@ BattleDrawMessageBuffer_Reverse:
     
     LDA BattleBoxString     ; and from the dest pointer
     SEC
-    SBC #$20  ; 20
+    SBC #$20 
     STA BattleBoxString
     LDA BattleBoxString+1
     SBC #$00
     STA BattleBoxString+1
     
+    JSR Battle_UpdatePPU_UpdateAudio_FixedBank    ; update audio and stuffs
+    
+    DEC btl_msgbuffer_loopctr
+    BNE @Loop         ; loop until all rows drawn
     RTS
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13179,57 +13184,10 @@ ClearBattleMessageBuffer:
     LDY #$00
     LDA #$00
     : STA btl_msgbuffer, Y      ; clear the message buffer
-      STA btl_msgbuffer+$30, Y  ;   (write $180 bytes)
+      STA btl_msgbuffer+$20, Y  ; which is $130 bytes long
       INY
       BNE :-
-    
-    ; After the message buffer is clear, it has to draw the bottom row of the
-    ;  bounding box for the enemies/player.  This gets drawn over by other boxes.
-    
-;    LDA #$FD                    ; tile FD is the bottom-box tile
-;    : STA btl_msgbuffer+1, Y    ; draw the row
-;      INY
-      ;CPY #$17
-;      CPY #$1D
-      ;; JIGS ^ draw more under box tiles
-;      BNE :-
-    
-    ;LDA #$FC                    ; FC = lower left corner tile
-    ;STA btl_msgbuffer+$01       ; for enemy box
-    ;STA btl_msgbuffer+$11       ; for player box
-    ;LDA #$FE                    ; FE = lower right corner tile
-    ;STA btl_msgbuffer+$10       ; for enemy box
-    ;STA btl_msgbuffer+$18       ; for player box
-    
-    ;; JIGS - I added some neat tiles ... $C9 prints one of them to merge the two boxes on the bottom
-    
-;    LDA #$FC                    
-;    STA btl_msgbuffer+$01       
-;    LDA #$C9                    
-;    STA btl_msgbuffer+$16       
-    
-;    LDA #$FE                    
-;    STA btl_msgbuffer+$1E       
-
-;; JIGS - this would print a thing instead, but it doesn't work right
-;  LDA #14
-;  STA dest_x       
-;  LDA #19
-;  STA dest_y
-  
-;  LDA #<btl_screenbackup
-;  STA text_ptr
-;  LDA #>btl_screenbackup
-;  STA text_ptr+1
-  
-;  LDA #1
-;  STA menustall
-;  LDA #$0C
-;  STA ret_bank
-  
-;  JMP DrawComplexString
- 
- RTS
+  RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -14078,17 +14036,6 @@ DrawBattleString:
     LDY btl_msgdraw_srcptr+1
     JSR FormatBattleString  ; draw the battle string to the output buffer
     
-;    LDY #$00                ; move 'top bytes' from string output buffer to the
-;    LDX #$00                ;  actual draw buffer
-;  @TopLoop:
-;      LDA btl_stringoutputbuf, X
-;      BEQ @StartBottomLoop
-;      STA ($8A), Y
-;      INY
-;      INX                   ; INX *2 because top/bottom tiles are interleaved
-;      INX
-;      JMP @TopLoop          ; loop until we hit the null terminator
-    
   @StartBottomLoop:         ; move 'bottom bytes'
     LDY #$20
     LDX #$00
@@ -14113,16 +14060,6 @@ DrawBattleString:
 ;;  These are all the boxes that pop up during combat to show attackers/damage/etc
 
 lut_CombatBoxes:
-;             BOX                      TEXT
-;       hdr    X    Y   wd   ht     hdr    X    Y
-; .BYTE $00, $00, $00, $0D, $03,    $01, $01, $00       ; 0 attacker name
-; .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 old attack/new EOB box
-; .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
-; .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 old damage/new EOB box
-; .BYTE $00, $00, $06, $20, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
-; .BYTE $00, $0D, $03, $0A, $03,    $01, $0E, $03       ; 5 damage
-; .BYTE $00, $0D, $00, $0A, $03,    $01, $0E, $00       ; 6 their attack ("FROST", "2Hits!" etc)
-  
   .BYTE $00, $00, $00, $0D, $03,    $01, $01, $00       ; 0 attacker name
   .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 attack
   .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
@@ -14168,7 +14105,7 @@ lut_BattleCommandBoxInfo:
 ;       hdr,  X    Y    ptr
   .BYTE $01, $03, $00, <@txt0, >@txt0   ; text
   .BYTE $01, $03, $02, <@txt1, >@txt1
-  .BYTE $00
+  .BYTE $FF
   ;.BYTE $01, $03, $04, <@txt2, >@txt2
   .BYTE $01, $03, $06, <@txt3, >@txt3
   .BYTE $01, $0A, $00, <@txt4, >@txt4
@@ -14283,10 +14220,10 @@ FormatBattleString:
 ;    LDA #$00
 ;    STA ScreenShakeCounter               ;  ????  no idea what this does
     
-    JSR SwapBtlTmpBytes     ; swap out btltmp bytes to back them up
-    
     STX btldraw_src         ; store source pointer
     STY btldraw_src+1
+    
+    JSR SwapBtlTmpBytes     ; swap out btltmp bytes to back them up
     
     LDY #$00                ; copy the actual string data to a buffer in RAM
     : LDA (btldraw_src), Y  ;   (presumably so we can swap out banks without fear
@@ -14995,9 +14932,9 @@ DrawBattle_IncSrcPtr:
 
 SwapBtlTmpBytes_L:
 SwapBtlTmpBytes:
-    PHA         ; backup A,X
-    TXA
-    PHA
+;   PHA         ; backup A,X7
+;   TXA
+;   PHA
     
     LDX #$0F
   @Loop:
@@ -15010,9 +14947,9 @@ SwapBtlTmpBytes:
       DEX
       BPL @Loop
       
-    PLA         ; restory A,X
-    TAX
-    PLA
+;    PLA         ; restory A,X
+;    TAX
+;    PLA
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -15125,10 +15062,22 @@ SwapPRG:
 
 OnReset:
     SEI            ; Set Interrupt flag (prevent IRQs from occuring)
-    LDA #0
+    
+    LDA #0    
+    LDX #0
+   @ResetRAM:
+    STA $0000, X
+    STA $0200, X
+    STA $0300, X
+    STA $0400, X
+    STA $0500, X
+    STA $0600, X
+    STA $0700, X
+    INX
+    BNE @ResetRAM
+
     STA $2000      ; Disable NMIs
-    STA soft2000
-    ;STA unk_FE     ; clear some PPU related areas in RAM
+    ;STA soft2000
     LDA #$06
     STA $2001      ; disable Spr/BG rendering (shut off PPU)
     CLD            ; clear Decimal flag (just a formality, doesn't really do anything)

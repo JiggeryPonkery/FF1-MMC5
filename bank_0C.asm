@@ -1107,8 +1107,12 @@ GetCharacterBattleCommand:
     
     LDX btlcmd_curchar
     JSR ClearGuardBuffers           ; in case they guarded then chose to re-select their command, undo the guard state
+    LDA btl_charparry, X
+    BPL :+
+    LDA #0
+    STA btl_charparry, X
     
-    LDY #ch_ailments - ch_stats     ; See if this character has any ailment that would prevent them from inputting
+  : LDY #ch_ailments - ch_stats     ; See if this character has any ailment that would prevent them from inputting
     LDA (CharStatsPointer), Y       ;   any commands
     AND #AIL_DEAD | AIL_STONE | AIL_SLEEP | AIL_CONF
     BEQ InputCharacterBattleCommand ; If they can, jump to routine to get input from menus
@@ -1325,8 +1329,8 @@ BattleSubMenu_Skill:
     
    @Parry:
     LDX btlcmd_curchar
-    LDA #1
-    STA btl_charparry, X            ; STA with 1 instead of INC so that it doesn't stack
+    LDA #$FF
+    STA btl_charparry, X            ; STA with FF
     BNE @SetSkill                   ; and can be DEC'd easily once it procs
     
    @Steal: 
@@ -4839,7 +4843,15 @@ DoBattleRound:
     CPX #$0D                   ; when X hits this, all combatants have been indexed properly!
     BNE @ThirdLoop
     
-
+    LDX #3    
+  @ActivateParry:
+    LDA btl_charparry, X
+    BPL :+
+    LDA #01
+    STA btl_charparry, X
+  : DEX
+    BPL @ActivateParry
+    
   @PerformBattleTurnLoop:
     LDY btl_curturn
     LDA #$00
@@ -11024,9 +11036,9 @@ DoExplosionEffect:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawEnemyEffect:
+    JSR SwapBtlTmpBytes_L
     LDA btl_defender
     PHA
-    JSR SwapBtlTmpBytes_L
     LDX btl_battletype
     BNE :+
       JMP DrawEnemyEffect_9Small          ; 9small formation

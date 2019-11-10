@@ -350,11 +350,11 @@ btltmp                  = $70 ; 16 bytes
 ;; ...and I haven't been bothered to do anything about it. Some may also use $8A and $8B?
 
 ;; leveling up
-LevelUp_Pointer         = $80
-lvlup_curexp            = $82  ; 2 byte pointer to character's current EXP
-lvlup_exptoadv          = $84  ; 2 byte pointer to EXP needed to advance
-lvlup_chstats           = $86  ; 2 byte pointer to character's OB stats
-battlereward            = $8C  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
+LevelUp_Pointer         = $70
+lvlup_curexp            = $72  ; 2 byte pointer to character's current EXP
+lvlup_exptoadv          = $74  ; 2 byte pointer to EXP needed to advance
+lvlup_chstats           = $76  ; 2 byte pointer to character's OB stats
+battlereward            = $7C  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
 ;                              ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
 ;                              ;  will never receive more than 65535 XP/GP in any one battle.
 
@@ -838,9 +838,9 @@ btl_unfmtcbtbox_buffer     = $6440  ; $6AFA  ; $80 bytes total, $10 bytes for ea
                                     ; Additional bytes are used for other areas
 
 
-btl_msgbuffer   = $6500  ; $691E   ; $180 bytes  ($0C rows * $20 bytes per row)
+btl_msgbuffer   = $6500  ; $120 bytes ($09 rows * $20 bytes per row)
                          ; this buffer contains on-screen tiles to be drawn to ppu$2240
-                         ; (note only $19 bytes are actually drawn, the remaining 7 bytes are padding)
+                         ; $20 more are read 
 
 btl_msgdraw_hdr         = $6640
 btl_msgdraw_x           = $6641

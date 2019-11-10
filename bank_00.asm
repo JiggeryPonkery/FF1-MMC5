@@ -6,6 +6,8 @@
 
 BANK_THIS = $00
 
+.incbin "bin/nesheader.bin"
+
 .incbin "chr/battle_blankspace.chr"
 .incbin "chr/backdrops/00_grasslands.chr"
 .incbin "chr/battle_blankspace.chr"
