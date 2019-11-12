@@ -1627,7 +1627,7 @@ LineUp_InMenu:
         JSR MainMenuSubTarget_NoClear ; get second target, don't clear cursor
         BCS UndoSwap
         
-       JSR PlaySFX_MenuSel         ; play the selection sound effect   
+       ;JSR PlaySFX_MenuSel         ; play the selection sound effect   
        LDA cursor                ; otherwise (A pressed), get the selected character
        ROR A
        ROR A
@@ -1684,8 +1684,8 @@ LineUp_InMenu:
       INY
       CPY #$40
       BNE :-
-            
-      @SwapComplete:
+
+     @SwapComplete:
       LDX MMC5_tmp+1      
       LDA ch_ailments, X
       AND #$0F
@@ -5383,9 +5383,9 @@ DrawGameTime:
     LDA playtimer+3 ; hours
     STA tmp
     JSR FormatNumber_2Digits ; formats, but doesn't remove leading 0s
-    LDA format_buf-2
-    STA bigstr_buf+1
     LDA format_buf-1
+    STA bigstr_buf+1
+    LDA format_buf-2
     STA bigstr_buf
     
     LDA #$7E         ; : seperators
@@ -5404,6 +5404,7 @@ DrawGameTime:
     STA dest_y
     LDA #1
     STA menustall
+    JSR WaitForVBlank_L
     JMP DrawComplexString  
 
 EnterMainMenu:
@@ -5466,9 +5467,8 @@ MainMenuLoop:
     JSR ClearOAM                  ; clear OAM (erasing all existing sprites)
     JSR DrawMainMenuCursor        ; draw the cursor
     JSR DrawMainMenuCharSprites   ; draw the character sprites
-    JSR WaitForVBlank_L
     JSR DrawGameTime
-    JSR MainMenuFrame                 ; Do a frame
+    JSR MainMenuFrame             ; Do a frame
 
     LDA joy_a                     ; check to see if A has been pressed
     BNE @A_Pressed
@@ -5482,8 +5482,8 @@ MainMenuLoop:
   
   @Select_Pressed:
     JSR LineUp_InMenu
-    BCC EnterMainMenu
-    JMP @EscapeSubTarget
+    BCC ResumeMainMenu            ; characters swappwed ; redraw menu
+    JMP @EscapeSubTarget          ; not swapped ; just reset the cursor
     
   @B_Pressed:
     LDA #0            ; turn PPU off
@@ -5574,7 +5574,7 @@ MainMenuLoop:
     CMP #$04
     BNE @Save    
     
-    @Options:
+   @Options:
     LDA #0
     STA $2001               ; turn off the PPU
     STA menustall           ; disable menu stalling
@@ -5587,20 +5587,12 @@ MainMenuLoop:
     JMP ResumeMainMenu
         
    @Save:
-    ;LDA mapflags            ; make sure we're on the overworld
-    ;LSR A                   ;  Get SM flag, and shift it into C
-    ;BCS @Rawr
-        JSR SaveGame
-        JMP EnterMainMenu
-    ;@Rawr:
-    ;JSR PlaySFX_Error        ; if can't use, play the error sound effect
+    JSR SaveGame
+    JMP ResumeMainMenu ; EnterMainMenu
 
 @EscapeSubTarget:             ; if they escaped the sub target menu...
     LDA #0
     STA cursor                ; reset the cursor to zero
-    ;LDA #6                     ; JIGS - originally #5
-    ;STA cursor_max            ; and reset cursor_max to 5 (only 5 main menu options)
-    ;JMP MainMenuLoop          ; then return to main menu loop
     JMP MainMenuResetCursorMax
 
     
@@ -5629,7 +5621,8 @@ MainMenuSubTarget_NoClear:
     JSR ClearOAM                 ; clear OAM
     JSR DrawMainMenuCharSprites  ; draw the main menu battle sprite
     JSR DrawMainMenuSubCursor    ; draw the sub target cursor
-    JSR MenuFrame                ; do a frame
+    JSR DrawGameTime
+    JSR MainMenuFrame            ; Do a frame
 
     LDA joy_a
     BNE @A_Pressed               ; check if A pressed
@@ -7968,6 +7961,12 @@ DrawMPTargetMenu_Elixir_OneChar:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+StatusMenuAttributes:
+.byte $FA,$F5
+.byte $AA,$55
+.byte $AA,$55
+.byte $AA,$55
+
 EnterStatusMenu:
     LDA #0
     STA $2001               ; turn off the PPU
@@ -7975,10 +7974,60 @@ EnterStatusMenu:
     STA menustall           ; disable menu stalling
     JSR ClearNT             ; clear the NT
 
-    LDA #$02                ; draw status box 0
-    JSR DrawMainItemBox
+    ;LDA #$02                ; draw status box 0
+    ;JSR DrawMainItemBox
+    ;LDA #19
+    ;INC dest_x
+    
+    LDA #>$23C0
+    STA $2006
+    LDA #<$23C0
+    STA $2006
+    
+    LDX #8
+    LDY #4
+   @AttributeLoop:
+    LDA StatusMenuAttributes-1, X
+    STA $2007
+    DEY
+    BNE @AttributeLoop
+    LDY #4
+    DEX
+    BNE @AttributeLoop
+    
+    LDA #$0F
+    STA cur_pal+6
+    LDA #$35
+    STA cur_pal+9
+    ;LDA #$38
+    ;STA cur_pal+10
+    LDA #$15
+    STA cur_pal+11
+  
+    
+    LDA #4
+    STA dest_y
+    LDA #20
+    STA dest_x
+    LDA #8
+    STA dest_wd
+    LDA #10
+    STA dest_ht               ; 8 tiles wide and 10 tall
+    LDA #0 
+    STA tmp+2                 ; and no additive!
+    
+    LDA #<statusbox_scrollwork  ; get the pointer to the orb box scrollwork
+    STA image_ptr            
+    LDA #>statusbox_scrollwork  
+    STA image_ptr+1          
+    JSR DrawImageRect        ; draw the image rect
+
+@ReenterStatusMenu:
+    LDA #02
+    STA dest_x
+    LDA #04
+    STA dest_y
     LDA #19
-    INC dest_x
     JSR DrawCharMenuString
 
     LDA #$03                ; and so on
@@ -7993,12 +8042,11 @@ EnterStatusMenu:
     INC dest_x
     JSR DrawCharMenuString
     
-    
     JSR ClearOAM            ; clear OAM
 
-    LDA #$A0
+    LDA #$B8
     STA spr_x
-    LDA #$20
+    LDA #$3C
     STA spr_y
 
     LDA submenu_targ        ; get target character ID
@@ -8006,25 +8054,44 @@ EnterStatusMenu:
     ROR A
     ROR A
     AND #$C0                ; shift to make ID a usable index
-    
     STA CharacterIndexBackup ;; JIGS - adding this
-    
-    JSR DrawOBSprite        ; then draw this character's OB sprite
-
     JSR TurnMenuScreenOn    ; turn the screen on
-   @Loop:  
+    
+   @Loop: 
+    JSR ClearOAM
+    LDX CharacterIndexBackup 
+    LDA playtimer+1         ; every other second
+    AND #01
+    BEQ @NormalPose
+    
+    LDA ch_ailments, X      ; set pose to cheer
+    ORA #$80
+    STA ch_ailments, X
+    BNE @DrawSprite
+
+   @NormalPose:             ; reset pose to normal
+    LDA ch_ailments, X
+    AND #$0F
+    STA ch_ailments, X
+   
+   @DrawSprite:   
+    TXA
+    JSR DrawOBSprite        ; then draw this character's OB sprite
     JSR MenuFrame
-    JSR MoveCursorLeftRight
+    JSR @MoveCursorLeftRight
     
     LDA joy_a
     ORA joy_b
-    BEQ @Loop                     ; check if A pressed    
+    BEQ @Loop                     ; check if A pressed  
+
+@ResetStatusMenuCharPose:    
+    LDX CharacterIndexBackup 
+    LDA ch_ailments, X
+    AND #$0F
+    STA ch_ailments, X
     RTS     
-
-
-
   
-MoveCursorLeftRight:
+@MoveCursorLeftRight:
     LDA joy            ; get joy data
     AND #$0F           ; isolate directional buttons
     CMP joy_prevdir    ; see if there were changes
@@ -8034,14 +8101,14 @@ MoveCursorLeftRight:
     CMP #0             ; see if buttons are being pressed
     BEQ @Exit          ; if not, exit
 
-    CMP #$01               ; otherwise, check for left/right
+    CMP #$01           ; otherwise, check for left/right
     BNE @Left
     
   @Right:
     LDA submenu_targ
     CLC
     ADC #$01
-    JMP :+
+    BNE :+
 
   @Left:
     LDA submenu_targ
@@ -8051,7 +8118,10 @@ MoveCursorLeftRight:
     STA submenu_targ
     PLA
     PLA
-    JMP EnterStatusMenu
+    JSR @ResetStatusMenuCharPose
+    LDA #0                      ; Turn off the PPU
+    STA $2000
+    JMP @ReenterStatusMenu
   
   @Exit:
    RTS
@@ -9164,21 +9234,22 @@ DrawOrbBox:
     STA orbbox_scrollwork-$20, X
     INX
     CPX #$60
-    BNE @Scrollwork
+    BNE @Scrollwork           ; the scrollwork is simply tiles $20-$5F in order
     
-    LDA #$02                     
+    LDA #$02                  ; X and Y positions are the same     
     STA dest_y                   
     STA dest_x
     LDA #8
     STA dest_wd
-    LDA #8
-    STA dest_ht
+    STA dest_ht               ; 8 tiles wide and tall
+    LDA #0 
+    STA tmp+2                 ; and no additive!
     
-    LDA #<orbbox_scrollwork        ; get the pointer to the orb box scrollwork
-    STA image_ptr
-    LDA #>orbbox_scrollwork
-    STA image_ptr+1
-    JSR DrawImageRect            ; draw the image rect
+    LDA #<orbbox_scrollwork  ; get the pointer to the orb box scrollwork
+    STA image_ptr            
+    LDA #>orbbox_scrollwork  
+    STA image_ptr+1          
+    JSR DrawImageRect        ; draw the image rect
     
 
       ; Fire Orb

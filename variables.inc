@@ -635,7 +635,8 @@ GetSpellLevelIndex   = $6019
 CharacterIndexBackup = $601A
 CharacterEquipBackup = $601B
 
-orbbox_scrollwork = $6100 ; for menu    
+orbbox_scrollwork    = $6100 ; for menu, $40 bytes   
+statusbox_scrollwork = $6140 ; for menu, $40 bytes   
 bigstr_buf        = $6300 ; 128 bytes
 SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
 

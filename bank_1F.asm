@@ -171,6 +171,7 @@
 .import AssignMapTileDamage_Z
 .import WriteAttributesToPPU
 .import LoadBattleTextChr
+.import LoadStatusBoxScrollWork
 
 .segment "BANK_FIXED"
 
@@ -10840,15 +10841,16 @@ LoadMenuBGCHRAndPalettes:
     ;JSR LoadBattleBGCHRAndPalettes   ; Load Battle BG and palettes.
     LDA #BANK_ORBCHR                 ;     This is mainly for menu related CHR and palettes
     JSR SwapPRG_L                    ; Swap to Bank D
-    LDX #06
+    LDX #08
     ;LDX #$02                         ; we want 2 rows of tiles
     LDA #<lut_OrbCHR                 ; from source address lut_OrbCHR
     STA tmp
     LDA #>lut_OrbCHR
     STA tmp+1
-    LDA #02
+    LDA #0
     ;LDA #$06                         ; dest ppu address $0600
     JSR CHRLoadToA                   ; load up desired CHR (this is the ORB graphics that appear in the upper-left corner of main menu
+    JSR LoadStatusBoxScrollWork    
     JMP LoadBorderPalette_Blue       ; Load up the blue border palette for menus
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

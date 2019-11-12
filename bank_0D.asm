@@ -2427,26 +2427,27 @@ MusicPlay:
     INC playtimer      ; frames 
     LDA playtimer
     CMP #60
-    BNE :+
+    BCC :+
        LDA #0          ; seconds
        STA playtimer   
        INC playtimer+1
        LDA playtimer+1
        CMP #60
-       BNE :+
+       BCC :+
         LDA #0         ; minutes 
         STA playtimer+1  
         INC playtimer+2
         LDA playtimer+2
         CMP #60
-        BNE :+
+        BCC :+
            LDA #0      ; hours
            STA playtimer+2
            INC playtimer+3
            LDA playtimer+3
            CMP #100
-           BNE :+
-            DEC playtimer+3 ; cap at 99 hours, you crazy
+           BCC :+
+            LDA #99
+            STA playtimer+3 ; cap at 99 hours, you crazy
 
  :  LDA music_track    ; check the music track
     BPL @Play          ; if high bit is set, song is over

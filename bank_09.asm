@@ -7,6 +7,7 @@
 
 .export EnterEndingScene, EnterMiniGame, EnterBridgeScene_L 
 .export lut_OrbCHR
+.export LoadStatusBoxScrollWork
 .import DrawComplexString_L, DrawBox_L, UpdateJoy_L, DrawPalette_L
 .import WaitForVBlank_L, lut_RNG
 .import CallMusicPlay_L
@@ -1453,15 +1454,35 @@ lut_OrbCHR:
  ; .INCBIN "chr/menuorbs.chr"
  .INCBIN "chr/new_menuorbs.chr"
 
+;; Note that the graphics are edited a bit to give the menu some neat connecting box tiles.
+
  
+LoadStatusBoxScrollWork: 
+  LDX #0
+ @Loop:
+  LDA @ImageTable, X
+  STA statusbox_scrollwork, X
+  INX
+  CPX #8*10
+  BNE @Loop
+  RTS  
  
- 
- 
+@ImageTable:
+.byte $32,$33,$08,$09,$08,$09,$34,$35 
+.byte $42,$43,$18,$19,$18,$19,$44,$45
+.byte $0E,$0F,$00,$00,$00,$00,$0A,$0B 
+.byte $1E,$1F,$00,$00,$00,$00,$1A,$1B
+.byte $0E,$0F,$00,$00,$00,$00,$0A,$0B 
+.byte $1E,$1F,$00,$00,$00,$00,$1A,$1B
+.byte $0E,$0F,$00,$00,$00,$00,$0A,$0B 
+.byte $1E,$1F,$00,$00,$00,$00,$1A,$1B
+.BYTE $3C,$3D,$0C,$0D,$0C,$0D,$3A,$3B 
+.BYTE $4C,$4D,$1C,$1D,$1C,$1D,$4A,$4B
  
  
  
 
-;; Note that the graphics are edited a bit to give the menu some neat connecting box tiles.
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
