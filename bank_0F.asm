@@ -635,7 +635,7 @@ StealFromEnemyZ:
   @Fail:
     PLA                             ; undo the push
   @Fail_NoPush:  
-  : DEC battle_stealsuccess
+    DEC battle_stealsuccess
     
   @Nothing:
     RTS
@@ -3563,7 +3563,7 @@ UnadjustEquipStats:
     SBC (tmp), Y           ; subtract weapon's damage bonus
     STA ch_damage, X       ; and write back
    
-  : LDA #00               ;; JIGS - clear these out
+    LDA #00               ;; JIGS - clear these out
     STA ch_critrate, X
     STA ch_weaponelement, X
     STA ch_weaponcategory, X
@@ -4022,7 +4022,7 @@ CritCheck:
    @CritAddAilment:
     BIT btl_defender_ailments
     BNE @noailment
- :  ORA btl_defender_ailments    ; add to existing ailments
+    ORA btl_defender_ailments    ; add to existing ailments
     STA btl_defender_ailments    
     LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
     CMP #$05                     ; is it still the black mage's turn?

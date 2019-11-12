@@ -2424,7 +2424,31 @@ Music_NewSong:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MusicPlay:
-    LDA music_track    ; check the music track
+    INC playtimer      ; frames 
+    LDA playtimer
+    CMP #60
+    BNE :+
+       LDA #0          ; seconds
+       STA playtimer   
+       INC playtimer+1
+       LDA playtimer+1
+       CMP #60
+       BNE :+
+        LDA #0         ; minutes 
+        STA playtimer+1  
+        INC playtimer+2
+        LDA playtimer+2
+        CMP #60
+        BNE :+
+           LDA #0      ; hours
+           STA playtimer+2
+           INC playtimer+3
+           LDA playtimer+3
+           CMP #100
+           BNE :+
+            DEC playtimer+3 ; cap at 99 hours, you crazy
+
+ :  LDA music_track    ; check the music track
     BPL @Play          ; if high bit is set, song is over
     CMP #$80           ;  if low bit is set, channels are already silenced
     BNE @Exit          ;  so just exit

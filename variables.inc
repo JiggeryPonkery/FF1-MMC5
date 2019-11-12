@@ -105,6 +105,11 @@ item_orb_start  = keyitems + $1C
   orb_earth     = item_orb_start + 3 ; $1F
 item_stop       = item_orb_start + 4 ; $20
 
+playtimer        = unsram + $F0 ; 4 bytes - game clock!
+;                = unsram + $F1
+;                = unsram + $F2
+;                = unsram + $F3
+
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00
 ch_ailments       = ch_stats + $01
@@ -346,17 +351,18 @@ btltmp                  = $70 ; 16 bytes
 ;;
 ;; Pointers - these are all 2 bytes each unless otherwise specified
 ;;
-;; IMPORTANT - several places in the code specifiy $88 and $89 instead of a named variable
-;; ...and I haven't been bothered to do anything about it. Some may also use $8A and $8B?
 
 ;; leveling up
 LevelUp_Pointer         = $70
-lvlup_curexp            = $72  ; 2 byte pointer to character's current EXP
-lvlup_exptoadv          = $74  ; 2 byte pointer to EXP needed to advance
-lvlup_chstats           = $76  ; 2 byte pointer to character's OB stats
-battlereward            = $7C  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
+LevelUp_Reward          = $72
+lvlup_curexp            = $74  ; 2 byte pointer to character's current EXP ; also used in status menu
+lvlup_exptoadv          = $76  ; 2 byte pointer to EXP needed to advance ; also used in status menu
+battlereward            = $78  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
 ;                              ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
 ;                              ;  will never receive more than 65535 XP/GP in any one battle.
+eob_gp_reward           = $7C ; + D
+eob_exp_reward          = $7E ; + F
+lvlup_chstats           = $80  ; 2 byte pointer to character's OB stats
 
 CharStatsPointer        = $80 
 CharBackupStatsPointer  = $82 ; these get loaded up at the same time
@@ -469,10 +475,8 @@ btl8x8spr_a             = $033B ; attribute
 btl8x8spr_t             = $033C ; tile ID
 btl8x8spr_i             = $033D ; slot to draw to (00-3F)
 battle_ailmentrandchance= $033E
-eob_gp_reward           = $033E ; + F
 battle_hitsconnected    = $033F     ; number of hits actually connected
 battle_critsconnected   = $0347
-eob_exp_reward          = $0347 ; + 8
 battle_thishitconnected = $0348
 btl_curturn             = $0349      ; current turn (index for btl_turnorder)
 eobtext_print_level     = $0449 ; + A 
@@ -630,7 +634,8 @@ TempSpellListIndex   = $6018
 GetSpellLevelIndex   = $6019
 CharacterIndexBackup = $601A
 CharacterEquipBackup = $601B
-    
+
+orbbox_scrollwork = $6100 ; for menu    
 bigstr_buf        = $6300 ; 128 bytes
 SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
 

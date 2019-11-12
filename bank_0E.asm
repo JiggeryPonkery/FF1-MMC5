@@ -863,8 +863,10 @@ M_CannotUseMagic:
 .byte $9C,$B2,$B5,$B5,$BC,$BF,$50,$26,$38,$22,$B1,$B2,$21,$B8,$3E,$05
 .byte $B7,$AB,$A4,$21,$B6,$B3,$A8,$4E,$FF,$1D,$23,$C0,$00 ; Sorry, you cannot use[enter]that spell here.
 
-M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape...
-.byte $7B,$7C,$7C,$7C,$7C,$7C,$7C,$7D,$00
+M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape and timer box...
+.byte $74,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$75,$01
+.byte $7B,$F6,$F6,$F6,$F6,$F6,$F6,$F6,$F6,$7D,$01,$01,$01,$01,$01,$01,$01
+.byte $74,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$75,$00
 
 M_ItemSubmenu:
 .byte $FF,$FF,$9E,$3E,$09,$03,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
@@ -4332,7 +4334,7 @@ CommonShopLoop_List:
     LDA (shop_cursor_ptr), Y    ; read it
     STA shopcurs_y       ; and record it
 
-  : JSR ShopFrame        ; now that cursor position has been recorded... do a frame
+    JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
     LDA joy_b
     BNE @B_Pressed       ; check to see if A or B have been pressed
@@ -5361,18 +5363,56 @@ PlaySFX_MenuMove:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-EnterMainMenu:
-    ;LDA #$51
-    ;STA music_track     ; set music track $51 (menu music)
-    ;JIGS - no resetting music here!
+DrawGameTime:
+    LDA playtimer+1 ; seconds
+    STA tmp
+    JSR FormatNumber_2Digits ; formats, but doesn't remove leading 0s
+    LDA format_buf-2
+    STA bigstr_buf+6
+    LDA format_buf-1
+    STA bigstr_buf+7
     
+    LDA playtimer+2 ; minutes
+    STA tmp
+    JSR FormatNumber_2Digits ; formats, but doesn't remove leading 0s
+    LDA format_buf-2
+    STA bigstr_buf+3
+    LDA format_buf-1
+    STA bigstr_buf+4
+    
+    LDA playtimer+3 ; hours
+    STA tmp
+    JSR FormatNumber_2Digits ; formats, but doesn't remove leading 0s
+    LDA format_buf-2
+    STA bigstr_buf+1
+    LDA format_buf-1
+    STA bigstr_buf
+    
+    LDA #$7E         ; : seperators
+    STA bigstr_buf+2
+    STA bigstr_buf+5
+    LDA #0
+    STA bigstr_buf+8
+    
+    LDA #<(bigstr_buf)    
+    STA text_ptr
+    LDA #>(bigstr_buf)
+    STA text_ptr+1
+    LDA #02 
+    STA dest_x 
+    LDA #27
+    STA dest_y
+    LDA #1
+    STA menustall
+    JMP DrawComplexString  
+
+EnterMainMenu:
     LDA #0
     STA $2001           ; turn off the PPU (we need to do some drawing)  
-    ;STA $4015           ; and silence the APU.  Music sill start next time MusicPlay is called.
-    ;STA $5015           ; and silence the MMC5 APU. (JIGS)
-    
     LDA #1
     STA MenuHush        ;; JIGS - mute music instead
+    LDA #BANK_THIS
+    STA cur_bank          ; set cur_bank to this bank
 
     JSR LoadMenuCHRPal        ; load menu related CHR and palettes
     LDX #$0B
@@ -5385,9 +5425,8 @@ EnterMainMenu:
 ;; ResumeMainMenu is called to redraw and reenter the main menu from other
 ;;  sub menus (like from the item menu).  This will redraw the main menu, but
 ;;  won't restart the music or reload CHR/Palettes like EnterMainMenu does
-
-    LDA #BANK_THIS
-    STA cur_bank          ; set cur_bank to this bank
+    
+    JSR WaitForVBlank_L
     JSR CallMusicPlay     ;   so we can call music play routine
     ;;JIGS -- I feel like this smooths out the music a bit more when opening the menu? maybe not
 
@@ -5423,11 +5462,13 @@ MainMenuResetCursorMax:
     LDA #5                        ;; JIGS - set cursor max to 5
   : STA cursor_max                ; flow seamlessly into MainMenuLoop
 
-MainMenuLoop:
+MainMenuLoop:   
     JSR ClearOAM                  ; clear OAM (erasing all existing sprites)
     JSR DrawMainMenuCursor        ; draw the cursor
     JSR DrawMainMenuCharSprites   ; draw the character sprites
-    JSR MenuFrame                 ; Do a frame
+    JSR WaitForVBlank_L
+    JSR DrawGameTime
+    JSR MainMenuFrame                 ; Do a frame
 
     LDA joy_a                     ; check to see if A has been pressed
     BNE @A_Pressed
@@ -5453,8 +5494,6 @@ MainMenuLoop:
     STA joy_select
     JSR CallMusicPlay
     RTS               ; and exit the main menu (by RTSing out of its loop)
-    ;JMP ExitMenu
-    ;; JIGS - moved to bank F to simplify and make space
 
     ; if A pressed, we need to move into the appropriate sub menu based on 'cursor' (selected menu item)
 
@@ -5467,7 +5506,7 @@ MainMenuLoop:
       LDA #0
       STA backup_cursor
       JSR EnterItemMenu         ; enter item menu
-      JMP EnterMainMenu ; ResumeMainMenu        ; then resume (redraw) main menu
+      JMP ResumeMainMenu        ; then resume (redraw) main menu
 
   @NotItem:
     CMP #$01
@@ -6391,7 +6430,7 @@ DrawLearnSpellMenu:
     CLC
     ADC item_pageswap
 
-  : JSR DrawMenuString         ; draw White / Black magic submenu
+    JSR DrawMenuString         ; draw White / Black magic submenu
   
     LDA item_pageswap
     BEQ @Page1
@@ -6400,19 +6439,19 @@ DrawLearnSpellMenu:
     CMP #2
     BEQ @Page3
     
-    @Page4:
+   @Page4:
     LDX #$30
     JMP :+
     
-    @Page3:
+   @Page3:
     LDX #$20
     JMP :+
     
-    @Page2:
+   @Page2:
     LDX #$10
     JMP :+
     
-    @Page1:
+   @Page1:
     LDX #0
   : STX MMC5_tmp+2
     LDY #0
@@ -6450,7 +6489,7 @@ DrawLearnSpellMenu:
     ADC #6
     TAY
     
-    @ResumeLoop:
+   @ResumeLoop:
     INC MMC5_tmp+2     ; inc the backed up X counter
     INC MMC5_tmp
     LDA MMC5_tmp
@@ -6471,7 +6510,7 @@ DrawLearnSpellMenu:
     CMP #2
     BEQ @DrawRightSide
     
-    @DrawLeftSide:
+   @DrawLeftSide:
     LDA #04 
     STA dest_x 
     LDA #05
@@ -6496,7 +6535,7 @@ DrawLearnSpellMenu:
     LDA #76
     JMP DrawMenuString     ; draw right side orbs
     
-    @SkipOne:
+   @SkipOne:
     LDA #$C2  
     STA bigstr_buf, Y
     STA bigstr_buf+1, Y
@@ -8327,9 +8366,8 @@ DrawMainMenuCharSprites:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MenuFrame:
-    JSR HushTriangle
-    ;; JIGS ^ every frame, gosh
     JSR WaitForVBlank_L    ; wait for VBlank
+MainMenuFrame:
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
 
@@ -8339,6 +8377,9 @@ MenuFrame:
     STA $2005
     STA $2005
 
+    JSR HushTriangle
+    ;; JIGS ^ every frame, gosh    
+    
     LDA music_track        ; if no music track is playing...
     BPL :+
       ;LDA #$51             ;  start music track $51  (menu music)
@@ -8679,7 +8720,7 @@ MoveMagicMenuCursor:
    @OopsUp: 
     CLC
     ADC #23
-  : STA cursor
+    STA cursor
     JSR @CheckCursor       
     BEQ @Up         
     JMP CloseDescBox_Sfx   
@@ -9037,6 +9078,8 @@ DrawMainMenu:
     JSR DrawOrbBox                 ; draw the orb box
     JSR DrawMainMenuGoldBox        ; gold box
     JSR DrawMainMenuOptionBox      ; and option box
+    LDA #$14
+    JSR DrawMainItemBox            ; timer box
 
 DrawMainMenu_CharacterBox:
     LDA #1                         ; then draw the boxes for each character
@@ -9076,9 +9119,9 @@ DrawMainMenu_CharacterBox:
     
     ;; JIGS - just a bit more to draw this weird line between the gold and orb boxes...
     
-    LDA #2
+    LDA #1
     STA dest_x
-    LDA #9
+    LDA #10
     STA dest_y
     LDA #65
     JMP DrawMenuString
@@ -9114,6 +9157,29 @@ DrawMainMenuGoldBox:
 DrawOrbBox:
     LDA #0             ; Draw main menu box ID 0  (the orb box)
     JSR DrawMainItemBox
+   
+    LDX #$20
+   @Scrollwork: 
+    TXA
+    STA orbbox_scrollwork-$20, X
+    INX
+    CPX #$60
+    BNE @Scrollwork
+    
+    LDA #$02                     
+    STA dest_y                   
+    STA dest_x
+    LDA #8
+    STA dest_wd
+    LDA #8
+    STA dest_ht
+    
+    LDA #<orbbox_scrollwork        ; get the pointer to the orb box scrollwork
+    STA image_ptr
+    LDA #>orbbox_scrollwork
+    STA image_ptr+1
+    JSR DrawImageRect            ; draw the image rect
+    
 
       ; Fire Orb
     LDX #$84           ; dest ppu address       = $2084
@@ -9242,13 +9308,13 @@ LoadMainItemBoxDims:
 lut_MainItemBoxes:
  
     ;       X   Y   wid height
-    .BYTE   $02,$02,$08,$08 ; 00 ; Main menu orb box
+    .BYTE   $01,$01,$0A,$0A ; 00 ; Main menu orb box
     .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
     .BYTE   $08,$02,$10,$0D ; 02 ; Status Menu - Name, Class, Level, Exp., Exp to Next
     .BYTE   $00,$0F,$10,$0D ; 03 ; Status Menu - main stats
     .BYTE   $10,$0F,$10,$0D ; 04 ; Status Menu - sub stats
-    .BYTE   $01,$09,$0A,$03 ; 05 ; Main menu gold box
-    .BYTE   $01,$0C,$0A,$11 ; 06 ; Main menu option box
+    .BYTE   $01,$0A,$0A,$03 ; 05 ; Main menu gold box
+    .BYTE   $01,$0C,$0A,$10 ; 06 ; Main menu option box
     .BYTE   $00,$01,$09,$03 ; 07 ; item title box (character name for magic screen)
     .BYTE   $00,$16,$20,$07 ; 08 ; Item description box
     .BYTE   $00,$03,$20,$13 ; 09 ; new magic menu and item box
@@ -9262,6 +9328,7 @@ lut_MainItemBoxes:
     .BYTE   $09,$01,$17,$03 ; 11 ; Magic/Item title submenu
     .BYTE   $00,$03,$10,$13 ; 12 ; Magic Learning menu left side
     .BYTE   $10,$03,$10,$13 ; 13 ; Magic Learning menu right side
+    .BYTE   $01,$1A,$0A,$03 ; 14 ; Main menu timer box
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9791,7 +9858,7 @@ EnterEquipInventory:
     LDA equip_impossible
     BNE @Error
     
-  : LDX ItemToEquip          ; get the new weapon
+    LDX ItemToEquip          ; get the new weapon
     DEX
     DEC inv_weapon, X        ; remove it from inventory
     RTS

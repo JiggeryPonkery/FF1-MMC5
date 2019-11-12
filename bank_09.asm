@@ -1450,7 +1450,16 @@ MiniGame_ProcessInput:
 ;;  unknown - unused  [$B5C9 :: 0x375D9]
 
 lut_OrbCHR: 
-  .INCBIN "chr/menuorbs.chr"
+ ; .INCBIN "chr/menuorbs.chr"
+ .INCBIN "chr/new_menuorbs.chr"
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 
 ;; Note that the graphics are edited a bit to give the menu some neat connecting box tiles.
 

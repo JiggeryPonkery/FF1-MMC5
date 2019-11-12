@@ -4468,7 +4468,7 @@ DrawMagicMessage:
     CPX #$41                        ; if >= $42, it indicates an enemy attack
     BCS RespondDelay
     
-  : LDA lut_MagicBattleMessages, X  ; Get the desired message to print
+    LDA lut_MagicBattleMessages, X  ; Get the desired message to print
     BEQ MessageRTS                  ; if 0, don't print anything.  Instead, just delay and exit
     BNE DrawMessageBoxDelay_ThenClearIt
 
@@ -5249,7 +5249,7 @@ ApplyPoisonToAllEnemies:
   : JSR ApplyPoisonToEnemy
     DEC btl_defender
     BMI :-
-  : RTS  
+    RTS  
 
 ApplyPoisonToEnemy:
     LDA btl_defender
@@ -5361,7 +5361,7 @@ ApplyRegenToEnemy:
     LDA #12                     ; 8% of max HP
     JSR RegenDivision
     
-  : LDY #en_hp                  ; move HP back to RAM stats
+    LDY #en_hp                  ; move HP back to RAM stats
     LDA math_basedamage
     STA (EnemyRAMPointer), Y
     INY
@@ -6550,7 +6550,7 @@ DoPhysicalAttack_NoAttackerBox:
       ;; JIGS - fixed the bug noted by Anomie as well, so this is capped AFTER all the equations
     
     ;;;;;
-  : LDA math_hitchance
+    LDA math_hitchance
     BNE :+
       INC math_hitchance                ; minimum hit chance of 1
       
@@ -6715,7 +6715,7 @@ DoPhysicalAttack_NoAttackerBox:
     LDA battle_thishitconnected
     BEQ @NextHitIteration
     
-  : LDA battle_attackerisplayer    ; 1 if player, 0 if enemy
+    LDA battle_attackerisplayer    ; 1 if player, 0 if enemy
     BEQ @DoEnemyAilmentChance
       LDA battle_defenderisplayer  ; 1 if player, 0 if enemy
       BNE :+
@@ -8668,7 +8668,8 @@ Battle_PrepareMagic:
   ;  BEQ :+
     
   ;  LSR A
-  : STA btlmag_effectivity
+  ; : 
+    STA btlmag_effectivity
     
     RTS
     
@@ -9621,7 +9622,7 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     PLA
     TAX
     JSR HideCharacter ; will clear Hidden ; when Caster steps back, they won't go into hiding again anyway.
- :  RTS
+    RTS
     
  
   ;; JIGS - loading and saving stats could be shortened by making a .word table of the ch_xxx - ch_stats stuff
@@ -10640,7 +10641,8 @@ BtlMag_Effect_RemoveResist:
       LDA #188                          ; hit chance = 188
       STA math_hitchance                ;   (148 base + 40 bonus)
       
-  : LDA #MATHBUF_HITCHANCE
+ ; : 
+    LDA #MATHBUF_HITCHANCE
     LDX btlmag_hitrate
     JSR MathBuf_Add                     ; add spell's hit rate to chance
     LDA #MATHBUF_HITCHANCE

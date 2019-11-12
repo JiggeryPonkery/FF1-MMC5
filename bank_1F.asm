@@ -311,15 +311,9 @@ GameStart:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DoOverworld:
-  ;  LDA #0
-  ;  STA MenuHush
-    ;; JIGS ^ Don't hush the music anymore!
-
     JSR PrepOverworld       ; do all overworld preparation
     JSR ScreenWipe_Open     ; then do the screen wipe effect
-                            ; then enter the overworld loop
-  ; JMP EnterOverworldLoop  ; <- flow into
-
+    JMP EnterOverworldLoop  ; then enter the overworld loop
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -328,6 +322,11 @@ DoOverworld:
 ;;   This is where everything spawns from on the overworld.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; this one is for entering the overworld from a menu/story screen
+EnterOW_NoWipe:
+    JSR PrepOverworld       ; do all necessary overworld preparation
+    JSR StopNoise_StopSprites
 
 EnterOverworldLoop:
     LDX #$FF            ; purge stack and wipe the stack pointer so it points to top of stack
@@ -349,15 +348,7 @@ OverworldLoop_2:
     BNE :+
         INC framecounter+1
   :     
-    
-   ; LDA framecounter           ; increment the *two byte* frame counter
-   ; CLC                        ;   what does this game have against the INC instruction?
-   ; ADC #1
-   ; STA framecounter
-   ; LDA framecounter+1
-   ; ADC #0
-   ; STA framecounter+1
-    
+   
     JSR OverworldMovement      ; do any pending movement animations and whatnot
                                ;   also does any required map drawing and updates
                                ;   the scroll appropriately
@@ -438,30 +429,25 @@ DoOWTransitions:
     BEQ @SkipBridgeScene  ;   if not triggered... skip it
     BMI @SkipBridgeScene  ;   if we've already done it in the past, skip it
 
-      LDA #0
-      JSR CyclePalettes      ; cycle palettes with code=00 (overworld, cycle out)
+      JSR StopNoise_StopSprites      ; cycle palettes with code=00 (overworld, cycle out)
 
       JSR LoadBridgeSceneGFX ; load CHR and NT for the bridge scene
       LDA #BANK_BRIDGESCENE
       JSR SwapPRG_L          ; swap to bank containing bridge scene
       JSR EnterBridgeScene_L ; do the bridge scene.
-
-      LDA #$04
-      JSR CyclePalettes   ; cycle out from bridge scene with code 4 (zero scroll, cycle out)
-      JMP EnterOW_PalCyc  ; then re-enter overworld
+      JMP EnterOW_NoWipe     ; then re-enter overworld
 
   @SkipBridgeScene:
     LDA entering_shop     ; see if we're entering a shop (caravan)
     BEQ @SkipShop         ; if not... skip it
 
       ;JSR GetOWTile       ; Get overworld tile (why do this here?  doesn't make sense)
-      LDA #$00
-      JSR CyclePalettes   ; cycle out the palette
+      JSR StopNoise_StopSprites   ; cycle out the palette
 
       LDA #BANK_MENUS
       JSR SwapPRG_L       ; swap to bank containing shops
       JSR EnterShop       ; and enter the shop!
-      JMP EnterOW_PalCyc  ; then re-enter overworld
+      JMP EnterOW_NoWipe  ; then re-enter overworld
 
   @SkipShop:
     BIT tileprop+1      ; check properties of tile we just moved to
@@ -476,52 +462,39 @@ DoOWTransitions:
 
       LDA #0
       STA joy_start       ; clear start button catcher
-      STA $400C           ; silence noise channel (stop ship/airship sound effects)
+      ;STA $400C           ; silence noise channel (stop ship/airship sound effects)
 
       JSR GetOWTile       ; get overworld tile (needed for some items, like the Floater)
-      LDA #$00
-      JSR CyclePalettes   ; cycle out the palette
+      JSR StopNoise_StopSprites   ; cycle out the palette
 
       LDA #BANK_MENUS
       JSR SwapPRG_L       ; swap to bank containing menus
       JSR EnterMainMenu   ; and enter the main menu
-      JMP EnterOW_PalCyc  ; then re-enter the overworld
+      JMP EnterOW_NoWipe  ; then re-enter the overworld
       
   @SkipStart:
     LDA joy_select        ; check to see if they pressed select
     BEQ @Exit             ; if not... nothing else to check.  Just exit
 
-    ;  LDA #$00            ; otherwise... if they did press select..
-    ;  STA $400C           ; silence noise (stop ship/airship sound effects)
-    ;  JSR CyclePalettes   ; cycle out the palette
-
-      LDA joy
+    LDA joy
       AND #$40            ; see if the B button is being held down
       BEQ @Pause ;Lineup         ;  if not... jump to the lineup menu.  Otherwise do the minimap screen
 
       @Minimap:
-        LDA #$00            ; otherwise... if they did press select..
-        STA $400C           ; silence noise (stop ship/airship sound effects)
-        JSR CyclePalettes   ; cycle out the palette
+        ;LDA #$00            ; otherwise... if they did press select..
+        ;STA $400C           ; silence noise (stop ship/airship sound effects)
+        JSR StopNoise_StopSprites   ; cycle out the palette
       
         LDA #BANK_MINIMAP
         JSR SwapPRG_L        ; swap to bank containing the minimap
         JSR EnterMinimap     ; do the minimap
-        JMP EnterOW_PalCyc   ; then re-enter overworld
-
-      ;@Lineup:
-       ; LDA #BANK_MENUS
-       ; JSR SwapPRG_L        ; swap to bank containing menus
-       ; JSR EnterLineupMenu  ; enter the lineup menu
-       ; JMP EnterOW_PalCyc   ; then re-enter overworld
+        JMP EnterOW_NoWipe   ; then re-enter overworld
        
        @Pause:
-       JSR PauseGame
+        JSR PauseGame
 
   @Exit:
    RTS
-
-
 
   @Battle:
     JSR GetOWTile          ; Get overworld tile (needed for battle backdrop)
@@ -536,8 +509,7 @@ DoOWTransitions:
 
     LDA btlformation
     JSR EnterBattle_L      ; start the battle!
-    JMP EnterOW_PalCyc     ; then re-enter overworld
-
+    JMP EnterOW_NoWipe     ; then re-enter overworld
 
   @Teleport:
     JSR GetOWTile           ; Get OW tile (so we know the battle backdrop for the map we're entering)
@@ -596,14 +568,14 @@ PauseGame:
     STA $5000   ; set MMC5 Squares volume to 0
     STA $5004   ;
   
-    @PauseLoop:
+   @PauseLoop:
     LDA mapflags            ; check if on overworld or town/dungeon
     LSR A                    
     BCS @StandardMap
         JSR SetOWScroll    ; do overworld scroll if on overworld 
         JMP :+
         
-    @StandardMap:          ; else, do town/dungeon scroll
+   @StandardMap:          ; else, do town/dungeon scroll
     JSR WaitForVBlank     
     LDA #>oam               ; and do Sprite DMA
     STA $4014               
@@ -616,7 +588,7 @@ PauseGame:
   : JSR UpdateJoy  ; keep checking if select is pressed again
     LDA joy_select
     BEQ @PauseLoop
-          
+
     LDA #0
     STA joy_select ; clear select so the game doesn't pause immediately again
     STA joy_start  ; clear start so the game doesn't go into menu after unpausing
@@ -738,7 +710,7 @@ ProcessOWInput:
     BNE @Exit          ; if not... exit
 
     LDA #0                  ; otherwise... they activated the minigame!
-    JSR CyclePalettes       ; cycle palette with code 0 (overworld, cycle out)
+    JSR StopNoise_StopSprites
     JSR LoadBridgeSceneGFX  ; load the NT and most of the CHR for the minigame
     LDA #BANK_MINIGAME
     JSR SwapPRG_L        ; swap to bank containing minigame
@@ -746,9 +718,7 @@ ProcessOWInput:
     BCC :+               ; if they compelted the minigame successfully...
       JSR MinigameReward ;  ... give them their reward
 
-:   LDA #$04             ; cycle palettes out from the minigame screen
-    JSR CyclePalettes    ; code=4 (zero scroll, cycle out)
-    JMP EnterOW_PalCyc   ; then re-enter overworld
+  : JMP EnterOW_NoWipe   ; then re-enter overworld
   @Exit:
     RTS
 
@@ -2083,20 +2053,6 @@ PrepOverworld:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Enter Overworld -- PalCyc   [$C762 :: 0x3C772]
-;;
-;;    Enters the overworld with the palette cycling effect
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-EnterOW_PalCyc:
-    JSR PrepOverworld       ; do all necessary overworld preparation
-    LDA #$01
-    JSR CyclePalettes       ; cycle palettes with code=01 (overworld, reverse cycle)
-    JMP EnterOverworldLoop  ; then enter the overworld loop
 
 
 
@@ -2486,7 +2442,7 @@ StandardMapLoop:
       CMP #TP_TELE_EXIT
       BEQ @ExitTeleport
 
-:     JSR ProcessSMInput    ; if none of those things -- process input, and continue
+      JSR ProcessSMInput    ; if none of those things -- process input, and continue
   @Continue:
     JSR ClearOAM            ; clear OAM
     JSR DrawSMSprites       ; and draw all sprites
@@ -2496,8 +2452,8 @@ StandardMapLoop:
    ; JSR GetSMTilePropNow    ; get the 'now' properties of the tile the player is on
     LDA #0                  ;   this seems totally useless to do here
     STA inroom              ; clear the inroom flags so that we're out of rooms when we enter the shop
-    LDA #2                  ;   this is to counter the effect of shop enterances also being doors that enter rooms
-    JSR CyclePalettes       ; do the palette cycle effect (code 2 -- standard map, cycle out)
+    ;LDA #2                 ;   this is to counter the effect of shop enterances also being doors that enter rooms
+    JSR StopNoise_StopSprites  ; do the palette cycle effect (code 2 -- standard map, cycle out)
 
     LDA #BANK_MENUS         ; swap to menu bank
     JSR SwapPRG_L
@@ -2716,9 +2672,10 @@ ProcessSMInput:
       STA joy_start            ; clear start button catcher
 
      ; JSR GetSMTilePropNow     ; get the properties of the tile we're standing on (for LUTE/ROD purposes)
-      LDA #$02
-      JSR CyclePalettes        ; cycle palettes out with code 2 (2=standard map)
-
+      ;LDA #$02
+      ;JSR CyclePalettes        ; cycle palettes out with code 2 (2=standard map)
+      
+      JSR StopNoise_StopSprites
       LDA #BANK_MENUS
       JSR SwapPRG_L
       JSR EnterMainMenu        ; enter the main menu
@@ -2738,8 +2695,9 @@ ProcessSMInput:
       ;JSR GetSMTilePropNow     ; do all the same stuff as when start is pressed.
       LDA #0                   ;   though I don't know why you'd need to get the now tile properties...
       STA joy_select
-      LDA #$02
-      JSR CyclePalettes
+      ;LDA #$02
+      ;JSR CyclePalettes
+      JSR StopNoise_StopSprites
       ;; JIGS - here we have the sound test menu!
   
       LDA joy
@@ -2834,7 +2792,7 @@ CanPlayerMoveSM:
     CMP #TP_SPEC_DEEPWATER
     BNE @NormalCheck
 
-  : LDA tileprop                ; reaches here if player currently standing in water
+    LDA tileprop                ; reaches here if player currently standing in water
     CMP #TP_SPEC_BRIDGEHORZ     ; check if the tile falls in the range of bridges, deep water, and water access
     BCC @CantMove               ; if its below, can't get out
     CMP #TP_SPEC_WATERACCESS+1  ; 
@@ -3427,7 +3385,7 @@ StandardMapMovement:
     BEQ SetSMScroll       ; if not, just skip ahead and set the scroll
                           ; the rest of this is only done during movement
       JSR SM_MovePlayer   ; Move the player in the desired direction
-    : JSR MapPoisonDamage   ; do poison damage
+      JSR MapPoisonDamage   ; do poison damage
 
       LDA tileprop          ; get the properties for this tile
       AND #TP_SPEC_MASK     ; mask out the special bits
@@ -4065,7 +4023,7 @@ SMMove_Door:
     ;  JSR PlayDoorSFX    ;  ... play the door sound effect
 
 SetChestAddr:      
-:   LDA scroll_y         ; get the Y scroll for drawing
+    LDA scroll_y         ; get the Y scroll for drawing
     CLC
     ADC #7               ; add 7 to get the row to which the player is on
     TAX                  ; throw that in X -- it will be the row to draw the door graphic to
@@ -4266,10 +4224,7 @@ EnterStandardMap:
 
 ReenterStandardMap:
     JSR PrepStandardMap   ; do map preparation stuff (redraw, etc)
-    ;LDA #$03              ; then do palette cycling effect code 3 (standard map -- cycling in)
-    ;; JIGS ^ disabling palette cycling, so disabling this
-    ;; Still using this JMP routine though!
-    JMP CyclePalettes     ;  and exit
+    JMP StopNoise_StopSprites ;  and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5605,7 +5560,7 @@ DrawDialogueBox:
      ; BEQ :+                     ; if they're the same (drawing the top/last row)
         JSR PrepDialogueBoxAttr  ; ... then skip over dialogue box attribute prepping (dialogue box isn't visible top row)
 
-  :   JSR WaitForVBlank_L        ; then wait for VBl again
+      JSR WaitForVBlank_L        ; then wait for VBl again
       JSR DrawMapAttributes      ; and draw the attributes for this row
       JSR SetSMScroll            ; then set the scroll to keep rendering looking good
       JSR CallMusicPlay_NoSwap   ; and keep the music playing
@@ -5898,7 +5853,7 @@ ShowDialogueBox:
     ;BEQ :+                 ; if dlgsfx > 1...
     ;  LDX #$58             ;  ... then use track $58 instead (treasure chest ditty)
     ;; JIGS - disabling the treasure box music, but not for Key Items
-:   STX music_track        ; write the desired track to the music_track to get it started
+   STX music_track        ; write the desired track to the music_track to get it started
 
   ; there are two seperate 'WaitForButton' loops because the dialogue box closes when the
   ; user presses A, or when they press any directional button.  The first loop waits
@@ -6435,7 +6390,7 @@ StartScreenWipe:
     ;LDA #22              
     ;STA sq2_sfx           ; mark square 2 as playing SFX for this many frames
 
-  : LDA #$38              ; 12.5% duty (harsh), volume=8
+    LDA #$38              ; 12.5% duty (harsh), volume=8
     STA $4004             ; uses Square 2 now... you know, the SFX channel?!
     LDA #%10001010        ; sweep downwards in pitch with speed=0 (fast!) and shift=2 (medium)
     STA $4005             ;  don't set F-value here, though -- that isn't done until
@@ -6802,337 +6757,16 @@ BattleTransition:
 
     JMP WaitVBlank_NoSprites   ; then wait for another VBlank before exiting
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Palette Cycle -- Draw Palette [$D918 :: 0x3D928]
-;;
-;;    Draws the temporary palette (tmp_pal).  BG colors only -- no sprite colors drawn.
-;;  For use in palette cycling.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;PalCyc_DrawPalette:
-;    LDA $2002          ; reset PPU toggle
-;    LDX #0             ; X will be our loop counter.  Zero it
-
-;    LDA #$3F           ; set PPU addr to $3F00 (palettes)
-;    STA $2006
-;    LDA #$00
-;    STA $2006
-
-;  @Loop:
-;      LDA tmp_pal, X   ; get color from tmp_pal
-;      STA $2007        ; draw it
-;      INX
-;      CPX #$10         ; and keep looping ($10 iterations)
-;      BCC @Loop
-
-;    LDA $2002          ; reset PPU toggle
-
-;    LDA #$3F           ; move PPU addr off of palettes
-;    STA $2006
-;    LDA #$00
-;    STA $2006
-;    STA $2006
-;    STA $2006
-
-;    RTS                ; and exit
-
-;; JIGS - disabling this
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Cycle Palettes   [$D946 :: 0x3D956]
-;;
-;;    Does that fugly palette cycling that acts as a transition into certain
-;;  areas.  Like when you enter the main menu, or enter a shop, etc.
-;;
-;;    The cycling is very simple.  +1 is added to each non-black color until it reaches
-;;  $xD (at which point it is replaced with $0F black).  Once all colors reach $0F, the
-;;  cycling is complete.
-;;
-;;    This process can also be done in reverse.  When in reverse, all colors that were
-;;  originally non-black start at $xC (where 'x' is their original brightness).  And -1 is done
-;;  until they reach their original color.
-;;
-;;    Note that since the reversed process starts the colors at $xC -- this means that the
-;;  reverse cycling will take EXTREMELY long if the palette contains any $xD, $xE, or $xF color
-;;  other than $0F.... because the palette will have to cycle through *256* colors to reach
-;;  the target color.  This is not a problem in the original game because it doesn't use any
-;;  of those colors (they're mostly black, except for some $xD colors -- and $0D is notorious
-;;  for screwing up the display on some television sets -- so they should all be avoided anyway).
-;;  This could be a problem in some hacks, though... if they changed a palette to use one of
-;;  those colors.
-;;
-;;  IN:  A = desired mode
-;;
-;;    Each of the 3 low bits in the desired mode indicates something:
-;;
-;;  bit 0 ($01) = set if cycling is to be done in reverse.  Clear if to be done normally
-;;  bit 1 ($02) = set if in standard map.  Clear if not (overworld, or menu, or whatever)
-;;  bit 2 ($04) = set if scroll is to be held at zero (for menus or whatever)
-;;
-;;    This value is dumped into 'palcyc_mode' and referred throughout this routine and
-;;  supporting routines.  It determines which palette to use, what scroll to reset to,
-;;  etc.
-;;
-;;    This routine will not exit until the cycling is complete.  Also, once it completes,
-;;  it swaps in the menu bank, and turns off the PPU (unless it was reverse -- in which case
-;;  the PPU stays on).
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-CyclePalettes:
-	LDA #$10					;; JIGS: Turning off noise, because there's a click when
+    ;; JIGS - deleted all the old palette cycling stuff.
+    ;; I'll put it back in when I re-order things enough.
+    ;; I want to have the original code available everywhere, but it just gets in the way right now.
+    
+StopNoise_StopSprites:
+	LDA #$30					;; JIGS: Turning off noise, because there's a click when
     STA $400C					;; entering menus on the ship
    	JSR WaitVBlank_NoSprites    ; wait for VBlank, and kill all sprites
-
-;; original game code:     
-    
-;    STA palcyc_mode           ; record the mode
-;    JSR WaitVBlank_NoSprites  ; wait for VBlank, and kill all sprites
-;    JSR PalCyc_SetScroll      ; set the scroll
-;    JSR PalCyc_GetInitialPal  ; load up the initial palette
-
-;    LDA #$01                  ; A will be a make-shift frame counter
-;  @Loop:
-;    PHA                       ; push the frame counter to back it up
-;    AND #$03                  ; mask low bits, and only take a step through the cycle
-;    BNE @NoStep               ;   if zero (once every 4 frames)
-
-;      JSR PalCyc_Step         ; if a 4th frame, take a step through the cycle
-;      CPY #0                  ; check to see if Y is zero (cycling is complete)
-;      BEQ @Done               ; if cycling is complete, break out of this loop
-
-;  @NoStep:
-;    JSR WaitForVBlank_L       ; wait for VBlank
-;    JSR PalCyc_DrawPalette    ; draw the new palette
-;    JSR PalCyc_SetScroll      ; set the scroll
-    JSR CallMusicPlay_NoSwap  ; and update music  (all the typical frame work)
-
-;    PLA                       ; pull the frame counter
-;    CLC
-;    ADC #1                    ; and add 1 to it
-;    JMP @Loop                 ; and keep looping until cycling is complete
-
-
-;  @Done:
-;    PLA               ; pull the frame counter just so it doesn't corrupt the stack (we're done with it)
-;    LDA palcyc_mode   ; get mode
-;    LSR A             ; check 'reverse' bit
-;    BCS :+            ; if NOT doing reverse....
-;      LDA #0          ; ... then turn PPU off
-;      STA $2001
-
-:   LDA #BANK_MENUS   ; swap to menus bank
-    JMP SwapPRG_L     ; and exit
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Palette Cycle -- Set Scroll   [$D982 :: 0x3D992]
-;;
-;;    Sets the scroll appropriately, and also disables sprite rendering
-;;
-;;  IN:  palcyc_mode = indicates how to set the scroll:
-;;
-;;     bit 2 set ($04) = zero scroll
-;;     bit 1 set ($02) = standard map scroll
-;;     otherwise       = overworld scroll
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;PalCyc_SetScroll:
-;    LDA palcyc_mode      ; get desired scroll setup
-;    AND #$04             ; check bit 2
-;    BEQ @Not4            ; if bit 2 clear, jump ahead
-
-;  @Do_Zero:              ; otherwise, do zero scroll
-;    LDA soft2000
-;    STA $2000            ; set NT bits
-
-;    LDA #$0A
-;    STA $2001            ; disable sprite rendering
-
-;    LDA #$00
-;    STA $2005
-;    STA $2005            ; zero scroll
-
-;    RTS                  ; exit
-
-;  @Not4:                 ; if bit 2 wasn't set... check bit 1
-;    LDA palcyc_mode
-;    AND #$02
-;    BNE @Do_SM           ; and branch appropriately
-
-;  @Do_OW:
-;    JSR SetOWScroll_PPUOn  ; set overworld scroll
-;    LDA #$0A
-;    STA $2001              ; disable sprites
-;    RTS                    ; exit
-
-;  @Do_SM:
-;    JSR SetSMScroll      ; set standard map scroll
-;    LDA #$0A
-;    STA $2001            ; disable sprites
-;    RTS                  ; exit
-
-;; JIGS - disabling this
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Palette Cycle -- Get Initial Palette  [$D9B3 :: 0x3D9C3]
-;;
-;;    Loads up pal_tmp with the initial palette to start cycling
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;PalCyc_GetInitialPal:
-;    LDX #0              ; start X (our loop counter) at zero
-;    LDA palcyc_mode     ; get the mode
-;    LSR A               ; shift 'reverse' bit into C
-;    BCC @CopyPal        ; if reverse bit is clear (cycling out), just copy the current palette and exit
-
-;      JSR @CopyPal      ; otherwise (reverse), copy the palettes, but then do more work...
-;      DEX               ; X=$0F after this DEX (CopyPal sets it to $10)
-                        ;  we're going to use it as a loop down counter, from $0F through $00.
-
-    ; if this is 'reversed' (cycling out), then we don't want the palettes to start at
-    ; their normal values (otherwise the cycling will be over immediately), so we mess
-    ; the colors up here
-
-;  @ScrambleLoop:
-;    LDA tmp_pal, X      ; get the color
-;    CMP #$0F            ; if it's black ($0F)
-;    BEQ @Skip           ;  skip it (don't change black)
-
-;    AND #$30            ; otherwise... isolate brightness bits
-;    ORA #$0C            ; and OR with color $0C (blue-green -- highest "legal" color other than black)
-;    STA tmp_pal, X      ; then write it back
-;  @Skip:
-;    DEX                 ; decrement our loop counter
-;    BPL @ScrambleLoop   ; and loop until it wraps ($10 iterations)
-
-;    RTS                 ; then exit!
-
-
-
-;  @CopyPal:
-;    LSR A               ; shift 'standard map' bit into C
-;    BCC @OutRoomLoop    ; if clear, we're not in a standard map... so do the 'outroom' palette
-;    LDA inroom          ; otherwise... check to see if we're inroom
-;    BEQ @OutRoomLoop    ; if we're not (inroom=0), then do outroom palette
-                        ; otherwise do inroom:
-
-;    @InRoomLoop:
-;      LDA inroom_pal, X ; copy inroom palette to temp palette
-;      STA tmp_pal, X
-;      INX
-;      CPX #$10
-;      BCC @InRoomLoop   ; loop until X=$10 ($10 iterations)
-;    RTS                 ; then exit
-
-;    @OutRoomLoop:
-;      LDA cur_pal, X    ; copy outroom (cur_pal) to temp pal
-;      STA tmp_pal, X
-;      INX
-;      CPX #$10
-;      BCC @OutRoomLoop  ; loop until X=$10 ($10 iterations)
-;    RTS                 ; then exit
-
-;; JIGS - disabling this too!
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Palette Cycle -- Step   [$D9EF :: 0x3D9FF]
-;;
-;;   Takes the colors in the palette one 'step' through the cycle
-;;
-;;  OUT:  Y = the number of colors that aren't done cycling yet
-;;                (zero = cycling is complete)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;PalCyc_Step:
-;    LDY #0            ; Y is our counter for colors that aren't done.
-;    LDX #0            ; X is our loop counter / index
-
-;    LDA palcyc_mode   ; get the mode
-;    LSR A             ; put 'reverse' bit in C
-;    BCS @Reverse      ; if it's set, do the 'reversed' cycling
-
-;  @NormalLoop:
-;    LDA tmp_pal, X    ; get this color
-;    CMP #$0F          ; check to see if it's black
-;    BEQ @NormalSkip   ; if it is, it's done cycling (stop at black), so skip it
-
-;    AND #$30          ; otherwise, get the brightness bits
-;    STA tmp           ; and back them up
-
-;    LDA tmp_pal, X    ; get the color again
-;    AND #$0F          ; and get the chroma bits
-;    CLC
-;    ADC #$01          ; add 1 to the chroma (cycle through the palette)
-;    CMP #$0D          ; see if chroma is >= $D  (result is put in C flag)
-
-;    ORA tmp           ; restore brightness bits
-
-;    BCC :+            ; then check C flag.  If chroma >= $0D....
-;      LDA #$0F        ; ... replace color with normal black $0F  ($xD, xE, and xF  all get changed to $0F)
-;:   STA $03F0, X      ; write cycled color back
-;    INY               ; INY to count this color as 'not done yet'
-
-;  @NormalSkip:
-;    INX               ; increment the loop counter
-;    CPX #$10
-;    BNE @NormalLoop   ; and loop until X=$10
-;    RTS               ; then exit
-
-
-;@Reverse:
-;    LSR A             ; shift 'standard map' mode bit into C
-;    BCC @OutroomLoop  ; if clear (not on standard map), do outroom cycling
-;    LDA inroom        ; otherwise... check inroom status
-;    BEQ @OutroomLoop  ; if clear, do outroom.  Otherwise, do inroom
-
-;  @InroomLoop:
-;    LDA tmp_pal, X     ; get this color
-;    CMP inroom_pal, X  ; compare to target color
-;    BEQ @InroomSkip    ; if equal, color is done
-
-;    SEC
-;    SBC #$01           ; otherwise, subtract 1 (from chroma)
-;    STA tmp_pal, X     ; and write back
-;    INY                ; then INY to count color as 'not done'
-
-;  @InroomSkip:
-;    INX                ; increment the loop counter
-;    CPX #$10
-;    BCC @InroomLoop    ; and keep looping until X=$10
-;    RTS                ; then exit
-
-
-;  @OutroomLoop:
-;    LDA tmp_pal, X     ; get this color
-;    CMP cur_pal, X     ; compare it to target color
-;    BEQ @OutroomSkip   ; if they're equal... this color is done
-
-;    SEC
-;    SBC #$01           ; otherwise, subtract 1 (from the chroma)
-;    STA tmp_pal, X     ; and write back to palette
-;    INY                ; INY to count the color as 'not done yet'
-
-;  @OutroomSkip:
-;    INX                ; increment the loop counter
-;    CPX #$10
-;    BCC @OutroomLoop   ; and keep looping until X=$10
-;    RTS                ; then exit
-
-;; JIGS - grahhh that was too much stuff! It's a cool effect, but it majorly slows down gameplay.
+    JMP CallMusicPlay_NoSwap  ; and update music  (all the typical frame work)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8098,7 +7732,7 @@ OpenTreasureChest:
     STA $2007
     JSR SetSMScroll
    
-  : LDA #DLGID_TCGET         ; put the treasure chest dialogue ID in A before exiting!
+    LDA #DLGID_TCGET         ; put the treasure chest dialogue ID in A before exiting!
     RTS
  
   @NotChest:
@@ -10708,7 +10342,10 @@ LoadBattleCHRPal:              ; does not load palettes for enemies
     JMP LoadBatSprCHRPalettes
 
 LoadMenuCHRPal:                ; does not load 'lit orb' palette, or the two middle palettes ($03C0-03CB)
+    JSR LoadShopBGCHRPalettes
     JSR LoadMenuBGCHRAndPalettes
+    JSR WaitForVBlank
+    JSR CallMusicPlay
     JMP LoadBatSprCHRPalettes
 
 LoadShopCHRPal:
@@ -10759,7 +10396,7 @@ LoadPlayerMapmanCHR:
                     ;    This points to mapman graphics for that class
     LDX #1          ; X=1  (load 1 row of tiles)
     LDA #$10        ; A=$10 (high byte of dest address:  $1000)
-    JMP CHRLoadToA  ; jump to CHR loader
+    BNE CHRLoadToA  ; jump to CHR loader
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10779,7 +10416,7 @@ LoadOWObjectCHR:
     STA tmp+1
     LDX #$06         ; 6 rows to load
     LDA #$11         ; dest address is $1100
-    JMP CHRLoadToA
+    BNE CHRLoadToA
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10791,13 +10428,13 @@ LoadOWObjectCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadOWBGCHR:
-    LDA #0
-    STA tmp
     LDA #$80
     STA tmp+1        ; source address is $8000
+    LDA #0
+    STA tmp
     LDX #$10         ; 16 rows to load (full pattern table)
-    LDA #0           ; dest address is $0000
-    JMP CHRLoadToA
+    ;LDA #0           ; dest address is $0000
+    ;JMP CHRLoadToA
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11200,15 +10837,17 @@ LoadBattleBGCHRPointers:
 
 
 LoadMenuBGCHRAndPalettes:
-    JSR LoadBattleBGCHRAndPalettes   ; Load Battle BG and palettes.
+    ;JSR LoadBattleBGCHRAndPalettes   ; Load Battle BG and palettes.
     LDA #BANK_ORBCHR                 ;     This is mainly for menu related CHR and palettes
     JSR SwapPRG_L                    ; Swap to Bank D
-    LDX #$02                         ; we want 2 rows of tiles
+    LDX #06
+    ;LDX #$02                         ; we want 2 rows of tiles
     LDA #<lut_OrbCHR                 ; from source address lut_OrbCHR
     STA tmp
     LDA #>lut_OrbCHR
     STA tmp+1
-    LDA #$06                         ; dest ppu address $0600
+    LDA #02
+    ;LDA #$06                         ; dest ppu address $0600
     JSR CHRLoadToA                   ; load up desired CHR (this is the ORB graphics that appear in the upper-left corner of main menu
     JMP LoadBorderPalette_Blue       ; Load up the blue border palette for menus
 
@@ -11269,43 +10908,22 @@ LoadBatSprCHRPalettes_NewGame:
 LoadBatSprCHRPalettes:
     JSR LoadBatSprCHR_SetPpuAddrAndSwap
     
-    ;; JIGS ^ does the same as v 
-    ;LDA #BANK_BTLCHR
-    ;JSR SwapPRG_L  ; swap to bank 9
-    ;LDA $2002      ; reset ppu addr toggle
-    ;LDA #$10
-    ;STA $2006      ; set dest ppu addr to $1000
-    ;LDA #$00
-    ;STA $2006
-    
-    ;; 
-    
-    ;STA tmp           ; clear low byte of source pointer
-    ;LDA ch_class      ; get character 1's class
-    ;JSR @LoadClass    ;  load it
-    ;LDA ch_class+$40  ; character 2's
-    ;JSR @LoadClass
-    ;LDA ch_class+$80  ; character 3's
-    ;JSR @LoadClass
-    ;LDA ch_class+$C0  ; character 4's
-    ;JSR @LoadClass
-    
     ;; JIGS - here we load sprites instead of classes 
     
     LDA #$00
     STA tmp            ; clear low byte of source pointer
     LDA ch_class      ; get character 1's sprite
     AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR @LoadClass     ; load it
+    JSR @LoadSprite     ; load it
     LDA ch_class+$40  ; character 2's
     AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR @LoadClass
+    JSR @LoadSprite
     LDA ch_class+$80  ; character 3's
     AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR @LoadClass
+    JSR @LoadSprite
     LDA ch_class+$C0  ; character 4's
     AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR @LoadClass
+    JSR @LoadSprite
     
     LDA #>lut_BatObjCHR  ; once all character's class graphics are loaded
     STA tmp+1            ;   change source pointer to $A800  (start of cursor and related battle CHR)
@@ -11318,7 +10936,7 @@ LoadBatSprCHRPalettes:
       LDA #BANK_MENUS
       JMP SwapPRG_L      ; and swap to bank E on exit
 
-@LoadClass:
+@LoadSprite:
     JSR ShiftSpriteHightoLow_Battle
     ;ASL A               ; double class index (each class has 2 rows of tiles)
     
@@ -11873,18 +11491,7 @@ DrawEquipMenuStrings:
       BNE @NotEquipped           ; then skip ahead (always branches)
 
   @LoadName:                     ; if the slot is not empty....
-   ; LDY MMC5_tmp+1
-   ; CPY #06
-   ; BCS :+
-   ; CPY #0
-   ; BEQ :+                       ; check offset (another backup of the loop counter, really...)
-    
-   
-   ; @ArmourOffset:
-   ; CLC
-   ; ADC #ARMORSTART
-    
-  : ASL A                        ; double it
+    ASL A                        ; double it
     TAX                          ; and stuff it in X to load up the pointer
     DEX
     DEX                          ; basically subtracts 1 from the item ID
@@ -12664,7 +12271,7 @@ BattleScreenShake:
     STA btl_soft2001 ;; JIGS - add red emphasis to screen
     JSR Battle_UpdatePPU_UpdateAudio_FixedBank ; 
     
-  : LDA #$06
+    LDA #$06
     STA ScreenShakeCounter           ; loop down counter.  6*2 = 12 frames  (2 frames per loop)
   @Loop:
       JSR @Stall2Frames ; wait 2 frames
@@ -13945,7 +13552,7 @@ FillItemBox_BankC:   ;; JIGS - just enough changes from the menu version to make
     STA tmp+3          ; also reset the cursor to 0 (which will be used as a loop counter below)
     STA tmp+2          ; now letter position counter
     
-  : LDA #BANK_MENUS    ; set the return bank to BANK_MENUS.
+    LDA #BANK_MENUS    ; set the return bank to BANK_MENUS.
     STA ret_bank       ;   this is required for DrawComplexString (called below)
     LDA #BANK_ITEMS    ; swap to BANK_ITEMS (bank containing item names)
     JSR SwapPRG_L
@@ -14720,7 +14327,7 @@ DrawEntityName:
     @Nameloop:
       LDA (btldraw_subsrc), Y           ; draw each character in the character's name
       JSR DrawBattleString_ExpandChar
-    : INY
+      INY
       CPY #$07                          ; JIGS - 7 letter names!
       BNE @Nameloop
       RTS
@@ -15638,18 +15245,6 @@ DashButton:
  
  
  
- 
-;; JIGS - 
-
-;ExitMenu:   ; exits the main menu when B is pushed, or when the save jingle ends!
-;    LDA #0            ; turn PPU off
-;    STA $2001
-;    STA joy_a         ; flush A, B, and Start joypad recordings
-;    STA joy_b
-;    STA joy_start
-;    JSR CallMusicPlay_NoSwap   
-;    RTS               ; and exit the main menu (by RTSing out of its loop)
-
 
 ;; JIGS - these two things raise and lower the volume of the triangle (and noise channel)    
 

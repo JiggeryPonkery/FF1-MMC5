@@ -2138,10 +2138,10 @@ LvlUp_LevelUp:
     LDA lvlup_chstats       ; set $80 to point to character's Max HP
     CLC
     ADC #ch_maxhp - ch_stats
-    STA CharStatsPointer
+    STA LevelUp_Pointer
     LDA lvlup_chstats+1
     ADC #$00
-    STA CharStatsPointer+1
+    STA LevelUp_Pointer+1
     
     JSR GiveHpBonusToChar   ; Finally, apply the HP bonus!
     
@@ -2430,9 +2430,9 @@ GiveRewardToParty:
     JSR AddBattleRewardToVal        ; add reward to target buffer
     
     LDA #<data_MaxRewardPlusOne     ; set $82 to point to reward max+1 (1000000)
-    STA CharBackupStatsPointer
+    STA LevelUp_Reward
     LDA #>data_MaxRewardPlusOne
-    STA CharBackupStatsPointer+1
+    STA LevelUp_Reward+1
     
     LDY #3 - 1                      ; compare 3 bytes
     JSR MultiByteCmp                ;  current value compared to max
@@ -2442,8 +2442,8 @@ GiveRewardToParty:
     ; Otherwise, current >= max
     
     LDY #$00                ; loop to copy 3 bytes of data
-    : LDA (CharBackupStatsPointer), Y          ; copy max to dest
-      STA (CharStatsPointer), Y
+    : LDA (LevelUp_Reward), Y          ; copy max to dest
+      STA (LevelUp_Pointer), Y
       INY
       CPY #$03
       BNE :-
@@ -2472,17 +2472,17 @@ GiveHpBonusToChar:
     JSR AddBattleRewardToVal    ; add reward (which is the HP bonus)
     
     LDA #<data_MaxHPPlusOne     ; copy HP cap to $82,83
-    STA CharBackupStatsPointer
+    STA LevelUp_Reward
     LDA #>data_MaxHPPlusOne
-    STA CharBackupStatsPointer+1
+    STA LevelUp_Reward+1
     
     LDY #2 - 1                  ; compare 2 byte value (char max HP to HP cap)
     JSR MultiByteCmp
     BCC @Done                   ; if max HP < cap, jump ahead to @Done
     
     LDY #$00                    ; copy the cap over to the max HP
-    : LDA (CharBackupStatsPointer), Y
-      STA (CharStatsPointer), Y
+    : LDA (LevelUp_Reward), Y
+      STA (LevelUp_Pointer), Y
       INY
       CPY #$02
       BNE :-
@@ -2491,10 +2491,10 @@ GiveHpBonusToChar:
  
   @Done:
     LDY #$00                    ; finally, copy the new max HP to eobtext_print_hp so
-    LDA (CharStatsPointer), Y  ;   it can be printed to the user!
+    LDA (LevelUp_Pointer), Y  ;   it can be printed to the user!
     STA eobtext_print_hp
     INY
-    LDA (CharStatsPointer), Y
+    LDA (LevelUp_Pointer), Y
     STA eobtext_print_hp+1
     RTS
 
@@ -2507,24 +2507,22 @@ GiveHpBonusToChar:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 AddBattleRewardToVal:
-            @loopctr = BattleBoxString+1 ; local
     LDA #$03
-    STA @loopctr                 ; loop 3 times (adding 3 bytes)
+    STA char_index               ; loop 3 times (adding 3 bytes)
     LDA #$00  
     TAY                          ; A, X, Y all zero'd
     TAX                          ; Y = dest index, X = source index
-    STA BattleBoxString          ;  ??? $8A also zero'd?
     
     CLC                          ; CLC at the start of the addition
   @Loop:
-      LDA (CharStatsPointer), Y  ; read dest byte
+      LDA (LevelUp_Pointer), Y  ; read dest byte
       ADC battlereward, X        ; sum with source/reward byte
-      STA (CharStatsPointer), Y  ; write back to dest
+      STA (LevelUp_Pointer), Y  ; write back to dest
       
       INX                        ; inc indexes to do next byte
       INY
       
-      DEC @loopctr               ; loop 3 times, for each byte
+      DEC char_index             ; loop 3 times, for each byte
       BNE @Loop
       
     RTS
@@ -2546,8 +2544,8 @@ AddBattleRewardToVal:
 
 MultiByteCmp:
   @Loop:
-    LDA (CharStatsPointer), Y ; load value
-    CMP (EnemyRAMPointer), Y  ; compare to target value
+    LDA (LevelUp_Pointer), Y ; load value
+    CMP (LevelUp_Reward), Y  ; compare to target value
     BEQ @NextByte             ; if equal, do next byte
     
       PHP                     ; if not equal...
@@ -2561,8 +2559,8 @@ MultiByteCmp:
     DEY                       ; decrease byte counter to move to next byte
     BNE @Loop                 ; loop if more bytes to compare
     
-    LDA (CharStatsPointer), Y ; otherwise, if this is the last byte
-    CMP (EnemyRAMPointer), Y  ; simply do the CMP
+    LDA (LevelUp_Pointer), Y ; otherwise, if this is the last byte
+    CMP (LevelUp_Reward), Y  ; simply do the CMP
     RTS                       ; the 'Z' result will be preserved on this CMP
     
     
