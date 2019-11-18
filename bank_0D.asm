@@ -2622,10 +2622,10 @@ Music_NewSong:
        STA CHAN_SQ2+ch_quiet
        STA CHAN_SQ3+ch_quiet
        STA CHAN_SQ4+ch_quiet
-       ;STA CHAN_SQ1+ch_extraquiet
-       ;STA CHAN_SQ2+ch_extraquiet
-       ;STA CHAN_SQ3+ch_extraquiet
-       ;STA CHAN_SQ4+ch_extraquiet
+       STA CHAN_SQ1+ch_customquiet
+       STA CHAN_SQ2+ch_customquiet
+       STA CHAN_SQ3+ch_customquiet
+       STA CHAN_SQ4+ch_customquiet
       
 
       LDA #$30            ; *then* set channel volumes to zero -- this will properly
