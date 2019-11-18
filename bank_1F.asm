@@ -84,7 +84,8 @@
 .export LoadMenuCHRPal_Z
 .export LoadPriceZ
 .export SkillText_BBelt
-.export lut_TilesetMusicTrack
+;.export lut_TilesetMusicTrack
+.export lut_MapMusicTrack
 .export lut_VehicleMusic
 .export JIGS_RefreshAttributes
 .export SetBattlePPUAddr
@@ -4351,8 +4352,10 @@ PrepStandardMap:
 
     LDA MenuHush            ; JIGS - if its 1, then the map music is already playing! 
     BNE @NoChange
-        LDX cur_tileset               ; get the tileset
-        LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
+        ;LDX cur_tileset               ; get the tileset
+        ;LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
+        LDX cur_map
+        LDA lut_MapMusicTrack, X      ;; JIGS - why tie songs to tilesets when each map can be specific?
         CMP dlgmusic_backup           ; is it already set as the backup song?
         BEQ @NoChange                 ; if so, its already playing, so skip loading it
         
@@ -13741,8 +13744,8 @@ lut_CombatSkillBox:
   .BYTE $01, $03, $04, <SkillText_Thief,   >SkillText_Thief   ; 01 Thief 
   .BYTE $01, $03, $04, <SkillText_BBelt,   >SkillText_BBelt   ; 02 Black Belt
   .BYTE $01, $03, $04, <SkillText_RMage,   >SkillText_RMage   ; 03 Red Mage
-  .BYTE $01, $03, $04, <SkillText_Blank,   >SkillText_Blank   ; 04 White Mage
-  .BYTE $01, $03, $04, <SkillText_Blank,   >SkillText_Blank   ; 05 Black Mage
+  .BYTE $01, $03, $04, <SkillText_WMage,   >SkillText_WMage   ; 04 White Mage
+  .BYTE $01, $03, $04, <SkillText_BMage,   >SkillText_BMage   ; 05 Black Mage
 ; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 06 Knight
 ; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 07 Ninja
 ; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 08 Master
@@ -13757,8 +13760,9 @@ SkillText_Fighter:   .BYTE $8C, $B2, $B9, $A8, $B5, $00    ; Cover
 SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
 SkillText_BBelt:     .BYTE $99, $A4, $B5, $B5, $BC, $00    ; Parry
 SkillText_RMage:     .BYTE $9C, $A6, $A4, $B1, $00         ; Scan
-SkillText_WBMage:    .BYTE $8C, $AB, $A4, $B1, $B7, $00    ; Chant
-SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; ______
+SkillText_WMage:     .BYTE $99, $B5, $A4, $BC, $00         ; Pray
+SkillText_BMage:     .BYTE $8F, $B2, $A6, $B8, $B6, $00    ; Focus
+SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; _____
  
 
 lut_PlayerBoxInfo:
@@ -14794,7 +14798,7 @@ WaitForVBlank:
     ORA #$80       ; flip on the Enable NMI bit
     STA $2000      ; and write it to PPU status reg
 
-OnIRQ:                   ; IRQs point here, but the game doesn't use IRQs, so it's moot
+OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
     JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
 
@@ -15155,15 +15159,79 @@ LongCall:
     
     
     
-    
-    
-    
-    
- lut_TilesetMusicTrack:
-    .BYTE $47, $48, $49, $4A, $4B, $4C, $4D, $4E    
-    
-    
-    
+; lut_TilesetMusicTrack:
+;.byte $47 ; Town maps
+;.byte $48 ; Castle 
+;.byte $49 ; Volcano
+;.byte $4A ; Matoya
+;.byte $4B ; Marsh Cave
+;.byte $4C ; Sea Shrine
+;.byte $4D ; Sky Castle
+;.byte $4E ; Temple of Fiends
+
+
+lut_MapMusicTrack:
+.byte $47 ; 00 - CONERIA
+.byte $47 ; 01 - PRAVOKA
+.byte $47 ; 02 - ELFLAND
+.byte $47 ; 03 - MELMOND
+.byte $47 ; 04 - CRESCENT_LAKE
+.byte $47 ; 05 - GAIA
+.byte $47 ; 06 - ONRAC
+.byte $47 ; 07 - LEIFEN
+.byte $48 ; 08 - Coneria_CASTLE_1F
+.byte $48 ; 09 - ELFLAND_CASTLE
+.byte $5B ; 0A - NORTHWEST_CASTLE
+.byte $5B ; 0B - CASTLE_OF_ORDEALS_1F
+.byte $4E ; 0C - TEMPLE_OF_FIENDS_PRESENT
+.byte $49 ; 0D - EARTH_CAVE_B1
+.byte $49 ; 0E - GURGU_VOLCANO_B1
+.byte $4B ; 0F - ICE_CAVE_B1
+.byte $4A ; 10 - CARDIA
+.byte $5B ; 4A ; 11 - BAHAMUTS_ROOM_B1
+.byte $4B ; 12 - WATERFALL
+.byte $4A ; 13 - DWARF_CAVE
+.byte $4A ; 14 - MATOYAS_CAVE
+.byte $4A ; 15 - SARDAS_CAVE
+.byte $4B ; 16 - MARSH_CAVE_B1
+.byte $4B ; 17 - MIRAGE_TOWER_1F
+.byte $48 ; 18 - Coneria_CASTLE_2F
+.byte $5B ; 19 - Castle_of_Ordeals_2F
+.byte $5B ; 1A - Castle_of_Ordeals_3F
+.byte $4B ; 1B - Marsh_Cave_B2       
+.byte $4B ; 1C - Marsh_Cave_B3       
+.byte $49 ; 1D - Earth_Cave_B2       
+.byte $49 ; 1E - Earth_Cave_B3       
+.byte $49 ; 1F - Earth_Cave_B4       
+.byte $49 ; 20 - Earth_Cave_B5       
+.byte $49 ; 21 - Gurgu_Volcano_B2    
+.byte $49 ; 22 - Gurgu_Volcano_B3    
+.byte $49 ; 23 - Gurgu_Volcano_B4    
+.byte $49 ; 24 - Gurgu_Volcano_B5    
+.byte $4B ; 25 - Ice_Cave_B2         
+.byte $4B ; 26 - Ice_Cave_B3         
+.byte $4A ; 27 - Bahamuts_Room_B2    
+.byte $4B ; 28 - Mirage_Tower_2F     
+.byte $4B ; 29 - Mirage_Tower_3F     
+.byte $4C ; 2A - Sea_Shrine_B5             
+.byte $4C ; 2B - Sea_Shrine_B4             
+.byte $4C ; 2C - Sea_Shrine_B3             
+.byte $4C ; 2D - Sea_Shrine_B2             
+.byte $4C ; 2E - Sea_Shrine_B1             
+.byte $4D ; 2F - Sky_Palace_1F             
+.byte $4D ; 30 - Sky_Palace_2F             
+.byte $4D ; 31 - Sky_Palace_3F             
+.byte $4D ; 32 - Sky_Palace_4F             
+.byte $4D ; 33 - Sky_Palace_5F             
+.byte $4E ; 34 - Temple_of_Fiends_1F       
+.byte $4E ; 35 - Temple_of_Fiends_2F       
+.byte $4E ; 36 - Temple_of_Fiends_3F       
+.byte $4E ; 37 - Temple_of_Fiends_4F_Earth 
+.byte $4E ; 38 - Temple_of_Fiends_5F_Fire  
+.byte $4E ; 39 - Temple_of_Fiends_6F_Water 
+.byte $4E ; 3A - Temple_of_Fiends_7F_Wind      
+.byte $4E ; 3B - Temple_of_Fiends_8F_Chaos     
+.byte $4B ; 3C - Titans_Tunnel                 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

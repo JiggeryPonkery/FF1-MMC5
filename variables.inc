@@ -432,7 +432,7 @@ ch_return               = $0251 ; + 2
 ch_duty                 = $0253 ; 
 ch_octave               = $0254 ; 
 ch_quiet                = $0255 ; 
-ch_extraquiet           = $0256 ; 
+ch_customquiet          = $0256 ; 
 
 text_ptr_backup         = $010D ; + E, F
 stack                   = $0100 
@@ -459,7 +459,7 @@ btl_drawflagsA          = $0318 ; bits 0-3 = set to indicate character should be
 ;                               ; bit    5 = set to draw weapon attack graphic
 ;                               ; bit    6 = set to draw magic graphic & flash BG.
 btl_drawflagsB          = $0319 ; bits 0-4 = set to indicate character should be drawn as stone
-btl_drawflagsC          = $031A ; for sleeping! ...in battle. And save game music things.
+btl_drawflagsC          = $031A ; bits 0-4 = set to indicate character should be drawn as dead (asleep); other 4 bits - set pray star sprite
 battle_attackerisplayer = $031B ; 1 if player is attacking, 0 if enemy is attacking
 battle_defenderisplayer = $031C ; 1 if player is defending, 0 if enemy is defending 
 LongCall_A              = $031D ; The LongCall routine restores them after it swaps banks
@@ -872,7 +872,7 @@ btltmp_boxright                = $6653
 btltmp_altmsgbuffer            = $6660  ; $20 bytes read
 btltmp_damageblockbuffer       = $6680  ; 6 bytes used, but $20 are read?
 btl_stringbuf                  = $66A0  ; $21 byte buffer to contain string data for printing (reads $21st byte, but doesn't use?)
-btl_attackbox_itemid           = $66C0  ; 
+btl_attackbox_itemid           = $66C0  ; 3 bytes, third byte is always 0 to terminate string
 btlbox_blockdata               = $6700  ; at least #91 bytes (Gear option is the biggest so far)
 
 theend_drawbuf                 = $6800     ; $700 bytes!
@@ -912,29 +912,35 @@ btl_charcmdbuf          = $6800 ; 4 bytes per character
 btl_charcmditem         = $6810 ; 1 byte per character for the rest
 btl_charcmdconsumetype  = $6814 ; 
 btl_charcmdconsumeid    = $6818 ; 
-btl_charparry           = $681C ; 
-btl_charcover           = $6820 ; 8 bytes ; first 4 =  who is being covered, second 4 = by whom
-btl_charregen           = $6828 ; 
-btl_charguard           = $682C ; 
-btl_charhidden          = $6830 ; 
-btl_charreflect         = $6834 ; 
-char_order_buf          = $6838 ; 
-btl_chardrawinfo        = $6840 ; $10 bytes, 4 bytes for each character
+btl_charparry           = $681C ; BB/Master Parry skill
+btl_charcover           = $6820 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
+btl_charregen           = $6828 ; Regeneration status
+btl_charguard           = $682C ; Guard status
+btl_charpray            = $6830 ; White Pray skill
+btl_charfocus           = $6834 ; Black Focus skill
+btl_charhidden          = $6838 ; Hidden status
+btl_charreflect         = $683C ; Reflection status
+btl_charrunic           = $6840 ; Red Runic skill
+btl_charrush            = $6844 ; Fighter Rush skill
+char_order_buf          = $6848 ; 
+
+btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
     btl_chardraw_x      = btl_chardrawinfo+0
     btl_chardraw_y      = btl_chardrawinfo+1
     btl_chardraw_gfxset = btl_chardrawinfo+2
     btl_chardraw_pose   = btl_chardrawinfo+3
 
-btl_flashsprite2        = $6850 ; $18 bytes, tmp storage of sprite data
-btl_flashsprite3        = $6868 ; $18 bytes, tmp storage of sprite data
-btl_charattrib          = $6880 ; attributes to use when drawing charcters in battle  (4 bytes, 1 for each)
-btlcmd_magicgfx         = $6884 ; 2 bytes per character.  [0] = graphic to draw, [1] = palette to use    
-btl_coverspritebackup   = $688A ; 4 bytes
-btl_palettes            = $6890 ; $20 bytes
-btltmp_attr             = $68B0 ; $40 bytes of attribute data for the battle setup ; NOT temporary! Needed for flashing enemies. 
-btlcurs_positions       = $68F8 ; $18 bytes, 2 bytes per entry, each entry is the pixel coord of where the
+btl_flashsprite2        = $6900 ; $18 bytes, tmp storage of sprite data
+btl_flashsprite3        = $6918 ; $18 bytes, tmp storage of sprite data
+btl_charattrib          = $6930 ; attributes to use when drawing charcters in battle  (4 bytes, 1 for each)
+btlcmd_magicgfx         = $6934 ; 2 bytes per character.  [0] = graphic to draw, [1] = palette to use    
+btl_coverspritebackup   = $693C ; 4 bytes
+btl_palettes            = $6940 ; $20 bytes
+btltmp_attr             = $6960 ; $40 bytes of attribute data for the battle setup ; NOT temporary! Needed for flashing enemies. 
+btlcurs_positions       = $69A0 ; $18 bytes, 2 bytes per entry, each entry is the pixel coord of where the
 ;                               ; cursor should be drawn when its item is selected. lut_MagicCursorPos has the most
-btltmp_backseat         = $6910 ; $10 byte buffer -- backup of btltmp
+
+btltmp_backseat         = $69F0 ; $10 byte buffer -- backup of btltmp
 
 
 

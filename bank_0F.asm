@@ -3268,7 +3268,7 @@ SoundTestSelect:
     LDA soundtest     
     CMP #$FF
     BNE :+
-      LDA #25
+      LDA #26
       STA soundtest
       CLC
  :  RTS
@@ -3278,7 +3278,7 @@ SoundTestSelect:
     STA soundtesthelper    
     INC soundtest
     LDA soundtest
-    CMP #26
+    CMP #27
     BNE @Exit
       LDA #00
       STA soundtest      
@@ -5892,6 +5892,7 @@ lut_SongNamesLong:
 .byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Unused)
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle 2
+.byte $9B,$B8,$AC,$B1,$A8,$A7,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Ruined Castle
 
 
 

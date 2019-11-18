@@ -3,7 +3,7 @@
 .export BackupMapMusic
 .export RestoreMapMusic
 
-.import lut_TilesetMusicTrack
+.import lut_MapMusicTrack
 .import lut_VehicleMusic
 .import MultiplyXA
 .import WaitForVBlank_L
@@ -51,8 +51,8 @@ BANK_THIS = $0D
 ;;  F4    = Silencer. F4 will turn it off and on for the channel. Halves volume byte.
 ;;  F5    = Duty Select - F5 01, 02, 03 - 12.5%, 25%, 50% duty.
 ;;  F6    = Silencer. Same as F4, but quarter of the volume.
-;;  F7    = unused!
-
+;;  F7    = CUSTOM silencer! F7 turns it on, then second byte is how much to subtract.
+;;          F7 00 turns it off
 ;;  F8    = One byte follows this -- the low 4 bits of which select the envelope speed
 ;;  F9-FE = Tempo select.  Low bits select which tempo to use
 ;;  FF    = End of song marker -- stops all music playback.
@@ -257,8 +257,12 @@ lut_ScoreData:
 .WORD MARSHBOSS_SQ3
 .WORD MARSHBOSS_SQ2
 
-
-
+;; $5B
+.WORD RUINEDCASTLE_SQ1
+.WORD RUINEDCASTLE_SQ4
+.WORD RUINEDCASTLE_TRI
+.WORD RUINEDCASTLE_SQ3
+.WORD RUINEDCASTLE_SQ2
 
 ;; With thanks to Gil Galad for their music driver disassembly for this sequence data!
 
@@ -769,6 +773,295 @@ CASTLE_TRI:
    .byte $D0
    .WORD CLOOP2 ; $E5,$8D
 
+   
+   
+RUINEDCASTLE_SQ1:
+   .byte $FE     ; tempo
+   .byte $ED     ; envelope
+   .byte $C8     ; all tracks have this delay
+   .byte $F8,$0C ; envelope speed
+   .byte $F5,$02 ; duty 25%
+   
+   RC_SQ1_PAUSE:
+   .byte $C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0
+   ;; do nothing for 12 4/4 bars, or 16 3/4 bars
+   
+   RC_SQ1_MELODY:
+   .byte $DA,$61,$75,$65,$45,$25,$43,$D9,$90,$C6
+   .byte $DA,$21,$45,$25,$15,$D9,$B5,$DA,$13,$D9,$60,$C6
+   .byte $B2,$C8,$DA,$15,$23,$43,$63,$73,$93,$75,$65,$43
+   .byte $D9,$B1,$DA,$15,$25,$61,$41,$D1
+   .WORD RC_SQ1_MELODY
+   .byte $D0
+   .WORD RC_SQ1_PAUSE
+
+RUINEDCASTLE_SQ2:
+   .byte $FE
+   .byte $F8,$0F ; 7 ; envelope speed
+   .byte $F5,$03 ; duty 50%   
+   .byte $C8     ; all tracks have this delay
+   .byte $D9     ; octave
+   
+   RC_SQ2_LOOP:
+   .byte $E1 ; decay from C
+   .byte $F1 
+   .WORD RC_SQ2_ABEEP
+   .byte $F1 
+   .WORD RC_SQ2_ABEEP
+   .byte $F1 
+   .WORD RC_SQ2_ABEEP
+   .byte $F1 
+   .WORD RC_SQ2_BFLATBEEP
+   .byte $F1 
+   .WORD RC_SQ2_GBEEP
+   .byte $E1 ; decay from C
+   .byte $F1 
+   .WORD RC_SQ2_ABEEP
+   .byte $F1 
+   .WORD RC_SQ2_GBEEP
+   .byte $E0 ; decay from F
+   .byte $F1 
+   .WORD RC_SQ2_ABEEP
+   .byte $D0
+   .WORD RC_SQ2_LOOP
+   
+   RC_SQ2_ABEEP:
+   .byte $96 
+   .byte $F6,$96,$F6 ; then quarter volume on, another note, quarter volume off
+   .byte $F7,$02 ; Decay from A (original C) or D (original F)
+   .byte $96   
+   .byte $F6,$96,$F6 
+   .byte $F7,$04 ; Decay from 8 or B
+   .byte $96
+   .byte $F6,$96,$F6 
+   .byte $F7,$06 ; Decay from 6 or 9
+   .byte $96
+   .byte $F6,$96,$F6 
+   .byte $F7,$08 ; Decay from 4 or 7
+   .byte $96
+   .byte $F6,$96,$F6 
+   .byte $F7,$0A ; Decay from 2 or 5   
+   .byte $96
+   .byte $F6,$96,$F6 
+   .byte $F7,$00 ; Custom silencer off
+   .byte $F2
+   
+    RC_SQ2_BFLATBEEP:
+   .byte $E0 ; decay from F
+   .byte $A6
+   .byte $F6,$A6,$F6    
+   .byte $F7,$02,$A6   
+   .byte $F6,$A6,$F6
+   .byte $F7,$04,$A6
+   .byte $F6,$A6,$F6
+   .byte $F7,$06,$A6
+   .byte $F6,$A6,$F6
+   .byte $F7,$08,$A6
+   .byte $F6,$A6,$F6
+   .byte $F7,$0A,$A6
+   .byte $F6,$A6,$F6
+   .byte $F7,$00 
+   .byte $F2
+   
+   RC_SQ2_GBEEP:
+   .byte $E0 ; decay from F
+   .byte $76
+   .byte $F6,$76,$F6   
+   .byte $F7,$02,$76   
+   .byte $F6,$76,$F6
+   .byte $F7,$04,$76
+   .byte $F6,$76,$F6
+   .byte $F7,$06,$76
+   .byte $F6,$76,$F6
+   .byte $F7,$08,$76
+   .byte $F6,$76,$F6
+   .byte $F7,$0A,$76
+   .byte $F6,$76,$F6
+   .byte $F7,$00 
+   .byte $F2
+   
+
+RUINEDCASTLE_TRI:
+   .byte $FE
+   .byte $C8     ; all tracks have this delay
+   
+   RC_TRI_BAR1_2:
+   .byte $D9,$26,$C8,$96,$C8,$DA,$26,$C4,$D1
+   .WORD RC_TRI_BAR1_2
+   
+   RC_TRI_BAR3_4:
+   .byte $D9,$16,$C8,$86,$C8,$DA,$16,$C4,$D1
+   .WORD RC_TRI_BAR3_4
+   
+   RC_TRI_BAR5_6:
+   .byte $D8,$B6,$C8,$D9,$66,$C8,$B6,$C4,$D1
+   .WORD RC_TRI_BAR5_6
+   
+   RC_TRI_BAR7_8:
+   .byte $D8,$A6,$C8,$D9,$56,$C8,$A6,$C4,$D1
+   .WORD RC_TRI_BAR7_8
+   
+   .byte $F1 ; goto
+   .WORD RC_TRI_BAR9_10
+   
+   .byte $D8,$B6,$C8,$D9,$66,$C8,$B6,$C4 ; bar 11
+   .byte $D8,$66,$C8,$D9,$16,$C8,$66,$C4 ; bar 12
+   
+   .byte $F1 ; goto
+   .WORD RC_TRI_BAR9_10 ; bar 13, 14
+   
+   RC_TRI_BAR15_16:
+   .byte $D8,$96,$C8,$D9,$46,$C8,$96,$C4,$D1
+   .WORD RC_TRI_BAR15_16
+   
+   .byte $D0 ; loop forever
+   .word RC_TRI_BAR1_2
+   
+   RC_TRI_BAR9_10:
+   .byte $D8,$76,$C8,$D9,$26,$C8,$76,$C4,$D1
+   .WORD RC_TRI_BAR9_10
+   .byte $F2 ; return
+   
+RUINEDCASTLE_SQ3:
+   .byte $FE
+   .byte $F8,$0F ; 7 ; envelope speed
+   .byte $F5,$03 ; duty 50%   
+   .byte $C8     ; all tracks have this delay
+   .byte $CE     ; delay by the teensiest amount
+   .byte $CE     ; delay by the teensiest amount
+   
+   RC_SQ3_LOOP:
+   .byte $F1 
+   .WORD RC_SQ3_DBEEP
+   .byte $F1 
+   .WORD RC_SQ3_DBEEP
+   .byte $F1 
+   .WORD RC_SQ3_DBEEP
+   .byte $F1 
+   .WORD RC_SQ3_CSHARPBEEP
+   .byte $F1 
+   .WORD RC_SQ3_BBEEP
+   .byte $F1 
+   .WORD RC_SQ3_DBEEP
+   .byte $F1 
+   .WORD RC_SQ3_BBEEP
+   .byte $DA ; octave
+   .byte $E0 ; decay from C
+   .byte $F1 
+   .WORD RC_SQ2_ABEEP ; share Square 2's beep
+   .byte $D0
+   .WORD RC_SQ3_LOOP
+   
+   RC_SQ3_DBEEP:
+   .byte $DA ; octave
+   .byte $E1 ; decay from C
+   .byte $26 
+   .byte $F6,$26,$F6
+   .byte $F7,$02,$26
+   .byte $F6,$26,$F6   
+   .byte $F7,$04,$26
+   .byte $F6,$26,$F6
+   .byte $F7,$06,$26
+   .byte $F6,$26,$F6   
+   .byte $F7,$08,$26
+   .byte $F6,$26,$F6   
+   .byte $F7,$0A,$26
+   .byte $F6,$26,$F6   
+   .byte $F7,$00 
+   .byte $F2
+   
+    RC_SQ3_CSHARPBEEP:
+   .byte $E0 ; decay from F
+   .byte $16 
+   .byte $F6,$16,$F6
+   .byte $F7,$02,$16   
+   .byte $F6,$16,$F6
+   .byte $F7,$04,$16
+   .byte $F6,$16,$F6
+   .byte $F7,$06,$16
+   .byte $F6,$16,$F6
+   .byte $F7,$08,$16
+   .byte $F6,$16,$F6
+   .byte $F7,$0A,$16
+   .byte $F6,$16,$F6
+   .byte $F7,$00 
+   .byte $F2
+   
+   RC_SQ3_BBEEP:
+   .byte $D9 ; octave
+   .byte $E0 ; decay from F
+   .byte $B6
+   .byte $F6,$B6,$F6   
+   .byte $F7,$02,$B6   
+   .byte $F6,$B6,$F6
+   .byte $F7,$04,$B6
+   .byte $F6,$B6,$F6
+   .byte $F7,$06,$B6
+   .byte $F6,$B6,$F6
+   .byte $F7,$08,$B6
+   .byte $F6,$B6,$F6
+   .byte $F7,$0A,$B6
+   .byte $F6,$B6,$F6
+   .byte $F7,$00 
+   .byte $F2
+   
+
+
+RUINEDCASTLE_SQ4:
+   .byte $FE
+   .byte $F5,$02 ; duty 25%   
+   .byte $C8     ; all tracks have this delay
+   .byte $CE     ; delay by the teensiest amount
+   
+   RC_SQ4_LOOP:
+   .byte $E8     ; hold, decay from C
+   .byte $F8,$07 ; envelope speed - beepy
+   .byte $F1
+   .word RC_SQ4_WRIGGLEBOOP
+   
+   .byte $D8
+   .byte $F8,$0D ; envelope speed
+   .byte $EF     ; fade in with tremelo
+   .byte $AF     ; 2 bar long drone
+
+   .byte $E8     ; hold, decay from C
+   .byte $F8,$07 ; envelope speed - beepy   
+   .byte $F1
+   .word RC_SQ4_WRIGGLEBOOP
+   
+   .byte $D8
+   .byte $F8,$0D ; envelope speed
+   .byte $EF     ; fade in with tremelo
+   .byte $9F     ; 2 bar long drone
+   .byte $D0
+   .WORD RC_SQ4_LOOP
+   
+   RC_SQ4_WRIGGLEBOOP:
+   .byte $DA,$25 ; this x5 note is $18 long
+   .byte $D9,$97 ; this x7 note is $0C long
+   .byte $F7,$03 ; -3 volume   
+   .byte $DA,$27 ; 
+   .byte $F7,$04 ; -4 volume
+   .byte $25     ; 
+   .byte $F7,$05 ; -5 volume
+   .byte $D9,$95 ; one 3/4 bar = $60
+   .byte $F7,$06 ; -6 volume
+   .byte $DA,$27  
+   .byte $F7,$07 ; -7 volume
+   .byte $D9,$97
+   .byte $F7,$08 ; -8 volume
+   .byte $97
+   .byte $F7,$09 ; -9 volume
+   .byte $DA,$27
+   .byte $F7,$0A ; -A volume
+   .byte $25 
+   .byte $F7,$0B ; -B volume
+   .byte $D9,$95 ; one 3/4 bar = $60
+   .byte $F7,$00 ; reset volume
+   .byte $D2
+   .WORD RC_SQ4_WRIGGLEBOOP
+   .byte $F2
+   
 
 EARTHCAVE_SQ1:
 .BYTE $F5,$02 ; JIGS - set duty to 25%, as Marsh Cave will set it different but never swap back to the original game's setting
@@ -2329,10 +2622,10 @@ Music_NewSong:
        STA CHAN_SQ2+ch_quiet
        STA CHAN_SQ3+ch_quiet
        STA CHAN_SQ4+ch_quiet
-       STA CHAN_SQ1+ch_extraquiet
-       STA CHAN_SQ2+ch_extraquiet
-       STA CHAN_SQ3+ch_extraquiet
-       STA CHAN_SQ4+ch_extraquiet
+       ;STA CHAN_SQ1+ch_extraquiet
+       ;STA CHAN_SQ2+ch_extraquiet
+       ;STA CHAN_SQ3+ch_extraquiet
+       ;STA CHAN_SQ4+ch_extraquiet
       
 
       LDA #$30            ; *then* set channel volumes to zero -- this will properly
@@ -2682,8 +2975,9 @@ MusicPlay:
 
       LDA (tmp), Y         ; then read the env byte to output
       
-      JSR QuarterVolume
+      JSR CustomVolume
       JSR HalfVolume
+      JSR QuarterVolume
       JSR HalfVolumeMenu
       ;; JIGS ^ inserting these! This checks to see if we need to halve the volume output
       ;; or double-halve it for the menu
@@ -2708,34 +3002,51 @@ MusicPlay:
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;JIGS - these two routines divide the volume by two if its meant to be
+;JIGS - Carry is not added back in, because if you halve the volume, then halve it again in the menu
+; you kinda just want it completely off by that point.
+;; This is mostly because the volume triggers are mainly used for echo and the echo gets "louder" in the menu sometimes
+
+CustomVolume:
+  STA tmp
+  LDY ch_customquiet, X ; loads the custom amount to cut from the volume
+  BEQ SkipVolume
+    STY tmp+1           
+    SEC
+    SBC tmp+1           ; subtract custom quietness
+    BPL :+
+      LDA #0            ; subtracted too much! Mark it 0.
+  : RTS  
 
 QuarterVolume:
   STA tmp
-  LDY ch_extraquiet, X
-  BEQ :+
-    CLC
-    LSR A     ; divide volume by 2
-    LSR A     ; then four
-;    ADC #$0   ; add the carry back in
-  : RTS  
+  LDA ch_quiet, X
+  AND #$10
+  BEQ SkipVolume
+   LDA tmp
+   LSR A     ; divide volume by 2
+   ;ADC #$0   ; add the carry back in
+   LSR A     ; then four
+   RTS
 
+SkipVolume:
+  LDA tmp
+  RTS
+  
 HalfVolume:
   STA tmp
-  LDY ch_quiet, X
-  BEQ :+
-    CLC
-    LSR A     ; divide volume by 2
-;    ADC #$0   ; add the carry back in
-  : RTS  
+  LDA ch_quiet, X
+  AND #$10
+  BEQ SkipVolume
+   LDA tmp
+   LSR A     ; divide volume by 2
+   ;ADC #$0   ; add the carry back in
+   RTS  
   
 HalfVolumeMenu:
-  STA tmp
   LDY MenuHush
   BEQ :+
-    CLC
     LSR A     ; divide volume by 2
-;    ADC #$0   ; add the carry back in
+    ;ADC #$0   ; add the carry back in
   : RTS      
     
     
@@ -2898,13 +3209,16 @@ Music_DoScore:
     CMP #$F4
     BNE @Code_F5
        LDA ch_quiet, X
+       AND #$01
        BNE @UnShush
-          LDA #01
+          LDA ch_quiet, X
+          ORA #$01
           STA ch_quiet, X
-          JMP SkipMusicBit
+          BNE SkipMusicBit
     
-       @UnShush:
-       LDA #00
+      @UnShush:
+       LDA ch_quiet, X
+       AND #$FE
        STA ch_quiet, X
        JMP SkipMusicBit
   
@@ -2917,20 +3231,33 @@ Music_DoScore:
 
   @Code_F6:
     CMP #$F6
-    BNE SkipMusicBit
-        LDA ch_extraquiet, X
+    BNE @Code_F7
+        LDA ch_quiet, X
+        AND #$10
         BNE @UnShush_2
-          LDA #01
-          STA ch_extraquiet, X
-          JMP SkipMusicBit
+          LDA ch_quiet, X
+          ORA #$10
+          STA ch_quiet, X
+          BNE SkipMusicBit
     
-       @UnShush_2:
-       LDA #00
-       STA ch_extraquiet, X
+      @UnShush_2:
+       LDA ch_quiet, X
+       AND #$EF
+       STA ch_quiet, X
+       JMP SkipMusicBit
+       
+   @Code_F7:
+    CMP #$F7
+    BNE SkipMusicBit
+        LDY #1                 
+        LDA (mu_scoreptr), Y  ; get the following byte in the score  
+        STA ch_customquiet, X ; save it (0 results in no volume loss)
+        LDA #2
+        BNE :+
      
    SkipMusicBit:
     LDA #1                     ; $F6-F7 do absolutely nothing
-    JMP Music_DoScore_IncByA   ;  just skip over this byte and continue processing
+  : JMP Music_DoScore_IncByA   ;  just skip over this byte and continue processing
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3649,8 +3976,10 @@ RestoreMapMusic:
    LSR A                   ; Get SM flag, and shift it into C
    BCC :+                  ; if set (on overworld), do overworld music
  
-   LDX cur_tileset               ; get the tileset
-   LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
+   ;LDX cur_tileset               ; get the tileset
+   ;LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
+   LDX cur_map
+   LDA lut_MapMusicTrack, X
    JMP @End
    
  : LDX vehicle
