@@ -59,7 +59,7 @@ ACTION_FLEE       = $80
 ENEMYAI_COUNTER   = $01
 ENEMYAI_REFLECT   = $80
 
-ENEMY_ATTACK_START = $45 ; this is the offset for enemy magic data
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;  elements
@@ -128,7 +128,7 @@ MAGDATA_TARGET       = $03   ; (01 = All enemies, 02 = One Enemy, 04 = Spell Cas
 MAGDATA_EFFECT       = $04
 MAGDATA_GRAPHIC      = $05
 MAGDATA_PALETTE      = $06
-MAGDATA_UNUSED       = $07
+MAGDATA_MESSAGE      = $07
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -160,8 +160,9 @@ BANK_BTLDATA      = $0B
 BANK_DOMAINS      = $0B
 BANK_BRIDGEGFX    = $0B
 BANK_EPILOGUEGFX  = $0B
+BANK_BTLPALETTES  = $0B
 
-BANK_BTLPALETTES  = $0C
+BANK_DOBATTLE     = $0C
 
 BANK_MUSIC        = $0D
 
@@ -322,6 +323,8 @@ BTLMSG_NOTHING          = $5F ; Nothing
 BTLMSG_SCANNING         = $60 ; Scanning...
 BTLMSG_ATTACKBLOCKED    = $61 ; _covered the attack!
 BTLMSG_COUNTER          = $62 ; Counter attack!
+BTLMSG_PRAYING          = $63 ; Praying...
+BTLMSG_FOCUSING         = $64 ; Focusing...
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
@@ -366,7 +369,7 @@ WPNID_XCALBUR      = $26 ; originally 27, but this comes pre-DEC
 ;;;;;;;;;;;;;;;;;;
 ;;  ailments
 AIL_DEAD            = $01
-AIL_STONE           = $02
+AIL_STOP            = $02
 AIL_POISON          = $04
 AIL_DARK            = $08
 AIL_STUN            = $10
@@ -883,7 +886,7 @@ MG_START = $30
   MG_CUR2 = MG_START + $10
   MG_HRM2 = MG_START + $11
   MG_AFIR = MG_START + $12
-  MG_HEAL = MG_START + $13
+  MG_REGN = MG_START + $13
   MG_FIR2 = MG_START + $14
   MG_HOLD = MG_START + $15
   MG_LIT2 = MG_START + $16
@@ -899,7 +902,7 @@ MG_START = $30
   MG_CUR3 = MG_START + $20
   MG_LIFE = MG_START + $21
   MG_HRM3 = MG_START + $22
-  MG_HEL2 = MG_START + $23
+  MG_RGN2 = MG_START + $23
   MG_FIR3 = MG_START + $24
   MG_BANE = MG_START + $25
   MG_WARP = MG_START + $26
@@ -915,7 +918,7 @@ MG_START = $30
   MG_CUR4 = MG_START + $30
   MG_HRM4 = MG_START + $31
   MG_ARUB = MG_START + $32
-  MG_HEL3 = MG_START + $33
+  MG_RGN3 = MG_START + $33
   MG_ICE3 = MG_START + $34
   MG_BRAK = MG_START + $35
   MG_SABR = MG_START + $36
@@ -928,74 +931,93 @@ MG_START = $30
   MG_STOP = MG_START + $3D
   MG_ZAP  = MG_START + $3E
   MG_XXXX = MG_START + $3F
-BATTLESPELLS = MG_START + $40
-BATTLESPELLS_START = BATTLESPELLS + $5C
+
+ BATTLESPELLS = MG_START + $40
+  MG_HEAL     = BATTLESPELLS + $0
+  MG_HEL2     = BATTLESPELLS + $1
+  MG_HEL3     = BATTLESPELLS + $2
+  MG_PRAYER   = BATTLESPELLS + $3
+  MG_COUNTER  = BATTLESPELLS + $4
+  MG_REFLECT  = BATTLESPELLS + $5
+  MG_REFLECT2 = BATTLESPELLS + $6
+  MG_UNUSED1  = BATTLESPELLS + $7
+  MG_UNUSED2  = BATTLESPELLS + $8
+  MG_UNUSED3  = BATTLESPELLS + $9
+  MG_UNUSED4  = BATTLESPELLS + $A
+  MG_UNUSED5  = BATTLESPELLS + $B
+  MG_UNUSED6  = BATTLESPELLS + $C
+  MG_UNUSED7  = BATTLESPELLS + $D
+  MG_UNUSED8  = BATTLESPELLS + $E
+  MG_UNUSED9  = BATTLESPELLS + $F
   
+BATTLESPELLS_END   = BATTLESPELLS + $F  
+BATTLESPELLS_START = BATTLESPELLS + $5C ; offset to add for battle spell names for printing
+ENEMY_ATTACK_START = BATTLESPELLS_END - MG_START ; this is the offset for enemy magic data  
   
 ;;;;;;;;;;;;;;;;;;
 ;;  Map IDs and Banks
 
-MAP_00  = $00
-MAP_01  = $01
-MAP_02  = $02
-MAP_03  = $03
-MAP_04  = $04
-MAP_05  = $05
-MAP_06  = $06
-MAP_07  = $07
-MAP_08  = $08
-MAP_09  = $09
-MAP_0A  = $0A
-MAP_0B  = $0B
-MAP_0C  = $0C
-MAP_0D  = $0D
-MAP_0E  = $0E
-MAP_0F  = $0F
-MAP_10  = $10
-MAP_11  = $11
-MAP_12  = $12
-MAP_13  = $13
-MAP_14  = $14
-MAP_15  = $15
-MAP_16  = $16
-MAP_17  = $17
-MAP_18  = $18
-MAP_19  = $19
-MAP_1A  = $1A
-MAP_1B  = $1B
-MAP_1C  = $1C
-MAP_1D  = $1D
-MAP_1E  = $1E
-MAP_1F  = $1F
-MAP_20  = $20
-MAP_21  = $21
-MAP_22  = $22
-MAP_23  = $23
-MAP_24  = $24
-MAP_25  = $25
-MAP_26  = $26
-MAP_27  = $27
-MAP_28  = $28
-MAP_29  = $29
-MAP_2A  = $2A
-MAP_2B  = $2B
-MAP_2C  = $2C
-MAP_2D  = $2D
-MAP_2E  = $2E
-MAP_2F  = $2F
-MAP_30  = $30
-MAP_31  = $31
-MAP_32  = $32
-MAP_33  = $33
-MAP_34  = $34
-MAP_35  = $35
-MAP_36  = $36
-MAP_37  = $37
-MAP_38  = $38
-MAP_39  = $39
-MAP_3A  = $3A
-MAP_3B  = $3B
-MAP_3C  = $3C
+MAP_00  = $00 ; CONERIA
+MAP_01  = $01 ; PRAVOKA
+MAP_02  = $02 ; ELFLAND
+MAP_03  = $03 ; MELMOND
+MAP_04  = $04 ; CRESCENT_LAKE
+MAP_05  = $05 ; GAIA
+MAP_06  = $06 ; ONRAC
+MAP_07  = $07 ; LEIFEN
+MAP_08  = $08 ; Coneria_CASTLE_1F
+MAP_09  = $09 ; ELFLAND_CASTLE
+MAP_0A  = $0A ; NORTHWEST_CASTLE
+MAP_0B  = $0B ; CASTLE_OF_ORDEALS_1F
+MAP_0C  = $0C ; TEMPLE_OF_FIENDS_PRESENT
+MAP_0D  = $0D ; EARTH_CAVE_B1
+MAP_0E  = $0E ; GURGU_VOLCANO_B1
+MAP_0F  = $0F ; ICE_CAVE_B1
+MAP_10  = $10 ; CARDIA
+MAP_11  = $11 ; BAHAMUTS_ROOM_B1
+MAP_12  = $12 ; WATERFALL
+MAP_13  = $13 ; DWARF_CAVE
+MAP_14  = $14 ; MATOYAS_CAVE
+MAP_15  = $15 ; SARDAS_CAVE
+MAP_16  = $16 ; MARSH_CAVE_B1
+MAP_17  = $17 ; MIRAGE_TOWER_1F
+MAP_18  = $18 ; Coneria_CASTLE_2F
+MAP_19  = $19 ; Castle_of_Ordeals_2F
+MAP_1A  = $1A ; Castle_of_Ordeals_3F
+MAP_1B  = $1B ; Marsh_Cave_B2       
+MAP_1C  = $1C ; Marsh_Cave_B3       
+MAP_1D  = $1D ; Earth_Cave_B2       
+MAP_1E  = $1E ; Earth_Cave_B3       
+MAP_1F  = $1F ; Earth_Cave_B4       
+MAP_20  = $20 ; Earth_Cave_B5       
+MAP_21  = $21 ; Gurgu_Volcano_B2    
+MAP_22  = $22 ; Gurgu_Volcano_B3    
+MAP_23  = $23 ; Gurgu_Volcano_B4    
+MAP_24  = $24 ; Gurgu_Volcano_B5    
+MAP_25  = $25 ; Ice_Cave_B2         
+MAP_26  = $26 ; Ice_Cave_B3         
+MAP_27  = $27 ; Bahamuts_Room_B2    
+MAP_28  = $28 ; Mirage_Tower_2F     
+MAP_29  = $29 ; Mirage_Tower_3F     
+MAP_2A  = $2A ; Sea_Shrine_B5             
+MAP_2B  = $2B ; Sea_Shrine_B4             
+MAP_2C  = $2C ; Sea_Shrine_B3             
+MAP_2D  = $2D ; Sea_Shrine_B2             
+MAP_2E  = $2E ; Sea_Shrine_B1             
+MAP_2F  = $2F ; Sky_Palace_1F             
+MAP_30  = $30 ; Sky_Palace_2F             
+MAP_31  = $31 ; Sky_Palace_3F             
+MAP_32  = $32 ; Sky_Palace_4F             
+MAP_33  = $33 ; Sky_Palace_5F             
+MAP_34  = $34 ; Temple_of_Fiends_1F       
+MAP_35  = $35 ; Temple_of_Fiends_2F       
+MAP_36  = $36 ; Temple_of_Fiends_3F       
+MAP_37  = $37 ; Temple_of_Fiends_4F_Earth 
+MAP_38  = $38 ; Temple_of_Fiends_5F_Fire  
+MAP_39  = $39 ; Temple_of_Fiends_6F_Water 
+MAP_3A  = $3A ; Temple_of_Fiends_7F_Wind    
+MAP_3B  = $3B ; Temple_of_Fiends_8F_Chaos   
+MAP_3C  = $3C ; Titans_Tunnel               
 
 MAP_BANKCHANGE_2 = MAP_18 ; first map in SM_Bank_2
 MAP_BANKCHANGE_3 = MAP_2A ; first map in SM_Bank_3

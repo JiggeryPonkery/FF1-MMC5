@@ -14,6 +14,7 @@
 .export PrintEXPToNext_B
 .export lut_Domains
 .export WriteAttributesToPPU
+.export lut_BattlePalettes
 
 .import Battle_ReadPPUData_L
 .import Battle_WritePPUData_L
@@ -134,6 +135,81 @@ lut_Domains:
 .byte $00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  LUT for Battle Palettes [$8F20 :: 0x30F30]
+;;
+;;    LUT of 64 4-byte palettes for use with battle formations
+
+lut_BattlePalettes:
+  ;.INCBIN "bin/battlepalettes.bin"
+;                          ; Enemies that use it: (may not be 100% accurate)  
+.byte $0F,$36,$27,$16 ; 00 ; Imp, Wolf
+.byte $0F,$36,$22,$13 ; 01 ; GrImp, GrWolf, Iguana
+.byte $0F,$25,$29,$1B ; 02 ; Giant, WrWolf
+.byte $0F,$23,$26,$16 ; 03 ; R.Hydra, R.Giant, Fire, Agama
+.byte $0F,$24,$30,$22 ; 04 ; FrWolf, FrGiant, Air
+.byte $0F,$26,$2B,$19 ; 05 ; Sauria
+.byte $0F,$3A,$16,$1B ; 06 ; Astos
+.byte $0F,$30,$31,$22 ; 07 ; Frost D., GrShark, Ghost
+.byte $0F,$37,$26,$16 ; 08 ; R. Sahag
+.byte $0F,$30,$2B,$1C ; 09 ; BigEye, Shark, Sahag
+.byte $0F,$36,$21,$12 ; 0A ; Kyzoku
+.byte $0F,$30,$28,$19 ; 0B ; WzSahag, Pirate
+.byte $0F,$30,$23,$1B ; 0C ; Bone, Crawl, GrPede
+.byte $0F,$37,$25,$16 ; 0D ; Creep, Cerebus, Red D., R. Bone
+.byte $0F,$38,$26,$14 ; 0E ; Ogre, Medusa
+.byte $0F,$23,$29,$19 ; 0F ; GrMedusa, GrOgre
+.byte $0F,$17,$31,$1C ; 10 ; Hyena, WzOgre
+.byte $0F,$36,$26,$14 ; 11 ; Cobra, Bull
+.byte $0F,$25,$2B,$19 ; 12 ; Asp, Troll
+.byte $0F,$30,$2C,$13 ; 13 ; Lobster, Naga, Water, SeaSnake, Garland
+.byte $0F,$30,$22,$12 ; 14 ; SeaTroll, Blue D.
+.byte $0F,$2B,$26,$16 ; 15 ; Scorpion, Pede
+.byte $0F,$16,$2C,$18 ; 16 ; Zombie, ZomBull, Phantom, ZombieD
+.byte $0F,$23,$30,$00 ; 17 ; Ghoul, Evilman, Eye
+.byte $0F,$30,$28,$1C ; 18 ; Specter, Image
+.byte $0F,$30,$2A,$18 ; 19 ; Geist, Wraith, Grey W.
+.byte $0F,$32,$1C,$0C ; 1A ; Spider, Shadow, Saber T, Muck
+.byte $0F,$37,$27,$13 ; 1B ; Worm
+.byte $0F,$16,$37,$18 ; 1C ; Earth, Sand W., Ankylo
+.byte $0F,$30,$28,$17 ; 1D ; Tiger, Manticor, Catman
+.byte $0F,$25,$2B,$19 ; 1E ; Mancat
+.byte $0F,$30,$12,$16 ; 1F ; Gargoyle
+.byte $0F,$37,$16,$13 ; 20 ; WzVamp, R. Goyle
+.byte $0F,$30,$28,$1A ; 21 ; Scum, Ooze, Gas D.
+.byte $0F,$36,$26,$16 ; 22 ; Arachnid, R.Ankylo
+.byte $0F,$30,$37,$1A ; 23 ; Sphinx
+.byte $0F,$30,$32,$0C ; 24 ; Mage, Badman
+.byte $0F,$30,$26,$16 ; 25 ; Mummy, Perelisk
+.byte $0F,$30,$27,$12 ; 26 ; Coctrice, WzMummy
+.byte $0F,$30,$27,$16 ; 27 ; Wyrm, T-Rex
+.byte $0F,$30,$2C,$1C ; 28 ; Wyvern
+.byte $0F,$36,$26,$16 ; 29 ; Tyro
+.byte $0F,$26,$3C,$1B ; 2A ; Hydra, Caribe
+.byte $0F,$25,$2A,$1A ; 2B ; Gator, Ocho
+.byte $0F,$1B,$27,$16 ; 2C ; Naocho, R.Caribe
+.byte $0F,$37,$32,$00 ; 2D ; FrFator, GrNaga
+.byte $0F,$37,$10,$1C ; 2E ; Fighter, Guard, IronGol
+.byte $0F,$30,$26,$00 ; 2F ; WarMech
+.byte $0F,$17,$38,$18 ; 30 ; Chimera
+.byte $0F,$13,$37,$1B ; 31 ; Jimera
+.byte $0F,$30,$27,$18 ; 32 ; Madpony, Wizard
+.byte $0F,$14,$30,$22 ; 33 ; Sorcerer, Nitemare
+.byte $0F,$36,$26,$16 ; 34 ; MudGol
+.byte $0F,$36,$10,$00 ; 35 ; RockGol
+.byte $0F,$30,$28,$04 ; 36 ; Lich
+.byte $0F,$30,$16,$23 ; 37 ; Lich
+.byte $0F,$16,$14,$30 ; 38 ; Kary
+.byte $0F,$16,$14,$28 ; 39 ; Kary
+.byte $0F,$27,$30,$23 ; 3A ; Kraken
+.byte $0F,$3B,$13,$23 ; 3B ; Kraken
+.byte $0F,$16,$2B,$12 ; 3C ; Tiamat
+.byte $0F,$27,$2B,$13 ; 3D ; Tiamat
+.byte $0F,$23,$28,$18 ; 3E ; Chaos
+.byte $0F,$30,$28,$18 ; 3F ; Chaos
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1597,17 +1673,15 @@ GetJoyInput:
     
 lut_RespondDelay:
 ;    .BYTE   $78, $50, $3C, $2D, $1E, $0F, $05, $01
-;; JIGS - making them a little less painfully slow...    
-    .BYTE   $40, $30, $20, $18, $10, $0A, $05, $01
 
-; 1 - 64 frames
-; 2 - 48 frames 
-; 3 - 32 frames
-; 4 - 24 frames
-; 5 - 16 frames
-; 6 - 10 frames
-; 7 - 5 frames
-; 8 - 1 frame
+;; JIGS - making some more options
+
+;  option #: 1    2    3    4    5    6    7    8    9  
+;  in frames:
+;           120,  90,  60,  45,  30,  20,  15,  10,  5
+    .BYTE   $78, $5A, $3C, $2D, $1E, $14, $0F, $0A, $05
+
+
    
 
     
@@ -2353,9 +2427,10 @@ lut_LvlUpHitRateBonus:
 ;;  to be 5-their_value.
   
 lut_LvlUpMagDefBonus:
-  .BYTE  3,  2,  4,  2,  2,  2,   3,  2,  4,  2,  2,  2
+  ;.BYTE  3,  2,  4,  2,  2,  2,   3,  2,  1,  2,  2,  2
+  .BYTE  2,  2,  2,  1,  2,  3,   2,  2,  2,  4,  2,  3
   ;     FT  TH  BB  RM  WM  BM   KN  NJ  MA  RW  WW  BW
-  ;; JIGS - keeping it 4 for Master. Mr. Fists can dodge magic better.
+  ;; JIGS - I reversed this, but I like the idea of Masters being so anti-magic that they can defend against it well!
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3112,7 +3187,7 @@ ChaosDeath:
                                             ;   The last 128 entries are not used.
     
     LDA #$00                    ; Start the Low-pitch noise rumble
-    STA $9C                     ; See ChaosDeath_FadeNoise for details
+    STA ChaosNoise              ; See ChaosDeath_FadeNoise for details
     JSR ChaosDeath_FadeNoise
 
     LDY #$00                    ; Fill @tilerowtbl with randomness

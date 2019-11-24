@@ -221,7 +221,7 @@ GameStart:
     : LDA lut_InitUnsramFirstPage, X
       STA unsram, X
       INX 
-      CPX #$48
+      CPX #$4F
       BNE :-
 
     ;; JIGS - Rather than take up 256 bytes in Bank 0, the original game only needs to initalize game_flags all to 1, with 7 exceptions.
@@ -6229,9 +6229,8 @@ ScreenWipeFrame_Prep:
 
 
 ;JIGS : here is another non-critical timing error because the code got squished up! so a fix: its only 3 bytes off
-
-NOP
-NOP
+; NOP
+; NOP
 
 
 
@@ -6675,15 +6674,21 @@ LoadMapPalettes:
 
     LDA ch_class            ; get lead party member's class
     AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR ShiftSpriteHightoLow_Battle
+    ;JSR ShiftSpriteHightoLow_Battle
     ;ASL A                   ; double it, and put it in X
+    LSR A
+    LSR A
+    ;; shift high to low, but then double them anyway!
     TAX
 
     LDA lut_MapmanPalettes, X   ; use that as an index to get that class's mapman palette
     STA cur_pal+$12
     LDA lut_MapmanPalettes+1, X
     STA cur_pal+$16
-
+    LDA lut_MapmanPalettes+2, X   
+    STA cur_pal+$13
+    LDA lut_MapmanPalettes+3, X
+    STA cur_pal+$17
     RTS                     ; then exit
 
 
@@ -11145,7 +11150,7 @@ LoadBattleSpritePalettes:
       RTS
 
 @BattleSpritePalettes:
-  .BYTE $0F,$28,$18,$21,  $0F,$16,$30,$36,   $0F,$30,$22,$12,  $0F,$30,$10,$00
+  .BYTE $0F,$18,$21,$28,  $0F,$16,$30,$36,   $0F,$08,$17,$28,  $0F,$30,$10,$00
 
 
 
@@ -11349,8 +11354,8 @@ DrawCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 lutClassBatSprPalette:
-  .BYTE $01,$00,$00,$01,$01,$00    ; unpromoted classes
-  .BYTE $01,$01,$00,$01,$01,$00    ; promoted classes
+  .BYTE $01,$02,$00,$01,$01,$00    ; unpromoted classes
+  .BYTE $01,$02,$00,$01,$01,$00    ; promoted classes
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13715,26 +13720,26 @@ lut_BattleCommandBoxInfo:
 ;       hdr   X    Y  width  height
   .BYTE $00, $00, $00, $10, $09         ; box 
 ;       hdr,  X    Y    ptr
-  .BYTE $01, $03, $00, <@txt0, >@txt0   ; text
-  .BYTE $01, $03, $02, <@txt1, >@txt1
+  .BYTE $01, $03, $00, <@Command1, >@Command1   ; text
+  .BYTE $01, $03, $02, <@Command2, >@Command2
   .BYTE $FF
-  ;.BYTE $01, $03, $04, <@txt2, >@txt2
-  .BYTE $01, $03, $06, <@txt3, >@txt3
-  .BYTE $01, $0A, $00, <@txt4, >@txt4
-  .BYTE $01, $0A, $02, <@txt5, >@txt5 
-  .BYTE $01, $0A, $04, <@txt6, >@txt6 
-  .BYTE $01, $0A, $06, <@txt7, >@txt7 
+  ;.BYTE $01, $03, $04, <@Command3, >@Command3
+  .BYTE $01, $03, $06, <@Command4, >@Command4
+  .BYTE $01, $0A, $00, <@Command5, >@Command5
+  .BYTE $01, $0A, $02, <@Command6, >@Command6 
+  .BYTE $01, $0A, $04, <@Command7, >@Command7 
+  .BYTE $01, $0A, $06, <@Command8, >@Command8 
   
   
-  @txt0:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
-  @txt1:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
- ; @txt2:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
-  @txt3:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
+  @Command1:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
+  @Command2:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
+ ; @Command3:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
+  @Command4:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
 
-  @txt4:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
-  @txt5:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
-  @txt6:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
-  @txt7:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
+  @Command5:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
+  @Command6:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
+  @Command7:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
+  @Command8:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
   
  ;
 
@@ -13768,15 +13773,15 @@ SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; _____
 lut_PlayerBoxInfo:
   .BYTE $00, $0F, $00, $11, $09         ; box 
 ;       hdr,  X    Y    ptr
-  .BYTE $01, $10, $00, <@txt0, >@txt0   ; text
-  .BYTE $01, $10, $02, <@txt1, >@txt1
-  .BYTE $01, $10, $04, <@txt2, >@txt2
-  .BYTE $01, $10, $06, <@txt3, >@txt3  
+  .BYTE $01, $10, $00, <@Char1Health, >@Char1Health   ; text
+  .BYTE $01, $10, $02, <@Char2Health, >@Char2Health
+  .BYTE $01, $10, $04, <@Char3Health, >@Char3Health
+  .BYTE $01, $10, $06, <@Char4Health, >@Char4Health
   
-  @txt0:  .BYTE $04, $FF, $13, $00, $05, $7A, $13, $00, $06, $00
-  @txt1:  .BYTE $05, $FF, $13, $40, $05, $7A, $13, $40, $06, $00
-  @txt2:  .BYTE $06, $FF, $13, $80, $05, $7A, $13, $80, $06, $00
-  @txt3:  .BYTE $07, $FF, $13, $C0, $05, $7A, $13, $C0, $06, $00
+  @Char1Health:  .BYTE $04, $FF, $13, $00, $05, $7A, $13, $00, $06, $00
+  @Char2Health:  .BYTE $05, $FF, $13, $40, $05, $7A, $13, $40, $06, $00
+  @Char3Health:  .BYTE $06, $FF, $13, $80, $05, $7A, $13, $80, $06, $00
+  @Char4Health:  .BYTE $07, $FF, $13, $C0, $05, $7A, $13, $C0, $06, $00
     
   
   
@@ -14194,8 +14199,9 @@ DrawBattleString_ControlCode:
   @PrintAttackName:     ; code:  0E
     LDA #BANK_ITEMS
     JSR SwapPRG_L
-    LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
-    BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
+    ;LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
+    ;BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
+    ;; JIGS - kind of pointless... also now items can do enemy attacks?
     
     LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
     CMP #ENEMY_ATTACK_START         ; if it's >= 42, then it's a special enemy attack
@@ -15385,7 +15391,7 @@ SaveScreenHelper:
     
     
 BattleBackgroundColor_LUT:
-.byte $0F,$01,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$2D,$25
+.byte $0F,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$2D,$25
     
     
 

@@ -367,9 +367,9 @@ ConeriaWMagic:
 ConeriaBMagic:
 .byte MG_FIRE, MG_SLEP, MG_LOCK, MG_LIT, $00  ;(Coneria) FIRE, SLEP, LOCK, LIT
 ConeriaTemple:
-.byte $28,$00,$00                             ;(Coneria) 40g Clinic
+;.byte $28,$00,$00                             ;(Coneria) 40g Clinic
 ConeriaInn:                               
-.byte $1E,$00,$00                             ;(Coneria) 30g Inn
+;.byte $1E,$00,$00                             ;(Coneria) 30g Inn
 ConeriaItem:                               
 .byte HEAL, PURE, TENT, $00                   ;(Coneria) Heal, Pure, Tent
 ProvokaWeapon:                              
@@ -381,9 +381,9 @@ ProvokaWMagic:
 ProvokaBMagic:                              
 .byte MG_ICE, MG_DARK, MG_TMPR, MG_SLOW, $00  ;(Provoka) ICE, DARK, TMPR, SLOW
 ProvokaTemple:                              
-.byte $50,$00                                 ;(Provoka) 80g Clinic
+;.byte $50,$00                                 ;(Provoka) 80g Clinic
 ProvokaInn:                                   
-.byte $32,$00                                 ;(Provoka) 50g Inn
+;.byte $32,$00                                 ;(Provoka) 50g Inn
 ProvokaItem:                                  
 .byte HEAL, PURE, EYEDROPS, TENT, CABIN       ;(Provoka) Heal, Pure, Tent, Cabin
 ElflandWeapon:                                
@@ -399,9 +399,9 @@ ElflandWMagic2:
 ElflandBMagic2:                               
 .byte MG_SLP2, MG_FAST, MG_CONF, MG_ICE2, $00 ;(Elfland) SLP2, FAST, CONF, ICE2
 ElflandTemple:                                
-.byte $C8,$00                                 ;(Elfland) 200g Clinic
+;.byte $C8,$00                                 ;(Elfland) 200g Clinic
 ElflandInn:                                   
-.byte $64,$00                                 ;(Elfland) 100g Inn
+;.byte $64,$00                                 ;(Elfland) 100g Inn
 ElflandItem:                                  
 .byte HEAL, PURE, TENT, CABIN, SOFT           ;(Elfland) Heal, Pure, Tent, Cabin, Soft
 MelmondWeapon:                                
@@ -413,7 +413,7 @@ MelmondWMagic:
 MelmondBMagic:                                
 .byte MG_FIR3, MG_BANE, MG_WARP, MG_SLO2, $00 ;(Melmond) FIR3, BANE, WARP, SLO2
 MelmondInn:                                   
-.byte $64,$00                                 ;(Melmond) 100g Inn
+;.byte $64,$00                                 ;(Melmond) 100g Inn
 LakeWeapon:                                   
 .byte WEP16+1, WEP17+1, WEP18+1, WEP19+1, $00 ;(Cresent Lake) Silver Knife, Silver Sword, Silver Hammer, Silver Axe
 LakeArmor:                                   
@@ -423,9 +423,9 @@ LakeWMagic:
 LakeBMagic:                                   
 .byte MG_LIT3, MG_RUB, MG_QAKE, MG_STUN, $00  ;(Cresent Lake) LIT3, RUB, QAKE, STUN
 LakeTemple:                                   
-.byte $90,$01,$00                             ;(Cresent Lake) 400g Clinic
+;.byte $90,$01,$00                             ;(Cresent Lake) 400g Clinic
 LakeInn:                                      
-.byte $C8,$00                                 ;(Cresent Lake) 200g Inn
+;.byte $C8,$00                                 ;(Cresent Lake) 200g Inn
 LakeItem:                                     
 .byte HEAL, PURE, TENT, CABIN, WAKEUPBELL     ;(Cresent Lake) Heal, Pure, Tent, Cabin
 GaiaWeapon:                                   
@@ -441,9 +441,9 @@ GaiaWMagic2:
 GaiaBMagic2:                                  
 .byte MG_STOP, MG_ZAP, MG_XXXX, $00           ;(Gaia) STOP, ZAP!, XXXX
 GaiaTemple:                                   
-.byte $EE,$02,$00                             ;(Gaia) 750g Clinic
+;.byte $EE,$02,$00                             ;(Gaia) 750g Clinic
 GaiaInn:                                      
-.byte $F4,$01,$00                             ;(Gaia) 500g Inn
+;.byte $F4,$01,$00                             ;(Gaia) 500g Inn
 GaiaItem:                                     
 .byte CABIN, HOUSE, HEAL, PURE, PHOENIXDOWN   ;(Gaia) Cabin, House, Heal, Pure
 OnracWMagic:                                  
@@ -451,9 +451,9 @@ OnracWMagic:
 OnracBMagic:                                  
 .byte MG_SABR, MG_BLND, $00                   ;(Onrac) SABR, BLND
 OnracTemple:                                  
-.byte $EE,$02,$00                             ;(Onrac) 750g Clinic
+;.byte $EE,$02,$00                             ;(Onrac) 750g Clinic
 OnracInn:                                     
-.byte $2C,$01,$00                             ;(Onrac) 300g Inn
+;.byte $2C,$01,$00                             ;(Onrac) 300g Inn
 OnracItem:                                    
 .byte TENT, CABIN, HOUSE, PURE, SOFT          ;(Onrac) Tent, Cabin, House, Pure, Soft
 CaravanShop:                                  
@@ -1187,6 +1187,7 @@ ConvertBattleNumber:
 BattleBGColorDigits:
     LDA BattleBGColor
     STA tmp
+    INC tmp
     JMP PrintNumber_2Digit
 
 PrintBattleTurn:
@@ -3642,8 +3643,14 @@ LoadEquippedMark:
     ;; this all draws a ! to the sprite CHR at tile $FF
 
 DrawShop:
+    LDA shop_type              ;; JIGS - skip loading "inventory" if its an inn or clinic
+    CMP #4
+    BEQ :+
+    CMP #5
+    BEQ :+              
+    
     JSR LoadShopInventory      ; load up this shop's inventory into the item box
-    JSR ClearNT                ; clear the nametable
+  : JSR ClearNT                ; clear the nametable
     LDA $2002                  ; reset the PPU toggle
 
     LDA #>$23D3
@@ -4801,25 +4808,22 @@ DrawInnClinicConfirm:
     ADC ch_level+$40
     ADC ch_level+$80
     ADC ch_level+$C0
+    ADC #$04             ;; add 4 to make all levels 1-based
     STA tmp
+   
     CMP #64              ;; if the part's level is 4*16, then double the price
-    BCC :+
+    BCC @DrawNumber
     
     LDX #10
     CMP #100             ;; if the party's level is 4*25 then triple the price
-    BCC :+
+    BCC @DrawNumber
     
     LDX #15
     CMP #140             ;; if the party's level is 4*35 then price gouge those 
-    BCC :+               ;; foolishly rich light warriors!
+    BCC @DrawNumber     ;; foolishly rich light warriors!
     
     LDX #25
-    
-  : JSR MultiplyXA
-    STA tmp
-    STX tmp+1
-    
-    JMP @DrawNumber
+    BNE @DrawNumber
     
    @CalculateClinicPrice: 
     LDA shop_curitem           ; code only reaches here if they can afford it.
@@ -4837,6 +4841,8 @@ DrawInnClinicConfirm:
     STX shop_curitem    
     
     LDA ch_level, X
+    CLC
+    ADC #01         ;; make level 1 based
     LDX #50         ;; JIGS - price for clinic is level * 50
     STA tmp
     AND #$F0
@@ -4855,17 +4861,20 @@ DrawInnClinicConfirm:
     LDX #200       ;; and past level 35, it is level * 200
     
   : LDA tmp          
+   
+   @DrawNumber:
     JSR MultiplyXA
     STA tmp
+    STA item_box
     STX tmp+1
-
-   @DrawNumber: 
+    STX item_box+1
    ; LDA item_box              ; copy the inn price (first dtwo bytes in item_box)
    ; STA tmp                   ;  to tmp  (for PrintNumdber)
    ; LDA item_box+1
    ; STA tmp+1
     LDA #0
     STA tmp+2                 ; 5digit print number needs 3 bytes... so just set high byte to zero
+    STA item_box+3
     INC dest_y
     INC dest_y
     LDA #04
@@ -5588,7 +5597,7 @@ MainMenuLoop:
         
    @Save:
     JSR SaveGame
-    JMP ResumeMainMenu ; EnterMainMenu
+    JMP EnterMainMenu ; uses Enter instead of Resume, to re-load the appropriate character sprites
 
 @EscapeSubTarget:             ; if they escaped the sub target menu...
     LDA #0
@@ -5962,7 +5971,7 @@ CureFamily_Loop:
     LDA ch_maxhp, X        
     STA ch_curhp, X        
     LDA ch_ailments, X
-    AND #AIL_DEAD | AIL_STONE
+    AND #AIL_DEAD | AIL_STOP
     STA ch_ailments, X      ; JIGS - also now does the battle effect of fixing most ailments (poison and blind here)
     
   : JSR PlayHealSFX
@@ -7431,7 +7440,7 @@ UseItem_Pure:
     BNE :+
 
 UseItem_Soft:
-    LDA #AIL_STONE
+    LDA #AIL_STOP
     STA hp_recovery
     LDA #48 
     PHA
@@ -8120,7 +8129,7 @@ EnterStatusMenu:
     PLA
     JSR @ResetStatusMenuCharPose
     LDA #0                      ; Turn off the PPU
-    STA $2000
+    STA $2001
     JMP @ReenterStatusMenu
   
   @Exit:

@@ -707,12 +707,22 @@ lut_ItemNamePtrTbl:
 .word CLASS11      ; CA
 .word CLASS12      ; CB
 
-.word BATTLESPELL1 ; CC
-.word BATTLESPELL2 ; CD
-.word BATTLESPELL3 ; CE
-.word BATTLESPELL4 ; CF
-.word BATTLESPELL5 ; D0
-.word BATTLESPELL6 ; D1
+.word BATTLESPELL1  ; CC
+.word BATTLESPELL2  ; CD
+.word BATTLESPELL3  ; CE
+.word BATTLESPELL4  ; CF
+.word BATTLESPELL5  ; D0
+.word BATTLESPELL6  ; D1
+.word BATTLESPELL7  ; D2
+.word BATTLESPELL8  ; D3
+.word BATTLESPELL9  ; D4
+.word BATTLESPELL10 ; D5
+.word BATTLESPELL11 ; D6
+.word BATTLESPELL12 ; D7
+.word BATTLESPELL13 ; D8
+.word BATTLESPELL14 ; D9
+.word BATTLESPELL15 ; DA
+.word BATTLESPELL16 ; DB
 
 lut_WeaponArmorNamePtrTbl:
 .word Weapon1      ; 0  ; Wooden Nunchuck
@@ -859,7 +869,8 @@ NAME_ELIXIR:
 NAME_PURE:
 .byte $99,$B8,$B5,$A8,$FF,$FF,$FF,$E1,$00 ; Pure___&
 NAME_SOFT:
-.byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
+;.byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
+.byte $8F,$AF,$B2,$BA,$AC,$B1,$AA,$EA,$00 ; Flowing(clock)
 NAME_P_DOWN:
 .byte $99,$AB,$B2,$A8,$B1,$AC,$BB,$E2,$00 ; PhoenixF
 NAME_TENT:
@@ -873,7 +884,7 @@ NAME_EYEDROPS:
 NAME_SMOKEBOMB:
 .byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$E3,$00 ; Smoke__Q
 NAME_WAKEUPBELL:
-.byte $A0,$A4,$AE,$A8,$B8,$B3,$FF,$E4,$00 ; Wakeup_^
+.byte $8A,$AF,$A4,$B5,$B0,$FF,$FF,$EA,$00 ; Alarm__(clock)
 
 
 ORB1: ; orbs
@@ -980,7 +991,7 @@ SPELL10:
 .byte $96,$9E,$9D,$8E,$FF,$FF,$FF,$00  ;  MUTE___
 SPELL11:
 ;.byte $8A,$95,$92,$9D,$00 ; ALIT
-.byte $8B,$98,$95,$9D,$FF,$DB,$FF,$00  ;  BOLT_(Shield)_
+.byte $8B,$98,$95,$9D,$FF,$FF,$DB,$00  ;  BOLT__(Shield)
 SPELL12:
 ;.byte $92,$97,$9F,$9C,$00 ; INVS
 .byte $92,$97,$9F,$92,$9C,$FF,$FF,$00  ;  INVIS__
@@ -998,28 +1009,29 @@ SPELL16:
 .byte $9C,$95,$98,$A0,$FF,$FF,$FF,$00  ;  SLOW___
 SPELL17:
 ;.byte $8C,$9E,$9B,$82,$00 ; CUR2
-.byte $8C,$9E,$9B,$8E,$FF,$82,$FF,$00  ;  CURE_2_
+.byte $8C,$9E,$9B,$8E,$FF,$FF,$82,$00  ;  CURE__2
 SPELL18:
 ;.byte $91,$9B,$96,$82,$00 ; HRM2
-.byte $91,$8A,$9B,$96,$FF,$82,$FF,$00  ;  HARM_2_
+.byte $91,$8A,$9B,$96,$FF,$FF,$82,$00  ;  HARM__2
 SPELL19:
 ;.byte $8A,$8F,$92,$9B,$00 ; AFIR
-.byte $8F,$92,$9B,$8E,$FF,$DB,$FF,$00  ;  FIRE_(shield)_
+.byte $8F,$92,$9B,$8E,$FF,$FF,$DB,$00  ;  FIRE__(shield)
 SPELL20:
 ;.byte $91,$8E,$8A,$95,$00 ; HEAL
-.byte $91,$8E,$8A,$95,$FF,$FF,$FF,$00  ;  HEAL___
+;.byte $91,$8E,$8A,$95,$FF,$FF,$FF,$00  ;  HEAL___
+.byte $9B,$8E,$90,$8E,$97,$FF,$FF,$00  ; REGEN__
 SPELL21:
 ;.byte $8F,$92,$9B,$82,$00 ; FIR2
-.byte $8F,$92,$9B,$8E,$FF,$82,$FF,$00  ;  FIRE_2_
+.byte $8F,$92,$9B,$8E,$FF,$FF,$82,$00  ;  FIRE__2
 SPELL22:
 ;.byte $91,$98,$95,$8D,$00 ; HOLD
 .byte $91,$98,$95,$8D,$FF,$FF,$FF,$00  ;  HOLD___
 SPELL23:
 ;.byte $95,$92,$9D,$82,$00 ; LIT2
-.byte $8B,$98,$95,$9D,$FF,$82,$FF,$00  ;  BOLT_2_
+.byte $8B,$98,$95,$9D,$FF,$FF,$82,$00  ;  BOLT__2
 SPELL24:
 ;.byte $95,$98,$94,$82,$00 ; L0K2
-.byte $95,$98,$8C,$94,$FF,$82,$FF,$00  ;  LOCK_2_
+.byte $95,$98,$8C,$94,$FF,$FF,$82,$00  ;  LOCK__2
 SPELL25:
 ;.byte $99,$9E,$9B,$8E,$00 ; PURE
 .byte $99,$9E,$9B,$8E,$FF,$FF,$FF,$00  ;  PURE___
@@ -1028,7 +1040,7 @@ SPELL26:
 .byte $8F,$8E,$8A,$9B,$FF,$FF,$FF,$00  ;  FEAR___
 SPELL27:
 ;.byte $8A,$92,$8C,$8E,$00 ; AICE
-.byte $92,$8C,$8E,$FF,$DB,$FF,$FF,$00  ;  ICE_(shield)__
+.byte $92,$8C,$8E,$FF,$FF,$FF,$DB,$00  ;  ICE___(shield)
 SPELL28:
 ;.byte $8A,$96,$9E,$9D,$00 ; AMUT
 .byte $9F,$98,$92,$8C,$8E,$FF,$FF,$00  ;  VOICE__
@@ -1043,22 +1055,23 @@ SPELL31:
 .byte $8C,$98,$97,$8F,$9E,$9C,$8E,$00  ;  CONFUSE
 SPELL32:
 ;.byte $92,$8C,$8E,$82,$00 ; ICE2
-.byte $92,$8C,$8E,$FF,$82,$FF,$FF,$00  ;  ICE_2__
+.byte $92,$8C,$8E,$FF,$FF,$FF,$82,$00  ;  ICE___2
 SPELL33:
 ;.byte $8C,$9E,$9B,$83,$00 ; CUR3
-.byte $8C,$9E,$9B,$8E,$FF,$83,$FF,$00  ;  CURE_3_
+.byte $8C,$9E,$9B,$8E,$FF,$FF,$83,$00  ;  CURE__3
 SPELL34:
 ;.byte $95,$92,$8F,$8E,$00 ; LIFE
 .byte $95,$92,$8F,$8E,$FF,$FF,$FF,$00  ;  LIFE___
 SPELL35:
 ;.byte $91,$9B,$96,$83,$00 ; HRM3
-.byte $91,$8A,$9B,$96,$FF,$83,$FF,$00  ;  HARM_3_
+.byte $91,$8A,$9B,$96,$FF,$FF,$83,$00  ;  HARM__3
 SPELL36:
 ;.byte $91,$8E,$95,$82,$00 ; HEL2
-.byte $91,$8E,$8A,$95,$FF,$82,$FF,$00  ;  HEAL_2_
+;.byte $91,$8E,$8A,$95,$FF,$FF,$82,$00  ;  HEAL__2
+.byte $9B,$8E,$90,$8E,$97,$FF,$82,$00  ; REGEN_2
 SPELL37:
 ;.byte $8F,$92,$9B,$83,$00 ; FIR3
-.byte $8F,$92,$9B,$8E,$FF,$83,$FF,$00  ;  FIRE_3_
+.byte $8F,$92,$9B,$8E,$FF,$FF,$83,$00  ;  FIRE__3
 SPELL38:
 ;.byte $8B,$8A,$97,$8E,$00 ; BANE
 .byte $8B,$8A,$97,$8E,$FF,$FF,$FF,$00  ;  BANE___
@@ -1067,10 +1080,11 @@ SPELL39:
 .byte $A0,$8A,$9B,$99,$FF,$FF,$FF,$00  ;  WARP___
 SPELL40:
 ;.byte $9C,$95,$98,$82,$00 ; SL02
-.byte $9C,$95,$98,$A0,$FF,$82,$FF,$00  ;  SLOW_2_
+.byte $9C,$95,$98,$A0,$FF,$FF,$82,$00  ;  SLOW__2
 SPELL41:
 ;.byte $9C,$98,$8F,$9D,$00 ; SOFT
-.byte $9C,$98,$8F,$9D,$FF,$FF,$FF,$00  ;  SOFT___
+;.byte $9C,$98,$8F,$9D,$FF,$FF,$FF,$00  ;  SOFT___
+.byte $EA,$FF,$8F,$97,$98,$A0,$FF,$FF,$FF,$00  ;  (Time)_FLOW_
 SPELL42:
 ;.byte $8E,$A1,$92,$9D,$00 ; EXIT
 .byte $8E,$A1,$92,$9D,$FF,$FF,$FF,$00  ;  EXIT___
@@ -1082,7 +1096,7 @@ SPELL44:
 .byte $92,$97,$9F,$92,$9C,$FF,$82,$00  ;  INVIS_2
 SPELL45:
 ;.byte $95,$92,$9D,$83,$00 ; LIT3
-.byte $8B,$98,$95,$9D,$FF,$83,$FF,$00  ;  BOLT_3_
+.byte $8B,$98,$95,$9D,$FF,$FF,$83,$00  ;  BOLT__3
 SPELL46:
 ;.byte $9B,$9E,$8B,$FF,$00 ; RUB_
 .byte $9B,$9E,$8B,$FF,$FF,$FF,$FF,$00  ;  RUB____
@@ -1094,19 +1108,20 @@ SPELL48:
 .byte $9C,$9D,$9E,$97,$FF,$FF,$FF,$00  ;  STUN___
 SPELL49:
 ;.byte $8C,$9E,$9B,$84,$00 ; CUR4
-.byte $8C,$9E,$9B,$8E,$FF,$84,$FF,$00  ;  CURE_4_
+.byte $8C,$9E,$9B,$8E,$FF,$FF,$84,$00  ;  CURE__4
 SPELL50:
 ;.byte $91,$9B,$96,$84,$00 ; HRM4
-.byte $91,$8A,$9B,$96,$FF,$84,$FF,$00  ;  HARM_4_
+.byte $91,$8A,$9B,$96,$FF,$FF,$84,$00  ;  HARM__4
 SPELL51:
 ;.byte $8A,$9B,$9E,$8B,$00 ; ARUB
-.byte $9B,$9E,$8B,$FF,$DB,$FF,$FF,$00  ;  RUB_(shield)__
+.byte $9B,$9E,$8B,$FF,$FF,$FF,$DB,$00  ;  RUB___(shield)
 SPELL52:
 ;.byte $91,$8E,$95,$83,$00 ; HEL3
-.byte $91,$8E,$8A,$95,$FF,$83,$FF,$00  ;  HEAL_3_
+;.byte $91,$8E,$8A,$95,$FF,$FF,$83,$00  ;  HEAL__3
+.byte $9B,$8E,$90,$8E,$97,$FF,$83,$00  ; REGEN_3
 SPELL53:
 ;.byte $92,$8C,$8E,$83,$00 ; ICE3
-.byte $92,$8C,$8E,$FF,$83,$FF,$FF,$00  ;  ICE_3__
+.byte $92,$8C,$8E,$FF,$FF,$FF,$83,$00  ;  ICE___3
 SPELL54:
 ;.byte $8B,$9B,$8A,$94,$00 ; BRAK
 .byte $8B,$9B,$8E,$8A,$94,$FF,$FF,$00  ;  BREAK__
@@ -1118,7 +1133,7 @@ SPELL56:
 .byte $8B,$95,$92,$97,$8D,$FF,$FF,$00  ;  BLIND__
 SPELL57:
 ;.byte $95,$92,$8F,$82,$00 ; LIF2
-.byte $95,$92,$8F,$8E,$FF,$82,$FF,$00  ;  LIFE_2_
+.byte $95,$92,$8F,$8E,$FF,$FF,$82,$00  ;  LIFE__2
 SPELL58:
 ;.byte $8F,$8A,$8D,$8E,$00 ; FADE
 .byte $91,$98,$95,$A2,$FF,$FF,$FF,$00  ;  HOLY___
@@ -1145,15 +1160,31 @@ SPELL64:
 BATTLESPELL1: ; CC
 .byte $91,$8E,$8A,$95,$FF,$FF,$FF,$00  ;  HEAL
 BATTLESPELL2: ; CD
-.byte $91,$8E,$8A,$95,$FF,$82,$FF,$00  ;  HEAL_2_
+.byte $91,$8E,$8A,$95,$FF,$FF,$82,$00  ;  HEAL__2
 BATTLESPELL3: ; CE
-.byte $91,$8E,$8A,$95,$FF,$83,$FF,$00  ;  HEAL_3_
+.byte $91,$8E,$8A,$95,$FF,$FF,$83,$00  ;  HEAL__3
 BATTLESPELL4: ; CF
-.BYTE $8C,$98,$9E,$97,$9D,$8E,$9B,$00  ;  COUNTER
+.byte $99,$9B,$8A,$A2,$8E,$9B,$FF,$00  ;  PRAYER
 BATTLESPELL5: ; D0
-.BYTE $9B,$8E,$8F,$95,$8E,$8C,$9D,$00  ;  REFLECT 
+.BYTE $8C,$98,$9E,$97,$9D,$8E,$9B,$00  ;  COUNTER
 BATTLESPELL6: ; D0
+.BYTE $9B,$8E,$8F,$95,$8E,$8C,$9D,$00  ;  REFLECT 
+BATTLESPELL7:  
 .BYTE $9B,$8E,$8F,$95,$8C,$9D,$82,$00  ;  REFLCT2 
+BATTLESPELL8:  
+BATTLESPELL9:  
+BATTLESPELL10: 
+BATTLESPELL11:
+BATTLESPELL12: 
+BATTLESPELL13: 
+BATTLESPELL14: 
+BATTLESPELL15: 
+BATTLESPELL16: 
+
+
+
+
+
 
 ;gold in chests
 ;; Note this is only the text data. Actual amount given is in the price list at the start of Bank 9
@@ -1678,6 +1709,8 @@ data_BattleMessages:
 .word BTL_MESSAGE96
 .word BTL_MESSAGE97
 .word BTL_MESSAGE98
+.word BTL_MESSAGE99
+.word BTL_MESSAGE100
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1878,9 +1911,10 @@ BTL_MESSAGE97:
 BTL_MESSAGE98:
 .byte $8C,$26,$B1,$53,$44,$39,$B7,$5E,$AE,$C4,$00 ; Counter attack!
 BTL_MESSAGE99:
-; Praying
+.byte $99,$B5,$A4,$BC,$1F,$AA,$69,$00 ; Praying...
 BTL_MESSAGE100:
-; Focus
+.byte $8F,$B2,$A6,$B8,$B6,$1F,$AA,$69,$00 ; Focusing...
+
 
 
 

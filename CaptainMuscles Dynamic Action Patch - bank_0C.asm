@@ -325,7 +325,7 @@ UndoCharacterBattleCommand:
     LDY # ch_ailments - ch_stats
     
     LDA (btl_ob_charstat_ptr), Y        ; see if they have ailments that would stop them from doing anything
-    AND #AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP
+    AND #AIL_DEAD | AIL_STOP | AIL_STUN | AIL_SLEEP
     BEQ @UndoPrevCharDrink              ; if they are able to input a command
     
     DEC btlcmd_curchar                  ; if they can't, dec curchar to go to the prev character
@@ -606,10 +606,10 @@ GetCharacterBattleCommand:
     
     LDY # ch_ailments - ch_stats    ; See if this character has any ailment that would prevent them from inputting
     LDA (btl_ob_charstat_ptr), Y    ;   any commands
-    AND # AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP
+    AND # AIL_DEAD | AIL_STOP | AIL_STUN | AIL_SLEEP
     BEQ InputCharacterBattleCommand ; If they can, jump to routine to get input from menus
     
-      AND # AIL_DEAD | AIL_STONE    ; if they are unable to input commands.. then isolate the Dead/Stone bits
+      AND # AIL_DEAD | AIL_STOP    ; if they are unable to input commands.. then isolate the Dead/Stone bits
       PHA
       LDA btlcmd_curchar
       ASL A
@@ -3342,7 +3342,7 @@ DoBattleRound:
 
 BattleTurnEnd_CheckForBattleEnd:
     LDA btl_defender_ailments       ; Check to see if the defender has died
-    AND #(AIL_DEAD | AIL_STONE)
+    AND #(AIL_DEAD | AIL_STOP)
     BEQ DoBattleRound_RTS           ; if not, nothing to do here, so just exit
         ; NOTE!!!  The game is BUGGED because if the last remaining enemy is
         ;  confused, and if they kill themselves, then btl_defender_ailments will
@@ -4489,7 +4489,7 @@ DoPhysicalAttack:
     JSR WalkForwardAndStrike    ; Do the animation to walk the character forward, swing their weapon, and walk back
     
     LDA btl_defender_ailments
-    AND #AIL_DEAD | AIL_STONE
+    AND #AIL_DEAD | AIL_STOP
     BNE :+                      ; if the enemy target is not already dead or stone...
       JSR DoExplosionEffect     ; play the "cha" sound effect and draw explosion animation on the enemy
       
@@ -4503,7 +4503,7 @@ DoPhysicalAttack:
     JSR BattleScreenShake_L     ; do the 'screen shake' animation
     
     LDA btl_defender_ailments
-    AND #AIL_DEAD | AIL_STONE
+    AND #AIL_DEAD | AIL_STOP
     BNE :+
       LDA battle_defender_index
       AND #$03                  ; if the player target is not already dead or stone...
@@ -4512,7 +4512,7 @@ DoPhysicalAttack:
     
     ;;;;;;;
   : LDA btl_defender_ailments
-    AND #AIL_DEAD | AIL_STONE
+    AND #AIL_DEAD | AIL_STOP
     BEQ :+                              ; if defender is dead/stone
       LDA #BTLMSG_INEFFECTIVE           ; draw the "Ineffective" battle message, clear all combat boxes, and exit
       JMP DrawBtlMsg_ClearCombatBoxes
@@ -7321,7 +7321,7 @@ Battle_PlMag_TargetSelf:
 Battle_PlMag_IsPlayerValid:
     LDY #ch_ailments - ch_stats
     LDA (btl_entityptr_obrom), Y
-    AND #AIL_DEAD | AIL_STONE
+    AND #AIL_DEAD | AIL_STOP
     RTS
     
     
@@ -7683,7 +7683,7 @@ Battle_CastMagicOnAllPlayers:
     
     LDY #ch_ailments - ch_stats             ; if they are dead or stoned, skip them
     LDA (btl_entityptr_obrom), Y            ;  (OB ailments!  why does IB exist?!?!)
-    AND #(AIL_DEAD | AIL_STONE)
+    AND #(AIL_DEAD | AIL_STOP)
     BNE :+
     
       LDA $6BCE
@@ -8973,7 +8973,7 @@ BtlMag_HandleAilmentChanges:
     
     ; Otherwise, defender is an enemy
     LDA btlmag_defender_ailments    ; See if the enemy has been killed/stoned
-    AND #(AIL_DEAD | AIL_STONE)
+    AND #(AIL_DEAD | AIL_STOP)
     BEQ :+                          ; if yes....
       JSR EraseEnemyGraphic         ;  Erase their graphic
       LDX btl_defender
@@ -8990,7 +8990,7 @@ BtlMag_HandleAilmentChanges:
     
   @CheckPlayerState:
     LDA btlmag_defender_ailments                        ; see if the player has been rendered immobile
-    AND #(AIL_DEAD | AIL_STONE | AIL_STUN | AIL_SLEEP)
+    AND #(AIL_DEAD | AIL_STOP | AIL_STUN | AIL_SLEEP)
     BEQ :+                          ; if yes...
       STA btlmag_fakeout_ailments   ; record fakout ailments to show that at least one player has
       LDA btl_defender              ;   been removed from combat

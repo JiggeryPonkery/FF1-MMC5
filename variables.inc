@@ -393,7 +393,6 @@ ScreenShakeCounter      = $9D ; used in battle and silent errors
 dlgbox_row              = $9D ; counts down from 7 when drawing dialogue box; nothing else 
 npcdir_seed             = $9E ; RNG seed for determining direction for NPCs to walk
 
-
 ;; Music stuff          
 ;                       = $A0
 ChaosNoise              = $A1 ; only used at the end of the game
@@ -476,6 +475,7 @@ btl8x8spr_t             = $033C ; tile ID
 btl8x8spr_i             = $033D ; slot to draw to (00-3F)
 battle_ailmentrandchance= $033E
 battle_hitsconnected    = $033F     ; number of hits actually connected
+
 battle_critsconnected   = $0347
 battle_thishitconnected = $0348
 btl_curturn             = $0349      ; current turn (index for btl_turnorder)
@@ -504,7 +504,7 @@ inputdelaycounter       = $035A ; counter to delay multiple-input processing whe
 btl_walkloopctr         = $035B 
 btl_animatingchar       = $035C ; the character currently being animated (0-3)
 btl_flashsprite1        = $035D 
-;                       = $035E
+MagicMessage            = $035E 
 btl_respondrate_tmp     = $035F                                
 btlcursspr_x            = $0360 
 btlcursspr_y            = $0361 
@@ -542,7 +542,7 @@ btlmag_magicsource      = $0379 ; 0=magic, 1=Item, 2=item
 btlmag_ailment_orig     = $037A ; A backup of 
 btl_drawformationindex  = $037B 
 btlmag_playerhitsfx     = $037C ; sound effect to play when magic hits player
-btltmp_attackerbuffer   = $037D 
+;unused                 = $037D 
 btl_backgroundflash     = $037E
 battle_stealsuccess     = $037F ; $FF if miss, $00 if no item, $01 if success
 explode_min_x           = $0380 
@@ -671,9 +671,9 @@ btlmag_effect               = btl_attacker + $02
 btlmag_effectivity          = btl_attacker + $03
 btlmag_hitrate              = btl_attacker + $04
 btlmag_element              = btl_attacker + $05
-btlmag_fakeout_defindex     = btl_attacker + $06 ; See Battle_DoTurn in bank C for a description of
-btlmag_fakeout_ailments     = btl_attacker + $07 ;   what these 'fakeout' vars are and how/why they're used
-btlmag_fakeout_defplayer    = btl_attacker + $08
+; btlmag_fakeout_defindex     = btl_attacker + $06 ; See Battle_DoTurn in bank C for a description of
+; btlmag_fakeout_ailments     = btl_attacker + $07 ;   what these 'fakeout' vars are and how/why they're used
+; btlmag_fakeout_defplayer    = btl_attacker + $08
 
 btl_defender                 = $6040 
 btl_defender_index           = btl_defender + $01
@@ -869,6 +869,7 @@ DrawBattleMagicBox_toporbottom = $6650
 btltmp_boxleft                 = $6651
 btltmp_boxcenter               = $6652
 btltmp_boxright                = $6653
+btltmp_attackerbuffer          = $6654  ; 2 bytes, second byte always 0 
 btltmp_altmsgbuffer            = $6660  ; $20 bytes read
 btltmp_damageblockbuffer       = $6680  ; 6 bytes used, but $20 are read?
 btl_stringbuf                  = $66A0  ; $21 byte buffer to contain string data for printing (reads $21st byte, but doesn't use?)

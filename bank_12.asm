@@ -842,122 +842,40 @@ lut_OWTileset:
 ; half, and the second for the bottom.
 
 lut_MapmanPalettes:
-.byte $16,$16 ; Fighter
-.byte $12,$17 ; Thief
-.byte $27,$12 ; BlackBelt
-.byte $16,$16 ; RedMage
-.byte $30,$30 ; WhiteMage
-.byte $27,$12 ; BlackMage
-.byte $16,$16 ; Knight
-.byte $16,$16 ; Ninja
-.byte $27,$12 ; Master
-.byte $16,$16 ; RedWiz
-.byte $16,$30 ; WhiteWiz
-.byte $27,$13 ; BlackWiz
+;      Clothes Top (usually hair)
+;      |   Clothes Bottom
+;      |   |   Skin Top
+;      |   |   |   Skin Bottom
+;      |   |   |   |
+;      v   v   v   v 
+.byte $16,$16,$36,$36 ; Fighter
+.byte $17,$08,$38,$38 ; Thief
+.byte $18,$21,$28,$28 ; BlackBelt
+.byte $16,$16,$36,$36 ; RedMage
+.byte $30,$30,$36,$36 ; WhiteMage
+.byte $27,$12,$36,$36 ; BlackMage
+.byte $16,$16,$36,$36 ; Knight
+.byte $08,$08,$38,$38 ; Ninja
+.byte $18,$21,$28,$28 ; Master
+.byte $16,$16,$36,$36 ; RedWiz
+.byte $16,$30,$36,$36 ; WhiteWiz
+.byte $27,$13,$36,$36 ; BlackWiz
 
 ;; unused, but needed for padding
 
 ;.byte $00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-
-;; JIGS - moved this to make use of this unused padding. 
-
-lut_InitUnsramFirstPage:
-.byte $00 ; 00 ship visible
-.byte $D2 ; 01 ship X 
-.byte $99 ; 02 ship Y
-.byte $00 ; 03 airship visible
-.byte $DD ; 04 airship X
-.byte $ED ; 05 airship Y
-.byte $00 ; 06 bridge visible
-.byte $98 ; 07 bridge X
-.byte $98 ; 08 bridge Y
-.byte $01 ; 09 canal visible
-.byte $66 ; 0A canal X
-.byte $A4 ; 0B canal Y
-.byte $00 ; 0C bridgescene ; 00 = hasnt happened yet. 01 = happens when move is complete, 80 =  already has happened
-.byte $92 ; 0D overworld scroll x
-.byte $9E ; 0E overworld scroll y
-.byte $01 ; 0F overworld vehicle
-.byte $01 ; 10 exp gain option (normal)
-.byte $01 ; 11 money gain option (normal)
-.byte $01 ; 12 encounter rate option (normal)
-.byte $00 ; 13 mute SFX option (on)
-.byte $00 ; 14 auto target option (on)
-.byte $04 ; 15 battle text speed (5)
-.byte $01 ; 16 battle text background color (1: blue)
-.byte $00 ; 17 unused
-.byte $00 ; 18 unused
-.byte $00 ; 19 unused
-.byte $00 ; 1A unused
-.byte $00 ; 1B unused
-.byte $00 ; 1C unused
-.byte $90 ; 1D gold low
-.byte $01 ; 1E gold middle
-.byte $00 ; 1F gold high
-
-; Items
-.byte $00 ;00 unused
-.byte $02 ;01 heal -- JIGS - added two heals
-.byte $00 ;02 X-heal
-.byte $00 ;03 ether
-.byte $00 ;04 elixier
-.byte $01 ;05 pure -- JIGS - added one pure 
-.byte $00 ;06 soft
-.byte $00 ;07 phoenix down
-.byte $00 ;08 tent
-.byte $00 ;09 cabin
-.byte $00 ;0A house
-.byte $00 ;0B eyedrops
-.byte $00 ;0C smokebomb
-.byte $00 ;0D wakeup bell
-.byte $00 ;0E nothing
-.byte $00 ;1F nothing
-
-; Key Items
-.byte $00 ;10 lute 
-.byte $00 ;11 crown
-.byte $00 ;12 crystal
-.byte $00 ;13 herb
-.byte $00 ;14 mystic key
-.byte $00 ;15 tnt
-.byte $00 ;16 adamant
-.byte $00 ;17 slab
-.byte $00 ;18 ruby
-.byte $00 ;19 rod
-.byte $00 ;1A floater
-.byte $00 ;1B chime
-.byte $00 ;1C tail
-.byte $00 ;1D cube
-.byte $00 ;1E bottle
-.byte $00 ;1F oxyale
-.byte $00 ;20 canoe
-.byte $00 ;21 
-.byte $00 ;22 
-.byte $00 ;23 
-.byte $00 ;24 
-.byte $00 ;25
-.byte $00 ;26
-.byte $00 ;27
-; 28
-; 29
-; 2A
-; 2B
-; 2C fire orb
-; 2D water orb
-; 2E air orb 
-; 2F earth orb
-;; JIGS - due to space limitations, these last 8 key item slots can't be set here.
-
 
 
 ;; Map tileset palette assignments
 ; Each byte is the palette map for one map tile (16x16 pixels)
 ; (each value is 2 bits, repeated 4 times for speed)
 ; must be on $400 byte bound - see padding above
+
+;.align $400
 
 lut_SMTilesetAttr: 
 .byte $00,$00,$00,$55,$55,$55,$55,$55,$55,$55,$55,$55,$55,$55,$00,$00 ; Town
@@ -2910,6 +2828,92 @@ lut_SMPalettes:
 ;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
 ;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
 ;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+
+lut_InitUnsramFirstPage:
+.byte $00 ; 00 ship visible
+.byte $D2 ; 01 ship X 
+.byte $99 ; 02 ship Y
+.byte $00 ; 03 airship visible
+.byte $DD ; 04 airship X
+.byte $ED ; 05 airship Y
+.byte $00 ; 06 bridge visible
+.byte $98 ; 07 bridge X
+.byte $98 ; 08 bridge Y
+.byte $01 ; 09 canal visible
+.byte $66 ; 0A canal X
+.byte $A4 ; 0B canal Y
+.byte $00 ; 0C bridgescene ; 00 = hasnt happened yet. 01 = happens when move is complete, 80 =  already has happened
+.byte $92 ; 0D overworld scroll x
+.byte $9E ; 0E overworld scroll y
+.byte $01 ; 0F overworld vehicle
+.byte $01 ; 10 exp gain option (normal)
+.byte $01 ; 11 money gain option (normal)
+.byte $01 ; 12 encounter rate option (normal)
+.byte $00 ; 13 mute SFX option (on)
+.byte $00 ; 14 auto target option (on)
+.byte $04 ; 15 battle text speed (5)
+.byte $01 ; 16 battle text background color (1: blue)
+.byte $00 ; 17 unused
+.byte $00 ; 18 unused
+.byte $00 ; 19 unused
+.byte $00 ; 1A unused 
+.byte $00 ; 1B unused
+.byte $00 ; 1C unused
+.byte $90 ; 1D gold low
+.byte $01 ; 1E gold middle
+.byte $00 ; 1F gold high
+
+; Items
+.byte $00 ; 20 unused
+.byte $02 ; 21 heal -- JIGS - added two heals
+.byte $00 ; 22 X-heal
+.byte $00 ; 23 ether
+.byte $00 ; 24 elixier
+.byte $01 ; 25 pure -- JIGS - added one pure 
+.byte $00 ; 26 soft
+.byte $00 ; 27 phoenix down
+.byte $00 ; 28 tent
+.byte $00 ; 29 cabin
+.byte $00 ; 2A house
+.byte $00 ; 2B eyedrops
+.byte $00 ; 2C smokebomb
+.byte $00 ; 2D wakeup bell
+.byte $00 ; 2E nothing
+.byte $00 ; 2F nothing
+
+; Key Items
+.byte $00 ; 30 lute 
+.byte $00 ; 31 crown
+.byte $00 ; 32 crystal
+.byte $00 ; 33 herb
+.byte $00 ; 34 mystic key
+.byte $00 ; 35 tnt
+.byte $00 ; 36 adamant
+.byte $00 ; 37 slab
+.byte $00 ; 38 ruby
+.byte $00 ; 39 rod
+.byte $00 ; 3A floater
+.byte $00 ; 3B chime
+.byte $00 ; 3C tail
+.byte $00 ; 3D cube
+.byte $00 ; 3E bottle
+.byte $00 ; 3F oxyale
+.byte $00 ; 40 canoe
+.byte $00 ; 41 
+.byte $00 ; 42 
+.byte $00 ; 43 
+.byte $00 ; 44 
+.byte $00 ; 45
+.byte $00 ; 46
+.byte $00 ; 47
+.byte $00 ; 48
+.byte $00 ; 49
+.byte $00 ; 4A
+.byte $00 ; 4B
+.byte $00 ; 4C fire orb
+.byte $00 ; 4D water orb
+.byte $00 ; 4E air orb 
+.byte $00 ; 4F earth orb
 
 
 .byte "END OF BANK 12"

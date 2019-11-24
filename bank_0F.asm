@@ -32,7 +32,7 @@
 .import AddGPToParty
 .import LoadPriceZ
 .import BattleRNG_L
-
+.import lutClassBatSprPalette
 
 
 
@@ -2863,13 +2863,13 @@ ChangeOption:
        DEC BattleTextSpeed
        LDA BattleTextSpeed
        BPL @Return         ; if the result didn't wrap (still positive), return
-       LDA #7
+       LDA #8
        STA BattleTextSpeed
        RTS
     
    @IncreaseBattleTextSpeed:
     LDA BattleTextSpeed
-    CMP #7
+    CMP #8
     BNE :+                  ; if its not over the limit, increase it
        LDA #0 
        STA BattleTextSpeed
@@ -2968,13 +2968,13 @@ BattleBackgroundColor:
     LDA BattleBGColor
     CMP #$FF
     BNE @Return
-    LDA #13
+    LDA #14
     STA BattleBGColor
     JMP @Return
     
     @NextColor:
     LDA BattleBGColor
-    CMP #13
+    CMP #14
     BNE :+
        LDA #0
        STA BattleBGColor
@@ -3855,6 +3855,7 @@ ReadjustBBEquipStats:
   @WeaponEquipped:
     LDA ch_strength, X        ; if a weapon is equipped... get strength stat
     LSR A                     ;  /2
+    ;CLC ;; JIGS  - fixes rounding error, if its a bug?
     ADC ch_damage, X          ; and add to damage
     STA ch_damage, X
     JMP @Armor ;RTS                       ; equipped BB's dmg = (str/2 + weapon)
@@ -3968,7 +3969,9 @@ CritCheck:
     AND #$01
     BEQ :+                          ; if defender resists the special attack's element (stun 01)
     RTS                             ; cancel specialty
-  : LDA #$10                        ; Stun ailment as used by STUN's effectivity in original game
+  : LDA #BTLMSG_PARALYZED
+    STA MMC5_tmp
+    LDA #AIL_STUN                   ; Stun ailment as used by STUN's effectivity in original game
     JMP @CritAddAilment
 
    @CritConfuse:
@@ -3976,7 +3979,9 @@ CritCheck:
     AND #$08
     BEQ :+                          ; if defender resists the special attack's element (dark/confuses 08)
     RTS                             ; cancel specialty
-  : LDA #$80                        ; Confuse ailment as used by CONF's effectivity in original game
+  : LDA #BTLMSG_CONFUSED 
+    STA MMC5_tmp
+    LDA #AIL_CONF                   ; Confuse ailment as used by CONF's effectivity in original game
     JMP @CritAddAilment
 
    @CritSlow:
@@ -4025,16 +4030,6 @@ CritCheck:
     ORA btl_defender_ailments    ; add to existing ailments
     STA btl_defender_ailments    
     LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
-    CMP #$05                     ; is it still the black mage's turn?
-    BEQ :+                       ; if yes, go print Confused
-    CMP #$0B                     ; is it still the black wizard's turn?
-    BNE :++                      ; if not, go print Paralyzed, since it must be the bbelts's turn
-  :    LDA #BTLMSG_CONFUSED      
-       STA MMC5_tmp 
-       RTS
-
-  : LDA #BTLMSG_PARALYZED
-    STA MMC5_tmp
 
    @noailment:
     RTS
@@ -4822,10 +4817,6 @@ lutClassBatSpriteID:
   .BYTE $00,$06,$0C,$12,$18,$1E    ; unpromoted classes
   .BYTE $24,$2A,$30,$36,$3C,$42    ; promoted classes
 
-lutClassBatSprPalette:
-  .BYTE $01,$00,$00,$01,$01,$00    ; unpromoted classes
-  .BYTE $01,$01,$00,$01,$01,$00    ; promoted classes
-
  SaveScreenCharSprite_LUT:
   .byte $56,$27
   .byte $A6,$27
@@ -5318,7 +5309,7 @@ PlayerAttackPlayer_PhysicalZ:
     
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
-    AND #AIL_DEAD | AIL_STONE
+    AND #AIL_DEAD | AIL_STOP
     BNE @Loop
     
     LDA btl_defender_index       ; record the defender index
@@ -5341,7 +5332,7 @@ CoverStuff:
     JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
-    AND #AIL_DEAD | AIL_STONE | AIL_SLEEP
+    AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
     BNE @NoCover                   ; the knight is immobile and can't help!
     LDA (CharStatsPointer), Y
     AND #AIL_STUN
@@ -5846,7 +5837,7 @@ Saved:
 .byte $9C,$8A,$9F,$8E,$8D,$C4,$00
 
 AreYouSure:
-.byte $7F,$F2,$7F,$F2,$FA,$FF,$8A,$9B,$8E,$FF,$A2,$98,$9E,$FF,$9C,$9E,$9B,$8E,$C5,$FB,$F2,$7F,$F2,$7F,$00
+.byte $7F,$F5,$7F,$F5,$FA,$FF,$8A,$9B,$8E,$FF,$A2,$98,$9E,$FF,$9C,$9E,$9B,$8E,$C5,$FB,$F5,$7F,$F5,$7F,$00
 
 Deleted:
 .byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00

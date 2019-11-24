@@ -266,7 +266,7 @@ lut_DialoguePtrTbl:
 .WORD ALTARFIRE         ; F4 ; The Altar of the Fire.
 .WORD ALTARWATER        ; F5 ; The Altar of the Water.
 .WORD ALTARDWIND        ; F6 ; The Altar of the Wind.
-.WORD OXYALESPRINGE     ; F7 ; At the bottom of the spring, something is flowing.
+.WORD OXYALESPRING      ; F7 ; At the bottom of the spring, something is flowing.
 .WORD TIAMATSOMETHING   ; F8 ; TIAMAT is the FIEND of the WIND....
 .WORD SKYWINDOW         ; F9 ; From this window one can see the entire world. The Four Forces are flowing together, into the center of the Four Altars. Into the Temple of FIENDS.
 .WORD EMPTY             ; FA ; Nothing here.
@@ -370,7 +370,7 @@ ALTARWATER:
 ALTARDWIND: 
 .byte $9D,$AB,$1A,$8A,$AF,$B7,$2F,$36,$A9,$1B,$AB,$1A,$A0,$1F,$A7,$C0,$00
 
-OXYALESPRINGE: 
+OXYALESPRING: 
 .byte $8A,$B7,$1B,$AB,$1A,$A5,$B2,$B7,$28,$B0,$36,$A9,$1B,$1D,$05,$B6,$B3,$B5,$1F,$AA,$BF,$24,$B2,$34,$1C,$1F,$AA,$2D,$B6,$05,$A9,$AF,$46,$1F,$AA,$C0,$00
 
 TIAMATSOMETHING: 
