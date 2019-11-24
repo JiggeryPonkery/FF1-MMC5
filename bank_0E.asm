@@ -8069,6 +8069,10 @@ EnterStatusMenu:
    @Loop: 
     JSR ClearOAM
     LDX CharacterIndexBackup 
+    LDA ch_ailments, X
+    AND #AIL_DEAD | AIL_STOP
+    BNE @NormalPose
+    
     LDA playtimer+1         ; every other second
     AND #01
     BEQ @NormalPose

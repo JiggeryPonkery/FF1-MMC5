@@ -11237,10 +11237,15 @@ DrawOBSprite:
     BNE @Standing
     
   @Stoned: 
-    LDA #$03              ; otherwise (ailment byte = 2), character is stoned
-    STA tmp+1             ;  change palette byte to 3 (stoned palette)
-    ;; JIGS - how could they crouch once stoned? Standing statues are more interesting.  
-  
+    ;LDA #$03              ; otherwise (ailment byte = 2), character is stoned
+    ;STA tmp+1             ;  change palette byte to 3 (stoned palette)
+   
+    LDA tmp+1
+    ORA #$40
+    STA tmp+1
+    LDA #$14              
+    BNE @Standing
+   
   @SwapReady:
     LDA #$0E              ; draw cheering  
 
@@ -11270,12 +11275,29 @@ DrawOBSprite:
 DrawSimple2x3Sprite:
     LDX sprindex       ; put sprite index in X
 
+    LDA tmp+1
+    PHA
+    AND #$40
+    BEQ @Normal
+    
+   @Reversed:
+    LDA #$F8
+    STA tmp+1
+    LDA spr_x
+    CLC
+    ADC #08
+    BNE :+
+    
+   @Normal: 
+    LDA #$08
+    STA tmp+1
+    
     LDA spr_x          ; get X coord
-    STA oam+$03, X     ;  write to UL, ML, and DL sprites
+  : STA oam+$03, X     ;  write to UL, ML, and DL sprites
     STA oam+$0B, X
     STA oam+$13, X
     CLC
-    ADC #$08           ; add 8 to X coord
+    ADC tmp+1; #$08           ; add 8 to X coord
     STA oam+$07, X     ;  write to UR, MR, and DR sprites
     STA oam+$0F, X
     STA oam+$17, X
@@ -11310,7 +11332,8 @@ DrawSimple2x3Sprite:
     ADC #$01
     STA oam+$15, X     ;  then DR
 
-    LDA tmp+1          ; get attribute byte
+    ;LDA tmp+1          ; get attribute byte
+    PLA
     STA oam+$02, X     ; and draw it to all 6 sprites
     STA oam+$06, X
     STA oam+$0A, X

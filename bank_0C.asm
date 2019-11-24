@@ -2344,7 +2344,7 @@ DrawCharacter:
     
   @DrawNotDead:
     ; Not dead, but see if they're stone
-    LDA btl_drawflagsB  ; Again, not sure exactly what this holds, but low 4 bits seem to indicate
+    LDA btl_drawflagsB  ; low 4 bits indicate
     AND #$0F            ;  which characters are stoned
     AND DrawCharTmp
     BEQ @DrawPraying     ; if not stoned, just draw them
@@ -2352,8 +2352,20 @@ DrawCharacter:
     ; otherwise, if they're stone
    ; LDA #$03
    ; STA btl8x8spr_a             ; overwrite their attribute value to use the stone palette
-    LDA #CHARPOSE_CHEER        
-    BNE @ForcePose
+   
+    LDA btl8x8spr_a
+    ORA #$40
+    STA btl8x8spr_a
+
+    LDA btl8x8spr_x             
+    CLC
+    ADC #$08
+    STA btl8x8spr_x
+    STA btl8x8spr_x+1
+
+    LDA #CHARPOSE_CROUCH
+    STA btl_chardraw_pose, Y 
+    BNE @DrawChar
     
   @DrawPraying:
     LDA btl_drawflags_tmp3
@@ -2444,10 +2456,19 @@ DrawCharacter_DeadRow:
 DrawCharacter_NextTile:
     INC btl8x8spr_i     ; Increment the oam index
     INC btl8x8spr_t     ; increment the tile index to draw
-    LDA btl8x8spr_x     ; add 8 to our drawing X position
+    
+    LDA btl8x8spr_a
+    AND #$40
+    BEQ :+
+        LDA btl8x8spr_x
+        SEC
+        SBC #$08
+        BNE :++
+    
+  : LDA btl8x8spr_x     ; add 8 to our drawing X position
     CLC
     ADC #$08
-    STA btl8x8spr_x
+  : STA btl8x8spr_x
     JMP BattleDraw8x8Sprite ; draw & exit
 
     
