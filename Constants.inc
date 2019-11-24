@@ -310,7 +310,7 @@ BTLMSG_HIDING           = $52 ; Slipped into hiding...
 BTLMSG_CANTHIDE         = $53 ; Can't hide now!
 BTLMSG_ALREADYHIDING    = $54 ; Already hidden!
 BTLMSG_EYEDROPS         = $55 ; Sight restored!
-BTLMSG_WAKEUPBELL       = $56 ; The bell rings loudly...
+BTLMSG_ALARMCLOCK       = $56 ; The bell rings loudly...
 BTLMSG_STEALING         = $57 ; Stealing...
 BTLMSG_STOLE            = $58 ; Stole_
 BTLMSG_SCROLL           = $59 ; _scroll
@@ -325,6 +325,7 @@ BTLMSG_ATTACKBLOCKED    = $61 ; _covered the attack!
 BTLMSG_COUNTER          = $62 ; Counter attack!
 BTLMSG_PRAYING          = $63 ; Praying...
 BTLMSG_FOCUSING         = $64 ; Focusing...
+BTLMSG_TIMEFLOW         = $64 ; Time begins to flow
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
@@ -597,14 +598,14 @@ X_HEAL         = $02
 ETHER          = $03
 ELIXIR         = $04
 PURE           = $05
-SOFT           = $06
+FLOWCLOCK      = $06
 PHOENIXDOWN    = $07
 TENT           = $08
 CABIN          = $09
 HOUSE          = $0A
 EYEDROPS       = $0B
 SMOKEBOMB      = $0C
-WAKEUPBELL     = $0D
+ALARMCLOCK     = $0D
 
 SMOKEBOMB_EFFECT  = $32 ; 50 steps
 BTL_HEAL_POTENCY  = $10 ; 16
@@ -907,7 +908,8 @@ MG_START = $30
   MG_BANE = MG_START + $25
   MG_WARP = MG_START + $26
   MG_SLO2 = MG_START + $27
-  MG_SOFT = MG_START + $28
+  ;MG_SOFT = MG_START + $28
+  MG_FLOW = MG_START + $28
   MG_EXIT = MG_START + $29
   MG_FOG2 = MG_START + $2A
   MG_INV2 = MG_START + $2B

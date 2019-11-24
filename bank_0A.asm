@@ -503,14 +503,14 @@ lut_ItemNamePtrTbl:
 .word NAME_ETHER        ; 03
 .word NAME_ELIXIR       ; 04
 .word NAME_PURE         ; 05
-.word NAME_SOFT         ; 06
+.word NAME_FLOWINGCLOCK ; 06
 .word NAME_P_DOWN       ; 07
 .word NAME_TENT         ; 08 
 .word NAME_CABIN        ; 09 
 .word NAME_HOUSE        ; 0A 
 .word NAME_EYEDROPS     ; 0B
 .word NAME_SMOKEBOMB    ; 0C
-.word NAME_WAKEUPBELL   ; 0D
+.word NAME_ALARMCLOCK   ; 0D
 .word BLANK             ; 0E
 .word BLANK             ; 0F
 
@@ -868,7 +868,7 @@ NAME_ELIXIR:
 .byte $8E,$AF,$AC,$BB,$AC,$B5,$FF,$E1,$00 ; Elixir_&
 NAME_PURE:
 .byte $99,$B8,$B5,$A8,$FF,$FF,$FF,$E1,$00 ; Pure___&
-NAME_SOFT:
+NAME_FLOWINGCLOCK:
 ;.byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
 .byte $8F,$AF,$B2,$BA,$AC,$B1,$AA,$EA,$00 ; Flowing(clock)
 NAME_P_DOWN:
@@ -883,7 +883,7 @@ NAME_EYEDROPS:
 .byte $8E,$BC,$A8,$A7,$B5,$B2,$B3,$B6,$00 ; Eyedrops
 NAME_SMOKEBOMB:
 .byte $9C,$B0,$B2,$AE,$A8,$FF,$FF,$E3,$00 ; Smoke__Q
-NAME_WAKEUPBELL:
+NAME_ALARMCLOCK:
 .byte $8A,$AF,$A4,$B5,$B0,$FF,$FF,$EA,$00 ; Alarm__(clock)
 
 
@@ -1711,6 +1711,7 @@ data_BattleMessages:
 .word BTL_MESSAGE98
 .word BTL_MESSAGE99
 .word BTL_MESSAGE100
+.word BTL_MESSAGE101
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1914,8 +1915,8 @@ BTL_MESSAGE99:
 .byte $99,$B5,$A4,$BC,$1F,$AA,$69,$00 ; Praying...
 BTL_MESSAGE100:
 .byte $8F,$B2,$A6,$B8,$B6,$1F,$AA,$69,$00 ; Focusing...
-
-
+BTL_MESSAGE101:
+.byte $9D,$AC,$34,$31,$A8,$AA,$1F,$1E,$28,$43,$AF,$46,$00 ; Time begins to flow
 
 
 
@@ -1946,14 +1947,14 @@ lut_ItemPrices:
 .word 5000    ; 03 ETHER
 .word 50000   ; 04 ELIXIR
 .word 0075    ; 05 PURE
-.word 0800    ; 06 SOFT
+.word 0800    ; 06 FLOWINGBELL
 .word 20000   ; 07 PHOENIX DOWN
 .word 0075    ; 08 TENT
 .word 0250    ; 09 CABIN
 .word 3000    ; 0A HOUSE
 .word 0200    ; 0B EYEDROP
 .word 2000    ; 0C SMOKEBOMB
-.word 0750    ; 0D WAKEUP BELL
+.word 0750    ; 0D ALARMCLOCK
 .word 0000    ; 0F nothing
 .word 0000    ; 0F nothing 
 

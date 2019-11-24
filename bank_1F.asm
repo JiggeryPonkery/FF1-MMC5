@@ -13496,8 +13496,8 @@ DrawBattleItemBox:
 ;BattleItems_LUT: ; in the order to display
 ;.byte HEAL, PURE
 ;.byte X_HEAL, EYEDROPS
-;.byte ETHER, WAKEUPBELL
-;.byte ELIXIR, SOFT
+;.byte ETHER, ALARMCLOCK
+;.byte ELIXIR, FLOWCLOCK
 ;.byte PHOENIXDOWN, SMOKEBOMB  
 
 DrawItemBox_L:

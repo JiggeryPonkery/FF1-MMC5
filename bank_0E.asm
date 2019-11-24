@@ -391,7 +391,7 @@ ElflandWeapon:
 ElflandArmor:                                
 .byte ARM4+1, ARM11+1, ARM18+1, ARM26+1, ARM27+1;(Elfland) Iron Armor, Copper Bracelet, Iron Shield, Cap, Wooden Helmet
 ElflandWMagic:                                
-.byte MG_CUR2, MG_HRM2, MG_AFIR, MG_HEAL, $00 ;(Elfland) CUR2, HRM2, AFIR, HEAL
+.byte MG_CUR2, MG_HRM2, MG_AFIR, MG_REGN, $00 ;(Elfland) CUR2, HRM2, AFIR, HEAL
 ElflandBMagic:                                
 .byte MG_FIR2, MG_HOLD, MG_LIT2, MG_LOK2, $00 ;(Elfland) FIR2, HOLD, LIT2, LOK2
 ElflandWMagic2:                               
@@ -403,13 +403,13 @@ ElflandTemple:
 ElflandInn:                                   
 ;.byte $64,$00                                 ;(Elfland) 100g Inn
 ElflandItem:                                  
-.byte HEAL, PURE, TENT, CABIN, SOFT           ;(Elfland) Heal, Pure, Tent, Cabin, Soft
+.byte HEAL, PURE, TENT, CABIN, FLOWCLOCK       ;(Elfland) Heal, Pure, Tent, Cabin, Soft
 MelmondWeapon:                                
 .byte WEP11+1, WEP12+1, WEP13+1, WEP15+1, $00 ;(Melmond) Iron Staff, Sabre, Long Sword, Falchion
 MelmondArmor:                                
 .byte ARM5+1, ARM12+1, ARM28+1, ARM34+1, ARM35+1;(Melmond) Steel Armor, Silver Bracelet, Iron Helmet, Copper Gauntlet, Iron Gauntlet
 MelmondWMagic:                                
-.byte MG_CUR3, MG_LIFE, MG_HRM3, MG_HEL2, $00 ;(Melmond) CUR3, LIFE, HRM3, HEL2
+.byte MG_CUR3, MG_LIFE, MG_HRM3, MG_RGN2, $00 ;(Melmond) CUR3, LIFE, HRM3, HEL2
 MelmondBMagic:                                
 .byte MG_FIR3, MG_BANE, MG_WARP, MG_SLO2, $00 ;(Melmond) FIR3, BANE, WARP, SLO2
 MelmondInn:                                   
@@ -419,7 +419,7 @@ LakeWeapon:
 LakeArmor:                                   
 .byte ARM6+1, ARM19+1, ARM24+1, ARM29+1, ARM36+1 ;(Cresent Lake) Silver Armor, Silver Shield, Buckler, Silver Helmet, Silver Gauntlet
 LakeWMagic:                                   
-.byte MG_SOFT, MG_EXIT, MG_FOG2, MG_INV2, $00 ;(Cresent Lake) SOFT, EXIT, FOG2, INV2
+.byte MG_FLOW, MG_EXIT, MG_FOG2, MG_INV2, $00 ;(Cresent Lake) SOFT, EXIT, FOG2, INV2
 LakeBMagic:                                   
 .byte MG_LIT3, MG_RUB, MG_QAKE, MG_STUN, $00  ;(Cresent Lake) LIT3, RUB, QAKE, STUN
 LakeTemple:                                   
@@ -427,7 +427,7 @@ LakeTemple:
 LakeInn:                                      
 ;.byte $C8,$00                                 ;(Cresent Lake) 200g Inn
 LakeItem:                                     
-.byte HEAL, PURE, TENT, CABIN, WAKEUPBELL     ;(Cresent Lake) Heal, Pure, Tent, Cabin
+.byte HEAL, PURE, TENT, CABIN, ALARMCLOCK     ;(Cresent Lake) Heal, Pure, Tent, Cabin
 GaiaWeapon:                                   
 .byte WEP35+1, $00                            ;(Gaia) CatClaw
 GaiaArmor:                                   
@@ -447,7 +447,7 @@ GaiaInn:
 GaiaItem:                                     
 .byte CABIN, HOUSE, HEAL, PURE, PHOENIXDOWN   ;(Gaia) Cabin, House, Heal, Pure
 OnracWMagic:                                  
-.byte MG_ARUB, MG_HEL3, $00                   ;(Onrac) ARUB, HEL3
+.byte MG_ARUB, MG_RGN3, $00                   ;(Onrac) ARUB, HEL3
 OnracBMagic:                                  
 .byte MG_SABR, MG_BLND, $00                   ;(Onrac) SABR, BLND
 OnracTemple:                                  
@@ -455,7 +455,7 @@ OnracTemple:
 OnracInn:                                     
 ;.byte $2C,$01,$00                             ;(Onrac) 300g Inn
 OnracItem:                                    
-.byte TENT, CABIN, HOUSE, PURE, SOFT          ;(Onrac) Tent, Cabin, House, Pure, Soft
+.byte TENT, CABIN, HOUSE, PURE, FLOWCLOCK      ;(Onrac) Tent, Cabin, House, Pure, Soft
 CaravanShop:                                  
 .byte X_HEAL, ETHER, ELIXIR, SMOKEBOMB, BOTTLE;(Caravan) Bottle
 LeifenWMagic:                                 
@@ -528,9 +528,9 @@ lut_MenuText:
 .word M_ItemEther             ; 2D ; 45
 .word M_ItemElixir            ; 2E ; 46 
 .word M_ItemPure              ; 2F ; 47 ; PURE magic
-.word M_ItemSoft              ; 30 ; 48 ; SOFT magic
+.word M_ItemFlowClock         ; 30 ; 48 ; SOFT magic
 .word M_ItemPhoenixDown       ; 31 ; 49 ; LIFE magic
-.word M_ItemHorn              ; 32 ; 50
+.word M_ItemAlarmClock        ; 32 ; 50
 .word M_ItemEyedrop           ; 33 ; 51
 .word M_ItemSmokebomb         ; 34 ; 52
 .word M_ItemUseTentCabin      ; 35 ; 53 ; HEAL magic
@@ -795,15 +795,15 @@ M_ItemPure:
 M_PureMagic:
 .byte $9E,$3E,$1B,$2E,$A6,$55,$1A,$B3,$B2,$30,$3C,$C0,$00 ; Use to cure poison.[END]
 
-M_ItemSoft:  
-M_SoftMagic:
-.byte $9E,$3E,$1B,$2E,$A6,$55,$1A,$37,$3C,$A8,$C0,$00 ; Use to cure stone.[END]
+M_ItemFlowClock:  
+M_FlowMagic:
+.byte $9E,$3E,$1B,$2E,$23,$37,$35,$1A,$1C,$1A,$A9,$AF,$46,$05,$36,$54,$57,$34,$C0,$00 ; Use to restore the[ENTER]flow of time.[END]
 
 M_ItemPhoenixDown:
 M_LifeMagic:
 .byte $9E,$3E,$1B,$2E,$23,$B9,$AC,$32,$1B,$1D,$24,$B3,$AC,$5C,$B7,$C0,$00 ; Use to revive the spirit.[END]
 
-M_ItemHorn:
+M_ItemAlarmClock:
 .byte $9E,$3E,$1B,$2E,$4D,$B8,$3E,$1B,$1D,$4F,$2F,$B7,$BC,$05
 .byte $A9,$4D,$B0,$24,$45,$A8,$B3,$2D,$29,$A5,$39,$B7,$45,$C0,$00 ; Use to rouse the party[ENTER]from sleep in battle.[END]
 
@@ -5877,9 +5877,9 @@ MagicMenu_Loop:
 :   CMP #MG_WARP
     BNE :+
       JMP UseMagic_WARP
-:   CMP #MG_SOFT
+:   CMP #MG_FLOW
     BNE :+
-      JMP UseMagic_SOFT
+      JMP UseMagic_FLOW
 :   CMP #MG_EXIT
     BNE :+
       JMP UseMagic_EXIT
@@ -6082,7 +6082,7 @@ UseMagic_LIFE:
     LDA #1
     BNE UseMagicCureAilment
 
-UseMagic_SOFT:
+UseMagic_FLOW:
     LDA #48
     PHA
     LDA #2
@@ -6879,14 +6879,14 @@ ItemMenu_Loop:
 .word UseItem_Ether       ; Ether
 .word UseItem_Elixir      ; Elixir
 .word UseItem_Pure        ; Pure
-.word UseItem_Soft        ; Soft
+.word Useitem_FlowClock   ; Flowing Clock
 .word UseItem_PhoenixDown ; Phoenix Down
 .word UseItem_Tent        ; Tent
 .word UseItem_Cabin       ; Cabin
 .word UseItem_House       ; House
 .word UseItem_Eyedrop     ; Eyedrops
 .word UseItem_Smokebomb   ; Smokebomb
-.word UseItem_Bell        ; Wakeup Horn
+.word Useitem_AlarmClock  ; Alarm clock
 .word UseItem_Bad         ; unused
 .word UseItem_Bad         ; unused
 
@@ -7439,7 +7439,7 @@ UseItem_Pure:
     PHA
     BNE :+
 
-UseItem_Soft:
+Useitem_FlowClock:
     LDA #AIL_STOP
     STA hp_recovery
     LDA #48 
@@ -7504,11 +7504,11 @@ UseAilmentCuringItem:
     JMP @Loop                  ;  and keep looping
 
 UseAilmentCuringItemLUT:
-    .byte 0, PHOENIXDOWN, SOFT, 0, PURE, 0, 0, 0, EYEDROPS
+    .byte 0, PHOENIXDOWN, FLOWCLOCK, 0, PURE, 0, 0, 0, EYEDROPS
     ;     0, 1,         , 2   , 3, 4,  , 5, 6, 7, 8
 
 
-UseItem_Bell:
+Useitem_AlarmClock:
     LDA #50
     JSR DrawItemDescBox       
     JSR MenuWaitForBtn_SFX

@@ -1631,8 +1631,8 @@ BattleSubMenu_Item:
     ORA item_down
     ORA item_pure
     ORA item_eyedrops
-    ORA item_bell
-    ORA item_soft
+    ORA item_alarm
+    ORA item_clock
     ORA item_smokebomb
     BNE BattleSubMenu_Item_NoUndraw ; if there are no potions...
       JSR DoNothingMessageBox       ; show the 'Nothing' box
@@ -1659,7 +1659,7 @@ BattleSubMenu_Item_NoUndraw:
     STA btlcmd_spellindex       ; now holds item ID
     CMP #SMOKEBOMB
     BEQ @NoTarget
-    CMP #WAKEUPBELL             ; it doesn't matter what gets saved as the target 
+    CMP #ALARMCLOCK             ; it doesn't matter what gets saved as the target 
     BNE @GetTarget              ; since it will never be used by these items
     
        @NoTarget:
@@ -8984,7 +8984,7 @@ UseItem_JumpTable:
     .word UseItem_Ether         ; 3
     .word UseItem_Elixir        ; 4
     .word UseItem_Pure          ; 5
-    .word UseItem_Soft          ; 6
+    .word Useitem_FlowClock     ; 6
     .word UseItem_PhoenixDown   ; 7
     NOP                         
     NOP                         ; 8 
@@ -8994,9 +8994,9 @@ UseItem_JumpTable:
     NOP                         ; 10
     .word UseItem_Eyedrops      ; 11 ; B
     .word UseItem_Smokebomb     ; 12 ; C
-    .word UseItem_WakeupBell    ; 13 ; D 
+    .word UseItem_AlarmClock    ; 13 ; D 
 
-UseItem_WakeupBell: 
+UseItem_AlarmClock: 
     LDX #0
    @Loop: 
     LDA ch_ailments, X
@@ -9007,11 +9007,11 @@ UseItem_WakeupBell:
     ADC #$40
     BNE @Loop
 
-    LDX #WAKEUPBELL
+    LDX #ALARMCLOCK
     DEC items, X           ; remove wakeup bell from inventory        
     LDA #3
     JSR PlayBattleSFX      ; play bell SFX
-    LDA #BTLMSG_WAKEUPBELL ; print "The bell rings loudly.."
+    LDA #BTLMSG_ALARMCLOCK ; print "The bell rings loudly.."
     JMP UseItem_End
 
 UseItem_Heal:  
@@ -9095,7 +9095,7 @@ UseItem_Pure:
     LDX #PURE
     JMP UseItem_AilmentCured
     
-UseItem_Soft:
+Useitem_FlowClock:
     JSR BtlMag_LoadPlayerDefenderStats_NoSFX
     LDA #AIL_STOP
     STA btlmag_effectivity
@@ -9110,7 +9110,7 @@ UseItem_Soft:
         LDA #25                 ; otherwise, give them 25 HP
         STA btlmag_defender_hp
     
-  : LDX #SOFT
+  : LDX #FLOWCLOCK
 UseItem_AilmentCured:
     DEC items, X                       ; remove item from inventory
     JSR UseItem_CommonCode
@@ -11027,7 +11027,7 @@ BtlMag_HandleAilmentChanges:
     BNE :+                       ; if not, just get the message
        LDA btl_defender          ; if stone, check defender
        BPL :+                    ; if its an enemy, print normal message
-        LDA #BTLMSG_STOPPED      ; if its a player, swap that message for "Stopped"
+        LDA #BTLMSG_TIMESTOPPED  ; if its a player, swap that message for "Time stopped"
         BNE @PrintMessageAndNext
  
   : LDA AilmentAdded_MessageLut-1, X ; -1 because X is +1
@@ -11105,7 +11105,7 @@ AilmentCured_MessageLut:
 .BYTE BTLMSG_PARALYZEDCURED ; stun
 .BYTE BTLMSG_SIGHTRECOVERED ; blind
 .BYTE BTLMSG_NEUTRALIZED    ; poison
-.BYTE BTLMSG_CURED          ; stone
+.BYTE BTLMSG_TIMEFLOW       ; stop
 .BYTE BTLMSG_LIFE           ; cure message for death
     
 ;; JIGS - bugged, need to confirm messages are picked right    
@@ -12236,7 +12236,7 @@ data_BattleSoundEffects:
   .WORD @sfx_Magic
   .WORD @sfx_EnemyAttack
   .WORD @sfx_PlayerAttack
-  .WORD @sfx_WakeupBell
+  .WORD @sfx_AlarmClock
   
 @sfx_Magic:
   .BYTE $3C, $01, $01
@@ -12259,7 +12259,7 @@ data_BattleSoundEffects:
   .BYTE $00, $00, $00, $00, $01,     $2F, $07, $04
   .BYTE $00, $00, $00, $00, $01,     $00, $00, $01
 
-@sfx_WakeupBell:
+@sfx_AlarmClock:
   .BYTE $90, $02, $01
   
   .BYTE $A0, $00, $50, $08, $10,     $00, $00, $01 
