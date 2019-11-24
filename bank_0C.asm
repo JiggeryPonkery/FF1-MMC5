@@ -5800,7 +5800,7 @@ FocusSkill:
     PLA
     ASL A
     TAY
-    LDA #$F4; E0
+    LDA #$E0
     STA btlcmd_magicgfx, Y
     LDA #$2F
     STA btlcmd_magicgfx+1, Y
