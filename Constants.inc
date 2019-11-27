@@ -60,17 +60,42 @@ ENEMYAI_COUNTER   = $01
 ENEMYAI_REFLECT   = $80
 
 
+ENEMYAI_MAGICSTART   = $02
+ENEMYAI_SPECIALSTART = $0B
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;  elements
-ELEMENT_TIME      = $01
-ELEMENT_STUN      = $02
-ELEMENT_POISON    = $04
-ELEMENT_DEATH     = $08
+ELEMENT_DARK      = $01
+ELEMENT_HOLY      = $02
+ELEMENT_WIND      = $04
+ELEMENT_WATER     = $08
 ELEMENT_FIRE      = $10
 ELEMENT_ICE       = $20
 ELEMENT_LIGHTNING = $40
 ELEMENT_EARTH     = $80
+
+;;;;;;;;;;;;;;;;;;
+;;  ailments
+AIL_DEAD            = $01
+AIL_STOP            = $02
+AIL_POISON          = $04
+AIL_DARK            = $08
+AIL_STUN            = $10
+AIL_SLEEP           = $20
+AIL_MUTE            = $40
+AIL_CONF            = $80
+
+
+;;;;;;;;;;;;;;;;;;
+;;  battle states ; good ailments!
+STATE_REGENLOW     = $10
+STATE_REGENMIDDLE  = $20
+STATE_REGENHIGH    = $40
+STATE_REGENALL     = $70 ; all the above
+STATE_REFLECT      = $80 
+STATE_REGENERATING = $07
+;; low 3 bits are used for how many turns left to regenerate
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -100,7 +125,7 @@ ENROMSTAT_EXP        = $00       ; 2 bytes
 ENROMSTAT_GP         = $02       ; 2 bytes
 ENROMSTAT_HPMAX      = $04       ; 2 bytes
 ENROMSTAT_MORALE     = $06
-ENROMSTAT_AI         = $07
+ENROMSTAT_STATRESIST = $07
 ENROMSTAT_EVADE      = $08
 ENROMSTAT_ABSORB     = $09
 ENROMSTAT_NUMHITS    = $0A
@@ -325,7 +350,11 @@ BTLMSG_ATTACKBLOCKED    = $61 ; _covered the attack!
 BTLMSG_COUNTER          = $62 ; Counter attack!
 BTLMSG_PRAYING          = $63 ; Praying...
 BTLMSG_FOCUSING         = $64 ; Focusing...
-BTLMSG_TIMEFLOW         = $64 ; Time begins to flow
+BTLMSG_TIMEFLOW         = $65 ; Time begins to flow
+BTLMSG_ABSORBEDSPELL    = $66 ; Absorbed the spell!
+BTLMSG_RUNICFAILED      = $67 ; Overwhelmed by_
+BTLMSG_RUNIC            = $68 ; Runic
+BTLMSG_NOWEAPON         = $69 ; No weapon equipped! 
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs
@@ -367,27 +396,7 @@ NORMTELE_SAVEDPRINCESS = $3F
 
 WPNID_XCALBUR      = $26 ; originally 27, but this comes pre-DEC
 
-;;;;;;;;;;;;;;;;;;
-;;  ailments
-AIL_DEAD            = $01
-AIL_STOP            = $02
-AIL_POISON          = $04
-AIL_DARK            = $08
-AIL_STUN            = $10
-AIL_SLEEP           = $20
-AIL_MUTE            = $40
-AIL_CONF            = $80
 
-
-;;;;;;;;;;;;;;;;;;
-;;  battle states ; good ailments!
-STATE_REGENLOW     = $10
-STATE_REGENMIDDLE  = $20
-STATE_REGENHIGH    = $40
-STATE_REGENALL     = $70 ; all the above
-STATE_REFLECT      = $80 
-STATE_REGENERATING = $07
-;; low 3 bits are used for how many turns left to regenerate
 
 ;;;;;;;;;;;;;;;;;;
 ;;  map object IDs
@@ -939,18 +948,18 @@ MG_START = $30
   MG_HEL2     = BATTLESPELLS + $1
   MG_HEL3     = BATTLESPELLS + $2
   MG_PRAYER   = BATTLESPELLS + $3
-  MG_COUNTER  = BATTLESPELLS + $4
-  MG_REFLECT  = BATTLESPELLS + $5
-  MG_REFLECT2 = BATTLESPELLS + $6
-  MG_UNUSED1  = BATTLESPELLS + $7
-  MG_UNUSED2  = BATTLESPELLS + $8
-  MG_UNUSED3  = BATTLESPELLS + $9
-  MG_UNUSED4  = BATTLESPELLS + $A
-  MG_UNUSED5  = BATTLESPELLS + $B
-  MG_UNUSED6  = BATTLESPELLS + $C
-  MG_UNUSED7  = BATTLESPELLS + $D
-  MG_UNUSED8  = BATTLESPELLS + $E
-  MG_UNUSED9  = BATTLESPELLS + $F
+  MG_REFLECT  = BATTLESPELLS + $4
+  MG_REFLECT2 = BATTLESPELLS + $5
+  MG_UNUSED1  = BATTLESPELLS + $6
+  MG_UNUSED2  = BATTLESPELLS + $7
+  MG_UNUSED3  = BATTLESPELLS + $8
+  MG_UNUSED4  = BATTLESPELLS + $9
+  MG_UNUSED5  = BATTLESPELLS + $A
+  MG_UNUSED6  = BATTLESPELLS + $B
+  MG_UNUSED7  = BATTLESPELLS + $C
+  MG_UNUSED8  = BATTLESPELLS + $D
+  MG_UNUSED9  = BATTLESPELLS + $E
+  MG_COUNTER  = BATTLESPELLS + $F
   
 BATTLESPELLS_END   = BATTLESPELLS + $F  
 BATTLESPELLS_START = BATTLESPELLS + $5C ; offset to add for battle spell names for printing
@@ -1039,5 +1048,49 @@ lut_SMPtrTbl       = $8000   ; BANK_STANDARDMAPS
 lut_BatSprCHR      = $9000   ; BANK_BTLCHR -- page
 lut_BatObjCHR      = $A800   ; BANK_BTLCHR -- page
 ;lut_DialoguePtrTbl = $8000   ; BANK_DIALOGUE
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; USER SET THINGS
+;;
+;;
+
+FAST_HITCAP              = $03 ; How many times the Fast spell can boost the hit multiplyer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

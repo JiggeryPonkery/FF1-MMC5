@@ -49,6 +49,9 @@
 .import RestoreMapMusic
 .import JIGS_RefreshAttributes
 .import ScanEnemyString
+.import LoadPlayerDefenderStats_ForEnemyAttack
+.import SkillText_RMage
+.import ShiftLeft4
 
 BANK_THIS = $0C
 
@@ -529,54 +532,54 @@ lut_EquipmentSpells:
 ;;  bytes   2-9 = magic spells available.  Each entry 0-based.  Or 'FF' to mark end of spells
 ;;  bytes $B-$E = special attacks (0 based), or 'FF' to mark end of attacks
 
-lut_EnemyAi:
-  
-  ;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ; 00 ; Frost Wolf
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ; 01 ; Agama
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ; 02 ; Sauria
-.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ; 03 ; OddEYE
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ; 04 ; BigEYE
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ; 05 ; Cerberus
-.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 06 ; WzOgre
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ; 07 ; Sand Worm
-.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ; 08 ; EYE
-.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ; 09 ; PHANTOM
-.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 0A ; Mancat
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ; 0B ; Vampire
-.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ; 0C ; WzVamp
-.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 0D ; Red Gargoyle
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ; 0E ; Frost Dragon
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ; 0F ; Red Dragon
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ; 10 ; Perelist
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ; 11 ; Red Hydra
-.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ; 12 ; Naga
-.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ; 13 ; Grey Naga
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ; 14 ; Chimera
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ; 15 ; Jimera
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ; 16 ; Sorcerer
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ; 17 ; Gas Dragon
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ; 18 ; Blue Dragon
-.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 19 ; Mug Golem
-.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ; 1A ; Rock Golem
-.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ; 1B ; Iron Golem
-.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 1C ; Badman
-.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ; 1D ; Mage
-.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ; 1E ; Fighter
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ; 1F ; Nitemare
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ; 20 ; WarMech
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ; 21 ; Manticor
-.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 22 ; Lich
-.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ; 23 ; Lich Reprise
-.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ; 24 ; Kary
-.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ; 25 ; Kary Reprise
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ; 26 ; Kraken
-.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ; 27 ; Kraken Reprise
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ; 28 ; Tiamat
-.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ; 29 ; Tiamat Reprise
-.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ; 2A ; Chaos
-.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 2B ; Astos
-
+;lut_EnemyAi:
+;  
+;  ;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ; 00 ; Frost Wolf
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ; 01 ; Agama
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ; 02 ; Sauria
+;.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ; 03 ; OddEYE
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ; 04 ; BigEYE
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ; 05 ; Cerberus
+;.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 06 ; WzOgre
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ; 07 ; Sand Worm
+;.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ; 08 ; EYE
+;.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ; 09 ; PHANTOM
+;.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 0A ; Mancat
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ; 0B ; Vampire
+;.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ; 0C ; WzVamp
+;.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 0D ; Red Gargoyle
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ; 0E ; Frost Dragon
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ; 0F ; Red Dragon
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ; 10 ; Perelist
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ; 11 ; Red Hydra
+;.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ; 12 ; Naga
+;.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ; 13 ; Grey Naga
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ; 14 ; Chimera
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ; 15 ; Jimera
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ; 16 ; Sorcerer
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ; 17 ; Gas Dragon
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ; 18 ; Blue Dragon
+;.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 19 ; Mug Golem
+;.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ; 1A ; Rock Golem
+;.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ; 1B ; Iron Golem
+;.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; 1C ; Badman
+;.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ; 1D ; Mage
+;.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ; 1E ; Fighter
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ; 1F ; Nitemare
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ; 20 ; WarMech
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ; 21 ; Manticor
+;.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 22 ; Lich
+;.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ; 23 ; Lich Reprise
+;.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ; 24 ; Kary
+;.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ; 25 ; Kary Reprise
+;.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ; 26 ; Kraken
+;.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ; 27 ; Kraken Reprise
+;.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ; 28 ; Tiamat
+;.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ; 29 ; Tiamat Reprise
+;.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ; 2A ; Chaos
+;.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ; 2B ; Astos
+;
 ;; From the FF Bytes documents 
 ;  ##   Strat.      (Magics and Magic Cycle : Attack and Attack Cycle)
 ;  00 = FrWOLF 	    (: FROST)
@@ -1245,7 +1248,7 @@ BattleSubMenu_Skill:
     CMP #2
     BEQ @Parry                      ; bb/master, parry
     CMP #3
-    BEQ @Scan                       ; red mage/wiz, scan
+    BEQ @Runic ;@Scan                       ; red mage/wiz, scan
     CMP #4
     BEQ @Pray                       ; white mage/wiz, pray
     BNE @SetSkill                   ; black mage/wiz, just set the skill
@@ -1259,10 +1262,24 @@ BattleSubMenu_Skill:
     INC btl_charpray, X
     BNE @SetSkill
     
-   @Scan:                           ; and red mage/wiz does Scan
-    JSR SelectEnemyTarget           ; Pick a target
-    CMP #$02
-    BEQ @CancelSkill
+  ; @Scan:                           ; and red mage/wiz does Scan
+  ;  JSR SelectEnemyTarget           ; Pick a target
+  ;  CMP #$02
+  ;  BEQ @CancelSkill
+  ;  BNE @SetSkill
+  
+   @Runic:
+    LDX btlcmd_curchar
+    LDY #ch_righthand - ch_stats
+    LDA (CharStatsPointer), Y
+    BNE :+
+        LDA #BTLMSG_NOWEAPON
+        JSR DrawMessageBoxDelay_ThenClearIt
+        JMP CancelBattleAction_RedrawCommand
+    
+  : LDY #ch_weaponsprite - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_charrunic, X            ; weapon sprite is saved here
     BNE @SetSkill
     
    @Parry:
@@ -2197,8 +2214,12 @@ UpdateSprites_BattleFrame:
     LDA btl_drawflagsA
     AND #$20                ; only draw the weapon graphic if the appropriate draw flag is set
     BEQ @DrawMagic
+    LDA ActiveRunic             ; if ActiveRunic is 0 OR $FF, skip flashing the background
+    BEQ :+
+    BMI :+
+      JSR DoMagicFlash          ; flash the background color
     
-      LDA #$00                  ; draw in oam slot 0
+    : LDA #$00                  ; draw in oam slot 0
       STA btl8x8spr_i
       LDA btlattackspr_x        ; set X,Y position
       STA btl8x8spr_x
@@ -3490,6 +3511,7 @@ UnhideCharacter:
 UnhideCharacter_Confirmed:    
     DEC btl_charhidden, X   ; set to 0
     INC Hidden              ; set to 1
+    JSR UpdateSprites_BattleFrame
   : RTS    
     
 HideCharacter:              ; assumes X is already set
@@ -3680,12 +3702,15 @@ WalkForwardAndStrike:
     STA Hidden
     STA Woosh ;; JIGS - ... it does a magic thing!
     
+    LDA ActiveRunic                 ; if Runic, skip walking forward
+    BNE :+
+    
     LDA #-2
     STA btl_walkdirection                  ; walk the character to the left
     
     JSR CharacterWalkAnimation
     
-    LDA PlayMagicSound              ; skip SFX
+    LDA PlayMagicSound              ; skip SFX, for confusion, so that player>player magic doesn't play the healing doodle when hurting them
     BEQ :+
     LDA btlmag_magicsource
     BNE :+                          ; if zero, it's magic... so...
@@ -3708,7 +3733,7 @@ WalkForwardAndStrike:
         ; otherwise, flow into magic processing
         JMP :+
     @BFrame:
-        JSR PrepAttackSprite_BFrame     ; ... and BFrame of animation
+      JSR PrepAttackSprite_BFrame       ; ... and BFrame of animation
     : JSR UpdateSprites_TwoFrames       ; redraw sprites on screen, do 2 frames.
     
       DEC btl_walkloopctr
@@ -3727,11 +3752,14 @@ WalkForwardAndStrike:
     STA btl_chardraw_pose, X            ; reset the character's pose to 'standing'
     JSR UpdateSprites_TwoFrames         ; then update sprites and do 2 frames.
     
+    LDA ActiveRunic                     ; if Runic, skip walking backward
+    BNE :+
+    
     LDA #2
     STA btl_walkdirection
     JSR CharacterWalkAnimation          ; Do the animation to walk the character back to the right
     
-    LDA btl_animatingchar
+  : LDA btl_animatingchar
     JSR SetNaturalPose                  ; reset character back to their natural pose
   ; JSR BattleClearVariableSprite       ; clear the wep/mag sprite (again?  Pointless to do here)
   ;; JIGS - ^
@@ -3761,7 +3789,19 @@ UpdateSprites_TwoFrames:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepAttackSprite_AFrame:
-    LDA btlattackspr_wepmag                 ; see if this is a weapon or a magic graphic
+    LDA ActiveRunic
+    BEQ :+
+   @Runic_AFrame:
+    JSR __PrepAttackSprite_Weapon_AFrame 
+    LDA #CHARPOSE_CHEER
+    STA btl_chardraw_pose, X       
+    LDA btl_chardraw_y, X                  ; weapon graphic is a bit higher
+    CLC
+    ADC #$08
+    STA btlattackspr_y
+    RTS
+
+  : LDA btlattackspr_wepmag                 ; see if this is a weapon or a magic graphic
     BEQ __PrepAttackSprite_Weapon_AFrame    ; if weapon, jump ahead to weapon processing
                                             ; otherwise, flow into magic processing
     
@@ -3832,7 +3872,7 @@ __PrepAttackSprite_Weapon_AFrame:
     STA btlattackspr_t              ; And set the pose to scene 0
     LDA #$00
     STA btlattackspr_pose
-    RTS
+  : RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3844,6 +3884,9 @@ __PrepAttackSprite_Weapon_AFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepAttackSprite_BFrame:
+    LDA ActiveRunic
+    BNE :-                      ; if doing the Runic animation, no B frame
+
     LDA btlattackspr_wepmag                 ; weapon or magic?
     BEQ :+                                  ; if magic...
       JSR __PrepAttackSprite_Magic_AFrame   ; Same setup as AFrame
@@ -4163,14 +4206,14 @@ lut_InBattleCharPaletteAssign:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DoMagicFlash:
-    LDA btl_usepalette + $18 + 1    ; get the color of the magic spell from the usepalette
+    LDA btl_usepalette + $1D        ; get the color of the magic spell from the usepalette
     CMP #$20                        ; if it's white, replace it with gray so it isn't
     BNE :+                          ;   so overwhelming
       LDA #$10
   : STA BattleTmpPointer2+1         ; store in tmp  ($89 is the flash color)
   
-    LDA btl_palettes + $10          ; get the original BG color
-    STA btl_backgroundflash         ; back it up (probably unnecessary, since btl_palettes is never changed)
+    ; LDA btl_palettes + $10          ; get the original BG color
+    ; STA btl_backgroundflash         ; back it up (probably unnecessary, since btl_palettes is never changed)
     
     JSR @FrameNoPaletteChange       ; Draw a normal frame
     
@@ -4178,8 +4221,9 @@ DoMagicFlash:
     JSR @FramePaletteChange         ;  and draw 2 more frames
     JSR @FrameNoPaletteChange
     
-    LDA btl_backgroundflash         ; restore original BG color and draw another frame
+   ; LDA btl_backgroundflash         ; restore original BG color and draw another frame
   ; JMP @FramePaletteChange         ;   <- code flows into this routine
+    LDA #$0F
     
   @FramePaletteChange:
     STA btl_usepalette + $10
@@ -4312,6 +4356,8 @@ DrawDefenderBox:
     JSR SaveAXY
     LDA #$03                            ; 03 = defender format code
     STA btltmp_altmsgbuffer + 9
+    LDA #0
+    STA btltmp_attackerbuffer+1         ; always makes sure this is 0
     LDX #<(btltmp_altmsgbuffer + 9)
     LDY #>(btltmp_altmsgbuffer + 9)
     LDA #$02                            ; then print defender combat box
@@ -4371,14 +4417,18 @@ DrawAttackBox:
     LDX #<btl_attackbox_itemid
     LDY #>btl_attackbox_itemid      ; get pointer to that string in YX
 
-    LDA #$01                        ; draw the attack name in box 1
-    JMP DrawCombatBox
+    LDA ActiveRunic
+    BEQ :+
+        LDA #$03                    ; Draw Runic in box 3
+        BNE :++                  
+  : LDA #$01                        ; draw the attack name in box 1
+  : JMP DrawCombatBox
     
    @skillname_lut:
    .byte BTLMSG_NOTHING
    .byte BTLMSG_STEALING
    .byte BTLMSG_NOTHING
-   .byte BTLMSG_SCANNING
+   .byte BTLMSG_RUNIC
    .byte BTLMSG_PRAYING
    .byte BTLMSG_FOCUSING
    ;.byte BTLMSG_NOTHING
@@ -5616,14 +5666,15 @@ Battle_DoPlayerTurn:
     STA battle_class
     CMP #1
     BEQ @Steal                      
-    CMP #3
-    BEQ @Scan
+    ;CMP #3
+    ;BEQ @Scan
     CMP #4
     BEQ @Pray
     CMP #5
     BEQ @Focus
    
    @Cover:
+   @Runic:
    @Parry:
     RTS
     
@@ -5633,10 +5684,10 @@ Battle_DoPlayerTurn:
    @Pray:
     JMP PraySkill   
     
-   @Scan:
-    LDX btl_charcmdbuf+2, Y         ; X = enemy target
-    LDA BattleCharID                ; A = attacker
-    JMP ScanEnemy
+   ;@Scan:
+   ; LDX btl_charcmdbuf+2, Y         ; X = enemy target
+   ; LDA BattleCharID                ; A = attacker
+   ; JMP ScanEnemy
     
    @Steal:
     LDX btl_charcmdbuf+2, Y         ; X = enemy target
@@ -6374,14 +6425,14 @@ ConfusedMagicTarget:
     LDA (MagicPointer), Y
     
     LSR A 
-    BCC :+ 
+    BCC :+                    ; 01 
       LDA #$02
       STA btlmag_playerhitsfx ; enemy->player magic plays the "cha" sound effect (ID 2)
       LDA #$08                ; change all enemies to whole party
      @RTS: 
       RTS
   : LSR A
-    BCC :+
+    BCC :+                    ; 02
       JSR BattleRNG_L
       AND #03
       ORA #$80
@@ -6390,20 +6441,22 @@ ConfusedMagicTarget:
       STA btlmag_playerhitsfx ; enemy->player magic plays the "cha" sound effect (ID 2)
       LDA #$10                ; change one enemy to one party member
       RTS
-  : LSR A                     ; skip over "spell caster" bit
-    LSR A    
+  : LSR A                     ; 04 - change target self to target one enemy
+    BCC :+
+      BCS @TargetOneEnemy
+  : LSR A                     ; 08 
     BCC :+ 
       LDA #$01                ; change whole party to all enemies
       RTS
-  : LSR A
+  : LSR A                     ; 10 
     BCC @0_RTS                ; not a spell that can be changed or something? 
+     @TargetOneEnemy:
       JSR GetRandomEnemy_ForMagic
       STX btl_defender
       LDA #$02                ; change one party member to one enemy
       RTS
       
-   @0_RTS:                    ; this part might not be needed, but safest to use it
-    LDA #0
+   @0_RTS:                    ; this part shouldn't come up until more targeting schemes are invented
     RTS
     
     ;; JIGS - figure out if the chosen spell can be cast on an enemy or player instead, 
@@ -6547,7 +6600,8 @@ EnemyAttackPlayer_Physical:
     .byte BANK_ENEMYSTATS
 
     ;; JIGS - again, moved to Bank Z to make space here for other changes, and to try and fix some bugs
-    
+
+EnemyAttackPlayer_Physical_ExtraLimbs:    
     JSR DoPhysicalAttack
 
 SavePlayerDefender:
@@ -6578,7 +6632,18 @@ SavePlayerDefender:
         LDA battle_hitsconnected
         BEQ :+
         INC btl_retaliate    
-  : RTS
+  : DEC btl_attacker_limbs                      ; dec the number of unique physical attacks to perform
+    LDA btl_attacker_limbs                  
+    BEQ @FinalEnd                               ; at 0, stop!   
+    
+    JSR GetRandomPlayerTarget
+    JSR LongCall
+    .word LoadPlayerDefenderStats_ForEnemyAttack
+    .byte BANK_ENEMYSTATS
+    JMP EnemyAttackPlayer_Physical_ExtraLimbs   ; if not 0, do another attack 
+
+   @FinalEnd:    
+    RTS
 
 
   
@@ -6716,11 +6781,13 @@ DoPhysicalAttack_NoAttackerBox:
         BEQ :+
         JSR HitChance_Add40
       
-  : LDA btl_defender_hidden         ; if defender is hidden, subtract another 40 from the attacker's hit chance
+  : LDA btl_defender_class         ; if defender is hidden, subtract another 40 from the attacker's hit chance
+    AND #$F0
     BEQ :+
       JSR HitChance_Subtract40
       
       LDA btl_defender_class        ; thieves and ninjas get an extra 40 for hiding
+      AND #$0F                      ; cut off hiding bit
       AND #CLS_TH | CLS_NJ
       BEQ :+
         JSR HitChance_Subtract40    ; if the enemy is blind, hitchance is #48 now
@@ -6813,6 +6880,7 @@ DoPhysicalAttack_NoAttackerBox:
       STA math_critchance
       
   : LDA btl_attacker_numhits            ; get proper number of hits (numhits * mult)
+    AND #$0F                            ; cut off high bits (amount of unique attack chances)
     LDX btl_attacker_numhitsmult        ;  the mult is essentially the multiplier for the FAST spell
     JSR MultiplyXA
     STA math_numhits
@@ -7933,7 +8001,7 @@ ReSortPartyByAilment:
       BNE @WeightLoop           ; loop 4 times (for each character)
       
     ; Now that ailment weights are added, we can just sort char_order_buf to
-    ;  go in ascending order, and characters will debilitating ailments will be
+    ;  go in ascending order, and characters with debilitating ailments will be
     ;  moved to the back of the party.
 
                 @outerloopctr = BattleBoxString
@@ -8036,10 +8104,6 @@ BackupOneCharacterBattleStats:
     LDA lut_InBattleCharPaletteAssign, Y
     LDY btl_tmpindex
     STA btl_charattrib, Y
-
-    LDA btl_tmpindex
-    LDY #ch_slotindex_backup - ch_backupstats
-    STA (CharBackupStatsPointer), Y
     
     LDY #ch_intelligence - ch_stats
     LDA #ch_intelligence_backup - ch_backupstats
@@ -8068,33 +8132,37 @@ BackupOneCharacterBattleStats:
     LDY #ch_magicdefense - ch_stats
     LDA #ch_magicdefense_backup - ch_backupstats
     JSR TransferByte
+
+    LDY #ch_critrate - ch_stats
+    LDA #ch_critrate_backup - ch_backupstats
+    JSR TransferByte
     
-    LDY #ch_elementresist - ch_stats
-    LDA #ch_elementresist_backup - ch_backupstats
+    LDY #ch_weaponelement - ch_stats
+    LDA #ch_weaponelement_backup - ch_backupstats
+    JSR TransferByte
+
+    LDY #ch_weaponcategory - ch_stats
+    LDA #ch_weaponcategory_backup - ch_backupstats
+    JSR TransferByte
+
+    LDY #ch_attackailment - ch_stats
+    LDA #ch_attackailment_backup - ch_backupstats
+    JSR TransferByte
+    
+    LDY #ch_attackailproc - ch_stats
+    LDA #ch_attackailproc_backup - ch_backupstats
     JSR TransferByte
     
     LDY #ch_elementweak - ch_stats
     LDA #ch_elementweak_backup - ch_backupstats
     JSR TransferByte
     
-    LDY #ch_weaponelement - ch_stats
-    LDA #ch_weaponelement_backup - ch_backupstats
+    LDY #ch_elementresist - ch_stats
+    LDA #ch_elementresist_backup - ch_backupstats
     JSR TransferByte
     
-    LDY #ch_weaponcategory - ch_stats
-    LDA #ch_weaponcategory_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_numhits - ch_stats
-    LDA #ch_numhits_backup - ch_backupstats
-    JSR TransferByte
-
-    LDY #ch_numhitsmult - ch_stats
-    LDA #ch_numhitsmult_backup - ch_backupstats
-    JSR TransferByte
-
-    LDY #ch_critrate - ch_stats
-    LDA #ch_critrate_backup - ch_backupstats
+    LDY #ch_statusresist - ch_stats
+    LDA #ch_statusresist_backup - ch_backupstats
     JMP TransferByte    
     
     
@@ -8572,6 +8640,7 @@ Battle_DoEnemyTurn:
       LDA #~AIL_CONF
       JSR ApplyEnemyAilmentMask
       LDA #BTLMSG_CONFUSECURED
+      LDA #BTLMSG_CONFUSECURED
       BNE @PrintAndEnd
       
   : LDA #BTLMSG_CONFUSED
@@ -8588,6 +8657,7 @@ Battle_DoEnemyTurn:
     ;;JIGS - altering the spell's properties to more resemble a physical attack
    
     LDX #0
+    STX ActiveRunic                     ; don't want Runic intercepting this
     STX btlmag_element                  ; clear fire element
     LDA #$20
     JSR UpdateVariablePalette           ; and make sure its white dust cloud
@@ -8693,7 +8763,7 @@ EnemyAi_ShouldPerformAction:
     STA btl_randomplayer       ; store rate
     LDA #$00
     LDX #$80
-    JSR RandAX      ; rand[ 0, 128 ]
+    JSR RandAX                 ; rand[ 0, 128 ]
     CMP btl_randomplayer       ; C clear if rand is less than rate (action should be performed)
     RTS
 
@@ -8710,14 +8780,14 @@ EnemyAi_ShouldPerformAction:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Enemy_DoAi:
-    LDY #en_ai
+    LDY #en_enemyid
     LDA (EnemyRAMPointer), Y
-    CMP #$FF                    ; get AI id from RAM 
-    BNE :+
-      JMP ChooseAndAttackPlayer ; no AI -- just attack a random player
+  ; CMP #$FF                    ; get AI id from RAM 
+  ; BNE :+
+  ;   JMP ChooseAndAttackPlayer ; no AI -- just attack a random player
       
     ; use enemy AI
-  : LDX #$10                ; get a pointer to this enemy's AI data
+    LDX #$10                ; get a pointer to this enemy's AI data
     JSR MultiplyXA          ; $10 bytes per AI entry
     CLC                     ;   end result, of this math:  @aiptr points to this enemy's AI data
     ADC #<lut_EnemyAi
@@ -8732,31 +8802,56 @@ Enemy_DoAi:
     BCS @CheckSpecialAttack         ; if not, jump ahead to check for special attacks
     
   @DoMagicAttack:
-    LDY #en_aimagpos
-    LDA (EnemyRAMPointer), Y
-    AND #$07                        ; get current magic pos
-    JSR @IncrementAiPos             ; increment magic position
-    ADC #$02                        ; position+2 is the index to the spell to cast
+ ;  LDY #en_aimagpos
+ ;  LDA (EnemyRAMPointer), Y
+ ;  AND #$07                        ; get current magic pos
+ ;  JSR @IncrementAiPos             ; increment magic position
+ ;  ADC #$02                        ; position+2 is the index to the spell to cast
+ ;  TAY
+ ;  LDA (EnemyAIPointer), Y         ; get the spell to cast
+ ;  CMP #$FF                        ; if $FF (empty slot)...
+ ;  BNE :+
+ ;    LDA #$00                      ; ...reset position, and start over
+ ;    LDY #en_aimagpos
+ ;    STA (EnemyRAMPointer), Y
+ ;    JMP @DoMagicAttack            ; keep going until we find a non-empty spell slot
+ ;  
+ ;: JMP Enemy_DoMagicEffect         ; with the magic spell in A, do the magic attack
+ 
+ ;; JIGS - new AI for magic:
+ 
+    LDA #ENEMYAI_MAGICSTART
+    LDX #ENEMYAI_SPECIALSTART - 1
+    JSR RandAX                      ; choose a random magic slot
     TAY
-    LDA (EnemyAIPointer), Y         ; get the spell to cast
-    CMP #$FF                        ; if $FF (empty slot)...
-    BNE :+
-      LDA #$00                      ; ...reset position, and start over
-      LDY #en_aimagpos
-      STA (EnemyRAMPointer), Y
-      JMP @DoMagicAttack            ; keep going until we find a non-empty spell slot
-    
-  : JMP Enemy_DoMagicEffect         ; with the magic spell in A, do the magic attack
+    LDA (EnemyAIPointer), Y
+    BMI @SecondSpellCast            ; if the high bit is set, the spell has been cast once already
+    CMP #$FF
+    BNE @FirstSpellCast
+        JMP ChooseAndAttackPlayer   ; no MP left for this spell, do physical attack
+   
+   @FirstSpellCast: 
+    ORA #$80
+    STA (EnemyAIPointer), Y         ; set the high bit
+    JMP Enemy_DoMagicEffect
+   
+   @SecondSpellCast: 
+    AND #$80                        ; cut off the high bit
+    PHA
+    LDA #$FF                        ; and set the whole thing to $FF to indicate no more mana left
+    STA (EnemyAIPointer), Y
+    PLA                             
+    JMP Enemy_DoMagicEffect
     
     ;;  This is like a mini-subroutine used by the surrounding code
     ;;    it is always JSR'd to, never branched to.  So RTS is OK.
-  @IncrementAiPos:
-    PHA                             ; backup position
-    CLC
-    ADC #$01                        ; +1
-    STA (EnemyRAMPointer), Y        ; and write it back
-    PLA                             ; restore backup
-    RTS
+  ;@IncrementAiPos:
+  ;  PHA                             ; backup position
+  ;  CLC
+  ;  ADC #$01                        ; +1
+  ;  STA (EnemyRAMPointer), Y        ; and write it back
+  ;  PLA                             ; restore backup
+  ;  RTS
   
   @CheckSpecialAttack:
     LDY #$01
@@ -8766,21 +8861,37 @@ Enemy_DoAi:
     
     ; otherwise, do a special attack
   @DoSpecialAttack:
-    LDY #en_aiatkpos            ; This block is the same as @DoMagicAttack -- the only difference
-    LDA (EnemyRAMPointer), Y    ;   is it cycles through the 4 enemy attack slots instead of the
-    AND #$03                    ;   8 magic slots.
-    JSR @IncrementAiPos
-    ADC #$0B
+   ; LDY #en_aiatkpos            ; This block is the same as @DoMagicAttack -- the only difference
+   ; LDA (EnemyRAMPointer), Y    ;   is it cycles through the 4 enemy attack slots instead of the
+   ; AND #$03                    ;   8 magic slots.
+   ; JSR @IncrementAiPos
+   ; ADC #$0B
+   ; TAY
+   ; LDA (EnemyAIPointer), Y
+   ; CMP #$FF
+   ; BNE :+
+   ;   LDA #$00
+   ;   LDY #en_aiatkpos
+   ;   STA (EnemyRAMPointer), Y
+   ;   JMP @DoSpecialAttack
+   
+    LDA #5
+    STA tmp                         ; loop counter for trying to find something to do
+   
+   @FindSpecialAttack:   
+    LDA #ENEMYAI_SPECIALSTART
+    LDX #ENEMYAI_SPECIALSTART + 4 
+    JSR RandAX                      ; choose a random special slot
     TAY
     LDA (EnemyAIPointer), Y
-    CMP #$FF
+    CMP #$FF                        ; if slot is empty, dec the loop counter and try again
     BNE :+
-      LDA #$00
-      LDY #en_aiatkpos
-      STA (EnemyRAMPointer), Y
-      JMP @DoSpecialAttack
+       DEC tmp
+       BEQ ChooseAndAttackPlayer    ; 5 slots, 5 random tries; if nothing found, give up and attack normally
+       BNE @FindSpecialAttack   
+   
   : CLC
-    ADC #$41                    ; add $40 to the special attack ID to indicate it's a special attack (0-3F are magic)
+    ADC #ENEMY_ATTACK_START     ; add $40 to the special attack ID to indicate it's a special attack (0-3F are magic)
     JMP Enemy_DoMagicEffect     ; and perform the special attack
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8948,9 +9059,220 @@ Battle_PrepareMagic:
         LDY #MAGDATA_PALETTE
         LDA (MagicPointer), Y
         STA btlcmd_magicgfx+1, X
-  : RTS
+  : ; RTS
+   
+Runic:
+    LDA btl_attackid
+    CMP #ENEMY_ATTACK_START - 1 ; minus one to count Counter as not magic
+    BCC :+ 
+        RTS                ; skip if the attack is a special attack and not a spell
+  : LDA btl_charrunic
+    ORA btl_charrunic+1
+    ORA btl_charrunic+2    ; combine all runic slots to see if any are active
+    ORA btl_charrunic+3     
+    BNE :+                 ; if no runics active, RTS without doing anything
+        RTS 
+  : LDA #01
+    STA ActiveRunic
+    RTS
     
+ConfusedRunicUser_Exit:  ; if Runic user is now a confused caster, don't do it  
+    AND #$03
+    TAX
+    LDA #0
+    STA btl_charrunic, X ; clear confused caster's runic use in case they get unconfused before the end of the turn
+    RTS    
     
+ConfirmRunic:
+    LDA ActiveRunic
+    BNE :+
+        CLC               ; not active, clear C and exit
+        RTS
+  : LDA btl_attacker      ; do it if caster is enemy
+    BPL @CheckTarget
+    LDA ConfusedMagic     ; do it if caster is a confused player
+    BNE @CheckTarget
+        CLC
+        RTS
+  
+  @CheckTarget:
+   LDY #MAGDATA_TARGET   
+   LDA (MagicPointer), Y ; for ConfusedMagic, this represents the ORIGINAL byte... 
+   LSR A
+   BCC DoRunic_Random
+
+;; JIGS - this is mostly to see the logic necessary in choosing what to do.     
+;     LDA ConfusedMagic  ; 01 > 08 when confused
+;     BEQ DoRunic_Fixed  ; 01 < Enemy is attacking all players
+;     BNE DoRunic_Fixed  ; 08 < Player is attacking all players
+; : LSR A
+;   BCC :+  
+;     LDA ConfusedMagic  ; 02 > 10 when confused
+;     BEQ DoRunic_Random ; 02 < Enemy is attacking one player
+;     BNE DoRunic_Random ; 10 < Player is attacking one player
+; : LSR A
+;   BCC :+  
+;     LDA ConfusedMagic  ; 04 > 02 
+;     BEQ DoRunic_Random ; 04 < Enemy is buffing/healing itself
+;     BNE DoRunic_Random ; 02 < Player is buffing/healing one enemy
+; : LSR A
+;   BCC :+  
+;     LDA ConfusedMagic  ; 08 > 01 
+;     BEQ DoRunic_Random ; 08 < Enemy is buffing/healing all enemies
+;     BNE DoRunic_Random ; 01 < Player is buffing/healing all enemies
+; : LSR A
+;   BCC :+     
+;     LDA ConfusedMagic  ; 10 > 02
+;     BEQ DoRunic_Random ; 10 < Enemy is buffing/healing enemy
+;     BNE DoRunic_Random ; 02 < Player is buffing/healing enemy
+; : CLC
+;   RTS ; should never happen until I add more targeting schemes    
+
+
+DoRunic_Fixed:           ; gets btl_defender, sees if its the Runic user. If not, exits without Runic activating
+    LDA btl_defender
+    CMP btl_attacker      
+    BEQ ConfusedRunicUser_Exit
+    STA MMC5_tmp
+    AND #$03
+    TAX
+    LDA btl_charrunic, X
+    BNE DoRunic_OK            
+    CLC
+    RTS
+    
+DoRunic_Random:         ; gets btl_defender, sees if its the Runic user. If not, finds who is and activates it.
+    LDA btl_defender
+    CMP btl_attacker     
+    BEQ ConfusedRunicUser_Exit
+    STA MMC5_tmp
+    
+  : JSR BattleRNG_L
+    AND #$03
+    TAX
+    LDA btl_charrunic, X
+    BEQ :-
+    
+DoRunic_OK:    
+    STA btlattackspr_gfx
+    LDA #0
+    STA btl_charrunic, X
+    TXA
+    ORA #$80
+    STA btl_defender
+
+    LDA btl_animatingchar       ; back up animatingchar in case of Confusion?
+    PHA
+    STX btl_animatingchar       ; set Runic user to animatingchar
+    TXA
+    PHA
+    JSR PrepCharStatPointers
+    JSR DrawDefenderBox         ; draw Runic user's name 
+
+    LDX #<SkillText_RMage
+    LDY #>SkillText_RMage
+    LDA #03
+    JSR DrawCombatBox           ; draws "Runic" in the damage/hits box
+    
+    LDY #ch_weaponpal - ch_stats
+    LDA (CharStatsPointer), Y   
+    LDX #0
+    JSR UpdateVariablePalette   ; set the variable palette to their weapon
+    
+    LDA btl_battletype
+    CMP #$03
+    BCC :+                      ; if its a fiend or chaos battle, 50/50 chance
+    JSR BattleRNG_L              
+    AND #01
+    BEQ :+
+     LDA #$FF
+     STA ActiveRunic            ; set Runic up to fail by setting high bit
+    
+  : PLA 
+    LDY #0
+    JSR WalkForwardAndStrike    ; doesn't really walk forward or strike, but handles the animation anyway
+  
+    LDA ActiveRunic             ; if its still only 01, it worked!
+    BPL :+
+   
+  @RunicFailed:
+    LDA #$0F
+    STA btl_unfmtcbtbox_buffer+$40
+    LDA #BTLMSG_RUNICFAILED
+    STA btl_unfmtcbtbox_buffer+$41
+    LDA btltmp_attackerbuffer         ; print "Overwhelmed by [enemy name]"
+    STA btl_unfmtcbtbox_buffer+$42
+    LDA #0
+    STA btl_unfmtcbtbox_buffer+$43
+    LDA #04
+    JSR DrawMessageBox_Prebuilt
+    JSR Delay_UndrawOneBox            ; undraw the message, and then undraw the "Runic" and defender box
+    JSR UndrawAllButTwoBoxes          ; even if the same name is going to be drawn again
+    PLA                               ; not sure how to fix that; would have to be in DrawDefenderBox or something  
+    STA btl_animatingchar             ; as that gets called after each ConfirmRunic call
+    LDA MMC5_tmp
+    STA btl_defender
+    CLC
+    RTS
+   
+ : LDA btl_attackid    ; this was already checked to make sure its not an enemy special attack
+   SEC
+   SBC #MG_START       ; subtract magic start ($30 at this time) to make it the spell ID
+   CMP #$40
+   BCC @NormalSpell    ; and see if it falls within normal spell ID ranges
+    SEC
+    SBC #$40 - 8       ; subtract all normal spells, -8 to offset the LUT
+    TAX
+    LDA Runic_MP_LUT, X
+    BMI @NoMP          ; if high bit set ($FF), this Battle Spell has no level equivalent
+    JMP @GiveMP
+   
+  @NormalSpell: 
+   LSR A               ; divide by 8 (gets the level of the spell)
+   LSR A
+   LSR A
+   TAX
+   LDA Runic_MP_LUT, X
+   
+  @GiveMP:
+   CLC
+   ADC #ch_mp - ch_stats      ; add MP offset 
+   TAY
+   LDA (CharStatsPointer), Y  
+   AND #$0F                   ; clear high bits to check max MP
+   JSR ShiftLeft4             ; and move the bits up
+   STA tmp
+   LDA (CharStatsPointer), Y  
+   AND #$F0                   ; clear low bits to check current MP
+   CMP tmp                    ; and compare against max MP
+   BEQ @NoMP                  ; if they're equal, no MP gain 
+   
+   CLC
+   ADC #$10                   ; add 1 current MP
+   ORA tmp                    ; add in the max again
+   STA (CharStatsPointer), Y  ; and save it all back
+   
+  @NoMP: 
+   DEC ActiveRunic
+   JSR Runic                  ; set ActiveRunic again if someone else is ready to go
+   
+   LDA #BTLMSG_ABSORBEDSPELL
+   JSR DrawMessageBoxDelay_ThenClearIt
+   PLA
+   STA btl_animatingchar
+   SEC
+   RTS
+
+Runic_MP_LUT:
+   .byte $00,$01,$02,$03,$04,$05,$06,$07 ; normal spells ; spell ID is divided by 8 
+   .byte $02,$04,$06,$05,$07,$FF,$FF,$FF ; battle spells ; each byte represents a spell
+   .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; battle spells
+
+
+
+
+
+
     
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9036,7 +9358,7 @@ UseItem_AlarmClock:
     JMP UseItem_End
 
 UseItem_Heal:  
-    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR BtlMag_LoadPlayerDefenderStats
     JSR Battle_PlMag_IsPlayerValid
     BNE UseItem_Ineffective
     
@@ -9050,7 +9372,7 @@ UseItem_Heal:
     JMP UseItem_End_RemoveItem
     
 UseItem_XHeal:  
-    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR BtlMag_LoadPlayerDefenderStats
     JSR Battle_PlMag_IsPlayerValid
     BNE UseItem_Ineffective
     
@@ -9063,7 +9385,7 @@ UseItem_XHeal:
     JMP UseItem_End_RemoveItem
     
 UseItem_Elixir:
-   JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+   JSR BtlMag_LoadPlayerDefenderStats
    JSR Battle_PlMag_IsPlayerValid
    BNE UseItem_Ineffective
    
@@ -9106,7 +9428,7 @@ UseItem_Ineffective:            ; put here so it can be BCC'd to easily
     JMP DrawMessageBoxDelay_ThenClearAll
     
 UseItem_Pure:
-    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_POISON
     STA btlmag_effectivity
     
@@ -9117,7 +9439,7 @@ UseItem_Pure:
     JMP UseItem_AilmentCured
     
 Useitem_FlowClock:
-    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_STOP
     STA btlmag_effectivity
     
@@ -9139,7 +9461,7 @@ UseItem_AilmentCured:
     JMP UseItem_End
   
 UseItem_PhoenixDown:
-    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_DEAD
     STA btlmag_effectivity
     
@@ -9224,7 +9546,7 @@ UseItem_Ether:
     JMP UseItem_End_RemoveItem
     
 UseItem_Eyedrops:
-    JSR BtlMag_LoadPlayerDefenderStats_NoSFX
+    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_DARK
     STA btlmag_effectivity
         
@@ -9252,6 +9574,8 @@ UseItem_CommonCode:
     JSR PlayBattleSFX  
     LDA btl_defender
     AND #$03
+    TAX
+    JSR UnhideCharacter
     JSR FlashCharacterSprite
     JMP BtlMag_SavePlayerDefenderStats ; save the cured ailment
 
@@ -9350,6 +9674,7 @@ ClearSpecialMagicVariables:
     LDA #0
     STA HiddenMagic
     STA ConfusedMagic
+    STA ActiveRunic
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9375,16 +9700,20 @@ Battle_PlayerMagic_CastOnTarget:
     
   : LSR A
     BCC :+
-      JMP Battle_PlMag_TargetAllEnemies ; bit 0 set = target all opponents
+      JMP Battle_PlMag_TargetAllEnemies   ; 01 = target all opponents
   : LSR A
     BCC :+
-      JMP Battle_PlMag_TargetOneEnemy   ; bit 1 set = target one opponent
+      JMP Battle_PlMag_TargetOneEnemy     ; 02 = target one opponent
   : LSR A
     BCC :+
-      BCS Battle_PlMag_TargetSelf       ; bit 2 set = target self
+      BCS Battle_PlMag_TargetSelf         ; 04 = target self
   : LSR A
-    BCC Battle_PlMag_TargetOnePlayer    ; (other) = target one ally
-    BCS Battle_PlMag_TargetAllPlayers   ; bit 3 set = target all allies
+    BCC :+ 
+      BCS Battle_PlMag_TargetAllPlayers   ; 08 = target all allies
+  : LSR A
+    BCC :+    
+      BCS Battle_PlMag_TargetOnePlayer    ; 10 = target one ally
+ : RTS ;; JIGS - this shouldn't happen but its here in case I need to add a new targeting scheme
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9645,7 +9974,6 @@ TargetSelf:
 
 Battle_CastMagicOnSelf_Enemy:           ; pretty straight forward....
     JSR TargetSelf
-    JSR DrawDefenderBox
     JMP Battle_CastMagicOnEnemy
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9666,7 +9994,7 @@ Battle_CastMagicOnRandEnemy:
     
     ; once we have an enemy that exists
     STX btl_defender            ; set it as the defender
-    JSR DrawDefenderBox         ; print defender box
+    
     JMP Battle_CastMagicOnEnemy ; and cast the spell!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9683,12 +10011,10 @@ Battle_CastMagicOnAllEnemies:
     TAX                         ; Skip the enemy if the slot is empty
     JSR DoesEnemyXExist
     BEQ @Next
-    
+
     ; Otherwise, the enemy exists!  Do it!
     LDA btl_targetall_tmp
     STA btl_defender                    ; set defender
-    JSR GetEnemyRAMPtr                  ; prep pointers
-    JSR DrawDefenderBox                 ; Draw defender box
     JSR Battle_CastMagicOnEnemy         ; cast it!
     JSR UndrawAllButTwoBoxes            ; undraw all boxes except for attacker/attack
     
@@ -9707,6 +10033,10 @@ Battle_CastMagicOnAllEnemies:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_CastMagicOnEnemy:
+    JSR ConfirmRunic
+    BCC :+      
+        RTS
+  : JSR DrawDefenderBox                 ; print defender box
     JSR BtlMag_LoadEnemyDefenderStats   ; load enemy stats into defender mem
     JSR BtlMag_PerformSpellEffect       ; do the spell (modifying defender's stats)
     JMP BtlMag_SaveEnemyDefenderStats   ; update changed enemy stats.
@@ -9723,9 +10053,7 @@ Battle_CastMagicOnRandomPlayer:
     LDA btl_randomplayer
     ORA #$80
     STA btl_defender
-    
-    JSR DrawDefenderBox             ; draw defender box
-    JMP Battle_CastMagicOnPlayer    ; then cast the magic and exit!
+    ;; flows
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9735,8 +10063,43 @@ Battle_CastMagicOnRandomPlayer:
 
 Battle_CastMagicOnPlayer:
     JSR BtlMag_LoadPlayerDefenderStats
+  
 Battle_CastMagicOnPlayer_NoLoad:
+    JSR ConfirmRunic
+    BCC :+                                ; carry set on success, skip doing magic on this player
+        RTS
+  : JSR DrawDefenderBox                   ; draw defender box
+    
+    LDA btlmag_playerhitsfx
+    JSR PlayBattleSFX               ; play the appropriate sound effect for this spell
+    
+    LDA btl_defender
+    AND #$03
+    TAX
+    PHA
+    PHA
+    LDA btl_charhidden, X
+    BEQ @NotHidden                  ; if they're not hidden, skip all this 
+    
+    JSR UnhideCharacter_Confirmed
+    
+    LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
+    BPL @EnemyAttacker     
+    LDA ConfusedMagic               ; its a player, but is it a bad spell?
+    BEQ @NotHidden                 
+    
+    ;; if player is "attacker", that is, the spell-caster...
+    ;; Then the defender will re-hide after the spell just fine 
+    ;; Otherwise, we want Hidden to be 0, so the character won't re-hide after getting hit by the enemy's magic.
+    
+   @EnemyAttacker:
+    DEC Hidden
+    
+   @NotHidden:    
+    PLA
+    JSR FlashCharacterSprite        ; flash this character's graphic
     JSR BtlMag_PerformSpellEffect
+    PLA
     JMP BtlMag_SavePlayerDefenderStats
     
     
@@ -9760,7 +10123,6 @@ Battle_CastMagicOnAllPlayers:
       LDA btl_targetall_tmp
       ORA #$80
       STA btl_defender                      ; set defender (high bit set to indicate it's a player)
-      JSR DrawDefenderBox                   ; 
       JSR BtlMag_LoadPlayerDefenderStats    ; load their stats, play sound effect, and flash player graphic
       JSR Battle_CastMagicOnPlayer_NoLoad   ; then cast the magic on the player (NoLoad because we already loaded them above)
       JSR UndrawAllButTwoBoxes              ; undraw all but the attacker and attack boxes
@@ -9789,46 +10151,21 @@ Battle_CastMagicOnAllPlayers:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_LoadPlayerDefenderStats:
-    LDA btlmag_playerhitsfx
-    JSR PlayBattleSFX               ; play the appropriate sound effect for this spell
-   
-BtlMag_LoadPlayerDefenderStats_NoSFX:
     LDA btl_defender
     AND #$03
     TAX
-    PHA
     JSR PrepCharStatPointers        ; prep entityptr's
     
     LDA btl_charregen, X            ; load up any current regen stuff just in case...
+    ORA btl_charreflect, X          ; and ORA with any reflection status 
     STA btlmag_defender_battlestate
     
-    LDA btl_charreflect, X          ; and ORA with any reflection status 
-    ORA btlmag_defender_battlestate
+    LDA btl_charhitmult, X
+    STA btlmag_defender_numhitsmult
  
-    LDA btl_charhidden, X
-    BEQ @NotHidden                  ; if they're not hidden, skip all this 
-    
-    JSR UnhideCharacter_Confirmed
-    
-    LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
-    BPL @EnemyAttacker     
-    
-    ;; if player is "attacker", that is, the spell-caster...
-    ;; Then the defender will re-hide after the spell just fine 
-    ;; Otherwise, we want Hidden to be 0, so the character won't re-hide after getting hit by the enemy's magic.
-    
-   @EnemyAttacker:
-    DEC Hidden
-    JSR UpdateSprites_BattleFrame ; and do a frame to unhide the character sprite before flashing it...?
-    
-   @NotHidden:    
-    LDA btl_defender
-    AND #$03
-    JSR FlashCharacterSprite        ; flash this character's graphic
-  
     LDA #$0
     STA btlmag_defender_category    ; This only matters for HARM spells, which check the Undead bit. 
-    
+
     LDY #ch_ailments - ch_stats     ;
     LDA (CharStatsPointer), Y    
     STA btlmag_defender_ailments
@@ -9846,10 +10183,6 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     INY
     LDA (CharStatsPointer), Y
     STA btlmag_defender_hpmax+1
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_battlestate
     
     LDY #ch_intelligence - ch_stats
     LDA (CharStatsPointer), Y
@@ -9879,6 +10212,10 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     LDA (CharStatsPointer), Y
     STA btlmag_defender_magicdefense
 
+    INY ; #ch_statusresist - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btlmag_defender_statusresist
+    
     INY ; #ch_elementresist - ch_stats
     LDA (CharStatsPointer), Y
     STA btlmag_defender_elementresist
@@ -9887,9 +10224,19 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     LDA (CharStatsPointer), Y
     STA btlmag_defender_elementweakness
     
-    LDY #ch_numhitsmult - ch_stats
+    INY ; #ch_attackailment - ch_stats
     LDA (CharStatsPointer), Y
-    STA btlmag_defender_numhitsmult
+    STA btlmag_defender_attackailment
+    
+    INY
+    LDA (CharStatsPointer), Y
+    STA btlmag_defender_attackailproc
+    
+
+    
+    INY
+    LDA (CharStatsPointer), Y
+    STA btlmag_defender_critrate
     
     LDY #ch_weaponelement - ch_stats
     LDA (CharStatsPointer), Y
@@ -9900,10 +10247,7 @@ BtlMag_LoadPlayerDefenderStats_NoSFX:
     STA btlmag_defender_weaponcategory
     
     ;; And now re-hide after flashing.   
-    
-    PLA
-    TAX
-    JSR HideCharacter ; will clear Hidden ; when Caster steps back, they won't go into hiding again anyway.
+
     RTS
     
  
@@ -10083,9 +10427,8 @@ BtlMag_SaveEnemyDefenderStats:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_SavePlayerDefenderStats:
-    LDA btl_defender
-    AND #$03
     TAX
+    JSR HideCharacter
     JSR PrepCharStatPointers
 
     LDA btlmag_defender_battlestate
@@ -10095,6 +10438,9 @@ BtlMag_SavePlayerDefenderStats:
     LDA btlmag_defender_battlestate
     AND #STATE_REGENALL | STATE_REGENERATING
     STA btl_charregen, X
+
+    LDA btlmag_defender_numhitsmult
+    STA btl_charhitmult, X
     
     LDA btlmag_defender_ailments
     LDY #ch_ailments - ch_stats
@@ -10135,6 +10481,10 @@ BtlMag_SavePlayerDefenderStats:
     LDA btlmag_defender_magicdefense
     STA (CharStatsPointer), Y
 
+    INY ; #ch_statusresist - ch_stats
+    LDA btlmag_defender_statusresist
+    STA (CharStatsPointer), Y
+    
     INY ; #ch_elementresist - ch_stats
     LDA btlmag_defender_elementresist
     STA (CharStatsPointer), Y
@@ -10143,14 +10493,22 @@ BtlMag_SavePlayerDefenderStats:
     LDA btlmag_defender_elementweakness
     STA (CharStatsPointer), Y
     
-    LDY #ch_numhitsmult - ch_stats
-    LDA btlmag_defender_numhitsmult
+    INY ; #ch_attackailment - ch_stats
+    LDA btlmag_defender_attackailment
+    STA (CharStatsPointer), Y
+    
+    INY ; #ch_attackailproc - ch_stats
+    LDA btlmag_defender_attackailproc
+    STA (CharStatsPointer), Y
+    
+    INY ; #ch_critrate - ch_stats
+    LDA btlmag_defender_critrate
     STA (CharStatsPointer), Y
     
     LDY #ch_weaponelement - ch_stats
     LDA btlmag_defender_weaponelement
     STA (CharStatsPointer), Y
-       
+
     INY ; #ch_weaponcategory - ch_stats
     LDA btlmag_defender_weaponcategory
     STA (CharStatsPointer), Y
@@ -10333,10 +10691,10 @@ BtlMag_DidSpellConnect:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BtlMag_MarkSpellConnected:
-    LDA #1
-    STA btlmag_spellconnected       ; set spellconnected var to nonzero to indicate it connected
-    RTS
+;BtlMag_MarkSpellConnected:
+;    LDA #1
+;    STA btlmag_spellconnected       ; set spellconnected var to nonzero to indicate it connected
+;    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10362,7 +10720,7 @@ BtlMag_ZeroHitChance:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_Damage:
-    JSR BtlMag_MarkSpellConnected           ; damage spells always connect
+    INC btlmag_spellconnected           ; damage spells always connect
     JSR BtlMag_LoadBaseHitChance            ; load base hit chance (since damage always hits, this becomes more of a "critical" chance)
     JSR PutEffectivityInDamageMathBuf       ; Load spell effectivity into 'damage' math buffer
     
@@ -10476,7 +10834,7 @@ BtlMag_Effect_DamageUndead:
       RTS                               ; and exit.
       
     ; Otherwise, if defender is undead..
-  : JSR BtlMag_MarkSpellConnected       ; Mark the spell as connected
+  : INC btlmag_spellconnected       ; Mark the spell as connected
     JMP BtlMag_ApplyDamage              ; And do the actual damage!
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10507,7 +10865,8 @@ BtlMag_Effect_InflictAilment:
       JSR BtlMag_DidSpellConnect
       BCC @Miss
         JSR BtlMag_ApplyAilments
-        JMP BtlMag_MarkSpellConnected
+        INC btlmag_spellconnected
+        RTS
   
   @Miss:
     RTS
@@ -10553,7 +10912,7 @@ BtlMag_Effect_Slow:
     JSR BtlMag_DidSpellConnect      ; See if they connected.  If not...
     BCC @Done                       ;  ... miss
     
-    JSR BtlMag_MarkSpellConnected   ; Otherwise, mark that this connected
+    INC btlmag_spellconnected   ; Otherwise, mark that this connected
     DEC btlmag_defender_numhitsmult ; Decrease their hit multiplier
     BPL @Done                       ;   if it wrapped...
     INC btlmag_defender_numhitsmult ;   ... INC it to undo it.  (This is where the 'bug' is, btlmag_spellconnected should be zero'd here)
@@ -10590,7 +10949,8 @@ BtlMag_Effect_LowerMorale:
     BCS :+
         LDA #0                      ; cap at 0 (don't let it wrap)
   : STA btlmag_defender_morale
-    JMP BtlMag_MarkSpellConnected   ; then mark the spell as connected and exit.
+    INC btlmag_spellconnected       ; then mark the spell as connected and exit.
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10603,7 +10963,7 @@ BtlMag_Effect_Regen:
     AND #AIL_DEAD
     BNE BtlMag_Effect_Slow_RTS       ; If they're dead, do nothing
     
-    JSR BtlMag_MarkSpellConnected
+    INC btlmag_spellconnected
     
     LDA btl_defender                 ; check if player or enemy
     BMI :+                           ; if player, jump ahead
@@ -10630,7 +10990,7 @@ BtlMag_Effect_Life:
     STA btlmag_effectivity
 
 BtlMag_Effect_RecoverHP:
-    JSR BtlMag_MarkSpellConnected   ; HP recovery always connects (doesn't it miss if dead?)
+    INC btlmag_spellconnected       ; HP recovery always connects (doesn't it miss if dead?)
     
     LDA btlmag_defender_ailments    ; Check defender ailment
     AND #AIL_DEAD
@@ -10685,8 +11045,7 @@ BtlMag_Effect_CureAilment:
     EOR #$FF
     AND btlmag_defender_ailments
     STA btlmag_defender_ailments
-    JSR BtlMag_MarkSpellConnected   ; and mark the spell as connected
-  ; RTS                             ; <- flow into
+    INC btlmag_spellconnected       ; and mark the spell as connected
     SEC
     RTS   ; C set if it worked
   
@@ -10703,12 +11062,14 @@ BtlMag_Effect_CureAil_RTS:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_AbsorbUp:
-    LDA btlmag_defender_defense      ; get defender absorb
+    LDA btlmag_defender_defense     ; get defender absorb
+    CLC
     ADC btlmag_effectivity          ; add effectivity to it
     BCC :+
       LDA #$FF                      ; (cap at 255)
-  : STA btlmag_defender_defense      ; that's our new absorb!
-    JMP BtlMag_MarkSpellConnected   ; This spell always connects.
+ : STA btlmag_defender_defense      ; that's our new absorb!
+   INC btlmag_spellconnected        ; This spell always connects.
+   RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10720,7 +11081,24 @@ BtlMag_Effect_ElemResist:
     LDA btlmag_effectivity          ; pretty straight forward...
     ORA btlmag_defender_elementresist
     STA btlmag_defender_elementresist
-    JMP BtlMag_MarkSpellConnected
+    INC btlmag_spellconnected
+    RTS
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  BtlMag_Effect_AttackUp2  [$BA28 :: 0x33A38]
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BtlMag_Effect_AttackUp2:
+    LDA btlmag_defender_hitrate     ; JIGS - FIXED; SABR also needed to have its hit rate set
+    CLC                             ; BUGGED - this is *probably* supposed to be using the spell hit-rate value                    
+    ADC btlmag_hitrate              ;   as a HIT bonus and then the effectivity as a DAMAGE bonus, but defender's
+    BCC :+                          ;   hit rate is not loaded into memory, so this end up adding it to
+      LDA #$FF                      ;   some other part of mem.  Note that this doesn't matter in the original
+  : STA btlmag_defender_hitrate     ;   game, as TMPR and SABR both have 0 for the spell's hit rate.
+
+    ;; flow into v 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10730,11 +11108,13 @@ BtlMag_Effect_ElemResist:
 
 BtlMag_Effect_AttackUp:
     LDA btlmag_defender_damage    ; identical to BtlMag_Effect_AbsorbUp, but modify attack power instead
+    CLC
     ADC btlmag_effectivity
     BCC :+
       LDA #$FF
   : STA btlmag_defender_damage
-    JMP BtlMag_MarkSpellConnected
+    INC btlmag_spellconnected
+    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10743,51 +11123,19 @@ BtlMag_Effect_AttackUp:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_Fast:
-    JSR BtlMag_MarkSpellConnected   ; Always connects (except when maxed -- this will be undone then)
     INC btlmag_defender_numhitsmult ; Increase hit multiplier
     
     LDA btlmag_defender_numhitsmult
-    CMP #3
+    CMP #FAST_HITCAP
     BCC :+                          ; if hit multiplier is >= 3
-      LDA #0
-      STA btlmag_spellconnected     ; undo the connect (this spell has no effect)
-      LDA #$02                      ; and max the multiplier at 2
+      LDA #$02                      ; then max the multiplier at 2
+      STA btlmag_defender_numhitsmult
+      RTS
       
   : STA btlmag_defender_numhitsmult
+    INC btlmag_spellconnected
     RTS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  BtlMag_Effect_AttackUp2  [$BA28 :: 0x33A38]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-BtlMag_Effect_AttackUp2:
-    ;LDA $6884                       ; BUGGED - this is *probably* supposed to be using the spell hit-rate value
-    
-    LDA btlmag_defender_hitrate     ; JIGS - FIXED?
-    
-    ADC btlmag_hitrate              ;   as a HIT bonus and then the effectivity as a DAMAGE bonus, but defender's
-    BCC :+                          ;   hit rate is not loaded into memory, so this end up adding it to
-      LDA #$FF                      ;   some other part of mem.  Note that this doesn't matter in the original
- : ;STA $6884                       ;   game, as TMPR and SABR both have 0 for the spell's hit rate.
-
-    STA btlmag_defender_hitrate    ; JIGS - changing this too?
-  
-            ; Code here is a duplicate of BtlMag_Effect_AttackUp.  You could just JMP there and save
-            ;   all this space.
-            
-        ;; JIGS - sound good
-    	JMP BtlMag_Effect_AttackUp        
-            
-;    LDA btlmag_effectivity          ; Add the spell effectivity to the defender's attack power.
-;    CLC
-;    ADC btlmag_defender_strength
-;    BCC :+
-;      LDA #$FF                      ; cap at 255
-;  : STA btlmag_defender_strength
-;    JMP BtlMag_MarkSpellConnected   ; Indicate spell connected.
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  BtlMag_Effect_EvadeDown  [$BA46 :: 0x33A56]
@@ -10816,7 +11164,7 @@ BtlMag_Effect_EvadeDown:
     BCS :+
       LDA #0                        ; clip at 0
   : STA btlmag_defender_evasion
-    JSR BtlMag_MarkSpellConnected   ; then mark that the spell connected
+    INC btlmag_spellconnected   ; then mark that the spell connected
   @Done:
     RTS
     
@@ -10828,10 +11176,10 @@ BtlMag_Effect_EvadeDown:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_CureAll:
-    JSR BtlMag_SetHPToMax           ; Fill HP to max
     LDA #0                          ; and zero ailments, curing all of them
     STA btlmag_defender_ailments
-    JMP BtlMag_MarkSpellConnected   ; mark as connected
+    INC btlmag_spellconnected       ; mark as connected
+    JMP BtlMag_SetHPToMax           ; Fill HP to max
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10845,7 +11193,8 @@ BtlMag_Effect_EvadeUp:
     BCC :+
       LDA #$FF
   : STA btlmag_defender_evasion
-    JMP BtlMag_MarkSpellConnected
+    INC btlmag_spellconnected
+    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10909,42 +11258,41 @@ WriteAToMagRandHit:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_RemoveResist:
-    JSR BtlMag_LoadBaseHitChance        ; load base hit chance (148)
-    
-    ;; JIGS - not really sure what to do here. Is the above JSR needed? In any case, I don't think this part is.
-    
- ;   LDA btlmag_element
- ;   AND btlmag_defender_elemresist
- ;   BEQ :+
- ;     JSR BtlMag_ZeroHitChance          ; if defender resists, hit chance = 0
- ; : LDA btlmag_element
- ;   AND btlmag_defender_elemweakness
- ;   BEQ :+                              ; if defender is weak,
-      LDA #188                          ; hit chance = 188
-      STA math_hitchance                ;   (148 base + 40 bonus)
-      
- ; : 
-    LDA #MATHBUF_HITCHANCE
-    LDX btlmag_hitrate
-    JSR MathBuf_Add                     ; add spell's hit rate to chance
-    LDA #MATHBUF_HITCHANCE
-    LDX btlmag_defender_magicdefense
-    JSR MathBuf_Sub                     ; subtract defender's magdef from hit chance
-    
-    JSR Random_0_200                    ; get hit roll
-    CMP #200                            ; 200 = always miss
-    BEQ BtlMag_Effect_RemRst_RTS
-    
-    JSR WriteAToMagRandHit              ; record hit roll
-    JSR BtlMag_DidSpellConnect          ; check to see if spell connected
-    BCC BtlMag_Effect_RemRst_RTS        ; if it did...
-    LDA #0
-    STA btlmag_defender_elementresist      ; clear all defender's elemental resistance
-    JSR BtlMag_MarkSpellConnected       ; and mark that the spell connected.
-    
-  ; RTS                                 ; <- flow into
+;   JSR BtlMag_LoadBaseHitChance        ; load base hit chance (148)
+;   
+;   ;; JIGS - not really sure what to do here. Is the above JSR needed? In any case, I don't think this part is.
+;   
+;;   LDA btlmag_element
+;;   AND btlmag_defender_elemresist
+;;   BEQ :+
+;;     JSR BtlMag_ZeroHitChance          ; if defender resists, hit chance = 0
+;; : LDA btlmag_element
+;;   AND btlmag_defender_elemweakness
+;;   BEQ :+                              ; if defender is weak,
+;     LDA #188                          ; hit chance = 188
+;     STA math_hitchance                ;   (148 base + 40 bonus)
+;     
+;; : 
+;   LDA #MATHBUF_HITCHANCE
+;   LDX btlmag_hitrate
+;   JSR MathBuf_Add                     ; add spell's hit rate to chance
+;   LDA #MATHBUF_HITCHANCE
+;   LDX btlmag_defender_magicdefense
+;   JSR MathBuf_Sub                     ; subtract defender's magdef from hit chance
+;   
+;   JSR Random_0_200                    ; get hit roll
+;   CMP #200                            ; 200 = always miss
+;   BEQ BtlMag_Effect_RemRst_RTS
+;   
+;   JSR WriteAToMagRandHit              ; record hit roll
+;   JSR BtlMag_DidSpellConnect          ; check to see if spell connected
+;   BCC BtlMag_Effect_RemRst_RTS        ; if it did...
+;; JIGS - just... make it work, why all the fuss?
 
-  
+    LDA #0
+    STA btlmag_defender_elementresist   ; clear all defender's elemental resistance
+    INC btlmag_spellconnected           ; and mark that the spell connected.
+    
 ;; Common RTS that is branched to by various surrounding code
 BtlMag_Effect_RemRst_RTS:
     RTS
@@ -10959,8 +11307,11 @@ BtlMag_Effect_RemRst_RTS:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_InflictAilment2:
-    LDA btlmag_element                  ; If the defender resists the elemenu
-    AND btlmag_defender_elementresist
+  ;  LDA btlmag_element                  ; If the defender resists the elemenu
+  ;  AND btlmag_defender_elementresist
+  
+    LDA btlmag_effectivity
+    AND btlmag_defender_statusresist
     BNE BtlMag_Effect_RemRst_RTS        ; then they are 100% immune.  Branch to RTS
     
     LDA #<300
@@ -10974,8 +11325,8 @@ BtlMag_Effect_InflictAilment2:
     BCC BtlMag_Effect_RemRst_RTS        ; if not, FAIL/exit
     
     JSR BtlMag_ApplyAilments            ; otherwise, apply the ailments
-    JMP BtlMag_MarkSpellConnected       ; and mark as connected, and exit
-
+    INC btlmag_spellconnected           ; and mark as connected, and exit
+    RTS
 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11130,7 +11481,7 @@ AilmentCured_MessageLut:
 .BYTE BTLMSG_LIFE           ; cure message for death
     
 ;; JIGS - bugged, need to confirm messages are picked right    
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  GetEnemyStatPtr  [$BB86 :: 0x33B96]

@@ -4794,12 +4794,8 @@ RestoreOneCharacterBattleStats:
     LDA #ch_magicdefense - ch_stats
     JSR TransferByteBack
     
-    LDY #ch_elementresist_backup - ch_backupstats
-    LDA #ch_elementresist - ch_stats
-    JSR TransferByteBack
-    
-    LDA #ch_elementweak - ch_stats
-    LDY #ch_elementweak_backup - ch_backupstats
+    LDA #ch_critrate - ch_stats
+    LDY #ch_critrate_backup - ch_backupstats
     JSR TransferByteBack
     
     LDA #ch_weaponelement - ch_stats
@@ -4809,17 +4805,25 @@ RestoreOneCharacterBattleStats:
     LDA #ch_weaponcategory - ch_stats
     LDY #ch_weaponcategory_backup - ch_backupstats
     JSR TransferByteBack
+
+    LDA #ch_attackailment - ch_stats
+    LDY #ch_attackailment_backup - ch_backupstats
+    JSR TransferByteBack
     
-    LDA #ch_numhits - ch_stats
-    LDY #ch_numhits_backup - ch_backupstats
+    LDA #ch_attackailproc - ch_stats
+    LDY #ch_attackailproc_backup - ch_backupstats
     JSR TransferByteBack
 
-    LDA #ch_numhitsmult - ch_stats
-    LDY #ch_numhitsmult_backup - ch_backupstats
+    LDA #ch_elementweak - ch_stats
+    LDY #ch_elementweak_backup - ch_backupstats
     JSR TransferByteBack
-
-    LDA #ch_critrate - ch_stats
-    LDY #ch_critrate_backup - ch_backupstats
+    
+    LDY #ch_elementresist_backup - ch_backupstats
+    LDA #ch_elementresist - ch_stats
+    JSR TransferByteBack
+    
+    LDY #ch_statusresist_backup - ch_backupstats
+    LDA #ch_statusresist - ch_stats
     
   TransferByteBack:
     PHA                             ; backup A

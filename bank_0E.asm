@@ -6601,7 +6601,7 @@ TryLearnSpell:
    
    LDA tmp+2            ; spell ID
    LDX #0
-    @KnownSpellsLoop:
+  @KnownSpellsLoop:
     CMP TempSpellList, X
     BEQ @AlreadyKnow
     INX 
@@ -6613,7 +6613,7 @@ TryLearnSpell:
     TAX  
     
     LDY #0
-    @EmptySlotLoop:    
+   @EmptySlotLoop:    
     LDA TempSpellList, X
     BEQ @FoundEmptySlot
     INX

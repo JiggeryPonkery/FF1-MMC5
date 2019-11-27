@@ -117,19 +117,19 @@ ch_name           = ch_stats + $02 ; 03, 04, 05, 06, 07, 08 - 7 bytes
 ch_exp            = ch_stats + $09 ; 0A, 0B - 3 bytes
 ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
 ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
-ch_battlestate    = ch_stats + $10 ;
-ch_level          = ch_stats + $11 ; OB this is 0 based, IB this is 1 based
-ch_strength       = ch_stats + $12
-ch_agility        = ch_stats + $13
-ch_intelligence   = ch_stats + $14 
-ch_vitality       = ch_stats + $15
-ch_speed          = ch_stats + $16
-ch_substats       = ch_stats + $17
-ch_damage         = ch_stats + $17
-ch_hitrate        = ch_stats + $18
-ch_defense        = ch_stats + $19
-ch_evasion        = ch_stats + $1A
-ch_magicdefense   = ch_stats + $1B
+ch_level          = ch_stats + $10 ; OB this is 0 based, IB this is 1 based
+ch_strength       = ch_stats + $11
+ch_agility        = ch_stats + $12
+ch_intelligence   = ch_stats + $13 
+ch_vitality       = ch_stats + $14
+ch_speed          = ch_stats + $15
+ch_substats       = ch_stats + $16
+ch_damage         = ch_stats + $16
+ch_hitrate        = ch_stats + $17
+ch_defense        = ch_stats + $18
+ch_evasion        = ch_stats + $19
+ch_magicdefense   = ch_stats + $1A
+ch_statusresist   = ch_stats + $1B ;
 ch_elementresist  = ch_stats + $1C ; effected by equipment, needs to refresh after battle
 ch_elementweak    = ch_stats + $1D ; effected by equipment, needs to refresh after battle
 ch_attackailment  = ch_stats + $1E ; effected by equipment
@@ -148,9 +148,9 @@ ch_weaponpal      = ch_stats + $29 ; effected by equipment
 ch_weaponelement  = ch_stats + $2A ; effected by equipment, needs to refresh after battle
 ch_weaponcategory = ch_stats + $2B ; effected by equipment, needs to refresh after battle
 ch_numhits        = ch_stats + $2C ; effected by equipment, needs to refresh after battle
-ch_numhitsmult    = ch_stats + $2D ; effected by equipment, needs to refresh after battle
-ch_critrate       = ch_stats + $2E ; effected by equipment, needs to refresh after battle
-ch_damagebackup   = ch_stats + $2F ; effected by equipment
+ch_critrate       = ch_stats + $2D ; effected by equipment, needs to refresh after battle
+ch_damagebackup   = ch_stats + $2E ; effected by equipment
+;unused           = ch_stats + $2F 
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 
@@ -542,7 +542,7 @@ btlmag_magicsource      = $0379 ; 0=magic, 1=Item, 2=item
 btlmag_ailment_orig     = $037A ; A backup of 
 btl_drawformationindex  = $037B 
 btlmag_playerhitsfx     = $037C ; sound effect to play when magic hits player
-;unused                 = $037D 
+ActiveRunic             = $037D 
 btl_backgroundflash     = $037E
 battle_stealsuccess     = $037F ; $FF if miss, $00 if no item, $01 if success
 explode_min_x           = $0380 
@@ -659,11 +659,12 @@ btl_attacker_category        = btl_attacker + $06
 btl_attacker_element         = btl_attacker + $07
 btl_attacker_attackailment   = btl_attacker + $08
 btl_attacker_ailments        = btl_attacker + $09
+btl_attacker_limbs           = btl_attacker + $0A ; the amount of limbs an enemy has (# of unique physical hits!) not used for players
 btl_attacker_graphic         = btl_attacker + $0A ; the graphic used for an attack
 btl_attacker_varplt          = btl_attacker + $0B ; The variable palette color used for an attack
-btl_attacker_sprite          = btl_attacker + $0C 
-btl_attacker_class           = btl_attacker + $0D
-btl_attacker_hidden          = btl_attacker + $0E
+btl_attacker_sprite          = btl_attacker + $0C ; this is not used and I don't know why I made it
+btl_attacker_class           = btl_attacker + $0D ; high bit is "hidden" state
+btl_attacker_hidden          = btl_attacker + $0E ; not sure what to use this for
 btl_attacker_ailmentchance   = btl_attacker + $0F
 
 btlmag_spellconnected       = btl_attacker + $01
@@ -671,9 +672,6 @@ btlmag_effect               = btl_attacker + $02
 btlmag_effectivity          = btl_attacker + $03
 btlmag_hitrate              = btl_attacker + $04
 btlmag_element              = btl_attacker + $05
-; btlmag_fakeout_defindex     = btl_attacker + $06 ; See Battle_DoTurn in bank C for a description of
-; btlmag_fakeout_ailments     = btl_attacker + $07 ;   what these 'fakeout' vars are and how/why they're used
-; btlmag_fakeout_defplayer    = btl_attacker + $08
 
 btl_defender                 = $6040 
 btl_defender_index           = btl_defender + $01
@@ -684,30 +682,35 @@ btl_defender_evasion         = btl_defender + $05
 btl_defender_magicdefense    = btl_defender + $06
 btl_defender_morale          = btl_defender + $07
 btl_defender_category        = btl_defender + $08
-btl_defender_elementweakness = btl_defender + $09
+btl_defender_statusresist    = btl_defender + $09
 btl_defender_elementresist   = btl_defender + $0A
-btl_defender_ailments        = btl_defender + $0B
-btl_defender_hidden          = btl_defender + $0C
-btl_defender_class           = btl_defender + $0D
+btl_defender_elementweakness = btl_defender + $0B
+btl_defender_ailments        = btl_defender + $0C
+btl_defender_class           = btl_defender + $0D ; high bit is "hidden" state
 btl_defender_hpmax           = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)
 btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
 
-btlmag_defender_intelligence    = btl_defender + $01
-btlmag_defender_speed           = btl_defender + $02
-btlmag_defender_damage          = btl_defender + $03
-btlmag_defender_hitrate         = btl_defender + $04
-btlmag_defender_defense         = btl_defender + $05
-btlmag_defender_evasion         = btl_defender + $06
-btlmag_defender_magicdefense    = btl_defender + $07
-btlmag_defender_morale          = btl_defender + $08 ; morale for enemies
-btlmag_defender_battlestate     = btl_defender + $08 ; battlestate for players
-btlmag_defender_numhitsmult     = btl_defender + $09
-btlmag_defender_category        = btl_defender + $0A
-btlmag_defender_weaponelement   = btl_defender + $0B
-btlmag_defender_weaponcategory  = btl_defender + $0C
-btlmag_defender_elementweakness = btl_defender + $0D
-btlmag_defender_elementresist   = btl_defender + $0E
-btlmag_defender_ailments        = btl_defender + $0F
+;; these are all things that can be changed by magic! Except max HP
+btlmag_defender_intelligence    = btl_defender - $08
+btlmag_defender_speed           = btl_defender - $07
+btlmag_defender_damage          = btl_defender - $06
+btlmag_defender_hitrate         = btl_defender - $05
+btlmag_defender_defense         = btl_defender - $04
+btlmag_defender_evasion         = btl_defender - $03
+btlmag_defender_magicdefense    = btl_defender - $02
+btlmag_defender_morale          = btl_defender - $01 ; morale for enemies
+btlmag_defender_battlestate     = btl_defender - $01 ; battlestate for players
+btlmag_defender_numhitsmult     = btl_defender + $01
+btlmag_defender_critrate        = btl_defender + $02
+btlmag_defender_category        = btl_defender + $03
+btlmag_defender_weaponelement   = btl_defender + $04
+btlmag_defender_weaponcategory  = btl_defender + $05
+btlmag_defender_attackailment   = btl_defender + $06
+btlmag_defender_attackailproc = btl_defender + $07
+btlmag_defender_elementweakness = btl_defender + $08
+btlmag_defender_elementresist   = btl_defender + $09
+btlmag_defender_statusresist    = btl_defender + $0A
+btlmag_defender_ailments        = btl_defender + $0B
 btlmag_defender_hpmax           = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2)  ; $6880
 btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $687A
 
@@ -768,48 +771,50 @@ btl_turnorderSpeed  = $6090 ; 13 bytes
     
     
 ;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
-ch_backupstats           = $60C0 ;; $10 per character, so fills up to $60FF
-ch_slotindex_backup      = ch_backupstats
-ch_intelligence_backup   = ch_backupstats + $01
-ch_speed_backup          = ch_backupstats + $02
-ch_damage_backup         = ch_backupstats + $03
-ch_hitrate_backup        = ch_backupstats + $04
-ch_defense_backup        = ch_backupstats + $05
-ch_evasion_backup        = ch_backupstats + $06
-ch_magicdefense_backup   = ch_backupstats + $07
-ch_elementresist_backup  = ch_backupstats + $08
-ch_elementweak_backup    = ch_backupstats + $09
-ch_weaponelement_backup  = ch_backupstats + $0A 
-ch_weaponcategory_backup = ch_backupstats + $0B 
-ch_numhits_backup        = ch_backupstats + $0C
-ch_numhitsmult_backup    = ch_backupstats + $0D
-ch_critrate_backup       = ch_backupstats + $0E    
+ch_backupstats            = $60C0 ;; $10 per character, so fills up to $60FF
+ch_slotindex_backup       = ch_backupstats
+ch_intelligence_backup    = ch_backupstats + $01
+ch_speed_backup           = ch_backupstats + $02
+ch_damage_backup          = ch_backupstats + $03
+ch_hitrate_backup         = ch_backupstats + $04
+ch_defense_backup         = ch_backupstats + $05
+ch_evasion_backup         = ch_backupstats + $06
+ch_magicdefense_backup    = ch_backupstats + $07
+ch_critrate_backup        = ch_backupstats + $08
+ch_weaponelement_backup   = ch_backupstats + $09 
+ch_weaponcategory_backup  = ch_backupstats + $0A 
+ch_attackailment_backup   = ch_backupstats + $0B 
+ch_attackailproc_backup   = ch_backupstats + $0C 
+ch_elementweak_backup     = ch_backupstats + $0D
+ch_elementresist_backup   = ch_backupstats + $0E
+ch_statusresist_backup    = ch_backupstats + $0F
     
 btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes 
-    en_hpmax        = $00 ; 2 bytes                     1 2 
-    en_morale       = $02 ; can be changed with magic   3
-    en_ai           = $03 ;                             4
-    en_evade        = $04 ; can be changed with magic   5
-    en_defense      = $05 ; can be changed with magic   6
-    en_numhits      = $06 ;                             7
-    en_hitrate      = $07 ; can be changed with magic   8
-    en_strength     = $08 ; can be changed with magic   9 
-    en_critrate     = $09 ;                             10
-    en_special      = $0A ;                             11
-    en_attackail    = $0B ;                             12
-    en_category     = $0C ;                             13 
-    en_magdef       = $0D ;                             14 
-    en_elemweakness = $0E ; can be changed with magic   15
-    en_elemresist   = $0F ; can be changed with magic   16
-    en_elemattack   = $10 ;                             17
-    en_speed        = $11 ;                             18
-    en_level        = $12 ;                             19  
-    en_item         = $13 ; can be changed by stealing  20
-    en_extraAI      = $14 ;                             21
+    en_hpmax        = $00 ; 2 bytes                             1 2 
+    en_morale       = $02 ; can be changed with magic           3
+    en_statusresist = $03 ;                                     4
+    en_evade        = $04 ; can be changed with magic           5
+    en_defense      = $05 ; can be changed with magic           6
+    en_numhits      = $06 ;                                     7
+    en_hitrate      = $07 ; can be changed with magic           8
+    en_strength     = $08 ; can be changed with magic           9 
+    en_critrate     = $09 ; can be changed with magic           10
+    en_special      = $0A ;                                     11
+    en_attackail    = $0B ; can be changed with magic           12
+    en_category     = $0C ;                                     13 
+    en_magdef       = $0D ;                                     14 
+    en_elemweakness = $0E ; can be changed with magic           15
+    en_elemresist   = $0F ; can be changed with magic           16
+    en_elemattack   = $10 ;                                     17
+    en_speed        = $11 ;                                     18
+    en_level        = $12 ;                                     19  
+    en_item         = $13 ; can be changed by stealing          20
+    en_BLANK        = $14 ;                                     21
+    
     ;; this block matches enemy ROM layout
     
-    en_aimagpos     = $15 ;                             22
-    en_aiatkpos     = $16 ;                             23
+    en_aimagpos     = $15 ; NOT USED ANYMORE                    22
+    en_extraAI      = $16 ; holds info like counter, guard, etc 23
     en_numhitsmult  = $17 ; can be changed with magic   24
     en_ailments     = $18 ; can be changed with magic   25
     en_hp           = $19 ; $1A ; 2 bytes               26 27
@@ -909,6 +914,7 @@ theend_drawbuf                 = $6800     ; $700 bytes!
 ;  btl_charcmdconsumeid contains 1 byte per character.  If will be the potion index
 ;       for Item, or the spell level for magic
 
+char_order_buf          = $6800 ; for sorting after battle
 btl_charcmdbuf          = $6800 ; 4 bytes per character
 btl_charcmditem         = $6810 ; 1 byte per character for the rest
 btl_charcmdconsumetype  = $6814 ; 
@@ -923,7 +929,9 @@ btl_charhidden          = $6838 ; Hidden status
 btl_charreflect         = $683C ; Reflection status
 btl_charrunic           = $6840 ; Red Runic skill
 btl_charrush            = $6844 ; Fighter Rush skill
-char_order_buf          = $6848 ; 
+btl_charhitmult         = $6848 ; Hit multiplyer
+
+
 
 btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
     btl_chardraw_x      = btl_chardrawinfo+0
@@ -964,7 +972,8 @@ mapobj          = $6F00         ; $100 bytes -- page
  mapobj_pl      = mapobj + $0D   ; bit 7 = talking to player (changes facing), other bits = being shoved by player
  mapobj_tsaptr  = mapobj + $0E
 
-lut_MagicData   = $7000  ; 
+lut_MagicData   = $7000  ; $400 bytes
+lut_EnemyAi     = $7400  ; $800 bytes
  
 enemy_ROM       = $7000  ; $B00 bytes, but on swapped page
  

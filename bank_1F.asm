@@ -79,6 +79,7 @@
 .export lut_RNG
 .export PlayDoorSFX
 .export DrawPlayerBox
+.export ShiftLeft4
 .export ShiftLeft6
 .export BattleBackgroundColor_LUT
 .export LoadMenuCHRPal_Z
@@ -91,6 +92,7 @@
 .export SetBattlePPUAddr
 .export ClearUnformattedCombatBoxBuffer
 .export SetPPUAddr_XA
+.export SkillText_RMage
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -13787,7 +13789,7 @@ lut_CombatSkillBox:
 SkillText_Fighter:   .BYTE $8C, $B2, $B9, $A8, $B5, $00    ; Cover
 SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
 SkillText_BBelt:     .BYTE $99, $A4, $B5, $B5, $BC, $00    ; Parry
-SkillText_RMage:     .BYTE $9C, $A6, $A4, $B1, $00         ; Scan
+SkillText_RMage:     .BYTE $9B, $B6, $B1, $AC, $B8, $00    ; Runic
 SkillText_WMage:     .BYTE $99, $B5, $A4, $BC, $00         ; Pray
 SkillText_BMage:     .BYTE $8F, $B2, $A6, $B8, $B6, $00    ; Focus
 SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; _____
@@ -14704,7 +14706,7 @@ SwapPRG:
 
 OnReset:
     SEI            ; Set Interrupt flag (prevent IRQs from occuring)
-    
+   
     LDA #0    
     LDX #0
    @ResetRAM:
