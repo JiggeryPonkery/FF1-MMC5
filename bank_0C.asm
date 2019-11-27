@@ -7037,31 +7037,21 @@ DoPhysicalAttack_NoAttackerBox:
     
     LDA battle_attackerisplayer    ; 1 if player, 0 if enemy
     BEQ @DoEnemyAilmentChance
-      LDA battle_defenderisplayer  ; 1 if player, 0 if enemy
-      BNE :+
-      LDA btl_battletype            ; if battle type is 3 or 4 (fiend or chaos)
-      CMP #$03                      ; then skip trying to apply ailment
-      BCS @NextHitIteration
-      : LDA btl_defender_category
-        AND $75      ; if enemy has a resistance to the attack, set chance to 1
-        BEQ :+       ; if no resistances found, jump ahead to set ailment chance to weapon's
-           LDA #1   
-           BNE :++   ; jump ahead to save it
-      
-      : LDA btl_attacker_ailmentchance  ; use ailment chance from weapon
-      : STA math_ailmentchance          
+       LDA btl_attacker_attackailment
+       AND btl_defender_statusresist
+       BNE @NextHitIteration            ; enemy has resistance to the status
+        LDA btl_attacker_ailmentchance  ; use ailment chance from weapon
+        STA math_ailmentchance          
         BNE @GetAilmentRandChance  ; skip all the enemy>player stuff with elements and magic defense checks
  
    @DoEnemyAilmentChance:
     LDA #100
     STA math_ailmentchance          ; base chance of connecting ailment = 100
-    LDA btl_defender_elementresist
-    AND btl_attacker_element
-    BEQ :+                          ; if defender resists attacker's element
-      LDA #$00                      ; chance to connect with ailment is zero  (later will be changed to 1)
-      STA math_ailmentchance
-      
-  : LDA #MATHBUF_AILMENTCHANCE
+    LDA btl_defender_statusresist
+    AND btl_attacker_attackailment
+    BNE @NextHitIteration           ; player's equipment is immune to the status, so skip it
+
+    LDA #MATHBUF_AILMENTCHANCE
     LDX btl_defender_magicdefense   ; subtract defender's magdef from ailment chance
     JSR MathBuf_Sub
     
@@ -10858,7 +10848,17 @@ BtlMag_DoStatPrep:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_InflictAilment:
-    JSR BtlMag_DoStatPrep
+   ; JSR BtlMag_DoStatPrep
+   
+    LDA btlmag_effectivity
+    AND btlmag_defender_statusresist
+    BNE @Miss
+
+    JSR BtlMag_LoadBaseHitChance        ; load base hit chance
+    JSR BtlMag_PrepHitAndDamage
+    
+   ; JIGS - ^ changed this
+   
     LDA math_magrandhit             ; get random hit roll
     CMP #200                        ; if rolled an even 200, skip ahead to a 'miss'
     BEQ @Miss
