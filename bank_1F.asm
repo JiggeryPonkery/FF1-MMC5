@@ -15369,27 +15369,27 @@ UnhushTriangle:
 
 ;; JIGS - AND FINALLY the option stuff for the encounter rate.   
     
-  EncounterRateOption:
-  LDA EncRateOption
-  BEQ @LowEncounterRate ; If EncRate is 0 (Low)
+EncounterRateOption:
+    LDA EncRateOption
+    BEQ @LowEncounterRate ; If EncRate is 0 (Low)
         CMP #2
         BEQ @HighEncounterRate ; If EncRate is 2 (High), 
           ;; Otherwise, ExpGain is 1, normal, so do nothing.
         RTS
 
-  @LowEncounterRate:
-  LSR tmp       ; 5 if on land, 1 if on ship
-  RTS
+   @LowEncounterRate:
+    LSR tmp       ; 5 if on land, 1 if on ship
+    RTS
   
-  @HighEncounterRate:
-  LDA #25
-  LDX vehicle          ; check the current vehicle
-  CPX #$04             ; see if it's the ship
-  BNE :+               ; if it is....
+   @HighEncounterRate:
+    LDA #25
+    LDX vehicle          ; check the current vehicle
+    CPX #$04             ; see if it's the ship
+    BNE :+               ; if it is....
     LDA #10            ;   ... 10 / 256 chance instead  (more infrequent battles at sea)
 
-: STA tmp              ; store chance of battle in tmp
-  RTS     
+  : STA tmp              ; store chance of battle in tmp
+    RTS     
   
 
 ;;JIGS - game does this so much, I guess I figure why not make it simpler? But then...
@@ -15401,12 +15401,12 @@ APUOFF:
     RTS    
 
 SaveScreenHelper: 
-  JSR LoadMenuCHRPal
-  LDA #BANK_MENUCHR
-  JSR SwapPRG
-  JSR LoadBattleSpritesForBank_Z
-  LDA #BANK_Z
-  JMP SwapPRG    
+    JSR LoadMenuCHRPal
+    LDA #BANK_MENUCHR
+    JSR SwapPRG
+    JSR LoadBattleSpritesForBank_Z
+    LDA #BANK_Z
+    JMP SwapPRG    
     
     
     
@@ -15420,166 +15420,113 @@ BattleBackgroundColor_LUT:
     
     
 
+
+
+
+
     
     
     
 Magic_ConvertBitsToBytes:
 ; A = character index, either 80, 81, 82, 83, or 00, 01, 02, 03
-AND #$03                 ; Strip away high bits, in case its in the 80s
-CLC                      ; Battle spell list will mess up without this!
-ROR A                    ; Right-shift 3 times (this uses the carry; doing it in Windows calculator, only shift twice)
-ROR A                    ; 
-ROR A                    ; 
-STA CharacterIndexBackup ; back up the character index 
-TAX
-LDA #0
-STA TempSpellListIndex  ; Now set this to 0 to start
-STA GetSpellLevelIndex  ; and this too.
-TAY
+    AND #$03                 ; Strip away high bits, in case its in the 80s
+    CLC                      ; Battle spell list will mess up without this!
+    ROR A                    ; Right-shift 3 times (this uses the carry; doing it in Windows calculator, only shift twice)
+    ROR A                    ; 
+    ROR A                    ; 
+    STA CharacterIndexBackup ; back up the character index 
+    TAX
+    LDA #0
+    ;STA TempSpellListIndex  ; Now set this to 0 to start
+    ;STA SpellLevelIndex  ; and this too.
+    ;STA SpellListLoopCounter
+    LDY #26                 ; 24 spells max - 3 per level, 8 levels; + 2 for those 3 variables, since 0 counts as 1!
 
-@ClearTempSpellList:
-    STA TempSpellList, Y ; Fill the temp list with 0s
-    INY                  ; increment Y
-    CPY #24              ; 24 spells max - 3 per level, 8 levels
-    BNE @ClearTempSpellList ; When Y = 24, list is filled!
+   @ClearTempSpellList:
+    STA TempSpellList, Y    ; Fill the temp list with 0s
+    DEY                     ; decrement Y
+    BPL @ClearTempSpellList ; When Y = FF, list is cleared!
 
-JSR GetSpellLevel 
-LDA ch_spells, X   ; level 1 spells
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+1, X ; level 2 spells
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+2, X
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+3, X
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+4, X
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+5, X
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+6, X
-JSR UnrollSpell
-
-JSR GetSpellLevel
-LDA ch_spells+7, X
-JSR UnrollSpell
-RTS
-
-GetSpellLevel:
-;A = GetSpellLevelIndex after the first loop
-ASL A                  ; double it
-TAY 
-LDA SpellList_LUT, Y   ; common technique for getting a specific address in tmp
-STA tmp
-LDA SpellList_LUT+1, Y
-STA tmp+1
-RTS
+   @SpellLoop: 
+    TXA
+    CLC
+    ADC SpellListLoopCounter
+    TAX   
+    LDA ch_spells, X   ; level 1 spells
+    JSR UnrollSpell
+    INC SpellListLoopCounter
+    LDA SpellListLoopCounter
+    CMP #$08
+    BNE @SpellLoop
+    RTS
 
 UnrollSpell:
-@Spell8:
+   @Spell8:
     ASL A
     BCC @Spell7
-        LDY #$07
+        LDY #$01
         JSR UnrollSpell_ConvertToSpellList
-@Spell7:
-    ASL A 
+   @Spell7:
+    ASL A
     BCC @Spell6
-        LDY #$06 
+        LDY #$02
         JSR UnrollSpell_ConvertToSpellList
-    
-@Spell6:
-    ASL A 
+   @Spell6:
+    ASL A
     BCC @Spell5
-        LDY #$05 
+        LDY #$03 
         JSR UnrollSpell_ConvertToSpellList
-
-@Spell5:
-    ASL A 
+   @Spell5:
+    ASL A
     BCC @Spell4
         LDY #$04 
         JSR UnrollSpell_ConvertToSpellList
-    
-@Spell4:
-    ASL A 
+   @Spell4:
+    ASL A
     BCC @Spell3
-        LDY #$03 
+        LDY #$05
         JSR UnrollSpell_ConvertToSpellList  
-    
-@Spell3:
-    ASL A 
+   @Spell3:
+    ASL A
     BCC @Spell2
-        LDY #$02 
+        LDY #$06 
         JSR UnrollSpell_ConvertToSpellList   
-
-@Spell2:
-    ASL A 
+   @Spell2:
+    ASL A
     BCC @Spell1
-        LDY #$01 
+        LDY #$07 
         JSR UnrollSpell_ConvertToSpellList   
-    
-@Spell1:
-    ASL A 
+   @Spell1:
+    ASL A
     BCC @End
-        LDY #$00 
+        LDY #$08 
         JSR UnrollSpell_ConvertToSpellList
-    
-@End:                       ; no more spells left to fiddle with...
-INC GetSpellLevelIndex      ; increase for each level: 0, 1, 2, 3, 4, 5, 6, 7
-LDA GetSpellLevelIndex
-LDX #03                     ; 3 spells max per level!
-JSR MultiplyXA              ; Multiply 3 * Spell Level Index
-STA TempSpellListIndex      ; and save as the temp spell list index. So level 1 * 3 is 3, level 2 * 3 is 6...
-LDA GetSpellLevelIndex      ; So even if a character knows more than 3 spells, the list will swap back to write over them
-LDX CharacterIndexBackup    ; ...I hope
-RTS
+        
+   @End:                       ; no more spells left to fiddle with...
+    INC SpellLevelIndex        ; increase for each level: 0, 1, 2, 3, 4, 5, 6, 7
+    LDA SpellLevelIndex
+    LDX #03                     ; 3 spells max per level!
+    JSR MultiplyXA              ; Multiply 3 * Spell Level Index
+    STA TempSpellListIndex      ; and save as the temp spell list index. So level 1 * 3 is 3, level 2 * 3 is 6...
+    LDA SpellLevelIndex         ; So even if a character knows more than 3 spells, the list will swap back to write over them
+    LDX CharacterIndexBackup    ; ...I hope
+    RTS
   
 UnrollSpell_ConvertToSpellList:
     PHA                     ; backup the whole lot of this level's spells
-    LDA (tmp), Y            ; tmp is a 2-byte address which, at the moment, should be "Level1Spells_LUT"
-    LDY TempSpellListIndex 
-    STA TempSpellList, Y    ; and A should be $08 now.
-    INY                     ; Move the index over one
-    STY TempSpellListIndex  ; and save it
+    LDX SpellLevelIndex     ; Spell level (0 based)
+    LDA #$08
+    JSR MultiplyXA          ; spell level * 8
+    STA tmp
+    TYA                     ; Spell ID - spell level
+    CLC
+    ADC tmp                 ; Spell ID + Spell Level = Real Spell ID! 
+    LDX TempSpellListIndex 
+    STA TempSpellList, X    
+    INC TempSpellListIndex  
     PLA                     ; and pull back from the stack to continue
     RTS
-
-SpellList_LUT:
-.word Level1Spells_LUT
-.word Level2Spells_LUT
-.word Level3Spells_LUT
-.word Level4Spells_LUT
-.word Level5Spells_LUT
-.word Level6Spells_LUT
-.word Level7Spells_LUT
-.word Level8Spells_LUT
     
-Level1Spells_LUT:
-.byte $08,$07,$06,$05,$04,$03,$02,$01 ; These are reversed! 
-Level2Spells_LUT:
-.byte $10,$0F,$0E,$0D,$0C,$0B,$0A,$09 ; So spells are stored backwards kinda...
-Level3Spells_LUT:
-.byte $18,$17,$16,$15,$14,$13,$12,$11 ; Since it pulls the leftmost bit into carry to check first
-Level4Spells_LUT:
-.byte $20,$1F,$1E,$1D,$1C,$1B,$1A,$19 ;  %10010001 - the 1 on the right is the fourth black magic spell
-Level5Spells_LUT:                     ;    \ ^
-.byte $28,$27,$26,$25,$24,$23,$22,$21 ; The 1|on the left is the first white magic spell
-Level6Spells_LUT:                     ;      |
-.byte $30,$2F,$2E,$2D,$2C,$2B,$2A,$29 ; and this is the fourth white magic spell
-Level7Spells_LUT:
-.byte $38,$37,$36,$35,$34,$33,$32,$31
-Level8Spells_LUT:
-.byte $40,$3F,$3E,$3D,$3C,$3B,$3A,$39
 
     
 

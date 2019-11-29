@@ -1084,7 +1084,7 @@ SPELL40:
 SPELL41:
 ;.byte $9C,$98,$8F,$9D,$00 ; SOFT
 ;.byte $9C,$98,$8F,$9D,$FF,$FF,$FF,$00  ;  SOFT___
-.byte $EA,$FF,$8F,$97,$98,$A0,$FF,$FF,$FF,$00  ;  (Time)_FLOW_
+.byte $EA,$FF,$8F,$95,$98,$A0,$FF,$00  ;  (Time)_FLOW_
 SPELL42:
 ;.byte $8E,$A1,$92,$9D,$00 ; EXIT
 .byte $8E,$A1,$92,$9D,$FF,$FF,$FF,$00  ;  EXIT___

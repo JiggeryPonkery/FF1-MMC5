@@ -631,9 +631,11 @@ LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
  
 TempSpellList        = $6000 ; to 6017 ; 24 bytes
 TempSpellListIndex   = $6018
-GetSpellLevelIndex   = $6019
-CharacterIndexBackup = $601A
-CharacterEquipBackup = $601B
+SpellLevelIndex      = $6019
+SpellListLoopCounter = $601A
+CharacterIndexBackup = $601B
+CharacterEquipBackup = $601C
+
 
 orbbox_scrollwork    = $6100 ; for menu, $40 bytes   
 statusbox_scrollwork = $6140 ; for menu, $40 bytes   

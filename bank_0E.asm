@@ -6299,7 +6299,7 @@ UseMagic_CheckMP:
 MagicMenu_ForgetSpell:
     LDX cursor
     LDA BigSpellLevel_LUT, X         ; get spell level
-    STA GetSpellLevelIndex           ; store in this snazzy variable
+    STA SpellLevelIndex           ; store in this snazzy variable
     
     LDX cursor
     LDA TempSpellList, X             ; get spell ID
@@ -6313,7 +6313,7 @@ MagicMenu_ForgetSpell:
     LDA ConvertSpellByteToBit_LUT, X ; convert the ID to a single bit
     STA tmp                          ; store in tmp
     
-    LDA GetSpellLevelIndex           ; get the spell level
+    LDA SpellLevelIndex           ; get the spell level
     CLC                        
     ADC CharacterIndexBackup         ; add the character's index
     ADC #ch_spells - ch_stats        ; and ch_spells
@@ -6579,7 +6579,7 @@ TryLearnSpell:
     LSR A
     LSR A
     
-    STA GetSpellLevelIndex ;; JIGS - save this for learning the spell later!
+    STA SpellLevelIndex ;; JIGS - save this for learning the spell later!
     
     TAY                 ; put spell level in Y
     LDA (tmp), Y        ; use it as index to get the desired permissions byte
@@ -6608,7 +6608,7 @@ TryLearnSpell:
     CPX #24
     BNE @KnownSpellsLoop
    
-    LDX GetSpellLevelIndex ; use it
+    LDX SpellLevelIndex ; use it
     LDA SpellLevel_LUT, X  ; to get THIS index...
     TAX  
     
@@ -6645,7 +6645,7 @@ TryLearnSpell:
 
     ;; Spell Level + Character Index + Start of spell list
     
-    LDA GetSpellLevelIndex
+    LDA SpellLevelIndex
     CLC
     ADC CharacterIndexBackup
     TAX
