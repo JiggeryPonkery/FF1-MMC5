@@ -1679,7 +1679,7 @@ DrawTitleWords:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    ReturnToTitle:
+ReturnToTitle:
     PLA
     PLA ; remove the "JSR NewGamePartyGeneration" bit from the stack?
     JMP CancelNewGame
@@ -1771,7 +1771,7 @@ NewGamePartyGeneration:
     ORA ptygen_class, X  ; combine with class bits
     STA ch_class, Y      ; and save!
     
-    LDA #8
+    LDA #7
     STA tmp
     
    @NameLoop: 
@@ -1781,6 +1781,12 @@ NewGamePartyGeneration:
     INX
     DEC tmp
     BNE @NameLoop
+    
+    LDA #0
+    STA playtimer
+    STA playtimer+1
+    STA playtimer+2
+    STA playtimer+3   ; and reset the timer to 0
     RTS
     
 
