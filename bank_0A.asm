@@ -52,6 +52,7 @@ lut_EnemyAttack:
 .word EnemyAttack24
 .word EnemyAttack25
 .word EnemyAttack26
+.word EnemyAttack27
 
 EnemyAttack1:
 .byte $8F,$9B,$98,$9C,$9D,$00             ; FROST
@@ -105,6 +106,9 @@ EnemyAttack25:
 .byte $9C,$A0,$92,$9B,$95,$00             ; SWIRL
 EnemyAttack26:
 .byte $9D,$98,$9B,$97,$8A,$8D,$98,$00     ; TORNADO
+EnemyAttack27:
+.byte $92,$96,$99,$FF,$99,$9E,$97,$8C,$91,$00 ; IMP PUNCH
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;  Enemy names [$94E0 :: 0x2D4F0]

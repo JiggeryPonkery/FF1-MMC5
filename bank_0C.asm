@@ -8750,11 +8750,11 @@ ClearEnemyID:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 EnemyAi_ShouldPerformAction:
-    STA btl_randomplayer       ; store rate
+    STA tmp                    ; store rate
     LDA #$00
     LDX #$80
     JSR RandAX                 ; rand[ 0, 128 ]
-    CMP btl_randomplayer       ; C clear if rand is less than rate (action should be performed)
+    CMP tmp                    ; C clear if rand is less than rate (action should be performed)
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8821,8 +8821,10 @@ Enemy_DoAi:
         JMP ChooseAndAttackPlayer   ; no MP left for this spell, do physical attack
    
    @FirstSpellCast: 
+    PHA
     ORA #$80
     STA (EnemyAIPointer), Y         ; set the high bit
+    PLA
     JMP Enemy_DoMagicEffect
    
    @SecondSpellCast: 
@@ -9858,11 +9860,6 @@ Battle_PlMag_TargetAllEnemies:
     
 Enemy_DoMagicEffect:
 ;            @enram =   btltmp+$A ; $9A     ; input - points to this enemy's stats in RAM
-
-    CLC
-    ADC #06
-    ;; JIGS - I moved magic stuff to $7000 in RAM
-    ;; there are 6 new slots before enemy attacks??
     
     STA btl_attackid                        ; store spell/attack we're using
     ;JSR ClearAltMessageBuffer

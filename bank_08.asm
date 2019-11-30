@@ -177,56 +177,64 @@ MagicData:
 ;; removed heal and pure data
 
 ;; Enemy attacks
-.byte $20,$18,$20,$01,$01,$00,$00,$00 ; 10 FROST    
-.byte $20,$0C,$10,$01,$01,$00,$00,$00 ; 11 HEAT     
-.byte $05,$02,$02,$02,$03,$00,$00,$00 ; 12 GLANCE   
-.byte $00,$10,$01,$02,$03,$00,$00,$00 ; 13 GAZE     
-.byte $18,$08,$01,$01,$03,$00,$00,$00 ; 14 FLASH    
-.byte $20,$07,$10,$01,$01,$00,$00,$00 ; 15 SCORCH   
-.byte $10,$01,$80,$01,$03,$00,$00,$16 ; 16 CRACK      ; Fell into crack
-.byte $00,$01,$08,$02,$03,$00,$00,$15 ; 17 SQUINT     ; Erased
-.byte $18,$11,$00,$02,$01,$00,$00,$00 ; 18 STARE      ; 
-.byte $10,$01,$04,$02,$03,$00,$00,$1F ; 19 GLARE      ; Exile to 4th dimension
-.byte $20,$32,$20,$01,$01,$00,$00,$00 ; 1A BLIZZARD   ; 
-.byte $20,$40,$10,$01,$01,$00,$00,$00 ; 1B BLAZE      ; 
-.byte $20,$60,$10,$01,$01,$00,$00,$00 ; 1C INFERNO    ; 
-.byte $20,$18,$10,$01,$01,$00,$00,$00 ; 1D CREMATE    ; 
-.byte $05,$02,$02,$01,$03,$00,$00,$4D ; 1E POISON     ; Poison smoke - JIGS - doesn't make sense, never did. Poison turns to stone? Sure it stops time now, why not.
-.byte $00,$10,$00,$01,$03,$00,$00,$00 ; 1F TRANCE     ; 
-.byte $20,$44,$02,$01,$01,$00,$00,$00 ; 20 POISON     ; 
-.byte $20,$4C,$40,$01,$01,$00,$00,$00 ; 21 THUNDER    ; 
-.byte $00,$01,$08,$01,$03,$00,$00,$15 ; 22 TOXIC      ; Erased
-.byte $18,$08,$01,$02,$03,$00,$00,$00 ; 23 SNORTING 
-.byte $30,$50,$00,$01,$01,$00,$00,$00 ; 24 NUCLEAR  
-.byte $18,$08,$01,$01,$03,$00,$00,$00 ; 25 INK      
-.byte $00,$04,$02,$01,$03,$00,$00,$00 ; 26 STINGER  
-.byte $20,$10,$01,$02,$03,$00,$00,$00 ; 27 DAZZLE   
-.byte $20,$40,$00,$01,$01,$00,$00,$00 ; 28 SWIRL      
-.byte $20,$40,$00,$01,$01,$00,$00,$00 ; 29 TORNADO    
+.byte $20,$18,$20,$01,$01,$00,$00,$00 ; 00 FROST    
+.byte $20,$0C,$10,$01,$01,$00,$00,$00 ; 01 HEAT     
+.byte $05,$02,$02,$02,$03,$00,$00,$00 ; 02 GLANCE   
+.byte $00,$10,$01,$02,$03,$00,$00,$00 ; 03 GAZE     
+.byte $18,$08,$01,$01,$03,$00,$00,$00 ; 04 FLASH    
+.byte $20,$07,$10,$01,$01,$00,$00,$00 ; 05 SCORCH   
+.byte $10,$01,$80,$01,$03,$00,$00,$16 ; 06 CRACK      ; Fell into crack
+.byte $00,$01,$08,$02,$03,$00,$00,$15 ; 07 SQUINT     ; Erased
+.byte $18,$11,$00,$02,$01,$00,$00,$00 ; 08 STARE      ; 
+.byte $10,$01,$04,$02,$03,$00,$00,$1F ; 09 GLARE      ; Exile to 4th dimension
+.byte $20,$32,$20,$01,$01,$00,$00,$00 ; 0A BLIZZARD   ; 
+.byte $20,$40,$10,$01,$01,$00,$00,$00 ; 0B BLAZE      ; 
+.byte $20,$60,$10,$01,$01,$00,$00,$00 ; 0C INFERNO    ; 
+.byte $20,$18,$10,$01,$01,$00,$00,$00 ; 0D CREMATE    ; 
+.byte $05,$02,$02,$01,$03,$00,$00,$4D ; 0E POISON     ; Poison smoke - JIGS - doesn't make sense, never did. Poison turns to stone? Sure it stops time now, why not.
+.byte $00,$10,$00,$01,$03,$00,$00,$00 ; 0F TRANCE     ; 
+.byte $20,$44,$02,$01,$01,$00,$00,$00 ; 10 POISON     ; 
+.byte $20,$4C,$40,$01,$01,$00,$00,$00 ; 11 THUNDER    ; 
+.byte $00,$01,$08,$01,$03,$00,$00,$15 ; 12 TOXIC      ; Erased
+.byte $18,$08,$01,$02,$03,$00,$00,$00 ; 13 SNORTING 
+.byte $30,$50,$00,$01,$01,$00,$00,$00 ; 14 NUCLEAR  
+.byte $18,$08,$01,$01,$03,$00,$00,$00 ; 15 INK      
+.byte $00,$04,$02,$01,$03,$00,$00,$00 ; 16 STINGER  
+.byte $20,$10,$01,$02,$03,$00,$00,$00 ; 17 DAZZLE   
+.byte $20,$40,$00,$01,$01,$00,$00,$00 ; 18 SWIRL      
+.byte $20,$40,$00,$01,$01,$00,$00,$00 ; 19 TORNADO    
 ; $D0 bytes
-
+;      ╒ Hit Rate
+;      |   ╒ Effectivity
+;      |   |   ╒ Element
+;      |   |   |   ╒ Target
+;      |   |   |   |   ╒ Effect
+;      |   |   |   |   |   ╒ Graphic
+;      |   |   |   |   |   |   ╒ Palette
+;      |   |   |   |   |   |   |   ╒ Message
+;      v   v   v   v   v   v   v   v  
+.byte $10,$05,$00,$01,$01,$00,$20,$00 ; 1A IMP PUNCH
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 1B
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 1C
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 1D
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 1E
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 1F
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 20
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 21
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 22
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 23
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 24
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 25
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 26
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 27
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 28
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 29
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 2A
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 2B
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 2C
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 2D
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 2E
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 2F
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 30
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 31
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 32
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 33
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 34
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 35
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 36
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 37
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 38
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 39
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 3A
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 3B
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 3C
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 3D
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 3E
-.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 3F
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -243,123 +251,123 @@ MagicData:
 EnemyAIData:
   
 ;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;00 IMP	
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;01 GrIMP	
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;02 WOLF	
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;03 GrWolf	
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;04 WrWolf 
+.byte $00,$05,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$FF,$FF,$FF,$FF ;00 IMP	
+.byte $00,$15,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$1A,$1A,$1A,$1A ;01 GrIMP	
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;02 WOLF	
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;03 GrWolf	
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;04 WrWolf 
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ;05 FrWOLF 
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;06 IGUANA 
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;06 IGUANA 
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ;07 AGAMA
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ;08 SAURIA
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;09 GIANT
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;0A FrGIANT
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;0B R`GIANT
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;0C SAHAG
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;0D R`SAHAG
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;0E WzSAHAG
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;0F PIRATE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;10 KYZOKU
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;11 SHARK
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;12 GrSHARK
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;09 GIANT
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0A FrGIANT
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0B R`GIANT
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0C SAHAG
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0D R`SAHAG
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0E WzSAHAG
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0F PIRATE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;10 KYZOKU
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;11 SHARK
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;12 GrSHARK
 .byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ;13 OddEYE
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ;14 BigEYE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;15 BONE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;16 R`BONE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;17 CREEP
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;18 CRAWL
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;19 HYENA
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;15 BONE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;16 R`BONE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;17 CREEP
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;18 CRAWL
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;19 HYENA
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ;1A CEREBUS
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;1B OGRE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;1C GrOGRE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1B OGRE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1C GrOGRE
 .byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1D WzOGRE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;1E ASP
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;1F COBRA
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;20 SeaSNAKE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;21 SCORPION
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;22 LOBSTER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;23 BULL
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;24 ZomBULL
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;25 TROLL
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;26 SeaTROLL
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;27 SHADOW
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;28 IMAGE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;29 WRAITH
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;2A GHOST
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;2B ZOMBIE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;2C GHOUL 
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;2D GEIST
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;2E SPECTER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;2F WORM
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1E ASP
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1F COBRA
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;20 SeaSNAKE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;21 SCORPION
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;22 LOBSTER
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;23 BULL
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;24 ZomBULL
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;25 TROLL
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;26 SeaTROLL
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;27 SHADOW
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;28 IMAGE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;29 WRAITH
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2A GHOST
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2B ZOMBIE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2C GHOUL 
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2D GEIST
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2E SPECTER
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2F WORM
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ;30 Sand W
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;31 Grey W
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;31 Grey W
 .byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ;32 EYE
 .byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ;33 PHANTOM
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;34 MEDUSA
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;35 GrMEDUSA
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;36 CATMAN
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;34 MEDUSA
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;35 GrMEDUSA
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;36 CATMAN
 .byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ;37 MANCAT
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;38 PEDE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;39 GrPEDE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;3A TIGER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;3B Saber T
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;38 PEDE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;39 GrPEDE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3A TIGER
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3B Saber T
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ;3C VAMPIRE
 .byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ;3D WzVAMP
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;3E GARGOYLE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3E GARGOYLE
 .byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3F R`GOYLE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;40 EARTH
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;41 FIRE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;40 EARTH
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;41 FIRE
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ;42 Frost D
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ;43 Red D
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;44 ZombieD
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;45 SCUM
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;46 MUCK
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;47 OOZE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;48 SLIME
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;49 SPIDER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;4A ARACHNID
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;44 ZombieD
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;45 SCUM
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;46 MUCK
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;47 OOZE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;48 SLIME
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;49 SPIDER
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4A ARACHNID
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ;4B MATICOR
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;4C SPHINX
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;4D R`ANKYLO
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;4E ANKYLO
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;4F MUMMY
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;50 WzMUMMY
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;51 COCTRICE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4C SPHINX
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4D R`ANKYLO
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4E ANKYLO
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4F MUMMY
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;50 WzMUMMY
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;51 COCTRICE
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ;52 PERILISK
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;53 WYVERN
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;54 WYRM
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;55 TYRO
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;56 T REX
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;57 CARIBE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;58 R`CARIBE
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;59 GATOR
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;5A FrGATOR
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;5B OCHO
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;5C NAOCHO
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;5D HYDRA
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;53 WYVERN
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;54 WYRM
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;55 TYRO
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;56 T REX
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;57 CARIBE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;58 R`CARIBE
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;59 GATOR
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5A FrGATOR
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5B OCHO
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5C NAOCHO
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5D HYDRA
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ;5E R`HYDRA
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;5F GAURD
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;60 SENTRY
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;61 WATER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;62 AIR
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5F GAURD
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;60 SENTRY
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;61 WATER
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;62 AIR
 .byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ;63 NAGA
 .byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ;64 GrNAGA
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ;65 CHIMERA
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ;66 JIMERA
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;67 WIZARD
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;67 WIZARD
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ;68 SORCERER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;69 GARLAND
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;69 GARLAND
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ;6A Gas D
 .byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ;6B Blue D
 .byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6C MudGOL
 .byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ;6D RockGOL
 .byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ;6E IronGOL
 .byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6F BADMAN
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;70 EVILMAN
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;70 EVILMAN
 .byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ;71 ASTOS
 .byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ;72 MAGE
 .byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ;73 FIGHTER
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00 ;74 MADPONY
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;74 MADPONY
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ;75 NITEMARE
 .byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ;76 WarMECH
 .byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ;77 LICH
