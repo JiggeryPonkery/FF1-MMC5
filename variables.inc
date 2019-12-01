@@ -353,6 +353,9 @@ btltmp                  = $70 ; 16 bytes
 ;;
 
 ;; leveling up
+eob_gp_reward           = $6B ; + C
+eob_exp_reward          = $6D ; + E ;; these two can't be in the $70s because btltmp gets swapped when printing
+
 LevelUp_Pointer         = $70
 LevelUp_Reward          = $72
 lvlup_curexp            = $74  ; 2 byte pointer to character's current EXP ; also used in status menu
@@ -360,8 +363,6 @@ lvlup_exptoadv          = $76  ; 2 byte pointer to EXP needed to advance ; also 
 battlereward            = $78  ; 3 bytes.  Note that while this var is 3 bytes, this stop behaving properly
 ;                              ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
 ;                              ;  will never receive more than 65535 XP/GP in any one battle.
-eob_gp_reward           = $7C ; + D
-eob_exp_reward          = $7E ; + F
 lvlup_chstats           = $80  ; 2 byte pointer to character's OB stats
 
 CharStatsPointer        = $80 
