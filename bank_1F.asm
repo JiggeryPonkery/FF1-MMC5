@@ -7274,32 +7274,10 @@ DrawDialogueString:
       PHA
       LDA text_ptr+1
       PHA
-      LDA ch_name          ; copy lead character's name to format buffer
-      STA format_buf-7
-      LDA ch_name+1       
-      STA format_buf-6    
-      LDA ch_name+2       
-      STA format_buf-5    
-      LDA ch_name+3       
-      STA format_buf-4
-      LDA ch_name+4       
-      STA format_buf-3
-      LDA ch_name+5       
-      STA format_buf-2
-      LDA ch_name+6       
-      STA format_buf-1      
       
-      LDX #7
-     @FixNameLoop:
-      LDA format_buf-7, X ;; JIGS - this goes backwards through the name, finding the $FFs at the end
-      CMP #$FF
-      BNE :+
-      
-     @ReplaceFF:          ;; then replaces with a 0, so a 4 letter name doesn't print 4 spaces after it.
-      LDA #0              ;; you should still plan your dialogue for 7 letter names though!
-      STA format_buf-7, X
-    : DEX
-      BNE @FixNameLoop      
+      LDX #0               ; X = lead character only
+      JSR DrawPlayerName  
+      JSR FixPlayerName
 
       LDA #<(format_buf-7) ; make text_ptr point to the format buffer
       STA text_ptr
@@ -8060,20 +8038,7 @@ DrawComplexString:
     BNE @StatCode_Over00
 
       LDX char_index 
-      LDA ch_name, X 
-      STA format_buf-7
-      LDA ch_name+1, X
-      STA format_buf-6
-      LDA ch_name+2, X
-      STA format_buf-5
-      LDA ch_name+3, X
-      STA format_buf-4
-      LDA ch_name+4, X
-      STA format_buf-3
-      LDA ch_name+5, X
-      STA format_buf-2
-      LDA ch_name+6, X
-      STA format_buf-1
+      JSR DrawPlayerName
 
       JSR @Save              ; need to draw a substring, so save current string
       LDA #<(format_buf-7)   ; set string source pointer to temp buffer
@@ -8328,6 +8293,37 @@ DrawComplexString:
     JSR SwapPRG_L      ; swap the data bank back in
     JMP @Draw_NoStall  ;  and continue with text processing
 
+
+DrawPlayerName:
+    LDA ch_name, X 
+    STA format_buf-7
+    LDA ch_name+1, X
+    STA format_buf-6
+    LDA ch_name+2, X
+    STA format_buf-5
+    LDA ch_name+3, X
+    STA format_buf-4
+    LDA ch_name+4, X
+    STA format_buf-3
+    LDA ch_name+5, X
+    STA format_buf-2
+    LDA ch_name+6, X
+    STA format_buf-1
+    RTS
+    
+FixPlayerName:    
+    LDX #7
+   @FixNameLoop:
+    LDA format_buf-7, X ;; JIGS - this goes backwards through the name, finding the $FFs at the end
+    CMP #$FF
+    BNE :+
+
+   @ReplaceFF:          ;; then replaces with a 0, so a 4 letter name doesn't print 4 spaces after it.
+    LDA #0              ;; you should still plan your dialogue for 7 letter names though!
+    STA format_buf-7, X
+  : DEX
+    BNE @FixNameLoop      
+    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -14219,7 +14215,13 @@ DrawBattleString_ControlCode:
     BEQ @Exit               ; if 'FF', that signals an empty slot, so don't print anything.
     JSR DrawEnemyName       ; then draw that enemy's name
     JMP DrawEnemyNumber    
-    
+
+  @PrintEquipmentName:     ; code:  0D
+    LDA #BANK_ITEMS
+    JSR SwapPRG_L
+    LDA #>lut_WeaponArmorNamePtrTbl
+    LDX #<lut_WeaponArmorNamePtrTbl
+    JMP @DrawAttackName
     
   @PrintAttackName:     ; code:  0E
     LDA #BANK_ITEMS
@@ -14229,31 +14231,22 @@ DrawBattleString_ControlCode:
     ;; JIGS - kind of pointless... also now items can do enemy attacks?
     
     LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
-    CMP #ENEMY_ATTACK_START         ; if it's >= 42, then it's a special enemy attack
-    BCC @PrintAttackName_AsItem     ; but less than 42, print it as an item (magic spell)
+    CMP #ENEMY_ATTACK_START         ; if it's >= then it's a special enemy attack, C is set
+    BCC :+   
     
-    CMP #BATTLESPELLS
-    BCS :+
-        ADC #BATTLESPELLS_START
-        BNE @PrintAttackName_AsItem
-    
-  : LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
+    LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
     LDX #<lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ;   index starts at $41
-    BEQ :+ ;; low byte is 0 since its at the start of the bank?
-    
-  @PrintAttackName_AsItem: ; attack is less than $42
+    BEQ @DrawAttackName ;; low byte is 0 since its at the start of the bank?    
+
+   @PrintAttackName_AsItem: ; attack is less than $42
     LDA #>lut_ItemNamePtrTbl
     LDX #<lut_ItemNamePtrTbl
-    
-  : JSR BattleDrawLoadSubSrcPtr
+   
+   @DrawAttackName:   
+    JSR BattleDrawLoadSubSrcPtr
     JMP DrawBattleSubString_Max8
     
-  @PrintEquipmentName:     ; code:  0D
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-    LDA #>lut_WeaponArmorNamePtrTbl
-    LDX #<lut_WeaponArmorNamePtrTbl
-    JMP :-
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

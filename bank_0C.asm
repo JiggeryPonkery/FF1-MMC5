@@ -4192,8 +4192,8 @@ lut_WeaponSwingTSA:
 ;;  lut for assigning palettes to in-battle char sprites  [$A03C :: 0x3204C]
 ;;
 lut_InBattleCharPaletteAssign:
-  .BYTE 1, 0, 0, 1, 1, 0
-  .BYTE 1, 1, 0, 1, 1, 0
+  .BYTE 1, 2, 0, 1, 1, 0
+  .BYTE 1, 2, 0, 1, 1, 0
   
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4380,10 +4380,13 @@ DrawAttackBox:
     ; source = magic
     LDA btl_attackid        ; see if the attack type is magic or a special attack
     CMP #ENEMY_ATTACK_START
-    BCS :+                  ; if its an enemy attack, skip changing the ID
+    BCS @EnemyAttack        ; if its an enemy attack, skip changing the ID
      ; CLC
       ADC #MG_START         ; add MG_START to the index to convert from a magic index to an item index.
       BNE :+
+    @EnemyAttack:
+      SBC #ENEMY_ATTACK_START ; subtract all the other magic spells to make it a 0-based index for the names
+      JMP :+ 
       
   @NotMagic:
     CMP #$01                ; if source=1, it's a Item

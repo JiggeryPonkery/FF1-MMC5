@@ -26,33 +26,33 @@ BANK_THIS = $0A
 ;; First, monster attacks:
 lut_EnemyAttack:
 
-.word EnemyAttack1
-.word EnemyAttack2
-.word EnemyAttack3
-.word EnemyAttack4
-.word EnemyAttack5
-.word EnemyAttack6
-.word EnemyAttack7
-.word EnemyAttack8
-.word EnemyAttack9
-.word EnemyAttack10
-.word EnemyAttack11
-.word EnemyAttack12
-.word EnemyAttack13
-.word EnemyAttack14
-.word EnemyAttack15
-.word EnemyAttack16
-.word EnemyAttack17
-.word EnemyAttack18
-.word EnemyAttack19
-.word EnemyAttack20
-.word EnemyAttack21
-.word EnemyAttack22
-.word EnemyAttack23
-.word EnemyAttack24
-.word EnemyAttack25
-.word EnemyAttack26
-.word EnemyAttack27
+.word EnemyAttack1   ; 0 
+.word EnemyAttack2   ; 1 
+.word EnemyAttack3   ; 2 
+.word EnemyAttack4   ; 3 
+.word EnemyAttack5   ; 4 
+.word EnemyAttack6   ; 5 
+.word EnemyAttack7   ; 6 
+.word EnemyAttack8   ; 7 
+.word EnemyAttack9   ; 8 
+.word EnemyAttack10  ; 9 
+.word EnemyAttack11  ; A 
+.word EnemyAttack12  ; B 
+.word EnemyAttack13  ; C 
+.word EnemyAttack14  ; D 
+.word EnemyAttack15  ; E 
+.word EnemyAttack16  ; F 
+.word EnemyAttack17  ; 10
+.word EnemyAttack18  ; 11
+.word EnemyAttack19  ; 12
+.word EnemyAttack20  ; 13
+.word EnemyAttack21  ; 14
+.word EnemyAttack22  ; 15
+.word EnemyAttack23  ; 16
+.word EnemyAttack24  ; 17
+.word EnemyAttack25  ; 18
+.word EnemyAttack26  ; 19
+.word EnemyAttack27  ; 1A
 
 EnemyAttack1:
 .byte $8F,$9B,$98,$9C,$9D,$00             ; FROST
@@ -617,116 +617,118 @@ lut_ItemNamePtrTbl:
 .word SPELL63      ; 6E ;  MG_ZAP  
 .word SPELL64      ; 6F ;  MG_XXXX 
 
-.word MoneyChest1  ; 70 
-.word MoneyChest2  ; 71
-.word MoneyChest3  ; 72
-.word MoneyChest4  ; 73
-.word MoneyChest5  ; 74
-.word MoneyChest6  ; 75
-.word MoneyChest7  ; 76
-.word MoneyChest8  ; 77
-.word MoneyChest9  ; 78
-.word MoneyChest10 ; 79
-.word MoneyChest11 ; 7A
-.word MoneyChest12 ; 7B
-.word MoneyChest13 ; 7C
-.word MoneyChest14 ; 7D
-.word MoneyChest15 ; 7E
-.word MoneyChest16 ; 7F
-.word MoneyChest17 ; 80
-.word MoneyChest18 ; 81
-.word MoneyChest19 ; 82
-.word MoneyChest20 ; 83
-.word MoneyChest21 ; 84
-.word MoneyChest22 ; 85
-.word MoneyChest23 ; 86
-.word MoneyChest24 ; 87
-.word MoneyChest25 ; 88
-.word MoneyChest26 ; 89
-.word MoneyChest27 ; 8A
-.word MoneyChest28 ; 8B
-.word MoneyChest29 ; 8C
-.word MoneyChest30 ; 8D
-.word MoneyChest31 ; 8E
-.word MoneyChest32 ; 8F
-.word MoneyChest33 ; 90
-.word MoneyChest34 ; 91
-.word MoneyChest35 ; 92
-.word MoneyChest36 ; 93
-.word MoneyChest37 ; 94
-.word MoneyChest38 ; 95
-.word MoneyChest39 ; 96
-.word MoneyChest40 ; 97
-.word MoneyChest41 ; 98
-.word MoneyChest42 ; 99
-.word MoneyChest43 ; 9A
-.word MoneyChest44 ; 9B
-.word MoneyChest45 ; 9C
-.word MoneyChest46 ; 9D
-.word MoneyChest47 ; 9E
-.word MoneyChest48 ; 9F
-.word MoneyChest49 ; A0
-.word MoneyChest50 ; A1
-.word MoneyChest51 ; A2
-.word MoneyChest52 ; A3
-.word MoneyChest53 ; A4
-.word MoneyChest54 ; A5
-.word MoneyChest55 ; A6
-.word MoneyChest56 ; A7
-.word MoneyChest57 ; A8
-.word MoneyChest58 ; A9
-.word MoneyChest59 ; AA
-.word MoneyChest60 ; AB
-.word MoneyChest61 ; AC
-.word MoneyChest62 ; AD
-.word MoneyChest63 ; AE
-.word MoneyChest64 ; AF
-.word MoneyChest65 ; B0
-.word MoneyChest66 ; B1
-.word MoneyChest67 ; B2
-.word MoneyChest68 ; B3
-.word MoneyChest69 ; B4
-.word MoneyChest70 ; B5
-.word MoneyChest71 ; B6
-.word MoneyChest72 ; B7
-.word MoneyChest73 ; B8
-.word MoneyChest74 ; B9
-.word MoneyChest75 ; BA
-.word MoneyChest76 ; BB
-.word MoneyChest77 ; BC
-.word MoneyChest78 ; BD
-.word MoneyChest79 ; BE
-.word MoneyChest80 ; BF
+.word BATTLESPELL1  ;  70
+.word BATTLESPELL2  ;  71
+.word BATTLESPELL3  ;  72
+.word BATTLESPELL4  ;  73
+.word BATTLESPELL5  ;  74
+.word BATTLESPELL6  ;  75
+.word BATTLESPELL7  ;  76
+.word BATTLESPELL8  ;  77
+.word BATTLESPELL9  ;  78
+.word BATTLESPELL10 ;  79
+.word BATTLESPELL11 ;  7A
+.word BATTLESPELL12 ;  7B
+.word BATTLESPELL13 ;  7C
+.word BATTLESPELL14 ;  7D
+.word BATTLESPELL15 ;  7E
+.word BATTLESPELL16 ;  7F
 
-.word CLASS1       ; C0
-.word CLASS2       ; C1
-.word CLASS3       ; C2
-.word CLASS4       ; C3
-.word CLASS5       ; C4
-.word CLASS6       ; C5
-.word CLASS7       ; C6
-.word CLASS8       ; C7
-.word CLASS9       ; C8
-.word CLASS10      ; C9
-.word CLASS11      ; CA
-.word CLASS12      ; CB
+.word MoneyChest1  ; 80
+.word MoneyChest2  ; 81
+.word MoneyChest3  ; 82
+.word MoneyChest4  ; 83
+.word MoneyChest5  ; 84
+.word MoneyChest6  ; 85
+.word MoneyChest7  ; 86
+.word MoneyChest8  ; 87
+.word MoneyChest9  ; 88
+.word MoneyChest10 ; 89
+.word MoneyChest11 ; 8A
+.word MoneyChest12 ; 8B
+.word MoneyChest13 ; 8C
+.word MoneyChest14 ; 8D
+.word MoneyChest15 ; 8E
+.word MoneyChest16 ; 8F
+.word MoneyChest17 ; 90
+.word MoneyChest18 ; 91
+.word MoneyChest19 ; 92
+.word MoneyChest20 ; 93
+.word MoneyChest21 ; 94
+.word MoneyChest22 ; 95
+.word MoneyChest23 ; 96
+.word MoneyChest24 ; 97
+.word MoneyChest25 ; 98
+.word MoneyChest26 ; 99
+.word MoneyChest27 ; 9A
+.word MoneyChest28 ; 9B
+.word MoneyChest29 ; 9C
+.word MoneyChest30 ; 9D
+.word MoneyChest31 ; 9E
+.word MoneyChest32 ; 9F
+.word MoneyChest33 ; A0
+.word MoneyChest34 ; A1
+.word MoneyChest35 ; A2
+.word MoneyChest36 ; A3
+.word MoneyChest37 ; A4
+.word MoneyChest38 ; A5
+.word MoneyChest39 ; A6
+.word MoneyChest40 ; A7
+.word MoneyChest41 ; A8
+.word MoneyChest42 ; A9
+.word MoneyChest43 ; AA
+.word MoneyChest44 ; AB
+.word MoneyChest45 ; AC
+.word MoneyChest46 ; AD
+.word MoneyChest47 ; AE
+.word MoneyChest48 ; AF
+.word MoneyChest49 ; B0
+.word MoneyChest50 ; B1
+.word MoneyChest51 ; B2
+.word MoneyChest52 ; B3
+.word MoneyChest53 ; B4
+.word MoneyChest54 ; B5
+.word MoneyChest55 ; B6
+.word MoneyChest56 ; B7
+.word MoneyChest57 ; B8
+.word MoneyChest58 ; B9
+.word MoneyChest59 ; BA
+.word MoneyChest60 ; BB
+.word MoneyChest61 ; BC
+.word MoneyChest62 ; BD
+.word MoneyChest63 ; BE
+.word MoneyChest64 ; BF
+.word MoneyChest65 ; C0
+.word MoneyChest66 ; C1
+.word MoneyChest67 ; C2
+.word MoneyChest68 ; C3
+.word MoneyChest69 ; C4
+.word MoneyChest70 ; C5
+.word MoneyChest71 ; C6
+.word MoneyChest72 ; C7
+.word MoneyChest73 ; C8
+.word MoneyChest74 ; C9
+.word MoneyChest75 ; CA
+.word MoneyChest76 ; CB
+.word MoneyChest77 ; CC
+.word MoneyChest78 ; CD
+.word MoneyChest79 ; CE
+.word MoneyChest80 ; CF
 
-.word BATTLESPELL1  ; CC
-.word BATTLESPELL2  ; CD
-.word BATTLESPELL3  ; CE
-.word BATTLESPELL4  ; CF
-.word BATTLESPELL5  ; D0
-.word BATTLESPELL6  ; D1
-.word BATTLESPELL7  ; D2
-.word BATTLESPELL8  ; D3
-.word BATTLESPELL9  ; D4
-.word BATTLESPELL10 ; D5
-.word BATTLESPELL11 ; D6
-.word BATTLESPELL12 ; D7
-.word BATTLESPELL13 ; D8
-.word BATTLESPELL14 ; D9
-.word BATTLESPELL15 ; DA
-.word BATTLESPELL16 ; DB
+.word CLASS1       ; D0
+.word CLASS2       ; D1
+.word CLASS3       ; D2
+.word CLASS4       ; D3
+.word CLASS5       ; D4
+.word CLASS6       ; D5
+.word CLASS7       ; D6
+.word CLASS8       ; D7
+.word CLASS9       ; D8
+.word CLASS10      ; D9
+.word CLASS11      ; DA
+.word CLASS12      ; DB
+
+
 
 lut_WeaponArmorNamePtrTbl:
 .word Weapon1      ; 0  ; Wooden Nunchuck
