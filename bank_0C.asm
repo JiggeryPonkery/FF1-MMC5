@@ -3742,8 +3742,8 @@ WalkForwardAndStrike:
       STA PlayMagicSound
       JSR PlayBattleSFX             ;  
     
-  : LDA #$08                    ; 6AA8 is the loop counter (loop 8 times), alternates between 
-    STA btl_walkloopctr                   ;   animation frames every 2 iterations.
+  : LDA #$08                            ; 6AA8 is the loop counter (loop 8 times), alternates between 
+    STA btl_walkloopctr                 ;   animation frames every 2 iterations.
     
   @DoAttackAnimationLoop:
     LDA btl_drawflagsA                  ; set the "draw weapon" draw flag
@@ -3767,7 +3767,6 @@ WalkForwardAndStrike:
     JSR BattleClearVariableSprite       ; Finally, once attack animation complete, clear the weapon/magic sprite
     JSR BattleFrame                     ; Do another frame to make sure it's erased  (seems silly to do that here... since
                                         ;   we do another frame shortly...)
-
     LDA btl_animatingchar
     ASL A
     ASL A
@@ -3815,7 +3814,7 @@ UpdateSprites_TwoFrames:
 PrepAttackSprite_AFrame:
     LDA ActiveRunic
     BEQ :+
-   @Runic_AFrame:
+Runic_AFrame:
     JSR __PrepAttackSprite_Weapon_AFrame 
     LDA #CHARPOSE_CHEER
     STA btl_chardraw_pose, X       
@@ -3896,7 +3895,7 @@ __PrepAttackSprite_Weapon_AFrame:
     STA btlattackspr_t              ; And set the pose to scene 0
     LDA #$00
     STA btlattackspr_pose
-  : RTS
+    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3909,9 +3908,10 @@ __PrepAttackSprite_Weapon_AFrame:
 
 PrepAttackSprite_BFrame:
     LDA ActiveRunic
-    BNE :-                      ; if doing the Runic animation, no B frame
+    BEQ :+                      ; if doing the Runic animation, no B frame
+        JMP Runic_AFrame
 
-    LDA btlattackspr_wepmag                 ; weapon or magic?
+  : LDA btlattackspr_wepmag                 ; weapon or magic?
     BEQ :+                                  ; if magic...
       JSR __PrepAttackSprite_Magic_AFrame   ; Same setup as AFrame
       LDA #$04
@@ -6666,8 +6666,11 @@ SavePlayerDefender:
         LDA battle_hitsconnected
         BEQ :+
         INC btl_retaliate    
-  : DEC btl_attacker_limbs                      ; dec the number of unique physical attacks to perform
-    LDA btl_attacker_limbs                  
+  : LDA btl_attacker
+    BMI @FinalEnd
+  
+    DEC btl_attacker_limbs                      ; dec the number of unique physical attacks to perform
+    ;LDA btl_attacker_limbs                  
     BEQ @FinalEnd                               ; at 0, stop!   
     
     JSR GetRandomPlayerTarget
@@ -9247,12 +9250,13 @@ DoRunic_OK:
     RTS
    
  : LDA btl_attackid    ; this was already checked to make sure its not an enemy special attack
-   SEC
-   SBC #MG_START       ; subtract magic start ($30 at this time) to make it the spell ID
+   ;; oops, already 0 based
+   ;SEC
+   ;SBC #MG_START       ; subtract magic start ($30 at this time) to make it the spell ID
    CMP #$40
    BCC @NormalSpell    ; and see if it falls within normal spell ID ranges
-    SEC
-    SBC #$40 - 8       ; subtract all normal spells, -8 to offset the LUT
+    CLC
+    ADC #8             ; add 8 to offset the LUT
     TAX
     LDA Runic_MP_LUT, X
     BMI @NoMP          ; if high bit set ($FF), this Battle Spell has no level equivalent
@@ -9271,11 +9275,12 @@ DoRunic_OK:
    TAY
    LDA (CharStatsPointer), Y  
    AND #$0F                   ; clear high bits to check max MP
+   STA tmp                    ; backup max
    JSR ShiftLeft4             ; and move the bits up
-   STA tmp
+   STA tmp+1                  ; save to compare it
    LDA (CharStatsPointer), Y  
    AND #$F0                   ; clear low bits to check current MP
-   CMP tmp                    ; and compare against max MP
+   CMP tmp+1                  ; and compare against max MP
    BEQ @NoMP                  ; if they're equal, no MP gain 
    
    CLC
@@ -9297,7 +9302,7 @@ DoRunic_OK:
    SEC
    RTS
 
-Runic_MP_LUT:
+Runic_MP_LUT: ; 0-based level for MP to be given to, so  7 = level 8
    .byte $00,$01,$02,$03,$04,$05,$06,$07 ; normal spells ; spell ID is divided by 8 
    .byte $02,$04,$06,$05,$07,$FF,$FF,$FF ; battle spells ; each byte represents a spell
    .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ; battle spells
@@ -9975,13 +9980,17 @@ Battle_EnemyMagic_CastOnTarget:
       
   : LSR A
     BCC :+
+      DEC ConfusedMagic ; doing this will make enemies flash intead of doing dust clouds
+      ; ^ should set to #FF xc; assuming that targeting themselves and allies is doing non-damaging spells    
       BCS Battle_CastMagicOnSelf_Enemy      ; 04 = target self
       
   : LSR A
     BCC :+
+      DEC ConfusedMagic
       BCS Battle_CastMagicOnAllEnemies      ; 08 = target all allies
       
-  : JMP Battle_CastMagicOnRandEnemy         ; 10 (others) = target one ally
+  : DEC ConfusedMagic
+    JMP Battle_CastMagicOnRandEnemy         ; 10 (others) = target one ally
 
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
