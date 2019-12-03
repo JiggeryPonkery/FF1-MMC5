@@ -675,6 +675,8 @@ btlmag_effect               = btl_attacker + $02
 btlmag_effectivity          = btl_attacker + $03
 btlmag_hitrate              = btl_attacker + $04
 btlmag_element              = btl_attacker + $05
+btlmag_color                = btl_attacker + $06 
+btlmag_target               = btl_attacker + $07
 
 btl_defender                 = $6040 
 btl_defender_index           = btl_defender + $01

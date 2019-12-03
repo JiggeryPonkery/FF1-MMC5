@@ -27,7 +27,6 @@
 .import EnemyAttackPlayer_PhysicalZ
 .import FormatBattleString_L
 .import GameStart_L
-.import HandPalette
 .import LoadEnemyStats
 .import LongCall
 .import Magic_ConvertBitsToBytes
@@ -1847,24 +1846,26 @@ BattleSubMenu_Equipment:
 
     TAX
     LDA lut_EquipmentSpells, X
-    STA tmp
-    
-    JSR GetPointerToMagicData
-    
-    LDY #$06
-    LDA (MagicPointer), Y
     TAX
-    PLA                          ; = btlcmd_curchar
-    ASL A
-    TAY
-    TXA
-    STA btlcmd_magicgfx+1, Y     ; save X as magic palette
+    
+   ; STA tmp
+   ; 
+   ; JSR GetPointerToMagicData
+   ; 
+   ; LDY #$06
+   ; LDA (MagicPointer), Y
+   ; TAX
+   ; PLA                          ; = btlcmd_curchar
+   ; ASL A
+   ; TAY
+   ; TXA
+   ; STA btlcmd_magicgfx+1, Y     ; save X as magic palette
     
     
   @GetSpellCast:
-    DEC tmp
-    LDX tmp                         ; put it in X
-    ;DEX                            ; DEX to make it 0-based (FF becomes "no spell")
+   ; DEC tmp
+   ; LDX tmp                         ; put it in X
+    DEX                            ; DEX to make it 0-based (FF becomes "no spell")
     LDY btlcmd_curchar              ; Y=cur char -- default to targetting yourself
     LDA #ACTION_GEAR
     JMP SetCharacterBattleCommand
@@ -2519,6 +2520,7 @@ DrawWeaponGraphicRow:
     STA btl8x8spr_t                 ; record it
     LDA lut_WeaponSwingTSA+4, X     ; get attribute & record it
     STA btl8x8spr_a
+    JSR FistColors
     JSR BattleDraw8x8Sprite         ; draw this tile
     
     INC btl8x8spr_i                 ; inc the oam position
@@ -2534,6 +2536,7 @@ DrawWeaponGraphicRow:
     STA btl8x8spr_t
     LDA lut_WeaponSwingTSA+4, X
     STA btl8x8spr_a
+    JSR FistColors
     JSR BattleDraw8x8Sprite
     
     LDA btl8x8spr_y                 ; add 8 to Y position
@@ -2544,6 +2547,27 @@ DrawWeaponGraphicRow:
     INC btl8x8spr_i                 ; and oam position
     RTS
 
+FistColors:                         ; this makes the fist sprite match the character, but leaves the dust cloud white
+    LDA btlattackspr_t
+    CMP #$AC
+    BNE @Return
+        LDY #ch_class - ch_stats
+        LDA (CharStatsPointer), Y   ; Check the sprite
+        AND #$F0
+        LSR A
+        LSR A
+        LSR A
+        LSR A                       ; move to low bits
+        TAY
+        LDA lut_InBattleCharPaletteAssign, Y ; get sprite colours
+        STA tmp
+        LDA btl8x8spr_a             ; remove low bits from the attributes
+        AND #$40
+        ORA tmp                     ; then add in the sprite's colours
+        STA btl8x8spr_a            
+   @Return:
+    RTS
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  PrepAndGetBattleMainCommand  [$9A2C :: 0x31A3C]
@@ -3795,9 +3819,9 @@ PrepAttackSprite_AFrame:
     JSR __PrepAttackSprite_Weapon_AFrame 
     LDA #CHARPOSE_CHEER
     STA btl_chardraw_pose, X       
-    LDA btl_chardraw_y, X                  ; weapon graphic is a bit higher
-    CLC
-    ADC #$08
+    LDA btlattackspr_y                      ; weapon graphic is a bit higher
+    SEC
+    SBC #$04
     STA btlattackspr_y
     RTS
 
@@ -5106,6 +5130,9 @@ ClearGuardBuffers:
     STA btl_charguard, X      
     STA btl_charcover, X
     STA btl_charcover+4, X
+    STA btl_charrunic, X
+    STA btl_charpray, X
+    STA btl_charrush, X
     RTS
     
 PrintBattleTurnNumber:
@@ -5497,19 +5524,22 @@ WalkForwardAndCastMagic:
     ASL A
     TAY                         ; *2 char index in Y, to get their magic graphic
     LDX btlcmd_magicgfx, Y
-    TXA                         ; graphic in X & pushed to stack
-    PHA
-    TYA 
-    PHA                         ; push 2*char index  (pointless)
     
-    LDA btlcmd_magicgfx+1, Y    ; A = palette
-    LDX #$01                    ; X = nonzero to indicate magic palette
-    JSR UpdateVariablePalette   ; update the palette
-    
-    PLA
-    TAY                         ; retore 2*char index in Y  (pointless because we never use it)
-    PLA
-    TAX                         ; restore graphic ID in X
+  ;; updating colours is done when preparing the spell's data  
+  ; TXA                         ; graphic in X & pushed to stack
+  ; PHA
+  ; TYA 
+  ; PHA                         ; push 2*char index  (pointless)
+  ; 
+  ; LDA btlcmd_magicgfx+1, Y    ; A = palette
+  ; LDX #$01                    ; X = nonzero to indicate magic palette
+  ; JSR UpdateVariablePalette   ; update the palette
+  ; 
+  ; PLA
+  ; TAY                         ; retore 2*char index in Y  (pointless because we never use it)
+  ; PLA
+  ; TAX                         ; restore graphic ID in X
+  
     PLA                         ; restore character index in A
     LDY #$01                    ; Y = nonzero to indicate doing the magic effect
     JSR WalkForwardAndStrike    ; walk forward and strike with magic!!!
@@ -5878,7 +5908,8 @@ FocusSkill:
     LDA #$E0
     STA btlcmd_magicgfx, Y
     LDA #$2F
-    STA btlcmd_magicgfx+1, Y
+    JSR UpdateVariablePalette
+    LDX #0 ; again, since Updating colours changed it
     PLA
     JSR WalkForwardAndCastMagic
     
@@ -6900,28 +6931,11 @@ DoPhysicalAttack_NoAttackerBox:
     LDX #$00                            ; 0 for physical/weapon attacks, nonzero for magic attacks
     JSR UpdateVariablePalette
     
-    ;LDY #ch_weaponsprite - ch_stats
-    ;LDA (CharStatsPointer), Y 
-    LDA btl_attacker_graphic
-    BEQ :+  ; JIGS - only do this longcall if no weapon equipped
-    CMP #$AC
-    BNE :++ ; or if using fists    
-        
-  : JSR LongCall
-    .word HandPalette
-    .byte BANK_ENEMYSTATS
-    
-    JSR DoFrame_UpdatePalette
-      ;; JIGS - Check character class and sprite to decide what colour fists to use...
-      ;; Since any sprite can be a blackbelt...
-       
-  : LDX btl_attacker_graphic    ; If the graphic is zero... then we shouldn't draw it
+    LDX btl_attacker_graphic    ; If the graphic is zero... then we shouldn't draw it
     BNE :+
       INC btlattackspr_nodraw   ; set set the 'nodraw' flag for attack sprites
       
-  : ;LDX btl_attacker_graphic    ; weapon graphic
-    LDY #$00                    ; 0 to indicate swinging a weapon
-    ;LDA battle_attacker_index   ; the attacker (0-3)
+  : LDY #$00                    ; 0 to indicate swinging a weapon
     STY PlayMagicSound
     LDA btl_attacker
     AND #$03
@@ -8773,13 +8787,14 @@ EnemyAi_ShouldPerformAction:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Enemy_DoAi:
-    LDY #en_enemyid
-    LDA (EnemyRAMPointer), Y
+  ; LDY #en_enemyid
+  ; LDA (EnemyRAMPointer), Y
   ; CMP #$FF                    ; get AI id from RAM 
   ; BNE :+
   ;   JMP ChooseAndAttackPlayer ; no AI -- just attack a random player
       
     ; use enemy AI
+    LDA btl_attacker        ; $00-$08
     LDX #$10                ; get a pointer to this enemy's AI data
     JSR MultiplyXA          ; $10 bytes per AI entry
     CLC                     ;   end result, of this math:  @aiptr points to this enemy's AI data
@@ -8794,6 +8809,8 @@ Enemy_DoAi:
     JSR EnemyAi_ShouldPerformAction ; See if we should do a magic attack
     BCS @CheckSpecialAttack         ; if not, jump ahead to check for special attacks
     
+   LDA #9
+   STA tmp                         ; loop counter for trying to find something to do 
   @DoMagicAttack:
  ;  LDY #en_aimagpos
  ;  LDA (EnemyRAMPointer), Y
@@ -8819,10 +8836,7 @@ Enemy_DoAi:
     TAY
     LDA (EnemyAIPointer), Y
     BMI @SecondSpellCast            ; if the high bit is set, the spell has been cast once already
-    CMP #$FF
-    BNE @FirstSpellCast
-        JMP ChooseAndAttackPlayer   ; no MP left for this spell, do physical attack
-   
+  
    @FirstSpellCast: 
     PHA
     ORA #$80
@@ -8831,7 +8845,13 @@ Enemy_DoAi:
     JMP Enemy_DoMagicEffect
    
    @SecondSpellCast: 
-    AND #$80                        ; cut off the high bit
+    CMP #$FF                        ; ...or there is no spell
+    BNE :+
+        DEC tmp
+        BEQ ChooseAndAttackPlayer   ; 9 slots, 9 random tries; if nothing found, give up and attack normally
+        BNE @DoMagicAttack          ; always branches
+        
+  : AND #$7F                        ; cut off the high bit, leave the rest
     PHA
     LDA #$FF                        ; and set the whole thing to $FF to indicate no more mana left
     STA (EnemyAIPointer), Y
@@ -9039,9 +9059,13 @@ Battle_PrepareMagic:
   ; : 
     STA btlmag_effectivity
     
-    LDY #MAGDATA_MESSAGE    ; and effectivity
+    LDY #MAGDATA_MESSAGE 
     LDA (MagicPointer), Y
     STA MagicMessage
+    
+    LDY #MAGDATA_TARGET
+    LDA (MagicPointer), Y
+    STA btlmag_target
     
     LDA btl_attacker
     BPL :+
@@ -9051,24 +9075,30 @@ Battle_PrepareMagic:
         LDY #MAGDATA_GRAPHIC
         LDA (MagicPointer), Y
         STA btlcmd_magicgfx, X
-        LDY #MAGDATA_PALETTE
-        LDA (MagicPointer), Y
-        STA btlcmd_magicgfx+1, X
-  : ; RTS
-   
+    ;; JIGS - set the graphic and palette here instead of doing confusing things with character buffers...    
+  : LDY #MAGDATA_PALETTE
+    LDA (MagicPointer), Y
+    STA btlmag_color
+    LDX #1
+    JSR UpdateVariablePalette   
+    
 Runic:
-    LDA btl_attackid
+    LDA btl_attacker
+    BPL :+
+        LDA ConfusedMagic
+        BEQ @NoRunic
+
+  : LDA btl_attackid
     CMP #ENEMY_ATTACK_START - 1 ; minus one to count Counter as not magic
-    BCC :+ 
-        RTS                ; skip if the attack is a special attack and not a spell
-  : LDA btl_charrunic
+    BCS @NoRunic           ; skip if the attack is a special attack and not a spell
+    LDA btl_charrunic
     ORA btl_charrunic+1
     ORA btl_charrunic+2    ; combine all runic slots to see if any are active
     ORA btl_charrunic+3     
-    BNE :+                 ; if no runics active, RTS without doing anything
-        RTS 
-  : LDA #01
+    BEQ @NoRunic           ; if no runics active, RTS without doing anything
+    LDA #01
     STA ActiveRunic
+   @NoRunic: 
     RTS
     
 ConfusedRunicUser_Exit:  ; if Runic user is now a confused caster, don't do it  
@@ -9091,8 +9121,9 @@ ConfirmRunic:
         RTS
   
   @CheckTarget:
-   LDY #MAGDATA_TARGET   
-   LDA (MagicPointer), Y ; for ConfusedMagic, this represents the ORIGINAL byte... 
+   ;LDY #MAGDATA_TARGET   
+   ;LDA (MagicPointer), Y ; for ConfusedMagic, this represents the ORIGINAL byte... 
+   LDA btlmag_target
    LSR A
    BCC DoRunic_Random
 
@@ -9136,10 +9167,13 @@ DoRunic_Fixed:           ; gets btl_defender, sees if its the Runic user. If not
     CLC
     RTS
     
-DoRunic_Random:         ; gets btl_defender, sees if its the Runic user. If not, finds who is and activates it.
-    LDA btl_defender
-    CMP btl_attacker     
+DoRunic_Random:         
+    LDA btl_attacker    ; is enemy attacking? if so, do it
+    BPL :+
+    CMP btl_defender    ; otherwise, its a player; check if the runic-user is the caster, and if so, do nothing 
     BEQ ConfusedRunicUser_Exit
+    
+    LDA btl_defender    ; backup the original target
     STA MMC5_tmp
     
   : JSR BattleRNG_L
@@ -9150,17 +9184,15 @@ DoRunic_Random:         ; gets btl_defender, sees if its the Runic user. If not,
     
 DoRunic_OK:    
     STA btlattackspr_gfx
+ ;  LDA btl_animatingchar       ; back up animatingchar in case of Confusion?
+ ;  PHA
     LDA #0
     STA btl_charrunic, X
     TXA
+    PHA                          ; back up index 
     ORA #$80
     STA btl_defender
 
-    LDA btl_animatingchar       ; back up animatingchar in case of Confusion?
-    PHA
-    STX btl_animatingchar       ; set Runic user to animatingchar
-    TXA
-    PHA
     JSR PrepCharStatPointers
     JSR DrawDefenderBox         ; draw Runic user's name 
 
@@ -9185,6 +9217,7 @@ DoRunic_OK:
     
   : PLA 
     LDY #0
+    LDX btlattackspr_gfx
     JSR WalkForwardAndStrike    ; doesn't really walk forward or strike, but handles the animation anyway
   
     LDA ActiveRunic             ; if its still only 01, it worked!
@@ -9203,8 +9236,11 @@ DoRunic_OK:
     JSR DrawMessageBox_Prebuilt
     JSR Delay_UndrawOneBox            ; undraw the message, and then undraw the "Runic" and defender box
     JSR UndrawAllButTwoBoxes          ; even if the same name is going to be drawn again
-    PLA                               ; not sure how to fix that; would have to be in DrawDefenderBox or something  
-    STA btl_animatingchar             ; as that gets called after each ConfirmRunic call
+  ;  PLA                               ; not sure how to fix that; would have to be in DrawDefenderBox or something  
+  ;  STA btl_animatingchar             ; as that gets called after each ConfirmRunic call
+    LDA btlmag_color                  ; reset spell colour
+    LDX #1
+    JSR UpdateVariablePalette          
     LDA MMC5_tmp
     STA btl_defender
     CLC
@@ -9253,8 +9289,11 @@ DoRunic_OK:
    
    LDA #BTLMSG_ABSORBEDSPELL
    JSR DrawMessageBoxDelay_ThenClearIt
-   PLA
-   STA btl_animatingchar
+   LDA btlmag_color           ; reset spell colour
+   LDX #1
+   JSR UpdateVariablePalette           
+  ; PLA
+  ; STA btl_animatingchar
    SEC
    RTS
 
@@ -9690,8 +9729,9 @@ Battle_PlayerMagic_CastOnTarget:
     JSR ConfusedMagicTarget             ; is 0 if its to cast normally
     BNE :++                             ; so this branches if MAGDATA_TARGET is loaded reversed
     
-  : LDY #MAGDATA_TARGET                 ; Check the target for the spell they're casting
-    LDA (MagicPointer), Y
+  : ;LDY #MAGDATA_TARGET                 ; Check the target for the spell they're casting
+    ;LDA (MagicPointer), Y
+    LDA btlmag_target
     
   : LSR A
     BCC :+
@@ -9886,8 +9926,9 @@ Enemy_DoMagicEffect:
       LDA #BTLMSG_SILENCED                  ; but then just say "ineffective"
       JMP DrawMessageBoxDelay_ThenClearAll  ; then clear boxes and exit
     
-  : LDY #MAGDATA_TARGET                 ; get the spell's Target byte
-    LDA (MagicPointer), Y
+  : ;LDY #MAGDATA_TARGET                 ; get the spell's Target byte
+    ;LDA (MagicPointer), Y
+    LDA btlmag_target
     JSR Battle_EnemyMagic_CastOnTarget  ; and use it to cast this spell!
   ; JMP Battle_EndMagicTurn             ; <- flow into -- end the turn
 

@@ -243,7 +243,7 @@ GameStart:
     STA game_flags+$40    ;   Sage
     STA game_flags+$41    ;   Woman
     
-    LDA #4                ; reset the respond rate to zero ;; JIGS - setting it to a nice frisky 5
+    LDA #5                ; reset the respond rate to zero ;; JIGS - setting it to a nice frisky 5
     STA BattleTextSpeed   ;
     
     LDA #$41
@@ -13785,7 +13785,7 @@ lut_CombatSkillBox:
 SkillText_Fighter:   .BYTE $8C, $B2, $B9, $A8, $B5, $00    ; Cover
 SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
 SkillText_BBelt:     .BYTE $99, $A4, $B5, $B5, $BC, $00    ; Parry
-SkillText_RMage:     .BYTE $9B, $B6, $B1, $AC, $B8, $00    ; Runic
+SkillText_RMage:     .BYTE $9B, $B8, $B1, $AC, $A6, $00    ; Runic
 SkillText_WMage:     .BYTE $99, $B5, $A4, $BC, $00         ; Pray
 SkillText_BMage:     .BYTE $8F, $B2, $A6, $B8, $B6, $00    ; Focus
 SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; _____
@@ -14232,7 +14232,7 @@ DrawBattleString_ControlCode:
     
     LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
     CMP #ENEMY_ATTACK_START         ; if it's >= then it's a special enemy attack, C is set
-    BCC :+   
+    BCC @PrintAttackName_AsItem
     
     LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
     LDX #<lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ;   index starts at $41
