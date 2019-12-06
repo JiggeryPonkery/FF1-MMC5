@@ -111,7 +111,7 @@ playtimer        = unsram + $F0 ; 4 bytes - game clock!
 ;                = unsram + $F3
 
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
-ch_class          = ch_stats + $00
+ch_class          = ch_stats + $00 ; high bits = sprite, low bits = class
 ch_ailments       = ch_stats + $01
 ch_name           = ch_stats + $02 ; 03, 04, 05, 06, 07, 08 - 7 bytes 
 ch_exp            = ch_stats + $09 ; 0A, 0B - 3 bytes
@@ -292,6 +292,7 @@ item_box_offset         = $5C
 item_box_offset_old     = $5D 
 inv_canequipinshop      = $5E 
 blank_item              = $5F
+
 shop_curprice           = $60 ; + 1, 2, 3 - 4 bytes ; will mess up buying things if shared
 shop_curitem            = $64
 shop_amount             = $65
@@ -304,7 +305,8 @@ shop_selling            = $6B
 shop_cursorchange       = $6C
 shop_listdrawn          = $6D
 shop_listactive         = $6E
-; char_index might not be shared 
+char_index              = $6F ; for printing character stats in menus and sprites in battle
+
 ItemToUnequip           = $70
 ItemToEquip             = $71
 slotcheck               = $72
@@ -342,7 +344,7 @@ btlsfxsq2_framectr      = $69 ;
 btlsfxnse_framectr      = $6A ; 
 btlsfxsq2_ptr           = $6B ; + C 
 btlsfxnse_ptr           = $6D ; + E 
-char_index              = $6F ; for printing character stats, mostly out of battle
+; char_index not shared = $6F
 
 ;; Battle Temp          
 btltmp                  = $70 ; 16 bytes
@@ -675,8 +677,10 @@ btlmag_effect               = btl_attacker + $02
 btlmag_effectivity          = btl_attacker + $03
 btlmag_hitrate              = btl_attacker + $04
 btlmag_element              = btl_attacker + $05
-btlmag_color                = btl_attacker + $06 
-btlmag_target               = btl_attacker + $07
+btlmag_color                = btl_attacker + $06
+btlmag_gfx                  = btl_attacker + $07
+btlmag_target               = btl_attacker + $08
+btlmag_message              = btl_attacker + $09
 
 btl_defender                 = $6040 
 btl_defender_index           = btl_defender + $01
@@ -696,26 +700,26 @@ btl_defender_hpmax           = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)
 btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
 
 ;; these are all things that can be changed by magic! Except max HP
-btlmag_defender_intelligence    = btl_defender - $08
-btlmag_defender_speed           = btl_defender - $07
-btlmag_defender_damage          = btl_defender - $06
-btlmag_defender_hitrate         = btl_defender - $05
-btlmag_defender_defense         = btl_defender - $04
-btlmag_defender_evasion         = btl_defender - $03
-btlmag_defender_magicdefense    = btl_defender - $02
-btlmag_defender_morale          = btl_defender - $01 ; morale for enemies
-btlmag_defender_battlestate     = btl_defender - $01 ; battlestate for players
-btlmag_defender_numhitsmult     = btl_defender + $01
-btlmag_defender_critrate        = btl_defender + $02
-btlmag_defender_category        = btl_defender + $03
-btlmag_defender_weaponelement   = btl_defender + $04
-btlmag_defender_weaponcategory  = btl_defender + $05
-btlmag_defender_attackailment   = btl_defender + $06
-btlmag_defender_attackailproc = btl_defender + $07
-btlmag_defender_elementweakness = btl_defender + $08
-btlmag_defender_elementresist   = btl_defender + $09
-btlmag_defender_statusresist    = btl_defender + $0A
-btlmag_defender_ailments        = btl_defender + $0B
+btlmag_defender_intelligence    = btl_attacker + $0B
+btlmag_defender_speed           = btl_attacker + $0C
+btlmag_defender_damage          = btl_attacker + $0D
+btlmag_defender_hitrate         = btl_attacker + $0E
+btlmag_defender_defense         = btl_attacker + $0F
+btlmag_defender_evasion         = btl_defender + $01
+btlmag_defender_magicdefense    = btl_defender + $02
+btlmag_defender_morale          = btl_defender + $03 ; morale for enemies
+btlmag_defender_battlestate     = btl_defender + $04 ; battlestate for players
+btlmag_defender_numhitsmult     = btl_defender + $05
+btlmag_defender_critrate        = btl_defender + $06
+btlmag_defender_category        = btl_defender + $07
+btlmag_defender_weaponelement   = btl_defender + $08
+btlmag_defender_weaponcategory  = btl_defender + $09
+btlmag_defender_attackailment   = btl_defender + $0A
+btlmag_defender_attackailproc   = btl_defender + $0B
+btlmag_defender_elementweakness = btl_defender + $0C
+btlmag_defender_elementresist   = btl_defender + $0D
+btlmag_defender_statusresist    = btl_defender + $0E
+btlmag_defender_ailments        = btl_defender + $0F
 btlmag_defender_hpmax           = btl_mathbuf + (MATHBUF_MAGDEFENDERMAXHP*2)  ; $6880
 btlmag_defender_hp              = btl_mathbuf + (MATHBUF_MAGDEFENDERHP*2)  ; $687A
 
@@ -924,18 +928,17 @@ btl_charcmdbuf          = $6800 ; 4 bytes per character
 btl_charcmditem         = $6810 ; 1 byte per character for the rest
 btl_charcmdconsumetype  = $6814 ; 
 btl_charcmdconsumeid    = $6818 ; 
-btl_charparry           = $681C ; BB/Master Parry skill
-btl_charcover           = $6820 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
-btl_charregen           = $6828 ; Regeneration status
-btl_charguard           = $682C ; Guard status
-btl_charpray            = $6830 ; White Pray skill
-btl_charfocus           = $6834 ; Black Focus skill
-btl_charhidden          = $6838 ; Hidden status
-btl_charreflect         = $683C ; Reflection status
-btl_charrunic           = $6840 ; Red Runic skill
-btl_charrush            = $6844 ; Fighter Rush skill
-btl_charhitmult         = $6848 ; Hit multiplyer
-
+btl_charhitmult         = $681C ; Hit multiplyer
+btl_charparry           = $6820 ; BB/Master Parry skill
+btl_charcover           = $6828 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
+btl_charregen           = $682C ; Regeneration status
+btl_charguard           = $6830 ; Guard status
+btl_charpray            = $6834 ; White Pray skill
+btl_charfocus           = $6838 ; Black Focus skill
+btl_charhidden          = $683C ; Hidden status
+btl_charreflect         = $6840 ; Reflection status
+btl_charrunic           = $6844 ; Red Runic skill
+btl_charrush            = $6848 ; Fighter Rush skill
 
 
 btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
@@ -946,9 +949,10 @@ btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
 
 btl_flashsprite2        = $6900 ; $18 bytes, tmp storage of sprite data
 btl_flashsprite3        = $6918 ; $18 bytes, tmp storage of sprite data
-btl_charattrib          = $6930 ; attributes to use when drawing charcters in battle  (4 bytes, 1 for each)
-btlcmd_magicgfx         = $6934 ; 2 bytes per character.  [0] = graphic to draw, [1] = palette to use    
-btl_coverspritebackup   = $693C ; 4 bytes
+btl_charattrib          = $6930 ; attributes to use when drawing charcters in battle 
+btl_charnaturalpose     = $6934 ; 
+btl_charactivepose      = $6938 ; 
+btl_coverspritebackup   = $693C ; 
 btl_palettes            = $6940 ; $20 bytes
 btltmp_attr             = $6960 ; $40 bytes of attribute data for the battle setup ; NOT temporary! Needed for flashing enemies. 
 btlcurs_positions       = $69A0 ; $18 bytes, 2 bytes per entry, each entry is the pixel coord of where the

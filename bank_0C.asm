@@ -51,6 +51,7 @@
 .import LoadPlayerDefenderStats_ForEnemyAttack
 .import SkillText_RMage
 .import ShiftLeft4
+.import LoadSprite_Bank04
 
 BANK_THIS = $0C
 
@@ -681,6 +682,9 @@ FinishBattlePrepAndFadeIn:
     .word LoadEnemyStats              ; this is all pretty self explanitory
     .byte BANK_ENEMYSTATS
     
+    JSR EnterBattlePrepareSprites
+    JSR BackupCharacterBattleStats
+    
     JSR BattleUpdatePPU
     
     LDA #$08                        ; enable BG drawing, but not sprites
@@ -695,8 +699,6 @@ FinishBattlePrepAndFadeIn:
     LDA #$1E
     STA btl_soft2001                ; enable BG and sprites
     
-    JSR EnterBattlePrepareSprites
-    JSR BackupCharacterBattleStats
     ;; JIGS - adding battle turn reset:
     LDA #1
     STA BattleTurn    
@@ -722,7 +724,7 @@ FinishBattlePrepAndFadeIn:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 WaitFrames_BattleResult:
-    JSR WaitForVBlank_L     ; wait a frame
+    JSR BattleWaitForVBlank_L ; wait a frame
     
     LDA #$00                ; burn a bunch of CPU time -- presumably so that 
     : SEC                   ;  WaitForVBlank isn't called again so close to start of
@@ -803,7 +805,6 @@ ClearCharBuffers:
       BNE :-
     RTS
    
-
 Battle_AfterFadeIn:
     LDA #$00                    ; zero a bunch of misc vars to prep them
     STA btl_strikingfirst
@@ -1937,14 +1938,37 @@ EnterBattlePrepareSprites:
     LDA #$7B
     STA btl_chardraw_y + $C
     
-    LDA #$00                    ; graphics sets are pretty much fixed -- it's effectively just ID<<5
+    LDA #$10 ;00                    ; graphics sets are pretty much fixed -- it's effectively just ID<<5
     STA btl_chardraw_gfxset + $0
-    LDA #$20
+    LDA #$18 ;20
     STA btl_chardraw_gfxset + $4
-    LDA #$40
+    LDA #$20 ;40
     STA btl_chardraw_gfxset + $8
-    LDA #$60
+    LDA #$28 ;60
     STA btl_chardraw_gfxset + $C
+
+    LDA #$12
+    STA btl_charactivepose
+    STA btl_charactivepose+1
+    STA btl_charactivepose+2
+    STA btl_charactivepose+3
+    JSR LoadAllCharacterSprites 
+    ;; this is to load the walking legs, the only 2 tiles that don't get over-written
+    ;; this allows loading each new character pose to only need to load up 6 tiles
+    ;; since 8 is cutting it too close to the next frame
+    
+    JSR SetAllNaturalPose
+    
+LoadAllCharacterSprites:    
+    LDA #0
+    STA char_index
+  : LDA #01
+    JSR LoadSprite 
+    INC char_index
+    LDA char_index
+    CMP #04
+    BNE :-
+    RTS    
     
   ; JMP SetAllNaturalPose       ; <- flow into
     
@@ -2283,6 +2307,23 @@ UpdateSprites_BattleFrame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; LoadSprite: A = 01 for loading a character pose, 02 for loading a weapon/magic sprite
+;; For characters, btl_charactivepose must be set
+;; For attack sprites, btlattackspr_gfx must be set using vanilla values (for now)
+
+UpdateCharacterSprite: ; In: X = 00, 01, 02, 03
+    STX char_index
+    LDA #1
+LoadSprite:
+    STA MMC5_tmp
+    JSR BattleWaitForVBlank_L
+    JSR LongCall
+    .word LoadSprite_Bank04
+    .byte $04
+    JSR BattleUpdatePPU
+    JSR BattleUpdateAudio
+    JMP UpdateSprites_BattleFrame
+
 CharacterPraySprite_Index:
     .byte $10, $20, $40, $80
 
@@ -2324,14 +2365,6 @@ DrawCharacter:
     
     LDA DrawCharacter_LUT, X
     STA DrawCharTmp
-
-   ; INX                     ; X is the char ID.  INX for purposes of below loop.    
-   ; LDA #$01                ; This will effectively set temp ram to be 1<<X
-   ; STA DrawCharTmp         ; This seems incredibly stupid though, as this could more easily be accomplished
-   ; : ASL DrawCharTmp       ; with a LUT of:  01,02,04,08
-   ;   DEX
-   ;   BNE :-
-   ; LSR DrawCharTmp               ; <- at this point, $68B6 = 1<<characterID
     
     LDA btl_drawflagsA      ; See if the character is dead
     ORA btl_drawflagsC              ; Or asleep!
@@ -2341,12 +2374,13 @@ DrawCharacter:
 
     @DrawDead:     
     ;; JIGS - adding label
-    
+
     ;;;;;;;;;;;;;;;
     ; If the character is to be drawn dead
-    LDA #$1A
-    CLC
-    ADC btl_chardraw_gfxset, Y
+    ;LDA #$1A
+    ;CLC
+    ;ADC btl_chardraw_gfxset, Y
+    LDA btl_chardraw_gfxset, Y
     STA btl8x8spr_t             ; Tile is $1A + gfxset
     
     LDA btl_chardraw_x, Y       ;; JIGS - a better way to change positions
@@ -2385,7 +2419,7 @@ DrawCharacter:
     STA btl8x8spr_x
     STA btl8x8spr_x+1
 
-    LDA #CHARPOSE_CROUCH
+    LDA #CHARPOSE_NORM ; #CHARPOSE_CROUCH
     STA btl_chardraw_pose, Y 
     BNE @DrawChar
     
@@ -2394,7 +2428,7 @@ DrawCharacter:
     AND #$0F
     AND DrawCharTmp
     BEQ @DrawChar               ; do nothing weird
-    LDA #CHARPOSE_CROUCH
+    LDA #CHARPOSE_NORM ; #CHARPOSE_CROUCH
    
   @ForcePose:   
     STA btl_chardraw_pose, Y    ; force them to be crouched
@@ -3424,7 +3458,6 @@ SetNaturalPose:
     ASL A
     ASL A
     ;TAX                         ; X=%0000xx00  where 'xx' is character ID
-    PHA
     ASL A                       
     ASL A                       
     ASL A                       
@@ -3444,16 +3477,22 @@ SetNaturalPose:
       STA btl_charcover+4, X
       STA btl_charreflect, X
       STA btl_charhidden, X
+      LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
+      LDA #LOADCHARPOSE_DEAD
+      BNE @SetAndReturn
       
   : LDA ch_ailments, Y          ;; JIGS - same goes for stone! But leave their HP alone
     AND #AIL_STOP        
     BEQ :+ 
-       ;STA ch_ailments, Y        
+       STA ch_ailments, Y        
        LDA #0
        STA btl_charguard, X
        STA btl_charcover, X
        STA btl_charcover+4, X
        STA btl_charhidden, X
+       LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
+       LDA #LOADCHARPOSE_CHEER
+       BNE @SetAndReturn
        ;; JIGS - reflect and regen can remain... use your stoned guy as a shield!
        
  ; : LDA btl_charhidden, X     
@@ -3461,6 +3500,13 @@ SetNaturalPose:
  ;; I eventually want to animate hiding a bit more-- a few frames of crouching between standing and walking
      
   : LDA ch_ailments, Y          ; get ailments again
+    AND #AIL_SLEEP
+    BEQ :+
+       LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
+       LDA #LOADCHARPOSE_DEAD
+       BNE @SetAndReturn
+    
+  : LDA ch_ailments, Y
     AND #(AIL_POISON | AIL_STUN )
     BNE @DoCrouching
     
@@ -3483,16 +3529,25 @@ SetNaturalPose:
     BCC @DoCrouching            ; if cur HP is less, they are crouching
 
 @DoStanding:                    ; otherwise, they're standing
-    LDY #CHARPOSE_STAND
-    BEQ :+
+    LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
+    LDA #LOADCHARPOSE_STAND
+    BEQ @SetAndReturn
     
 @DoCrouching:
-    LDY #CHARPOSE_CROUCH                
-  : PLA
+    LDA #LOADCHARPOSE_CROUCH                
+    LDY #CHARPOSE_NORM ; #CHARPOSE_CROUCH       
+   @SetAndReturn: 
+    STA btl_charactivepose, X
+    TXA
+    PHA
+    ASL A
+    ASL A
     TAX
     TYA
     STA btl_chardraw_pose, X
-    RTS    
+    PLA
+    TAX ; reset X for checking btl_charactivepose
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3526,7 +3581,11 @@ CharWalkAnimationRight:
     JSR CharacterWalkAnimation
     LDA btl_animatingchar
     JSR SetNaturalPose          ; after animation is complete, revert this character to their natural pose
-    JMP UpdateSprites_TwoFrames ; update, then return
+    LDA btl_charactivepose, X   ; 0 if they're standing normally, so do nothing, as its already loaded from walking
+    BEQ :+                      ; otherwise, change their loaded graphic tiles
+       JSR UpdateCharacterSprite
+    
+  : JMP UpdateSprites_TwoFrames ; update, then return
 
 UnhideCharacter:    
     TAX
@@ -3563,6 +3622,7 @@ HideCharacter:              ; assumes X is already set
 ;;  characters.
 ;;
 ;;    This routine takes 16 frames to complete.
+;;    JIGS - seventeen if it has to update the graphics
 ;;
 ;;    For whatever weird reason, this routine moves the character every
 ;;  OTHER frame rather than every frame.  Which is especially weird since
@@ -3570,32 +3630,41 @@ HideCharacter:              ; assumes X is already set
 ;;  The game could have very easily made animation smoother by halving the
 ;;  walk speed and updating every frame.  Weird weird.
 ;;
+;; JIGS - actually, tried that... trust me, THAT's weirder!
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 CharacterWalkAnimation:
     LDA #$08
     STA btl_walkloopctr                  ; loop down counter -- looping 8 times for 16 total frames
+
+    LDX btl_animatingchar
+    LDA btl_charactivepose, X  
+    BEQ @Loop
+       LDA #LOADCHARPOSE_STAND
+       STA btl_charactivepose, X  
+       JSR UpdateCharacterSprite
     
   @Loop:
-      LDA btl_animatingchar     ; get the character index
-      ASL A
-      ASL A
-      TAX                       ; index for btl_chardraw buffer
-      
-      LDA btl_walkloopctr
-      AND #$02                  ; toggle animation pose every 4 frames
-      ASL A                     ; switch between pose '0' (stand) and pose '4' (walk)
-      STA btl_chardraw_pose, X
-      
-      LDA btl_chardraw_x, X     ; add the directional value to the X position
-      CLC
-      ADC btl_walkdirection
-      STA btl_chardraw_x, X
-      
-      JSR UpdateSprites_TwoFrames   ; update sprites, do 2 frames of animation
-      
-      DEC btl_walkloopctr
-      BNE @Loop                 ; keep looping
+    LDA btl_animatingchar
+    ASL A
+    ASL A
+    TAX                       ; index for btl_chardraw buffer
+    
+    LDA btl_walkloopctr
+    AND #$02                  ; toggle animation pose every 4 frames
+    ASL A                     ; switch between pose '0' (stand) and pose '4' (walk)
+    STA btl_chardraw_pose, X
+    
+    LDA btl_chardraw_x, X     ; add the directional value to the X position
+    CLC
+    ADC btl_walkdirection
+    STA btl_chardraw_x, X
+
+    JSR UpdateSprites_TwoFrames   ; update sprites, do 2 frames of animation
+
+    DEC btl_walkloopctr
+    BNE @Loop                 ; keep looping
     RTS
     
     
@@ -3604,7 +3673,7 @@ PartyWalkAnimation:
     STA btl_walkloopctr                  ; loop down counter -- looping 8 times for 16 total frames
     LDA #-4
     STA btl_walkdirection
-
+    
   @Loop:
     LDA #0
     STA btl_animatingchar
@@ -3612,12 +3681,19 @@ PartyWalkAnimation:
       LDA btl_animatingchar
       JSR PrepCharStatPointers
       
-      LDY # ch_ailments - ch_stats  ; See if this character has any ailment that would prevent them from moving
+      LDY #ch_ailments - ch_stats  ; See if this character has any ailment that would prevent them from moving
       LDA (CharStatsPointer), Y   
-      AND # AIL_DEAD | AIL_STOP | AIL_SLEEP
-      BNE :+
+      AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
+      BNE :++
  
-      LDA btl_animatingchar
+      LDX btl_animatingchar       ; character can walk, so make sure they're using the right graphics set
+      LDA btl_charactivepose, X
+      BEQ :+
+        LDA #LOADCHARPOSE_STAND
+        STA btl_charactivepose, X
+        JSR UpdateCharacterSprite ; takes 1 extra frame for each character who has to be set to stand/walk pose
+ 
+    : LDA btl_animatingchar
       ASL A
       ASL A
       TAX                       ; index for btl_chardraw buffer
@@ -3665,7 +3741,7 @@ PlayFanfareAndCheer:
     LDA #0
     STA $4015             ; silence APU
     STA $5015           ; and silence the MMC5 APU. (JIGS)
-    JSR WaitForVBlank_L
+    JSR BattleWaitForVBlank_L
     ;; I have no idea how to stop the fanfare from starting with a noise crunchy sound...
     ;; but this seems to do the trick?
 
@@ -3677,29 +3753,73 @@ PlayFanfareAndCheer:
     STA music_track
     STA btl_followupmusic
     
+    LDA #0
+    STA btl_chardraw_pose+$0
+    STA btl_chardraw_pose+$4
+    STA btl_chardraw_pose+$8
+    STA btl_chardraw_pose+$C
+    STA MMC5_tmp+2
+    STA MMC5_tmp+1
+    
     LDA battleswon
     CMP #$FF
     BEQ :+
        INC battleswon
     
-  : LDA #$40                    ; loop counter
+  : LDA #$80                    ; loop counter
     STA btl_walkloopctr
   @Loop:
       LDA btl_walkloopctr
-      AND #(CHARPOSE_CHEER >> 1)    ; alternate between CHEER/STAND poses every 8 loop iterations
-      ASL A
-      STA btl_chardraw_pose+$0
-      STA btl_chardraw_pose+$4
-      STA btl_chardraw_pose+$8
-      STA btl_chardraw_pose+$C
+      AND #$0F
+      CMP #$08                 ; alternate between CHEER/STAND poses every 8 loop iterations
+      BNE @NoUpdate
+      INC MMC5_tmp+2
       
+      LDA #0
+      STA MMC5_tmp+1
+      
+     @CharLoop: 
+      LDA MMC5_tmp+1    
+      JSR PrepCharStatPointers
+      LDY #ch_ailments - ch_stats  ; See if this character has any ailment that would prevent them from moving
+      LDA (CharStatsPointer), Y   
+      AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
+      BNE @NextCharacter
+     
+      LDX MMC5_tmp+1
+      LDA MMC5_tmp+2
+      AND #01
+      BEQ :+
+        LDA #LOADCHARPOSE_CHEER
+        STA btl_charactivepose, X
+        BNE @UpdateSprite
+
+      : STA btl_charactivepose, X ; pose is 0 
+      
+      @UpdateSprite:  
+        JSR UpdateCharacterSprite 
+
+      @NextCharacter:  
+        INC MMC5_tmp+1              ; inc to next character
+        LDA MMC5_tmp+1
+        CMP #$04
+        BNE @CharLoop
+        
+        LDA btl_walkloopctr
+        SEC
+        SBC #4
+        STA btl_walkloopctr         ; remove 4 frames, since that's how many it took to load the next pose
+      
+     @NoUpdate: 
       JSR UpdateSprites_TwoFrames   ; draw!
       
       DEC btl_walkloopctr
       BNE @Loop
       
-    JSR SetAllNaturalPose           ; afterwards, give everyone their natural pose
-    JMP UpdateSprites_TwoFrames     ; draw, and exit
+    ;JSR SetAllNaturalPose           ; afterwards, give everyone their natural pose
+    ;; JIGS - don't bother, they're going to be walking or not
+    ;JMP UpdateSprites_TwoFrames     ; draw, and exit
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3715,6 +3835,12 @@ PlayFanfareAndCheer:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+LoadCheerPose:
+      LDX btl_animatingchar
+      LDA #LOADCHARPOSE_CHEER
+      STA btl_charactivepose, X
+      JMP UpdateCharacterSprite     
+      
 WalkForwardAndStrike:
     STA btl_animatingchar       ; A = character to animate
     STX btlattackspr_gfx        ; X = attack sprite graphic
@@ -3727,9 +3853,11 @@ WalkForwardAndStrike:
     STA Woosh ;; JIGS - ... it does a magic thing!
     
     LDA ActiveRunic                 ; if Runic, skip walking forward
-    BNE :+
+    BEQ :+
+       JSR LoadCheerPose
+       JMP :++
     
-    LDA #-2
+  : LDA #-2
     STA btl_walkdirection                  ; walk the character to the left
     
     JSR CharacterWalkAnimation
@@ -3738,6 +3866,8 @@ WalkForwardAndStrike:
     BEQ :+
     LDA btlmag_magicsource
     BNE :+                          ; if zero, it's magic... so...
+      JSR LoadCheerPose
+    
       LDA #$00                      ; ...play magic sfx.  
       STA PlayMagicSound
       JSR PlayBattleSFX             ;  
@@ -3754,15 +3884,16 @@ WalkForwardAndStrike:
     AND #$02                            ; every other frame...
     BEQ @BFrame
         JSR PrepAttackSprite_AFrame     ; alternate between AFrame of animation
-        ; otherwise, flow into magic processing
-        JMP :+
-    @BFrame:
+        BCS :+                          ; carry clear if its Runic or Magic, set if its a weapon
+    @BFrame:                            
       JSR PrepAttackSprite_BFrame       ; ... and BFrame of animation
+      BCC :++                           ; carry clear if its Runic or Magic, set if its a weapon
+    : JSR UpdateSprites_BattleFrame     ; only do one frame, since it took 1 frame to load the new character pose
+      JMP :++
     : JSR UpdateSprites_TwoFrames       ; redraw sprites on screen, do 2 frames.
     
-      DEC btl_walkloopctr
+    : DEC btl_walkloopctr
       BNE @DoAttackAnimationLoop        ; loop until counter expires
-    
     
     JSR BattleClearVariableSprite       ; Finally, once attack animation complete, clear the weapon/magic sprite
     JSR BattleFrame                     ; Do another frame to make sure it's erased  (seems silly to do that here... since
@@ -3771,7 +3902,7 @@ WalkForwardAndStrike:
     ASL A
     ASL A
     TAX
-    LDA #CHARPOSE_STAND
+    LDA #CHARPOSE_NORM ; #CHARPOSE_STAND
     STA btl_chardraw_pose, X            ; reset the character's pose to 'standing'
     JSR UpdateSprites_TwoFrames         ; then update sprites and do 2 frames.
     
@@ -3784,6 +3915,8 @@ WalkForwardAndStrike:
     
   : LDA btl_animatingchar
     JSR SetNaturalPose                  ; reset character back to their natural pose
+    JSR UpdateCharacterSprite
+    
   ; JSR BattleClearVariableSprite       ; clear the wep/mag sprite (again?  Pointless to do here)
   ;; JIGS - ^
   ; JMP UpdateSprites_TwoFrames         ; <- flow into.  Update sprites and do 2 frames
@@ -3815,28 +3948,31 @@ PrepAttackSprite_AFrame:
     LDA ActiveRunic
     BEQ :+
 Runic_AFrame:
-    JSR __PrepAttackSprite_Weapon_AFrame 
-    LDA #CHARPOSE_CHEER
+    JSR PrepAttackSprite_Weapon_AFrame 
+    LDA #CHARPOSE_NORM ; #CHARPOSE_CHEER
     STA btl_chardraw_pose, X       
     LDA btlattackspr_y                      ; weapon graphic is a bit higher
     SEC
     SBC #$04
     STA btlattackspr_y
+    CLC
     RTS
 
   : LDA btlattackspr_wepmag                 ; see if this is a weapon or a magic graphic
-    BEQ __PrepAttackSprite_Weapon_AFrame    ; if weapon, jump ahead to weapon processing
-                                            ; otherwise, flow into magic processing
+    BNE PrepAttackSprite_Magic_AFrame
+       JSR PrepAttackSprite_Weapon_AFrame
+       LDA #LOADCHARPOSE_ATTACK_1
+       LDX btl_animatingchar
+       STA btl_charactivepose, X
+       JSR UpdateCharacterSprite
+       SEC
+       RTS
     
-    ;; [$9ED6 :: 0x31EE6]
     ;;  Support routine:  Sets the btlattackspr to the 'A' frame for magic    
-__PrepAttackSprite_Magic_AFrame:
-    JSR __PrepAttackSprite_Weapon_AFrame    ; magic AFrame is the same as weapon AFrame, but with some changes:
-    LDA #CHARPOSE_CHEER
-    STA btl_chardraw_pose, X                ; player is cheering rather than swinging
-    
-   ; LDA btlattackspr_gfx                    ; (moving graphic over to _t is unnecessary here, as this was
-   ; STA btlattackspr_t                      ;  already done in the WeaponAFrame)
+PrepAttackSprite_Magic_AFrame:
+    JSR PrepAttackSprite_Weapon_AFrame    ; magic AFrame is the same as weapon AFrame, but with some changes:
+    LDA #CHARPOSE_NORM ; #CHARPOSE_CHEER
+    STA btl_chardraw_pose, X              ; player is cheering rather than swinging
     
     LDA btlattackspr_gfx ; check what kind of graphic it is
     CMP #$E8             ; if its the little flare from the hands, don't move the sprite
@@ -3870,17 +4006,17 @@ __PrepAttackSprite_Magic_AFrame:
     ORA #$40                                ; drawflag bit.
     AND #~$20                               ; this will cause the BG color to flash.
     STA btl_drawflagsA
+    CLC
     RTS
     
-    ;; [$9EEF :: 0x31EFF]
     ;;  Support routine:  Sets the btlattackspr to the 'A' frame for weapons    
-__PrepAttackSprite_Weapon_AFrame:
+PrepAttackSprite_Weapon_AFrame:
     LDA btl_animatingchar           ; use character*4 as index
     ASL A
     ASL A
     TAX
     
-    LDA #CHARPOSE_ATTACK_F
+    LDA #CHARPOSE_ALT ; #CHARPOSE_ATTACK_F
     STA btl_chardraw_pose, X        ; set the pose to forward attack
     
     LDA btl_chardraw_x, X           ; weapon graphic is $10 pixels left of the char graphic
@@ -3913,9 +4049,10 @@ PrepAttackSprite_BFrame:
 
   : LDA btlattackspr_wepmag                 ; weapon or magic?
     BEQ :+                                  ; if magic...
-      JSR __PrepAttackSprite_Magic_AFrame   ; Same setup as AFrame
+      JSR PrepAttackSprite_Magic_AFrame   ; Same setup as AFrame
       LDA #$04
-      STA btlattackspr_pose                 ; just the pose is different.
+      STA btlattackspr_pose                 ; just the SPRITE pose is different.
+      CLC
       RTS
 
   : LDA btl_animatingchar       ; BFrame for weapons is different.  The weapon has to move
@@ -3936,11 +4073,19 @@ PrepAttackSprite_BFrame:
     LDA btlattackspr_gfx        ; copy graphic over
     STA btlattackspr_t
     
-    LDA #CHARPOSE_ATTACK_B      ; change the player's pose to backward attack
-    STA btlattackspr_pose       ;  also.. it just works out the pose is the same for the BFrame of the attack sprite
+    LDA #$08
+    STA btlattackspr_pose       
+
+    LDA #CHARPOSE_NORM ; #CHARPOSE_ATTACK_B      ; change the player's pose to backward attack
     STA btl_chardraw_pose, X
     
     INC btlattackspr_hidell     ; set the hideLL flag to stop the graphic from drawing over the character's face
+    
+    LDX btl_animatingchar
+    LDA #LOADCHARPOSE_ATTACK_2
+    STA btl_charactivepose, X
+    JSR UpdateCharacterSprite
+    SEC
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4186,14 +4331,23 @@ lut_EnemyIndexMix:
 ;;   of padding).  Each byte is the tile to use for the 16x8 sprite for a single tile row in the pose.
 
 lut_CharacterPoseTSA:
-  .BYTE $00, $02, $04, $00      ; 00 = standing pose
-  .BYTE $00, $02, $06, $00      ; 04 = walking pose
-  .BYTE $08, $0A, $0C, $00      ; 08 = attacking (arm back) pose
-  .BYTE $00, $02, $06, $00      ; 0C = attacking (arm forward) pose
-  .BYTE $0E, $10, $12, $00      ; 10 = cheering pose
-  .BYTE $0E, $10, $12, $00      ; 14 = cheering pose again (possibly for casting magic or something?)
-  .BYTE $14, $16, $18, $00      ; 18 = crouching pose  (for when you're hurt)
-  .BYTE $14, $16, $18, $00      ; 1C = crouching pose again
+  .BYTE $00, $02, $04, $00      ; 00 = standing pose - CHARPOSE_NORM
+  .BYTE $00, $02, $06, $00      ; 04 = walking pose - CHARPOSE_ALT
+ ;; .BYTE $00, $02, $06, $00      ; 08 = attacking (arm back) pose
+ ;; .BYTE $00, $02, $06, $00      ; 0C = attacking (arm forward) pose
+ ;; .BYTE $00, $02, $04, $00      ; 10 = cheering pose
+ ;; .BYTE $00, $02, $04, $00      ; 14 = cheering pose again (possibly for casting magic or something?)
+ ;; .BYTE $00, $02, $04, $00      ; 18 = crouching pose  (for when you're hurt)
+ ;; .BYTE $00, $02, $04, $00      ; 1C = crouching pose again
+  
+; .BYTE $00, $02, $04, $00      ; 00 = standing pose
+; .BYTE $00, $02, $06, $00      ; 04 = walking pose
+; .BYTE $08, $0A, $0C, $00      ; 08 = attacking (arm back) pose
+; .BYTE $00, $02, $06, $00      ; 0C = attacking (arm forward) pose
+; .BYTE $0E, $10, $12, $00      ; 10 = cheering pose
+; .BYTE $0E, $10, $12, $00      ; 14 = cheering pose again (possibly for casting magic or something?)
+; .BYTE $14, $16, $18, $00      ; 18 = crouching pose  (for when you're hurt)
+; .BYTE $14, $16, $18, $00      ; 1C = crouching pose again
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4254,7 +4408,7 @@ DoMagicFlash:
     JMP DoFrame_UpdatePalette
     
   @FrameNoPaletteChange:
-    JSR WaitForVBlank_L
+    JSR BattleWaitForVBlank_L
     JSR BattleUpdatePPU
   ; JMP BattleUpdateAudio  ; <- code flows into this routine
     
@@ -4321,7 +4475,7 @@ UndrawBoxes:
      LDA #BTLMSG_TERMINATED
      JSR DrawMessageBox
     @Loop: 
-     JSR WaitForVBlank_L
+     JSR BattleWaitForVBlank_L
      JMP @Loop
    
  : LDA tmp
@@ -4533,7 +4687,7 @@ DrawMagicMessage:
     BCS MessageRTS ; RespondDelay
     
     ;LDA lut_MagicBattleMessages, X  ; Get the desired message to print
-    LDA MagicMessage
+    LDA btlmag_message
     BEQ MessageRTS                  ; if 0, don't print anything.  Instead, just delay and exit
     BNE DrawMessageBoxDelay_ThenClearIt
 
@@ -4615,7 +4769,7 @@ RespondDelay_ClearCombatBoxes:
 RespondDelay:
     LDA btl_responddelay        ; get the delay
     STA btl_respondrate_tmp     ; stuff it in temp ram as loop counter
-    : JSR WaitForVBlank_L       ; wait that many frames
+    : JSR BattleWaitForVBlank_L ; wait that many frames
       JSR BattleUpdateAudio     ; updating audio each frame
       DEC btl_respondrate_tmp
       BNE :-
@@ -4689,7 +4843,7 @@ MoveCoverSprite:
     STA btl_chardraw_x, Y
     LDA btl_chardraw_y, X
     STA btl_chardraw_y, Y
-    LDA #CHARPOSE_CHEER
+    LDA #CHARPOSE_NORM ; #CHARPOSE_CHEER
     STA btl_chardraw_pose, Y 
     JSR UpdateSprites_BattleFrame
   : RTS
@@ -5140,7 +5294,7 @@ PrintBattleTurnNumber:
     .word PrintBattleTurn
     .byte BANK_MENUS
     
-    JSR WaitForVBlank_L
+    JSR BattleWaitForVBlank_L
     
     LDA #>$205D                  ; set PPU addr
     STA $2006
@@ -5520,10 +5674,11 @@ RegenDivision:
 
 WalkForwardAndCastMagic:
     STX btlattackspr_nodraw     ; write nodraw flag
-    PHA                         ; (backup character index)
-    ASL A
-    TAY                         ; *2 char index in Y, to get their magic graphic
-    LDX btlcmd_magicgfx, Y
+    ;PHA                         ; (backup character index)
+    ;ASL A
+    ;TAY                         ; *2 char index in Y, to get their magic graphic
+    ;LDX btlcmd_magicgfx, Y
+    LDX btlmag_gfx
     
   ;; updating colours is done when preparing the spell's data  
   ; TXA                         ; graphic in X & pushed to stack
@@ -5540,7 +5695,7 @@ WalkForwardAndCastMagic:
   ; PLA
   ; TAX                         ; restore graphic ID in X
   
-    PLA                         ; restore character index in A
+    ;PLA                         ; restore character index in A
     LDY #$01                    ; Y = nonzero to indicate doing the magic effect
     JSR WalkForwardAndStrike    ; walk forward and strike with magic!!!
     
@@ -5756,9 +5911,9 @@ IsCommandPlayerValid:
   : LDA ailment_backup
     AND #AIL_CONF                   ; are they confused?
     BEQ :+
-      JSR Player_Confused           ; if yes, do physical attack (will try to un-confuse too)
-    
-  : SEC
+      JSR Player_Confused           ; if yes, do something random! (will try to un-confuse too)
+     ; continues here if confuse was cured
+  : SEC ; set C to allow doing an action (if action exists in command buffer)
     RTS 
    
 StealFromEnemy:
@@ -5886,7 +6041,6 @@ ScanEnemy:
 FocusSkill:
     LDA BattleCharID
     PHA
-    PHA
     JSR DrawCharacterNameAttackerBox
     JSR DrawSkillBox
 
@@ -5898,18 +6052,14 @@ FocusSkill:
     ORA #$80                       ; set high bit--so at the end of the turn, the boost
     STA btl_charfocus, X           ; is not divided, giving at least 1 turn with full potency
    
+    LDA #$2F
+    JSR UpdateVariablePalette
     LDA #0
     STA PlayMagicSound             ; this isn't a spell, don't do SFX!
     STA btl_unfmtcbtbox_buffer+$44 ; and terminate the upcoming message
     TAX                            ; X = 0, needed for WalkForwardAndCAstMagic
-    PLA
-    ASL A
-    TAY
     LDA #$E0
-    STA btlcmd_magicgfx, Y
-    LDA #$2F
-    JSR UpdateVariablePalette
-    LDX #0 ; again, since Updating colours changed it
+    STA btlmag_gfx
     PLA
     JSR WalkForwardAndCastMagic
     
@@ -6362,19 +6512,17 @@ Player_Confused:
     JSR BattleRNG_L
     AND #$03                            ; random [0,1]
     BEQ :+                              ; smarten up if 0 (25% chance)
-        
         LDA #BTLMSG_CONFUSED            ; print "Confused" message, and exit
         JSR DrawMessageBoxDelay_ThenClearIt
         JMP PlayerConfusedAttack
     
-  : LDY #ch_ailments - ch_stats           ; and OB stats
+  : LDY #ch_ailments - ch_stats           
     LDA (CharStatsPointer), Y
     AND #~AIL_CONF
     STA (CharStatsPointer), Y
     LDA #BTLMSG_CONFUSECURED              ; print "Came to their senses" message and exit
-    JSR DrawMessageBoxDelay_ThenClearIt   ; should jump back to DoPlayerTurn? 
-    RTS
-    
+    JMP DrawMessageBoxDelay_ThenClearIt   ; should jump back to DoPlayerTurn? 
+   
    
 PlayerRandomSpell:
     LDA BattleCharID
@@ -6654,6 +6802,11 @@ SavePlayerDefender:
     LDA btl_defender_ailments
     STA (CharStatsPointer), Y
     
+    LDA btl_defender_index
+    JSR SetNaturalPose
+    JSR UpdateCharacterSprite
+    JSR DrawCharacterStatus_Fast   
+    
     LDA btl_retaliate             ; see if this was a counter attack
     BEQ :+                        
        DEC btl_retaliate          ; if so, just turn off the flag and exit
@@ -6661,7 +6814,8 @@ SavePlayerDefender:
     
     ;; JIGS - since X is btl_defender_index, and not btl_defender
     ;; retaliation won't trigger if the bb/master was covered! Which makes sense, right?
-  : LDA btl_charparry, X
+  : LDX btl_defender_index
+    LDA btl_charparry, X
     BEQ :+
         LDA battle_hitsconnected
         BEQ :+
@@ -7471,7 +7625,8 @@ ZeroXYIfNegative:
 DrawCharacterStatus:
     JSR SetAllNaturalPose
     JSR UpdateSprites_BattleFrame
-    
+
+DrawCharacterStatus_Fast:    
     LDA #$00
     TAX
     STA CharacterIndexBackup   ; temp var for character index/loop counter - not $00, $40, $80, $C0, but 0, 1, 2, 3
@@ -7557,7 +7712,7 @@ DrawCharacterStatus:
     LDA #>$20DD
     STA BattleTmpPointer+1
     
-    JSR WaitForVBlank_L               ; since we're about to do some drawing, wait for VBlank
+    JSR BattleWaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
     LDA $2002                         ; clear toggle
     
     LDX #0
@@ -7651,7 +7806,7 @@ DrawCharacterStatus:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DoMiniFrame:
-    JSR WaitForVBlank_L
+    JSR BattleWaitForVBlank_L
     JMP BattleUpdateAudio
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7755,7 +7910,7 @@ ResetUsePalette:
 BattleFadeIn:
     JSR BattleClearOAM          ; Clear OAM
     LDA #$00
-    STA soft2000              ; clear other PPU settings
+    STA soft2000                ; clear other PPU settings
     STA $2001                   ; including disabling rendering, though since btl_soft2001 has
                                 ;   rendering enabled, rendering will be re-enabled when palettes are updated
     
@@ -7764,7 +7919,7 @@ BattleFadeIn:
     LDA #>oam
     STA $4014                   ; Do DMA (clearing actual PPU OAM)
     LDA #$04
-    STA btl_another_loopctr                   ; loop downcounter.  Looping 4 times -- once for each shade
+    STA btl_another_loopctr     ; loop downcounter.  Looping 4 times -- once for each shade
     JSR BattleUpdateAudio       ; since we just did a frame, keep audio updated
     
     ; This fades in by using the fadeout routine.  Basically it will reset the palette each iteration
@@ -9064,22 +9219,18 @@ Battle_PrepareMagic:
     
     LDY #MAGDATA_MESSAGE 
     LDA (MagicPointer), Y
-    STA MagicMessage
+    STA btlmag_message
     
     LDY #MAGDATA_TARGET
     LDA (MagicPointer), Y
     STA btlmag_target
     
-    LDA btl_attacker
-    BPL :+
-        AND #$7F
-        ASL A
-        TAX
-        LDY #MAGDATA_GRAPHIC
-        LDA (MagicPointer), Y
-        STA btlcmd_magicgfx, X
+    LDY #MAGDATA_GRAPHIC
+    LDA (MagicPointer), Y
+    STA btlmag_gfx
+    
     ;; JIGS - set the graphic and palette here instead of doing confusing things with character buffers...    
-  : LDY #MAGDATA_PALETTE
+    LDY #MAGDATA_PALETTE
     LDA (MagicPointer), Y
     STA btlmag_color
     LDX #1
@@ -10553,7 +10704,12 @@ BtlMag_SavePlayerDefenderStats:
     LDA btlmag_defender_weaponcategory
     STA (CharStatsPointer), Y
     
-    JMP DrawCharacterStatus                 ; update icons to reflect any status changes
+    LDA btl_defender
+    AND #$03
+    JSR SetNaturalPose
+    JSR UpdateCharacterSprite
+    
+    JMP DrawCharacterStatus_Fast           ; update icons to reflect any status changes, without updating all sprites
     ; while this is done at the end of every turn, spells that cast over the party can show their effect immediately
     
     
@@ -11767,8 +11923,8 @@ DrawEnemyEffect:
     STA explode_max_x
     
   @EraseLoop:
-      JSR WaitForVBlank_L           ; Vblank
-      LDA explode_max_x                    ; Set PPU Addr
+      JSR BattleWaitForVBlank_L     ; Vblank
+      LDA explode_max_x             ; Set PPU Addr
       STA $2006
       LDA explode_min_y
       STA $2006
@@ -11804,7 +11960,7 @@ DrawEnemyEffect:
 
 VBlank_SetPPUAddr:
     PHA                         ; backup A
-    JSR WaitForVBlank_L         ; VBlank
+    JSR BattleWaitForVBlank_L   ; VBlank
     LDA btltmp+$B               ; set ppu addr
     STA $2006
     LDA btltmp+$A
@@ -12114,10 +12270,10 @@ DrawExplosions:
       DEY
       BNE :-
       
-    JSR WaitForVBlank_L     ; Do one more frame
-    LDA #>oam               ; so we can update sprite data in the PPU
+    JSR BattleWaitForVBlank_L ; Do one more frame
+    LDA #>oam                 ; so we can update sprite data in the PPU
     STA $4014
-    JMP BattleUpdateAudio   ; update audio since we did a frame
+    JMP BattleUpdateAudio     ; update audio since we did a frame
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12172,7 +12328,7 @@ DrawExplosion_Frame:
       DEX
       BNE :-
       
-    JSR WaitForVBlank_L         ; do a frame
+    JSR BattleWaitForVBlank_L   ; do a frame
     LDA #>oam                   ; where OAM is updated
     STA $4014
     JMP BattleUpdateAudio       ; update music/sfx during this frame as well
@@ -12386,7 +12542,7 @@ DisplayAttackIndicator:
   STA tmp+6
    
  @Begin:
-  JSR WaitForVBlank_L
+  JSR BattleWaitForVBlank_L
   LDY tmp+7  
  @Loop:
   JSR @SetAddress

@@ -175,6 +175,7 @@
 .import WriteAttributesToPPU
 .import LoadBattleTextChr
 .import LoadStatusBoxScrollWork
+.import LoadSprite_Bank04
 
 .segment "BANK_FIXED"
 
@@ -11953,6 +11954,11 @@ EnterBattle:
     LDA #$08
     JSR SwapPRG_L
     JSR LoadBattleTextChr
+    
+    LDA #04
+    STA MMC5_tmp
+    JSR SwapPRG_L
+    JSR LoadSprite_Bank04
     
       LDX #$00             ; reset all battle variables to 0           
     : LDA #0             ; this is where map tileset data is kept in dungeons and such
