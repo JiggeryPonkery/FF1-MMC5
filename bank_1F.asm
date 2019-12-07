@@ -11955,10 +11955,11 @@ EnterBattle:
     JSR SwapPRG_L
     JSR LoadBattleTextChr
     
-    LDA #04
+    LDA #08
     STA MMC5_tmp
+    LDA #04
     JSR SwapPRG_L
-    JSR LoadSprite_Bank04
+    JSR LoadSprite_Bank04 ; this loads the player>enemy attack cloud sprites
     
       LDX #$00             ; reset all battle variables to 0           
     : LDA #0             ; this is where map tileset data is kept in dungeons and such
@@ -12826,7 +12827,7 @@ ClearBattleMessageBuffer_L:
 ClearBattleMessageBuffer:
     ; Clear the message buffer
     LDY #$00
-    LDA #$00
+    LDA #$F6 ; 00
     : STA btl_msgbuffer, Y      ; clear the message buffer
       STA btl_msgbuffer+$20, Y  ; which is $130 bytes long
       INY
@@ -13715,8 +13716,7 @@ lut_CombatBoxes:
   
   lut_CombatEtherBox:                                   ; 7 Ether/MP box
 ;       hdr    X    Y   wd   ht 
-  .BYTE $00, $00, $00, $11, $09 ; MP list 
-  .BYTE $FF, $00, $00
+  .BYTE $00, $00, $00, $11, $09,    $FF, $00, $00       ; MP list 
   
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14827,9 +14827,28 @@ WaitForVBlank:
     LDA soft2000   ; Load desired PPU state
     ORA #$80       ; flip on the Enable NMI bit
     STA $2000      ; and write it to PPU status reg
+    
+    LDA InBattle
+    BEQ OnIRQ
+        LDA #159   
+        STA $5203
 
 OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
+    LDA $5204      ; JIGS - high bit set when scanling #159 is being drawn
+    BPL @ContinueLooping
+    
+    LDX #$11       ; waits for H-blank so as not to draw weird dots on the screen
+  : DEX
+    BNE :-
+    
+    LDA soft2000
+    ORA #$90       ; make background tiles use the sprites!
+    STA $2000
+    
+    LDA #$00       
+    STA $5203      ; Clear trigger 
+   @ContinueLooping: 
     JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

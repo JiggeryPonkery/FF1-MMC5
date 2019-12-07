@@ -12,7 +12,7 @@
 .import WaitForVBlank_L
 
 ;; JIGS imported... v 
-.import LongCall, CHRLoad
+.import LongCall, CHRLoad, CallMusicPlay_L, BattleWaitForVBlank_L
 
 
 .segment "BANK_04"
@@ -190,7 +190,9 @@ LoadSprite_Bank04:
     LSR A    
     BCS LoadBattleSprite
     LSR A
-    BCS LoadMagicWeaponSprite
+    BCS LoadWeaponSprite
+    LSR A
+    BCS LoadMagicSprite
     BCC LoadAttackCloud
 
 BattleCharPositions_LUT:
@@ -210,32 +212,6 @@ BattleCharPose_LUT:
    .byte $A0,$01,$60 ; $0F ; Dead       ; 6 tiles
    .byte $00,$00,$80 ; $12 ; Stand/Walk ; 8 tiles, loads the walking legs before battle
    ;; Don't want to load 8 tiles per frame, so this last one is for before battle begins
-   
-LoadMagicWeaponSprite:
-    LDA #0
-    STA tmp
-    LDA btlattackspr_gfx
-    ROL A
-    ROR tmp
-    ROL A
-    ROR tmp
-    ROL A
-    ROR tmp
-    ROL A
-    ROR tmp                 ; this should convert something like $A8 into $0A80
-    STA tmp+1
-    LDA #<MagicWeaponSprites
-    CLC
-    ADC tmp
-    STA tmp
-    LDA #>MagicWeaponSprites+1
-    ADC tmp+1
-    STA tmp+1
-    LDA #$40
-    STA tmp+2
-    LDA #$10
-    LDX #0
-    JMP CHRLoadToAX
 
 LoadAttackCloud:
     LDA #<MagicWeaponSprites+$40
@@ -250,7 +226,91 @@ LoadAttackCloud:
     LDA #$10
     LDX #$40
     JMP CHRLoadToAX
+   
+LoadWeaponSprite:
+    LDA #0
+    STA tmp+1
+    LDA btlattackspr_gfx
+    CLC
+    ROL A
+    ROL tmp+1
+    ROL A
+    ROL tmp+1
+    ROL A
+    ROL tmp+1
+    ROL A
+    ROL tmp+1                 ; this should convert something like $A8 into $0A80
+    CLC
+    ADC #<MagicWeaponSprites
+    STA tmp
+    LDA #>MagicWeaponSprites
+    ADC tmp+1
+    STA tmp+1
+    LDA #$40
+    STA tmp+2
+    LDA #$10
+    LDX #$00
+    JMP CHRLoadToAX
     
+LoadMagicSprite:
+    LDA #0
+    STA tmp+1
+    LDA btlattackspr_gfx
+    CLC
+    ROL A
+    ROL tmp+1
+    ROL A
+    ROL tmp+1
+    ROL A
+    ROL tmp+1
+    ROL A
+    ROL tmp+1               ; this should convert something like $A8 into $0A80
+    CLC
+    ADC #<MagicWeaponSprites
+    STA tmp
+    LDA #>MagicWeaponSprites
+    ADC tmp+1
+    STA tmp+1
+    PHA
+    LDA tmp
+    PHA
+    LDA #$40
+    STA tmp+2
+    LDA #$13
+    LDX #$00
+    JSR CHRLoadToAX    
+    ;; do the first 4 tiles
+    
+    ;; BattleUpdatePPU - Copy:
+    LDA btl_soft2001
+    STA $2001               ; copy over soft2001
+    LDA #$00
+    STA $2005               ; reset scroll
+    STA $2005
+    
+    LDA $2002
+    LDA #>oam
+    STA $4014                   ; Do OAM DMA
+    LDA #BANK_THIS
+    STA cur_bank            ; set the swap-back bank (necessary because music playback is in another bank)
+    JSR CallMusicPlay_L     ; Call music playback to keep it playing
+    ;; does not update battle sfx, so make sure this is called before SFX begin
+    
+    JSR BattleWaitForVBlank_L
+    
+    LDA #$40
+    STA tmp+2
+    PLA 
+    STA tmp
+    CLC
+    ADC #$40
+    STA tmp
+    PLA 
+    ADC #$00
+    STA tmp+1
+    LDA #$13
+    LDX #$40
+    JMP CHRLoadToAX
 
     
     

@@ -685,6 +685,9 @@ FinishBattlePrepAndFadeIn:
     JSR EnterBattlePrepareSprites
     JSR BackupCharacterBattleStats
     
+    LDA #01
+    STA InBattle
+    
     JSR BattleUpdatePPU
     
     LDA #$08                        ; enable BG drawing, but not sprites
@@ -734,6 +737,7 @@ WaitFrames_BattleResult:
     DEC btl_result          ; loop until counter has expired
     BNE WaitFrames_BattleResult
     
+    DEC InBattle
     SEC                     ; SEC before exit? This triggers the End Game bridge scene
   WaitFrames_BattleResult_RTS:
     RTS
@@ -1701,7 +1705,7 @@ BattleSubMenu_Item_NoUndraw:
     BNE @SkipTarget
     
    @EtherManaMenu:
-    LDA #6
+    LDA #7
     JSR DrawCombatBox
     JSR LongCall
     .word DrawManaString_ForBattle
@@ -2252,6 +2256,8 @@ UpdateSprites_BattleFrame:
       LDA btlattackspr_y
       STA btl8x8spr_y
       STA btl8x8spr_y+1
+      LDA #$00                  ; use tile $00
+      STA btl8x8spr_t
       LDX btlattackspr_pose     ; get pose (0 or 8 depending on whether or not to flip the graphic)
       JSR DrawWeaponGraphicRow  ; draw 2 rows of tiles.  No need to set tile here, as DrawWeaponGraphicRow
       JSR DrawWeaponGraphicRow  ;    takes care of that
@@ -2281,7 +2287,8 @@ UpdateSprites_BattleFrame:
       LDA #$03 ; 2                  ; use palette 2
       STA btl8x8spr_a
       
-      LDA btlattackspr_t        ; set tile
+      LDA #$30                  ; use tile $30
+      ;LDA btlattackspr_t       ; set tile
       CLC
       ADC btlattackspr_pose     ; add pose to adjust for magic animation
       STA btl8x8spr_t
@@ -2582,7 +2589,7 @@ DrawWeaponGraphicRow:
     RTS
 
 FistColors:                         ; this makes the fist sprite match the character, but leaves the dust cloud white
-    LDA btlattackspr_t
+    LDA btlattackspr_gfx ; btlattackspr_t
     CMP #$AC
     BNE @Return
         LDY #ch_class - ch_stats
@@ -3638,6 +3645,7 @@ CharacterWalkAnimation:
     LDA #$08
     STA btl_walkloopctr                  ; loop down counter -- looping 8 times for 16 total frames
 
+CharacterRunAnimation:                   ; btl_walkloopctr is set before this
     LDX btl_animatingchar
     LDA btl_charactivepose, X  
     BEQ @Loop
@@ -3843,7 +3851,7 @@ LoadCheerPose:
       
 WalkForwardAndStrike:
     STA btl_animatingchar       ; A = character to animate
-    STX btlattackspr_gfx        ; X = attack sprite graphic
+   ; STX btlattackspr_gfx        ; X = attack sprite graphic
     STY btlattackspr_wepmag     ; Y = 0,1 to choose between weapon/magic
 
     ;; JIGS - adding: - note that after this, the character does not go back into hiding!
@@ -3884,7 +3892,8 @@ WalkForwardAndStrike:
     AND #$02                            ; every other frame...
     BEQ @BFrame
         JSR PrepAttackSprite_AFrame     ; alternate between AFrame of animation
-        BCS :+                          ; carry clear if its Runic or Magic, set if its a weapon
+        BCS :++                         ; carry clear if its Runic or Magic, set if its a weapon
+        BCC :+
     @BFrame:                            
       JSR PrepAttackSprite_BFrame       ; ... and BFrame of animation
       BCC :++                           ; carry clear if its Runic or Magic, set if its a weapon
@@ -4027,8 +4036,8 @@ PrepAttackSprite_Weapon_AFrame:
     LDA btl_chardraw_y, X           ; weapon graphic is at same Y position as char
     STA btlattackspr_y
     
-    LDA btlattackspr_gfx            ; Set the tile to the appropriate graphic
-    STA btlattackspr_t              ; And set the pose to scene 0
+  ;  LDA btlattackspr_gfx            ; Set the tile to the appropriate graphic
+  ;  STA btlattackspr_t              ; And set the pose to scene 0
     LDA #$00
     STA btlattackspr_pose
     RTS
@@ -4049,7 +4058,7 @@ PrepAttackSprite_BFrame:
 
   : LDA btlattackspr_wepmag                 ; weapon or magic?
     BEQ :+                                  ; if magic...
-      JSR PrepAttackSprite_Magic_AFrame   ; Same setup as AFrame
+      JSR PrepAttackSprite_Magic_AFrame     ; Same setup as AFrame
       LDA #$04
       STA btlattackspr_pose                 ; just the SPRITE pose is different.
       CLC
@@ -4070,8 +4079,8 @@ PrepAttackSprite_BFrame:
     SBC #$08
     STA btlattackspr_y
     
-    LDA btlattackspr_gfx        ; copy graphic over
-    STA btlattackspr_t
+  ;  LDA btlattackspr_gfx        ; copy graphic over
+  ;  STA btlattackspr_t
     
     LDA #$08
     STA btlattackspr_pose       
@@ -5678,7 +5687,7 @@ WalkForwardAndCastMagic:
     ;ASL A
     ;TAY                         ; *2 char index in Y, to get their magic graphic
     ;LDX btlcmd_magicgfx, Y
-    LDX btlmag_gfx
+ ;   LDX btlmag_gfx
     
   ;; updating colours is done when preparing the spell's data  
   ; TXA                         ; graphic in X & pushed to stack
@@ -5941,33 +5950,16 @@ StealFromEnemy:
     STA btl_walkloopctr                 ; loop down counter
   
   ;; 8 pixels per movement... that should be 1 screen width
-   
-   @Loop:
-    LDA btl_animatingchar     ; get the character index
-    ASL A
-    ASL A
-    TAX                       ; index for btl_chardraw buffer
-    
-    LDA btl_walkloopctr
-    AND #$02                  ; toggle animation pose every 4 frames
-    ASL A                     ; switch between pose '0' (stand) and pose '4' (walk)
-    STA btl_chardraw_pose, X
-    
-    LDA btl_chardraw_x, X     ; add the directional value to the X position
-    CLC
-    ADC btl_walkdirection
-    STA btl_chardraw_x, X
-    
-    JSR UpdateSprites_TwoFrames   ; update sprites, do 2 frames of animation
-    
-    DEC btl_walkloopctr
-    BNE @Loop                 ; keep looping
+    JSR CharacterRunAnimation
 
     JSR SetNaturalPose    
-    LDX btl_animatingchar
+    ;LDX btl_animatingchar
     JSR HideCharacter
+    LDA btl_charactivepose, X   ; 0 if they're standing normally, so do nothing, as its already loaded from walking
+    BEQ :+                      ; otherwise, change their loaded graphic tiles
+       JSR UpdateCharacterSprite
     
-    JSR LongCall
+  : JSR LongCall
     .word StealFromEnemyZ
     .byte BANK_ENEMYSTATS
     
@@ -6051,15 +6043,18 @@ FocusSkill:
     LDX BattleCharID
     ORA #$80                       ; set high bit--so at the end of the turn, the boost
     STA btl_charfocus, X           ; is not divided, giving at least 1 turn with full potency
-   
+
+    LDA #$E0
+    STA btlattackspr_gfx
+    LDA #04
+    JSR LoadSprite
+    
     LDA #$2F
     JSR UpdateVariablePalette
     LDA #0
     STA PlayMagicSound             ; this isn't a spell, don't do SFX!
     STA btl_unfmtcbtbox_buffer+$44 ; and terminate the upcoming message
     TAX                            ; X = 0, needed for WalkForwardAndCAstMagic
-    LDA #$E0
-    STA btlmag_gfx
     PLA
     JSR WalkForwardAndCastMagic
     
@@ -6693,8 +6688,14 @@ PlayerAttackEnemy_Physical:
     ;;        The whole elmental weakness thing confuses me too much, but I think I did it okay.
     ;;        Doing this saves a lot of space to change other parts of the battle code.
 
+    LDA btl_attacker_graphic ; load the attack sprite in advance... unless its empty!
+    BEQ :+
+    STA btlattackspr_gfx
+    LDA #$02
+    JSR LoadSprite    
+    
     ;;;;;;;;;;;;;;;;;;;;
-    JSR DoPhysicalAttack            ; Do the attack!!
+  : JSR DoPhysicalAttack            ; Do the attack!!
     ;;;;;;;;;;;;;;;;;;;;
     
     LDY #en_ailments                ; IB ailements
@@ -7960,6 +7961,8 @@ BattleFadeOut:
       JSR Do3Frames_UpdatePalette   ; draw it
       DEC btl_another_loopctr
       BNE @Loop                     ; repeat 4 times
+      
+    DEC InBattle  
     RTS
 
     
@@ -9228,6 +9231,7 @@ Battle_PrepareMagic:
     LDY #MAGDATA_GRAPHIC
     LDA (MagicPointer), Y
     STA btlmag_gfx
+    STA btlattackspr_gfx
     
     ;; JIGS - set the graphic and palette here instead of doing confusing things with character buffers...    
     LDY #MAGDATA_PALETTE
@@ -9348,6 +9352,10 @@ DoRunic_OK:
     STA btl_defender
 
     JSR PrepCharStatPointers
+    
+    LDA #02
+    JSR LoadSprite              ; load up the weapon sprite
+    
     JSR DrawDefenderBox         ; draw Runic user's name 
 
     LDX #<SkillText_RMage
@@ -9371,7 +9379,7 @@ DoRunic_OK:
     
   : PLA 
     LDY #0
-    LDX btlattackspr_gfx
+    ;LDX btlattackspr_gfx
     JSR WalkForwardAndStrike    ; doesn't really walk forward or strike, but handles the animation anyway
   
     LDA ActiveRunic             ; if its still only 01, it worked!
@@ -9852,6 +9860,8 @@ Player_DoMagicEffect:
     ; STA btlmag_fakeout_ailments             ; clear the fakeout ailments
     
     JSR Battle_PrepareMagic                 ; Otherwise, load up magic effect info
+    LDA #04
+    JSR LoadSprite                          ; load up the sprite    
     JSR Battle_PlayerMagic_CastOnTarget     ; And actually cast the spell
     JMP Battle_EndMagicTurn                 ; End the turn
     
@@ -12247,7 +12257,7 @@ DrawExplosions:
       ASL A
       ASL A
       CLC
-      ADC #$F4
+      ADC #$04 ;F4
       
       LDX btltmp+2              ; use the loop counter as the slot
       JSR DrawExplosion_Frame   ; draw the graphic and do a frame

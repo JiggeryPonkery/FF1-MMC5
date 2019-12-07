@@ -27,18 +27,30 @@ LoadBattleTextChr:
     INX
     BNE :-
 
-    LDA $2002          ; Set address to $1000 
+    LDA $2002         
     LDA #>$0800
     STA $2006
     LDA #<$0800
     STA $2006
-;
     LDA #>BattleTextChr
     STA tmp+1        
     LDA #<BattleTextChr
     STA tmp
-    LDX #8   
+    LDX #8  
+    JSR CHRLoad
+    
+    LDA #>$1300
+    STA $2006
+    LDA #<$1300
+    STA $2006
+    LDA #>BattleTextChr_Sprites
+    STA tmp+1        
+    LDA #<BattleTextChr_Sprites
+    STA tmp
+    LDX #13 
     JMP CHRLoad
+    
+    
 
 
     
@@ -197,7 +209,7 @@ MagicData:
 ;      |   |   |   |   |   |   ╒ Palette
 ;      |   |   |   |   |   |   |   ╒ Message
 ;      v   v   v   v   v   v   v   v  
-.byte $10,$05,$00,$03,$01,$00,$20,$00 ; 1A IMP PUNCH  ; 6A
+.byte $10,$05,$00,$02,$01,$00,$20,$00 ; 1A IMP PUNCH  ; 6A
 .byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1B            ; 6B
 .byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1C            ; 6C
 .byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1D            ; 6D
@@ -226,6 +238,9 @@ MagicData:
 
 BattleTextChr:
 .incbin "chr/battle_text.chr"
+
+BattleTextChr_Sprites:
+.incbin "chr/battle_text_sprites.chr"
 
 
 .byte "END OF BANK 08"
