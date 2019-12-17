@@ -2370,8 +2370,9 @@ NothingToSell:
   : LDA #$02
     JSR LoadShopBoxDims         ; erase shop box 2 (inventory)
     JSR EraseBox
-    DEC shop_selling
-    DEC shop_listdrawn
+	LDA #$0
+    STA shop_selling
+    STA shop_listdrawn
     JMP MainShopLoop    
     
 ;;;;;;;;;;;;;;;;;;;;;
@@ -5491,7 +5492,7 @@ MainMenuLoop:
   
   @Select_Pressed:
     JSR LineUp_InMenu
-    BCC ResumeMainMenu            ; characters swappwed ; redraw menu
+    BCC EnterMainMenu ; ResumeMainMenu  ; characters swappwed ; redraw menu
     JMP @EscapeSubTarget          ; not swapped ; just reset the cursor
     
   @B_Pressed:
@@ -5628,8 +5629,8 @@ MainMenuSubTarget_NoClear:
 
   @Loop:
     JSR ClearOAM                 ; clear OAM
-    JSR DrawMainMenuCharSprites  ; draw the main menu battle sprite
     JSR DrawMainMenuSubCursor    ; draw the sub target cursor
+    JSR DrawMainMenuCharSprites  ; draw the main menu battle sprite
     JSR DrawGameTime
     JSR MainMenuFrame            ; Do a frame
 

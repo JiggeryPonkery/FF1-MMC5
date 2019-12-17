@@ -1857,9 +1857,10 @@ DoPartyGen_OnCharacter:
     CMP #$02  ; if left is pressed
       BEQ @ReverseCharThing
     CMP #$04  ; or if down is pressed
-      BEQ @ReverseCharSpriteThing
-    CMP #$08  ; or if up is pressed
       BEQ @CharSpriteThing
+    CMP #$08  ; or if up is pressed
+      BEQ @ReverseCharSpriteThing
+
   
    ; Otherwise, if any direction was pressed:
     LDX char_index
@@ -2452,13 +2453,12 @@ PtyGen_DrawChars:
     LDA lutClassBatSprPalette, X   ; get the palette that class uses
     STA tmp+1             ; write the palette to tmp+1  (used by DrawSimple2x3Sprite)
 
-    TXA               ; multiply the class index by $20
-    ASL A             ;  this gets the tiles in the pattern tables which have this
-    ASL A             ;  sprite's CHR ($20 tiles is 2 rows, there are 2 rows of tiles
-    ASL A             ;  per class)
-    ASL A
-    ;ASL A
-    ;; JIGS ^ one too many? Not sure, this might be a 12 classes fix thing.
+    TXA               ; multiply the class index by $06
+    ASL A             ; double it
+	STA tmp           ; save it
+	ASL A             ; double it again
+	CLC               ; add in the first double!
+	ADC tmp
     STA tmp           ; store it in tmp for DrawSimple2x3Sprite
     JMP DrawSimple2x3Sprite
 

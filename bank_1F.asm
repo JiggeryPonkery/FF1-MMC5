@@ -10877,42 +10877,49 @@ LoadMenuBGCHRAndPalettes:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadBatSprCHRPalettes_NewGame:
-    JSR LoadBatSprCHR_SetPpuAddrAndSwap
-    
-    ;; JIGS ^ does the same as v 
-    ;LDA #BANK_BTLCHR
-    ;JSR SwapPRG_L  ; Swap to bank 9
-    ;LDA $2002      ; Reset PPU Addr Toggle
-    ;LDA #$10
-    ;STA $2006      ;  set dest PPU Addr to $1000
-    ;LDA #$00
-    ;STA $2006
-
-    LDA #>lut_BatSprCHR    ;  set source pointer
-    STA tmp+1
-    LDA #<lut_BatSprCHR
-    STA tmp
-
-;    LDX #2*6       ;  12 rows (2 rows per class * 6 classes)
-;    JSR CHRLoad    ; Load up the CHR
-
-    ;; JIGS v - not sure if this is my code, probably someone else's! Thanks, stranger. 
-
-    @loop:
-        LDX #1          ; Only load 1 row of tile data for this class
-        JSR CHRLoad     ; Load up the CHR
-        INC tmp+1       ; Increase high byte of source pointer (skip the 2nd row of tiles)
-        LDA tmp+1
-        CMP #>lut_BatSprCHR + (12*2)  ; See if we've passed over 24 rows (all 12 classes, 2 rows per class)
-        BNE @loop                     ; If not, keep looping until we do
-    
-    LDA #>(lut_BatObjCHR + $400)  ; change source pointer to bottom half of cursor and related CHR
-    STA tmp+1
-    LDX #$04                      ; load 4 rows (bottom half)
-    JSR CHRLoad_Cont   ; load cursor and other battle related CHR
-    JSR LoadBattleSpritePalettes  ; load palettes for these sprites
-    LDA #BANK_Z
-    JMP SwapPRG_L      ; and swap to bank E on exit
+    LDA #BANK_BTLCHR
+    JSR SwapPRG_L     
+	JSR LoadBattleSpritesForBank_Z
+	LDA #BANK_Z
+    JMP SwapPRG_L      
+	
+;;
+;;  JSR LoadBatSprCHR_SetPpuAddrAndSwap
+;;  
+;;  ;; JIGS ^ does the same as v 
+;;  ;LDA #BANK_BTLCHR
+;;  ;JSR SwapPRG_L  ; Swap to bank 9
+;;  ;LDA $2002      ; Reset PPU Addr Toggle
+;;  ;LDA #$10
+;;  ;STA $2006      ;  set dest PPU Addr to $1000
+;;  ;LDA #$00
+;;  ;STA $2006
+;;
+;;  LDA #>lut_BatSprCHR    ;  set source pointer
+;;  STA tmp+1
+;;  LDA #<lut_BatSprCHR
+;;  STA tmp
+;;
+;;   LDX #2*6       ;  12 rows (2 rows per class * 6 classes)
+;;   JSR CHRLoad    ; Load up the CHR
+;;
+;;  ;; JIGS v - not sure if this is my code, probably someone else's! Thanks, stranger. 
+;;
+;;  @loop:
+;;      LDX #1          ; Only load 1 row of tile data for this class
+;;      JSR CHRLoad     ; Load up the CHR
+;;      INC tmp+1       ; Increase high byte of source pointer (skip the 2nd row of tiles)
+;;      LDA tmp+1
+;;      CMP #>lut_BatSprCHR + (12*2)  ; See if we've passed over 24 rows (all 12 classes, 2 rows per class)
+;;      BNE @loop                     ; If not, keep looping until we do
+;;  
+;;  LDA #>(lut_BatObjCHR + $400)  ; change source pointer to bottom half of cursor and related CHR
+;;  STA tmp+1
+;;  LDX #$04                      ; load 4 rows (bottom half)
+;;  JSR CHRLoad_Cont   ; load cursor and other battle related CHR
+;;  JSR LoadBattleSpritePalettes  ; load palettes for these sprites
+;;  LDA #BANK_Z
+;;  JMP SwapPRG_L      
 
 LoadBatSprCHRPalettes:
     JSR LoadBatSprCHR_SetPpuAddrAndSwap

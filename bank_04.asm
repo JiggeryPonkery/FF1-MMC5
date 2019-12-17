@@ -85,9 +85,9 @@ LoadShopCHRForBank_Z: ;; JIGS - Its either put this here or copy all of lut_Shop
     
     
 LoadBattleSpritesForBank_Z: 
-    LDA #0    
     LDA $2002  
-    STA tmp+3
+    LDA #0    
+    STA tmp+3					; counter for 12 classes 
 
    @Loop:
     LDA #$60                    ; CHRLoadToAX is different, in that it doesn't do rows, so tmp+2 is amount of writes
@@ -187,13 +187,13 @@ CHRLoad_Loop:
     
 LoadSprite_Bank04:
     LDA MMC5_tmp
-    LSR A    
+    LSR A    				; 01 
     BCS LoadBattleSprite
-    LSR A
+    LSR A                   ; 02 
     BCS LoadWeaponSprite
-    LSR A
-    BCS LoadMagicSprite
-    BCC LoadAttackCloud
+    LSR A                   ; 04 
+    BCS LoadMagicSprite     
+    BCC LoadAttackCloud     ; 08
 
 BattleCharPositions_LUT:
    .byte $11,$00    ; character 0 

@@ -652,7 +652,8 @@ ExitBattle:
     LDA btl_result                  ; check battle result
     CMP #$FF                        ; if not $FF...
     BEQ @ChaosWait
-    
+
+	DEC InBattle    
     JSR LongCall
     .word RestoreMapMusic
     .byte BANK_MUSIC
@@ -1044,7 +1045,6 @@ GetCharacterBattleCommand:
     
     LDX btlcmd_curchar
     JSR ClearGuardBuffers           ; in case they guarded then chose to re-select their command, undo the guard state
-    STA btl_charpray, X
     LDA btl_charparry, X
     BPL :+
     LDA #0
@@ -6509,7 +6509,13 @@ Player_Confused:
     BEQ :+                              ; smarten up if 0 (25% chance)
         LDA #BTLMSG_CONFUSED            ; print "Confused" message, and exit
         JSR DrawMessageBoxDelay_ThenClearIt
-        JMP PlayerConfusedAttack
+		LDX BattleCharID
+		LDA #0
+		STA btl_charguard, X      
+		STA btl_charrunic, X
+		STA btl_charpray, X
+        STA btl_charrush, X
+		JMP PlayerConfusedAttack
     
   : LDY #ch_ailments - ch_stats           
     LDA (CharStatsPointer), Y
@@ -7961,8 +7967,7 @@ BattleFadeOut:
       JSR Do3Frames_UpdatePalette   ; draw it
       DEC btl_another_loopctr
       BNE @Loop                     ; repeat 4 times
-      
-    DEC InBattle  
+
     RTS
 
     
@@ -9259,12 +9264,13 @@ Runic:
    @NoRunic: 
     RTS
     
-ConfusedRunicUser_Exit:  ; if Runic user is now a confused caster, don't do it  
-    AND #$03
-    TAX
-    LDA #0
-    STA btl_charrunic, X ; clear confused caster's runic use in case they get unconfused before the end of the turn
-    RTS    
+;ConfusedRunicUser_Exit:  ; if Runic user is now a confused caster, don't do it  
+;    AND #$03
+;    TAX
+;    LDA #0
+;    STA btl_charrunic, X ; clear confused caster's runic use in case they get unconfused before the end of the turn
+;    RTS    
+;; JIGS - Confusion should now cancel Runic on its own.
     
 ConfirmRunic:
     LDA ActiveRunic
@@ -9315,8 +9321,8 @@ ConfirmRunic:
 
 DoRunic_Fixed:           ; gets btl_defender, sees if its the Runic user. If not, exits without Runic activating
     LDA btl_defender
-    CMP btl_attacker      
-    BEQ ConfusedRunicUser_Exit
+  ;  CMP btl_attacker      
+  ;  BEQ ConfusedRunicUser_Exit
     STA MMC5_tmp
     AND #$03
     TAX
@@ -9328,8 +9334,8 @@ DoRunic_Fixed:           ; gets btl_defender, sees if its the Runic user. If not
 DoRunic_Random:         
     LDA btl_attacker    ; is enemy attacking? if so, do it
     BPL :+
-    CMP btl_defender    ; otherwise, its a player; check if the runic-user is the caster, and if so, do nothing 
-    BEQ ConfusedRunicUser_Exit
+   ; CMP btl_defender    ; otherwise, its a player; check if the runic-user is the caster, and if so, do nothing 
+   ; BEQ ConfusedRunicUser_Exit
     
     LDA btl_defender    ; backup the original target
     STA MMC5_tmp
