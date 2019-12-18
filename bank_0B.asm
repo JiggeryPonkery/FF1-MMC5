@@ -1827,7 +1827,7 @@ EndOfBattleWrapUp:
     
     JSR WaitForAnyInput                     ; wait for the user to press any button
     JSR RespondDelay_UndrawAllCombatBoxes   ; then delay and undraw all boxes
-        
+
     LDY #en_exp                 ; get the EXP reward for this battle
     JSR SumBattleRewardEXP
     JSR DivideRewardBySurvivors ; divide that reward by the number of surviving players
@@ -1840,7 +1840,7 @@ EndOfBattleWrapUp:
     ORA battlereward            ; OR high/low bytes to see if reward was zero
     BNE :+                      ; if it was...
       INC eob_exp_reward        ;   ... inc it.  Minimum of 1 EXP for reward.
-      
+	  
   : LDY #en_gp                  ; get the GP reward and store it in eob_gp_reward for it to be printed
     JSR SumBattleRewardGP         ; this is *kind of* bugged, as the game will properly award a 3-byte
     LDA battlereward            ;   GP value, but only 2 bytes will be printed.  So if you somehow
@@ -1990,6 +1990,12 @@ LvlUp_AwardExp:
     STA battlereward+1
     
     JSR LvlUp_GetCharExp            ; get this char's exp pointer
+	
+	LDA lvlup_curexp
+	STA LevelUp_Pointer
+	LDA lvlup_curexp+1
+	STA LevelUp_Pointer+1
+	
     JSR GiveRewardToParty           ; add the exp reward to it
     
         ; <-- "jump here" point  (see end of LvlUp_LevelUp for explanation of this note)
