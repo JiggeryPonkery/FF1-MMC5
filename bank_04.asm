@@ -4,15 +4,18 @@
 
 
 .export lut_ShopCHR
+.export lut_MenuTextCHR
 .export LoadShopCHRForBank_Z
 .export LoadBattleSpritesForBank_Z
 .export LoadSprite_Bank04
-; ^ JIGS added some
+.export lut_BackdropPal
+.export lut_BtlBackdrops
 
 .import WaitForVBlank_L
-
-;; JIGS imported... v 
-.import LongCall, CHRLoad, CallMusicPlay_L, BattleWaitForVBlank_L
+.import LongCall
+.import CHRLoad
+.import CallMusicPlay_L
+.import BattleWaitForVBlank_L
 
 
 .segment "BANK_04"
@@ -20,8 +23,10 @@
 BANK_THIS = $04
 
 lut_ShopCHR:
-.INCBIN "chr/shop_text.chr" 
+.INCBIN "chr/shop.chr" 
 
+lut_MenuTextCHR:
+.INCBIN "chr/menu_text.chr" 
 
 ;; JIGS: Battle sprites split into class
 
@@ -59,6 +64,171 @@ MagicWeaponSprites:
 ;; JIGS - Disch's original disassembly had a long string of data here.
 ;; Turns out it was character, weapon, and magic sprites, so I sorted them out! 
 ;; Now they're easy to edit with YY-CHR or by copying edited data from a FFHackster-compatible rom.
+
+; Battle backdrop palettes
+
+lut_BackdropPal:
+.byte $0F,$31,$29,$30 ; 00 ; grasslands
+.byte $0F,$0C,$17,$07 ; 01 ; cave
+.byte $0F,$1C,$2B,$1B ; 02 ; cave_2
+.byte $0F,$30,$3C,$22 ; 03 ; ocean
+.byte $0F,$18,$0A,$1C ; 04 ; forest
+.byte $0F,$3C,$1C,$0C ; 05 ; temple
+.byte $0F,$37,$31,$28 ; 06 ; desert
+.byte $0F,$27,$17,$1C ; 07 ; brambles
+.byte $0F,$1A,$17,$07 ; 08 ; cave_3
+.byte $0F,$30,$10,$00 ; 09 ; castle
+.byte $0F,$22,$1A,$10 ; 0A ; river
+.byte $0F,$37,$10,$00 ; 0B ; sky_castle
+.byte $0F,$21,$12,$03 ; 0C ; sea_shrine
+.byte $0F,$31,$22,$13 ; 0D ; cave_4
+.byte $0F,$26,$16,$06 ; 0E ; cave_5
+.byte $0F,$2B,$1C,$0C ; 0F ; waterfall
+
+.byte $0F,$30,$00,$31 ; Weapon shop
+.byte $0F,$10,$27,$17 ; Armor shop
+.byte $0F,$3C,$1C,$0C ; White magic shop
+.byte $0F,$3B,$1B,$0B ; Black magic shop
+.byte $0F,$37,$16,$10 ; Clinic
+.byte $0F,$36,$16,$07 ; Inn
+.byte $0F,$37,$17,$07 ; Item
+.byte $0F,$30,$28,$16 ; Caravan
+
+
+; Battle backdrop assignment
+
+lut_BtlBackdrops:
+.byte $00 ; grasslands
+.byte $09 ; castle
+.byte $09 ; castle
+.byte $04 ; forest
+.byte $04 ; forest
+.byte $04 ; forest
+.byte $00 ; grasslands
+.byte $03 ; ocean
+.byte $00 ; grasslands
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $08 ; cave_3
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $04 ; forest
+.byte $04 ; forest
+.byte $04 ; forest
+.byte $03 ; ocean
+.byte $03 ; ocean
+.byte $03 ; ocean
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $09 ; castle
+.byte $09 ; castle
+.byte $0B ; sky_castle
+.byte $06 ; desert
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $04 ; forest
+.byte $04 ; forest
+.byte $04 ; forest
+.byte $00 ; grasslands
+.byte $03 ; ocean
+.byte $00 ; grasslands
+.byte $09 ; castle
+.byte $09 ; castle
+.byte $0D ; cave_4
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $02 ; cave_2
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $02 ; cave_2
+.byte $FF ; unused?
+.byte $02 ; cave_2
+.byte $02 ; cave_2
+.byte $06 ; desert
+.byte $06 ; desert
+.byte $09 ; castle
+.byte $09 ; castle
+.byte $02 ; cave_2
+.byte $00 ; grasslands
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $00 ; grasslands
+.byte $0A ; river
+.byte $0A ; river
+.byte $06 ; desert
+.byte $06 ; desert
+.byte $0A ; river
+.byte $06 ; desert
+.byte $0F ; waterfall?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $00 ; grasslands
+.byte $03 ; ocean
+.byte $FF ; unused?
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $FF ; unused?
+.byte $0A ; river
+.byte $0A ; river
+.byte $06 ; desert
+.byte $06 ; desert
+.byte $00 ; grasslands
+.byte $07 ; brambles
+.byte $00 ; grasslands
+.byte $05 ; temple
+.byte $05 ; temple
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $0C ; sea_shrine
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $07 ; brambles
+.byte $07 ; brambles
+.byte $0E ; cave_5
+.byte $0E ; cave_5
+.byte $02 ; cave_2
+.byte $02 ; cave_2
+.byte $02 ; cave_2
+.byte $02 ; cave_2
+.byte $02 ; cave_2
+.byte $FF ; unused?
+.byte $02 ; cave_2
+.byte $00 ; grasslands
+.byte $01 ; cave
+.byte $FF ; unused?
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $07 ; brambles
+.byte $07 ; brambles
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $00 ; grasslands
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+.byte $FF ; unused?
+
+
+
 
 
 
@@ -101,7 +271,7 @@ LoadBattleSpritesForBank_Z:
     LDA tmp+3
     CMP #12
     BNE @Loop
-    RTS
+    JMP LoadBlackTile_BG
    
 LoadBattleSpritesLocation:
     LDA tmp+3
@@ -225,7 +395,8 @@ LoadAttackCloud:
     STA tmp+2
     LDA #$10
     LDX #$40
-    JMP CHRLoadToAX
+    JSR CHRLoadToAX
+	JMP LoadBlackTiles_Sprite
    
 LoadWeaponSprite:
     LDA #0
@@ -290,7 +461,7 @@ LoadMagicSprite:
     
     LDA $2002
     LDA #>oam
-    STA $4014                   ; Do OAM DMA
+    STA $4014               ; Do OAM DMA
     LDA #BANK_THIS
     STA cur_bank            ; set the swap-back bank (necessary because music playback is in another bank)
     JSR CallMusicPlay_L     ; Call music playback to keep it playing
@@ -312,7 +483,29 @@ LoadMagicSprite:
     LDX #$40
     JMP CHRLoadToAX
 
-    
+;; JIGS - this is really just so I don't see garbage in the PPU viewer while testing battle graphics...
+;; since now it displays sprites instead of background tiles
+
+LoadBlackTiles_Sprite:
+    LDX #>$1000
+    LDA #<$1000
+    STX $2006             ; write X as high byte
+    STA $2006             ; A as low byte
+	JMP FillBlackTile
+
+LoadBlackTile_BG: ;; this one is necessary for the save screen and new game screens!
+    LDA #0
+    STA $2006
+    STA $2006
+
+FillBlackTile:    
+;   LDA #0
+    LDX #$10
+   @Loop:
+    STA $2007             ; write $20 zeros to clear 2 tiles
+    DEX
+    BNE @Loop
+    RTS
     
 .byte "END OF BANK 04"    
     

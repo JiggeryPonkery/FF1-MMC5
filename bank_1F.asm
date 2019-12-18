@@ -176,6 +176,7 @@
 .import LoadBattleTextChr
 .import LoadStatusBoxScrollWork
 .import LoadSprite_Bank04
+.import lut_MenuTextCHR
 
 .segment "BANK_FIXED"
 
@@ -510,7 +511,7 @@ DoOWTransitions:
     STA $4015              ; and APU
     STA $5015              ; and MMC5 APU (JIGS)
     
-    JSR LoadBattleCHRPal   ; Load all necessary CHR for battles, and some palettes
+  ;  JSR LoadBattleCHRPal   ; Load all necessary CHR for battles, and some palettes
 
     LDA btlformation
     JSR EnterBattle_L      ; start the battle!
@@ -2487,7 +2488,7 @@ StandardMapLoop:
     STA $4015
     STA $5015               ; MMC5 - JIGS
 
-    JSR LoadBattleCHRPal    ; Load CHR and palettes for the battle
+  ;  JSR LoadBattleCHRPal    ; Load CHR and palettes for the battle
     LDA btlformation
     JSR EnterBattle_L       ; start the battle!
     BCC :+                  ;  see if this battle was the end game battle
@@ -10340,24 +10341,17 @@ LoadBridgeSceneGFX_Menu: ;; JIGS -- this is for menu loading; don't want to turn
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;LoadNewGameCHRPal:
-;    JSR LoadMenuBGCHRAndPalettes
-;    JMP LoadBatSprCHRPalettes_NewGame
-
-LoadBattleCHRPal:              ; does not load palettes for enemies
-    JSR LoadBattleBGCHRAndPalettes
-    JMP LoadBatSprCHRPalettes
+;; JIGS - moved battle loading stuff, not really necessary to have so many JSRs and JMPs all over the place
 
 LoadMenuCHRPal:                ; does not load 'lit orb' palette, or the two middle palettes ($03C0-03CB)
-    JSR LoadShopBGCHRPalettes
-    JSR LoadMenuBGCHRAndPalettes
-    JSR WaitForVBlank
-    JSR CallMusicPlay
+    JSR LoadMenuOrbBGCHRAndPalettes
+LoadMenuCHRPal_TextOnly:
+	JSR LoadMenuTextBGCHR
     JMP LoadBatSprCHRPalettes
 
 LoadShopCHRPal:
     JSR LoadShopBGCHRPalettes
+	JSR LoadMenuTextBGCHR	   ; Loads up the blue menu palette as well
     JMP LoadBatSprCHRPalettes
 
 LoadSMCHR:                     ; standard map -- does not any palettes
@@ -10368,18 +10362,26 @@ LoadSMCHR:                     ; standard map -- does not any palettes
     JMP LoadMapObjCHR
 
 LoadOWCHR:                     ; overworld map -- does not load any palettes
-    LDA #BANK_MAPCHR
+    JSR LoadCHR_MusicPlay
+	LDA #BANK_MAPCHR
+	STA cur_bank
     JSR SwapPRG_L
     JSR LoadOWBGCHR
+	JSR LoadCHR_MusicPlay
     JSR LoadPlayerMapmanCHR
     JMP LoadOWObjectCHR
     
 LoadMenuCHRPal_Z:
-    JSR LoadMenuCHRPal
-    JSR LoadBorderPalette_Blue       ; Load up the blue border palette for menus    
-    JMP LoadBatSprCHRPalettes_NewGame
-;    LDA #BANK_Z
-;    JMP SwapPRG_L
+	JSR LoadMenuTextBGCHR
+    LDA #BANK_BTLCHR
+    JSR SwapPRG_L     
+	JSR LoadBattleSpritesForBank_Z
+	LDA #BANK_Z
+    JMP SwapPRG_L      
+
+LoadCHR_MusicPlay:	
+	JSR WaitForVBlank_L
+	JMP CallMusicPlay_L
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10436,14 +10438,25 @@ LoadOWObjectCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadOWBGCHR:
-    LDA #$80
-    STA tmp+1        ; source address is $8000
-    LDA #0
-    STA tmp
-    LDX #$10         ; 16 rows to load (full pattern table)
-    ;LDA #0           ; dest address is $0000
-    ;JMP CHRLoadToA
-
+;;    LDA #$80
+;;    STA tmp+1        ; source address is $8000
+;;    LDA #0
+;;    STA tmp
+;;    LDX #$10         ; 16 rows to load (full pattern table)
+	LDA #$80
+	STA tmp+1
+	LDA #0
+	STA tmp
+	LDX #$08
+	JSR CHRLoadToA		;; JIGS - load half, update music, load the next half
+	JSR LoadCHR_MusicPlay
+	LDA #$88
+	STA tmp+1
+	LDA #0
+	STA tmp
+	LDX #$08
+	TXA	
+	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  CHR Row Loading To Given Address 'A'  [$E95A :: 0x3E96A]
@@ -10644,23 +10657,6 @@ LoadMapObjCHR:
 
 
 LoadShopBGCHRPalettes:
-    LDA #BANK_MENUCHR  ; swap to bank containing shop CHR
-    JSR SwapPRG_L
-
-    LDA #<lut_ShopCHR
-    STA tmp
-    LDA #>lut_ShopCHR  ; source pointer (tmp) = lut_ShopCHR
-    STA tmp+1
-
-    LDA #$00           ; dest PPU address = $0000
-    ;LDX #$08           ; 8 rows to load
-    LDX #$10
-    JSR CHRLoadToA     ; load them up  (loads all shop related CHR
-    ;; JIGS - got a weird bug here, so I put the lut_ShopCHR directly in bank 09 where it belongs
-    ;; And since its the same block of data that loads the MenuCHR, I'm just doubling the amount of rows
-    ;; ...it didn't kill the bug, but its more efficient anyway, I guess.
-    
-    ;JSR LoadMenuCHR    ;  then load up all menu related CHR (font/borders/etc)
     JSR LoadShopTypeAndPalette   ; load shop palettes and type
 
        ; LoadShopTypeAndPalette doesn't load the palettes for the title
@@ -10672,7 +10668,36 @@ LoadShopBGCHRPalettes:
       STA cur_pal+4, X   ; copy over the shop palettes
       DEX                ; and loop until X wraps (8 colors copied in total)
       BPL @Loop
-    RTS
+	  
+	JSR LoadCHR_MusicPlay	  
+	  
+    LDA #BANK_MENUCHR  ; swap to bank containing shop CHR
+    JSR SwapPRG_L
+
+    LDA #<lut_ShopCHR
+	STA tmp
+    LDA #>lut_ShopCHR  ; source pointer (tmp) = lut_ShopCHR
+    STA tmp+1
+
+    LDA #$00           ; dest PPU address = $0000
+    LDX #$08
+    JMP CHRLoadToA     ; load them up  (loads all shop related CHR
+	
+LoadMenuTextBGCHR:
+	JSR LoadCHR_MusicPlay	
+
+    LDA #BANK_MENUCHR 
+    JSR SwapPRG_L
+
+    LDA #<lut_MenuTextCHR
+	STA tmp
+    LDA #>lut_MenuTextCHR
+	STA tmp+1
+	
+    LDA #$08           ; dest PPU address = $0800
+    TAX
+    JSR CHRLoadToA     ; load them up  (loads all shop related CHR
+	JMP LoadBorderPalette_Blue
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10687,49 +10712,43 @@ LoadBattleBGCHRAndPalettes:
     LDA #BANK_BACKDROPPAL              ; Swap to BANK_OWINFO
     JSR SwapPRG_L
 
+	JSR LoadBattleBackdropPalette
+
+	LDA #08
+    STA MMC5_tmp
+    JSR LoadSprite_Bank04           ; this loads the player>enemy attack cloud sprites
+
     ;; JIGS - slight changes
     
     LDX ow_tile                   ; Get last OW tile we stepped on
-    LDY lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
-    ;; Load Y instead of A
-    
-    LDA #BANK_BATTLEBG           ; swap to bank with backdrops
-    JSR SwapPRG_L
+    LDA lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
     
     ;; every backdrop is 1 tile of black, 1 row of graphics, and another 1 tile of black
     ;; for a total of $120 bytes
     ;; but they're arranged in #BANK_BATTLEBG in $10 tile rows
     ;; So an ID of 09 would be at $8900
    
-    TYA                           ; now transfer Y to A-- saves having to do an LDA #0 again
     AND #$0F                      ; mask with $0F (there are only 16 battle BGs)
     ORA #$80                      ; add $80 to get high byte
     STA tmp+1                     ; save high byte
+
+    LDA #BANK_BATTLEBG           ; swap to bank with backdrops
+    JSR SwapPRG_L	
  
     LDA #0
+	TAX
     STA tmp                       ; save low byte
-    LDY $2002                     ; reset PPU address toggle
-    STA $2006                     ; Dest address = $0000
-    STA $2006
+ ;  LDY $2002                     ; reset PPU address toggle
+ ;; toggled while loading attack clouds
+	JSR SetPPUAddr_XA             ; Dest address = $0000
+
     JSR @FillBlackTile            ; and fill one tile with 0s
     INX                           ; X = 1 row
     TAY                           ; Y = 0 
     
-    JSR CHRLoad_Cont
+    JSR CHRLoad_Cont			  ; this writes the backdrop graphics
     JSR @FillBlackTile            ; fill second tile with 0s
   
-  ; JSR LoadBattleBGCHRPointers   ; Swap in desired bank, and set up pointers to battle backdrop
-  ; LDA #$00                      ; Dest address = $0000
-  ; LDX #$01                      ; Load 1 row of tiles
-  ; JSR CHRLoadToA                ; Load up the CHR
-   
- ; @Loop:                  ; Battle backdrops are actually 1 row + 2 tiles ($12 tiles)
- ;     LDA (tmp), Y        ;   so loop to load another 2 tiles ($20 bytes)
- ;     STA $2007
- ;     INY
- ;     CPY #$20
- ;     BCC @Loop
-
     LDA btlformation ; get battle formation number
     ;ASL A            ; multiply it by 16
     ;ASL A
@@ -10759,17 +10778,14 @@ LoadBattleBGCHRAndPalettes:
     JSR LoadBattleBGCHRPointers    ; load pointers for Enemy CHR
     INC tmp+1                      ; increment high byte of pointer (enemy CHR starts 1 row in, before that is battle backdrop)
     LDX #$07                       ; load 7 rows
-    JSR CHRLoad_Cont               ;   continue CHR loading from Y=$20
-    
-   ; LDA #<BattleIcons
-   ; STA tmp+1
-   ; LDA #>BattleIcons
-   ; STA tmp
-   ; do something to just load 6 tiles after enemy graphics
-    
-    JSR LoadMenuCHR                ; load CHR for font/menu/etc
-    JMP LoadBattleBGPalettes       ; finally.. load palettes for menu and backdrop
-    
+    JSR CHRLoad_Cont               ; continue CHR loading from Y=$20
+	
+	LDA #$08
+    JSR SwapPRG_L
+    JSR LoadBattleTextChr		   ; also loads magic data and enemy AI into RAM
+
+	JSR LoadBattleSpritePalettes
+	JMP LoadBorderPalette_Color
     
    @FillBlackTile:    
     LDA #0
@@ -10843,22 +10859,17 @@ LoadBattleBGCHRPointers:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-LoadMenuBGCHRAndPalettes:
-    ;JSR LoadBattleBGCHRAndPalettes   ; Load Battle BG and palettes.
-    LDA #BANK_ORBCHR                 ;     This is mainly for menu related CHR and palettes
+LoadMenuOrbBGCHRAndPalettes:
+    LDA #BANK_ORBCHR                 ; This is mainly for menu related CHR and palettes
     JSR SwapPRG_L                    ; Swap to Bank D
     LDX #08
-    ;LDX #$02                         ; we want 2 rows of tiles
     LDA #<lut_OrbCHR                 ; from source address lut_OrbCHR
     STA tmp
     LDA #>lut_OrbCHR
     STA tmp+1
     LDA #0
-    ;LDA #$06                         ; dest ppu address $0600
     JSR CHRLoadToA                   ; load up desired CHR (this is the ORB graphics that appear in the upper-left corner of main menu
-    JSR LoadStatusBoxScrollWork    
-    JMP LoadBorderPalette_Blue       ; Load up the blue border palette for menus
+	JMP LoadStatusBoxScrollWork      ; this loads up the scrollwork image in RAM for later drawing
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10876,85 +10887,37 @@ LoadMenuBGCHRAndPalettes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-LoadBatSprCHRPalettes_NewGame:
-    LDA #BANK_BTLCHR
-    JSR SwapPRG_L     
-	JSR LoadBattleSpritesForBank_Z
-	LDA #BANK_Z
-    JMP SwapPRG_L      
-	
-;;
-;;  JSR LoadBatSprCHR_SetPpuAddrAndSwap
-;;  
-;;  ;; JIGS ^ does the same as v 
-;;  ;LDA #BANK_BTLCHR
-;;  ;JSR SwapPRG_L  ; Swap to bank 9
-;;  ;LDA $2002      ; Reset PPU Addr Toggle
-;;  ;LDA #$10
-;;  ;STA $2006      ;  set dest PPU Addr to $1000
-;;  ;LDA #$00
-;;  ;STA $2006
-;;
-;;  LDA #>lut_BatSprCHR    ;  set source pointer
-;;  STA tmp+1
-;;  LDA #<lut_BatSprCHR
-;;  STA tmp
-;;
-;;   LDX #2*6       ;  12 rows (2 rows per class * 6 classes)
-;;   JSR CHRLoad    ; Load up the CHR
-;;
-;;  ;; JIGS v - not sure if this is my code, probably someone else's! Thanks, stranger. 
-;;
-;;  @loop:
-;;      LDX #1          ; Only load 1 row of tile data for this class
-;;      JSR CHRLoad     ; Load up the CHR
-;;      INC tmp+1       ; Increase high byte of source pointer (skip the 2nd row of tiles)
-;;      LDA tmp+1
-;;      CMP #>lut_BatSprCHR + (12*2)  ; See if we've passed over 24 rows (all 12 classes, 2 rows per class)
-;;      BNE @loop                     ; If not, keep looping until we do
-;;  
-;;  LDA #>(lut_BatObjCHR + $400)  ; change source pointer to bottom half of cursor and related CHR
-;;  STA tmp+1
-;;  LDX #$04                      ; load 4 rows (bottom half)
-;;  JSR CHRLoad_Cont   ; load cursor and other battle related CHR
-;;  JSR LoadBattleSpritePalettes  ; load palettes for these sprites
-;;  LDA #BANK_Z
-;;  JMP SwapPRG_L      
-
 LoadBatSprCHRPalettes:
     JSR LoadBatSprCHR_SetPpuAddrAndSwap
     
     ;; JIGS - here we load sprites instead of classes 
     
     LDA #$00
-    STA tmp            ; clear low byte of source pointer
-    LDA ch_class      ; get character 1's sprite
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR @LoadSprite     ; load it
-    LDA ch_class+$40  ; character 2's
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
+    STA tmp              ; clear low byte of source pointer
+    LDA ch_class         ; get character 1's sprite
+    JSR @LoadSprite      ; load it
+	
+    LDA ch_class+$40     ; character 2's
     JSR @LoadSprite
-    LDA ch_class+$80  ; character 3's
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
+	
+    LDA ch_class+$80     ; character 3's
     JSR @LoadSprite
-    LDA ch_class+$C0  ; character 4's
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
+
+    LDA ch_class+$C0     ; character 4's
     JSR @LoadSprite
     
     LDA #>lut_BatObjCHR  ; once all character's class graphics are loaded
     STA tmp+1            ;   change source pointer to $A800  (start of cursor and related battle CHR)
     LDX #$08             ; signal to load 8 rows
-
-       ; above two routines both merge here
-
-      JSR CHRLoad_Cont   ; load cursor and other battle related CHR
-      JSR LoadBattleSpritePalettes  ; load palettes for these sprites
-      LDA #BANK_MENUS
-      JMP SwapPRG_L      ; and swap to bank E on exit
+  
+    JSR CHRLoad_Cont   ; load cursor and other battle related CHR
+    JSR LoadBattleSpritePalettes  ; load palettes for these sprites
+    LDA #BANK_MENUS
+    JMP SwapPRG_L      ; and swap to bank E on exit
 
 @LoadSprite:
+    AND #$F0             ;; JIGS - cut off low bits to get sprite
     JSR ShiftSpriteHightoLow_Battle
-    ;ASL A               ; double class index (each class has 2 rows of tiles)
     
     CLC
     ADC #>lut_BatSprCHR ; add high byte of the source pointer
@@ -10979,44 +10942,6 @@ ShiftSpriteHightoLow_Battle:
    LSR A
    RTS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Border Palette  [$EB29 :: 0x3EB39]
-;;
-;;    Loads the greyscale palette used for the border in menus
-;;   The routine has 2 entry points... one to load the BLACK bg (used in battle)
-;;   and one to load the BLUE bg (used in menus/shops)
-;;
-;;   X,Y remain unchanged
-;;
-;;   OUT:  $03CC-03CF = border palette
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBorderPalette_Blue:
-    LDA #$01
-    BNE :+         ; always branches
-
-LoadBorderPalette_Black:
-    ;LDA #$0F
-    TXA
-    PHA
-    LDX BattleBGColor
-    LDA BattleBackgroundColor_LUT, X
-    JSR :+
-    PLA
-    TAX
-    RTS    
-
-    :  STA cur_pal+$E   ; Black or Blue goes to color 2
-       LDA #$0F
-       STA cur_pal+$C   ; Black always to color 0
-       LDA #$00
-       STA cur_pal+$D   ; Grey always to color 1
-       LDA #$30
-       STA cur_pal+$F   ; White always to color 3
-       RTS
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11043,9 +10968,77 @@ LoadShopTypeAndPalette:
     ASL A
     ASL A
     ORA #$40             ; *4 and add $40 to get offset to required backdrop palette
-    JSR LoadBackdropPalette     ; get the backdrop palette loaded
-    JMP LoadBorderPalette_Blue  ; and the border palette loaded
+    JMP LoadBackdropPalette     ; get the backdrop palette loaded
+	
+	;; JIGS - do this after loading shop/menu chr
+   ;JMP LoadBorderPalette_Blue  ; and the border palette loaded
+   
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Load Border Palette  [$EB29 :: 0x3EB39]
+;;
+;;    Loads the greyscale palette used for the border in menus
+;;   The routine has 2 entry points... one to load the BLACK bg (used in battle)
+;;   and one to load the BLUE bg (used in menus/shops)
+;;
+;;   X,Y remain unchanged
+;;
+;;   OUT:  $03CC-03CF = border palette
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+LoadBorderPalette_Blue:
+    LDA #$01
+    BNE :+         ; always branches
+
+LoadBorderPalette_Color:
+    LDX BattleBGColor
+    LDA BattleBackgroundColor_LUT, X
+ :  STA cur_pal+$E   ; Black or Blue goes to color 2
+    LDA #$0F
+    STA cur_pal+$C   ; Black always to color 0
+    LDA #$00
+    STA cur_pal+$D   ; Grey always to color 1
+    LDA #$30
+    STA cur_pal+$F   ; White always to color 3
+    RTS   
+   
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  LUT for Shop Money and Title Boxes  [$EB74 :: 0x3EB84]
+;;
+;;   These are the purple and green box palettes used for the title and money
+;;     boxes inside of shops
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+lut_ShopPalettes:
+  ;.BYTE  $0F,$00,$04,$30,  $0F,$00,$0A,$30
+;       purple box stuff -- green box stuff 
+ 
+  .BYTE  $0F,$00,$04,$30,  $0F,$00,$11,$30
+ 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Load Battle Backdrop Palette  [$EB7C :: 0x3EB8C]
+;;
+;;   Loads required battle backdrop palette.  Note the difference between this and
+;;    LoadBackdropPalette.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+LoadBattleBackdropPalette:
+     LDA #BANK_BACKDROPPAL    ; Swap to required bank
+     JSR SwapPRG_L
+     LDX ow_tile              ; Get last OW tile stepped on
+     LDA lut_BtlBackdrops, X  ; use it to index and get battle backdrop ID
+     AND #$0F                 ; multiply ID by 4
+     ASL A
+     ASL A                    ; and load up the palette
+	 ;; flow into loading
+	 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Load Backdrop Palette  [$EB5A :: 0x3EB6A]
@@ -11072,71 +11065,6 @@ LoadBackdropPalette:
     LDA lut_BackdropPal+3, X
     STA cur_pal+3
     RTS
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for Shop Money and Title Boxes  [$EB74 :: 0x3EB84]
-;;
-;;   These are the purple and green box palettes used for the title and money
-;;     boxes inside of shops
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-lut_ShopPalettes:
-  ;.BYTE  $0F,$00,$04,$30,  $0F,$00,$0A,$30
-;       purple box stuff -- green box stuff 
- 
-  .BYTE  $0F,$00,$04,$30,  $0F,$00,$11,$30
- 
-  
-  
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Battle Backdrop Palette  [$EB7C :: 0x3EB8C]
-;;
-;;   Loads required battle backdrop palette.  Note the difference between this and
-;;    LoadBackdropPalette.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattleBackdropPalette:
-     LDA #BANK_BACKDROPPAL    ; Swap to required bank
-     JSR SwapPRG_L
-     LDX ow_tile              ; Get last OW tile stepped on
-     LDA lut_BtlBackdrops, X  ; use it to index and get battle backdrop ID
-     AND #$0F                 ; multiply ID by 4
-     ASL A
-     ASL A                    ; and load up the palette
-     JMP LoadBackdropPalette
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Battle BG Palettes  [$EB8D :: 0x3EB9D]
-;;
-;;    Loads both the Battle Backdrop palette, and border palette
-;;    Does not load sprite palettes or palette for the enemies
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattleBGPalettes:
-    JSR LoadBattleBackdropPalette
-    JMP LoadBorderPalette_Black
-
-    ;; Faux routine -- same as above but gives the menus a blue background instead of black
-    ;;   I do not believe this code is ever used by the game
-
-;LoadBattleBGPalettes_Blue:
-;    JSR LoadBattleBackdropPalette
-;    JMP LoadBorderPalette_Blue
-
-;; JIGS - clearing unused stuff
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11953,20 +11881,12 @@ BattleCrossPageJump:
 EnterBattle_L:
 EnterBattle:
 
+	JSR LoadBattleBGCHRAndPalettes
+
     LDA #BANK_Z               ;; and do pre-emptive battle prep for gear...
     JSR SwapPRG_L
     JSR UnadjustEquipStats
     JSR ReadjustEquipStats
-    
-    LDA #$08
-    JSR SwapPRG_L
-    JSR LoadBattleTextChr
-    
-    LDA #08
-    STA MMC5_tmp
-    LDA #04
-    JSR SwapPRG_L
-    JSR LoadSprite_Bank04 ; this loads the player>enemy attack cloud sprites
     
       LDX #$00             ; reset all battle variables to 0           
     : LDA #0             ; this is where map tileset data is kept in dungeons and such
@@ -12012,7 +11932,7 @@ EnterBattle:
   ;; Turn off PPU and clear nametables
 
     LDA #0
-    STA menustall           ; disable menu stalling
+    STA menustall             ; disable menu stalling
     JSR Battle_PPUOff         ; turn PPU off
     LDA $2002                 ; reset PPU toggle
 
@@ -12023,47 +11943,22 @@ EnterBattle:
     LDY #8                    ; loops to clear $0800 bytes of NT data (both nametables)
   @ClearNT_OuterLoop:
       LDX #0
-    @ClearNT_InnerLoop:         ; inner loop clears $100 bytes
-        STA $2007
-        DEX
-        BNE @ClearNT_InnerLoop
-      DEY                       ; outer loop runs inner loop 8 times
-      BNE @ClearNT_OuterLoop    ;  clearing $800 bytes total
-
-  ;; Draw Various (hardcoded) boxes on the screen
-
-;    LDA #1              ; box at 1,1
-;    STA box_x         ; with dims 16,18
-;    LDX #16             ;  this is the box housing the enemies (big box on the left)
-;    LDY #18
-;    JSR BattleBox_vAXY
-
-;    LDA #17             ; box at 17,1
-;    STA box_x         ; with dims 8,16
-;    LDA #1              ;  this is the box housing the player sprites (box on right)
-;    LDX #8
-;    LDY #18
-;    JSR BattleBox_vAXY
-
-;    LDA #25               ; draw the four boxes that will house player stats
-;    LDX #21               ; draw them from the bottom up so that top boxes appear to lay over
-;    JSR Battle_PlayerBox  ;  top of the bottom boxes
-;    LDX #15
-;    JSR Battle_PlayerBox
-;    LDX #9
-;    JSR Battle_PlayerBox
-;    LDX #3
-;    JSR Battle_PlayerBox
-
-;;    LDA #1              ; box at 1,1
-;;   STA box_x         ; with dims 16,18
-;;    LDX #30             ;  this is the box housing the enemies (big box on the left)
-;;    LDY #18
-;;   JSR BattleBox_vAXY
-;; JIGS - old battle box for enemies and players!
-
-    ;; JIGS - we only need the one box. 
-    ;; The routine that draws player health and names will draw box borders!
+   @ClearNT_InnerLoop:        ; inner loop clears $100 bytes
+      STA $2007
+      DEX
+      BNE @ClearNT_InnerLoop
+    DEY                     ; outer loop runs inner loop 8 times
+    BNE @ClearNT_OuterLoop  ;  clearing $800 bytes total
+	  
+    LDX #>$2280
+    LDA #<$2280               ; now fill the lower half, where messaages are, with $F6
+    JSR SetPPUAddr_XA         ; which should be a blank sprite
+    JSR @FillMessageNTWith_F6
+	
+	LDX #>$2680
+    LDA #<$2680               ; and again for the other side
+    JSR SetPPUAddr_XA         
+    JSR @FillMessageNTWith_F6
 
   ;; Draw Attribute Table
 
@@ -12114,32 +12009,30 @@ EnterBattle:
     JSR DrawBattleBackdropRow   ; 4 rows total
     
     
-    LDA #28              ; box at 1,1
-    STA box_x         ; with dims 16,18
-    LDA #1
-    LDX #4             ;  this draws the battle turn box
+    LDA #28                    ; box at 1,1
+    STA box_x                  ; with dims 16,18
+    LDA #1                   
+    LDX #4                     ;  this draws the battle turn box
     LDY #3
     JSR BattleBox_vAXY
 
-  ;; Clear the '$FF' tile so it's fully transparent instead of
-  ;;   fully solid (normally is innards of box body)
-
-  ;  JSR WaitForVBlank_L     ; wait for VBlank again  (why!  PPU is off!)
-  ;  LDX #>$0FF0
-  ;  LDA #<$0FF0             ;  set PPU addr to $0FF0 (CHR for tile $FF)
-  ;  JSR SetPPUAddr_XA
-
-;;    LDA #0
-;;    LDX #$10
-;;  @ClearFFLoop:
- ;;     STA $2007             ; write $10 zeros to clear the tile
-  ;;    DEX
-  ;;    BNE @ClearFFLoop
-      
-    LDA #BANK_BATTLE        ; swap in the battle bank
+    LDA #BANK_BATTLE           ; swap in the battle bank
     STA battle_bank
     JSR SwapPRG_L
-    JMP PrepBattleVarsAndEnterBattle_L            ; and jump to battle routine!
+    JMP PrepBattleVarsAndEnterBattle_L ; and jump to battle routine!
+	
+  @FillMessageNTWith_F6:
+    LDA #$F6			 
+    LDY #10                    ; 10 tiles from the message box starting area
+  @ClearMessageNT_OuterLoop:
+      LDX #$20                 ; and $20 tiles across 
+   @ClearMessageNT_InnerLoop:   
+      STA $2007
+      DEX
+      BNE @ClearMessageNT_InnerLoop
+    DEY                 
+    BNE @ClearMessageNT_OuterLoop  	
+	RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -15329,7 +15222,7 @@ SoundTestMenu:         ;
     STA joy
     STA joy_prevdir
     STA menustall
-    JSR LoadMenuCHRPal        ; load menu related CHR and palettes
+    JSR LoadMenuCHRPal_TextOnly ; load menu related CHR and palettes
     LDA #BANK_Z
     JSR SwapPRG
     JMP SoundTestZ
@@ -15426,10 +15319,11 @@ APUOFF:
     RTS    
 
 SaveScreenHelper: 
-    JSR LoadMenuCHRPal
+  ;  JSR LoadMenuCHRPal
     LDA #BANK_MENUCHR
     JSR SwapPRG
     JSR LoadBattleSpritesForBank_Z
+	JSR LoadBorderPalette_Blue
     LDA #BANK_Z
     JMP SwapPRG    
     

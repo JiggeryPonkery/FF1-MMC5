@@ -16,8 +16,8 @@
 .export lut_ClassStartingStats
 .export lut_Treasure
 .export lut_Treasure_2
-.export lut_BackdropPal
-.export lut_BtlBackdrops
+;;.export lut_BackdropPal
+;;.export lut_BtlBackdrops
 .export lut_MapObjects
 
 .segment "BANK_13"
@@ -1454,167 +1454,167 @@ lut_MapObjects:
 .byte $00,$00,$00
 
 
-; Battle backdrop palettes
-
-lut_BackdropPal:
-.byte $0F,$31,$29,$30 ; 00 ; grasslands
-.byte $0F,$0C,$17,$07 ; 01 ; cave
-.byte $0F,$1C,$2B,$1B ; 02 ; cave_2
-.byte $0F,$30,$3C,$22 ; 03 ; ocean
-.byte $0F,$18,$0A,$1C ; 04 ; forest
-.byte $0F,$3C,$1C,$0C ; 05 ; temple
-.byte $0F,$37,$31,$28 ; 06 ; desert
-.byte $0F,$27,$17,$1C ; 07 ; brambles
-.byte $0F,$1A,$17,$07 ; 08 ; cave_3
-.byte $0F,$30,$10,$00 ; 09 ; castle
-.byte $0F,$22,$1A,$10 ; 0A ; river
-.byte $0F,$37,$10,$00 ; 0B ; sky_castle
-.byte $0F,$21,$12,$03 ; 0C ; sea_shrine
-.byte $0F,$31,$22,$13 ; 0D ; cave_4
-.byte $0F,$26,$16,$06 ; 0E ; cave_5
-.byte $0F,$2B,$1C,$0C ; 0F ; waterfall
-
-.byte $0F,$30,$00,$31 ; Weapon shop
-.byte $0F,$10,$27,$17 ; Armor shop
-.byte $0F,$3C,$1C,$0C ; White magic shop
-.byte $0F,$3B,$1B,$0B ; Black magic shop
-.byte $0F,$37,$16,$10 ; Clinic
-.byte $0F,$36,$16,$07 ; Inn
-.byte $0F,$37,$17,$07 ; Item
-.byte $0F,$30,$28,$16 ; Caravan
-
-
-; Battle backdrop assignment
-
-lut_BtlBackdrops:
-.byte $00 ; grasslands
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $08 ; cave_3
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $03 ; ocean
-.byte $03 ; ocean
-.byte $03 ; ocean
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $0B ; sky_castle
-.byte $06 ; desert
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $00 ; grasslands
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $0D ; cave_4
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $02 ; cave_2
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $0A ; river
-.byte $0A ; river
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $0A ; river
-.byte $06 ; desert
-.byte $0F ; waterfall?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $0A ; river
-.byte $0A ; river
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $00 ; grasslands
-.byte $05 ; temple
-.byte $05 ; temple
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $0C ; sea_shrine
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $07 ; brambles
-.byte $0E ; cave_5
-.byte $0E ; cave_5
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $00 ; grasslands
-.byte $01 ; cave
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $07 ; brambles
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
+;;; Battle backdrop palettes
+;;
+;;lut_BackdropPal:
+;;.byte $0F,$31,$29,$30 ; 00 ; grasslands
+;;.byte $0F,$0C,$17,$07 ; 01 ; cave
+;;.byte $0F,$1C,$2B,$1B ; 02 ; cave_2
+;;.byte $0F,$30,$3C,$22 ; 03 ; ocean
+;;.byte $0F,$18,$0A,$1C ; 04 ; forest
+;;.byte $0F,$3C,$1C,$0C ; 05 ; temple
+;;.byte $0F,$37,$31,$28 ; 06 ; desert
+;;.byte $0F,$27,$17,$1C ; 07 ; brambles
+;;.byte $0F,$1A,$17,$07 ; 08 ; cave_3
+;;.byte $0F,$30,$10,$00 ; 09 ; castle
+;;.byte $0F,$22,$1A,$10 ; 0A ; river
+;;.byte $0F,$37,$10,$00 ; 0B ; sky_castle
+;;.byte $0F,$21,$12,$03 ; 0C ; sea_shrine
+;;.byte $0F,$31,$22,$13 ; 0D ; cave_4
+;;.byte $0F,$26,$16,$06 ; 0E ; cave_5
+;;.byte $0F,$2B,$1C,$0C ; 0F ; waterfall
+;;
+;;.byte $0F,$30,$00,$31 ; Weapon shop
+;;.byte $0F,$10,$27,$17 ; Armor shop
+;;.byte $0F,$3C,$1C,$0C ; White magic shop
+;;.byte $0F,$3B,$1B,$0B ; Black magic shop
+;;.byte $0F,$37,$16,$10 ; Clinic
+;;.byte $0F,$36,$16,$07 ; Inn
+;;.byte $0F,$37,$17,$07 ; Item
+;;.byte $0F,$30,$28,$16 ; Caravan
+;;
+;;
+;;; Battle backdrop assignment
+;;
+;;lut_BtlBackdrops:
+;;.byte $00 ; grasslands
+;;.byte $09 ; castle
+;;.byte $09 ; castle
+;;.byte $04 ; forest
+;;.byte $04 ; forest
+;;.byte $04 ; forest
+;;.byte $00 ; grasslands
+;;.byte $03 ; ocean
+;;.byte $00 ; grasslands
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $08 ; cave_3
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $04 ; forest
+;;.byte $04 ; forest
+;;.byte $04 ; forest
+;;.byte $03 ; ocean
+;;.byte $03 ; ocean
+;;.byte $03 ; ocean
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $09 ; castle
+;;.byte $09 ; castle
+;;.byte $0B ; sky_castle
+;;.byte $06 ; desert
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $04 ; forest
+;;.byte $04 ; forest
+;;.byte $04 ; forest
+;;.byte $00 ; grasslands
+;;.byte $03 ; ocean
+;;.byte $00 ; grasslands
+;;.byte $09 ; castle
+;;.byte $09 ; castle
+;;.byte $0D ; cave_4
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $02 ; cave_2
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $02 ; cave_2
+;;.byte $FF ; unused?
+;;.byte $02 ; cave_2
+;;.byte $02 ; cave_2
+;;.byte $06 ; desert
+;;.byte $06 ; desert
+;;.byte $09 ; castle
+;;.byte $09 ; castle
+;;.byte $02 ; cave_2
+;;.byte $00 ; grasslands
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $00 ; grasslands
+;;.byte $0A ; river
+;;.byte $0A ; river
+;;.byte $06 ; desert
+;;.byte $06 ; desert
+;;.byte $0A ; river
+;;.byte $06 ; desert
+;;.byte $0F ; waterfall?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $00 ; grasslands
+;;.byte $03 ; ocean
+;;.byte $FF ; unused?
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $FF ; unused?
+;;.byte $0A ; river
+;;.byte $0A ; river
+;;.byte $06 ; desert
+;;.byte $06 ; desert
+;;.byte $00 ; grasslands
+;;.byte $07 ; brambles
+;;.byte $00 ; grasslands
+;;.byte $05 ; temple
+;;.byte $05 ; temple
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $0C ; sea_shrine
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $07 ; brambles
+;;.byte $07 ; brambles
+;;.byte $0E ; cave_5
+;;.byte $0E ; cave_5
+;;.byte $02 ; cave_2
+;;.byte $02 ; cave_2
+;;.byte $02 ; cave_2
+;;.byte $02 ; cave_2
+;;.byte $02 ; cave_2
+;;.byte $FF ; unused?
+;;.byte $02 ; cave_2
+;;.byte $00 ; grasslands
+;;.byte $01 ; cave
+;;.byte $FF ; unused?
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $07 ; brambles
+;;.byte $07 ; brambles
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $00 ; grasslands
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
+;;.byte $FF ; unused?
 
 
 lut_ClassStartingStats:
