@@ -465,17 +465,10 @@ DoOWTransitions:
 
     LDA joy_start         ; did they press start?
     BEQ @SkipStart        ; if not... skip it
-
-      LDA #0
-      STA joy_start       ; clear start button catcher
-      ;STA $400C           ; silence noise channel (stop ship/airship sound effects)
-
-      JSR GetOWTile       ; get overworld tile (needed for some items, like the Floater)
-      JSR StopNoise_StopSprites   ; cycle out the palette
-
-      LDA #BANK_MENUS
-      JSR SwapPRG_L       ; swap to bank containing menus
-      JSR EnterMainMenu   ; and enter the main menu
+	
+	
+	  JSR GetOWTile       ; get overworld tile (needed for some items, like the Floater)
+      JSR DoMainMenu
       JMP EnterOW_NoWipe  ; then re-enter the overworld
       
   @SkipStart:
@@ -555,7 +548,15 @@ DoOWTransitions:
     JMP DoOverworld         ; we jump to reload and start the overworld all over again.
 
     
-    
+DoMainMenu:
+    LDA #0
+    STA joy_start       ; clear start button catcher
+    JSR StopNoise_StopSprites   ; cycle out the palette
+
+    LDA #BANK_MENUS
+    JSR SwapPRG_L       ; swap to bank containing menus
+	INC MenuHush
+    JMP EnterMainMenu   ; and enter the main menu    
     
     
     
@@ -2673,19 +2674,7 @@ ProcessSMInput:
  ;;
  ;; Start button pressed
  ;;
-
-      LDA #0
-      STA joy_start            ; clear start button catcher
-
-     ; JSR GetSMTilePropNow     ; get the properties of the tile we're standing on (for LUTE/ROD purposes)
-      ;LDA #$02
-      ;JSR CyclePalettes        ; cycle palettes out with code 2 (2=standard map)
-      
-      JSR StopNoise_StopSprites
-      LDA #BANK_MENUS
-      JSR SwapPRG_L
-      JSR EnterMainMenu        ; enter the main menu
-
+      JSR DoMainMenu        ; enter the main menu
       JMP ReenterStandardMap   ; then reenter the map
 
   ;; if neither A nor Start pressed... jumps here to check select
@@ -8203,46 +8192,6 @@ DrawComplexString:
    LDA #$E8
    RTS
  
- ;; old version:
-;   ASL A
-    ;BCC :+                    ; bit 7 set = confused (players are never confused)
-    ; LDA #$E5
-    ; RTS
-; : ASL A                       ; bit 6 set = mute
-;    BCC :+                      
-;     LDA #$EA
-;     RTS
-; : ASL A                       ; bit 5 set = sleep 
-;    BCC :+                      
-;     LDA #$E7
-;     RTS
-; : ASL A                       ; bit 4 set = stun 
-;    BCC :+                      
-;     LDA #$E9
-;     RTS
-; : ASL A                       ; bit 3 set = dark
-;    BCC :+                     
-;     LDA #$E8
-;     RTS
-; : ASL A                       ; bit 2 set = poison
-;    BCC :++
-;   : LDA #$E4
-;     RTS
-; : ASL A                       ; bit 1 set = stone
-;    BCC :+
-;     LDA #$E6       
-;     RTS                       
-; : ASL A                       ; bit 0 set = dead 
-;    BCC :+
-;     LDA #$E3
-;     RTS
-; : LDA MenuHush                ; if in battle, print blank space instead
-;   BEQ :+
-;   LDA #$E2                    ; no bits set = healthy li'l heart
-;   RTS    
-; : LDA #$FF                    
-;   RTS 
-   
    
   ;; JIGS - used by both normal items/spells and weapon/armours 
  @DrawItemPrep:
@@ -10371,8 +10320,11 @@ LoadOWCHR:                     ; overworld map -- does not load any palettes
     JSR LoadPlayerMapmanCHR
 	
 LoadCHR_MusicPlay:	
+    LDA MenuHush              ; only update music if exiting/loading the menu
+	BEQ :+
 	JSR WaitForVBlank_L
-	JMP CallMusicPlay_L
+	JSR CallMusicPlay_L
+  :	RTS
     
 LoadMenuCHRPal_Z:
 	JSR LoadMenuTextBGCHR
@@ -10543,7 +10495,7 @@ LoadTilesetAndMenuCHR:
     JSR CHRLoadToA
 
           ;  no JMP or RTS -- seamlessly runs into LoadMenuCHR
-
+	JMP LoadMenuTextBGCHR
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10554,18 +10506,18 @@ LoadTilesetAndMenuCHR:
 ;;  IN:   tmp   = assumed to be 0 (does not explicitly set it)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadMenuCHR:
-    LDA #BANK_MENUCHR
-    JSR SwapPRG_L    ; swap to bank containing menu chr
-    LDA #$88
-    STA tmp+1        ; source address = $8800 (note:  low byte not explicitly set)
-    LDA #$00
-    STA tmp            ;; JIGS - needed for the Title Screen stuff. LAZY CODERS.
-    LDX #8           ; 8 rows to load
-    LDA #8           ; dest address = $0800
-    JMP CHRLoadToA
-
+;
+;LoadMenuCHR:
+;    LDA #BANK_MENUCHR
+;    JSR SwapPRG_L    ; swap to bank containing menu chr
+;    LDA #$88
+;    STA tmp+1        ; source address = $8800 (note:  low byte not explicitly set)
+;    LDA #$00
+;    STA tmp            ;; JIGS - needed for the Title Screen stuff. LAZY CODERS.
+;    LDX #8           ; 8 rows to load
+;    LDA #8           ; dest address = $0800
+;    JMP CHRLoadToA
+;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10687,6 +10639,7 @@ LoadShopBGCHRPalettes:
 LoadMenuTextBGCHR:
 	JSR LoadCHR_MusicPlay	
 
+LoadMenuCHR:
     LDA #BANK_MENUCHR 
     JSR SwapPRG_L
 
@@ -14838,7 +14791,7 @@ Dialogue_CoverSprites_VBl:
 
 DimBatSprPalettes:
     LDY #0             ; Y will count how many colors are not yet black
-    LDX #7             ; X will be our loop down counter and palette index
+    LDX #$0B            ; X will be our loop down counter and palette index
 
   @Loop:
     LDA cur_pal+$10, X ; get color in current palette
@@ -14872,7 +14825,7 @@ DimBatSprPalettes:
 
 BrightenBatSprPalettes:
     LDY #0              ; Y will count how many colors are not fully brightened
-    LDX #$07            ; X will be loop down counter and palette index (7 iterations)
+    LDX #$0B            ; X will be loop down counter and palette index (7 iterations)
   @Loop:
     LDA cur_pal+$10, X  ; get the current color in the palette
     CMP tmp_pal, X      ; compare it to our backed up palette
@@ -14910,7 +14863,7 @@ BrightenBatSprPalettes:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BackUpBatSprPalettes:
-    LDX #$07            ; X is our loop counter.  Going to back up 7 colors (color 0 is transparent)
+    LDX #$0B            ; X is our loop counter.  Going to back up B colors (color 0 is transparent)
   @Loop:
     LDA cur_pal+$10, X  ; copy the color...
     STA tmp_pal, X
@@ -15324,6 +15277,7 @@ SaveScreenHelper:
     LDA #BANK_MENUCHR
     JSR SwapPRG
     JSR LoadBattleSpritesForBank_Z
+	JSR LoadBattleSpritePalettes
 	JSR LoadBorderPalette_Blue
     LDA #BANK_Z
     JMP SwapPRG    

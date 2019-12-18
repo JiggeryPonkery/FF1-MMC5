@@ -3856,10 +3856,8 @@ ReadjustBBEquipStats:
     BNE @Exit
 
   @BlackBelt:
-    LDA ch_damage, X          ; check this BB's damage stat
+    LDA ch_righthand, X      
     BEQ @NoWeaponEquipped     ; if zero, we know this BB has no weapon equipped
-                              ; we know this because UnadjustBBEquipStats zeros damage for blackbelts.
-                              ; thus the only way it could be nonzero is if it had a weapon bonus added.
 
   @WeaponEquipped:
     LDA ch_strength, X        ; if a weapon is equipped... get strength stat

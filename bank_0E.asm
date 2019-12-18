@@ -5420,8 +5420,6 @@ DrawGameTime:
 EnterMainMenu:
     LDA #0
     STA $2001           ; turn off the PPU (we need to do some drawing)  
-    LDA #1
-    STA MenuHush        ;; JIGS - mute music instead
     LDA #BANK_THIS
     STA cur_bank          ; set cur_bank to this bank
 

@@ -780,6 +780,7 @@ CheckForEndOfBattle:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleFadeOutAndRestartGame:
+	DEC InBattle
     JSR BattleFadeOut
     JMP GameStart_L     ; then jump to GameStart, which returns the user to the title screen.
     
