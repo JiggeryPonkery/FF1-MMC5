@@ -10369,7 +10369,10 @@ LoadOWCHR:                     ; overworld map -- does not load any palettes
     JSR LoadOWBGCHR
 	JSR LoadCHR_MusicPlay
     JSR LoadPlayerMapmanCHR
-    JMP LoadOWObjectCHR
+	
+LoadCHR_MusicPlay:	
+	JSR WaitForVBlank_L
+	JMP CallMusicPlay_L
     
 LoadMenuCHRPal_Z:
 	JSR LoadMenuTextBGCHR
@@ -10379,9 +10382,7 @@ LoadMenuCHRPal_Z:
 	LDA #BANK_Z
     JMP SwapPRG_L      
 
-LoadCHR_MusicPlay:	
-	JSR WaitForVBlank_L
-	JMP CallMusicPlay_L
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10406,7 +10407,7 @@ LoadPlayerMapmanCHR:
                     ;    This points to mapman graphics for that class
     LDX #1          ; X=1  (load 1 row of tiles)
     LDA #$10        ; A=$10 (high byte of dest address:  $1000)
-    BNE CHRLoadToA  ; jump to CHR loader
+    JSR CHRLoadToA  ; jump to CHR loader
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
