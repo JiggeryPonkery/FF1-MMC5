@@ -5674,13 +5674,13 @@ DrawMagicMenu:
     JSR DrawMagicMenuMainBox       ; draw the big box containing all the spells
     ;; item_pageswap is set to 0 if no spells are found
     
-    LDA #$07
+    LDA #06
     JSR DrawMainItemBox             
     DEC dest_y
     LDA #7
     JSR DrawCharMenuString         ; draw the character's name
    
-    LDA #$11
+    LDA #07
     JSR DrawMainItemBox            ; sub menu box
 
 DrawMagicSubMenuString:
@@ -6325,7 +6325,7 @@ MagicMenu_ForgetSpell:
     JSR DrawMagicMenu                ; reload the magic screen to show the spell has vanished
     JMP TurnMenuScreenOn_ClearOAM    ; clear OAM and turn the screen on
     
-    @Oops:
+   @Oops:
     JMP PlaySFX_Error                ; you tried to forget a spell that doesn't exist!
     ;                                ; this really shouldn't be possible
     
@@ -6347,10 +6347,10 @@ MagicMenu_LearnSpell:
     JSR MoveMagicLearnMenuCursor   ; otherwise, move the cursor if a direction was pressed
     JMP @LearnSpell_MainLoop       ; and keep looping
 
-    @B_Pressed:
+   @B_Pressed:
     RTS                       ; if B pressed, just exit
     
-    @A_Pressed:
+   @A_Pressed:
     LDA cursor
     ASL A
     ASL A
@@ -6374,7 +6374,7 @@ MagicMenu_LearnSpell:
     ;BEQ MagicMenu_LearnSpell ; if not, re-draw screen to remove it
     ;JMP @LearnSpell_MainLoop       ; and keep looping
 
-    @NoSpell:
+   @NoSpell:
     JSR PlaySFX_Error
     JMP @LearnSpell_MainLoop       ; and keep looping
 
@@ -6387,23 +6387,23 @@ DrawLearnSpellMenu:
     
     JSR ClearNT
     
-    LDA #$12
-    JSR DrawMainItemBox          ; 
-    LDA #$13
+	LDA #14
+    JSR DrawMainItemBox          ; draw these first so the name and submenu boxes overlap
+    LDA #15
     JSR DrawMainItemBox          ; Draw the two learning menu boxes
-    
-    LDA #$07
+	
+    LDA #06
     JSR DrawMainItemBox             
     DEC dest_y
     LDA #7
     JSR DrawCharMenuString         ; draw the character's name
     
-    LDA #$11
+    LDA #07
     JSR DrawMainItemBox            ; sub menu box
     DEC dest_y
     LDA #11
     STA dest_x
-    
+	
 ;    LDA item_pageswap
 ;    BEQ @Page1Title
 ;    CMP #1
@@ -6660,7 +6660,7 @@ TryLearnSpell:
     
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
-    LDA #$08              ; draw main/item box ID $08  (the description box)
+    LDA #09               ; draw main/item box ID $08  (the description box)
     JSR DrawMainItemBox
     INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
     LDA #77
@@ -6705,10 +6705,10 @@ EnterItemMenu:
     STA descboxopen     ; indicate that the descbox is closed
     JSR ClearNT         ; wipe the NT clean
                         ;  then start drawing the item menu
-    LDA #$09         
-    JSR DrawMainItemBox                        
-    
-    LDA #$07               ; draw mainitem box ID 7 (the "ITEM" title box)
+	LDA #08         
+    JSR DrawMainItemBox    ; draw first, so that the next boxes overlap it 
+
+    LDA #06                ; draw mainitem box ID 7 (the "ITEM" title box)
     JSR DrawMainItemBox
     DEC dest_y
     
@@ -6721,7 +6721,7 @@ EnterItemMenu:
   : LDA #3                 ; draw QUEST in box
     JSR DrawMenuString     ;  and draw it and return   
   
-  : LDA #$11               ; draw submenu box
+  : LDA #07                ; draw submenu box
     JSR DrawMainItemBox
     DEC dest_y
     LDA #66
@@ -7870,7 +7870,7 @@ CheckForMP:
     
 DrawItemTargetMenu:
     JSR ScreenOff_ClearNT
-    LDA #$0A 
+    LDA #10
     JSR DrawMainItemBox
     LDA #3
     STA submenu_targ
@@ -7895,7 +7895,7 @@ DrawItemTargetMenu_OneChar:
     
 DrawItemTargetMenu_Elixir:
     JSR ScreenOff_ClearNT
-    LDA #$10 
+    LDA #12
     JSR DrawMainItemBox
     LDA #3
     STA submenu_targ
@@ -7927,7 +7927,7 @@ DrawItemTargetMenu_Elixir_OneChar:
     
 DrawMPTargetMenu:
     JSR ScreenOff_ClearNT
-    LDA #$0B
+    LDA #11
     JSR DrawMainItemBox             ; draw main box for all character's MP
     INC dest_x                      
     INC dest_y                      
@@ -7982,7 +7982,7 @@ EnterStatusMenu:
     STA menustall           ; disable menu stalling
     JSR ClearNT             ; clear the NT
 
-    ;LDA #$02                ; draw status box 0
+    ;LDA #$02                ; Upper left box
     ;JSR DrawMainItemBox
     ;LDA #19
     ;INC dest_x
@@ -8038,13 +8038,13 @@ EnterStatusMenu:
     LDA #19
     JSR DrawCharMenuString
 
-    LDA #$03                ; and so on
+    LDA #03                 ; lower left box
     JSR DrawMainItemBox
     LDA #20
     INC dest_x
     JSR DrawCharMenuString
     
-    LDA #$04                ; and so on
+    LDA #04                 ; lower right box
     JSR DrawMainItemBox
     LDA #21
     INC dest_x
@@ -9155,23 +9155,33 @@ lut_MagicLearnCursor_Y:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 DrawMainMenu:
     JSR ClearNT                    ; start by clearing the NT
     JSR DrawOrbBox                 ; draw the orb box
-    JSR DrawMainMenuGoldBox        ; gold box
-    JSR DrawMainMenuOptionBox      ; and option box
-    LDA #$14
-    JSR DrawMainItemBox            ; timer box
+   ; JSR DrawMainMenuGoldBox        ; gold box
+   ; JSR DrawMainMenuOptionBox      ; and option box
+   ; LDA #$14
+   ; JSR DrawMainItemBox            ; timer box
+   
+   LDA #02
+   STA dest_x
+   LDA #11
+   STA dest_y
+   LDA #0
+   JSR DrawMenuString	; draw gold string
+   LDA #04
+   STA dest_x
+   LDA #14
+   STA dest_y
+   LDA #1
+   JSR DrawMenuString   ; draw options string
 
 DrawMainMenu_CharacterBox:
     LDA #1                         ; then draw the boxes for each character
     JSR DrawMainItemBox            ;  stats...starting with the first character
     LDA #$00
     JSR DrawMainMenuCharBoxBody
-
-;    LDA #2                         ; second
-;    JSR DrawMainItemBox
-    
 
     LDA #12
     STA dest_x
@@ -9180,9 +9190,6 @@ DrawMainMenu_CharacterBox:
     LDA #$40
     JSR DrawMainMenuCharBoxBody
 
-;    LDA #3                         ; third
-;    JSR DrawMainItemBox
-    
     LDA #12
     STA dest_x
     LDA #15
@@ -9190,8 +9197,6 @@ DrawMainMenu_CharacterBox:
     LDA #$80
     JSR DrawMainMenuCharBoxBody
 
-;    LDA #4                         ; fourth
-;    JSR DrawMainItemBox
     LDA #12
     STA dest_x
     LDA #21
@@ -9217,13 +9222,14 @@ DrawMainMenu_CharacterBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawMainMenuGoldBox:
-    LDA #5               ; draw main/item box number 5 (the GP box)
-    JSR DrawMainItemBox
-    LDA #0              ; draw menu string ID=$01  (current GP, followed by " G")
-    DEC dest_y
-    ;; JIGS ^ the gold box is thinner now
-    JMP DrawMenuString
+ ;DrawMainMenuGoldBox:
+ ;  LDA #16             ; draw main/item box number 5 (the GP box)
+ ;  JSR DrawMainItemBox
+ ;  LDA #0              ; draw menu string ID=$01  (current GP, followed by " G")
+ ;  DEC dest_y
+ ;  ;; JIGS ^ the gold box is thinner now
+ ;  LDA #0
+ ;  JMP DrawMenuString
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9391,27 +9397,26 @@ LoadMainItemBoxDims:
 lut_MainItemBoxes:
  
     ;       X   Y   wid height
-    .BYTE   $01,$01,$0A,$0A ; 00 ; Main menu orb box
+  ;  .BYTE   $01,$01,$0A,$0A ; 00 ; Main menu orb box
+    .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb box
     .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
     .BYTE   $08,$02,$10,$0D ; 02 ; Status Menu - Name, Class, Level, Exp., Exp to Next
     .BYTE   $00,$0F,$10,$0D ; 03 ; Status Menu - main stats
     .BYTE   $10,$0F,$10,$0D ; 04 ; Status Menu - sub stats
-    .BYTE   $01,$0A,$0A,$03 ; 05 ; Main menu gold box
-    .BYTE   $01,$0C,$0A,$10 ; 06 ; Main menu option box
-    .BYTE   $00,$01,$09,$03 ; 07 ; item title box (character name for magic screen)
-    .BYTE   $00,$16,$20,$07 ; 08 ; Item description box
-    .BYTE   $00,$03,$20,$13 ; 09 ; new magic menu and item box
-    .BYTE   $05,$06,$16,$0E ; 0A ; Item Target Menu (HP)
-    .BYTE   $03,$01,$1A,$15 ; 0B ; Item Target Menu (MP)
-    .BYTE   $01,$01,$1E,$1C ; 0C ; Equip Menu ()
-    .BYTE   $00,$03,$20,$14 ; 0D ; unused
-    .BYTE   $02,$01,$09,$03 ; 0E ; unused
-    .BYTE   $01,$16,$0C,$03 ; 0F ; unused
-    .BYTE   $05,$03,$16,$13 ; 10 ; Item Target Menu (HP/MP)
-    .BYTE   $09,$01,$17,$03 ; 11 ; Magic/Item title submenu
-    .BYTE   $00,$03,$10,$13 ; 12 ; Magic Learning menu left side
-    .BYTE   $10,$03,$10,$13 ; 13 ; Magic Learning menu right side
-    .BYTE   $01,$1A,$0A,$03 ; 14 ; Main menu timer box
+	.BYTE   $10,$02,$10,$0D ; 05 ; Status Menu - extra box in case...
+    .BYTE   $00,$01,$09,$03 ; 06 ; Item title box (character name for magic screen)
+	.BYTE   $09,$01,$17,$03 ; 07 ; Magic/Item title submenu
+    .BYTE   $00,$03,$20,$13 ; 08 ; Inventory box
+	.BYTE   $00,$16,$20,$07 ; 09 ; Item description box
+    .BYTE   $05,$06,$16,$0E ; 10 ; Item Target Menu (HP)
+    .BYTE   $03,$01,$1A,$15 ; 11 ; Item Target Menu (MP)
+    .BYTE   $05,$03,$16,$13 ; 12 ; Item Target Menu (HP/MP)
+	.BYTE   $01,$01,$1E,$1C ; 13 ; Equip Menu
+    .BYTE   $00,$03,$10,$13 ; 14 ; Magic Learning menu left side
+    .BYTE   $10,$03,$10,$13 ; 15 ; Magic Learning menu right side
+   ; .BYTE   $01,$0A,$0A,$03 ; 16 ; Main menu gold box
+   ; .BYTE   $01,$0C,$0A,$10 ; 17 ; Main menu option box
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9422,13 +9427,13 @@ lut_MainItemBoxes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawMainMenuOptionBox:
-    LDA #6
-    JSR DrawMainItemBox    ; Draw Main/Item Box ID=$06  (the option box)
-    LDA #4
-    STA dest_x             ; JIGS - due to widening the option box, text needs to be pushed right 2 extra 
-    LDA #01                ; Draw Menu String ID=$02 (the option text)
-    JMP DrawMenuString
+;DrawMainMenuOptionBox:
+;    LDA #17
+;    JSR DrawMainItemBox    ; Draw Main/Item Box ID=$06  (the option box)
+;    LDA #4
+;    STA dest_x             ; JIGS - due to widening the option box, text needs to be pushed right 2 extra 
+;    LDA #01                ; Draw Menu String ID=$02 (the option text)
+;    JMP DrawMenuString
 
 
 
@@ -9456,7 +9461,7 @@ DrawCharDescBox:
     PHA                  
     LDA #1               
     STA menustall
-    LDA #$08             
+    LDA #09             
     JSR DrawMainItemBox
     PLA                  
     INC descboxopen      
@@ -9470,7 +9475,7 @@ DrawItemDescBox:
     PHA                   ; push menu string ID to back it up
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
-    LDA #$08              ; draw main/item box ID $08  (the description box)
+    LDA #09               ; draw main/item box ID $08  (the description box)
     JSR DrawMainItemBox
     PLA                   ; restore menu string ID
     INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
@@ -9530,7 +9535,7 @@ DrawMenuComplexString:
 EraseDescBox:
     LDA #1
     STA menustall            ; set menustall -- we will need to stall here, since the PPU is on
-    LDA #$08
+    LDA #09
     JSR LoadMainItemBoxDims  ; load box dimensions for box ID 8 (the item description box)
     JMP EraseBox             ;  erase the box, then exit
 
@@ -9757,7 +9762,7 @@ DrawMainMenuCharBoxBody:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawMagicMenuMainBox:
-    LDA #$09
+    LDA #08
     JSR DrawMainItemBox          ; Draw the box itself from the list of MainItem boxes
     
     LDY #$C0                     ; set char menu string length to $C0
@@ -10250,24 +10255,25 @@ lut_EquipInventoryPageTitle:
 .byte $04, $05, $06, $4E 
     
 DrawEquipInventory:
-    LDA #$09                ; Box List
+    LDA #08                ; Inventory List
     JSR DrawMainItemBox
-    
-    LDA #$08                ; Description box
+
+    LDA #06                ; Name
+    JSR DrawMainItemBox
+    DEC dest_y
+
+    LDA #07
+    JSR DrawCharMenuString
+   
+    LDA #09                ; Description box
     JSR DrawMainItemBox
     JSR EquipStatsDescBoxString ; base string, no stats
-   
-    LDA #$07                ; Name
-    JSR DrawMainItemBox
-    DEC dest_y
-    LDA #7
-    JSR DrawCharMenuString
-  
-    LDA #$11
-    JSR DrawMainItemBox     ; sub menu box
+
+    LDA #07
+    JSR DrawMainItemBox    ; sub menu box
     DEC dest_y
     INC dest_x
-    
+
     LDX item_pageswap
     LDA lut_EquipInventoryPageTitle, X
     JSR DrawMenuString         ; draw page number and arrows
@@ -10746,7 +10752,7 @@ MoveEquipInventoryCursor:
 DrawEquipMenu:
    JSR ClearNT             ; clear the NT
    
-   LDA #$0C                
+   LDA #13            
    JSR DrawMainItemBox
 
    LDA CharacterEquipBackup
