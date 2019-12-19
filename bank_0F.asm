@@ -34,6 +34,7 @@
 .import LoadPriceZ
 .import BattleRNG_L
 .import lutClassBatSprPalette
+.import PlayDoorSFX
 
 
 
@@ -4248,7 +4249,7 @@ SaveScreenLoop:
    @Select_Pressed:
     LDA #02
     STA dest_y
-    LDA #04 ; 10
+    LDA #02 ; 10
     STA dest_x
     LDA #01
     STA menustall
@@ -4554,7 +4555,7 @@ GameDeleted:
     LDA #11
     JSR DrawCharMenuString
     JSR DrawSaveScreenNames
-    JSR PlaySFX_Error
+    JSR PlayDoorSFX
     JSR WaitForButton
     JMP SaveScreen
     
@@ -5890,7 +5891,7 @@ Saved:
 .byte $9C,$8A,$9F,$8E,$8D,$C4,$00
 
 AreYouSure:
-.byte $7F,$F5,$7F,$F5,$FA,$FF,$8A,$9B,$8E,$FF,$A2,$98,$9E,$FF,$9C,$9E,$9B,$8E,$C5,$FB,$F5,$7F,$F5,$7F,$00
+.byte $F3,$F4,$7F,$F4,$F3,$F4,$FA,$FF,$8A,$9B,$8E,$FF,$A2,$98,$9E,$FF,$9C,$9E,$9B,$8E,$C5,$FB,$F4,$F3,$F4,$7F,$F4,$F3,$00
 
 Deleted:
 .byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00

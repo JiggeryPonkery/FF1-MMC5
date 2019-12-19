@@ -864,9 +864,9 @@ M_CannotUseMagic:
 .byte $B7,$AB,$A4,$21,$B6,$B3,$A8,$4E,$FF,$1D,$23,$C0,$00 ; Sorry, you cannot use[enter]that spell here.
 
 M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape and timer box...
-.byte $74,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$75,$01
-.byte $7B,$F6,$F6,$F6,$F6,$F6,$F6,$F6,$F6,$7D,$01,$01,$01,$01,$01,$01,$01
-.byte $74,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$7C,$75,$00
+.byte $74,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$75,$01
+.byte $7B,$7E,$7E,$7E,$7E,$7E,$7E,$7E,$7E,$7C,$01,$01,$01,$01,$01,$01,$01
+.byte $74,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$75,$00
 
 M_ItemSubmenu:
 .byte $FF,$FF,$9E,$3E,$09,$03,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
@@ -5373,6 +5373,10 @@ PlaySFX_MenuMove:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+MusicPlay_LoadingCHR:      ; this is to smooth out music while loading up screens
+    JSR WaitForVBlank_L
+    JMP CallMusicPlay    
+
 DrawGameTime:
     LDA playtimer+1 ; seconds
     STA tmp
@@ -5398,7 +5402,7 @@ DrawGameTime:
     LDA format_buf-2
     STA bigstr_buf
     
-    LDA #$7E         ; : seperators
+    LDA #$E4        ; : seperators
     STA bigstr_buf+2
     STA bigstr_buf+5
     LDA #0
@@ -5434,10 +5438,6 @@ EnterMainMenu:
 ;; ResumeMainMenu is called to redraw and reenter the main menu from other
 ;;  sub menus (like from the item menu).  This will redraw the main menu, but
 ;;  won't restart the music or reload CHR/Palettes like EnterMainMenu does
-    
-    JSR WaitForVBlank_L
-    JSR CallMusicPlay     ;   so we can call music play routine
-    ;;JIGS -- I feel like this smooths out the music a bit more when opening the menu? maybe not
 
 ResumeMainMenu:
     LDA #0
@@ -5445,6 +5445,7 @@ ResumeMainMenu:
     STA menustall                   ; and disable menu stalling
 
     JSR DrawMainMenu                ; draw the main menu
+	JSR MusicPlay_LoadingCHR
     JSR TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen on
 
     LDA #0
@@ -9180,6 +9181,9 @@ DrawMainMenu:
 DrawMainMenu_CharacterBox:
     LDA #1                         ; then draw the boxes for each character
     JSR DrawMainItemBox            ;  stats...starting with the first character
+	;; at this point, should be at scanline 250 or so... 
+	JSR CallMusicPlay
+	
     LDA #$00
     JSR DrawMainMenuCharBoxBody
 
@@ -9316,7 +9320,7 @@ DrawOrbBox:
     CMP #0        ; check orb status
     BNE :+        ; if lit, skip ahead
 
-      LDY #$76    ; if orb not lit... replace tile with $76 (unlit orb graphics)
+      LDY #$60    ; if orb not lit... replace tile with $76 (unlit orb graphics)
       LDA #$C0    ; and OR #$C0 to our attribute byte
       ORA tmp+7   ;  unlit orbs use palette 3
       STA tmp+7   ;  lit orbs use palette 0 -- so this changes attributes accordingly

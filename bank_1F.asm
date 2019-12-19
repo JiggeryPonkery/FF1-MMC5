@@ -10293,9 +10293,11 @@ LoadBridgeSceneGFX_Menu: ;; JIGS -- this is for menu loading; don't want to turn
 ;; JIGS - moved battle loading stuff, not really necessary to have so many JSRs and JMPs all over the place
 
 LoadMenuCHRPal:                ; does not load 'lit orb' palette, or the two middle palettes ($03C0-03CB)
+    JSR LoadCHR_MusicPlay   
     JSR LoadMenuOrbBGCHRAndPalettes
 LoadMenuCHRPal_TextOnly:
 	JSR LoadMenuTextBGCHR
+	JSR LoadCHR_MusicPlay
     JMP LoadBatSprCHRPalettes
 
 LoadShopCHRPal:
@@ -10859,13 +10861,18 @@ LoadBatSprCHRPalettes:
 
     LDA ch_class+$C0     ; character 4's
     JSR @LoadSprite
+	
+	JSR LoadCHR_MusicPlay
     
     LDA #>lut_BatObjCHR  ; once all character's class graphics are loaded
     STA tmp+1            ;   change source pointer to $A800  (start of cursor and related battle CHR)
     LDX #$08             ; signal to load 8 rows
+	LDA #0
+	STA tmp
   
-    JSR CHRLoad_Cont   ; load cursor and other battle related CHR
+    JSR CHRLoad; _Cont   ; load cursor and other battle related CHR
     JSR LoadBattleSpritePalettes  ; load palettes for these sprites
+	JSR LoadCHR_MusicPlay
     LDA #BANK_MENUS
     JMP SwapPRG_L      ; and swap to bank E on exit
 
@@ -10886,6 +10893,7 @@ LoadBatSprCHR_SetPpuAddrAndSwap:
     LDA #$00
     STA $2006
     LDA #BANK_BTLCHR
+	STA cur_bank
     JMP SwapPRG_L     
     
 ShiftSpriteHightoLow:
