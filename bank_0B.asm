@@ -1922,8 +1922,8 @@ PrintEXPToNext_B:
     LDY #$00                    ;  and push the result (low byte first)
     SEC                         ; loop 3 times (3 bytes of data)
   @FindDifLoop:
-      LDA (lvlup_exptoadv), Y
-      SBC (lvlup_curexp), Y
+      LDA (LevelUp_Reward), Y
+      SBC (LevelUp_Pointer), Y
       PHA
       INY
       DEX
@@ -1990,18 +1990,12 @@ LvlUp_AwardExp:
     STA battlereward+1
     
     JSR LvlUp_GetCharExp            ; get this char's exp pointer
-	
-	LDA lvlup_curexp
-	STA LevelUp_Pointer
-	LDA lvlup_curexp+1
-	STA LevelUp_Pointer+1
-	
     JSR GiveRewardToParty           ; add the exp reward to it
     
         ; <-- "jump here" point  (see end of LvlUp_LevelUp for explanation of this note)
     
     JSR LvlUp_GetExpToAdvance       ; Get exp to advance
-    LDY #3 - 1                      ; compare 3 bytes (lvlup_curexp to lvlup_exptoadv)
+    LDY #3 - 1                      ; compare 3 bytes (LevelUp_Pointer to lvlup_exptoadv)
     JSR MultiByteCmp
     
     BCS LvlUp_LevelUp               ; if curexp >= exptoadvance, LEVEL UP
@@ -2014,7 +2008,7 @@ LvlUp_AwardExp:
 ;;  LvlUp_GetCharExp  [$9BF3 :: 0x2DC03]
 ;;
 ;;  input:   lvlup_chstats
-;;  output:  lvlup_curexp
+;;  output:  LevelUp_Pointer
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -2022,11 +2016,11 @@ LvlUp_GetCharExp:
     LDA lvlup_chstats                 ; self explanitory
     CLC
     ADC #ch_exp - ch_stats
-    STA lvlup_curexp ; $80
+    STA LevelUp_Pointer ; $80
     
     LDA #$00
     ADC lvlup_chstats+1
-    STA lvlup_curexp+1 ; $81
+    STA LevelUp_Pointer+1 ; $81
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2034,7 +2028,7 @@ LvlUp_GetCharExp:
 ;;  LvlUp_GetExpToAdvance  [$9C01 :: 0x2DC11]
 ;;
 ;;  input:   lvlup_chstats
-;;  output:  lvlup_exptoadv = points to 3-byte value containing total Exp required to advance
+;;  output:  LevelUp_Reward = points to 3-byte value containing total Exp required to advance
 ;;
 ;;    Gives nonsense if character is at level 50
 ;;
@@ -2045,14 +2039,14 @@ LvlUp_GetExpToAdvance:
     LDA (lvlup_chstats), Y
     ASL A
     CLC
-    ADC (lvlup_chstats), Y                ; A = level*3
+    ADC (lvlup_chstats), Y      ; A = level*3
     
     ADC #<lut_ExpToAdvance      ; Add to address of exp LUT
-    STA lvlup_exptoadv          ; $82
+    STA LevelUp_Reward          ; $82
     
     LDA #$00
     ADC #>lut_ExpToAdvance
-    STA lvlup_exptoadv+1        ; $83
+    STA LevelUp_Reward+1        ; $83
     
     RTS
     
@@ -2060,7 +2054,7 @@ LvlUp_GetExpToAdvance:
 ;;
 ;;  LvlUp_LevelUp  [$9C14 :: 0x2DC24]
 ;;
-;;  input:   lvlup_curexp, lvlup_chmagic, and lvlup_chstats
+;;  input:   LevelUp_Pointer, lvlup_chmagic, and lvlup_chstats
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
