@@ -20,7 +20,7 @@
 .import Battle_WritePPUData_L
 .import CallMusicPlay_L
 .import WaitForVBlank_L
-.import UndrawNBattleBlocks_L
+;.import UndrawNBattleBlocks_L
 .import DrawCombatBox_L
 .import BattleRNG_L
 .import BattleCrossPageJump_L
@@ -2357,7 +2357,7 @@ LvlUp_LevelUp:
       JSR WaitForAnyInput           ; wait a bit more for the user to press something
       
       LDA #$01
-      JSR UndrawNBattleBlocks_L     ; then undraw the box we just drew
+      ;JSR UndrawNBattleBlocks_L     ; then undraw the box we just drew
       
   @DisplayLoop_Next:
     INC @displaymsgcode             ; inc msg code to refer to next stat name
@@ -2842,7 +2842,7 @@ DrawEOBCombatBox:
 RespondDelay_UndrawAllCombatBoxes:
     JSR RespondDelay                ; this is all self explanitory...
     LDA btl_boxcount
-    JSR UndrawNBattleBlocks_L
+  ;  JSR UndrawNBattleBlocks_L
     LDA #$00
     STA btl_boxcount
     RTS

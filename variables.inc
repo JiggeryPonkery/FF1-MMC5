@@ -394,6 +394,10 @@ ScreenShakeCounter      = $9D ; used in battle and silent errors
 dlgbox_row              = $9D ; counts down from 7 when drawing dialogue box; nothing else 
 npcdir_seed             = $9E ; RNG seed for determining direction for NPCs to walk
 InBattle                = $9F
+RAMSwap                 = $A0 ; 0 for normal RAM, 1 for extra
+btldraw_width           = $A1 ; change later!
+btldraw_width_counter   = $A3 ; change later!
+btldraw_box_id          = $A2
 
 ;; Music stuff          
 ;                       = $A0
@@ -983,26 +987,14 @@ mapobj          = $6F00         ; $100 bytes -- page
 lut_MagicData   = $7000  ; $400 bytes
 lut_EnemyAi     = $7400  ; $90 bytes
 
-; these count the lines of text in each box, starting from the upper left inside tile, +1 on the box edge for the newline code byte
-CharacterBoxBuffer  = $7500 ; 16*4 = $58
-CommandBoxBuffer    = $7558 ; 15*4 = $54
-RosterBoxBuffer     = $75AC ; 14*4 = $50
-SkillBoxBuffer      = $75FC ; not implimenteded yet
-MagicBoxBuffer      = $75FC ; 31*4 = $C4
-GearBoxBuffer       = $76C0 ; 22*4 = $88
-ItemBoxBuffer       = $7748 ; 15*4 = $54
-EtherBoxBuffer      = $779C ; 16*4 = $58 (doesn't really use the buffer though)
-ConfirmBoxBuffer    = $77F4 ; 15*4 = $54 (doesn't really use the buffer though)
-AttackerBoxBuffer   = $7848 ; 12
-AttackBoxBuffer     = $7854 ; 12
-DefenderBoxBuffer   = $7860 ; 12
-DamageBoxBuffer     = $786C ; 12
-MessageBoxBuffer    = $7878 ; 31
-
+;Sizes of the battle message boxes in RAM
+BattleBoxBuffers     = $7500
+BattleBoxBufferList  = $7FF0
+BattleBoxBufferCount = $7FFF ; total list of drawn boxes
 
  
 
- 
+
  
  
  

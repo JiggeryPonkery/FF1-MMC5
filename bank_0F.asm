@@ -4106,15 +4106,15 @@ ThiefHiddenCheck:
 
 SaveScreen:
     LDA #0
-    STA cursor                      ; flush cursor, joypad, and prev joy directions
+    STA cursor               ; flush cursor, joypad, and prev joy directions
     STA joy
     STA joy_prevdir
-    STA $2001               ; turn off the PPU
-    STA menustall           ; disable menu stalling
-    STA SaveGameMusic           ; clear this variable, which will help reset music later
-    JSR ClearNT             ; clear the NT
+    STA $2001                ; turn off the PPU
+    STA menustall            ; disable menu stalling
+    STA SaveGameMusic        ; clear this variable, which will help reset music later
+    JSR ClearNT              ; clear the NT
     LDA #1
-    STA $5113                ; swap battery-backed PRG RAM into $8000 page   
+    STA $5113                ; swap battery-backed PRG RAM
     JSR SaveScreenHelper  
     
     LDA #1

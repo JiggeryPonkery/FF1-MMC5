@@ -17,15 +17,15 @@
 .import ClearBattleMessageBuffer_L
 .import ClericCheck
 .import CritCheck
-.import DrawBattleEquipmentBox_L
-.import DrawBattleMagicBox_L
+;.import DrawBattleEquipmentBox_L
+;.import DrawBattleMagicBox_L
 .import DrawCombatBox_L
-.import DrawCommandBox_L
+;.import DrawCommandBox_L
 .import DrawComplexString
-.import DrawItemBox_L
-.import DrawRosterBox_L
+;.import DrawItemBox_L
+;.import DrawRosterBox_L
 .import EnemyAttackPlayer_PhysicalZ
-.import FormatBattleString_L
+.import FormatBattleString
 .import GameStart_L
 .import LoadEnemyStats
 .import LongCall
@@ -37,19 +37,19 @@
 .import RandAX
 .import ShiftSpriteHightoLow
 .import SwapBtlTmpBytes_L
-.import UndrawNBattleBlocks_L
+;.import UndrawNBattleBlocks_L
 .import WaitForVBlank_L
 .import PlayDoorSFX
 .import DrawManaString_ForBattle
-.import DrawPlayerBox
+;.import DrawPlayerBox
 .import ShiftLeft6
 .import StealFromEnemyZ
-.import SkillText_BBelt
+;.import SkillText_BBelt
 .import RestoreMapMusic
 .import JIGS_RefreshAttributes
 .import ScanEnemyString
 .import LoadPlayerDefenderStats_ForEnemyAttack
-.import SkillText_RMage
+;.import SkillText_RMage
 .import ShiftLeft4
 .import LoadSprite_Bank04
 
@@ -708,7 +708,8 @@ FinishBattlePrepAndFadeIn:
     STA BattleTurn    
     JSR PrintBattleTurnNumber
     JSR DrawCharacterStatus
-    JSR DrawPlayerBox
+    LDA #5
+    JSR DrawCombatBox_L
     
     JMP Battle_AfterFadeIn
     
@@ -902,7 +903,8 @@ BattleLogicLoop_DoCombat_Surprised:     ; alternative entry point for when the p
 
 BattleLogicLoop:
     JSR RebuildEnemyRoster          ; Rebuild the roster in case some enemies died/ran away
-    JSR DrawRosterBox_L             ; Draw the roster box
+    LDA #7
+    JSR DrawCombatBox_L             ; Draw the roster box
     INC btl_boxcount
    @FrameLoop: 
     JSR DoFrame_WithInput        
@@ -940,7 +942,7 @@ BattleLogicLoop_ReEntry:
     INC btlcmd_curchar       ; set this to 4 so the BacktrackBattleCommand jump table works right!
     
 ReadyToFight:
-    LDA #5
+    LDA #$0C
     JSR DrawCombatBox_NoRestore
     JSR LongCall             ; swap to Bank Z to draw this
     .word BattleConfirmation
@@ -1164,7 +1166,8 @@ InputCharacterBattleCommand:
     JSR CharWalkAnimationLeft           ; walk this character left
 
 CancelBattleAction_RedrawCommand:    
-    JSR DrawCommandBox
+    LDA #6
+    JSR DrawCombatBox_L
     JSR UpdateSprites_BattleFrame       ; then do a frame with updated battle sprites
 
 InputCharacterBattleCommand2:           ;; JIGS - instead of making them walk around all the time...
@@ -1662,8 +1665,10 @@ BattleSubMenu_Item:
     
 BattleSubMenu_Item_NoUndraw:
     INC btl_boxcount
-    JSR DrawItemBox_L          ; otherwise (have at least 1 potion), draw the Item box
+    LDA #$0A
+    JSR DrawCombatBox_L          ; otherwise (have at least 1 potion), draw the Item box
   
+    ;LDA #5
     JSR MenuSelection_Item     ; get menu selection from the player  
     JSR UndrawOneBox
     CMP #$02
@@ -1706,7 +1711,7 @@ BattleSubMenu_Item_NoUndraw:
     BNE @SkipTarget
     
    @EtherManaMenu:
-    LDA #7
+    LDA #$0B
     JSR DrawCombatBox
     JSR LongCall
     .word DrawManaString_ForBattle
@@ -1803,7 +1808,8 @@ BattleSubMenu_Equipment:
       JSR DoNothingMessageBox       ; Show the "nothing" box
       JMP CancelBattleAction_RedrawCommand
   
-  : JSR DrawBattleEquipmentBox_L    ; Draw the item box
+  : LDA #9
+    JSR DrawCombatBox_L    ; Draw the item box
     INC btl_boxcount
     JSR MenuSelection_Equipment     ; and run the logic for selecting an item
     
@@ -2723,7 +2729,8 @@ SelectEnemyTarget:
         LDA #$01                        ; output: A = 1 ('A' button pressed)
         RTS
     
- :  JSR DrawRosterBox_L         ; and show enemy names instead
+ :  LDA #7
+    JSR DrawCombatBox_L         ; and show enemy names instead
     INC btl_boxcount
     
     LDA #$00                    ; initialize/clear the cursor position
@@ -3199,7 +3206,8 @@ MenuSelection_Magic:
     LDA #$00
     STA DrawBattleMagicBox_toporbottom     ; set page number to 0 (draw top page of magic box)
     
-    JSR DrawBattleMagicBox_L    ; draw it!
+    LDA #8
+    JSR DrawCombatBox_L    ; draw it!
     INC btl_boxcount
     
 @MenuSelection:
@@ -3294,7 +3302,8 @@ MenuSelection_Magic:
       RTS                       ; page 1 = do nothing
   : INC DrawBattleMagicBox_toporbottom                   ; page 0 = inc to page 1
     JSR UndrawOneBox
-    JSR DrawBattleMagicBox_L    ; draw the page 1 magic box
+    LDA #8
+    JSR DrawCombatBox_L    ; draw the page 1 magic box
     INC btl_boxcount
   @NormalMove_Down:
     INC btlcurs_y
@@ -3310,7 +3319,8 @@ MenuSelection_Magic:
       RTS                       ; page 0?  exit
   : DEC DrawBattleMagicBox_toporbottom                   ; page 1?  move to page 0, and redraw it
     JSR UndrawOneBox
-    JSR DrawBattleMagicBox_L
+    LDA #8
+    JSR DrawCombatBox_L
     INC btl_boxcount
   @NormalMove_Up:
     DEC btlcurs_y
@@ -4489,7 +4499,7 @@ UndrawBoxes:
      JMP @Loop
    
  : LDA tmp
-   JSR UndrawNBattleBlocks_L
+;   JSR UndrawNBattleBlocks_L
    ;JSR RespondDelay
    JMP RestoreAXY
    
@@ -4507,7 +4517,7 @@ UndrawAllKnownBoxes:
    JSR SaveAXY
 UndrawAllKnownBoxes_NoSave:
    LDA btl_boxcount
-   JSR UndrawNBattleBlocks_L
+;   JSR UndrawNBattleBlocks_L
    LDA #0
    STA btl_boxcount
    ;JSR RespondDelay
@@ -4737,7 +4747,8 @@ DrawCombatBox_NoRestore:
 
 DrawCommandBox:
     INC btl_boxcount
-    JMP DrawCommandBox_L
+    LDA #6
+    JMP DrawCombatBox_L
 
     
     
@@ -5118,7 +5129,8 @@ DoBattleRound:
     LDA tmp
   
   : JSR Battle_DoTurn                       ; do their turn
-  : JSR DrawPlayerBox                       ; draw the player box overtop the current player box
+  : LDA #5
+    JSR DrawCombatBox_L                       ; draw the player box overtop the current player box
     JSR DrawCharacterStatus                 ; update character on-screen stats
     INC btl_boxcount
     JSR UndrawOneBox                        ; then undraw it; effectively updates HP
@@ -6015,7 +6027,7 @@ ScanEnemy:
     .word ScanEnemyString
     .byte $0A
     
-    LDA #6
+    LDA #$0D
     JSR DrawCombatBox
     LDA #BANK_THIS
     STA ret_bank
@@ -9365,8 +9377,8 @@ DoRunic_OK:
     
     JSR DrawDefenderBox         ; draw Runic user's name 
 
-    LDX #<SkillText_RMage
-    LDY #>SkillText_RMage
+ ;; LDX #<SkillText_RMage
+ ;; LDY #>SkillText_RMage
     LDA #03
     JSR DrawCombatBox           ; draws "Runic" in the damage/hits box
     

@@ -23,28 +23,28 @@
 .export DimBatSprPalettes
 .export DoOverworld
 .export Draw2x2Sprite
-.export DrawBattleEquipmentBox_L
-.export DrawBattleMagicBox_L
+;.export DrawBattleEquipmentBox_L
+;.export DrawBattleMagicBox_L
 .export DrawBox
 .export DrawBox_L
 .export DrawCombatBox_L
-.export DrawCommandBox_L
+;.export DrawCommandBox_L
 .export DrawComplexString
 .export DrawComplexString_L
 .export DrawCursor
-.export DrawItemBox_L
+;.export DrawItemBox_L
 .export DrawEquipMenuStrings
 .export DrawImageRect
 .export FillItemBox
 .export DrawOBSprite
 .export DrawPalette
 .export DrawPalette_L
-.export DrawRosterBox_L
+;.export DrawRosterBox_L
 .export DrawSimple2x3Sprite
 .export EraseBox
 .export FadeInBatSprPalettes
 .export FadeOutBatSprPalettes
-.export FormatBattleString_L
+.export FormatBattleString
 .export GameLoaded
 .export GameStart2
 .export GameStart_L
@@ -66,8 +66,8 @@
 .export ShiftSpriteHightoLow
 .export StartNewGame
 .export SwapBtlTmpBytes_L
-.export UndrawBattleBlock
-.export UndrawNBattleBlocks_L
+;.export UndrawBattleBlock
+;.export UndrawNBattleBlocks_L
 .export UpdateJoy
 .export UpdateJoy_L
 .export WaitForVBlank_L
@@ -78,13 +78,13 @@
 .export lut_NTRowStartLo
 .export lut_RNG
 .export PlayDoorSFX
-.export DrawPlayerBox
+;.export DrawPlayerBox
 .export ShiftLeft4
 .export ShiftLeft6
 .export BattleBackgroundColor_LUT
 .export LoadMenuCHRPal_Z
 .export LoadPriceZ
-.export SkillText_BBelt
+;.export SkillText_BBelt
 ;.export lut_TilesetMusicTrack
 .export lut_MapMusicTrack
 .export lut_VehicleMusic
@@ -92,7 +92,7 @@
 .export SetBattlePPUAddr
 .export ClearUnformattedCombatBoxBuffer
 .export SetPPUAddr_XA
-.export SkillText_RMage
+;.export SkillText_RMage
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -7445,6 +7445,26 @@ CoordToNTAddr:
     STA ppu_dest+1            ;  and record it
     RTS
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  [$DCF4 :: 0x3DD04]
+;;
+;;  These LUTs are used by routines to find the NT address of the start of each row
+;;    Really, they just shortcut a multiplication by $20 ($20 tiles per row)
+;;
+
+lut_NTRowStartLo:
+  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
+  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
+  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
+  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
+
+lut_NTRowStartHi:
+  .BYTE $20,$20,$20,$20,$20,$20,$20,$20
+  .BYTE $21,$21,$21,$21,$21,$21,$21,$21
+  .BYTE $22,$22,$22,$22,$22,$22,$22,$22
+  .BYTE $23,$23,$23,$23,$23,$23,$23,$23
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7506,30 +7526,6 @@ DrawImageRect:
     BNE @RowLoop          ; and loop until it expires
 
     RTS                   ; then exit
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  [$DCF4 :: 0x3DD04]
-;;
-;;  These LUTs are used by routines to find the NT address of the start of each row
-;;    Really, they just shortcut a multiplication by $20 ($20 tiles per row)
-;;
-
-lut_NTRowStartLo:
-  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
-  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
-  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
-  .BYTE $00,$20,$40,$60,$80,$A0,$C0,$E0
-
-lut_NTRowStartHi:
-  .BYTE $20,$20,$20,$20,$20,$20,$20,$20
-  .BYTE $21,$21,$21,$21,$21,$21,$21,$21
-  .BYTE $22,$22,$22,$22,$22,$22,$22,$22
-  .BYTE $23,$23,$23,$23,$23,$23,$23,$23
-
-
-
-
 
 
 
@@ -8314,6 +8310,7 @@ DrawBox:
     SBC #$02
     STA tmp+11        ;  put new height in temp ram
 
+DrawBox_Preset:
     JSR DrawBoxRow_Top    ; Draw the top row of the box
 @Loop:                    ; Loop to draw all inner rows
       JSR DrawBoxRow_Mid  ;   draw inner row
@@ -11843,6 +11840,7 @@ BattleCrossPageJump:
 EnterBattle_L:
 EnterBattle:
 
+    JSR JigsBox_Start ; clear box buffers and draw empty boxes to RAM
 	JSR LoadBattleBGCHRAndPalettes
 
     LDA #BANK_Z               ;; and do pre-emptive battle prep for gear...
@@ -12281,20 +12279,7 @@ BattleUpdateAudio_FixedBank:
 :   JMP CallMusicPlay_L
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  BattleWaitForVBlank  [$F4A1 :: 0x3F4B1]
-;;
-;;  Identical to WaitForVBlank, but uses btl_soft2000 instead of the regular soft2000
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-BattleWaitForVBlank_L:
-BattleWaitForVBlank:
-    LDA btl_soft2000
-    STA soft2000
-    JMP WaitForVBlank_L
-    
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12307,18 +12292,21 @@ BattleWaitForVBlank:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleDrawMessageBuffer:
-    LDA #<$2280               ; set target PPU address to $2240
-    STA BattleBoxString       ; This has the start of the bottom row of the bounding box for 
+    LDA tmp+8                 ; box X and Y position totals
+    CLC    
+    ADC #<$2280               ; set target PPU address to $2240
+    STA btldraw_dst           ; This has the start of the bottom row of the bounding box for 
     LDA #>$2280               ;  enemies
-    STA BattleBoxString+1
+    ADC #0
+    STA btldraw_dst+1
     
-    LDA #<btl_msgbuffer       ; set source pointer to point to message data buffer
-    STA BattleTmpPointer2
-    LDA #>btl_msgbuffer
-    STA BattleTmpPointer2+1
+  ;  LDA #<btl_msgbuffer       ; set source pointer to point to message data buffer
+  ;  STA BattleTmpPointer2
+  ;  LDA #>btl_msgbuffer
+  ;  STA BattleTmpPointer2+1
     
-    LDA #$09 ; 0A
-    STA btl_msgbuffer_loopctr ; loop down-counter ($0C rows)
+  ;  LDA #$09 ; 0A
+  ;  STA btl_msgbuffer_loopctr ; loop down-counter ($0C rows)
   @Loop:
       JSR Battle_DrawMessageRow_VBlank  ; draw a row
       
@@ -12330,13 +12318,13 @@ BattleDrawMessageBuffer:
       ADC #$00
       STA BattleTmpPointer2+1
       
-      LDA BattleBoxString           ; add $20 to the target PPU address
+      LDA btldraw_dst          ; add $20 to the target PPU address
       CLC
       ADC #$20
-      STA BattleBoxString
-      LDA BattleBoxString+1
+      STA btldraw_dst
+      LDA btldraw_dst+1
       ADC #$00
-      STA BattleBoxString+1
+      STA btldraw_dst+1
       
       JSR Battle_UpdatePPU_UpdateAudio_FixedBank    ; update audio (since we did a frame), and reset scroll
       
@@ -12361,20 +12349,16 @@ Battle_DrawMessageRow_VBlank:
     JSR BattleWaitForVBlank
     
 Battle_DrawMessageRow:
-    LDA BattleBoxString+1
+    LDA btldraw_dst+1
     STA $2006           ; set provided PPU address
-    LDA BattleBoxString
+    LDA btldraw_dst
     STA $2006
     LDY #$00
   @Loop:
       LDA (BattleTmpPointer2), Y      ; read $19 bytes from source pointer
-      STA $2007         ;  and draw them
+      STA $2007        
       INY
-      CPY #$20 ; 20 ;; JIGS - RAWR
-      ;; WHAT A PAIN; this tells the game to stop drawing boxes so they don't cover up the character names...
-      ;; instead of just having the programmers not make boxes that are so big they cover up the names...
-      ;; which they do anyway... so. Now, it looks for the edge of the screen and stops there.   
-      
+      CPY tmp+6 ; box width 
       BNE @Loop
     RTS
 
@@ -12429,69 +12413,6 @@ BattleDrawMessageBuffer_Reverse:
     RTS
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  GetBattleMessagePtr  [$F544 :: 0x3F554]
-;;
-;;  Gets a pointer to the given X,Y position in the battle message buffer.
-;;
-;;  input:  X = desired X coord
-;;          Y = desired Y coord
-;;
-;;  output:  YX = 16-bit ptr
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-GetBattleMessagePtr:
-    LDA #$00
-    STA BattleTmpPointer2+1   ; zero high byte of temp memory
-   
-    TXA
-    PHA
-    TYA
-    LDX #$20
-    JSR MultiplyXA 
-    STA BattleTmpPointer2 
-    PLA
-    CLC
-    ADC BattleTmpPointer2
-    STA BattleTmpPointer2
-    TXA
-    ADC #$00
-    STA BattleTmpPointer2+1
-   
-    ;; JIGS - saves like 4 bytes or something doing it this way? Maybe a bit more
-   
-  ; TYA                       ; multiply Y coord by $20
-  ; ASL A
-  ; ROL BattleTmpPointer2+1 
-  ; ASL A
-  ; ROL BattleTmpPointer2+1 
-  ; ASL A
-  ; ROL BattleTmpPointer2+1 
-  ; ASL A
-  ; ROL BattleTmpPointer2+1 
-  ; ASL A
-  ; ROL BattleTmpPointer2+1   ; high byte gets rolled into $89
-  ; STA BattleTmpPointer2     ; low byte in $88
-  ; 
-  ; TXA                       ; Add X coord to low byte
-  ; CLC
-  ; ADC BattleTmpPointer2
-  ; STA BattleTmpPointer2
-   
-  ; LDA #$00                  ; add any carry to high byte
-  ; ADC BattleTmpPointer2+1
-  ; STA BattleTmpPointer2
-   
-   CLC                       ; lastly, sum that result with 'btl_msgbuffer'
-   LDA #<btl_msgbuffer
-   ADC BattleTmpPointer2
-   TAX                       ; low byte in X
-   LDA #>btl_msgbuffer
-   ADC BattleTmpPointer2+1
-   TAY                       ; high byte in Y
-   RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12553,44 +12474,44 @@ DrawBattleBox_Row:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-DrawBattleBox:   ;F200
-    LDX btl_msgdraw_x           ; get X,Y coords of box
-    LDY btl_msgdraw_y
-    JSR GetBattleMessagePtr
-    STX BattleTmpPointer2       ; put in $88,$89, this is our destination pointer
-    STY BattleTmpPointer2+1
-    
-    LDA #$F7                    ; draw the top row of the box
-    STA btltmp_boxleft
-    LDA #$F8
-    STA btltmp_boxcenter
-    LDA #$F9
-    STA btltmp_boxright
-    JSR DrawBattleBox_Row
-    
-    LDA btl_msgdraw_height      ; get the height of the box
-    SEC
-    SBC #$02                    ; subtract 2 to make this the number of center rows to draw
-    STA btl_drawbox_loopctr                   ; store in temp
-    
-    LDA #$FA                    ; Draw all the center rows
-    STA btltmp_boxleft
-    LDA #$FF
-    STA btltmp_boxcenter
-    LDA #$FB
-    STA btltmp_boxright
-  @Loop:
-      JSR DrawBattleBox_Row
-      DEC btl_drawbox_loopctr
-      BNE @Loop
-      
-    LDA #$FC                    ; draw the bottom row
-    STA btltmp_boxleft
-    LDA #$FD
-    STA btltmp_boxcenter
-    LDA #$FE
-    STA btltmp_boxright
-    JMP DrawBattleBox_Row
+;;DrawBattleBox:   ;F200
+;;    LDX btl_msgdraw_x           ; get X,Y coords of box
+;;    LDY btl_msgdraw_y
+;;    JSR GetBattleMessagePtr
+;;    STX BattleTmpPointer2       ; put in $88,$89, this is our destination pointer
+;;    STY BattleTmpPointer2+1
+;;    
+;;    LDA #$F7                    ; draw the top row of the box
+;;    STA btltmp_boxleft
+;;    LDA #$F8
+;;    STA btltmp_boxcenter
+;;    LDA #$F9
+;;    STA btltmp_boxright
+;;    JSR DrawBattleBox_Row
+;;    
+;;    LDA btl_msgdraw_height      ; get the height of the box
+;;    SEC
+;;    SBC #$02                    ; subtract 2 to make this the number of center rows to draw
+;;    STA btl_drawbox_loopctr                   ; store in temp
+;;    
+;;    LDA #$FA                    ; Draw all the center rows
+;;    STA btltmp_boxleft
+;;    LDA #$FF
+;;    STA btltmp_boxcenter
+;;    LDA #$FB
+;;    STA btltmp_boxright
+;;  @Loop:
+;;      JSR DrawBattleBox_Row
+;;      DEC btl_drawbox_loopctr
+;;      BNE @Loop
+;;      
+;;    LDA #$FC                    ; draw the bottom row
+;;    STA btltmp_boxleft
+;;    LDA #$FD
+;;    STA btltmp_boxcenter
+;;    LDA #$FE
+;;    STA btltmp_boxright
+;;    JMP DrawBattleBox_Row
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12599,15 +12520,15 @@ DrawBattleBox:   ;F200
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-DrawBattleBox_NextBlock:
-    LDA btldraw_blockptrstart   ; just add 5 to the block pointer
-    CLC
-    ADC #$05
-    STA btldraw_blockptrstart
-    LDA btldraw_blockptrstart+1
-    ADC #$00
-    STA btldraw_blockptrstart+1
-    RTS
+;;DrawBattleBox_NextBlock:
+;;    LDA btldraw_blockptrstart   ; just add 5 to the block pointer
+;;    CLC
+;;    ADC #$05
+;;    STA btldraw_blockptrstart
+;;    LDA btldraw_blockptrstart+1
+;;    ADC #$00
+;;    STA btldraw_blockptrstart+1
+;;    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12617,18 +12538,18 @@ DrawBattleBox_NextBlock:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawBattleBox_FetchBlock:
-    LDY #$00                          ; copy 5 bytes of data
-    : LDA (btldraw_blockptrstart), Y  ;  from the $8C pointer
-      STA btl_msgdraw_hdr, Y          ;  to the btl_msgdraw vars
-      INY
-      CPY #$05
-      BNE :-
-  ; JMP DrawBattleBox_Exit          ; <- flow into it
-    
-    
-DrawBattleBox_Exit:
-    RTS
+;;DrawBattleBox_FetchBlock:
+;;    LDY #$00                          ; copy 5 bytes of data
+;;    : LDA (btldraw_blockptrstart), Y  ;  from the $8C pointer
+;;      STA btl_msgdraw_hdr, Y          ;  to the btl_msgdraw vars
+;;      INY
+;;      CPY #$05
+;;      BNE :-
+;;  ; JMP DrawBattleBox_Exit          ; <- flow into it
+;;    
+;;    
+;;DrawBattleBox_Exit:
+;;    RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12665,17 +12586,17 @@ DrawBattleBox_Exit:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawBattleBoxAndText:
-    JSR DrawBattleBox_FetchBlock        ; get the first box block
-    JSR DrawBattleBox                   ; use it to draw the box
-  @Loop:
-      JSR DrawBattleBox_NextBlock       ; move to next block (text block)
-      LDY #$00
-      LDA (btldraw_blockptrstart), Y    ; if the header byte is zero
-      BEQ DrawBattleBox_Exit            ; exit
-      JSR DrawBattleBox_FetchBlock      ; otherwise, fetch the block
-      JSR DrawBattleString              ; and use it to draw text
-      JMP @Loop                         ; keep going until null terminator is found
+;;DrawBattleBoxAndText:
+;;    JSR DrawBattleBox_FetchBlock        ; get the first box block
+;;    JSR DrawBattleBox                   ; use it to draw the box
+;;  @Loop:
+;;      JSR DrawBattleBox_NextBlock       ; move to next block (text block)
+;;      LDY #$00
+;;      LDA (btldraw_blockptrstart), Y    ; if the header byte is zero
+;;      BEQ DrawBattleBox_Exit            ; exit
+;;      JSR DrawBattleBox_FetchBlock      ; otherwise, fetch the block
+;;      JSR DrawBattleString              ; and use it to draw text
+;;      JMP @Loop                         ; keep going until null terminator is found
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12705,18 +12626,18 @@ ClearBattleMessageBuffer:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawBlockBuffer:
-    JSR DrawBattleBoxAndText        ; Render blocks to the msg buffer
-    JSR BattleDrawMessageBuffer     ; Draw message buffer to the PPU
-    
-    INC btl_msgdraw_blockcount      ; Count the number of blocks we've drawn
-    
-    LDA btldraw_blockptrstart       ; reset the end pointer to point
-    STA btldraw_blockptrend         ;   to the start of the buffer
-    LDA btldraw_blockptrstart+1
-    STA btldraw_blockptrend+1
-    
-    RTS
+;;DrawBlockBuffer:
+;;    JSR DrawBattleBoxAndText        ; Render blocks to the msg buffer
+;;    JSR BattleDrawMessageBuffer     ; Draw message buffer to the PPU
+;;    
+;;    INC btl_msgdraw_blockcount      ; Count the number of blocks we've drawn
+;;    
+;;    LDA btldraw_blockptrstart       ; reset the end pointer to point
+;;    STA btldraw_blockptrend         ;   to the start of the buffer
+;;    LDA btldraw_blockptrstart+1
+;;    STA btldraw_blockptrend+1
+;;    
+;;    RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12728,72 +12649,36 @@ DrawBlockBuffer:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-UndrawBattleBlock:
-    LDA btl_msgdraw_blockcount
-    STA btl_msgdraw_blockcount_backup  ; backup the block count
-    DEC btl_msgdraw_blockcount_backup  ; reduce the count by 1 so we draw one less
-    JSR ClearBattleMessageBuffer    ; erase everything in the buffer
-    
-    LDA #<btlbox_blockdata          ; reset the blockptr
-    STA btldraw_blockptrstart
-    LDA #>btlbox_blockdata
-    STA btldraw_blockptrstart+1
-    
-    LDA #0                          ; 
-    STA btl_msgdraw_blockcount      ; clear the block count
-    
-  @Loop:
-      LDA btl_msgdraw_blockcount    ; compare block count
-      CMP btl_msgdraw_blockcount_backup  ;   to 1-less-than original block count
-      BEQ :+                        ; if we've reached that, we're done
-      JSR DrawBattleBoxAndText      ; otherwise, draw another block
-      INC btl_msgdraw_blockcount
-      JMP @Loop                     ; and repeat
-
-  : JSR BattleDrawMessageBuffer_Reverse ; reverse-draw to erase the block from the screen
-    LDA btldraw_blockptrstart           ; move the end pointer to this position, so
-    STA btldraw_blockptrend             ; the block we dropped will be actually removed
-    LDA btldraw_blockptrstart+1
-    STA btldraw_blockptrend+1
-    
-    RTS
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;UndrawBattleBlock:
+;;    LDA btl_msgdraw_blockcount
+;;    STA btl_msgdraw_blockcount_backup  ; backup the block count
+;;    DEC btl_msgdraw_blockcount_backup  ; reduce the count by 1 so we draw one less
+;;    JSR ClearBattleMessageBuffer    ; erase everything in the buffer
+;;    
+;;    LDA #<btlbox_blockdata          ; reset the blockptr
+;;    STA btldraw_blockptrstart
+;;    LDA #>btlbox_blockdata
+;;    STA btldraw_blockptrstart+1
+;;    
+;;    LDA #0                          ; 
+;;    STA btl_msgdraw_blockcount      ; clear the block count
+;;    
+;;  @Loop:
+;;      LDA btl_msgdraw_blockcount    ; compare block count
+;;      CMP btl_msgdraw_blockcount_backup  ;   to 1-less-than original block count
+;;      BEQ :+                        ; if we've reached that, we're done
+;;      JSR DrawBattleBoxAndText      ; otherwise, draw another block
+;;      INC btl_msgdraw_blockcount
+;;      JMP @Loop                     ; and repeat
 ;;
-;;  BattleDraw_AddBlockToBuffer  [$F690 :: 0x3F6A0]
-;;
-;;  Adds the block stored in 'msgdraw' to the end of the block buffer
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  : JSR BattleDrawMessageBuffer_Reverse ; reverse-draw to erase the block from the screen
+;;    LDA btldraw_blockptrstart           ; move the end pointer to this position, so
+;;    STA btldraw_blockptrend             ; the block we dropped will be actually removed
+;;    LDA btldraw_blockptrstart+1
+;;    STA btldraw_blockptrend+1
+;;    
+;;    RTS
 
-BattleDraw_AddBlockToBuffer:
-    TYA                 ; backup Y
-    PHA
-    
-    LDY #$00
-  @Loop:
-      LDA btl_msgdraw_hdr, Y        ; copy 5 bytes from the msgdraw buffer
-      STA (btldraw_blockptrend), Y  ; to the end of our block data
-      INY
-      CPY #$05
-      BNE @Loop
-      
-    LDA btldraw_blockptrend         ; then add 5 bytes to the end pointer
-    CLC                             ; to move it up
-    ADC #$05
-    STA btldraw_blockptrend
-    LDA btldraw_blockptrend+1
-    ADC #$00
-    STA btldraw_blockptrend+1
-    
-    LDA #$00                        ; add a null terminator to the end of the
-    TAY                             ; block data
-    STA (btldraw_blockptrend), Y
-    
-    PLA                             ; retore Y, and exit
-    TAY
-    RTS
-    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  UndrawNBattleBlocks  [$F6B3 :: 0x3F6C3]
@@ -12804,18 +12689,18 @@ BattleDraw_AddBlockToBuffer:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-UndrawNBattleBlocks_L:
-UndrawNBattleBlocks:
-    AND #$FF            ; see if A==0
-    BEQ @Exit           ; if zero, just exit
-    
-    STA UndrawNBattleBlocks_loopctr           ; otherwise, store in temp to use as a downcounter
-  @Loop:
-      JSR UndrawBattleBlock ; undraw one
-      DEC UndrawNBattleBlocks_loopctr             ; dec
-      BNE @Loop             ; loop until no more to undraw
-  @Exit:
-    RTS
+;;UndrawNBattleBlocks_L:
+;;UndrawNBattleBlocks:
+;;    AND #$FF            ; see if A==0
+;;    BEQ @Exit           ; if zero, just exit
+;;    
+;;    STA UndrawNBattleBlocks_loopctr           ; otherwise, store in temp to use as a downcounter
+;;  @Loop:
+;;      JSR UndrawBattleBlock ; undraw one
+;;      DEC UndrawNBattleBlocks_loopctr             ; dec
+;;      BNE @Loop             ; loop until no more to undraw
+;;  @Exit:
+;;    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12829,47 +12714,47 @@ UndrawNBattleBlocks:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawRosterBox_L: 
-DrawRosterBox:
-    LDY #$05                        ; copy 5 bytes from the roster
-    : LDA lut_EnemyRosterBox-1, Y   ;   box to msgdraw
-      STA btl_msgdraw_hdr-1, Y      ; (-1 because Y is 1-based in this loop)
-      DEY
-      BNE :-
-      
-    JSR BattleDraw_AddBlockToBuffer ; add msgdraw to our block buffer
-    INC btl_msgdraw_hdr         ; inc the header so its nonzero
-   ; INC btl_msgdraw_x           ; move right 2 columns
-    INC btl_msgdraw_x
-    DEC btl_msgdraw_y           ; move up 1 row because we move down 2 rows later,
-    DEC btl_msgdraw_y           ;  and we really only want to move down 1.
-    
-    LDY #$00
-  @RosterLoop:
-      INC btl_msgdraw_y               ; after each row, move down 2 rows
-      INC btl_msgdraw_y
-    
-      TYA
-      ASL A                           ; *2 (2 bytes per string)
-      CLC
-      ADC #<@lut_EnemyRosterStrings    ; add to the lut address
-      STA btl_msgdraw_srcptr
-      LDA #$00
-      ADC #>@lut_EnemyRosterStrings
-      STA btl_msgdraw_srcptr+1
-    
-      JSR BattleDraw_AddBlockToBuffer ; Add this block to the draw buffer
-      INY
-      CPY #$04
-      BNE @RosterLoop                 ; loop 4 times (to print each enemy in the roster
-      
-    JMP DrawBlockBuffer            ; Then actually draw it!
-    
-@lut_EnemyRosterStrings:
-  .BYTE $08, $00        ; these are just the roster control codes, followed by the null terminator
-  .BYTE $09, $00        ; JIGS - these now print the amount of enemies
-  .BYTE $0A, $00
-  .BYTE $0B, $00    
+;;DrawRosterBox_L: 
+;;DrawRosterBox:
+;;    LDY #$05                        ; copy 5 bytes from the roster
+;;    : LDA lut_EnemyRosterBox-1, Y   ;   box to msgdraw
+;;      STA btl_msgdraw_hdr-1, Y      ; (-1 because Y is 1-based in this loop)
+;;      DEY
+;;      BNE :-
+;;      
+;;    JSR BattleDraw_AddBlockToBuffer ; add msgdraw to our block buffer
+;;    INC btl_msgdraw_hdr         ; inc the header so its nonzero
+;;   ; INC btl_msgdraw_x           ; move right 2 columns
+;;    INC btl_msgdraw_x
+;;    DEC btl_msgdraw_y           ; move up 1 row because we move down 2 rows later,
+;;    DEC btl_msgdraw_y           ;  and we really only want to move down 1.
+;;    
+;;    LDY #$00
+;;  @RosterLoop:
+;;      INC btl_msgdraw_y               ; after each row, move down 2 rows
+;;      INC btl_msgdraw_y
+;;    
+;;      TYA
+;;      ASL A                           ; *2 (2 bytes per string)
+;;      CLC
+;;      ADC #<@lut_EnemyRosterStrings    ; add to the lut address
+;;      STA btl_msgdraw_srcptr
+;;      LDA #$00
+;;      ADC #>@lut_EnemyRosterStrings
+;;      STA btl_msgdraw_srcptr+1
+;;    
+;;      JSR BattleDraw_AddBlockToBuffer ; Add this block to the draw buffer
+;;      INY
+;;      CPY #$04
+;;      BNE @RosterLoop                 ; loop 4 times (to print each enemy in the roster
+;;      
+;;    JMP DrawBlockBuffer            ; Then actually draw it!
+;;    
+;;@lut_EnemyRosterStrings:
+;;  .BYTE $08, $00        ; these are just the roster control codes, followed by the null terminator
+;;  .BYTE $09, $00        ; JIGS - these now print the amount of enemies
+;;  .BYTE $0A, $00
+;;  .BYTE $0B, $00    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12882,64 +12767,64 @@ DrawRosterBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawCommandBox_L:
-DrawCommandBox:
-    LDY #$00
-    LDX #$00
-  @Loop:
-    LDA lut_BattleCommandBoxInfo, Y    ; copy 6*5 bytes (6 blocks)
-    CPY #15                            ; when Y = 15, A is a dummy byte
-    BEQ @DrawSkill                     ; and it goes to draw the skill
-    STA btl_msgdraw_hdr, X             ; based on "battle_class" set earlier
-    INX
-    CPX #$05
-    BNE :++                             ; every 5 bytes, add the block to the
-      JSR BattleDraw_AddBlockToBuffer  ;  output buffer
-   :  LDX #$00
-  : INY
-    CPY #41 ; 45
-    BNE @Loop
-    JMP DrawBlockBuffer                ; then finally draw it
-    
-   @DrawSkill:
-    TYA
-    PHA                                ; backup Y
-    LDA battle_class
-    LDX #5
-    JSR MultiplyXA
-    TAY
-    
-    LDX #$00 
-  : LDA lut_CombatSkillBox, Y          ; this gets the skill text to put up!
-    STA btl_msgdraw_hdr, X
-    INX
-    INY
-    CPX #5
-    BNE :-
-    JSR BattleDraw_AddBlockToBuffer    ; add it to the block buffer
-    PLA
-    TAY
-    JMP :---
-    
-    
-
-
-DrawPlayerBox:
-    LDY #$00
-    LDX #$00
-  @Loop:
-      LDA lut_PlayerBoxInfo, Y           ; copy 6*5 bytes (6 blocks)
-      STA btl_msgdraw_hdr, X
-      INX
-      CPX #$05
-      BNE :+                                    ; every 5 bytes, add the block to the
-        JSR BattleDraw_AddBlockToBuffer         ;  output buffer
-        LDX #$00
-    : INY
-      CPY #5*5
-      BNE @Loop
-      
-    JMP DrawBlockBuffer            ; then finally draw it
+;;DrawCommandBox_L:
+;;DrawCommandBox:
+;;    LDY #$00
+;;    LDX #$00
+;;  @Loop:
+;;    LDA lut_BattleCommandBoxInfo, Y    ; copy 6*5 bytes (6 blocks)
+;;    CPY #15                            ; when Y = 15, A is a dummy byte
+;;    BEQ @DrawSkill                     ; and it goes to draw the skill
+;;    STA btl_msgdraw_hdr, X             ; based on "battle_class" set earlier
+;;    INX
+;;    CPX #$05
+;;    BNE :++                             ; every 5 bytes, add the block to the
+;;      JSR BattleDraw_AddBlockToBuffer  ;  output buffer
+;;   :  LDX #$00
+;;  : INY
+;;    CPY #41 ; 45
+;;    BNE @Loop
+;;    JMP DrawBlockBuffer                ; then finally draw it
+;;    
+;;   @DrawSkill:
+;;    TYA
+;;    PHA                                ; backup Y
+;;    LDA battle_class
+;;    LDX #5
+;;    JSR MultiplyXA
+;;    TAY
+;;    
+;;    LDX #$00 
+;;  : LDA lut_CombatSkillBox, Y          ; this gets the skill text to put up!
+;;    STA btl_msgdraw_hdr, X
+;;    INX
+;;    INY
+;;    CPX #5
+;;    BNE :-
+;;    JSR BattleDraw_AddBlockToBuffer    ; add it to the block buffer
+;;    PLA
+;;    TAY
+;;    JMP :---
+;;    
+;;    
+;;
+;;
+;;DrawPlayerBox:
+;;    LDY #$00
+;;    LDX #$00
+;;  @Loop:
+;;      LDA lut_PlayerBoxInfo, Y           ; copy 6*5 bytes (6 blocks)
+;;      STA btl_msgdraw_hdr, X
+;;      INX
+;;      CPX #$05
+;;      BNE :+                                    ; every 5 bytes, add the block to the
+;;        JSR BattleDraw_AddBlockToBuffer         ;  output buffer
+;;        LDX #$00
+;;    : INY
+;;      CPY #5*5
+;;      BNE @Loop
+;;      
+;;    JMP DrawBlockBuffer            ; then finally draw it
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12956,39 +12841,59 @@ DrawPlayerBox:
 
 DrawCombatBox_L:
 DrawCombatBox:
-    STX btl_tmp_drawcombatbox1           ; stuff X,Y in temp mem
-    STY btl_tmp_drawcombatbox2
+    STA btldraw_box_id
+    CMP #4
+    BCS :+
+        ;; only box IDs after this have variable messages
+        ;; the rest are preset, so we gotta set up the string they'll be printing
+    LDX #$02
+    LDY #$5D
+    ;; for testing, just do the first character's name
+
+  : STX btldraw_src            ; store source pointer
+    STY btldraw_src+1
     
-    ASL A               ; Y = A * 8  (8 bytes per box)
+    INC BattleBoxBufferCount   ; add this box to the buffer list
+    LDX BattleBoxBufferCount    
+    STA BattleBoxBufferList, X ; add this box ID to the list
+    
     ASL A
     ASL A
-    TAY
+    TAX
+    LDA JigsDrawBox_LUT, X     ; get box width
+    STA btldraw_width
+    TXA 
+    LSR A                      ; back to *2 
+    TAX    
+    LDA btldraw_width
+    SEC                        ; set carry to add +1 
+    ADC JigsDrawBoxAddress_LUT+5, X ; add box address (low)
+    STA btldraw_dst
+    LDA JigsDrawBoxAddress_LUT+4, X ; get box address (high)
+    ADC #0                     ; add carry
+    STA btldraw_dst+1
     
-    LDX #$00
-    : LDA lut_CombatBoxes, Y    ; copy first 5 bytes (Box data)
-      STA btl_msgdraw_hdr, X
-      INX
-      INY
-      CPX #$05
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer ; add the block
-    
-    LDX #$00
-    : LDA lut_CombatBoxes, Y    ; copy 3 more bytes (Text data)
-      BMI :+                    ; if high bit is set, skip text
-      STA btl_msgdraw_hdr, X
-      INX
-      INY
-      CPX #$03
-      BNE :-
-      
-    LDA btl_tmp_drawcombatbox1  ; use temp mem (YX provided at start of routine)
-    STA btl_msgdraw_srcptr      ;  as pointer to text data
-    LDA btl_tmp_drawcombatbox2
-    STA btl_msgdraw_srcptr+1
-    
-    JSR BattleDraw_AddBlockToBuffer ; add this text block
-  : JMP DrawBlockBuffer             ; then draw it.
+    DEC btldraw_width          ; make width -2 (no box sides)
+    DEC btldraw_width          ; 
+    JSR SetBtlDrawWidthCounter ; make sure strings don't write over the box borders
+    JSR FormatBattleString     ; decompress the string to the box's innards in RAM
+    JSR JigsBoxDrawToBuffer    ; copy the box to the screen buffer
+    ;; also first copies the screen buffer to backup RAM
+    ;; so that undrawing restores the exact tiles "behind" the box
+    JMP BattleDrawMessageBuffer
+
+
+SetBtlDrawWidthCounter:
+    LDA #$FF
+    SEC
+    SBC btldraw_width
+    STA btldraw_width_counter        
+    ; when this gets inc'd to 0, add btldraw_width to btldraw_dst
+    RTS
+
+
+
+
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13019,137 +12924,137 @@ ClearUnformattedCombatBoxBuffer:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawBattleMagicBox_L:
-DrawBattleMagicBox:
-    LDY #$05                                ; prep the block for the magic/item box
-    : LDA lut_CombatItemMagicBox-1, Y
-      STA btl_msgdraw_hdr-1, Y
-      DEY
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
-    
-    JSR ClearUnformattedCombatBoxBuffer     ; clear the unformatted buffer (so we can draw to it)
-    
-    INC btl_msgdraw_hdr     ; inc hdr (should be 1 for text blocks)
-    INC btl_msgdraw_x       ; move down+right 1 tile for text
-    ;INC btl_msgdraw_y
-    
-    LDA #$00
-    STA DrawBattleMagicBox_loopctr               ; loop counter / row index
-    
-    LDA #<TempSpellList
-    STA BattleTmpPointer2
-    LDA #>TempSpellList
-    STA BattleTmpPointer2+1
-    
-    LDA DrawBattleMagicBox_toporbottom  ; See if we're drawing the top or bottom page
-    BNE @BottomPage
-    
-  @TopPage:
-    LDA DrawBattleMagicBox_loopctr  
-    
-    LDX #03
-    JSR MultiplyXA
-    ;TAY
-
-    JSR @DoMagicSorting    
-    BNE @TopPage                    ; and loop until all 4 rows drawn
-    JMP @Done
-    
-    
-  @BottomPage:                      ; This is identical to @TopPage, only it changes
-    LDA DrawBattleMagicBox_loopctr  ;  a few constants to print the bottom page instead.
-    
-    LDX #03
-    JSR MultiplyXA
-    CLC
-    ADC #3*4
-    ;TAY
-    
-    JSR @DoMagicSorting
-    CMP #$04
-    BNE @BottomPage
-
-  @Done:
-    JMP DrawBlockBuffer
-    
-    
-    
-  @DoMagicSorting:
-    STA TempSpellListIndex ; backup Y
-    LDA DrawBattleMagicBox_loopctr
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    JSR ShiftLeft5
-    TAX
-
-    ; Print the 'L#' text on the left side of the box
-    LDA #$95                        ; 'L'
-    STA btl_unfmtcbtbox_buffer, X
-    LDA DrawBattleMagicBox_loopctr
-    CLC
-    LDY DrawBattleMagicBox_toporbottom ; check top or bottom box again
-    BEQ :+
-        ADC #4 ; add 4 if its the level 4-8 box
- :  
-    ADC #$81                        ; '1' + row (level)
-    STA btl_unfmtcbtbox_buffer+1, X
-    
-    ; Print the names of the spells
-    JSR BattleMenu_DrawMagicNames
-    
-    LDA CharacterIndexBackup 
-    CLC
-    ADC #ch_mp - ch_stats
-    ADC DrawBattleMagicBox_loopctr ; basically spell level!
-    
-    LDY DrawBattleMagicBox_toporbottom ; check top or bottom box again
-    BEQ :+
-        ADC #4 ; add 4 to Y if its the level 4-8 box
- :  TAY
-    LDA ch_stats, Y
-    PHA      ; backup MP
-    AND #$F0 ; remove max mp
-    LSR A
-    LSR A
-    LSR A
-    LSR A ; shift current into low bits
-    CLC
-    
-    ADC #$80                            ; + $80 to convert to the tile
-    STA btl_unfmtcbtbox_buffer + 12, X  ; print that tile
-    
-    LDA #$7A
-    STA btl_unfmtcbtbox_buffer + 13, X
-    
-    PLA       ; retrieve MP
-    AND #$0F  ; remove current mp
-    CLC
-    ADC #$80  ; convert to number tile 
-    STA btl_unfmtcbtbox_buffer + 14, X
-    
-    LDA #$00
-    STA btl_unfmtcbtbox_buffer + 15, X  ; null terminate the string
-        
-    TXA                             ; get the dest index, and add to the pointer
-    CLC                             ;  to the unformatted buffer.
-    ADC #<btl_unfmtcbtbox_buffer    ; set the source pointer
-    STA btl_msgdraw_srcptr
-    LDA #$00
-    ADC #>btl_unfmtcbtbox_buffer
-    STA btl_msgdraw_srcptr+1
-    
-    JSR BattleDraw_AddBlockToBuffer ; Add that block to the block buffer
-    
-    INC btl_msgdraw_y               ; then move down 2 rows
-    INC btl_msgdraw_y
-    INC DrawBattleMagicBox_loopctr                       ; inc the row counter
-    LDA DrawBattleMagicBox_loopctr
-    CMP #$04
-    RTS    
+;;DrawBattleMagicBox_L:
+;;DrawBattleMagicBox:
+;;    LDY #$05                                ; prep the block for the magic/item box
+;;    : LDA lut_CombatItemMagicBox-1, Y
+;;      STA btl_msgdraw_hdr-1, Y
+;;      DEY
+;;      BNE :-
+;;    JSR BattleDraw_AddBlockToBuffer         ; add it to the block buffer
+;;    
+;;    JSR ClearUnformattedCombatBoxBuffer     ; clear the unformatted buffer (so we can draw to it)
+;;    
+;;    INC btl_msgdraw_hdr     ; inc hdr (should be 1 for text blocks)
+;;    INC btl_msgdraw_x       ; move down+right 1 tile for text
+;;    ;INC btl_msgdraw_y
+;;    
+;;    LDA #$00
+;;    STA DrawBattleMagicBox_loopctr               ; loop counter / row index
+;;    
+;;    LDA #<TempSpellList
+;;    STA BattleTmpPointer2
+;;    LDA #>TempSpellList
+;;    STA BattleTmpPointer2+1
+;;    
+;;    LDA DrawBattleMagicBox_toporbottom  ; See if we're drawing the top or bottom page
+;;    BNE @BottomPage
+;;    
+;;  @TopPage:
+;;    LDA DrawBattleMagicBox_loopctr  
+;;    
+;;    LDX #03
+;;    JSR MultiplyXA
+;;    ;TAY
+;;
+;;    JSR @DoMagicSorting    
+;;    BNE @TopPage                    ; and loop until all 4 rows drawn
+;;    JMP @Done
+;;    
+;;    
+;;  @BottomPage:                      ; This is identical to @TopPage, only it changes
+;;    LDA DrawBattleMagicBox_loopctr  ;  a few constants to print the bottom page instead.
+;;    
+;;    LDX #03
+;;    JSR MultiplyXA
+;;    CLC
+;;    ADC #3*4
+;;    ;TAY
+;;    
+;;    JSR @DoMagicSorting
+;;    CMP #$04
+;;    BNE @BottomPage
+;;
+;;  @Done:
+;;    JMP DrawBlockBuffer
+;;    
+;;    
+;;    
+;;  @DoMagicSorting:
+;;    STA TempSpellListIndex ; backup Y
+;;    LDA DrawBattleMagicBox_loopctr
+;;    ;ASL A
+;;    ;ASL A
+;;    ;ASL A
+;;    ;ASL A
+;;    ;ASL A
+;;    JSR ShiftLeft5
+;;    TAX
+;;
+;;    ; Print the 'L#' text on the left side of the box
+;;    LDA #$95                        ; 'L'
+;;    STA btl_unfmtcbtbox_buffer, X
+;;    LDA DrawBattleMagicBox_loopctr
+;;    CLC
+;;    LDY DrawBattleMagicBox_toporbottom ; check top or bottom box again
+;;    BEQ :+
+;;        ADC #4 ; add 4 if its the level 4-8 box
+;; :  
+;;    ADC #$81                        ; '1' + row (level)
+;;    STA btl_unfmtcbtbox_buffer+1, X
+;;    
+;;    ; Print the names of the spells
+;;    JSR BattleMenu_DrawMagicNames
+;;    
+;;    LDA CharacterIndexBackup 
+;;    CLC
+;;    ADC #ch_mp - ch_stats
+;;    ADC DrawBattleMagicBox_loopctr ; basically spell level!
+;;    
+;;    LDY DrawBattleMagicBox_toporbottom ; check top or bottom box again
+;;    BEQ :+
+;;        ADC #4 ; add 4 to Y if its the level 4-8 box
+;; :  TAY
+;;    LDA ch_stats, Y
+;;    PHA      ; backup MP
+;;    AND #$F0 ; remove max mp
+;;    LSR A
+;;    LSR A
+;;    LSR A
+;;    LSR A ; shift current into low bits
+;;    CLC
+;;    
+;;    ADC #$80                            ; + $80 to convert to the tile
+;;    STA btl_unfmtcbtbox_buffer + 12, X  ; print that tile
+;;    
+;;    LDA #$7A
+;;    STA btl_unfmtcbtbox_buffer + 13, X
+;;    
+;;    PLA       ; retrieve MP
+;;    AND #$0F  ; remove current mp
+;;    CLC
+;;    ADC #$80  ; convert to number tile 
+;;    STA btl_unfmtcbtbox_buffer + 14, X
+;;    
+;;    LDA #$00
+;;    STA btl_unfmtcbtbox_buffer + 15, X  ; null terminate the string
+;;        
+;;    TXA                             ; get the dest index, and add to the pointer
+;;    CLC                             ;  to the unformatted buffer.
+;;    ADC #<btl_unfmtcbtbox_buffer    ; set the source pointer
+;;    STA btl_msgdraw_srcptr
+;;    LDA #$00
+;;    ADC #>btl_unfmtcbtbox_buffer
+;;    STA btl_msgdraw_srcptr+1
+;;    
+;;    JSR BattleDraw_AddBlockToBuffer ; Add that block to the block buffer
+;;    
+;;    INC btl_msgdraw_y               ; then move down 2 rows
+;;    INC btl_msgdraw_y
+;;    INC DrawBattleMagicBox_loopctr                       ; inc the row counter
+;;    LDA DrawBattleMagicBox_loopctr
+;;    CMP #$04
+;;    RTS    
     
     
 
@@ -13168,52 +13073,52 @@ DrawBattleMagicBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BattleMenu_DrawMagicNames:
-    LDA #$0E
-    STA btl_unfmtcbtbox_buffer + 3, X   ; set the 3 '0E' control codes to print item names
-    STA btl_unfmtcbtbox_buffer + 6, X
-    STA btl_unfmtcbtbox_buffer + 9, X
-    
-    LDY TempSpellListIndex
-    LDA (BattleTmpPointer2), Y          ; check slot 0
-    BNE :+                              ; if it's empty (no spell)
-      LDA #$10
-      STA btl_unfmtcbtbox_buffer + 3, X ; replace 0E code with 10 code to print spaces
-      LDA #$07                          ;; JIGS - 7 letter spell names!
-      STA btl_unfmtcbtbox_buffer + 4, X ; 04 to print 4 spaces
-      JMP @Column1
-  : CLC                                 ; otherwise (not empty), onvert from a 1-based magic index
-    ADC #MG_START-1                     ; to a 0-based item index, and put the index after the '0E' code
-    STA btl_unfmtcbtbox_buffer + 4, X
-
-  @Column1:                             ; Then repeat the above process for each of the 3 columns
-    INY
-    LDA (BattleTmpPointer2), Y
-    BNE :+
-      LDA #$10
-      STA btl_unfmtcbtbox_buffer + 6, X
-      LDA #$07 ;; JIGS - 7 letter spell names!
-      STA btl_unfmtcbtbox_buffer + 7, X
-      JMP @Column2
-  : CLC
-    ADC #MG_START-1
-    STA btl_unfmtcbtbox_buffer + 7, X
-    
-  @Column2:
-    INY
-    LDA (BattleTmpPointer2), Y
-      BNE :+
-      LDA #$10
-      STA btl_unfmtcbtbox_buffer + 9, X
-      LDA #$07 ;; JIGS - 7 letter spell names!
-      STA btl_unfmtcbtbox_buffer + 10, X
-      JMP @Done
-  : CLC
-    ADC #MG_START-1
-    STA btl_unfmtcbtbox_buffer + 10, X
-    
-  @Done:
-    RTS
+;;BattleMenu_DrawMagicNames:
+;;    LDA #$0E
+;;    STA btl_unfmtcbtbox_buffer + 3, X   ; set the 3 '0E' control codes to print item names
+;;    STA btl_unfmtcbtbox_buffer + 6, X
+;;    STA btl_unfmtcbtbox_buffer + 9, X
+;;    
+;;    LDY TempSpellListIndex
+;;    LDA (BattleTmpPointer2), Y          ; check slot 0
+;;    BNE :+                              ; if it's empty (no spell)
+;;      LDA #$10
+;;      STA btl_unfmtcbtbox_buffer + 3, X ; replace 0E code with 10 code to print spaces
+;;      LDA #$07                          ;; JIGS - 7 letter spell names!
+;;      STA btl_unfmtcbtbox_buffer + 4, X ; 04 to print 4 spaces
+;;      JMP @Column1
+;;  : CLC                                 ; otherwise (not empty), onvert from a 1-based magic index
+;;    ADC #MG_START-1                     ; to a 0-based item index, and put the index after the '0E' code
+;;    STA btl_unfmtcbtbox_buffer + 4, X
+;;
+;;  @Column1:                             ; Then repeat the above process for each of the 3 columns
+;;    INY
+;;    LDA (BattleTmpPointer2), Y
+;;    BNE :+
+;;      LDA #$10
+;;      STA btl_unfmtcbtbox_buffer + 6, X
+;;      LDA #$07 ;; JIGS - 7 letter spell names!
+;;      STA btl_unfmtcbtbox_buffer + 7, X
+;;      JMP @Column2
+;;  : CLC
+;;    ADC #MG_START-1
+;;    STA btl_unfmtcbtbox_buffer + 7, X
+;;    
+;;  @Column2:
+;;    INY
+;;    LDA (BattleTmpPointer2), Y
+;;      BNE :+
+;;      LDA #$10
+;;      STA btl_unfmtcbtbox_buffer + 9, X
+;;      LDA #$07 ;; JIGS - 7 letter spell names!
+;;      STA btl_unfmtcbtbox_buffer + 10, X
+;;      JMP @Done
+;;  : CLC
+;;    ADC #MG_START-1
+;;    STA btl_unfmtcbtbox_buffer + 10, X
+;;    
+;;  @Done:
+;;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13243,135 +13148,135 @@ ShiftLeft4:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawBattleEquipmentBox_L: 
-DrawBattleItemBox:
-    LDY #$05                                ; 5 bytes of block data
-;    : LDA lut_CombatItemMagicBox-1, Y       ; copy over the block data for the Item box
-    : LDA lut_CombatEquipmentBox-1, Y            ; JIGS - Magic box is bigger, so this uses default item box data
-      STA btl_msgdraw_hdr-1, Y
-      DEY
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer         ; Add the block to the buffer to be drawn
-    JSR ClearUnformattedCombatBoxBuffer     ; Chear the unformatted buffer (we'll be drawing to it shortly)
-    
-    INC btl_msgdraw_hdr     ; hdr=1 for contained text
-    INC btl_msgdraw_x       ; move draw coords right+down 1 tile
-    ;INC btl_msgdraw_y
-    
-    LDA #$00
-    STA DrawBattleMagicBox_loopctr               ; loop counter and equip slot to print (0-3)
-    
-    LDA btlcmd_curchar
-    JSR ShiftLeft6          ; Get the char stat index in X (00,40,80,C0)
-    TAX                     ;  This will be the source index
-    
-    ; Loop 4 times, once for each row.
-    ; 
-    ; Each row consists of 8 bytes of unformatted data:
-    ;    FF 0E xx FF FF 0E xx 00        where:
-    ; FF    = space
-    ; 0E xx = code to draw item 'xx's name
-    ; 00    = null terminator
-    ;
-    ; Alternatively, instead of '0E xx', it will output '10 07' if the weapon slot is empty
-    ;   which will draw 07 spaces.
-    ; If the armor slot is empty, then it'll null terminate the string with 00 instead of
-    ;   having the 2nd '0E xx'.
-    ;
-    ; Strangely, even though only 8 bytes are used, the game spaces rows $20 bytes apart
-  @MainLoop:
-    LDA DrawBattleMagicBox_loopctr      ; Row number * $20 in Y
-    JSR ShiftLeft5                      ; This is the offset in the unformatted buffer to print to
-    TAY
-    
-    LDA #$0D
-    STA btl_unfmtcbtbox_buffer + 2, Y   ; put in the 0D control codes (for printing weapons and armor)
-    STA btl_unfmtcbtbox_buffer + 7, Y
-    
-    LDA ch_righthand, X
-    BNE :+ 
-    
-    @NothingLeft:
-     LDA #$10
-     STA btl_unfmtcbtbox_buffer + 2, Y ; replace the 0E control code with 10 control code
-     LDA #$08                          ; 8 spaces
-     JMP @AddToBufferLeft
-
-  : ;PHA 
-    ;TXA 
-    ;AND #$0F
-    ;BEQ @PrintWeaponLeft
-    ;CMP #06
-    ;BEQ @PrintWeaponLeft
-        
-    ;@PrintArmorLeft:
-    ;PLA
-    ;CLC
-    ;ADC #ARMORSTART-1
-    ;JMP @AddToBufferLeft
-    
-    ;@PrintWeaponLeft:
-    ;PLA
-    SEC
-    SBC #1
-        
-    @AddToBufferLeft:
-    STA btl_unfmtcbtbox_buffer + 3, Y
-    
-    INX
-    LDA ch_righthand, X
-    BNE :+ 
-    
-    @NothingRight:
-    LDA #$FF
-    STA btl_unfmtcbtbox_buffer + 7, Y ; replace the 0E control code with two spaces
-    JMP @AddToBufferRight
-    
-  : ;PHA 
-    ;TXA 
-    ;AND #$0F
-    ;CMP #07
-    ;BEQ @PrintWeaponRight
-        
-    ;@PrintArmorRight:
-    ;PLA
-    ;CLC
-    ;ADC #ARMORSTART-1
-    ;JMP @AddToBufferRight
-    
-    ;@PrintWeaponRight:
-    ;PLA
-    SEC
-    SBC #1
-    
-    @AddToBufferRight:
-    STA btl_unfmtcbtbox_buffer + 8, Y
-        
-   @EndLine:
-     LDA #0
-     STA btl_unfmtcbtbox_buffer + 9, Y
-    
-    TYA                                 ; set the source pointer to the unformatted
-    CLC                                 ;  buffer + the offset
-    ADC #<btl_unfmtcbtbox_buffer
-    STA btl_msgdraw_srcptr
-    LDA #$00
-    ADC #>btl_unfmtcbtbox_buffer
-    STA btl_msgdraw_srcptr+1
-    
-    JSR BattleDraw_AddBlockToBuffer     ; then draw this row
-    
-    INX                                 ; inc source index
-    INC btl_msgdraw_y                   ; move drawing down 2 rows
-    INC btl_msgdraw_y
-    INC DrawBattleMagicBox_loopctr      ; inc the row counter
-    LDA DrawBattleMagicBox_loopctr
-    CMP #$04                            ; loop until 4 rows are drawn
-    BEQ :+
-      JMP  @MainLoop
-    
-    ; Finally, after all rows added, Actually draw the block buffer and exit
-  : JMP DrawBlockBuffer
+;;DrawBattleEquipmentBox_L: 
+;;DrawBattleItemBox:
+;;    LDY #$05                                ; 5 bytes of block data
+;;;    : LDA lut_CombatItemMagicBox-1, Y       ; copy over the block data for the Item box
+;;    : LDA lut_CombatEquipmentBox-1, Y            ; JIGS - Magic box is bigger, so this uses default item box data
+;;      STA btl_msgdraw_hdr-1, Y
+;;      DEY
+;;      BNE :-
+;;    JSR BattleDraw_AddBlockToBuffer         ; Add the block to the buffer to be drawn
+;;    JSR ClearUnformattedCombatBoxBuffer     ; Chear the unformatted buffer (we'll be drawing to it shortly)
+;;    
+;;    INC btl_msgdraw_hdr     ; hdr=1 for contained text
+;;    INC btl_msgdraw_x       ; move draw coords right+down 1 tile
+;;    ;INC btl_msgdraw_y
+;;    
+;;    LDA #$00
+;;    STA DrawBattleMagicBox_loopctr               ; loop counter and equip slot to print (0-3)
+;;    
+;;    LDA btlcmd_curchar
+;;    JSR ShiftLeft6          ; Get the char stat index in X (00,40,80,C0)
+;;    TAX                     ;  This will be the source index
+;;    
+;;    ; Loop 4 times, once for each row.
+;;    ; 
+;;    ; Each row consists of 8 bytes of unformatted data:
+;;    ;    FF 0E xx FF FF 0E xx 00        where:
+;;    ; FF    = space
+;;    ; 0E xx = code to draw item 'xx's name
+;;    ; 00    = null terminator
+;;    ;
+;;    ; Alternatively, instead of '0E xx', it will output '10 07' if the weapon slot is empty
+;;    ;   which will draw 07 spaces.
+;;    ; If the armor slot is empty, then it'll null terminate the string with 00 instead of
+;;    ;   having the 2nd '0E xx'.
+;;    ;
+;;    ; Strangely, even though only 8 bytes are used, the game spaces rows $20 bytes apart
+;;  @MainLoop:
+;;    LDA DrawBattleMagicBox_loopctr      ; Row number * $20 in Y
+;;    JSR ShiftLeft5                      ; This is the offset in the unformatted buffer to print to
+;;    TAY
+;;    
+;;    LDA #$0D
+;;    STA btl_unfmtcbtbox_buffer + 2, Y   ; put in the 0D control codes (for printing weapons and armor)
+;;    STA btl_unfmtcbtbox_buffer + 7, Y
+;;    
+;;    LDA ch_righthand, X
+;;    BNE :+ 
+;;    
+;;    @NothingLeft:
+;;     LDA #$10
+;;     STA btl_unfmtcbtbox_buffer + 2, Y ; replace the 0E control code with 10 control code
+;;     LDA #$08                          ; 8 spaces
+;;     JMP @AddToBufferLeft
+;;
+;;  : ;PHA 
+;;    ;TXA 
+;;    ;AND #$0F
+;;    ;BEQ @PrintWeaponLeft
+;;    ;CMP #06
+;;    ;BEQ @PrintWeaponLeft
+;;        
+;;    ;@PrintArmorLeft:
+;;    ;PLA
+;;    ;CLC
+;;    ;ADC #ARMORSTART-1
+;;    ;JMP @AddToBufferLeft
+;;    
+;;    ;@PrintWeaponLeft:
+;;    ;PLA
+;;    SEC
+;;    SBC #1
+;;        
+;;    @AddToBufferLeft:
+;;    STA btl_unfmtcbtbox_buffer + 3, Y
+;;    
+;;    INX
+;;    LDA ch_righthand, X
+;;    BNE :+ 
+;;    
+;;    @NothingRight:
+;;    LDA #$FF
+;;    STA btl_unfmtcbtbox_buffer + 7, Y ; replace the 0E control code with two spaces
+;;    JMP @AddToBufferRight
+;;    
+;;  : ;PHA 
+;;    ;TXA 
+;;    ;AND #$0F
+;;    ;CMP #07
+;;    ;BEQ @PrintWeaponRight
+;;        
+;;    ;@PrintArmorRight:
+;;    ;PLA
+;;    ;CLC
+;;    ;ADC #ARMORSTART-1
+;;    ;JMP @AddToBufferRight
+;;    
+;;    ;@PrintWeaponRight:
+;;    ;PLA
+;;    SEC
+;;    SBC #1
+;;    
+;;    @AddToBufferRight:
+;;    STA btl_unfmtcbtbox_buffer + 8, Y
+;;        
+;;   @EndLine:
+;;     LDA #0
+;;     STA btl_unfmtcbtbox_buffer + 9, Y
+;;    
+;;    TYA                                 ; set the source pointer to the unformatted
+;;    CLC                                 ;  buffer + the offset
+;;    ADC #<btl_unfmtcbtbox_buffer
+;;    STA btl_msgdraw_srcptr
+;;    LDA #$00
+;;    ADC #>btl_unfmtcbtbox_buffer
+;;    STA btl_msgdraw_srcptr+1
+;;    
+;;    JSR BattleDraw_AddBlockToBuffer     ; then draw this row
+;;    
+;;    INX                                 ; inc source index
+;;    INC btl_msgdraw_y                   ; move drawing down 2 rows
+;;    INC btl_msgdraw_y
+;;    INC DrawBattleMagicBox_loopctr      ; inc the row counter
+;;    LDA DrawBattleMagicBox_loopctr
+;;    CMP #$04                            ; loop until 4 rows are drawn
+;;    BEQ :+
+;;      JMP  @MainLoop
+;;    
+;;    ; Finally, after all rows added, Actually draw the block buffer and exit
+;;  : JMP DrawBlockBuffer
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13390,135 +13295,135 @@ DrawBattleItemBox:
 ;.byte ELIXIR, FLOWCLOCK
 ;.byte PHOENIXDOWN, SMOKEBOMB  
 
-DrawItemBox_L:
-DrawItemBox:
-    LDY #$05
-    : LDA lut_CombatItemBox-1, Y       ; load the specs for the Item box
-      STA btl_msgdraw_hdr-1, Y          ; -1 because Y is 1-based
-      DEY
-      BNE :-
-    JSR BattleDraw_AddBlockToBuffer     ; add the box to the block buffer
-    
-    JSR DrawBlockBuffer 
-    
-FillItemBox_BankC:   ;; JIGS - just enough changes from the menu version to make 
-     ;; it difficult to copy-paste segments and have each routine JSR to them...
-
-    LDX #$80
-    LDA #$FF
-   @FillBlanks:
-     STA bigstr_buf, X
-     DEX
-     CPX #$10
-     BCS @FillBlanks ; fill the first 10 bytes of item_box too
-     STA item_box, X
-     CPX #0
-     BNE @FillBlanks
-
-    STX tmp+2        ; loop counter
-    LDY #1           ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
-
-  @ItemFillLoop:
-      LDA items, Y       ; check our item qty
-      BEQ @IncSrc        ; if it's nonzero...
-        TYA              ;  put this item ID in A
-        CMP #TENT
-        BEQ @IncSrc
-        CMP #CABIN
-        BEQ @IncSrc
-        CMP #HOUSE
-        BEQ @IncSrc      ; skip these 3 items
-        
-        STA item_box, X  ;  and write it to the item box buffer
-        INX              ;  inc our dest index
-
-    @IncSrc:
-      INY                  ; inc our source index
-      INC tmp+2            ; inc loop counter
-      LDA tmp+2
-      CMP #13              ; only 10 consumables for battle
-      BCC @ItemFillLoop
-
-    CPX #0                 ; if the dest index is still zero, the player has no items
-    BNE @StartDrawingItems ;   otherwise (nonzero), start drawing the items they have
-
-    ; no items, so no further work to be done... just exit with C set
-      SEC
-      RTS
-
-  @StartDrawingItems:
-    LDA #0
-    STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
-    STA tmp+3          ; also reset the cursor to 0 (which will be used as a loop counter below)
-    STA tmp+2          ; now letter position counter
-    
-    LDA #BANK_MENUS    ; set the return bank to BANK_MENUS.
-    STA ret_bank       ;   this is required for DrawComplexString (called below)
-    LDA #BANK_ITEMS    ; swap to BANK_ITEMS (bank containing item names)
-    JSR SwapPRG_L
-    
-  @DrawItemLoop:
-    LDX tmp+3          ; get current loop counter and put it in X
-    LDA item_box, X    ; index the item box to see what item name we're to draw
-    BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
-
-    ASL A              ; otherwise double the item ID
-    TAX                ;  and put it in X to index (will be used to index the string pointer table)
-
-    LDA lut_ItemNamePtrTbl, X   ; get the pointer to this item name
-    STA tmp                     ;  and put it in (tmp)
-    LDA lut_ItemNamePtrTbl+1, X
-    STA tmp+1
-    
-    TXA
-    PHA
-    
-    LDX tmp+2
-    LDY #0
-
-   @CopyLoop:
-      LDA (tmp), Y         ; copy each character
-      BEQ :+               ; stop at null terminator--don't copy it - X should be in the 9th slot for consumables now
-      STA bigstr_buf, X    ; and put in bigstr_buf
-      INX 
-      INY 
-      JMP @CopyLoop
-      
-  : STX tmp+2               ; backup letter postion counter
-    PLA                     ; put X back in A and right-shift it
-    LSR A                   ; this restores the unedited item ID number
-    TAX                     ; put item ID in X
-    LDA items, X            ; use it to index inventory to see how many of this item we have
-    STA tmp                 ;  put the qty in tmp
-    
-    LDA #BANK_MENUS
-    JSR SwapPRG_L           ; also swap to BANK_MENUS (for PrintNumber routines)
-    JSR PrintNumber_2Digit  ; print the 2 digit number
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-
-    LDX tmp+2               ; restore letter position counter
-    INX                     ; increase X to 10th slot
-    LDA format_buf-2        ; copy the printed 2 digit number from the format buffer
-    STA bigstr_buf, X         
-    INX                     ; increase X to the 11th slot
-    LDA format_buf-1
-    STA bigstr_buf, X       ; consumables will only appear on page 1
-    INX
-    LDA #01
-    STA bigstr_buf, X
-    INX    
-    STX tmp+2
-    INC tmp+3
-    JMP @DrawItemLoop
-   
-  @Exit:  
-    LDA #$0C
-    STA ret_bank ; for DrawComplexString later
-    JSR SwapPRG_L
-  
-    CLC    ; C clear on exit indicates there was at least 1 item in inventory
-    RTS
+;;DrawItemBox_L:
+;;DrawItemBox:
+;;    LDY #$05
+;;    : LDA lut_CombatItemBox-1, Y       ; load the specs for the Item box
+;;      STA btl_msgdraw_hdr-1, Y          ; -1 because Y is 1-based
+;;      DEY
+;;      BNE :-
+;;    JSR BattleDraw_AddBlockToBuffer     ; add the box to the block buffer
+;;    
+;;    JSR DrawBlockBuffer 
+;;    
+;;FillItemBox_BankC:   ;; JIGS - just enough changes from the menu version to make 
+;;     ;; it difficult to copy-paste segments and have each routine JSR to them...
+;;
+;;    LDX #$80
+;;    LDA #$FF
+;;   @FillBlanks:
+;;     STA bigstr_buf, X
+;;     DEX
+;;     CPX #$10
+;;     BCS @FillBlanks ; fill the first 10 bytes of item_box too
+;;     STA item_box, X
+;;     CPX #0
+;;     BNE @FillBlanks
+;;
+;;    STX tmp+2        ; loop counter
+;;    LDY #1           ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
+;;
+;;  @ItemFillLoop:
+;;      LDA items, Y       ; check our item qty
+;;      BEQ @IncSrc        ; if it's nonzero...
+;;        TYA              ;  put this item ID in A
+;;        CMP #TENT
+;;        BEQ @IncSrc
+;;        CMP #CABIN
+;;        BEQ @IncSrc
+;;        CMP #HOUSE
+;;        BEQ @IncSrc      ; skip these 3 items
+;;        
+;;        STA item_box, X  ;  and write it to the item box buffer
+;;        INX              ;  inc our dest index
+;;
+;;    @IncSrc:
+;;      INY                  ; inc our source index
+;;      INC tmp+2            ; inc loop counter
+;;      LDA tmp+2
+;;      CMP #13              ; only 10 consumables for battle
+;;      BCC @ItemFillLoop
+;;
+;;    CPX #0                 ; if the dest index is still zero, the player has no items
+;;    BNE @StartDrawingItems ;   otherwise (nonzero), start drawing the items they have
+;;
+;;    ; no items, so no further work to be done... just exit with C set
+;;      SEC
+;;      RTS
+;;
+;;  @StartDrawingItems:
+;;    LDA #0
+;;    STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
+;;    STA tmp+3          ; also reset the cursor to 0 (which will be used as a loop counter below)
+;;    STA tmp+2          ; now letter position counter
+;;    
+;;    LDA #BANK_MENUS    ; set the return bank to BANK_MENUS.
+;;    STA ret_bank       ;   this is required for DrawComplexString (called below)
+;;    LDA #BANK_ITEMS    ; swap to BANK_ITEMS (bank containing item names)
+;;    JSR SwapPRG_L
+;;    
+;;  @DrawItemLoop:
+;;    LDX tmp+3          ; get current loop counter and put it in X
+;;    LDA item_box, X    ; index the item box to see what item name we're to draw
+;;    BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
+;;
+;;    ASL A              ; otherwise double the item ID
+;;    TAX                ;  and put it in X to index (will be used to index the string pointer table)
+;;
+;;    LDA lut_ItemNamePtrTbl, X   ; get the pointer to this item name
+;;    STA tmp                     ;  and put it in (tmp)
+;;    LDA lut_ItemNamePtrTbl+1, X
+;;    STA tmp+1
+;;    
+;;    TXA
+;;    PHA
+;;    
+;;    LDX tmp+2
+;;    LDY #0
+;;
+;;   @CopyLoop:
+;;      LDA (tmp), Y         ; copy each character
+;;      BEQ :+               ; stop at null terminator--don't copy it - X should be in the 9th slot for consumables now
+;;      STA bigstr_buf, X    ; and put in bigstr_buf
+;;      INX 
+;;      INY 
+;;      JMP @CopyLoop
+;;      
+;;  : STX tmp+2               ; backup letter postion counter
+;;    PLA                     ; put X back in A and right-shift it
+;;    LSR A                   ; this restores the unedited item ID number
+;;    TAX                     ; put item ID in X
+;;    LDA items, X            ; use it to index inventory to see how many of this item we have
+;;    STA tmp                 ;  put the qty in tmp
+;;    
+;;    LDA #BANK_MENUS
+;;    JSR SwapPRG_L           ; also swap to BANK_MENUS (for PrintNumber routines)
+;;    JSR PrintNumber_2Digit  ; print the 2 digit number
+;;    LDA #BANK_ITEMS
+;;    JSR SwapPRG_L
+;;
+;;    LDX tmp+2               ; restore letter position counter
+;;    INX                     ; increase X to 10th slot
+;;    LDA format_buf-2        ; copy the printed 2 digit number from the format buffer
+;;    STA bigstr_buf, X         
+;;    INX                     ; increase X to the 11th slot
+;;    LDA format_buf-1
+;;    STA bigstr_buf, X       ; consumables will only appear on page 1
+;;    INX
+;;    LDA #01
+;;    STA bigstr_buf, X
+;;    INX    
+;;    STX tmp+2
+;;    INC tmp+3
+;;    JMP @DrawItemLoop
+;;   
+;;  @Exit:  
+;;    LDA #$0C
+;;    STA ret_bank ; for DrawComplexString later
+;;    JSR SwapPRG_L
+;;  
+;;    CLC    ; C clear on exit indicates there was at least 1 item in inventory
+;;    RTS
     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13532,30 +13437,30 @@ FillItemBox_BankC:   ;; JIGS - just enough changes from the menu version to make
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawBattleString:
-    LDX btl_msgdraw_x
-    LDY btl_msgdraw_y
-    JSR GetBattleMessagePtr
-    STX BattleTmpPointer      ; store target pointer in temp ram
-    STY BattleTmpPointer+1
-    
-    LDX btl_msgdraw_srcptr
-    LDY btl_msgdraw_srcptr+1
-    JSR FormatBattleString  ; draw the battle string to the output buffer
-    
-  @StartBottomLoop:         ; move 'bottom bytes'
-    LDY #$20
-    LDX #$00
-  @BottomLoop:
-      LDA btl_stringoutputbuf+1, X
-      BEQ @Exit
-      STA (BattleTmpPointer), Y
-      INY
-      INX
-      JMP @BottomLoop
-    
-  @Exit:
-    RTS
+;;DrawBattleString:
+;;    LDX btl_msgdraw_x
+;;    LDY btl_msgdraw_y
+;;    JSR GetBattleMessagePtr
+;;    STX BattleTmpPointer      ; store target pointer in temp ram
+;;    STY BattleTmpPointer+1
+;;    
+;;    LDX btl_msgdraw_srcptr
+;;    LDY btl_msgdraw_srcptr+1
+;;    JSR FormatBattleString  ; draw the battle string to the output buffer
+;;    
+;;  @StartBottomLoop:         ; move 'bottom bytes'
+;;    LDY #$20
+;;    LDX #$00
+;;  @BottomLoop:
+;;      LDA btl_stringoutputbuf+1, X
+;;      BEQ @Exit
+;;      STA (BattleTmpPointer), Y
+;;      INY
+;;      INX
+;;      JMP @BottomLoop
+;;    
+;;  @Exit:
+;;    RTS
 
 
  
@@ -13566,111 +13471,111 @@ DrawBattleString:
 ;;
 ;;  These are all the boxes that pop up during combat to show attackers/damage/etc
 
-lut_CombatBoxes:
-  .BYTE $00, $00, $00, $0D, $03,    $01, $01, $00       ; 0 attacker name
-  .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 attack
-  .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
-  .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 damage
-  .BYTE $00, $00, $06, $20, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
-  
-  .BYTE $00, $00, $00, $10, $09,    $FF, $00, $00       ; 5 Ready? box
-  .BYTE $00, $00, $03, $20, $06,    $FF, $00, $00       ; 6 Scan box
-  
-  lut_CombatEtherBox:                                   ; 7 Ether/MP box
-;       hdr    X    Y   wd   ht 
-  .BYTE $00, $00, $00, $11, $09,    $FF, $00, $00       ; MP list 
-  
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;lut_CombatBoxes:
+;;  .BYTE $00, $00, $00, $0D, $03,    $01, $01, $00       ; 0 attacker name
+;;  .BYTE $00, $0D, $00, $0D, $03,    $01, $0E, $00       ; 1 attack
+;;  .BYTE $00, $00, $03, $0D, $03,    $01, $01, $03       ; 2 defender name
+;;  .BYTE $00, $0D, $03, $0D, $03,    $01, $0E, $03       ; 3 damage
+;;  .BYTE $00, $00, $06, $20, $03,    $01, $01, $06       ; 4 bottom message ("Terminated", "Critical Hit", etc)
+;;  
+;;  .BYTE $00, $00, $00, $10, $09,    $FF, $00, $00       ; 5 Ready? box
+;;  .BYTE $00, $00, $03, $20, $06,    $FF, $00, $00       ; 6 Scan box
+;;  
+;;  lut_CombatEtherBox:                                   ; 7 Ether/MP box
+;;;       hdr    X    Y   wd   ht 
+;;  .BYTE $00, $00, $00, $11, $09,    $FF, $00, $00       ; MP list 
+;;  
+;;  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;
+;;;;  Combat Item/Magic Box lut    [$FA11 :: 0x3FA21]
+;;;;
+;;;;      The box that pops up for the ITEM and MAGIC menus
 ;;
-;;  Combat Item/Magic Box lut    [$FA11 :: 0x3FA21]
+;;lut_CombatItemMagicBox:
+;;;       hdr    X    Y   wd   ht 
+;;  .BYTE $00, $00, $00, $20, $09 ; magic
+;; 
+;;lut_CombatEquipmentBox:
+;;  .BYTE $00, $00, $00, $17, $09 ; weapons / armor
 ;;
-;;      The box that pops up for the ITEM and MAGIC menus
-
-lut_CombatItemMagicBox:
-;       hdr    X    Y   wd   ht 
-  .BYTE $00, $00, $00, $20, $09 ; magic
- 
-lut_CombatEquipmentBox:
-  .BYTE $00, $00, $00, $17, $09 ; weapons / armor
-
-lut_CombatItemBox:
-  .BYTE $00, $00, $00, $10, $09 ; potions and items
-
-lut_EnemyRosterBox:
-;       hdr   X    Y  width  height
-  .BYTE $00, $00, $00, $0F, $09
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;lut_CombatItemBox:
+;;  .BYTE $00, $00, $00, $10, $09 ; potions and items
 ;;
-;;  Lut for the battle command box  [$FA1B :: 0x3FA2B]
-
-lut_BattleCommandBoxInfo:
-;       hdr   X    Y  width  height
-  .BYTE $00, $00, $00, $10, $09         ; box 
-;       hdr,  X    Y    ptr
-  .BYTE $01, $03, $00, <@Command1, >@Command1   ; text
-  .BYTE $01, $03, $02, <@Command2, >@Command2
-  .BYTE $FF
-  ;.BYTE $01, $03, $04, <@Command3, >@Command3
-  .BYTE $01, $03, $06, <@Command4, >@Command4
-  .BYTE $01, $0A, $00, <@Command5, >@Command5
-  .BYTE $01, $0A, $02, <@Command6, >@Command6 
-  .BYTE $01, $0A, $04, <@Command7, >@Command7 
-  .BYTE $01, $0A, $06, <@Command8, >@Command8 
-  
-  
-  @Command1:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
-  @Command2:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
- ; @Command3:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
-  @Command4:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
-
-  @Command5:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
-  @Command6:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
-  @Command7:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
-  @Command8:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
-  
- ;
-
-lut_CombatSkillBox:
-;       hdr,  X    Y    ptr
-  .BYTE $01, $03, $04, <SkillText_Fighter, >SkillText_Fighter ; 00 Fighter
-  .BYTE $01, $03, $04, <SkillText_Thief,   >SkillText_Thief   ; 01 Thief 
-  .BYTE $01, $03, $04, <SkillText_BBelt,   >SkillText_BBelt   ; 02 Black Belt
-  .BYTE $01, $03, $04, <SkillText_RMage,   >SkillText_RMage   ; 03 Red Mage
-  .BYTE $01, $03, $04, <SkillText_WMage,   >SkillText_WMage   ; 04 White Mage
-  .BYTE $01, $03, $04, <SkillText_BMage,   >SkillText_BMage   ; 05 Black Mage
-; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 06 Knight
-; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 07 Ninja
-; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 08 Master
-; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 09 Red Wizard
-; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 0A White Wizard
-; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 0B Black Wizard
-
-;; This list is halved until needed. GetBattleClass in Bank C will  
-;; subtract 6 from itself if the character's class is over #CLS_KN--knight
-
-SkillText_Fighter:   .BYTE $8C, $B2, $B9, $A8, $B5, $00    ; Cover
-SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
-SkillText_BBelt:     .BYTE $99, $A4, $B5, $B5, $BC, $00    ; Parry
-SkillText_RMage:     .BYTE $9B, $B8, $B1, $AC, $A6, $00    ; Runic
-SkillText_WMage:     .BYTE $99, $B5, $A4, $BC, $00         ; Pray
-SkillText_BMage:     .BYTE $8F, $B2, $A6, $B8, $B6, $00    ; Focus
-SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; _____
- 
-
-lut_PlayerBoxInfo:
-  .BYTE $00, $0F, $00, $11, $09         ; box 
-;       hdr,  X    Y    ptr
-  .BYTE $01, $10, $00, <@Char1Health, >@Char1Health   ; text
-  .BYTE $01, $10, $02, <@Char2Health, >@Char2Health
-  .BYTE $01, $10, $04, <@Char3Health, >@Char3Health
-  .BYTE $01, $10, $06, <@Char4Health, >@Char4Health
-  
-  @Char1Health:  .BYTE $04, $FF, $13, $00, $05, $7A, $13, $00, $06, $00
-  @Char2Health:  .BYTE $05, $FF, $13, $40, $05, $7A, $13, $40, $06, $00
-  @Char3Health:  .BYTE $06, $FF, $13, $80, $05, $7A, $13, $80, $06, $00
-  @Char4Health:  .BYTE $07, $FF, $13, $C0, $05, $7A, $13, $C0, $06, $00
+;;lut_EnemyRosterBox:
+;;;       hdr   X    Y  width  height
+;;  .BYTE $00, $00, $00, $0F, $09
+;;  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;
+;;;;  Lut for the battle command box  [$FA1B :: 0x3FA2B]
+;;
+;;lut_BattleCommandBoxInfo:
+;;;       hdr   X    Y  width  height
+;;  .BYTE $00, $00, $00, $10, $09         ; box 
+;;;       hdr,  X    Y    ptr
+;;  .BYTE $01, $03, $00, <@Command1, >@Command1   ; text
+;;  .BYTE $01, $03, $02, <@Command2, >@Command2
+;;  .BYTE $FF
+;;  ;.BYTE $01, $03, $04, <@Command3, >@Command3
+;;  .BYTE $01, $03, $06, <@Command4, >@Command4
+;;  .BYTE $01, $0A, $00, <@Command5, >@Command5
+;;  .BYTE $01, $0A, $02, <@Command6, >@Command6 
+;;  .BYTE $01, $0A, $04, <@Command7, >@Command7 
+;;  .BYTE $01, $0A, $06, <@Command8, >@Command8 
+;;  
+;;  
+;;  @Command1:  .BYTE $8F, $AC, $AA, $AB, $B7, $00     ; "Fight"
+;;  @Command2:  .BYTE $96, $A4, $AA, $AC, $A6, $00     ; "Magic"
+;; ; @Command3:  .BYTE $9C, $AE, $AC, $AF, $AF, $00     ; "Skill" 
+;;  @Command4:  .BYTE $90, $A8, $A4, $B5, $D4, $00     ; "Gear(sword)"
+;;
+;;  @Command5:  .BYTE $90, $B8, $A4, $B5, $A7, $00     ; "Guard"
+;;  @Command6:  .BYTE $92, $B7, $A8, $B0, $B6, $00     ; "Items" 
+;;  @Command7:  .BYTE $91, $AC, $A7, $A8, $00          ; "Hide"
+;;  @Command8:  .BYTE $8F, $AF, $A8, $A8, $00          ; "Flee"
+;;  
+;; ;
+;;
+;;lut_CombatSkillBox:
+;;;       hdr,  X    Y    ptr
+;;  .BYTE $01, $03, $04, <SkillText_Fighter, >SkillText_Fighter ; 00 Fighter
+;;  .BYTE $01, $03, $04, <SkillText_Thief,   >SkillText_Thief   ; 01 Thief 
+;;  .BYTE $01, $03, $04, <SkillText_BBelt,   >SkillText_BBelt   ; 02 Black Belt
+;;  .BYTE $01, $03, $04, <SkillText_RMage,   >SkillText_RMage   ; 03 Red Mage
+;;  .BYTE $01, $03, $04, <SkillText_WMage,   >SkillText_WMage   ; 04 White Mage
+;;  .BYTE $01, $03, $04, <SkillText_BMage,   >SkillText_BMage   ; 05 Black Mage
+;;; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 06 Knight
+;;; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 07 Ninja
+;;; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 08 Master
+;;; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 09 Red Wizard
+;;; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 0A White Wizard
+;;; .BYTE $01, $03, $04, <SkillText_Blank, >SkillText_Blank     ; 0B Black Wizard
+;;
+;;;; This list is halved until needed. GetBattleClass in Bank C will  
+;;;; subtract 6 from itself if the character's class is over #CLS_KN--knight
+;;
+;;SkillText_Fighter:   .BYTE $8C, $B2, $B9, $A8, $B5, $00    ; Cover
+;;SkillText_Thief:     .BYTE $9C, $B7, $A8, $A4, $AF, $00    ; Steal
+;;SkillText_BBelt:     .BYTE $99, $A4, $B5, $B5, $BC, $00    ; Parry
+;;SkillText_RMage:     .BYTE $9B, $B8, $B1, $AC, $A6, $00    ; Runic
+;;SkillText_WMage:     .BYTE $99, $B5, $A4, $BC, $00         ; Pray
+;;SkillText_BMage:     .BYTE $8F, $B2, $A6, $B8, $B6, $00    ; Focus
+;;SkillText_Blank:     .BYTE $FF, $FF, $FF, $FF, $FF, $00    ; _____
+;; 
+;;
+;;lut_PlayerBoxInfo:
+;;  .BYTE $00, $0F, $00, $11, $09         ; box 
+;;;       hdr,  X    Y    ptr
+;;  .BYTE $01, $10, $00, <@Char1Health, >@Char1Health   ; text
+;;  .BYTE $01, $10, $02, <@Char2Health, >@Char2Health
+;;  .BYTE $01, $10, $04, <@Char3Health, >@Char3Health
+;;  .BYTE $01, $10, $06, <@Char4Health, >@Char4Health
+;;  
+;;  @Char1Health:  .BYTE $04, $FF, $13, $00, $05, $7A, $13, $00, $06, $00
+;;  @Char2Health:  .BYTE $05, $FF, $13, $40, $05, $7A, $13, $40, $06, $00
+;;  @Char3Health:  .BYTE $06, $FF, $13, $80, $05, $7A, $13, $80, $06, $00
+;;  @Char4Health:  .BYTE $07, $FF, $13, $C0, $05, $7A, $13, $C0, $06, $00
     
   
   
@@ -13722,14 +13627,7 @@ lut_PlayerBoxInfo:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-FormatBattleString_L:
-FormatBattleString:
-;    LDA #$00
-;    STA ScreenShakeCounter               ;  ????  no idea what this does
-    
-    STX btldraw_src         ; store source pointer
-    STY btldraw_src+1
-    
+FormatBattleString:   
     JSR SwapBtlTmpBytes     ; swap out btltmp bytes to back them up
     
     LDY #$00                ; copy the actual string data to a buffer in RAM
@@ -13744,11 +13642,6 @@ FormatBattleString:
     LDA #>btl_stringbuf
     STA btldraw_src+1
     
-    LDA #<btl_stringoutputbuf   ; Set our output pointer to point to
-    STA btldraw_dst             ;   our string output buffer
-    LDA #>btl_stringoutputbuf
-    STA btldraw_dst+1
-    
     ; Iterate the string and draw each character
   @Loop:
     LDX #$00
@@ -13757,17 +13650,18 @@ FormatBattleString:
     CMP #$48
     BCS :+
       JSR DrawBattleString_ControlCode    ; if <  #$48
-      JMP :++
-:     JSR DrawBattleString_ExpandChar    ; if >= #$48
-
-:   JSR DrawBattle_IncSrcPtr    ; Inc the source pointer and continue looping
+      JMP @IncPtr
+    : JSR DrawBattleString_ExpandChar
+      
+   @IncPtr:
+    JSR DrawBattle_IncSrcPtr    ; Inc the source pointer and continue looping
     JMP @Loop
     
   @Done:
-    LDA #$00
-    LDY #$00
-    INY
-    STA (btldraw_dst), Y
+    ;LDA #$00
+    ;LDY #$00
+    ;INY
+    ;STA (btldraw_dst), Y
     JMP SwapBtlTmpBytes     ; swap back the original btltmp bytes, then exit
 
 
@@ -13831,15 +13725,23 @@ DrawBattleString_ExpandChar:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawBattleString_DrawChar:
-    LDY #$01
+    LDY #$00
     STA (btldraw_dst), Y        ; put bottom part is position [1]
-    ;DEY
-    ;TXA
-    ;STA (btldraw_dst), Y        ; and top part in position [0]
-    ;JMP DrawBattleString_IncDstPtr
     
-    DrawBattleString_IncDstPtr:
-    INC btldraw_dst
+DrawBattleString_IncDstPtr:
+    INC btldraw_width_counter
+    BNE :+
+        JSR SetBtlDrawWidthCounter
+        LDA btldraw_dst
+        SEC                        ; set carry so its always +1 to low byte
+        ADC btldraw_width          ; so we don't have to increment it after 
+        STA btldraw_dst
+        LDA #0
+        ADC btldraw_dst+1
+        STA btldraw_dst+1
+        RTS
+
+  : INC btldraw_dst
     BNE :+
       INC btldraw_dst+1
     : RTS  
@@ -13893,7 +13795,7 @@ DrawBattle_Division:
     
 
 DrawPlayerHP:
-    LDA #0
+    LDA #8
     STA tmp+9 ; DrawPlayerHPCounter
 
     JSR DrawBattle_IncSrcPtr
@@ -13919,11 +13821,9 @@ DrawPlayerHP:
     ;; and after doing this, whatever routines that follow don't wait for VBlank and 
     ;; do music soon enough, resulting in a frame (possibly 2?) of music not updating
     ;; So every time an HP number is converted from hex to decimal,
-    ;; It increases a counter, and when it hits 8, it forces a frame/audio update
+    ;; It decreases the counter from 8, and when it hits 0, it forces a frame/audio update
     
-    INC tmp+9 ; DrawPlayerHPCounter
-    LDA tmp+9 ; DrawPlayerHPCounter
-    CMP #8
+    DEC tmp+9 ; DrawPlayerHPCounter
     BNE :+
     
     JSR WaitForVBlank
@@ -14662,6 +14562,19 @@ OnNMI:
     RTS            ; return to the game
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  BattleWaitForVBlank  [$F4A1 :: 0x3F4B1]
+;;
+;;  Identical to WaitForVBlank, but uses btl_soft2000 instead of the regular soft2000
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BattleWaitForVBlank_L:
+BattleWaitForVBlank:
+    LDA btl_soft2000
+    STA soft2000
+;    JMP WaitForVBlank_L
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -15409,6 +15322,227 @@ UnrollSpell_ConvertToSpellList:
     PLA                     ; and pull back from the stack to continue
     RTS
     
+;;;;;;;;;;;;;;;;
+
+JigsDrawBox_LUT:
+;; width, height, X, Y positions
+;; max width is $20
+;; max height is $09 (Maybe $0A?)
+;; highest Y position possible for a readable box is *6*. 8 breaks things.
+;; highest X position possible for a readable 1-tile-wide box is $1D ?
+
+.byte $0D,$03,$00,$00 ; 0, Attacker Box
+.byte $0D,$03,$0D,$00 ; 1, Attack Box
+.byte $0D,$03,$00,$03 ; 2, Defender Box
+.byte $0D,$03,$0D,$03 ; 3, Damage Box
+.byte $20,$03,$00,$06 ; 4, Message Box
+.byte $11,$09,$0F,$00 ; 5, Character Box
+.byte $0F,$09,$00,$00 ; 6, Command Box
+.byte $0E,$09,$00,$00 ; 7, Roster Box
+.byte $20,$09,$00,$00 ; 8, Magic Box
+.byte $16,$09,$00,$00 ; 9, Gear Box
+.byte $0F,$09,$00,$00 ; A, Item Box
+.byte $10,$09,$00,$00 ; B, Ether Box
+.byte $0F,$09,$00,$00 ; C, Confirm Box
+.byte $00,$00,$00,$00 ; D, Scan Box    - not ready
+.byte $00,$00,$00,$00 ; E, Skill Box   - not ready
+
+JigsDrawBoxAddress_LUT:
+.byte $75,$00 ; 48           ; 0, Attacker Box
+.byte $75,$30 ; 48           ; 1, Attack Box
+.byte $75,$60 ; 48           ; 2, Defender Box
+.byte $75,$90 ; 48           ; 3, Damage Box
+.byte $75,$C0 ; 99            ; 4, Message Box
+.byte $76,$23 ;             ; 5, Character Box
+.byte $76,$CD ;             ; 6, Command Box
+.byte $77,$6D ;             ; 7, Roster Box
+.byte $78,$03 ;             ; 8, Magic Box
+.byte $79,$4D ;             ; 9, Gear Box
+.byte $7A,$33 ;             ; A, Item Box
+.byte $7A,$D3 ;             ; B, Ether Box
+.byte $7B,$70 ;             ; C, Confirm Box
+.byte $7C,$1D ;             ; D, Scan Box    - not ready
+.byte $7C,$1D ;             ; E, Skill Box   - not ready
+
+BoxTiles:
+    .byte $F7,$F8,$F9
+    .byte $FA,$FF,$FB
+    .byte $FC,$FD,$FE
+
+;; in: A = Box ID
+JigsBoxDrawToBuffer:
+    LDA btldraw_box_id
+    ASL A
+    TAX
+    LDA JigsDrawBoxAddress_LUT+4, X
+    STA tmp+1                 ; Load address high
+    LDA JigsDrawBoxAddress_LUT+5, X
+    STA tmp                   ; Load address low (now accessed with "(tmp), Y")
+    TXA
+    ASL A                     ; X = ID * 4
+    TAX
+    LDA JigsDrawBox_LUT, X
+    STA tmp+6                 ; Width
+    LDA JigsDrawBox_LUT+1, X
+    STA btl_msgbuffer_loopctr ; Height (amount of rows to draw)
+    LDA JigsDrawBox_LUT+2, X
+    STA tmp+4                 ; X pos
+    LDA JigsDrawBox_LUT+3, X  ; Y pos
+    LDX #32
+    JSR MultiplyXA
+    STA tmp+5                 ; new Y position = screen width * original Y position
+    CLC
+    ADC tmp+4                 ; add in X position
+    STA tmp+8                 ; Tmp+8 = X and Y position totals, for use with adding to $2280 to draw to the screen
+    ADC #<btl_msgbuffer       ; and screen buffer start
+    STA BattleTmpPointer2     ; save address low (screen buffer)
+    LDA #0
+    ADC #>btl_msgbuffer       
+    STA BattleTmpPointer2+1   ; save address high (screen buffer)
+    LDY #0
+
+   @TransferBoxTile:
+    LDA RAMSwap
+    BNE @Undraw
+    
+    LDA (BattleTmpPointer2), Y ; copy screen buffer to backup box
+    LDX #1
+    STX $5113                 ; swap to backup RAM
+    STA (tmp), Y              ; save the screen buffer tile to backup RAM box buffer
+    LDA #0
+    STA $5113                 ; swap to normal RAM
+    LDA (tmp), Y              ; then copy box to draw it to the screen buffer
+    STA (BattleTmpPointer2), Y
+
+   @INC_pointer:
+    INC tmp
+    BNE :+
+        INC tmp+1
+  : INC tmp+2
+    BNE :+
+        INC tmp+3
+
+  : CMP #$F9                ; if the tile just drawn was the right side of a box
+    BEQ @NextRow            ; do the next row
+    CMP #$FB
+    BEQ @NextRow
+    CMP #$FE                ; if it was the bottom right corner, end
+    BNE @TransferBoxTile
+    RTS 
+   
+   @NextRow:   
+    LDA #32                 ; screen width   
+    SEC
+    SBC tmp+6               ; minus width of box
+    CLC
+    ADC tmp+2               ; add it to save address low
+    STA tmp+2
+    LDA #0
+    ADC tmp+3               ; and add in the carry
+    STA tmp+3
+    BNE @TransferBoxTile
+    
+   @Undraw:
+    LDA #1                  ; Get the tile from the backup RAM
+    STA $5113
+    LDA (tmp), Y
+    LDX #0
+    STX $5113               ; swap back to normal RAM
+    STA (BattleTmpPointer2), Y
+    JMP @INC_pointer
+
+   
+    
+JigsBox_Start:
+;; First, clear the list of drawn boxes, and set the count to 0.
+
+    LDA #0
+    STA BattleBoxBufferCount
+
+    LDA #$FF
+    LDX #$0E
+  : STA BattleBoxBufferList, X
+    DEX
+    BPL :-
+
+    LDA #>BattleBoxBuffers
+    STA tmp+2    
+    LDA #<BattleBoxBuffers ; should be #0
+    STA tmp+1               
+    
+    STA tmp
+  : JSR ClearJigsBoxBuffer  ; Loop through all the possible boxes to set them up.
+    INC tmp
+    LDA tmp
+    CMP #$0D                ; only $0C boxes so far
+    BNE :-
+    RTS
+    
+;; This draws a blank box to RAM.    
+    
+ClearJigsBoxBuffer:
+    ASL A
+    ASL A                   ; * 4
+    TAX
+    LDA JigsDrawBox_LUT, X
+    STA box_wd
+    LDA JigsDrawBox_LUT+1, X
+    STA box_ht
+    DEC box_ht
+    DEC box_ht              ; remove 2 from height
+    DEC box_wd              ; and 1 from width
+    LDY #0
+    
+    LDX #$FF                ; so the first INX will set it to 0
+    JSR @DoRow              ; top row
+  : LDX #2                  ; X is the index to the box tiles, so use the middle row by default
+    JSR @DoRow              ; middle rows
+    DEC box_ht              ; decrement the height counter (no need to back it up)
+    BMI @End
+    BNE :-                  ; when the height counter = 0 there's one row left, so don't set X back
+    JMP @DoRow              ; bottom row
+    
+   @DoRow:
+    INX                      
+    LDA box_wd
+    STA tmp+5               ; set width counter
+    JSR @DrawBoxTileToRAM   ; do one tile
+    INX                     ; inc X to get next tile graphic
+    DEC tmp+5               ; decrement the width counter
+  : JSR @DrawBoxTileToRAM   ; loop to do middle tiles
+    DEC tmp+5               ; when the width counter = 0, there's one tile left
+    BNE :-                  ; until then, keep looping
+    INX                     ; get third tile, and flow into doing it
+
+   @DrawBoxTileToRAM:
+    LDA BoxTiles, X         ; get the tile graphic
+    STA (tmp+1), Y          ; draw it to RAM
+    INC tmp+1               ; inc the pointer 
+    BNE @End
+        INC tmp+2           ; and inc the high bit if it wraps
+   @End:
+    RTS
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
 
     
 
@@ -15417,3 +15551,4 @@ UnrollSpell_ConvertToSpellList:
   .WORD OnNMI
   .WORD OnReset
   .WORD OnIRQ     ;IRQ vector points to an infinite loop (IRQs should never occur)
+
