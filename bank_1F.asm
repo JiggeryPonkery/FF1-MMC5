@@ -11840,9 +11840,6 @@ BattleCrossPageJump:
 EnterBattle_L:
 EnterBattle:
 
-    JSR JigsBox_Start ; clear box buffers and draw empty boxes to RAM
-	JSR LoadBattleBGCHRAndPalettes
-
     LDA #BANK_Z               ;; and do pre-emptive battle prep for gear...
     JSR SwapPRG_L
     JSR UnadjustEquipStats
@@ -11895,6 +11892,9 @@ EnterBattle:
     STA menustall             ; disable menu stalling
     JSR Battle_PPUOff         ; turn PPU off
     LDA $2002                 ; reset PPU toggle
+    
+    JSR JigsBox_Start ; clear box buffers and draw empty boxes to RAM
+	JSR LoadBattleBGCHRAndPalettes    
 
     LDX #>$2000
     LDA #<$2000
@@ -12842,10 +12842,10 @@ ClearBattleMessageBuffer:
 DrawCombatBox_L:
 DrawCombatBox:
     STA btldraw_box_id
-    CMP #4
-    BCS :+
-        ;; only box IDs after this have variable messages
-        ;; the rest are preset, so we gotta set up the string they'll be printing
+    CMP #5
+    BCC :+
+        ;; box IDs after this have preset content
+        ;; so we gotta set up the string they'll be printing
     LDX #$02
     LDY #$5D
     ;; for testing, just do the first character's name
@@ -12855,26 +12855,27 @@ DrawCombatBox:
     
     INC BattleBoxBufferCount   ; add this box to the buffer list
     LDX BattleBoxBufferCount    
-    STA BattleBoxBufferList, X ; add this box ID to the list
+    STA BattleBoxBufferList-1, X ; add this box ID to the list
     
     ASL A
     ASL A
     TAX
     LDA JigsDrawBox_LUT, X     ; get box width
     STA btldraw_width
+    ;DEC btldraw_width          ; subtract one
     TXA 
     LSR A                      ; back to *2 
     TAX    
     LDA btldraw_width
+    ;CLC
     SEC                        ; set carry to add +1 
-    ADC JigsDrawBoxAddress_LUT+5, X ; add box address (low)
+    ADC JigsDrawBoxAddress_LUT+1, X ; add box address (low)
     STA btldraw_dst
-    LDA JigsDrawBoxAddress_LUT+4, X ; get box address (high)
+    LDA JigsDrawBoxAddress_LUT, X ; get box address (high)
     ADC #0                     ; add carry
     STA btldraw_dst+1
     
     DEC btldraw_width          ; make width -2 (no box sides)
-    DEC btldraw_width          ; 
     JSR SetBtlDrawWidthCounter ; make sure strings don't write over the box borders
     JSR FormatBattleString     ; decompress the string to the box's innards in RAM
     JSR JigsBoxDrawToBuffer    ; copy the box to the screen buffer
@@ -15337,32 +15338,34 @@ JigsDrawBox_LUT:
 .byte $0D,$03,$0D,$03 ; 3, Damage Box
 .byte $20,$03,$00,$06 ; 4, Message Box
 .byte $11,$09,$0F,$00 ; 5, Character Box
-.byte $0F,$09,$00,$00 ; 6, Command Box
-.byte $0E,$09,$00,$00 ; 7, Roster Box
+.byte $10,$09,$00,$00 ; 6, Command Box
+.byte $0F,$09,$00,$00 ; 7, Roster Box
 .byte $20,$09,$00,$00 ; 8, Magic Box
-.byte $16,$09,$00,$00 ; 9, Gear Box
-.byte $0F,$09,$00,$00 ; A, Item Box
-.byte $10,$09,$00,$00 ; B, Ether Box
-.byte $0F,$09,$00,$00 ; C, Confirm Box
-.byte $00,$00,$00,$00 ; D, Scan Box    - not ready
-.byte $00,$00,$00,$00 ; E, Skill Box   - not ready
+.byte $17,$09,$00,$00 ; 9, Gear Box
+.byte $11,$09,$00,$00 ; A, Ether Box
+.byte $20,$06,$00,$03 ; B, Scan Box
+.byte $10,$09,$00,$00 ; C, Item Box
+.byte $10,$09,$00,$00 ; D, Confirm Box
+.byte $0F,$09,$00,$00 ; E, Skill Box
 
 JigsDrawBoxAddress_LUT:
-.byte $75,$00 ; 48           ; 0, Attacker Box
-.byte $75,$30 ; 48           ; 1, Attack Box
-.byte $75,$60 ; 48           ; 2, Defender Box
-.byte $75,$90 ; 48           ; 3, Damage Box
-.byte $75,$C0 ; 99            ; 4, Message Box
-.byte $76,$23 ;             ; 5, Character Box
-.byte $76,$CD ;             ; 6, Command Box
-.byte $77,$6D ;             ; 7, Roster Box
-.byte $78,$03 ;             ; 8, Magic Box
-.byte $79,$4D ;             ; 9, Gear Box
-.byte $7A,$33 ;             ; A, Item Box
-.byte $7A,$D3 ;             ; B, Ether Box
-.byte $7B,$70 ;             ; C, Confirm Box
-.byte $7C,$1D ;             ; D, Scan Box    - not ready
-.byte $7C,$1D ;             ; E, Skill Box   - not ready
+.byte $75,$00 ; 0, Attacker Box
+.byte $75,$40 ; 1, Attack Box
+.byte $75,$80 ; 2, Defender Box
+.byte $75,$C0 ; 3, Damage Box
+.byte $76,$00 ; 4, Message Box
+.byte $76,$60 ; 5, Character Box
+.byte $77,$00 ; 6, Command Box
+.byte $77,$A0 ; 7, Roster Box
+.byte $78,$40 ; 8, Magic Box
+.byte $79,$60 ; 9, Gear Box
+.byte $7A,$40 ; A, Ether Box  
+.byte $7A,$E0 ; B, Scan Box    
+.byte $77,$00 ; C, Item Box    - shared with Command
+.byte $77,$00 ; D, Confirm Box - shared with Command
+.byte $77,$A0 ; E, Skill Box   - shared with Roster
+;; Spaced them out so its easier to read to make sure things are working. 
+;; See JigsBox_Start for instructions on making a more snug version
 
 BoxTiles:
     .byte $F7,$F8,$F9
@@ -15374,9 +15377,9 @@ JigsBoxDrawToBuffer:
     LDA btldraw_box_id
     ASL A
     TAX
-    LDA JigsDrawBoxAddress_LUT+4, X
+    LDA JigsDrawBoxAddress_LUT, X
     STA tmp+1                 ; Load address high
-    LDA JigsDrawBoxAddress_LUT+5, X
+    LDA JigsDrawBoxAddress_LUT+1, X
     STA tmp                   ; Load address low (now accessed with "(tmp), Y")
     TXA
     ASL A                     ; X = ID * 4
@@ -15396,23 +15399,25 @@ JigsBoxDrawToBuffer:
     STA tmp+8                 ; Tmp+8 = X and Y position totals, for use with adding to $2280 to draw to the screen
     ADC #<btl_msgbuffer       ; and screen buffer start
     STA BattleTmpPointer2     ; save address low (screen buffer)
+    STA tmp+2
     LDA #0
     ADC #>btl_msgbuffer       
     STA BattleTmpPointer2+1   ; save address high (screen buffer)
+    STA tmp+3
     LDY #0
 
    @TransferBoxTile:
     LDA RAMSwap
     BNE @Undraw
-    
-    LDA (BattleTmpPointer2), Y ; copy screen buffer to backup box
+
+    LDA (tmp+2), Y            ; copy screen buffer to backup box
     LDX #1
     STX $5113                 ; swap to backup RAM
     STA (tmp), Y              ; save the screen buffer tile to backup RAM box buffer
     LDA #0
     STA $5113                 ; swap to normal RAM
     LDA (tmp), Y              ; then copy box to draw it to the screen buffer
-    STA (BattleTmpPointer2), Y
+    STA (tmp+2), Y
 
    @INC_pointer:
     INC tmp
@@ -15431,7 +15436,7 @@ JigsBoxDrawToBuffer:
     RTS 
    
    @NextRow:   
-    LDA #32                 ; screen width   
+    LDA #32                 ; screen width
     SEC
     SBC tmp+6               ; minus width of box
     CLC
@@ -15448,29 +15453,29 @@ JigsBoxDrawToBuffer:
     LDA (tmp), Y
     LDX #0
     STX $5113               ; swap back to normal RAM
-    STA (BattleTmpPointer2), Y
+    STA (tmp+2), Y
     JMP @INC_pointer
 
    
     
 JigsBox_Start:
 ;; First, clear the list of drawn boxes, and set the count to 0.
-
-    LDA #0
-    STA BattleBoxBufferCount
-
     LDA #$FF
-    LDX #$0E
-  : STA BattleBoxBufferList, X
+    LDX #$0F
+  : STA BattleBoxBufferList-1, X
     DEX
-    BPL :-
+    BNE :-
 
-    LDA #>BattleBoxBuffers
-    STA tmp+2    
-    LDA #<BattleBoxBuffers ; should be #0
-    STA tmp+1               
+;    LDA #>BattleBoxBuffers
+;    STA tmp+2    
+;    LDA #<BattleBoxBuffers ; should be #0
+;    STA tmp+1               
+;; Enable this and disable the Address_LUT reads to see how the boxes are nudged up beside each other in RAM
     
-    STA tmp
+    STX BattleBoxBufferCount
+    STX tmp
+    
+    TXA                     ; X and tmp are both 0 now
   : JSR ClearJigsBoxBuffer  ; Loop through all the possible boxes to set them up.
     INC tmp
     LDA tmp
@@ -15478,19 +15483,31 @@ JigsBox_Start:
     BNE :-
     RTS
     
-;; This draws a blank box to RAM.    
+;; This draws a blank box to RAM, when A = the box ID
     
 ClearJigsBoxBuffer:
     ASL A
+    
+    ;; vv -- disable this block and enable the one above to make the boxes super snug, then edit the addresses in the lut to match how they're drawn
+    
+    TAX
+    LDA JigsDrawBoxAddress_LUT, X   ; address high byte
+    STA tmp+2
+    LDA JigsDrawBoxAddress_LUT+1, X ; address low byte
+    STA tmp+1
+    TXA
+    
+    ;; ^^ 
+    
     ASL A                   ; * 4
     TAX
     LDA JigsDrawBox_LUT, X
     STA box_wd
     LDA JigsDrawBox_LUT+1, X
+    SEC
+    SBC #2                  ; height - 2
     STA box_ht
-    DEC box_ht
-    DEC box_ht              ; remove 2 from height
-    DEC box_wd              ; and 1 from width
+    DEC box_wd              ; width - 1
     LDY #0
     
     LDX #$FF                ; so the first INX will set it to 0
@@ -15498,9 +15515,7 @@ ClearJigsBoxBuffer:
   : LDX #2                  ; X is the index to the box tiles, so use the middle row by default
     JSR @DoRow              ; middle rows
     DEC box_ht              ; decrement the height counter (no need to back it up)
-    BMI @End
     BNE :-                  ; when the height counter = 0 there's one row left, so don't set X back
-    JMP @DoRow              ; bottom row
     
    @DoRow:
     INX                      
