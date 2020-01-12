@@ -356,6 +356,13 @@ BTLMSG_ABSORBEDSPELL    = $66 ; Absorbed the spell!
 BTLMSG_RUNICFAILED      = $67 ; Overwhelmed by_
 BTLMSG_RUNIC            = $68 ; Runic
 BTLMSG_NOWEAPON         = $69 ; No weapon equipped! 
+BTLMSG_READY            = $6A ; Ready?
+BTLMSG_CHARGE           = $6B ; Charge?!
+BTLMSG_RUNAWAY_QUERY    = $6C ; Run away?
+BTLMSG_YESNO            = $6D ; Yes    No
+BTLMSG_YESNO_EMPH       = $6E ; Yes!   No!
+BTLMSG_YESNO_UNSURE     = $6F ; Yes... No...
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;  Alternative battle message IDs

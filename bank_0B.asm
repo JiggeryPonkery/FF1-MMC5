@@ -1598,12 +1598,12 @@ PrepBattleVarsAndEnterBattle:
     LDA lut_RespondDelay, Y     ; prep respond rate
     STA btl_responddelay
     
-    LDA #<btlbox_blockdata      ; Prepare the block data pointer
-    STA btldraw_blockptrstart
-    STA btldraw_blockptrend
-    LDA #>btlbox_blockdata
-    STA btldraw_blockptrstart+1
-    STA btldraw_blockptrend+1
+   ; LDA #<btlbox_blockdata      ; Prepare the block data pointer
+   ; STA btldraw_blockptrstart
+   ; STA btldraw_blockptrend
+   ; LDA #>btlbox_blockdata
+   ; STA btldraw_blockptrstart+1
+   ; STA btldraw_blockptrend+1
     
     INC ch_level
     INC ch_level+$40

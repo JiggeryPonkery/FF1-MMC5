@@ -728,8 +728,6 @@ lut_ItemNamePtrTbl:
 .word CLASS11      ; DA
 .word CLASS12      ; DB
 
-
-
 lut_WeaponArmorNamePtrTbl:
 .word Weapon1      ; 0  ; Wooden Nunchuck
 .word Weapon2      ; 1  ; Small Knife
@@ -1721,6 +1719,12 @@ data_BattleMessages:
 .word BTL_MESSAGE103
 .word BTL_MESSAGE104
 .word BTL_MESSAGE105
+.word BTL_MESSAGE106
+.word BTL_MESSAGE107
+.word BTL_MESSAGE108
+.word BTL_MESSAGE109
+.word BTL_MESSAGE110
+.word BTL_MESSAGE111
   
 BTL_MESSAGE1:  
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
@@ -1934,6 +1938,19 @@ BTL_MESSAGE104:
 .byte $9B,$B6,$B1,$AC,$B8,$00 ; Runic
 BTL_MESSAGE105:
 .byte $97,$2E,$60,$A4,$B3,$3C,$FF,$A8,$B4,$B8,$AC,$B3,$B3,$40,$C4,$00 ; No weapon equipped!
+BTL_MESSAGE106:
+.byte $FF,$FF,$FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$FF,$FF,$00 ;   Ready? 
+BTL_MESSAGE107:
+.byte $FF,$FF,$FF,$8C,$AB,$A4,$B5,$AA,$A8,$C5,$C4,$FF,$FF,$FF,$FF,$00 ;  Charge?!
+BTL_MESSAGE108:
+.byte $FF,$FF,$FF,$9B,$B8,$B1,$FF,$A4,$BA,$A4,$BC,$C5,$FF,$FF,$FF,$00 ;  Run away?
+BTL_MESSAGE109:
+.byte $FF,$FF,$A2,$A8,$B6,$FF,$FF,$FF,$FF,$97,$B2,$00 ; Yes    No
+BTL_MESSAGE110:
+.byte $FF,$FF,$A2,$A8,$B6,$C4,$FF,$FF,$FF,$97,$B2,$C4,$00 ; Yes!   No!
+BTL_MESSAGE111:
+.byte $FF,$FF,$A2,$A8,$B6,$C3,$C0,$FF,$FF,$97,$B2,$C3,$C0,$00 ; Yes... No...
+
 
 
 

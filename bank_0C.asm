@@ -17,13 +17,8 @@
 .import ClearBattleMessageBuffer_L
 .import ClericCheck
 .import CritCheck
-;.import DrawBattleEquipmentBox_L
-;.import DrawBattleMagicBox_L
 .import DrawCombatBox_L
-;.import DrawCommandBox_L
 .import DrawComplexString
-;.import DrawItemBox_L
-;.import DrawRosterBox_L
 .import EnemyAttackPlayer_PhysicalZ
 .import FormatBattleString
 .import GameStart_L
@@ -37,21 +32,21 @@
 .import RandAX
 .import ShiftSpriteHightoLow
 .import SwapBtlTmpBytes_L
-;.import UndrawNBattleBlocks_L
+.import UndrawNBattleBlocks_L
 .import WaitForVBlank_L
 .import PlayDoorSFX
 .import DrawManaString_ForBattle
-;.import DrawPlayerBox
 .import ShiftLeft6
 .import StealFromEnemyZ
-;.import SkillText_BBelt
+.import SkillText_BBelt
 .import RestoreMapMusic
 .import JIGS_RefreshAttributes
 .import ScanEnemyString
 .import LoadPlayerDefenderStats_ForEnemyAttack
-;.import SkillText_RMage
+.import SkillText_RMage
 .import ShiftLeft4
 .import LoadSprite_Bank04
+.import DrawItemBox_String
 
 BANK_THIS = $0C
 
@@ -709,7 +704,7 @@ FinishBattlePrepAndFadeIn:
     JSR PrintBattleTurnNumber
     JSR DrawCharacterStatus
     LDA #5
-    JSR DrawCombatBox_L
+    JSR DrawCombatBox
     
     JMP Battle_AfterFadeIn
     
@@ -904,8 +899,8 @@ BattleLogicLoop_DoCombat_Surprised:     ; alternative entry point for when the p
 BattleLogicLoop:
     JSR RebuildEnemyRoster          ; Rebuild the roster in case some enemies died/ran away
     LDA #7
-    JSR DrawCombatBox_L             ; Draw the roster box
-    INC btl_boxcount
+    JSR DrawCombatBox             ; Draw the roster box
+    
    @FrameLoop: 
     JSR DoFrame_WithInput        
     BEQ @FrameLoop
@@ -942,11 +937,8 @@ BattleLogicLoop_ReEntry:
     INC btlcmd_curchar       ; set this to 4 so the BacktrackBattleCommand jump table works right!
     
 ReadyToFight:
-    LDA #$0C
+    LDA #$0E
     JSR DrawCombatBox_NoRestore
-    JSR LongCall             ; swap to Bank Z to draw this
-    .word BattleConfirmation
-    .byte BANK_Z
     
     LDA #0
     STA gettingcommand    
@@ -1167,7 +1159,7 @@ InputCharacterBattleCommand:
 
 CancelBattleAction_RedrawCommand:    
     LDA #6
-    JSR DrawCombatBox_L
+    JSR DrawCombatBox
     JSR UpdateSprites_BattleFrame       ; then do a frame with updated battle sprites
 
 InputCharacterBattleCommand2:           ;; JIGS - instead of making them walk around all the time...
@@ -1382,7 +1374,7 @@ BattleSubMenu_Hide:
 SetAutoBattle:
     LDA #0
     STA AutoTargetOption         ; turn on AutoTarget
-    DEC battle_autoswitch
+    INC battle_autoswitch
     JSR SetAutoFirstChar   
     
    @Loop:
@@ -1409,7 +1401,8 @@ SetAutoFirstChar:
     JMP HideCharacter            ;; JIGS - rehide them if previously hidden
 
 SetAutoRun:
-    INC battle_autoswitch
+    LDA #02
+    STA battle_autoswitch
     JSR SetAutoFirstChar   
    
    @Loop:
@@ -1497,7 +1490,7 @@ BattleSubMenu_Magic_NoUndraw:
     JSR MultiplyXA
     STA tmp
     
-    LDA DrawBattleMagicBox_toporbottom ; first 12 spells or second 12 spells, (0 or 1)
+   ; LDA DrawBattleMagicBox_toporbottom ; first 12 spells or second 12 spells, (0 or 1)
     BEQ :+
     
     LDA #4         ; if its 1, put 4 in tmp+1
@@ -1664,11 +1657,11 @@ BattleSubMenu_Item:
       JMP CancelBattleAction_RedrawCommand
     
 BattleSubMenu_Item_NoUndraw:
-    INC btl_boxcount
-    LDA #$0A
-    JSR DrawCombatBox_L          ; otherwise (have at least 1 potion), draw the Item box
+    JSR DrawItemBox_String     ; set up the item box string
+
+    LDA #$0D
+    JSR DrawCombatBox          ; otherwise (have at least 1 potion), draw the Item box
   
-    ;LDA #5
     JSR MenuSelection_Item     ; get menu selection from the player  
     JSR UndrawOneBox
     CMP #$02
@@ -1809,8 +1802,7 @@ BattleSubMenu_Equipment:
       JMP CancelBattleAction_RedrawCommand
   
   : LDA #9
-    JSR DrawCombatBox_L    ; Draw the item box
-    INC btl_boxcount
+    JSR DrawCombatBox    ; Draw the item box
     JSR MenuSelection_Equipment     ; and run the logic for selecting an item
     
     JSR UndrawOneBox
@@ -1918,8 +1910,8 @@ EnterBattlePrepareSprites:
     STA btl_drawflagsB
     STA btl_drawflagsC              ;; JIGS - adding this
     STA Hidden
-    STA btl_msgdraw_blockcount  ; clear the block count (important for undrawing in fixed bank code)
-    STA btl_boxcount               
+   ; STA btl_msgdraw_blockcount  ; clear the block count (important for undrawing in fixed bank code)
+    STA BattleBoxBufferCount       
     STA btlattackspr_nodraw              
     
     JSR BattleClearOAM      ; clear shadow OAM
@@ -2730,8 +2722,7 @@ SelectEnemyTarget:
         RTS
     
  :  LDA #7
-    JSR DrawCombatBox_L         ; and show enemy names instead
-    INC btl_boxcount
+    JSR DrawCombatBox         ; and show enemy names instead
     
     LDA #$00                    ; initialize/clear the cursor position
     STA btlcurs
@@ -3064,17 +3055,17 @@ MenuSelection_Item:
 
     LDA #01
     STA menustall
-    STA bigstr_buf+11, X
-    STA bigstr_buf+23, X
-    STA bigstr_buf+35, X ; Items are spaced 13 bytes apart, so put the line break on the first three 
+    STA item_box+11, X
+    STA item_box+23, X
+    STA item_box+35, X ; Items are spaced 13 bytes apart, so put the line break on the first three 
     LDA #0 
-    STA bigstr_buf+47, X ; and the null terminator on the fourth, every time the list is moved
+    STA item_box+47, X ; and the null terminator on the fourth, every time the list is moved
 
-    LDA #<(bigstr_buf)
+    LDA #<(item_box)
     CLC
     ADC tmp             ; add the list offset
     STA text_ptr
-    LDA #>(bigstr_buf)
+    LDA #>(item_box)
     ADC #0
     STA text_ptr+1
     
@@ -3204,11 +3195,10 @@ SharedMenuCode_A:
 
 MenuSelection_Magic:
     LDA #$00
-    STA DrawBattleMagicBox_toporbottom     ; set page number to 0 (draw top page of magic box)
+    STA item_pageswap     ; set page number to 0 (draw top page of magic box)
     
     LDA #8
-    JSR DrawCombatBox_L    ; draw it!
-    INC btl_boxcount
+    JSR DrawCombatBox    ; draw it!
     
 @MenuSelection:
     LDA #$00
@@ -3297,14 +3287,14 @@ MenuSelection_Magic:
     AND #$03
     CMP #$03                    ; see if it's at the bottom of the page
     BNE @NormalMove_Down        ; if not, do a normal move
-    LDA DrawBattleMagicBox_toporbottom                   ; otherwise, check the page
+    LDA item_pageswap                   ; otherwise, check the page
     BEQ :+
       RTS                       ; page 1 = do nothing
-  : INC DrawBattleMagicBox_toporbottom                   ; page 0 = inc to page 1
+  : INC item_pageswap                   ; page 0 = inc to page 1
     JSR UndrawOneBox
     LDA #8
-    JSR DrawCombatBox_L    ; draw the page 1 magic box
-    INC btl_boxcount
+    JSR DrawCombatBox    ; draw the page 1 magic box
+    
   @NormalMove_Down:
     INC btlcurs_y
     RTS
@@ -3313,15 +3303,15 @@ MenuSelection_Magic:
     LDA btlcurs_y
     AND #$03                    ; top row of page?
     BNE @NormalMove_Up          ; no?  then normal move
-    LDA DrawBattleMagicBox_toporbottom                   ; yes?  check page
+    LDA item_pageswap                   ; yes?  check page
     CMP #$01
     BEQ :+
       RTS                       ; page 0?  exit
-  : DEC DrawBattleMagicBox_toporbottom                   ; page 1?  move to page 0, and redraw it
+  : DEC item_pageswap                   ; page 1?  move to page 0, and redraw it
     JSR UndrawOneBox
     LDA #8
-    JSR DrawCombatBox_L
-    INC btl_boxcount
+    JSR DrawCombatBox
+
   @NormalMove_Up:
     DEC btlcurs_y
     RTS
@@ -3765,7 +3755,7 @@ PlayFanfareAndCheer:
     ;; but this seems to do the trick?
 
     JSR ClearCharBuffers        ; unhides characters, turns off guard, regen, etc
-    INC btl_boxcount
+    ;INC BattleBoxBufferCount
     JSR UndrawOneBox            ; undraw the player name and HP box
 
     LDA #$53                    ; play fanfare music
@@ -4487,10 +4477,9 @@ UndrawOneBox_NoSave:
     
 UndrawBoxes: 
    STA tmp   
-   LDA btl_boxcount
+   LDA BattleBoxBufferCount
    SEC
    SBC tmp
-   STA btl_boxcount
    BPL :+
      LDA #BTLMSG_TERMINATED
      JSR DrawMessageBox
@@ -4499,7 +4488,7 @@ UndrawBoxes:
      JMP @Loop
    
  : LDA tmp
-;   JSR UndrawNBattleBlocks_L
+   JSR UndrawNBattleBlocks_L
    ;JSR RespondDelay
    JMP RestoreAXY
    
@@ -4508,7 +4497,7 @@ UndrawAllButTwoBoxes:
    ;JSR RespondDelay
   @Loop:
     JSR UndrawOneBox_NoSave
-    LDA btl_boxcount
+    LDA BattleBoxBufferCount
     CMP #$02
     BNE @Loop
     BEQ RestoreAXY
@@ -4516,10 +4505,10 @@ UndrawAllButTwoBoxes:
 UndrawAllKnownBoxes:
    JSR SaveAXY
 UndrawAllKnownBoxes_NoSave:
-   LDA btl_boxcount
-;   JSR UndrawNBattleBlocks_L
+   LDA BattleBoxBufferCount
+   JSR UndrawNBattleBlocks_L
    LDA #0
-   STA btl_boxcount
+   STA BattleBoxBufferCount
    ;JSR RespondDelay
     
 RestoreAXY:
@@ -4540,24 +4529,24 @@ DrawCharacterNameAttackerBox:
     
 DrawAttackerBox:
     JSR SaveAXY
-    LDA btl_boxcount            ; only draw the attacker name 
+    LDA BattleBoxBufferCount    ; only draw the attacker name 
     BNE RestoreAXY              ; if there are no boxes already drawn
     LDA #$02                    ; $02 is the code for the attacker
-    STA btltmp_attackerbuffer   ; put that in buffer to hold attacker name
+    STA btl_unfmtcbtbox_buffer  ; put that in buffer to hold attacker name
     LDA #0
-    STA btltmp_attackerbuffer+1 ; always makes sure this is 0
-    LDX #<btltmp_attackerbuffer ; set XY to point to that buffer
-    LDY #>btltmp_attackerbuffer
+    STA btl_unfmtcbtbox_buffer+1 ; always makes sure this is 0
+    LDX #<btl_unfmtcbtbox_buffer ; set XY to point to that buffer
+    LDY #>btl_unfmtcbtbox_buffer
     JMP DrawCombatBox
 
 DrawDefenderBox:
     JSR SaveAXY
     LDA #$03                            ; 03 = defender format code
-    STA btltmp_altmsgbuffer + 9
+    STA btl_unfmtcbtbox_buffer + 9
     LDA #0
-    STA btltmp_attackerbuffer+1         ; always makes sure this is 0
-    LDX #<(btltmp_altmsgbuffer + 9)
-    LDY #>(btltmp_altmsgbuffer + 9)
+    STA btl_unfmtcbtbox_buffer+1         ; always makes sure this is 0
+    LDX #<(btl_unfmtcbtbox_buffer + 9)
+    LDY #>(btl_unfmtcbtbox_buffer + 9)
     LDA #$02                            ; then print defender combat box
     JMP DrawCombatBox
 
@@ -4611,12 +4600,12 @@ DrawAttackBox:
     LDA #$0F
 
   @Print:
-    STA btl_attackbox_itemid
-    STX btl_attackbox_itemid+1     
+    STA btl_unfmtcbtbox_buffer
+    STX btl_unfmtcbtbox_buffer+1     
     LDA #0
-    STA btl_attackbox_itemid+2       
-    LDX #<btl_attackbox_itemid
-    LDY #>btl_attackbox_itemid      ; get pointer to that string in YX
+    STA btl_unfmtcbtbox_buffer+2       
+    LDX #<btl_unfmtcbtbox_buffer
+    LDY #>btl_unfmtcbtbox_buffer      ; get pointer to that string in YX
 
     LDA ActiveRunic
     BEQ :+
@@ -4646,13 +4635,13 @@ DrawDamageBox:
     LDY #$00
   @Loop:
       LDA @Data, Y      ; copy unformatted text to output buffer
-      STA btltmp_damageblockbuffer, Y
+      STA btl_unfmtcbtbox_buffer, Y
       INY
       DEX
       BNE @Loop
       
-    LDX #<btltmp_damageblockbuffer  ; YX is a a pointer to our text buffer in RAM
-    LDY #>btltmp_damageblockbuffer
+    LDX #<btl_unfmtcbtbox_buffer  ; YX is a a pointer to our text buffer in RAM
+    LDY #>btl_unfmtcbtbox_buffer
     LDA #$03                        ; combat box ID 3
     JSR DrawCombatBox
     JMP RespondDelay
@@ -4731,8 +4720,7 @@ MessageRTS:
     RTS
 
 DrawCombatBox:
-    INC btl_boxcount
-    JSR DrawCombatBox_L    
+    JSR DrawCombatBox_L
     JMP RestoreAXY
 
 ;; input: A = box ID to draw    
@@ -4742,13 +4730,11 @@ DrawMessageBox_Prebuilt:        ; for more complicated messages... assumes that 
     LDY BattleTmpPointer2+1
     
 DrawCombatBox_NoRestore:   
-    INC btl_boxcount
-    JMP DrawCombatBox_L        
+    JMP DrawCombatBox        
 
 DrawCommandBox:
-    INC btl_boxcount
     LDA #6
-    JMP DrawCombatBox_L
+    JMP DrawCombatBox
 
     
     
@@ -4803,9 +4789,9 @@ ClearAltMessageBuffer:
     PHA
     LDX #0 ; #$04            ; index starts at 4
     LDA #$00
-    ; STA btl_boxcount
-    : ;STA btltmp_altmsgbuffer-5, X  ; but -5?  (also clears explode_count)
-      STA btltmp_altmsgbuffer, X
+    ; STA BattleBoxBufferCount
+    : ;STA btl_unfmtcbtbox_buffer-5, X  ; but -5?  (also clears explode_count)
+      STA btl_unfmtcbtbox_buffer, X
       INX
       CPX #$20
       BNE :-
@@ -4990,7 +4976,7 @@ DoBattleRound:
       BNE :-
     ; at this point, Y=0
     
-    STY btl_boxcount                ; clear the battle box counter
+  ;  STY btl_boxcount                ; clear the battle box counter
     STY btl_result                  ; Zero the battle result to indicate we should keep looping)
 
     ; Shuffle the turn order.  This is done by looping 16 times, each time
@@ -5130,9 +5116,9 @@ DoBattleRound:
   
   : JSR Battle_DoTurn                       ; do their turn
   : LDA #5
-    JSR DrawCombatBox_L                       ; draw the player box overtop the current player box
+    JSR DrawCombatBox                       ; draw the player box overtop the current player box
     JSR DrawCharacterStatus                 ; update character on-screen stats
-    INC btl_boxcount
+    ;INC BattleBoxBufferCount
     JSR UndrawOneBox                        ; then undraw it; effectively updates HP
     JSR BattleTurnEnd_CheckForBattleEnd     ; wrap up / see if battle is over (will double-RTS if battle is over)
     LDA btl_retaliate
@@ -5503,9 +5489,9 @@ ApplyPoisonToPlayer:
 DrawPoisonAsAttack:                 ; Who is getting poisoned
     JSR DrawAttackerBox
     LDA #$0F
-    STA btltmp_altmsgbuffer + 9
+    STA btl_unfmtcbtbox_buffer + 9
     LDA #BTLMSG_POISONED            ; the message for poison
-    STA btltmp_altmsgbuffer + 10
+    STA btl_unfmtcbtbox_buffer + 10
     LDA #02
     JSR DrawMessageBox_Prebuilt
 	JMP DrawDamageBox               ; print damage    
@@ -9409,7 +9395,7 @@ DoRunic_OK:
     STA btl_unfmtcbtbox_buffer+$40
     LDA #BTLMSG_RUNICFAILED
     STA btl_unfmtcbtbox_buffer+$41
-    LDA btltmp_attackerbuffer         ; print "Overwhelmed by [enemy name]"
+  ;  LDA btltmp attackerbuffer         ; print "Overwhelmed by [enemy name]"
     STA btl_unfmtcbtbox_buffer+$42
     LDA #0
     STA btl_unfmtcbtbox_buffer+$43

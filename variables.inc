@@ -57,14 +57,14 @@ item_x_heal     = items + $02
 item_ether      = items + $03
 item_elixir     = items + $04
 item_pure       = items + $05
-item_clock       = items + $06
+item_clock      = items + $06
 item_down       = items + $07
 item_tent       = items + $08
 item_cabin      = items + $09
 item_house      = items + $0A
 item_eyedrops   = items + $0B
 item_smokebomb  = items + $0C
-item_alarm       = items + $0D
+item_alarm      = items + $0D
 item_unknown1   = items + $0E
 item_unknown2   = items + $0F
 item_qty_stop   = items + $10
@@ -649,9 +649,8 @@ bigstr_buf        = $6300 ; 128 bytes
 SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
 
 puzzle           = $6400  ; used in minigame
-str_buf          = $6400  ; $39 bytes at least -- buffer must not cross page
+str_buf          = $6400  ; buffer must not cross page
 item_box         = $6400  ; used in shops
-btl_screenbackup = $6400  ; used in battle
 
 
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
@@ -849,51 +848,14 @@ btl_formdata        = $6230 ; $10 bytes (formation data as appears in ROM)
     btlform_norun   = btlform_enplt     ; no run flag (in low bit)
     btlform_enqtyB  = btl_formdata+$E   ; enemy quantities for B formation (2 bytes)    
    
-    
-;; $6300 is used by bigstr_buf, which prints the "Ready now?" box and maybe something else
-;; $6400 is used by the Item option
-btl_enemyIDs               = $6400  ; 9 entries of enemy IDs
-btl_enemyroster            = $6409  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
-btl_enemyamount            = $640E  ; JIGS - tmp byte for number of enemies, for battle printing
-btl_stringoutputbuf        = $6410  ; output buffer where decoded strings are printed
-btl_unfmtcbtbox_buffer     = $6440  ; $6AFA  ; $80 bytes total, $10 bytes for each combat box.
-                                    ; houses the unformatted text for each combat box.
-                                    ; Additional bytes are used for other areas
+btl_enemyIDs               = $6240  ; 9 entries of enemy IDs
+btl_enemyroster            = $6249  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
+btl_enemyamount            = $624E  ; temp byte for number of enemies, for battle printing
+btl_unfmtcbtbox_buffer     = $6250  ; 
 
+btl_stringbuf              = $6300  ; holds the string to draw to a battle box.
+btl_msgbuffer              = $6500  ; $120 bytes ($09 rows * $20 bytes per row) - holds all on-screen battle message tiles
 
-btl_msgbuffer   = $6500  ; $120 bytes ($09 rows * $20 bytes per row)
-                         ; this buffer contains on-screen tiles to be drawn to ppu$2240
-                         ; $20 more are read 
-
-btl_msgdraw_hdr         = $6640
-btl_msgdraw_x           = $6641
-btl_msgdraw_y           = $6642
-btl_msgdraw_width       = $6643
-btl_msgdraw_height      = $6644
-btl_msgdraw_srcptr      = $6643  ; shared -- needs to match btl_msgdraw_width?
-;                                ; $0544    above +1
-btl_msgdraw_blockcount         = $6645 ; the number of blocks drawn
-btl_msgdraw_blockcount_backup  = $6646
-btl_boxcount                   = $6647 ; the number of combat boxes that have been drawn
-DrawBattleMagicBox_loopctr     = $6649
-UndrawNBattleBlocks_loopctr    = $664A
-btl_drawbox_loopctr            = $664B
-btl_msgbuffer_loopctr          = $664C
-EOBCombatBox_tmp               = $664D
-btl_tmp_drawcombatbox1         = $664E
-btl_tmp_drawcombatbox2         = $664F
-DrawBattleMagicBox_toporbottom = $6650
-btltmp_boxleft                 = $6651
-btltmp_boxcenter               = $6652
-btltmp_boxright                = $6653
-btltmp_attackerbuffer          = $6654  ; 2 bytes, second byte always 0 
-btltmp_altmsgbuffer            = $6660  ; $20 bytes read
-btltmp_damageblockbuffer       = $6680  ; 6 bytes used, but $20 are read?
-btl_stringbuf                  = $66A0  ; $21 byte buffer to contain string data for printing (reads $21st byte, but doesn't use?)
-btl_attackbox_itemid           = $66C0  ; 3 bytes, third byte is always 0 to terminate string
-btlbox_blockdata               = $6700  ; at least #91 bytes (Gear option is the biggest so far)
-
-theend_drawbuf                 = $6800     ; $700 bytes!
 
 
 
@@ -964,6 +926,23 @@ btlcurs_positions       = $69A0 ; $18 bytes, 2 bytes per entry, each entry is th
 btltmp_backseat         = $69F0 ; $10 byte buffer -- backup of btltmp
 
 
+lut_MagicData   = $7000  ; $400 bytes
+lut_EnemyAi     = $7400  ; $90 bytes
+
+;Sizes of the battle message boxes in RAM
+BattleBoxBuffers     = $7500
+BattleBoxBufferList  = $7FF0
+UndrawNBattleBlocks_loopctr = $7FFB
+btl_boxcount          = $7FFC
+EOBCombatBox_tmp      = $7FFD
+btl_msgbuffer_loopctr = $7FFE ; how many rows to transfer from the buffer to the screen
+BattleBoxBufferCount  = $7FFF ; total list of drawn boxes
+
+ 
+
+
+
+
 
 
 
@@ -982,28 +961,11 @@ mapobj          = $6F00         ; $100 bytes -- page
  mapobj_movectr = mapobj + $0B
  mapobj_face    = mapobj + $0C
  mapobj_pl      = mapobj + $0D   ; bit 7 = talking to player (changes facing), other bits = being shoved by player
- mapobj_tsaptr  = mapobj + $0E
+ mapobj_tsaptr  = mapobj + $0E 
 
-lut_MagicData   = $7000  ; $400 bytes
-lut_EnemyAi     = $7400  ; $90 bytes
-
-;Sizes of the battle message boxes in RAM
-BattleBoxBuffers     = $7500
-BattleBoxBufferList  = $7FF0
-BattleBoxBufferCount = $7FFF ; total list of drawn boxes
-
- 
-
-
- 
- 
- 
- 
- 
- 
- 
- 
 mapdata         = $7000  ; must be on $1000 byte bound (ie:  pretty much unmovable)
 
 mm_decorchr     = $7000  ; $300 bytes -- should be on page bound, shared
 mm_titlechr     = $7300  ; $280 bytes -- should be on page bound, shared
+
+theend_drawbuf  = $7900  ; $700 bytes! 
