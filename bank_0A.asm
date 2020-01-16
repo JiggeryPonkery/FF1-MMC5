@@ -1939,7 +1939,7 @@ BTL_MESSAGE104:
 BTL_MESSAGE105:
 .byte $97,$2E,$60,$A4,$B3,$3C,$FF,$A8,$B4,$B8,$AC,$B3,$B3,$40,$C4,$00 ; No weapon equipped!
 BTL_MESSAGE106:
-.byte $FF,$FF,$FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$FF,$FF,$00 ;   Ready? 
+.byte $FF,$FF,$FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$00 ;   Ready? 
 BTL_MESSAGE107:
 .byte $FF,$FF,$FF,$8C,$AB,$A4,$B5,$AA,$A8,$C5,$C4,$FF,$FF,$FF,$FF,$00 ;  Charge?!
 BTL_MESSAGE108:

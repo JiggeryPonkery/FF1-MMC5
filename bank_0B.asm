@@ -2323,7 +2323,7 @@ LvlUp_LevelUp:
     
             @displayloopctr    = $6AA6  ;  eobbox_slotid  ; btlinput_prevstate  
             @displaymsgcode    = $6AA7  ;  eobbox_textid  ; inputdelaycounter 
-            @displaybuffer     = $6AFA  ;  btl_unfmtcbtbox_buffer
+            @displaybuffer     = $6AFA  ;  btl_unformattedstringbuf
     LDA #$00
     STA @displayloopctr             ; zero the loop counter
     LDA #BTLMSG_STR
@@ -3345,12 +3345,12 @@ PrepareEnemyFormation:
     ; This is basic RAM clearing to prep generation of the battle formation.
     ;   This clears things like number of available slots for each enemy, as well
     ;   as enemy stats.
+    ;; JIGS - only clears a little bit now, enemy stat loading does its own clearing
+    
     LDA #$00
-    LDX #$DE
-    LDY #$00
-    : STA $6BB2, Y ; btl_smallslots
-      INY
-      DEX
+    LDY #$20
+    : STA btl_enemyIDs-1, Y ; btl_smallslots
+      DEY
       BNE :-
       
     ; fill RAM at $6BB7 to $6BCC with $FF
@@ -3435,7 +3435,7 @@ PrepareEnemyFormation:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ;; JIGS - this is done a few times, so I consolidated them into a JSR/RTS to save a few bytes
-    UnrollThing:
+UnrollThing:
     ROL A
     ROL A
     AND #$01
@@ -3554,7 +3554,7 @@ PrepareEnemyFormation_SmallLarge:
     
     JSR RandAX              ; with A=min and X=max, get a random number of enemies
     ORA #$00                ; ORA with 0 just to update the Z flag
-    BEQ @Exit2              ; If there are no enemies, jump ahead to an RTS
+    BEQ @Exit              ; If there are no enemies, jump ahead to an RTS
     
     STA btl_drawformationtmp2               ; put the number of enemies in 6BD0
     
@@ -3567,7 +3567,7 @@ PrepareEnemyFormation_SmallLarge:
     BPL :+
       INY                   ; Y=1 for large enemies, Y=0 for small enemies
   : LDA btl_smallslots, Y   ; see if there are enough slots available for this enemy
-    BEQ @Exit2              ; if no slots remaining, jump ahead to RTS
+    BEQ @Exit              ; if no slots remaining, jump ahead to RTS
     
 @Loop:
     LDY #$00
@@ -3576,7 +3576,7 @@ PrepareEnemyFormation_SmallLarge:
     BPL :+
       INY                   ; Y=1 for large, 0 for small
 :   LDA btl_smallslots, Y   ; check to see if there are slots available
-    BEQ @Exit1              ; if there are no more slots available, jump ahead to an RTS
+    BEQ @Exit              ; if there are no more slots available, jump ahead to an RTS
     
     SEC
     SBC #$01
@@ -3587,23 +3587,21 @@ PrepareEnemyFormation_SmallLarge:
     ORA btl_tmppltassign    ; combine with palette
     STA btl_enemygfxplt, X  ; record it for this generated enemy
     
-    TYA
-    PHA                     ; pointless: backup small/large indicator
+    ;TYA
+    ;PHA                     ; pointless: backup small/large indicator
     
     LDY btltmp+2            ; get index to enemy ID
     LDA btl_formdata, Y     ; get enemy ID
     STA btl_enemyIDs, X     ; record it for this generated enemy
     
-    PLA                     ; pointless: restore backup of small/large indicator (but it's never used again)
-    TAY
+   ;PLA                     ; pointless: restore backup of small/large indicator (but it's never used again)
+    ;TAY
     
     INC btl_enemycount      ; increment the generated enemy counter
     DEC btl_drawformationtmp2               ; decrement the counter indicating how many of this type of enemy we have to make
     BNE @Loop               ; loop until we've generated all of them
     
-@Exit1:
-   RTS
-@Exit2:
+@Exit:
    RTS
    
    

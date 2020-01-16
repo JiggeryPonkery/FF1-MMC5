@@ -800,7 +800,7 @@ ch_elementweak_backup     = ch_backupstats + $0D
 ch_elementresist_backup   = ch_backupstats + $0E
 ch_statusresist_backup    = ch_backupstats + $0F
     
-btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes 
+btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes ($F3)
     en_hpmax        = $00 ; 2 bytes                             1 2 
     en_morale       = $02 ; can be changed with magic           3
     en_statusresist = $03 ;                                     4
@@ -835,8 +835,6 @@ btl_enemyrewards    = $6200 ; up to $6224 (9*4)
     en_exp          = $00 ; 2 bytes                     1 2
     en_gp           = $02 ; 2 bytes                     2 3 
 
-btl_enemygfxplt     = $6227 ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
-    
 btl_formdata        = $6230 ; $10 bytes (formation data as appears in ROM)
     btlform_type    = btl_formdata+$0   ; battle type (high 4 bits) -- low 4 bits are pattern table
     btlform_engfx   = btl_formdata+$1   ; graphic assignment (2 bits per enemy)
@@ -850,12 +848,14 @@ btl_formdata        = $6230 ; $10 bytes (formation data as appears in ROM)
    
 btl_enemyIDs               = $6240  ; 9 entries of enemy IDs
 btl_enemyroster            = $6249  ; 4 bytes of enemy IDs printed in the main battle menu, showing enemies in the fight
-btl_enemyamount            = $624E  ; temp byte for number of enemies, for battle printing
-btl_unfmtcbtbox_buffer     = $6250  ; 
+btl_enemyamount            = $624F  ; temp byte for number of enemies, for battle printing
+btl_enemygfxplt            = $6250  ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
 
-btl_stringbuf              = $6300  ; holds the string to draw to a battle box.
+btl_unfmtcbtbox_buffer     = $6300  ; 
+
+btl_unformattedstringbuf   = $6300
 btl_msgbuffer              = $6500  ; $120 bytes ($09 rows * $20 bytes per row) - holds all on-screen battle message tiles
-
+btl_stringbuf              = $6620  ; holds the string to draw to a battle box.
 
 
 

@@ -89,6 +89,7 @@
 .export SkillText_RMage
 .export DrawItemBox_String
 .export DrawMagicBox_String
+.export DrawEquipBox_String
 
 .import ClearNT
 .import EnterBridgeScene_L
@@ -7827,7 +7828,7 @@ AddGPToParty:
 ;;
 ;;   stat codes (for use with control codes $10-13) are as follows:
 ;;
-;;  00    = name
+;;  00    = name (fixed width)
 ;;  01    = class
 ;;  02    = out of battle stat icon
 ;;  03    = Level
@@ -7851,7 +7852,8 @@ AddGPToParty:
 ;;  40    = Elemental Resistence (but prints it as a number!)
 ;;  41    = Mag Def
 ;;  42    = Exp to Next Level
-;;  43-FF = unused (default to same as $42)
+;;  43    = name (variable width)
+;;  44-FF = unused (default to same as $42)
 ;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -7871,12 +7873,15 @@ DrawComplexString:
     JSR SwapPRG_L
     JSR CoordToNTAddr
 
-  @StallAndDraw:
-   ; LDA menustall     ; check to see if we need to stall
-   ; BEQ @Draw_NoStall ; if not, skip over stall call
-    JSR MenuCondStall ;   this isn't really necessary, since MenuCondStall checks menustall already
+ComplexString_CheckMenuStall:
+    JSR MenuCondStall ; See if it needs to wait for VBlank or not; will wait if it does (menustall = $01)
+    LDX $2002         ; reset PPU toggle
+    LDX ppu_dest+1    ;  load and set desired PPU address
+    STX $2006         ;  do this with X, as to not disturb A, which is still our character
+    LDX ppu_dest
+    STX $2006
 
-  @Draw_NoStall:
+ComplexString_GetNext:
     LDY #0            ; zero Y -- we don't want to use it as an index.  Rather, the pointer is updated
     LDA (text_ptr), Y ;   after each fetch
     BEQ DrawComplexString_Exit   ; if the character is 0  (null terminator), exit the routine
@@ -7886,19 +7891,19 @@ DrawComplexString:
       INC text_ptr+1  ;   inc high byte if low byte wrapped
 
 :   CMP #$1A          ; values below $1A are control codes.  See if this is a control code
-    BCC @ControlCode  ;   if it is, jump ahead
+    BCC ComplexStringControlCode  ;   if it is, jump ahead
 
-  @DrawIcon_SetPPUAddress: ;; JIGS - a label for my icons
-    LDX $2002         ; reset PPU toggle
-    LDX ppu_dest+1    ;  load and set desired PPU address
-    STX $2006         ;  do this with X, as to not disturb A, which is still our character
-    LDX ppu_dest
-    STX $2006
+ComplexString_DrawAndResume:    
+    JSR ComplexString_JustDraw
+    JMP ComplexString_GetNext ; and repeat the process until terminated
 
+;; JIGS - seperating this allows control codes to draw tiles without having to resume the main string or substring
+
+ComplexString_JustDraw:
     CMP #$6A          ; see if this is a DTE character
-    BCS @noDTE        ;  if < #$7A, it is DTE  (even though it probably should be #$6A)
+    BCS @noDTE        ;  if < #$6A, it is DTE
 
-      SEC             ;  characters 1A-69 are valid DTE characters.  6A-79 are treated as DTE, but will draw crap
+      SEC             ;  characters 1A-69 are valid DTE characters. 
       SBC #$1A        ; subtract #$1A to get a zero-based index
       TAX             ; put the index in X
       LDA lut_DTE1, X ;  load and draw the first character in DTE
@@ -7909,298 +7914,249 @@ DrawComplexString:
   @noDTE:
     STA $2007         ; draw the character as-is
     INC ppu_dest      ; increment dest PPU address
-    JMP @Draw_NoStall ; and repeat the process until terminated
-
+    RTS
+    
+    
+;; JIGS - mini rant. I have to wonder at the purpose of the original code setting the PPU address EVERY SINGLE TILE.
+;; STA $2007 already increments the next save to the right...
+;; and the INC ppu_dest lines don't even get the high bit so it can wrap normally! Strings have to rely on line breaks for that!
+;; so while I'm keeping those lines in so that any calls to re-setting the PPU destination remain accurate...
+;; it does NOT need to waste time setting the address again and again and again.
+;; this should massively speed up drawing!    
+;; ...update: So it saves like maybe 2-3 scanlines, but I'm calling that a win still.
+    
 
    ; Jumps here for control codes.  Start comparing to see which control code this actually is
-@ControlCode:
-    CMP #$08
+   ;; JIGS - cleaning this up so people know what its doing... not to save space.
+   ;; though it may just save space anyway...?
+ComplexStringControlCode:
+    CMP #$01
+    BEQ ComplexString_DoubleLineBreak
+    CMP #$02
+    BEQ ComplexString_ItemName
+    CMP #$03
     BNE :+
-    DEC ppu_dest
-    JMP @Draw_NoStall
+        JMP ComplexString_ItemPrice  
+  : CMP #$04
+    BEQ ComplexString_PlayerGold
+    CMP #$05
+    BEQ ComplexString_SingleLineBreak
 
-:   CMP #$09
-    BNE @Not_09    
+ ;; $06 does nothing actually
+
+    CMP #$07
+    BNE :+
+        JMP ComplexString_WeaponArmorName
+  : CMP #$08
+    BEQ ComplexString_Backspace
+    CMP #$09
+    BEQ ComplexString_SpaceString
+
+  ;; 0A to 0F do nothing        
+  
+    CMP #$14 ;; check if its equal to or over $14 ... if not, then it is either invalid (0A-0F) or a character stat code ($10-$13)
+    BCS ComplexString_SingleLineBreak
+    JMP ComplexString_CharacterStatCode
+  
+;; now the control code routines!  
+  
+ComplexString_SingleLineBreak:
+    LDX #$20         ;  X=20 for a single line break (control code $05)
+    BNE :+
+    
+ComplexString_DoubleLineBreak:
+    LDX #$40         ; Line break -- X=40 for a double line break (control code $01),
+
+  : STX tmp          
+    LDA ppu_dest     ; store X in tmp for future use.
+    AND #$E0         ; Load dest PPU Addr, mask off the low bits (move to start of the row)
+    ORA dest_x       ;  OR with the destination X coord (moving back to original start column)
+    CLC
+    ADC tmp          ; add the line break value (number of rows to inc by) to PPU Addr
+    STA ppu_dest
+    LDA ppu_dest+1
+    ADC #0           ; catch any carry for the high byte
+    STA ppu_dest+1
+    JMP ComplexString_CheckMenuStall   ; continue processing text
+  
+ComplexString_Backspace:
+    DEC ppu_dest              ;; Important to note that it doesn't dec the high byte. 
+    JMP ComplexString_GetNext ;; Only use this when you know its not gonna mess up!
+
+ComplexString_SpaceString:    ;; prints spaces! Simple
+    JSR ComplexString_GetNextByte
+    STA spaceruns
+  
+    LDA #$FF
+   @PrintSpaces:
+    JSR ComplexString_JustDraw
+    
+    DEC spaceruns
+    BNE @PrintSpaces
+    JMP ComplexString_GetNext
+
+ComplexString_PlayerGold:
+    LDA #BANK_MENUS                        ; swap to the menu bank for the PrintGold routine
+    JSR ComplexString_SaveTextPointer_Swap ; this is a substring we'll need to draw, so save 
+    JSR PrintGold                          ;  PrintGold to temp buffer
+    JSR ComplexString_CheckMenuStall       ;  recursively call this routine to draw temp buffer (do another frame if necessary)
+    JMP ComplexString_RestoreTextPointer   ; then restore original string state and continue
+
+ComplexString_ItemName:
+    JSR ComplexString_GetNextByte        ;; get the item ID
+    
+ComplexString_ItemName_FromCharCode:    
+    JSR ComplexString_DrawItemPrep       ;; swaps to the Item name bank, saves the pointer, and checks if the item = bottle
+    BCS @itemHigh                        ; if doubling A caused a carry (item ID >= $80)... jump ahead
+      LDA lut_ItemNamePtrTbl, X          ;  if item ID was < $80... read pointer from first half of pointer table
+      STA text_ptr                       ;  low byte of pointer
+      LDA lut_ItemNamePtrTbl+1, X        ;  high byte of pointer (will be written after jump)
+      JMP :+
+      
+  @itemHigh:                             ; item high -- if item ID was >= $80
+      LDA lut_ItemNamePtrTbl+$100, X     ;  load pointer from second half of pointer table
+      STA text_ptr                       ;  write low byte of pointer
+      LDA lut_ItemNamePtrTbl+$101, X     ;  high byte (written next inst)
+
+  : STA text_ptr+1                       ; finally write high byte of pointer
+    JSR ComplexString_GetNext            ; recursively draw the substring
+    JMP ComplexString_RestoreTextPointer ; then restore original string and continue
+
+ComplexString_WeaponArmorName:
+    JSR ComplexString_GetNextByte
+    JSR ComplexString_DrawItemPrep
+      DEX
+      DEX                                  ; weapons and armour need to be shifted 1 to a 0 based ID
+      LDA lut_WeaponArmorNamePtrTbl, X   
+      STA text_ptr                       
+      LDA lut_WeaponArmorNamePtrTbl+1, X 
+      JMP :-
+
+ComplexString_ItemPrice:
+    JSR ComplexString_GetNextByte          ;; get the item ID
+    PHA
+    LDA #BANK_MENUS
+    JSR ComplexString_SaveTextPointer_Swap ; Save string info (item price is a substring)
+    PLA                                    ; get back the item ID
+    JSR PrintPrice                         ; print the price to temp string buffer
+    JSR ComplexString_CheckMenuStall       ; recursivly draw it (waits a frame if necessary)
+    JMP ComplexString_RestoreTextPointer   ; then restore original string state and continue
+
+ComplexString_GetNextByte:         ;; support routine, just gets the next byte and incs the text pointer
     LDA (text_ptr), Y
     INC text_ptr
     BNE :+
       INC text_ptr+1
-  : STA spaceruns
-   @PrintSpaces:
-    LDA #$FF
-    LDX $2002
-    LDX ppu_dest+1
-    STX $2006
-    LDX ppu_dest
-    STX $2006
-    STA $2007
-    INC ppu_dest
-    
-    DEC spaceruns
-    LDA spaceruns
-    BNE @PrintSpaces
-    JMP @StallAndDraw
+  : RTS
+  
+ComplexString_DrawItemPrep: ;; support routine for item names
+    TAX                     ;; backup item ID
+    LDA #BANK_ITEMS
+    JSR ComplexString_SaveTextPointer_Swap
+    JSR DumbBottleThing
+    TXA                     ; get item ID
+    ASL A                   ; double it (for pointer table lookup)
+    TAX                     ; put low byte in X for indexing   
+    RTS  
 
-   @Not_09:
-    CMP #$01           ; is it $01?
-    BNE @Code_02to19   ; if not, jump ahead
-
-    ;;; Control code $01 -- double line break
-    LDX #$40
-
-  @LineBreak:      ; Line break -- X=40 for a double line break (control code $01),
-    STX tmp        ;  X=20 for a single line break (control code $05)
-    LDA ppu_dest   ; store X in tmp for future use.
-    AND #$E0       ; Load dest PPU Addr, mask off the low bits (move to start of the row)
-    ORA dest_x     ;  OR with the destination X coord (moving back to original start column)
-    CLC
-    ADC tmp        ; add the line break value (number of rows to inc by) to PPU Addr
-    STA ppu_dest
-    LDA ppu_dest+1
-    ADC #0         ; catch any carry for the high byte
-    STA ppu_dest+1
-    JMP @StallAndDraw   ; continue processing text
-
-
-@Code_02to19:
-    CMP #$02        ; is control code $02?
-    BNE :+
-      JMP @Code_02  ; if it is, jump to its handler
-
-:   CMP #$03        ; otherwise... is it $03?
-    BNE :+
-      JMP @Code_03  ; if it is, jump to 03's handler
-
-:   CMP #$04        ; otherwise... 04?
-    BNE @Code05to19
-
-    ;;; Control code $04 -- draws current gold
-    JSR @Save               ; this is a substring we'll need to draw, so save 
-    LDA #BANK_MENUS
-    JSR SwapPRG_L           ;  swap to menu bank (for "PrintGold" routine)
-    JSR PrintGold           ;  PrintGold to temp buffer
-    JSR @StallAndDraw       ;  recursively call this routine to draw temp buffer
-    JMP @Restore            ; then restore original string state and continue
-
-
-@Code05to19:
-    CMP #$14         ; is control code < $14?
-    BCC @Code07to13
-
-                     ; codes $14 and up default to single line break
-@SingleLineBreak:    ; reached by control codes $05-0F and $14-19
-    LDX #$20         ; these control codes all just do a single line break
-    JMP @LineBreak   ;  afaik, $05 is the only single line break used by the game.. the other
-                     ;  control codes are probably invalid and just line break by default
-
-@Code07to13:
-    CMP #$07   ;; JIGS - weapon/armor name
-    BNE :+  
-      JMP @Code_07
-
-:   CMP #$10              ; is control code < $10?
-    BCC @SingleLineBreak  ; if yes... line break
-
+ComplexString_CharacterStatCode:
     ;;;; Control Codes $10-13
     ;;;;   These control codes indicate to draw a stat of a specific character
     ;;;;   ($10 is character 0, $11 is character 1, etc)
     ;;;; Which stat to draw is determined by the next byte in the string
 
-    ROR A          ; rotate low to 2 bits to the high 2 bits and mask them out
-    ROR A          ;  effectively giving you character * $40
-    ROR A          ;  this will be used to index character stats
-    AND #$C0
+    ;ROR A          ; rotate low to 2 bits to the high 2 bits and mask them out
+    ;ROR A          ;  effectively giving you character * $40
+    ;ROR A          ;  this will be used to index character stats
+    ;AND #$C0
+    JSR ShiftLeft6
     STA char_index ; store index
-
-    LDA (text_ptr), Y   ; get the next byte in the string (the stat to draw)
-    INC text_ptr        ; inc our string pointer
-    BNE :+
-      INC text_ptr+1    ; inc high byte if low byte wrapped
-
-:   CMP #0
-    BNE @StatCode_Over00
-
-      LDX char_index 
-      JSR DrawPlayerName
-
-      JSR @Save              ; need to draw a substring, so save current string
-      LDA #<(format_buf-7)   ; set string source pointer to temp buffer
-      STA text_ptr
-      LDA #>(format_buf-7)  
-      STA text_ptr+1
-      JSR @Draw_NoStall      ; recursively draw it
-      JMP @Restore           ; then restore original string and continue
-
-
-@StatCode_Over00:
+    TAX            ; and put in X as well
+    JSR ComplexString_GetNextByte
+    
+    CMP #$00
+    BEQ ComplexString_CharCode_Name
     CMP #$01
-    BNE @StatCode_Over01
-
-      ;; Stat Code $01 -- the character's class name
-      LDX char_index   ; get character index
-      LDA ch_class, X  ; get character's class
-      AND #$0F             ;; JIGS - cut off high bits (sprite)
-      CLC              ; add #$F0 (start of class names)
-      ADC #ITEM_CLASSSTART ; draw it (yes I know, class names are not items, but they're stored with items)
-      JMP @DrawItem
-
-@StatCode_Over01:
+    BEQ ComplexString_CharCode_Class
     CMP #$02
-    BNE @StatCode_Over02
-
-      ;; Stat Code $02 -- draw ailment icon
-     
-      LDX char_index        
-      LDA ch_ailments, X    
-      JSR @DrawStatIcon
-      JMP @DrawIcon_SetPPUAddress
-      
-@StatCode_Over02:
-    CMP #$0C
-    BCC @DrawCharStat      ; if stat code is between $02-0B, relay this stat code to PrintCharStat
-
+    BEQ ComplexString_CharCode_AilmentIcon
+    ;; if its still below $14, then its a normal stat
+    CMP #$14
+    BCC ComplexString_CharCode_NumericalStat
     CMP #$2C
-    BCC @StatCode_0Cto2B   ; see if stat code is below #$2C.  If it isn't, we relay to PrintCharStat
-
-  @DrawCharStat:           ; this paticular stat code is going to be handled in a routine in another bank
-    TAX                    ;  temporarily put the code in X
-    JSR @Save              ;  save string data (we'll be drawing a substring)
-    LDA #BANK_MENUS
-    JSR SwapPRG_L          ;  swap to menu bank (has the PrintCharStat routine)
-    TXA                    ;  put the stat code back in A
-    JSR PrintCharStat      ;  print it to temp string buffer
-    JSR @StallAndDraw      ; draw it to the screen
-    JMP @Restore           ; restore original string data and continue
-
-
-@StatCode_0Cto2B:
-  
-;; JIGS - and this v is heavily edited... Original below
-
-@StatCode_14to2B:     ;; Stat Codes $14-2B -- magic
+    BCC ComplexString_CharCode_MagicName
+    ;; if its still below $2B, draw the name of the spell they know!
+    
+    CMP #$43
+    BNE ComplexString_CharCode_NumericalStat 
+    ;; if its is NOT $43, do the normal stats
+    ;; otherwise, do the variable width name:
+    
+ComplexString_CharCode_Name_VariableWidth:
+    JSR DrawPlayerName
+    JSR FixPlayerName
+    BEQ :+ ; always branches
+ 
+ComplexString_CharCode_Name:
+    JSR DrawPlayerName
+  : JSR ComplexString_SaveTextPointer    ; need to draw a substring, so save current string
+    LDA #<(format_buf-7)                 ; set string source pointer to temp buffer
+    STA text_ptr
+    LDA #>(format_buf-7)  
+    STA text_ptr+1
+    JSR ComplexString_GetNext            ; recursively draw it
+    JMP ComplexString_RestoreTextPointer ; then restore original string and continue
+    
+ComplexString_CharCode_MagicName:
     SEC
-    SBC #$14          ; subtract #$14 to get it zero based
-    TAX               ; use that as an index
+    SBC #$14                        ; subtract #$14 to get it zero based
+    TAX                             ; use that as an index
     LDA TempSpellList, X 
-    BEQ :+            ; if 0, skip ahead and draw nothing (no spell)
-
+    BEQ :+                          ; if 0, skip ahead and draw nothing (no spell)
       CLC
       ADC #ITEM_MAGICSTART-1
-      JMP @DrawItem   ; and jump to @DrawItem
+      JMP ComplexString_ItemName_FromCharCode
+ : JMP ComplexString_CheckMenuStall ; jumps here when spell=0.  Simply do nothing and continue with string processing    
 
-:   JMP @StallAndDraw ; jumps here when spell=0.  Simply do nothing and continue with string processing
+ComplexString_CharCode_Class:
+    LDA ch_class, X      ; get character's class
+    AND #$0F             ;; JIGS - cut off high bits (sprite)
+    CLC                  ; add #$F0 (start of class names)
+    ADC #ITEM_CLASSSTART ; draw it (yes I know, class names are not items, but they're stored with items)
+    JMP ComplexString_ItemName_FromCharCode
 
-    ;;; Control Code $02 -- draws an item name
-  @Code_02:
-    LDA (text_ptr), Y     ; get another byte from the string (this byte is the ID of the item string to draw)
-    INC text_ptr          ; inc source pointer
-    BNE @DrawItem
-      INC text_ptr+1      ;   and inc high byte if low byte wrapped
-
-  @DrawItem:
-    JSR @DrawItemPrep
-
-    BCS @itemHigh                 ; if doubling A caused a carry (item ID >= $80)... jump ahead
-      LDA lut_ItemNamePtrTbl, X   ;  if item ID was < $80... read pointer from first half of pointer table
-      STA text_ptr                ;  low byte of pointer
-      LDA lut_ItemNamePtrTbl+1, X ;  high byte of pointer (will be written after jump)
-      JMP @itemGo
-
-  @itemHigh:                         ; item high -- if item ID was >= $80
-      LDA lut_ItemNamePtrTbl+$100, X ;  load pointer from second half of pointer table
-      STA text_ptr                   ;  write low byte of pointer
-      LDA lut_ItemNamePtrTbl+$101, X ;  high byte (written next inst)
-
-  @itemGo:
-    STA text_ptr+1        ; finally write high byte of pointer
-    JSR @Draw_NoStall     ; recursively draw the substring
-    JMP @Restore          ; then restore original string and continue
-
-    ;;;; Control Code $03 -- prints an item price
-  @Code_03:
-    LDA (text_ptr), Y    ; get another byte of string (the ID of item whose price we want)
-    INC text_ptr         ; inc string pointer
-    BNE :+
-      INC text_ptr+1     ; inc high byte if low byte wrapped
-
-:   JSR @Save            ; Save string info (item price is a substring)
-    TAX                  ; put item ID in X temporarily
-    LDA #BANK_MENUS
-    JSR SwapPRG_L        ; swap to bank (for PrintPrice routine)
-    TXA                  ; get back the item ID
-    JSR PrintPrice       ; print the price to temp string buffer
-    JSR @StallAndDraw    ; recursivly draw it
-    JMP @Restore         ; then restore original string state and continue
-
-    ;;;; Control Code $07 -- prints a weapon or armor name
-  @Code_07:
-    LDA (text_ptr), Y     ; get another byte from the string (this byte is the ID of the item string to draw)
-    INC text_ptr          ; inc source pointer
-    BNE :+
-      INC text_ptr+1      ; and inc high byte if low byte wrapped
-  
-  : JSR @DrawItemPrep
-      DEX
-      DEX                 ; weapons and armour need to be shifted 1 to a 0 based ID
-      LDA lut_WeaponArmorNamePtrTbl, X   
-      STA text_ptr                       
-      LDA lut_WeaponArmorNamePtrTbl+1, X 
-      JMP @itemGo
-   
- ;; JIGS - And here's the stat icons!
- ;; A = OB ailment
- 
- ; 01 - dead
- ; 02 - stone
- ; 04 - poison
- ; 08 - dark
- ; 10 - stun
- ; 20 - sleep
- ; 40 - mute
- ; 80 - confused
- 
- ;; there's really no reason to print them out of battle though, since only 3 can persist
- 
- @DrawStatIcon:
+ComplexString_CharCode_AilmentIcon:
+    LDA ch_ailments, X    
     BEQ @Healthy
     LSR A
     BCC :+
-      LDA #$E9  ; dead -- note, different tile than the battle version of this code uses
-      RTS       ; since battles use a black backdrop and menus use a coloured one
+    LDA #$E9  ; dead -- note, different tile than the battle version of this code uses
+    RTS       ; since battles use a black backdrop and menus use a coloured one
   : LSR A
     BCC :+    
-      LDA #$EA  ; stone
-      RTS
+    LDA #$EA  ; stone
+    RTS
   : LSR A
     BCC :+
-      LDA #$EB  ; poison
-      RTS
+    LDA #$EB  ; poison
+    RTS
   : LSR A  
     BCC @Healthy
-      LDA #$F4  ; blind
-      RTS
+    LDA #$F4  ; blind
+    BNE :+
 
  @Healthy:
-   LDA #$E8
-   RTS
- 
-   
-  ;; JIGS - used by both normal items/spells and weapon/armours 
- @DrawItemPrep:
-   JSR @Save             ; drawing an item requires a substring.  Save current string
-    TAX                   ; put item ID in X temporarily
+    LDA #$E8
+    JMP ComplexString_DrawAndResume
 
-    LDA #BANK_ITEMS
-    STA cur_bank 
-    JSR SwapPRG_L         ; swap to BANK_ITEMS (contains item strings)
-
-        JSR DumbBottleThing
-    
-    TXA                   ; get item ID
-    ASL A                 ; double it (for pointer table lookup)
-    TAX                   ; put low byte in X for indexing   
-   RTS
-   
+ComplexString_CharCode_NumericalStat:
+    PHA                                    ;  temporarily put the code in X
+    LDA #BANK_MENUS
+    JSR ComplexString_SaveTextPointer_Swap ;  save string data (we'll be drawing a substring)
+    PLA                                    ;  put the stat code back in A
+    JSR PrintCharStat                      ;  print it to temp string buffer
+    JSR ComplexString_CheckMenuStall       ; draw it to the screen
+    ;; flow into restoring and resuming!
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8213,31 +8169,33 @@ DrawComplexString:
 ;;    Note that Restore does not RTS, but rather JMPs back to the text
 ;;  loop explicitly -- therefore you should JMP to it.. not JSR to it.
 ;;
-;;    Note I'm still using local labels here ... this is still part of DrawComplexString  x_x
-;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-@Save:
-    LDY text_ptr    ; back up the text pointer
-    STY text_ptr_backup      ;  and the data bank
-    LDY text_ptr+1  ;  to temporary RAM space
-    STY text_ptr_backup+1
-    LDY cur_bank    ; use Y, so as not to dirty A
-    STY text_ptr_backup+2
-    RTS
-
-@Restore:
-    LDA text_ptr_backup     ; restore text pointer and data bank
+ComplexString_RestoreTextPointer:
+    LDA text_ptr_backup        ; restore text pointer and data bank
     STA text_ptr
     LDA text_ptr_backup+1
     STA text_ptr+1
     LDA text_ptr_backup+2
     STA cur_bank
-    JSR SwapPRG_L      ; swap the data bank back in
-    JMP @Draw_NoStall  ;  and continue with text processing
+    JSR SwapPRG_L              ; swap the data bank back in
+    JMP ComplexString_GetNext  ;  and continue with text processing
 
+ComplexString_SaveTextPointer_Swap:
+    STA cur_bank 
+    JSR SwapPRG_L              ; swap to the bank set in A
 
-DrawPlayerName:
+ComplexString_SaveTextPointer:
+    LDY text_ptr               ; back up the text pointer
+    STY text_ptr_backup        ;  and the data bank
+    LDY text_ptr+1             ;  to temporary RAM space
+    STY text_ptr_backup+1
+    LDY cur_bank               ; use Y, so as not to dirty A
+    STY text_ptr_backup+2
+    RTS
+
+DrawPlayerName: ;; used by Dialogue strings as well
+    LDX char_index 
     LDA ch_name, X 
     STA format_buf-7
     LDA ch_name+1, X
@@ -8253,8 +8211,11 @@ DrawPlayerName:
     LDA ch_name+6, X
     STA format_buf-1
     RTS
-    
-FixPlayerName:    
+
+;; NOTE : This is not merged with the above for a reason!
+;; Names having a fixed width is necessary for menus and such.
+
+FixPlayerName: 
     LDX #7
    @FixNameLoop:
     LDA format_buf-7, X ;; JIGS - this goes backwards through the name, finding the $FFs at the end
@@ -8267,7 +8228,8 @@ FixPlayerName:
   : DEX
     BNE @FixNameLoop      
     RTS
-    
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;   Draw Box  [$E063 :: 0x3E073]
@@ -12471,28 +12433,30 @@ CombatBoxStrings_LUT:
     .WORD PlayerBoxString
     .WORD CommandString
     .WORD EnemyRosterString
-    .WORD $6400             ; Magic (uses item_box contents)
-    .WORD UnderConstruction ; Gear
-    .WORD UnderConstruction ; Ether
+    .WORD $6300             ; Magic (uses btl_unformattedstringbuf contents)
+    .WORD $6300             ; Gear  (uses btl_unformattedstringbuf contents)
+    .WORD EtherBoxString    ; Ether
     .WORD UnderConstruction ; Scan
     .WORD UnderConstruction ; Skill
-    .WORD $6400             ; Item  (uses item_box contents)
+    .WORD $6300             ; Item  (uses btl_unformattedstringbuf contents)
     
 UnderConstruction:
-    .byte $97,$98,$9D,$FF,$8D,$98,$97,$8E,$00 ; NOT DONE
+   ; .byte $97,$98,$9D,$FF,$8D,$98,$97,$8E,$00 ; NOT DONE
 
 DrawCombatBox_L:
 DrawCombatBox:
+    STA btldraw_box_id
+    STX btldraw_src            ; store source pointer
+    STY btldraw_src+1
     PHA
     JSR ClearJigsBoxBuffer
     PLA    
-    STA btldraw_box_id
     CMP #5
     BCC :+
         ;; box IDs after this have preset content
         ;; so we gotta set up the string they'll be printing
 
-        PHA                       ; backup the box ID
+        PHA                       ; backup the box ID again
         CMP #$0E                  ; is it the Confirm box?
         BNE @NormalBox            ; if not, jump ahead, otherwise...
             LDA battle_autoswitch ; 0 if ready, 1 if charge, 2 if running
@@ -12501,15 +12465,12 @@ DrawCombatBox:
         ASL A
         TAX
         LDA CombatBoxStrings_LUT+1, X
-        TAY
+        STA btldraw_src+1
         LDA CombatBoxStrings_LUT, X
-        TAX
+        STA btldraw_src
         PLA
         
-  : STX btldraw_src            ; store source pointer
-    STY btldraw_src+1
-    
-    INC BattleBoxBufferCount   ; add this box to the buffer list
+  : INC BattleBoxBufferCount   ; add this box to the buffer list
     LDX BattleBoxBufferCount    
     STA BattleBoxBufferList-1, X ; add this box ID to the list
     
@@ -12558,7 +12519,7 @@ DrawCombatBox:
 ClearUnformattedCombatBoxBuffer:
     LDY #$80                ; pretty self explanitory routine
     LDA #$FF
-    : STA btl_unfmtcbtbox_buffer-1, Y    ; fill buffer ($80 bytes) with $FF
+    : STA btl_unformattedstringbuf-1, Y    ; fill buffer ($80 bytes) with $FF
       DEY
       BNE :-
     RTS
@@ -12585,145 +12546,86 @@ ShiftLeft4:
     ASL A
     RTS
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawBattleItemBox  [$F89E :: 0x3F8AE]
-;;
-;;    Draws the "Item box" that appears in the battle menu when the player
-;;  selects the ITEM option in the battle menu
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;DrawBattleEquipmentBox_L: 
-;;DrawBattleItemBox:
-;;    LDY #$05                                ; 5 bytes of block data
-;;;    : LDA lut_CombatItemMagicBox-1, Y       ; copy over the block data for the Item box
-;;    : LDA lut_CombatEquipmentBox-1, Y            ; JIGS - Magic box is bigger, so this uses default item box data
-;;      STA btl_msgdraw_hdr-1, Y
-;;      DEY
-;;      BNE :-
-;;    JSR BattleDraw_AddBlockToBuffer         ; Add the block to the buffer to be drawn
-;;    JSR ClearUnformattedCombatBoxBuffer     ; Chear the unformatted buffer (we'll be drawing to it shortly)
-;;    
-;;    INC btl_msgdraw_hdr     ; hdr=1 for contained text
-;;    INC btl_msgdraw_x       ; move draw coords right+down 1 tile
-;;    ;INC btl_msgdraw_y
-;;    
-;;    LDA #$00
-;;    STA DrawBattleMagicBox_loopctr               ; loop counter and equip slot to print (0-3)
-;;    
-;;    LDA btlcmd_curchar
-;;    JSR ShiftLeft6          ; Get the char stat index in X (00,40,80,C0)
-;;    TAX                     ;  This will be the source index
-;;    
-;;    ; Loop 4 times, once for each row.
-;;    ; 
-;;    ; Each row consists of 8 bytes of unformatted data:
-;;    ;    FF 0E xx FF FF 0E xx 00        where:
-;;    ; FF    = space
-;;    ; 0E xx = code to draw item 'xx's name
-;;    ; 00    = null terminator
-;;    ;
-;;    ; Alternatively, instead of '0E xx', it will output '10 07' if the weapon slot is empty
-;;    ;   which will draw 07 spaces.
-;;    ; If the armor slot is empty, then it'll null terminate the string with 00 instead of
-;;    ;   having the 2nd '0E xx'.
-;;    ;
-;;    ; Strangely, even though only 8 bytes are used, the game spaces rows $20 bytes apart
-;;  @MainLoop:
-;;    LDA DrawBattleMagicBox_loopctr      ; Row number * $20 in Y
-;;    JSR ShiftLeft5                      ; This is the offset in the unformatted buffer to print to
-;;    TAY
-;;    
-;;    LDA #$0D
-;;    STA btl_unfmtcbtbox_buffer + 2, Y   ; put in the 0D control codes (for printing weapons and armor)
-;;    STA btl_unfmtcbtbox_buffer + 7, Y
-;;    
-;;    LDA ch_righthand, X
-;;    BNE :+ 
-;;    
-;;    @NothingLeft:
-;;     LDA #$10
-;;     STA btl_unfmtcbtbox_buffer + 2, Y ; replace the 0E control code with 10 control code
-;;     LDA #$08                          ; 8 spaces
-;;     JMP @AddToBufferLeft
-;;
-;;  : ;PHA 
-;;    ;TXA 
-;;    ;AND #$0F
-;;    ;BEQ @PrintWeaponLeft
-;;    ;CMP #06
-;;    ;BEQ @PrintWeaponLeft
-;;        
-;;    ;@PrintArmorLeft:
-;;    ;PLA
-;;    ;CLC
-;;    ;ADC #ARMORSTART-1
-;;    ;JMP @AddToBufferLeft
-;;    
-;;    ;@PrintWeaponLeft:
-;;    ;PLA
-;;    SEC
-;;    SBC #1
-;;        
-;;    @AddToBufferLeft:
-;;    STA btl_unfmtcbtbox_buffer + 3, Y
-;;    
-;;    INX
-;;    LDA ch_righthand, X
-;;    BNE :+ 
-;;    
-;;    @NothingRight:
-;;    LDA #$FF
-;;    STA btl_unfmtcbtbox_buffer + 7, Y ; replace the 0E control code with two spaces
-;;    JMP @AddToBufferRight
-;;    
-;;  : ;PHA 
-;;    ;TXA 
-;;    ;AND #$0F
-;;    ;CMP #07
-;;    ;BEQ @PrintWeaponRight
-;;        
-;;    ;@PrintArmorRight:
-;;    ;PLA
-;;    ;CLC
-;;    ;ADC #ARMORSTART-1
-;;    ;JMP @AddToBufferRight
-;;    
-;;    ;@PrintWeaponRight:
-;;    ;PLA
-;;    SEC
-;;    SBC #1
-;;    
-;;    @AddToBufferRight:
-;;    STA btl_unfmtcbtbox_buffer + 8, Y
-;;        
-;;   @EndLine:
-;;     LDA #0
-;;     STA btl_unfmtcbtbox_buffer + 9, Y
-;;    
-;;    TYA                                 ; set the source pointer to the unformatted
-;;    CLC                                 ;  buffer + the offset
-;;    ADC #<btl_unfmtcbtbox_buffer
-;;    STA btl_msgdraw_srcptr
-;;    LDA #$00
-;;    ADC #>btl_unfmtcbtbox_buffer
-;;    STA btl_msgdraw_srcptr+1
-;;    
-;;    JSR BattleDraw_AddBlockToBuffer     ; then draw this row
-;;    
-;;    INX                                 ; inc source index
-;;    INC btl_msgdraw_y                   ; move drawing down 2 rows
-;;    INC btl_msgdraw_y
-;;    INC DrawBattleMagicBox_loopctr      ; inc the row counter
-;;    LDA DrawBattleMagicBox_loopctr
-;;    CMP #$04                            ; loop until 4 rows are drawn
-;;    BEQ :+
-;;      JMP  @MainLoop
-;;    
-;;    ; Finally, after all rows added, Actually draw the block buffer and exit
-;;  : JMP DrawBlockBuffer
+;; JIGS - this one is easier than the Magic and Item Box, since it doesn't have to scroll.
+;; So instead of drawing the whole string to somewhere DrawComplexString can write it out,
+;; it just needs to get the shorthand control codes to decompress when drawing the box the first time!
 
+DrawEquipBox_String:
+    LDA #0
+    STA tmp+1               ; row counter
+
+    LDA btlcmd_curchar
+    JSR ShiftLeft6          ; Get the char stat index in X (00,40,80,C0)
+    STA tmp               ;  This will be the source index
+    
+  ;  Right, Left     ; FF, FF, 0D, item ID, FF, FF, FF, 0D, item ID, 01
+  ;  Head,  Body     ;  0   1   2        3   4   5   6   7        8   9
+  ;  Hands, Acc.
+  ;  Item1, Item2
+    
+  @MainLoop:
+    LDA tmp+1                ; row #
+    LDX #10                   ; amount of tiles per row
+    JSR MultiplyXA
+    TAY
+    LDX tmp                ; restore character index to X
+    
+    LDA #$FF
+    STA btl_unformattedstringbuf, Y
+    STA btl_unformattedstringbuf+1, Y
+    STA btl_unformattedstringbuf+4, Y
+    STA btl_unformattedstringbuf+5, Y
+    STA btl_unformattedstringbuf+6, Y
+    
+    LDA #$0D                           ; put in the 0D control codes (for printing weapons and armor)
+    STA btl_unformattedstringbuf+2, Y  
+    STA btl_unformattedstringbuf+7, Y
+    
+    LDA ch_righthand, X
+    BNE :+ 
+    
+   @NothingLeft:
+    LDA #$10
+    STA btl_unformattedstringbuf+2, Y ; replace the 0E control code with 10 control code
+    LDA #$08                          ; 8 spaces
+    BNE @AddToBufferLeft
+ 
+  : SEC                               ; subtract 1 from the item ID
+    SBC #1
+        
+   @AddToBufferLeft:
+    STA btl_unformattedstringbuf+3, Y
+    
+    LDA ch_righthand+1, X
+    BNE :+ 
+    
+   @NothingRight:
+    LDA #$10
+    STA btl_unformattedstringbuf+7, Y ; replace the 0E control code with 10 control code
+    LDA #$08                          ; 8 spaces
+    BNE @AddToBufferRight
+    
+  : SEC
+    SBC #1
+    
+   @AddToBufferRight:
+    STA btl_unformattedstringbuf+8, Y
+        
+   @EndLine:
+    LDA #$01
+    STA btl_unformattedstringbuf+9, Y
+    
+    INC tmp
+    INC tmp ; increment character index by 2 to look at the next 2 equipment pieces
+    INC tmp+1 ; and the row counter by 1
+    LDA tmp+1
+    CMP #$04  ; at 4 rows done, stop                        
+    BNE @MainLoop
+    
+    LDA #0
+    STA btl_unformattedstringbuf+9, Y ; end the string
+    RTS
 
 
 DrawMagicBox_String:
@@ -12731,28 +12633,24 @@ DrawMagicBox_String:
     JSR SwapPRG_L
 
     LDA #0
-    STA SpellLevelIndex  
-    STA tmp+5               ; blank spells per level
+    STA tmp+5               ; spell level
     STA tmp+4               ; total spell counter
     STA tmp+3               ; magic list counter
     STA tmp+2               ; string position
-
+    
    @MagicRowLoop: 
     LDX tmp+2
     LDA #$95                ; L
-    STA item_box, X
-    LDA #$FF                ; _
-    STA item_box+2, X
-    LDA #$7A                ; / 
-    STA item_box+28, X
-    
-    LDA SpellLevelIndex     ; Row level
+    STA btl_unformattedstringbuf, X
+    LDA tmp+5               ; Row/spell level
     CLC
     ADC #$81                ; + 1, so that 0 = 1 and 9 = 8
-    STA item_box+1, X
+    STA btl_unformattedstringbuf+1, X
+    LDA #$FF                ; _
+    STA btl_unformattedstringbuf+2, X
     
    @MagicLoop:              ; get the magic ID from the temp list and spell it out 
-    LDX tmp+3
+    LDX tmp+4
     LDA TempSpellList, X
     BEQ @Blank
     CLC
@@ -12769,93 +12667,98 @@ DrawMagicBox_String:
    @MagicNameLoop:      ; do the name until the null terminator, then do a space after it
     LDA (tmp), Y
     BEQ :+
-    STA item_box+3, X
+    STA btl_unformattedstringbuf+3, X
     INX
     INY
     BNE @MagicNameLoop
  
   : LDA #$FF
-    STA item_box+3, X
+    STA btl_unformattedstringbuf+3, X
     INX
     BNE @Next
    
    @Blank:              ; inc tmp+5 every time there's an empty spell slot on this row
-    INC tmp+5
-
+    LDX tmp+2
+    LDA #$FF
+    LDY #8
+  : STA btl_unformattedstringbuf+3, X
+    INX
+    DEY
+    BNE :-
+   
    @Next:
+    STX tmp+2
     INC tmp+3           ; do 3 spell names
     INC tmp+4           ; and inc the spell total
     LDA tmp+3
     CMP #3
     BNE @MagicLoop
-    
-   @DoBlanks:
-    LDA tmp+5
-    BEQ @NoBlanks       ; skip if no blank spells found
    
-    LDX tmp+2
-  : LDY #8              ; if its a blank spell slot, fill with 8 spaces 
-    LDA #$FF    
-  : STA item_box+3, X
-    INX
-    DEY
-    BNE :-
-    DEC tmp+5
-    BNE :--
-   
-   @NoBlanks: 
     LDA #0
     STA tmp+3           ; reset the spell name row counter thingy
-    
-    LDA btlcmd_curchar  ; current character
-    CLC
-    ADC #$10            ; stat code offset
-    STA item_box+3, X   ; item_box+3 still, because we haven't incremented X for the first 3 tiles
-    STA item_box+6, X
-    LDA #$2C            ; current MP
-    CLC
-    ADC SpellLevelIndex ; + spell level
-    STA item_box+4, X
-    LDA #$34            ; max MP
-    CLC
-    ADC SpellLevelIndex ; + spell level
-    STA item_box+7, X   
-    
-;; all this should print:   
-;; L#_MAGIC-1_MAGIC-2_MAGIC-3_##/## -- the two ## get converted by DrawComplexString to a single digit
 
-    INC SpellLevelIndex
-    TXA
+    LDA char_index
     CLC
-    ADC #3+5 ; 3 for the first 3 tiles that X wasn't incremented after, and then the last 5.
+    ADC tmp+5             ; spell level
+    ADC #ch_mp - ch_stats ; MP offset
+    TAY
+    LDA ch_stats, Y       ; load the actual stat
+    PHA                   ; back it up
+    AND #$F0              ; get high bits (current mp)
+    LSR A
+    LSR A
+    LSR A
+    LSR A                 ; shift to low bits
+    ORA #$80              ; add in #$80 to make it a numerical tile
+    STA btl_unformattedstringbuf+3, X
+    ; item_box+3 still, because we haven't incremented X for the first 3 tiles drawn
+    
+    LDA #$7A              ; / tile
+    STA btl_unformattedstringbuf+4, X
+    PLA 
+    AND #$0F              ; restore MP byte, get low bits, add #$80
+    ORA #$80
+    STA btl_unformattedstringbuf+5, X
+    
+    LDA #01               ; and end the row with the line break
+    STA btl_unformattedstringbuf+6, X
+
+    ;; all this should print:   
+    ;; L#_MAGIC-1_MAGIC-2_MAGIC-3#(#/#)
+
+    INC tmp+5
+    TXA 
+    CLC
+    ADC #7
     STA tmp+2
     LDA tmp+4
     CMP #24             ; stop at 24 spells, 8 rows
-    BEQ @RTS
+    BEQ @Finish
     JMP @MagicRowLoop
-   @RTS:
-    RTS
-
-
+    
+   @Finish:
+    LDA #0
+    STA btl_unformattedstringbuf+123
+    JMP SetCReturnBank
 
 
 
 DrawItemBox_String:
-;;FillItemBox_BankC:   ;; JIGS - just enough changes from the menu version to make 
-     ;; it difficult to copy-paste segments and have each routine JSR to them...
+    ;; JIGS - just enough changes from the menu version to make 
+    ;; it difficult to copy-paste segments and have each routine JSR to them...
 
     LDX #$A0
     LDA #$FF
    @FillBlanks:
-     STA item_box-1, X             ; item_box is where the string buffer will be held...
-     DEX                           ; so the names are kinda reversed, sorry
+     STA btl_unformattedstringbuf-1, X             
+     DEX                           
      BNE @FillBlanks               
      LDX #$10
-   : STA btl_unfmtcbtbox_buffer, X ; holds item IDs
+   : STA item_box, X ; holds item IDs
      DEX
      BNE :-
 
-    STX item_box+$8F ; set a 0 null terminator just in case.
+    STX btl_unformattedstringbuf+$8F ; set a 0 null terminator just in case.
     LDY #1           ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
 
   @ItemFillLoop:
@@ -12869,7 +12772,7 @@ DrawItemBox_String:
         CMP #HOUSE
         BEQ @IncSrc      ; skip these 3 items
         
-        STA btl_unfmtcbtbox_buffer, X  ;  and write it to the item box buffer
+        STA item_box, X  ;  and write it to the item box buffer
         INX              ;  inc our dest index
 
     @IncSrc:
@@ -12879,7 +12782,7 @@ DrawItemBox_String:
 
   @StartDrawingItems:
     LDA #0
-    STA btl_unfmtcbtbox_buffer, X    ; put a null terminator at the end of the item box (needed for following loop)
+    STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
     STA tmp+3          ; also reset the loop counter
     LDA #2             
     STA tmp+2          ; 2 for the letter position counter
@@ -12889,7 +12792,7 @@ DrawItemBox_String:
     JSR SwapPRG_L
   
     LDX tmp+3          ; get current loop counter and put it in X
-    LDA btl_unfmtcbtbox_buffer, X    ; index the item box to see what item name we're to draw
+    LDA item_box, X    ; index the item box to see what item name we're to draw
     BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
 
     PHA                ; otherwise, back it up
@@ -12907,7 +12810,7 @@ DrawItemBox_String:
    @CopyLoop:
       LDA (tmp), Y         ; copy each character
       BEQ :+               ; stop at null terminator--don't copy it - X should be in the 9th slot for consumables now
-      STA item_box, X   
+      STA btl_unformattedstringbuf, X   
       INX 
       INY 
       BNE @CopyLoop
@@ -12925,13 +12828,13 @@ DrawItemBox_String:
     LDX tmp+2               ; restore letter position counter
     INX                     ; increase X to 10th slot
     LDA format_buf-2        ; copy the printed 2 digit number from the format buffer
-    STA item_box, X         
+    STA btl_unformattedstringbuf, X         
     INX                     ; increase X to the 11th slot
     LDA format_buf-1
-    STA item_box, X         
+    STA btl_unformattedstringbuf, X         
     INX
     LDA #01
-    STA item_box, X         ; put the line break in
+    STA btl_unformattedstringbuf, X         ; put the line break in
     INX    
     INX
     INX                     ; INC X twice more, leaving the $FFs to make room for the cursor later
@@ -12940,7 +12843,11 @@ DrawItemBox_String:
     BNE @DrawItemLoop       ; continue the loop!
    
   @Exit:  
+    STA btl_unformattedstringbuf+55
+
+SetCReturnBank:  
     LDA #$0C
+    STA ret_bank
     JMP SwapPRG_L
     
 
@@ -12974,6 +12881,12 @@ EnemyRosterString:
 .BYTE $09,$01  
 .BYTE $0A,$01
 .BYTE $0B,$00    
+
+EtherBoxString:
+.BYTE $95,$81,$FF,$FF,$15,$00,$FF,$95,$85,$FF,$FF,$15,$04,$01
+.BYTE $95,$82,$FF,$FF,$15,$01,$FF,$95,$86,$FF,$FF,$15,$05,$01
+.BYTE $95,$83,$FF,$FF,$15,$02,$FF,$95,$87,$FF,$FF,$15,$06,$01
+.BYTE $95,$84,$FF,$FF,$15,$03,$FF,$95,$88,$FF,$FF,$15,$07,$00
 
 ConfirmTurn:
 .byte $01, $0F, BTLMSG_READY,         $01, $10, $0E, $0F, BTLMSG_YESNO,        $00 
@@ -13017,6 +12930,7 @@ ConfirmRunAway:
 ;;  12       = converts btl_defender_index to name
 ;;  13 xx yy = print character stat, xx = character ID, yy = stat
 ;;  14       = print skill text based on battle_class variable
+;;  15 xx    = print defender's MP stat, where xx = stat to print
 ;;
 ;;  Values >= $48 are printed as normal tiles.
 ;;
@@ -13220,9 +13134,8 @@ DrawPlayerHP:
     STA tmp+9 ; DrawPlayerHPCounter
 
     JSR DrawBattle_IncSrcPtr
-    LDA (btldraw_src), Y     ; get the number to print, stuff it in $96,97
+    LDA (btldraw_src), Y     ; get the char index from the string
     STA char_index
-    INY
     LDA #BANK_MENUS
     JSR SwapPRG_L
     JSR DrawBattle_IncSrcPtr
@@ -13373,9 +13286,11 @@ DrawBattleString_ControlCode:
     CMP #$12
     BEQ @PrintDefenderIndex     ; code:  12
     CMP #$13
-    BNE @PrintClassSkill        ; code:  14
-
-    JMP DrawPlayerHP            ; code:  13
+    BEQ @DrawPlayerHP           ; code:  13
+    CMP #$14
+    BEQ @PrintClassSkill        ; code:  14
+    CMP #$15
+    BEQ @DrawPlayerMP           ; code:  15
 
   @Exit:
     RTS
@@ -13450,7 +13365,36 @@ DrawBattleString_ControlCode:
     DEC btldraw_subsrc           ; when 5 characters are copied over, exit
     BNE :-
     RTS
+    
+   @DrawPlayerHP:
+    JMP DrawPlayerHP
 
+   @DrawPlayerMP:
+    ;LDA submenu_targ              ; set by the item box or opening the magic menu in battle
+    ;JSR ShiftLeft6
+    ;STA char_index
+    ;; should be set in BattleSubMenu_Magic now
+   
+    LDA #BANK_MENUS
+    JSR SwapPRG_L
+    JSR DrawBattle_IncSrcPtr      ; inc the pointer to get the spell level
+    LDA (btldraw_src), Y          ; load it
+    PHA                           ; back it up
+    CLC           
+    ADC #$2C                      ; add the current MP stat byte to it
+    JSR PrintCharStat
+    LDA format_buf-1
+    JSR DrawBattleString_DrawChar ; draws current MP 
+    LDA #$7A
+    JSR DrawBattleString_DrawChar ; draws / 
+    PLA                           ; spell level byte
+    CLC
+    ADC #$34                      ; add maximum MP stat byte to it
+    JSR PrintCharStat
+    LDA format_buf-1    
+    JMP DrawBattleString_DrawChar ; draws max MP 
+    
+    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13684,7 +13628,10 @@ DrawEnemyNumber:
     LDA btl_enemyamount
     CMP #2
     BCS :+
-        RTS  ; just exit if there's less than 2 enemies    
+        LDA #$7F
+        STA btl_enemyamount
+        ;; if there's less than 2 enemies, (only one), print a space instead of a number
+        ;; ORA #$80 will make this $FF
     
   : LDA btldraw_width_counter     ; see if the destination is at the edge of the roster box
     CMP #1                        ; if it is, print the number
@@ -14761,12 +14708,12 @@ UnrollSpell_ConvertToSpellList:
 ;;;;;;;;;;;;;;;;
 
 JigsDrawBox_LUT:
-;; width, height, X, Y positions
+
 ;; max width is $20
 ;; max height is $09
 ;; highest Y position possible for a readable box is *6*. 8 breaks things.
 ;; highest X position possible for a readable 1-tile-wide box is $1D ?
-
+;; width, height, X, Y positions
 .byte $0D,$03,$00,$00 ; 0, Attacker Box
 .byte $0D,$03,$0D,$00 ; 1, Attack Box
 .byte $0D,$03,$00,$03 ; 2, Defender Box
@@ -14780,8 +14727,8 @@ JigsDrawBox_LUT:
 .byte $11,$09,$00,$00 ; A, Ether Box
 .byte $20,$06,$00,$03 ; B, Scan Box
 .byte $0F,$09,$00,$00 ; C, Skill Box
-.byte $10,$09,$00,$00 ; D, Item Box
-.byte $10,$09,$00,$00 ; E, Confirm Box
+.byte $0F,$09,$00,$00 ; D, Item Box
+.byte $0F,$09,$00,$00 ; E, Confirm Box
 
 JigsDrawBoxAddress_LUT:
 .byte $75,$00 ; 0, Attacker Box
@@ -14820,6 +14767,7 @@ UndrawBattleBlock:
   
   @FoundBox:  
     STA btldraw_box_id           
+    DEC BattleBoxBufferCount
     LDA #$FF
     STA BattleBoxBufferList-1, X ; and clear the box from the list buffer
   

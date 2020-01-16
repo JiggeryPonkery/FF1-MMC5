@@ -14,7 +14,6 @@
 .export PrintNumber_2Digit
 .export PrintPrice
 .export TurnMenuScreenOn_ClearOAM
-.export DrawManaString_ForBattle
 .export BattleBGColorDigits
 .export TalkToTile_BankE
 .export ConvertBattleNumber
@@ -559,7 +558,7 @@ lut_MenuText:
 .word M_MagicMenuOrbs         ; 4C ; 76
 .word M_MagicNameLearned      ; 4D ; 77
 .word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
-.word Battle_Ether_MPList     ; 4F ; 79 ; for battle... easier to do it here than copy buncha code over
+.word Battle_Ether_MPList     ; 4F ; 79 ; unused now
 .word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
 .word M_EquipStats_Blank      ; 51 ; 81 ; 
 .word M_EquipInventoryWeapon  ; 52 ; 82 ; 
@@ -903,13 +902,14 @@ M_MagicMenuOrbs:
 .byte $E5,$01,$E5,$01,$E5,$01,$E5,$01,$E6,$01,$E6,$01,$E6,$01,$E6,$00
 
 M_MagicNameLearned:
-.byte $FF,$10,$00,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell!
+.byte $FF,$10,$43,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
 
 Battle_Ether_MPList:
-.byte $95,$81,$FF,$FF,$10,$2C,$7A,$10,$34,$FF,$95,$85,$FF,$FF,$10,$30,$7A,$10,$38,$01
-.byte $95,$82,$FF,$FF,$10,$2D,$7A,$10,$35,$FF,$95,$86,$FF,$FF,$10,$31,$7A,$10,$39,$01
-.byte $95,$83,$FF,$FF,$10,$2E,$7A,$10,$36,$FF,$95,$87,$FF,$FF,$10,$32,$7A,$10,$3A,$01
-.byte $95,$84,$FF,$FF,$10,$2F,$7A,$10,$37,$FF,$95,$88,$FF,$FF,$10,$33,$7A,$10,$3B,$00
+;; not used anymore
+;.byte $95,$81,$FF,$FF,$10,$2C,$7A,$10,$34,$FF,$95,$85,$FF,$FF,$10,$30,$7A,$10,$38,$01
+;.byte $95,$82,$FF,$FF,$10,$2D,$7A,$10,$35,$FF,$95,$86,$FF,$FF,$10,$31,$7A,$10,$39,$01
+;.byte $95,$83,$FF,$FF,$10,$2E,$7A,$10,$36,$FF,$95,$87,$FF,$FF,$10,$32,$7A,$10,$3A,$01
+;.byte $95,$84,$FF,$FF,$10,$2F,$7A,$10,$37,$FF,$95,$88,$FF,$FF,$10,$33,$7A,$10,$3B,$00
 
 M_MagicMenuMPTitle:
 ;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
@@ -10838,15 +10838,6 @@ lut_EquipOffset:
 .byte $00,$01,$01,$01,$01,$01,$00,$00
 
 
-DrawManaString_ForBattle:
-LDA #01
-STA dest_x
-LDA #21
-STA dest_y
-LDA #1
-STA menustall
-LDA #$4F
-JMP DrawCharMenuString
 
 
 
