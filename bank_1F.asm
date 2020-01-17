@@ -12433,16 +12433,16 @@ DrawCombatBox:
     ASL A
     ASL A
     TAX
-    LDA JigsDrawBox_LUT, X     ; get box width
+    LDA JigsDrawBox_LUT-8, X     ; get box width
     STA btldraw_width
     TXA 
     LSR A                      ; back to *2 
     TAX    
     LDA btldraw_width
     SEC                        ; set carry to add +1 
-    ADC JigsDrawBoxAddress_LUT+1, X ; add box address (low)
+    ADC JigsDrawBoxAddress_LUT-3, X ; (+1) add box address (low)
     STA btldraw_dst
-    LDA JigsDrawBoxAddress_LUT, X ; get box address (high)
+    LDA JigsDrawBoxAddress_LUT-4, X ; get box address (high)
     ADC #0                     ; add carry
     STA btldraw_dst+1
     
@@ -14668,9 +14668,10 @@ JigsDrawBox_LUT:
 ;; highest X position possible for a readable 1-tile-wide box is $1D ?
 ;; width, height, X, Y positions
 
-.byte $0F,$09,$00,$00 ; 00, Confirm Box
-.byte $0F,$09,$00,$00 ; 01
-.byte $0F,$09,$00,$00 ; 02 filler :( 
+;; with these 8 missing, just make sure any reading of the LUT is -8?
+;.byte $01,$01,$00,$00 ; 01
+;.byte $01,$01,$00,$00 ; 02 filler
+.byte $0F,$09,$00,$00 ; 02, Confirm Box
 .byte $11,$09,$0F,$00 ; 03, Character Box
 .byte $10,$09,$00,$00 ; 04, Command Box
 .byte $0F,$09,$00,$00 ; 05, Roster Box
@@ -14689,10 +14690,10 @@ JigsDrawBox_LUT:
 
 
 
-JigsDrawBoxAddress_LUT:
-.byte $77,$A0 ; 00, Confirm Box - shared with Roster
-.byte $00,$00
-.byte $00,$00
+JigsDrawBoxAddress_LUT: ; read from -4 
+;.byte $75,$00
+;.byte $75,$00
+.byte $77,$A0 ; 02, Confirm Box - shared with Roster
 .byte $76,$60 ; 03, Character Box
 .byte $77,$00 ; 04, Command Box
 .byte $77,$A0 ; 05, Roster Box
@@ -14761,22 +14762,22 @@ JigsBoxDrawToBuffer:
     LDA btldraw_box_id
     ASL A
     TAX
-    LDA JigsDrawBoxAddress_LUT, X
+    LDA JigsDrawBoxAddress_LUT-4, X
     STA tmp+1                 ; Load address high
-    LDA JigsDrawBoxAddress_LUT+1, X
+    LDA JigsDrawBoxAddress_LUT-3, X ; (+1)
     STA tmp                   ; Load address low (now accessed with "(tmp), Y")
     TXA
     ASL A                     ; X = ID * 4
     TAX
-    LDA JigsDrawBox_LUT, X
+    LDA JigsDrawBox_LUT-8, X
     STA tmp+6                 ; Width
     STA tmp+10                ; "tiles left in row" counter
-    LDA JigsDrawBox_LUT+1, X
+    LDA JigsDrawBox_LUT-7, X  ; (+1)
     STA btl_msgbuffer_loopctr ; Height (amount of rows to draw)
     STA tmp+11
-    LDA JigsDrawBox_LUT+2, X
+    LDA JigsDrawBox_LUT-6, X  ; (+2)
     STA tmp+4                 ; X pos
-    LDA JigsDrawBox_LUT+3, X  ; Y pos
+    LDA JigsDrawBox_LUT-5, X  ; Y pos (+3)
     LDX #32
     JSR MultiplyXA
     STA tmp+5                 ; new Y position = screen width * original Y position
@@ -14866,14 +14867,14 @@ JigsBox_Start:
 ;    STA tmp+1               
 ;; Enable this and disable the Address_LUT reads to see how the boxes are nudged up beside each other in RAM
     
-    STX BattleBoxBufferCount
-    STX tmp
-    
-    TXA                     ; X and tmp are both 0 now
+    STX BattleBoxBufferCount ; set to 0
+    LDA #$02
+    STA tmp
+
   : JSR ClearJigsBoxBuffer  ; Loop through all the possible boxes to set them up.
     INC tmp
     LDA tmp
-    CMP #$0D                ; only $0C boxes so far
+    CMP #$10                ; only $0C boxes so far
     BNE :-
     RTS
     
@@ -14885,9 +14886,9 @@ ClearJigsBoxBuffer:
     ;; vv -- disable this block and enable the one above to make the boxes super snug, then edit the addresses in the lut to match how they're drawn
     
     TAX
-    LDA JigsDrawBoxAddress_LUT, X   ; address high byte
+    LDA JigsDrawBoxAddress_LUT-4, X ; address high byte
     STA tmp+2
-    LDA JigsDrawBoxAddress_LUT+1, X ; address low byte
+    LDA JigsDrawBoxAddress_LUT-3, X ; (+1) address low byte
     STA tmp+1
     TXA
     
@@ -14895,9 +14896,9 @@ ClearJigsBoxBuffer:
     
     ASL A                   ; * 4
     TAX
-    LDA JigsDrawBox_LUT, X
+    LDA JigsDrawBox_LUT-8, X
     STA box_wd
-    LDA JigsDrawBox_LUT+1, X
+    LDA JigsDrawBox_LUT-7, X ; (+1)
     SEC
     SBC #2                  ; height - 2
     STA box_ht
