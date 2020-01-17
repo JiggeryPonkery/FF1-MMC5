@@ -174,6 +174,7 @@
 .import LoadStatusBoxScrollWork
 .import LoadSprite_Bank04
 .import lut_MenuTextCHR
+.import LoadStoneSprites
 
 .segment "BANK_FIXED"
 
@@ -10620,6 +10621,11 @@ LoadMenuCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadBattleBGCHRAndPalettes:
+    ;; Load this up first, so it doesn't overwrite the stone sprites
+	LDA #$08
+    JSR SwapPRG_L
+    JSR LoadBattleTextChr		   ; also loads magic data and enemy AI into RAM
+
     LDA #BANK_BACKDROPPAL              ; Swap to BANK_OWINFO
     JSR SwapPRG_L
 
@@ -10628,6 +10634,7 @@ LoadBattleBGCHRAndPalettes:
 	LDA #08
     STA MMC5_tmp
     JSR LoadSprite_Bank04           ; this loads the player>enemy attack cloud sprites
+    JSR LoadStoneSprites            ; this loads the player stone graphics to background tiles
 
     ;; JIGS - slight changes
     
@@ -10691,10 +10698,6 @@ LoadBattleBGCHRAndPalettes:
     LDX #$07                       ; load 7 rows
     JSR CHRLoad_Cont               ; continue CHR loading from Y=$20
 	
-	LDA #$08
-    JSR SwapPRG_L
-    JSR LoadBattleTextChr		   ; also loads magic data and enemy AI into RAM
-
 	JSR LoadBattleSpritePalettes
 	JMP LoadBorderPalette_Color
     
@@ -12007,40 +12010,6 @@ SetPPUAddr_XA:
     RTS
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Battle_PlayerBox  [$F3C6 :: 0x3F3D6]
-;;
-;;    Draws a box with width=6 and height=7, at coords A,X  (X=Y coord).
-;;  This box is used to house the player name and HP in battle.
-;;
-;;  This routine takes care to not change A,X or Y
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;Battle_PlayerBox:
-;    STA box_x        ; record A as X coord
-;    STX box_y        ; record X as Y coord
-
-;    PHA                ; then back up A and X
-;    TXA
-;    PHA
-
-;    LDX #6
-;    STX box_wd       ; set width to 6
-;    INX
-;    STX box_ht       ; and height to 7
-
-;    JSR Battle_PPUOff  ; turn off the PPU
-;    JSR DrawBox_L      ; draw the box
-
-;    PLA                ; restore backed up A, X
-;    TAX
-;    PLA
-
-;    RTS                ; and exit!
-
-;; JIGS - No longer needed.
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12097,10 +12066,10 @@ lut_BtlAttrTbl:
 ;  .BYTE $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
 
   .BYTE $00,$00,$00,$00,$00,$00,$00,$FF
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$F0
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$FF
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$FF
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$FF
+  .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
+  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
+  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
+  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
   .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
   .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
   .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
@@ -12422,42 +12391,24 @@ UndrawNBattleBlocks:
 
 
 CombatBoxStrings_LUT:
-    .WORD ConfirmTurn
-    .WORD ConfirmCharge
-    .WORD ConfirmRunAway
-    .WORD $0000
-    .WORD $0000             
-    ;; While the confirm box is ID #$0D, these strings are found with "battle_autoswitch"
-    ;; the two $0000 are necessary blank filler
-    
-    .WORD PlayerBoxString
-    .WORD CommandString
-    .WORD EnemyRosterString
-    .WORD $6300             ; Magic (uses btl_unformattedstringbuf contents)
-    .WORD $6300             ; Gear  (uses btl_unformattedstringbuf contents)
-    .WORD EtherBoxString    ; Ether
-    .WORD UnderConstruction ; Scan
-    .WORD UnderConstruction ; Skill
-    .WORD $6300             ; Item  (uses btl_unformattedstringbuf contents)
-    
-UnderConstruction:
-   ; .byte $97,$98,$9D,$FF,$8D,$98,$97,$8E,$00 ; NOT DONE
+    .WORD ConfirmTurn       ; battle_autoswitch = 0 
+    .WORD ConfirmCharge     ; battle_autoswitch = 1 
+    .WORD ConfirmRunAway    ; battle_autoswitch = 2 
+    .WORD PlayerBoxString   ; 03
+    .WORD CommandString     ; 04
+    .WORD EnemyRosterString ; 05
+    .WORD EtherBoxString    ; 06
 
 DrawCombatBox_L:
 DrawCombatBox:
     STA btldraw_box_id
-    STX btldraw_src            ; store source pointer
+    STX btldraw_src            ; store source pointer (even if its garbage)
     STY btldraw_src+1
-    PHA
-    JSR ClearJigsBoxBuffer
-    PLA    
-    CMP #5
-    BCC :+
-        ;; box IDs after this have preset content
-        ;; so we gotta set up the string they'll be printing
-
-        PHA                       ; backup the box ID again
-        CMP #$0E                  ; is it the Confirm box?
+    CMP #BOX_HPUPDATE
+    BEQ @HPUpdate_EntryPoint   ; if just updating HP, skip all this
+    BCS :+                     ; If the ID is above that, then X and Y are already pointing to the right spots
+        PHA                       ; backup the box ID
+        CMP #BOX_CONFIRM          ; is it the Confirm box?
         BNE @NormalBox            ; if not, jump ahead, otherwise...
             LDA battle_autoswitch ; 0 if ready, 1 if charge, 2 if running
         
@@ -12470,21 +12421,24 @@ DrawCombatBox:
         STA btldraw_src
         PLA
         
-  : INC BattleBoxBufferCount   ; add this box to the buffer list
+  : PHA
+    JSR ClearJigsBoxBuffer     ; make sure the box is empty before drawing text to it
+    PLA    
+    
+    INC BattleBoxBufferCount   ; add this box to the buffer list
     LDX BattleBoxBufferCount    
     STA BattleBoxBufferList-1, X ; add this box ID to the list
-    
+   
+   @HPUpdate_EntryPoint:    
     ASL A
     ASL A
     TAX
     LDA JigsDrawBox_LUT, X     ; get box width
     STA btldraw_width
-    ;DEC btldraw_width          ; subtract one
     TXA 
     LSR A                      ; back to *2 
     TAX    
     LDA btldraw_width
-    ;CLC
     SEC                        ; set carry to add +1 
     ADC JigsDrawBoxAddress_LUT+1, X ; add box address (low)
     STA btldraw_dst
@@ -12492,7 +12446,6 @@ DrawCombatBox:
     ADC #0                     ; add carry
     STA btldraw_dst+1
     
-    ;DEC btldraw_width          ; make width -2 (no box sides)
     JSR SetBtlDrawWidthCounter ; make sure strings don't write over the box borders
     JSR FormatBattleString     ; decompress the string to the box's innards in RAM
     JSR JigsBoxDrawToBuffer    ; copy the box to the screen buffer
@@ -12603,7 +12556,7 @@ DrawEquipBox_String:
    @NothingRight:
     LDA #$10
     STA btl_unformattedstringbuf+7, Y ; replace the 0E control code with 10 control code
-    LDA #$08                          ; 8 spaces
+    LDA #$08                          ; 
     BNE @AddToBufferRight
     
   : SEC
@@ -12889,13 +12842,13 @@ EtherBoxString:
 .BYTE $95,$84,$FF,$FF,$15,$03,$FF,$95,$88,$FF,$FF,$15,$07,$00
 
 ConfirmTurn:
-.byte $01, $0F, BTLMSG_READY,         $01, $10, $0E, $0F, BTLMSG_YESNO,        $00 
+.byte $01, $0F, BTLMSG_READY,         $01, $01, $0F, BTLMSG_YESNO,        $00 
 
-ConfirmCharge:
-.byte $01, $0F, BTLMSG_CHARGE,        $01, $10, $0E, $0F, BTLMSG_YESNO_EMPH,   $00
+ConfirmCharge: 
+.byte $01, $0F, BTLMSG_CHARGE,        $01, $01, $0F, BTLMSG_YESNO_EMPH,   $00
 
 ConfirmRunAway:
-.byte $01, $0F, BTLMSG_RUNAWAY_QUERY, $01, $10, $0E, $0F, BTLMSG_YESNO_UNSURE, $00        
+.byte $01, $0F, BTLMSG_RUNAWAY_QUERY, $01, $01, $0F, BTLMSG_YESNO_UNSURE, $00        
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13468,7 +13421,7 @@ DrawString_SpaceRun:
     LDA (btldraw_src), Y        ; get the run length
     TAX
     LDA #$FF                    ; blank space tile
-    : LDY #$01
+    : ;LDY #$00
       STA (btldraw_dst), Y      ; print top/bottom portions as empty space
       JSR DrawBattleString_IncDstPtr
       DEX
@@ -14714,38 +14667,53 @@ JigsDrawBox_LUT:
 ;; highest Y position possible for a readable box is *6*. 8 breaks things.
 ;; highest X position possible for a readable 1-tile-wide box is $1D ?
 ;; width, height, X, Y positions
-.byte $0D,$03,$00,$00 ; 0, Attacker Box
-.byte $0D,$03,$0D,$00 ; 1, Attack Box
-.byte $0D,$03,$00,$03 ; 2, Defender Box
-.byte $0D,$03,$0D,$03 ; 3, Damage Box
-.byte $20,$03,$00,$06 ; 4, Message Box
-.byte $11,$09,$0F,$00 ; 5, Character Box
-.byte $10,$09,$00,$00 ; 6, Command Box
-.byte $0F,$09,$00,$00 ; 7, Roster Box
-.byte $20,$09,$00,$00 ; 8, Magic Box
-.byte $17,$09,$00,$00 ; 9, Gear Box
-.byte $11,$09,$00,$00 ; A, Ether Box
-.byte $20,$06,$00,$03 ; B, Scan Box
-.byte $0F,$09,$00,$00 ; C, Skill Box
-.byte $0F,$09,$00,$00 ; D, Item Box
-.byte $0F,$09,$00,$00 ; E, Confirm Box
+
+.byte $0F,$09,$00,$00 ; 00, Confirm Box
+.byte $0F,$09,$00,$00 ; 01
+.byte $0F,$09,$00,$00 ; 02 filler :( 
+.byte $11,$09,$0F,$00 ; 03, Character Box
+.byte $10,$09,$00,$00 ; 04, Command Box
+.byte $0F,$09,$00,$00 ; 05, Roster Box
+.byte $11,$09,$00,$00 ; 06, Ether Box
+.byte $07,$09,$19,$01 ; 07, Player HP
+.byte $0D,$03,$00,$00 ; 08, Attacker Box
+.byte $0D,$03,$0D,$00 ; 09, Attack Box
+.byte $0D,$03,$00,$03 ; 0A, Defender Box
+.byte $0D,$03,$0D,$03 ; 0B, Damage Box
+.byte $20,$03,$00,$06 ; 0C, Message Box
+.byte $20,$09,$00,$00 ; 0D, Magic Box
+.byte $0F,$09,$00,$00 ; 0E, Item Box
+.byte $17,$09,$00,$00 ; 0F, Gear Box
+.byte $20,$06,$00,$03 ; 10, Scan Box
+.byte $0F,$09,$00,$00 ; 11, Skill Box
+
+
 
 JigsDrawBoxAddress_LUT:
-.byte $75,$00 ; 0, Attacker Box
-.byte $75,$40 ; 1, Attack Box
-.byte $75,$80 ; 2, Defender Box
-.byte $75,$C0 ; 3, Damage Box
-.byte $76,$00 ; 4, Message Box
-.byte $76,$60 ; 5, Character Box
-.byte $77,$00 ; 6, Command Box
-.byte $77,$A0 ; 7, Roster Box
-.byte $78,$40 ; 8, Magic Box
-.byte $79,$60 ; 9, Gear Box
-.byte $7A,$40 ; A, Ether Box  
-.byte $7A,$E0 ; B, Scan Box    
-.byte $77,$A0 ; C, Skill Box   - shared with Roster
-.byte $77,$A0 ; D, Item Box    - shared with Roster
-.byte $77,$A0 ; E, Confirm Box - shared with Roster
+.byte $77,$A0 ; 00, Confirm Box - shared with Roster
+.byte $00,$00
+.byte $00,$00
+.byte $76,$60 ; 03, Character Box
+.byte $77,$00 ; 04, Command Box
+.byte $77,$A0 ; 05, Roster Box
+.byte $7A,$40 ; 06, Ether Box  
+.byte $76,$7A ; 07, Player HP   - sorta shared with Character Box
+
+.byte $75,$00 ; 08, Attacker Box
+.byte $75,$40 ; 09, Attack Box
+.byte $75,$80 ; 0A, Defender Box
+.byte $75,$C0 ; 0B, Damage Box
+.byte $76,$00 ; 0C, Message Box
+
+.byte $78,$40 ; 0D, Magic Box
+.byte $77,$A0 ; 0E, Item Box    - shared with Roster
+.byte $79,$60 ; 0F, Gear Box
+.byte $7A,$E0 ; 10, Scan Box    
+;.byte $77,$A0 ; C, Skill Box  - should be shared with Roster if it existed
+
+
+;; They're ordered by a weird box ID system more than RAM location now.
+
 ;; Spaced them out so its easier to read to make sure things are working. 
 ;; See JigsBox_Start for instructions on making a more snug version
 
@@ -14827,7 +14795,13 @@ JigsBoxDrawToBuffer:
    @TransferBoxTile:
     LDA RAMSwap
     BNE @Undraw
-
+    BPL @NormalBox
+    
+    LDA (tmp), Y             ; for HP updating, only copy new text over
+    STA (tmp+2), Y
+    JMP @INC_pointer
+    
+   @NormalBox:
     LDA (tmp+2), Y            ; copy screen buffer to backup box
     LDX #1
     STX $5113                 ; swap to backup RAM
@@ -14873,8 +14847,6 @@ JigsBoxDrawToBuffer:
     DEC tmp+11              ; decrement "rows left in box" counter
     BNE @TransferBoxTile
     RTS
-    
-
 
    
    
@@ -14963,8 +14935,10 @@ ClearJigsBoxBuffer:
  
 
 
-
-
+;; this draws a mini box, but the #0F ID skips incrementing drawn-box stuff
+;; and it uses no box borders. It should just decompress the HP string
+;; in the same place it was first drawn at the start of battle,
+;; and then update the screen...?
 
 
 

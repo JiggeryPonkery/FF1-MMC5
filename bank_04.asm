@@ -10,6 +10,7 @@
 .export LoadSprite_Bank04
 .export lut_BackdropPal
 .export lut_BtlBackdrops
+.export LoadStoneSprites
 
 .import WaitForVBlank_L
 .import LongCall
@@ -285,7 +286,7 @@ LoadBattleSpritesLocation:
     RTS    
 
 LoadBattleSpritesLUT_1:
-   .byte $10,$00               ; location to draw to for ($1000)
+   .byte $10,$00               ; location to draw to ($1000)
    .word FighterSprites
    .byte $10,$60
    .word ThiefSprites
@@ -309,6 +310,40 @@ LoadBattleSpritesLUT_1:
    .word WhiteWizSprites
    .byte $14,$20
    .word BlackWizSprites    
+
+LoadStoneSprites:
+    LDA #$00
+    STA char_index
+   @CharLoop:
+    TAX
+    LDA ch_class, X
+    AND #$F0
+    LSR A
+    LSR A
+    TAY
+    LDA LoadBattleSpritesLUT_1+3,Y ; high byte only
+    STA tmp+1
+    LDA #$E0                       ; first byte of cheer pose from the CharPose_LUT
+    STA tmp
+    LDA #$60                       ; amount of tiles to draw (6)
+    STA tmp+2
+    LDA char_index                 ; then get the destination address to draw the tiles to
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    LSR A                          ; shift it into 0, 1, 2, or 3 * 2
+    TAY 
+    LDA BattleCharStonePositions_LUT+1, Y
+    TAX
+    LDA BattleCharStonePositions_LUT, Y    
+    JSR CHRLoadToAX                ; draw the cheer pose to background tiles
+    LDA char_index
+    CLC
+    ADC #$40
+    STA char_index
+    BNE @CharLoop                  ; when char_index loops back to $00, all 4 are done 
+    RTS
 
 LoadBattleSprite:   
    LDA char_index
@@ -365,11 +400,17 @@ LoadSprite_Bank04:
     BCS LoadMagicSprite     
     BCC LoadAttackCloud     ; 08
 
+BattleCharStonePositions_LUT:
+   .byte $0E,$00    ; character 0 
+   .byte $0E,$80    ; character 1 
+   .byte $0E,$00    ; character 2 
+   .byte $0E,$80    ; character 3 
+   
 BattleCharPositions_LUT:
    .byte $11,$00    ; character 0 
    .byte $11,$80    ; character 1 
    .byte $12,$00    ; character 2 
-   .byte $12,$80    ; character 3 
+   .byte $12,$80    ; character 3    
 
 BattleCharPose_LUT:
    ; first two bytes is offset for where to load sprites from

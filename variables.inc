@@ -929,6 +929,8 @@ btltmp_backseat         = $69F0 ; $10 byte buffer -- backup of btltmp
 lut_MagicData   = $7000  ; $400 bytes
 lut_EnemyAi     = $7400  ; $90 bytes
 
+PlayerHPString_RAM   = $74E0 ; $20 bytes
+
 ;Sizes of the battle message boxes in RAM
 BattleBoxBuffers     = $7500
 BattleBoxBufferList  = $7FF0

@@ -578,15 +578,15 @@ lut_StealList:
    
 StealFromEnemyZ:
     LDA #$0F
-    STA btl_unformattedstringbuf+$40 ; message code
+    STA btl_unformattedstringbuf ; message code
     LDA #BTLMSG_STOLE
-    STA btl_unformattedstringbuf+$41 ; message "Stole"
+    STA btl_unformattedstringbuf+1 ; message "Stole"
     LDA #$0E
-    STA btl_unformattedstringbuf+$42 ; put the item name code into the message buffer
+    STA btl_unformattedstringbuf+2 ; put the item name code into the message buffer
     
     LDA #0
-    STA btl_unformattedstringbuf+$44 ; 44 must be 0'd if its a normal item
-    STA btl_unformattedstringbuf+$46 ; if its a scroll, 44 and 45 are written over, so end at 46    
+    STA btl_unformattedstringbuf+4 ; 44 must be 0'd if its a normal item
+    STA btl_unformattedstringbuf+6 ; if its a scroll, 44 and 45 are written over, so end at 46    
     STA MMC5_tmp+2
     STA MMC5_tmp+1
     STA battle_stealsuccess
@@ -709,31 +709,31 @@ StealFromEnemyZ:
    @StealMagic:                     ; do all the different ways of putting items in your inventory
     INY 
     LDA (tmp), Y
-    STA btl_unformattedstringbuf+$43  ; put the item name next in the message buffer
+    STA btl_unformattedstringbuf+3  ; put the item name next in the message buffer
     SEC
     SBC #ITEM_MAGICSTART
     TAX
     INC inv_magic, X
     LDA #$0F
-    STA btl_unformattedstringbuf+$44
+    STA btl_unformattedstringbuf+4
     LDA #BTLMSG_SCROLL
-    STA btl_unformattedstringbuf+$45  ; and put _scroll at the end of the message
+    STA btl_unformattedstringbuf+5  ; and put _scroll at the end of the message
     RTS
     
    @StealEquipment:
     LDA #$0D
-    STA btl_unformattedstringbuf+$42   ; here, re-write the item name byte with equipment name byte
+    STA btl_unformattedstringbuf+2   ; here, re-write the item name byte with equipment name byte
     INY 
     LDA (tmp), Y
     TAX
-    STX btl_unformattedstringbuf+$43
+    STX btl_unformattedstringbuf+3
     INC inv_weapon, X
     RTS
 
    @StealItem:
     INY 
     LDA (tmp), Y
-    STA btl_unformattedstringbuf+$43
+    STA btl_unformattedstringbuf+3
     TAX
     INC items, X
     RTS
@@ -744,7 +744,7 @@ StealFromEnemyZ:
    
     INY 
     LDA (tmp), Y
-    STA btl_unformattedstringbuf+$43
+    STA btl_unformattedstringbuf+3
     JSR LoadPriceZ                   ; get the price of the item (the amount of gold stolen)
     JSR AddGPToParty                 ; add that to the party's GP
     RTS
@@ -5913,12 +5913,12 @@ lut_IBCharStatsPtrTable:
   .WORD ch_backupstats + (3*$10)
   
   
-lut_UnformattedCombatBoxBuffer:
-  .WORD btl_unformattedstringbuf
-  .WORD btl_unformattedstringbuf + $10
-  .WORD btl_unformattedstringbuf + $20
-  .WORD btl_unformattedstringbuf + $30
-  .WORD btl_unformattedstringbuf + $40  
+;lut_UnformattedCombatBoxBuffer:
+;  .WORD btl_unformattedstringbuf
+;  .WORD btl_unformattedstringbuf + $10
+;  .WORD btl_unformattedstringbuf + $20
+;  .WORD btl_unformattedstringbuf + $30
+;  .WORD btl_unformattedstringbuf + $40  
   
   
   

@@ -26,6 +26,12 @@ LoadBattleTextChr:
     STA lut_MagicData+$300, x
     INX
     BNE :-
+    
+    LDX #$20
+  : LDA PlayerHPString_ROM, X
+    STA PlayerHPString_RAM, X
+    DEX
+    BPL :-
 
     LDA $2002         
     LDA #>$0800
@@ -233,7 +239,12 @@ MagicData:
 .byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2F            ; 7F
 
 
-
+;; Player HP String
+PlayerHPString_ROM:
+.byte $13,$00,$05,$7A,$13,$00,$06,$01
+.byte $13,$40,$05,$7A,$13,$40,$06,$01
+.byte $13,$80,$05,$7A,$13,$80,$06,$01
+.byte $13,$C0,$05,$7A,$13,$C0,$06,$00
 
 
 BattleTextChr:

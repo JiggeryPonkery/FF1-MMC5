@@ -247,6 +247,38 @@ BTL_ASTOS          = $7D
 BTL_BIKKE          = $7A
 BTL_GARLAND        = $79
 
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;
+;;  battle box IDs  (1-based)
+BOX_CONFIRM         = $0  ; 1 and 2 can't be used...
+BOX_PLAYER          = $03
+BOX_COMMAND         = $04
+BOX_ENEMYROSTER     = $05
+BOX_ETHER           = $06
+BOX_HPUPDATE        = $07 ; fairly important
+
+BOX_ATTACKER        = $08
+BOX_ATTACK          = $09
+BOX_DEFENDER        = $0A
+BOX_DAMAGE          = $0B
+BOX_MESSAGE         = $0C
+BOX_MAGIC           = $0D
+BOX_ITEM            = $0E
+BOX_GEAR            = $0F
+BOX_SCAN            = $10
+
+
+
+
+
+
+
+
 ;;;;;;;;;;;;;;;;;;
 ;;  battle message IDs  (1-based)
 
