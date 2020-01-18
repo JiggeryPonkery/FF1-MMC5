@@ -3751,7 +3751,9 @@ PlayFanfareAndCheer:
     ;; but this seems to do the trick?
 
     JSR ClearCharBuffers        ; unhides characters, turns off guard, regen, etc
-    ;INC BattleBoxBufferCount
+    INC BattleBoxBufferCount
+    LDA #BOX_PLAYER
+    STA BattleBoxBufferList     ; put the box ID in the list so the undrawing knows which area to clear
     JSR UndrawOneBox            ; undraw the player name and HP box
 
     LDA #$53                    ; play fanfare music
@@ -4498,8 +4500,9 @@ UndrawAllKnownBoxes:
 UndrawAllKnownBoxes_NoSave:
     LDA BattleBoxBufferCount
     JSR UndrawNBattleBlocks_L
-    LDA #0
-    STA BattleBoxBufferCount
+    ;LDA #0
+    ;STA BattleBoxBufferCount
+    ;; ^ THIS should already happen...
     ;JSR RespondDelay
     
 RestoreAXY:
@@ -4663,7 +4666,7 @@ DrawMessageBox:
     LDA #$00
 ;    STA (BattleTmpPointer2), Y  ; write terminator to pos 2
     STA btl_unformattedstringbuf+2
-    LDA #$04
+    LDA #BOX_MESSAGE
     JMP DrawMessageBox_Prebuilt
     
 DrawMagicMessage:
@@ -7307,7 +7310,7 @@ DoPhysicalAttack_NoAttackerBox:
       STA btl_unformattedstringbuf+1
       LDA #$00
       STA btl_unformattedstringbuf+2
-      LDA #$03                          ; output "Missed!"
+      LDA #BOX_DAMAGE                    ; output "Missed!"
       JSR DrawMessageBox_Prebuilt
       JMP DoPhysicalAttack_Exit
       ;BEQ @OutputDamageBox              ; (always branch) 

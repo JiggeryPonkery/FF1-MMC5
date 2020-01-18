@@ -851,8 +851,6 @@ btl_enemyroster            = $6249  ; 4 bytes of enemy IDs printed in the main b
 btl_enemyamount            = $624F  ; temp byte for number of enemies, for battle printing
 btl_enemygfxplt            = $6250  ; 9 entries of enemy graphic and palette assignment (graphic in high 2 bits, plt in low bit)
 
-btl_unfmtcbtbox_buffer     = $6300  ; 
-
 btl_unformattedstringbuf   = $6300
 btl_msgbuffer              = $6500  ; $120 bytes ($09 rows * $20 bytes per row) - holds all on-screen battle message tiles
 btl_stringbuf              = $6620  ; holds the string to draw to a battle box.
@@ -933,9 +931,9 @@ PlayerHPString_RAM   = $74E0 ; $20 bytes
 
 ;Sizes of the battle message boxes in RAM
 BattleBoxBuffers     = $7500
-BattleBoxBufferList  = $7FF0
+HPUpdateBox          = $7FA0 ; 81 bytes
+BattleBoxBufferList  = $7FF1 ; to 7FF9 - 8 bytes
 UndrawNBattleBlocks_loopctr = $7FFB
-btl_boxcount          = $7FFC
 EOBCombatBox_tmp      = $7FFD
 btl_msgbuffer_loopctr = $7FFE ; how many rows to transfer from the buffer to the screen
 BattleBoxBufferCount  = $7FFF ; total list of drawn boxes

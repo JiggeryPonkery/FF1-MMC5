@@ -20,7 +20,7 @@
 .import Battle_WritePPUData_L
 .import CallMusicPlay_L
 .import WaitForVBlank_L
-;.import UndrawNBattleBlocks_L
+.import UndrawNBattleBlocks_L
 .import DrawCombatBox_L
 .import BattleRNG_L
 .import BattleCrossPageJump_L
@@ -1795,10 +1795,10 @@ GameOver:
     STA music_track           ; Play the sad "game over" music
     STA btl_followupmusic
     
-    LDA #$00
-    STA btl_boxcount          ; reset combat box count
+  ;  LDA #$00
+  ;  STA btl_boxcount          ; reset combat box count
     
-    LDA #$04                    ; draw the "Party Perished" text
+    LDA #BOX_MESSAGE            ; draw the "Party Perished" text
     LDX #$09                    ;  in combat box 4 (bottom/wide one)
     JSR DrawEOBCombatBox
     
@@ -1818,11 +1818,12 @@ GameOver:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 EndOfBattleWrapUp:
-    LDA #$00
-    STA btl_boxcount          ; clear combat box count
+   ; LDA #$00
+   ; STA btl_boxcount          ; clear combat box count
     
-    TAX
-    LDA #$04
+   ; TAX
+    LDX #0
+    LDA #BOX_MESSAGE
     JSR DrawEOBCombatBox            ; draw "mosters perished" in combat box 4
     
     JSR WaitForAnyInput                     ; wait for the user to press any button
@@ -2250,8 +2251,8 @@ LvlUp_LevelUp:
     
     @ApplyStatBonus:
       STA tmp
-      ;LDY LevelUp_LoopCounter              ; record stat increase in this statup buffer
-      ;STA LevelUp_StatBuffer, Y      ;   so that this can be reported back to the user later
+      LDY LevelUp_LoopCounter              ; record stat increase in this statup buffer
+      STA LevelUp_StatBuffer, Y      ;   so that this can be reported back to the user later
       
       LDY LevelUp_StatIndex
       CLC
@@ -2312,8 +2313,8 @@ LvlUp_LevelUp:
   
     ;;---- Display the actual ... display to indicate to the user that they levelled up
     
-    ;LDA #$00                    ; draw 4 EOB Boxes:
-    ;STA eobbox_slotid           ;   Level Up | <Name> L##
+    LDA #$00                    ; draw 4 EOB Boxes:
+    STA eobbox_slotid           ;   Level Up | <Name> L##
     LDA #$05                    ;   HP Max   | ### pts.
     STA eobbox_textid
     JSR Draw4EobBoxes
@@ -2321,9 +2322,8 @@ LvlUp_LevelUp:
     ; Now we need to loop through all of the base stats (str/int/etc) and print
     ;  a "Str Up!" msg if that stat increased.
     
-            @displayloopctr    = $6AA6  ;  eobbox_slotid  ; btlinput_prevstate  
-            @displaymsgcode    = $6AA7  ;  eobbox_textid  ; inputdelaycounter 
-            @displaybuffer     = $6AFA  ;  btl_unformattedstringbuf
+            @displayloopctr    = btl_unformattedstringbuf+8  ;  eobbox_slotid  ; btlinput_prevstate  
+            @displaymsgcode    = btl_unformattedstringbuf+10  ;  eobbox_textid  ; inputdelaycounter 
     LDA #$00
     STA @displayloopctr             ; zero the loop counter
     LDA #BTLMSG_STR
@@ -2336,28 +2336,28 @@ LvlUp_LevelUp:
     BEQ @DisplayLoop_Next           ; if it didn't, skip ahead.  Otherwise...
     
       LDA #BTLMSG_UP                ; fill the display buffer with the following string:
-      STA @displaybuffer+3          ; 0F <StatMsgCode> 0F <UpMsgCode> 00
+      STA btl_unformattedstringbuf+3          ; 0F <StatMsgCode> 0F <UpMsgCode> 00
       LDA #$0F                      ;  which of course will print "Str Up!" or "Int Up!"
-      STA @displaybuffer+0
-      STA @displaybuffer+2
+      STA btl_unformattedstringbuf+0
+      STA btl_unformattedstringbuf+2
       LDA @displaymsgcode
-      STA @displaybuffer+1
+      STA btl_unformattedstringbuf+1
       LDA #$00
-      STA @displaybuffer+4
+      STA btl_unformattedstringbuf+4
       
       LDA #BANK_THIS                ; set swap-back bank to this bank.
       STA cur_bank
       
-      LDA #$04
-      LDX #<@displaybuffer
-      LDY #>@displaybuffer
+      LDA #BOX_MESSAGE
+      LDX #<btl_unformattedstringbuf
+      LDY #>btl_unformattedstringbuf
       JSR DrawCombatBox_L           ; draw this string in combat box 4
       
       JSR RespondDelay              ; wait a bit for them to read it
       JSR WaitForAnyInput           ; wait a bit more for the user to press something
       
       LDA #$01
-      ;JSR UndrawNBattleBlocks_L     ; then undraw the box we just drew
+      JSR UndrawNBattleBlocks_L     ; then undraw the box we just drew
       
   @DisplayLoop_Next:
     INC @displaymsgcode             ; inc msg code to refer to next stat name
@@ -2393,7 +2393,7 @@ LvlUp_LevelUp:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Draw4EobBoxes:
-  LDA #0
+  LDA #8; 0
   STA eobbox_slotid ;; JIGS - just in case
 
   @Loop:
@@ -2404,7 +2404,7 @@ Draw4EobBoxes:
       INC eobbox_slotid         ; inc slot and text
       INC eobbox_textid
       LDA eobbox_slotid
-      CMP #$04                  ; keep looping until all 4 slots drawn
+      CMP #$0C ; 4                  ; keep looping until all 4 slots drawn
       BNE @Loop
  
     RTS
@@ -2828,7 +2828,7 @@ DrawEOBCombatBox:
     LDA EOBCombatBox_tmp    ; restore combo box ID in A
     JSR DrawCombatBox_L     ; A = box ID, YX = pointer to string
     
-    INC btl_boxcount        ; count this combat box
+  ;  INC btl_boxcount        ; count this combat box
     RTS                     ; and exit!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2841,10 +2841,10 @@ DrawEOBCombatBox:
 
 RespondDelay_UndrawAllCombatBoxes:
     JSR RespondDelay                ; this is all self explanitory...
-    LDA btl_boxcount
-  ;  JSR UndrawNBattleBlocks_L
-    LDA #$00
-    STA btl_boxcount
+    LDA BattleBoxBufferCount
+    JSR UndrawNBattleBlocks_L
+;    LDA #$00
+;    STA btl_boxcount
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

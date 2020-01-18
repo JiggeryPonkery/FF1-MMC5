@@ -12246,7 +12246,7 @@ BattleDrawMessageBuffer:
       ADC #$00
       STA btldraw_dst+1
       
-      JSR Battle_UpdatePPU_UpdateAudio_FixedBank    ; update audio (since we did a frame), and reset scroll
+      JSR Battle_UpdatePPU_UpdateAudio_FixedBank
       
       DEC btl_msgbuffer_loopctr         ; loop for each row
       BNE @Loop
@@ -12294,14 +12294,26 @@ Battle_DrawMessageRow:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleDrawMessageBuffer_Reverse:
-    LDA tmp+4                 ; box X position only
-    CLC    
-    ADC #<$2380               
-    STA btldraw_dst           
-    LDA #>$2380               
-    ADC #0
+
+ ;  height - 1 + Y position + X position * 32 + $2280
+  
+    LDA btl_msgbuffer_loopctr ; height
+    SEC
+    SBC #1     ; -1 from height
+    CLC
+    ADC tmp+12 ; Y position of box upper left corner
+    LDX #32
+    JSR MultiplyXA
+    CLC
+    ADC tmp+4  ; X position
+    ADC #$80
+    STA btldraw_dst
+    TXA
+    ADC #$22
     STA btldraw_dst+1
     
+    ;; should get bottom left tile of box to start at 
+ 
    @Loop:
     JSR Battle_DrawMessageRow_VBlank  ; draw a row
     
@@ -12321,8 +12333,8 @@ BattleDrawMessageBuffer_Reverse:
     SBC #$00
     STA btldraw_dst+1
     
-    JSR Battle_UpdatePPU_UpdateAudio_FixedBank    ; update audio and stuffs
-    
+    JSR Battle_UpdatePPU_UpdateAudio_FixedBank
+
     DEC btl_msgbuffer_loopctr
     BNE @Loop         ; loop until all rows drawn
     RTS
@@ -12370,7 +12382,7 @@ UndrawNBattleBlocks:
       DEC UndrawNBattleBlocks_loopctr             ; dec
       BNE @Loop             ; loop until no more to undraw
   @Exit:
-    RTS
+    JMP DrawBox_WaitForVBlank
     
     
     
@@ -12403,7 +12415,7 @@ DrawCombatBox_L:
 DrawCombatBox:
     STA btldraw_box_id
     STX btldraw_src            ; store source pointer (even if its garbage)
-    STY btldraw_src+1
+    STY btldraw_src+1          ; but this should always point to btl_unformattedstringbuf
     CMP #BOX_HPUPDATE
     BEQ @HPUpdate_EntryPoint   ; if just updating HP, skip all this
     BCS :+                     ; If the ID is above that, then X and Y are already pointing to the right spots
@@ -12447,13 +12459,17 @@ DrawCombatBox:
     STA btldraw_dst+1
     
     JSR SetBtlDrawWidthCounter ; make sure strings don't write over the box borders
-    JSR FormatBattleString     ; decompress the string to the box's innards in RAM
+    JSR DrawBox_WaitForVBlank
+    JSR FormatBattleString     ; decompress the string to the box's innards in RAM    
+    JSR DrawBox_WaitForVBlank
     JSR JigsBoxDrawToBuffer    ; copy the box to the screen buffer
     ;; also first copies the screen buffer to backup RAM
     ;; so that undrawing restores the exact tiles "behind" the box
-    JMP BattleDrawMessageBuffer
+    JSR BattleDrawMessageBuffer
 
-
+DrawBox_WaitForVBlank:
+    JSR BattleWaitForVBlank    ; Wait for V Blank and do audio before trying to decompress the string
+    JMP Battle_UpdatePPU_UpdateAudio_FixedBank
 
 
 
@@ -14666,6 +14682,7 @@ JigsDrawBox_LUT:
 ;; max height is $09
 ;; highest Y position possible for a readable box is *6*. 8 breaks things.
 ;; highest X position possible for a readable 1-tile-wide box is $1D ?
+
 ;; width, height, X, Y positions
 
 ;; with these 8 missing, just make sure any reading of the LUT is -8?
@@ -14676,7 +14693,7 @@ JigsDrawBox_LUT:
 .byte $10,$09,$00,$00 ; 04, Command Box
 .byte $0F,$09,$00,$00 ; 05, Roster Box
 .byte $11,$09,$00,$00 ; 06, Ether Box
-.byte $07,$09,$19,$01 ; 07, Player HP
+.byte $09,$09,$17,$00 ; 07, Player HP
 .byte $0D,$03,$00,$00 ; 08, Attacker Box
 .byte $0D,$03,$0D,$00 ; 09, Attack Box
 .byte $0D,$03,$00,$03 ; 0A, Defender Box
@@ -14698,7 +14715,7 @@ JigsDrawBoxAddress_LUT: ; read from -4
 .byte $77,$00 ; 04, Command Box
 .byte $77,$A0 ; 05, Roster Box
 .byte $7A,$40 ; 06, Ether Box  
-.byte $76,$7A ; 07, Player HP   - sorta shared with Character Box
+.byte $7F,$A0 ; 07, Player HP   
 
 .byte $75,$00 ; 08, Attacker Box
 .byte $75,$40 ; 09, Attack Box
@@ -14727,21 +14744,16 @@ BoxTiles:
 
 
 UndrawBattleBlock:
-    LDX #$08
-  : LDA BattleBoxBufferList-1, X ; go backwards through the list
-    BPL @FoundBox                ; jump ahead if its not $FF
-    DEX                          ; else, decrement X
-    BPL :-                       ; and keep looping until X = $FF
-    RTS                          ; which means no more boxes to draw
-  
-  @FoundBox:  
+    LDX BattleBoxBufferCount
+    LDA BattleBoxBufferList-1, X
     STA btldraw_box_id           
     DEC BattleBoxBufferCount
     LDA #$FF
     STA BattleBoxBufferList-1, X ; and clear the box from the list buffer
   
 JigsBoxUndrawFromBuffer:   
-    INC RAMSwap
+    JSR DrawBox_WaitForVBlank
+    INC RAMSwap                  ; set the swap switch to copy old data to the screen buffer
     JSR JigsBoxDrawToBuffer
     DEC RAMSwap
     LDA #32
@@ -14778,6 +14790,7 @@ JigsBoxDrawToBuffer:
     LDA JigsDrawBox_LUT-6, X  ; (+2)
     STA tmp+4                 ; X pos
     LDA JigsDrawBox_LUT-5, X  ; Y pos (+3)
+    STA tmp+12
     LDX #32
     JSR MultiplyXA
     STA tmp+5                 ; new Y position = screen width * original Y position
@@ -14795,12 +14808,8 @@ JigsBoxDrawToBuffer:
 
    @TransferBoxTile:
     LDA RAMSwap
+    BMI @HPUpdate
     BNE @Undraw
-    BPL @NormalBox
-    
-    LDA (tmp), Y             ; for HP updating, only copy new text over
-    STA (tmp+2), Y
-    JMP @INC_pointer
     
    @NormalBox:
     LDA (tmp+2), Y            ; copy screen buffer to backup box
@@ -14810,6 +14819,11 @@ JigsBoxDrawToBuffer:
     LDA #0
     STA $5113                 ; swap to normal RAM
     LDA (tmp), Y              ; then copy box to draw it to the screen buffer
+    STA (tmp+2), Y
+    BNE @INC_pointer
+
+   @HPUpdate:
+    LDA (tmp), Y             ; for HP updating, only copy new text over
     STA (tmp+2), Y
     BNE @INC_pointer
 
@@ -14876,6 +14890,20 @@ JigsBox_Start:
     LDA tmp
     CMP #$10                ; only $0C boxes so far
     BNE :-
+    
+    ;; Now to fix the HP update box...
+    LDA #$F8
+    STA HPUpdateBox
+    LDA #$FD
+    STA HPUpdateBox+72
+    LDA #$FF
+    STA HPUpdateBox+9
+    STA HPUpdateBox+18
+    STA HPUpdateBox+27
+    STA HPUpdateBox+36
+    STA HPUpdateBox+45
+    STA HPUpdateBox+54
+    STA HPUpdateBox+63
     RTS
     
 ;; This draws a blank box to RAM, when A = the box ID
