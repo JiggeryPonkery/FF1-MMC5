@@ -254,8 +254,9 @@ BTL_GARLAND        = $79
 
 
 ;;;;;;;;;;;;;;;;;;
-;;  battle box IDs  (1-based)
-BOX_CONFIRM         = $02  ; 0 and 1 can't be used...
+;;  battle box IDs  (2-based?)
+; 0 and 1 can't be used...
+BOX_CONFIRM         = $02  
 BOX_PLAYER          = $03
 BOX_COMMAND         = $04
 BOX_ENEMYROSTER     = $05

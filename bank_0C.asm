@@ -1501,7 +1501,7 @@ BattleSubMenu_Magic_NoUndraw:
     CLC
     ADC btlcurs_x   ; spell (0-2)
     TAY                             ; put that index in Y, and use it to get the chosen spell
-    LDA TempSpellList-1, Y            ;; JIGS - proper spell list
+    LDA TempSpellList, Y            ;; JIGS - proper spell list
     BNE :+                          ; if they selected an empty slot, do the @NothingBox -- otherwise skip over it
     
   @NothingBox:
@@ -7286,7 +7286,7 @@ DoPhysicalAttack_NoAttackerBox:
       LDA #BTLMSG_HITS
       STA btl_unformattedstringbuf+4
       
-      LDA #$01                          ; draw it in combat box 1
+      LDA #BOX_ATTACK    
       ;LDX #<(btl_unformattedstringbuf + $10)
       ;LDY #>(btl_unformattedstringbuf + $10)
       JSR DrawMessageBox_Prebuilt
@@ -7372,7 +7372,7 @@ DoPhysicalAttack_NoAttackerBox:
       LDA #BTLMSG_SLAIN                 ;  print "Slain" battle message
       BNE @DrawThisMessage
   : LDA #BTLMSG_TERMINATED              ; otherwise, print the "Terminated" battle message
-    JMP @DrawThisMessage
+    BNE @DrawThisMessage
     
   @TryWake:  
 ;    LDA battle_hitsconnected
@@ -9929,7 +9929,6 @@ Battle_PlayerMagic_CastOnTarget:
 
 Battle_PlMag_TargetSelf:
     JSR TargetSelf                      ; set target to yourself
-    JSR DrawDefenderBox                 ; draw defender box
     JMP Battle_CastMagicOnPlayer        ; and cast the spell
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9959,7 +9958,6 @@ Battle_PlMag_IsPlayerValid:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_PlMag_TargetOnePlayer:
-    JSR DrawDefenderBox                     ; Draw defender box
     JSR BtlMag_LoadPlayerDefenderStats      ; Load defender stats (and do "hit with magic" animation/sound)
     LDA btlmag_effect
     CMP #$06 ; is the spell Life?
@@ -9988,7 +9986,6 @@ Battle_PlMag_TargetAllPlayers:
     ORA #$80                            ; set high bit to indicate it is a player target
     STA btl_defender                    ; set as defender
     
-    JSR DrawDefenderBox                 ; ... do magic casting stuff
     JSR BtlMag_LoadPlayerDefenderStats
     JSR Battle_PlMag_IsPlayerValid
     BEQ :+
@@ -10016,20 +10013,19 @@ Battle_PlMag_TargetOneEnemy:
    
     ;; JIGS - auto-target for magic:
     LDX btl_defender
-    LDA AutoTargetOption
-    BNE @SkipAutoTarget
-    
     JSR DoesEnemyXExist
-    BNE :+ ;@SkipAutoTarget ; they do exist, so cast on the intended target
-    JMP Battle_CastMagicOnRandEnemy ; they don't exist, so pick a random one.
+    BEQ @CheckAutoTarget ; they don't exit, so see if auto target is on or not
+     ;; else, they do exist, so cast on intended target       
+     JMP Battle_CastMagicOnEnemy   
     
-    @SkipAutoTarget:
-    JSR DoesEnemyXExist
-    BNE :+                          ; if the enemy does not exist
-      JMP DrawIneffective           ;  just show "Ineffective" message, and exit
-  : TXA
-    JSR DrawDefenderBox
-    JMP Battle_CastMagicOnEnemy
+   @CheckAutoTarget:
+    LDA AutoTargetOption ; 0 = on, 1 = off
+    BEQ @RandomEnemy     ; if on, choose a new random enemy 
+        JMP DrawIneffective  ; if off, just show "Ineffective" message, and exit
+    
+   @RandomEnemy: 
+    JMP Battle_CastMagicOnRandEnemy ; they don't exist, so pick a random one
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10046,9 +10042,8 @@ Battle_PlMag_TargetAllEnemies:
     LDA btl_enemyIDs, Y             ; get the ID of this enemy slot
     CMP #$FF                        ;  if FF, the enemy does not exist, so skip it
     BEQ @Next
-      LDA btl_targetall_tmp         ; otherwise, if not FF, it's a valid target.
-      STA btl_defender              ; make it the defender
-      JSR DrawDefenderBox           ; draw the Defender box
+      ;                             ; otherwise, if not FF, it's a valid target.
+      STY btl_defender              ; make it the defender
       JSR Battle_CastMagicOnEnemy   ; do the actual spell
       JSR UndrawAllButTwoBoxes      ; undraw all but attacker and attack boxes
       
@@ -10057,7 +10052,6 @@ Battle_PlMag_TargetAllEnemies:
     LDA btl_targetall_tmp           ; Keep looping until all 9 slots targetted
     CMP #$09
     BNE @Loop
-    
     RTS
     
     
@@ -10184,27 +10178,6 @@ Battle_CastMagicOnSelf_Enemy:           ; pretty straight forward....
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  Battle_CastMagicOnRandEnemy  [$B54D :: 0x3355D]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Battle_CastMagicOnRandEnemy:
-  @Loop:
-    LDA #$00
-    LDX #$08
-    JSR RandAX
-    TAX                     ; random enemy slot [0,8]
-    
-    JSR DoesEnemyXExist     ; does an enemy exist in that slot?
-    BEQ @Loop               ; loop until we find an enemy that exists
-    
-    ; once we have an enemy that exists
-    STX btl_defender            ; set it as the defender
-    
-    JMP Battle_CastMagicOnEnemy ; and cast the spell!
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
 ;;  Battle_CastMagicOnAllEnemies  [$B563 :: 0x33573]
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10231,6 +10204,27 @@ Battle_CastMagicOnAllEnemies:
     BNE @Loop
     
     RTS
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Battle_CastMagicOnRandEnemy  [$B54D :: 0x3355D]
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Battle_CastMagicOnRandEnemy:
+  @Loop:
+    LDA #$00
+    LDX #$08
+    JSR RandAX
+    TAX                     ; random enemy slot [0,8]
+    
+    JSR DoesEnemyXExist     ; does an enemy exist in that slot?
+    BEQ @Loop               ; loop until we find an enemy that exists
+    
+    ; once we have an enemy that exists
+    STX btl_defender            ; set it as the defender
+    ;; flow into ... 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

@@ -2020,7 +2020,7 @@ TREASURE_TRI:
    .byte $FC,$F8,$08,$E0,$C9,$C9,$C9,$C9,$C9,$FF
 
 BLANK:   ; For songs that need to loop
-.byte $F6 ; silencer on
+.byte $F7,$3F ; custom silencer on; subtract $3F from volume
 BLANK_LOOP:
 .BYTE $EF ; envelope pattern that starts with the quietest note
 .BYTE $FE ; note length LUT with shortest note - tempo
@@ -2622,10 +2622,12 @@ Music_NewSong:
        STA CHAN_SQ2+ch_quiet
        STA CHAN_SQ3+ch_quiet
        STA CHAN_SQ4+ch_quiet
+       STA CHAN_TRI+ch_quiet
        STA CHAN_SQ1+ch_customquiet
        STA CHAN_SQ2+ch_customquiet
        STA CHAN_SQ3+ch_customquiet
        STA CHAN_SQ4+ch_customquiet
+       STA CHAN_TRI+ch_customquiet
       
 
       LDA #$30            ; *then* set channel volumes to zero -- this will properly
@@ -3208,19 +3210,19 @@ Music_DoScore:
   @Code_F4:
     CMP #$F4
     BNE @Code_F5
-       LDA ch_quiet, X
-       AND #$01
-       BNE @UnShush
-          LDA ch_quiet, X
-          ORA #$01
-          STA ch_quiet, X
-          BNE SkipMusicBit
-    
-      @UnShush:
-       LDA ch_quiet, X
-       AND #$FE
-       STA ch_quiet, X
-       JMP SkipMusicBit
+       LDA ch_quiet, X       ;
+       AND #$01              ; $01 means its already quiet, $00 means its not
+       BNE @UnShush          ; if $01, then turn to $00
+          LDA ch_quiet, X    ; its off: reload it to restore high bits
+          ORA #$01           ; and add in the $01
+          STA ch_quiet, X    ; save
+          BNE SkipMusicBit   ;
+
+      @UnShush:              ; its on here:
+       LDA ch_quiet, X       ; reload to restore high bits
+       AND #$FE              ; and cut out the $01 
+       STA ch_quiet, X       ; save it
+       JMP SkipMusicBit      ;
   
   @Code_F5:
     CMP #$F5
@@ -3232,13 +3234,13 @@ Music_DoScore:
   @Code_F6:
     CMP #$F6
     BNE @Code_F7
-        LDA ch_quiet, X
-        AND #$10
-        BNE @UnShush_2
-          LDA ch_quiet, X
-          ORA #$10
-          STA ch_quiet, X
-          BNE SkipMusicBit
+        LDA ch_quiet, X     ; just like code F4 but with the bits reversed
+        AND #$10            ; $10 means its on, $00 means its off
+        BNE @UnShush_2      ; 
+          LDA ch_quiet, X   ; 
+          ORA #$10          ; 
+          STA ch_quiet, X   ; 
+          BNE SkipMusicBit  ; 
     
       @UnShush_2:
        LDA ch_quiet, X

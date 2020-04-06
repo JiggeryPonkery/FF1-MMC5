@@ -242,16 +242,20 @@ mg_slidespr             = $35 ; + 6, 7
 mg_slidedir             = $38 
 
 ;; Box Drawing Things   
+btldraw_box_id          = $40
+btldraw_width           = $41
+btldraw_width_counter   = $46
+
 box_x                   = $40
 box_y                   = $41
 box_wd                  = $42 ; shared
 box_ht                  = $43 ; shared
 dest_wd                 = $42 ; for drawing image rectangles
 dest_ht                 = $43 
-dest_x                  = $44
+btldraw_max             = $44 ; maximum characters to draw
+dest_x                  = $44 ; NOT used in battle box drawing?
 dest_y                  = $45
 spaceruns               = $46 ; see drawcomplexstring; amount of spaces to draw
-btldraw_max             = $46 ; maximum characters to draw
 image_ptr               = $47 ; + 8 - for images
 text_ptr                = $47 ; + 8 - for text
 format_buf              = $50 ; 7 bytes, goes in reverse (4A-50) -- must not cross page bound
@@ -395,13 +399,11 @@ dlgbox_row              = $9D ; counts down from 7 when drawing dialogue box; no
 npcdir_seed             = $9E ; RNG seed for determining direction for NPCs to walk
 InBattle                = $9F
 RAMSwap                 = $A0 ; 0 for normal RAM, 1 for extra
-btldraw_width           = $A1 ; change later!
-btldraw_width_counter   = $A3 ; change later!
-btldraw_box_id          = $A2
 
 ;; Music stuff          
 ;                       = $A0
 ChaosNoise              = $A1 ; only used at the end of the game
+TriangleHushTrigger     = $A1
 SaveGameMusic           = $A2 
 soundtesthelper         = $A3 ; Something to do with the sound test screen
 soundtest               = $A4 ; Something to do with the sound test screen
@@ -433,11 +435,11 @@ ch_loopctr              = $D  ; remaining loop counter
 ch_freq                 = $E  ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
 ;                             ; these are added in for the music system!
 ch_loop_marker          = $0250 ; somehow this will end up at $0300, $0310, $0320 $0330, and $0340
-ch_return               = $0251 ; + 2
-ch_duty                 = $0253 ; 
-ch_octave               = $0254 ; 
-ch_quiet                = $0255 ; 
-ch_customquiet          = $0256 ; 
+ch_return               = $0251 ; $0301 + 2
+ch_duty                 = $0253 ; $0303 
+ch_octave               = $0254 ; $0304
+ch_quiet                = $0255 ; $0305
+ch_customquiet          = $0256 ; $0306
 
 text_ptr_backup         = $010D ; + E, F
 stack                   = $0100 

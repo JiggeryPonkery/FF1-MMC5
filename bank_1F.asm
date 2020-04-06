@@ -12526,7 +12526,7 @@ DrawEquipBox_String:
 
     LDA btlcmd_curchar
     JSR ShiftLeft6          ; Get the char stat index in X (00,40,80,C0)
-    STA tmp               ;  This will be the source index
+    STA tmp                 ;  This will be the source index
     
   ;  Right, Left     ; FF, FF, 0D, item ID, FF, FF, FF, 0D, item ID, 01
   ;  Head,  Body     ;  0   1   2        3   4   5   6   7        8   9
@@ -12535,10 +12535,10 @@ DrawEquipBox_String:
     
   @MainLoop:
     LDA tmp+1                ; row #
-    LDX #10                   ; amount of tiles per row
+    LDX #10                  ; amount of tiles per row
     JSR MultiplyXA
     TAY
-    LDX tmp                ; restore character index to X
+    LDX tmp                  ; restore character index to X
     
     LDA #$FF
     STA btl_unformattedstringbuf, Y
@@ -12562,7 +12562,7 @@ DrawEquipBox_String:
  
   : SEC                               ; subtract 1 from the item ID
     SBC #1
-        
+
    @AddToBufferLeft:
     STA btl_unformattedstringbuf+3, Y
     
@@ -12580,7 +12580,7 @@ DrawEquipBox_String:
     
    @AddToBufferRight:
     STA btl_unformattedstringbuf+8, Y
-        
+
    @EndLine:
     LDA #$01
     STA btl_unformattedstringbuf+9, Y
@@ -14504,8 +14504,11 @@ HushTriangle:
     RTS
     
 UnhushTriangle:
+    LDA CHAN_TRI+ch_quiet ; is the triangle's quiet trigger on? 
+    BNE HushTriangle      ; if so, don't unshush it--make sure it IS shushed!
+
     LDA TriangleHush
-    CMP #0
+;    CMP #0
     BEQ @return
     DEC TriangleHush
     STA $4011
@@ -14706,6 +14709,7 @@ JigsDrawBox_LUT:
 .byte $0F,$09,$00,$00 ; 11, Skill Box
 
 
+;; again note: box IDs 0 and 1 will not work. They are for variations of the "Ready?" box!
 
 JigsDrawBoxAddress_LUT: ; read from -4 
 ;.byte $75,$00
