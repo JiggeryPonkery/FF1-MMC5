@@ -2077,7 +2077,7 @@ lut_Treasure:
 .byte $02, ARM26    ; 09 ; Temple of Fiends 3 - Cap    
 .byte $02, WEP27    ; 0A ; Temple of Fiends 4 - Rune   Sword
 .byte $02, WEP26    ; 0B ; Temple of Fiends 5 - Were   Sword
-.byte $01, FLOWCLOCK; 0C ; Temple of Fiends 6 - Flowing Clock  
+.byte $01, SOFT     ; 0C ; Temple of Fiends 6 - Soft  
 .byte $02, WEP18    ; 0D ; Elfland 1          - Silver Hammer
 .byte $00, GOLD22   ; 0E ; Elfland 2          - 400 G
 .byte $00, GOLD19   ; 0F ; Elfland 3          - 330 G
@@ -2158,7 +2158,7 @@ lut_Treasure:
 .byte $00, GOLD41   ; 59 ; Gurgu Volcano 16   - 4150 G
 .byte $00, GOLD35   ; 5A ; Gurgu Volcano 17   - 1520 G
 .byte $02, ARM29    ; 5B ; Gurgu Volcano 18   - Silver Helmet
-.byte $01, FLOWCLOCK; 5C ; Gurgu Volcano 19   - Flowing Clock  
+.byte $01, SOFT     ; 5C ; Gurgu Volcano 19   - Soft  
 .byte $00, GOLD39   ; 5D ; Gurgu Volcano 20   - 2750 G
 .byte $00, GOLD36   ; 5E ; Gurgu Volcano 21   - 1760 G
 .byte $02, WEP2     ; 5F ; Gurgu Volcano 22   - Wooden Staff
@@ -2207,7 +2207,7 @@ lut_Treasure:
 .byte $00, GOLD24   ; 8A ; Cardia 7           - 500 G
 .byte $01, HOUSE    ; 8B ; Cardia 8           - HOUSE  
 .byte $00, GOLD26   ; 8C ; Cardia 9           - 575 G
-.byte $01, FLOWCLOCK; 8D ; Cardia 10          - Flowing Clock  
+.byte $01, SOFT     ; 8D ; Cardia 10          - Soft  
 .byte $01, CABIN    ; 8E ; Cardia 11          - CABIN  
 .byte $00, GOLD52   ; 8F ; Cardia 12          - 9500 G
 .byte $00, GOLD11   ; 90 ; Cardia 13          - 160 G
@@ -2301,13 +2301,13 @@ lut_Treasure:
 .byte $00, GOLD56   ; E8 ; Sky Palace 19      - 13000 G
 .byte $01, ADAMANT  ; E9 ; Sky Palace 20      - ADAMANT
 .byte $00, GOLD41   ; EA ; Sky Palace 21      - 4150 G
-.byte $01, FLOWCLOCK; EB ; Sky Palace 22      - Flowing Clock  
+.byte $01, SOFT     ; EB ; Sky Palace 22      - Soft  
 .byte $00, GOLD40   ; EC ; Sky Palace 23      - 3400 G
 .byte $02, WEP38    ; ED ; Sky Palace 24      - Katana 
 .byte $01, ARM25    ; EE ; Sky Palace 25      - ProCape
 .byte $02, ARM1     ; EF ; Sky Palace 26      - Cloth  
 .byte $00, GOLD52   ; F0 ; Sky Palace 27      - 9500 G
-.byte $01, FLOWCLOCK; F1 ; Sky Palace 28      - Flowing Clock  
+.byte $01, SOFT     ; F1 ; Sky Palace 28      - Soft  
 .byte $00, GOLD44   ; F2 ; Sky Palace 29      - 6400 G
 .byte $00, GOLD49   ; F3 ; Sky Palace 30      - 8135 G
 .byte $00, GOLD50   ; F4 ; Sky Palace 31      - 9000 G

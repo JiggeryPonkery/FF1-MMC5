@@ -1486,6 +1486,7 @@ BattleSubMenu_Magic_NoUndraw:
     STA char_index
     
     JSR DrawMagicBox_String
+    JSR WaitForVBlank_L
     LDA #BOX_MAGIC
     JSR DrawCombatBox
     JSR MenuSelection_Magic
@@ -1624,7 +1625,7 @@ BattleSubMenu_Item:
     ORA item_pure
     ORA item_eyedrops
     ORA item_alarm
-    ORA item_clock
+    ORA item_soft
     ORA item_smokebomb
     BNE BattleSubMenu_Item_NoUndraw ; if there are no potions...
       JSR DoNothingMessageBox       ; show the 'Nothing' box
@@ -3187,20 +3188,21 @@ MenuSelection_Magic:
     
    @RedrawList:
     LDA item_pageswap
-    LDX #31    
+    LDX #32    
     JSR MultiplyXA
     STA tmp
     TAX
     
     LDA #01
     STA menustall
-    STA btl_unformattedstringbuf+30, X
-    STA btl_unformattedstringbuf+61, X
-    STA btl_unformattedstringbuf+92, X ; Items are spaced 31 bytes apart, so put the line break on the first three 
+    STA btl_unformattedstringbuf+31, X
+    STA btl_unformattedstringbuf+63, X
+    STA btl_unformattedstringbuf+95, X ; Items are spaced 32 bytes apart, so put the line break on the first three 
     LDA #0 
-    STA btl_unformattedstringbuf+123, X ; and the null terminator on the fourth, every time the list is moved
+    STA btl_unformattedstringbuf+127, X ; and the null terminator on the fourth, every time the list is moved
     
     JSR SharedScrollingMenuCode
+    
 
   @MainLoop:
     LDA btl_drawflagsA
@@ -9530,7 +9532,7 @@ UseItem_JumpTable:
     .word UseItem_Ether         ; 3
     .word UseItem_Elixir        ; 4
     .word UseItem_Pure          ; 5
-    .word Useitem_FlowClock     ; 6
+    .word Useitem_Soft          ; 6
     .word UseItem_PhoenixDown   ; 7
     NOP                         
     NOP                         ; 8 
@@ -9546,47 +9548,44 @@ UseItem_AlarmClock:
     LDX #0
    @Loop: 
     LDA ch_ailments, X
-    AND #~AIL_SLEEP ; $DF  ; clear out all ailments that aren't sleep
+    AND #~AIL_SLEEP ; $DF  ; clear out only the sleep ailment
     STA ch_ailments, X
     TXA
     CLC
     ADC #$40
     BNE @Loop
 
-    LDX #ALARMCLOCK
-    DEC items, X           ; remove wakeup bell from inventory        
     LDA #3
     JSR PlayBattleSFX      ; play bell SFX
     LDA #BTLMSG_ALARMCLOCK ; print "The bell rings loudly.."
-    JMP UseItem_End
+    LDX #ALARMCLOCK
+    JMP UseItem_End_RemoveItem
 
 UseItem_Heal:  
-    JSR BtlMag_LoadPlayerDefenderStats
-    JSR Battle_PlMag_IsPlayerValid
-    BNE UseItem_Ineffective
-    
-    LDA #BTL_HEAL_POTENCY
-    STA btlmag_effectivity
-    JSR BtlMag_Effect_RecoverHP
-    JSR UseItem_CommonCode
-
-    LDX #HEAL
-    LDA #BTLMSG_HPUP
-    JMP UseItem_End_RemoveItem
+    LDA #HEAL
+    LDX #BTL_HEAL_POTENCY
+    BNE :+
     
 UseItem_XHeal:  
+    LDA #X_HEAL
+    LDX #BTL_XHEAL_POTENCY
+
+  : PHA
+    STX btlmag_effectivity
     JSR BtlMag_LoadPlayerDefenderStats
     JSR Battle_PlMag_IsPlayerValid
-    BNE UseItem_Ineffective
-    
-    LDA #BTL_XHEAL_POTENCY
-    STA btlmag_effectivity
+    BNE UseItem_Heal_Ineffective
+
     JSR BtlMag_Effect_RecoverHP
-    JSR UseItem_CommonCode
+    PLA
+    TAX                                ; Heal or X Heal is in X
     LDA #BTLMSG_HPUP                   ; print "HP up!"
-    LDX #X_HEAL
-    JMP UseItem_End_RemoveItem
+    JMP UseItem_CommonCode
     
+UseItem_Heal_Ineffective:
+    PLA
+    JMP UseItem_Ineffective
+
 UseItem_Elixir:
    JSR BtlMag_LoadPlayerDefenderStats
    JSR Battle_PlMag_IsPlayerValid
@@ -9620,28 +9619,20 @@ UseItem_Elixir:
     CPY #08
     BNE @InnerLoop
 
-    JSR UseItem_CommonCode
     LDA #BTLMSG_ELIXIR
     LDX #ELIXIR
-    JMP UseItem_End_RemoveItem
-
-UseItem_Ineffective:            ; put here so it can be BCC'd to easily
-    DEC HiddenMagic
-    LDA #BTLMSG_INEFFECTIVENOW 
-    JMP DrawMessageBoxDelay_ThenClearAll
+    JMP UseItem_CommonCode
     
 UseItem_Pure:
     JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_POISON
-    STA btlmag_effectivity
-    
-    JSR BtlMag_Effect_CureAilment
-    BCC UseItem_Ineffective
+    JSR UseItem_CureAilment
     
     LDX #PURE
-    JMP UseItem_AilmentCured
-    
-Useitem_FlowClock:
+    LDA #BTLMSG_NEUTRALIZED
+    JMP UseItem_CommonCode
+
+Useitem_Soft:
     JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_STOP
     STA btlmag_effectivity
@@ -9656,27 +9647,33 @@ Useitem_FlowClock:
         LDA #25                 ; otherwise, give them 25 HP
         STA btlmag_defender_hp
     
-  : LDX #FLOWCLOCK
-UseItem_AilmentCured:
-    DEC items, X                       ; remove item from inventory
-    JSR UseItem_CommonCode
-    LDA #BTLMSG_CURED                  ; print "Cured!"
-    JMP UseItem_End
+  : LDX #SOFT
+    LDA #BTLMSG_STONECURED
+    JMP UseItem_CommonCode
+    
+UseItem_CureAilment_Fail:
+    PLA 
+    PLA
+UseItem_Ineffective:
+    LDA #BTLMSG_INEFFECTIVENOW 
+    JMP UseItem_End        
+
+UseItem_CureAilment:    
+    STA btlmag_effectivity
+    JSR BtlMag_Effect_CureAilment
+    BCC UseItem_CureAilment_Fail
+    RTS        
   
 UseItem_PhoenixDown:
     JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_DEAD
-    STA btlmag_effectivity
-    
-    JSR BtlMag_Effect_CureAilment
-    BCC UseItem_Ineffective
+    JSR UseItem_CureAilment
     
     LDA #25                            ; give them 25 HP
     STA btlmag_defender_hp
-    JSR UseItem_CommonCode
     LDA #BTLMSG_LIFE
     LDX #PHOENIXDOWN    
-    JMP UseItem_End_RemoveItem
+    JMP UseItem_CommonCode
   
 UseItem_Smokebomb:            
     LDA #0 
@@ -9704,7 +9701,8 @@ UseItem_Smokebomb:
     LDX #SMOKEBOMB
     LDA #BTLMSG_HIDING    
     JMP UseItem_End_RemoveItem
-    
+
+   
 UseItem_Ether:
     LDA btl_attacker
     AND #$03
@@ -9721,7 +9719,7 @@ UseItem_Ether:
 
     LDA ch_ailments, X
     AND #(AIL_DEAD | AIL_STOP)
-    BNE Eyedrops_Ineffective ; if character is dead or stoned, ineffective
+    BNE UseItem_Ineffective ; if character is dead or stoned, ineffective
     
     TXA
     CLC
@@ -9751,28 +9749,14 @@ UseItem_Ether:
 UseItem_Eyedrops:
     JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_DARK
-    STA btlmag_effectivity
-        
-    JSR BtlMag_Effect_CureAilment
-    BCS :+
-
-Eyedrops_Ineffective: ; (the other one is too far away...)
-    DEC HiddenMagic
-    LDA #BTLMSG_INEFFECTIVENOW 
-    JMP DrawMessageBoxDelay_ThenClearAll    
-    
-  : JSR UseItem_CommonCode
+    JSR UseItem_CureAilment
+ 
     LDX #EYEDROPS
-    LDA #BTLMSG_EYEDROPS
-    
-UseItem_End_RemoveItem:
-    DEC items, X
-
-UseItem_End:
-    DEC HiddenMagic
-    JMP DrawMessageBoxDelay_ThenClearAll 
+    LDA #BTLMSG_SIGHTRECOVERED
 
 UseItem_CommonCode:
+    PHA
+    DEC items, X
     LDA btlmag_playerhitsfx
     JSR PlayBattleSFX  
     LDA btl_defender
@@ -9780,9 +9764,20 @@ UseItem_CommonCode:
     TAX
     JSR UnhideCharacter
     JSR FlashCharacterSprite
-    JMP BtlMag_SavePlayerDefenderStats ; save the cured ailment
+    JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
+    PLA
+    
+UseItem_End:    
+    DEC HiddenMagic
+    JMP DrawMessageBoxDelay_ThenClearAll 
+    
+UseItem_End_RemoveItem:
+    DEC items, X
+    JMP UseItem_End
+    
 
 
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11614,7 +11609,7 @@ BtlMag_HandleAilmentChanges:
     BNE :+                       ; if not, just get the message
        LDA btl_defender          ; if stone, check defender
        BPL :+                    ; if its an enemy, print normal message
-        LDA #BTLMSG_TIMESTOPPED  ; if its a player, swap that message for "Time stopped"
+        LDA #BTLMSG_STONE        ; if its a player, swap that message for "Petrified"
         BNE @PrintMessageAndNext
  
   : LDA AilmentAdded_MessageLut-1, X ; -1 because X is +1
@@ -11692,7 +11687,7 @@ AilmentCured_MessageLut:
 .BYTE BTLMSG_PARALYZEDCURED ; stun
 .BYTE BTLMSG_SIGHTRECOVERED ; blind
 .BYTE BTLMSG_NEUTRALIZED    ; poison
-.BYTE BTLMSG_TIMEFLOW       ; stop
+.BYTE BTLMSG_STONECURED     ; stone
 .BYTE BTLMSG_LIFE           ; cure message for death
     
 ;; JIGS - bugged, need to confirm messages are picked right    

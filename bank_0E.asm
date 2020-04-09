@@ -402,7 +402,7 @@ ElflandTemple:
 ElflandInn:                                   
 ;.byte $64,$00                                 ;(Elfland) 100g Inn
 ElflandItem:                                  
-.byte HEAL, PURE, TENT, CABIN, FLOWCLOCK       ;(Elfland) Heal, Pure, Tent, Cabin, Soft
+.byte HEAL, PURE, TENT, CABIN, SOFT            ;(Elfland) Heal, Pure, Tent, Cabin, Soft
 MelmondWeapon:                                
 .byte WEP11+1, WEP12+1, WEP13+1, WEP15+1, $00 ;(Melmond) Iron Staff, Sabre, Long Sword, Falchion
 MelmondArmor:                                
@@ -418,7 +418,7 @@ LakeWeapon:
 LakeArmor:                                   
 .byte ARM6+1, ARM19+1, ARM24+1, ARM29+1, ARM36+1 ;(Cresent Lake) Silver Armor, Silver Shield, Buckler, Silver Helmet, Silver Gauntlet
 LakeWMagic:                                   
-.byte MG_FLOW, MG_EXIT, MG_FOG2, MG_INV2, $00 ;(Cresent Lake) SOFT, EXIT, FOG2, INV2
+.byte MG_SOFT, MG_EXIT, MG_FOG2, MG_INV2, $00 ;(Cresent Lake) SOFT, EXIT, FOG2, INV2
 LakeBMagic:                                   
 .byte MG_LIT3, MG_RUB, MG_QAKE, MG_STUN, $00  ;(Cresent Lake) LIT3, RUB, QAKE, STUN
 LakeTemple:                                   
@@ -454,7 +454,7 @@ OnracTemple:
 OnracInn:                                     
 ;.byte $2C,$01,$00                             ;(Onrac) 300g Inn
 OnracItem:                                    
-.byte TENT, CABIN, HOUSE, PURE, FLOWCLOCK      ;(Onrac) Tent, Cabin, House, Pure, Soft
+.byte TENT, CABIN, HOUSE, PURE, SOFT          ;(Onrac) Tent, Cabin, House, Pure, Soft
 CaravanShop:                                  
 .byte X_HEAL, ETHER, ELIXIR, SMOKEBOMB, BOTTLE;(Caravan) Bottle
 LeifenWMagic:                                 
@@ -527,7 +527,7 @@ lut_MenuText:
 .word M_ItemEther             ; 2D ; 45
 .word M_ItemElixir            ; 2E ; 46 
 .word M_ItemPure              ; 2F ; 47 ; PURE magic
-.word M_ItemFlowClock         ; 30 ; 48 ; SOFT magic
+.word M_ItemSoft              ; 30 ; 48 ; SOFT magic
 .word M_ItemPhoenixDown       ; 31 ; 49 ; LIFE magic
 .word M_ItemAlarmClock        ; 32 ; 50
 .word M_ItemEyedrop           ; 33 ; 51
@@ -794,9 +794,10 @@ M_ItemPure:
 M_PureMagic:
 .byte $9E,$3E,$1B,$2E,$A6,$55,$1A,$B3,$B2,$30,$3C,$C0,$00 ; Use to cure poison.[END]
 
-M_ItemFlowClock:  
-M_FlowMagic:
-.byte $9E,$3E,$1B,$2E,$23,$37,$35,$1A,$1C,$1A,$A9,$AF,$46,$05,$36,$54,$57,$34,$C0,$00 ; Use to restore the[ENTER]flow of time.[END]
+M_ItemSoft:  
+M_SoftMagic:
+.byte $9E,$3E,$1B,$2E,$23,$37,$35,$1A,$1C,$A8,$05
+.byte $A5,$B2,$A7,$4B,$A9,$4D,$B0,$4F,$A8,$B7,$5C,$A9,$AC,$51,$57,$3C,$C0,$00 ; Use to restore the[ENTER]body from petrification.[END]
 
 M_ItemPhoenixDown:
 M_LifeMagic:
@@ -5877,9 +5878,9 @@ MagicMenu_Loop:
 :   CMP #MG_WARP
     BNE :+
       JMP UseMagic_WARP
-:   CMP #MG_FLOW
+:   CMP #MG_SOFT
     BNE :+
-      JMP UseMagic_FLOW
+      JMP UseMagic_SOFT
 :   CMP #MG_EXIT
     BNE :+
       JMP UseMagic_EXIT
@@ -6082,7 +6083,7 @@ UseMagic_LIFE:
     LDA #1
     BNE UseMagicCureAilment
 
-UseMagic_FLOW:
+UseMagic_SOFT:
     LDA #48
     PHA
     LDA #2
@@ -6879,7 +6880,7 @@ ItemMenu_Loop:
 .word UseItem_Ether       ; Ether
 .word UseItem_Elixir      ; Elixir
 .word UseItem_Pure        ; Pure
-.word Useitem_FlowClock   ; Flowing Clock
+.word Useitem_Soft        ; Soft
 .word UseItem_PhoenixDown ; Phoenix Down
 .word UseItem_Tent        ; Tent
 .word UseItem_Cabin       ; Cabin
@@ -7439,7 +7440,7 @@ UseItem_Pure:
     PHA
     BNE :+
 
-Useitem_FlowClock:
+Useitem_Soft:
     LDA #AIL_STOP
     STA hp_recovery
     LDA #48 
@@ -7504,7 +7505,7 @@ UseAilmentCuringItem:
     JMP @Loop                  ;  and keep looping
 
 UseAilmentCuringItemLUT:
-    .byte 0, PHOENIXDOWN, FLOWCLOCK, 0, PURE, 0, 0, 0, EYEDROPS
+    .byte 0, PHOENIXDOWN, SOFT, 0, PURE, 0, 0, 0, EYEDROPS
     ;     0, 1,         , 2   , 3, 4,  , 5, 6, 7, 8
 
 
@@ -9623,9 +9624,9 @@ DrawMainMenuCharBoxBody:
     ORA ch_mp+6, X
     ORA ch_mp+7, X
    
-    BNE @DrawMP       ; if max MP is nonzero, jump ahead to DrawMP
-      JMP @NoMP       ; otherwise... jump ahead to NoMP
-
+    ;BNE @DrawMP       ; if max MP is nonzero, jump ahead to DrawMP
+    ;  JMP @NoMP       ; otherwise... jump ahead to NoMP
+    BEQ @NoMP
 
   @DrawMP:
     LDY #$00          ; Y is dest index for our drawing loop, start it at zero

@@ -507,7 +507,7 @@ lut_ItemNamePtrTbl:
 .word NAME_ETHER        ; 03
 .word NAME_ELIXIR       ; 04
 .word NAME_PURE         ; 05
-.word NAME_FLOWINGCLOCK ; 06
+.word NAME_SOFT         ; 06
 .word NAME_P_DOWN       ; 07
 .word NAME_TENT         ; 08 
 .word NAME_CABIN        ; 09 
@@ -872,9 +872,8 @@ NAME_ELIXIR:
 .byte $8E,$AF,$AC,$BB,$AC,$B5,$FF,$E1,$00 ; Elixir_&
 NAME_PURE:
 .byte $99,$B8,$B5,$A8,$FF,$FF,$FF,$E1,$00 ; Pure___&
-NAME_FLOWINGCLOCK:
-;.byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
-.byte $8F,$AF,$B2,$BA,$AC,$B1,$AA,$EA,$00 ; Flowing(clock)
+NAME_SOFT:
+.byte $9C,$B2,$A9,$B7,$FF,$FF,$FF,$E1,$00 ; Soft___&
 NAME_P_DOWN:
 .byte $99,$AB,$B2,$A8,$B1,$AC,$BB,$E2,$00 ; PhoenixF
 NAME_TENT:
@@ -1087,8 +1086,7 @@ SPELL40:
 .byte $9C,$95,$98,$A0,$FF,$FF,$82,$00  ;  SLOW__2
 SPELL41:
 ;.byte $9C,$98,$8F,$9D,$00 ; SOFT
-;.byte $9C,$98,$8F,$9D,$FF,$FF,$FF,$00  ;  SOFT___
-.byte $EA,$FF,$8F,$95,$98,$A0,$FF,$00  ;  (Time)_FLOW_
+.byte $9C,$98,$8F,$9D,$FF,$FF,$FF,$00  ;  SOFT___
 SPELL42:
 ;.byte $8E,$A1,$92,$9D,$00 ; EXIT
 .byte $8E,$A1,$92,$9D,$FF,$FF,$FF,$00  ;  EXIT___
@@ -1859,15 +1857,15 @@ BTL_MESSAGE64:
 BTL_MESSAGE65:
 .byte $FF,$FF,$FF,$FF,$00 ; ____
 BTL_MESSAGE66:
-.byte $E6,$E7,$E8,$E9,$00 ; {E6}{E7}{E8}{E9} (Stone) ; JIGS - the squished text doesn't exist anymore...
+.byte $99,$A8,$B7,$5C,$A9,$AC,$40,$00 ; Petrified
 BTL_MESSAGE67:
-.byte $E2,$E3,$E4,$E5,$00 ; {E2}{E3}{E4}{E5} (Poison) ; JIGS - the squished text doesn't exist anymore...
+.byte $9D,$1D,$24,$28,$5A,$24,$1D,$4E,$31,$23,$A4,$AE,$B6,$C4,$00 ; The stone shell breaks!
 BTL_MESSAGE68:
 .byte $8D,$A4,$B5,$AE,$00 ; Dark
 BTL_MESSAGE69:
 .byte $9C,$B7,$B8,$B1,$00 ; Stun
 BTL_MESSAGE70:
-.byte $8A,$EA,$C8,$C9,$00 ; A {EA}{C8}{C9} (sl eep) ; JIGS - the squished text doesn't exist anymore...
+;.byte $8A,$EA,$C8,$C9,$00 ; A {EA}{C8}{C9} (sl eep) ; JIGS - the squished text doesn't exist anymore...
 BTL_MESSAGE71:
 .byte $96,$B8,$B7,$A8,$00 ; Mute
 BTL_MESSAGE72:
@@ -1970,7 +1968,7 @@ lut_ItemPrices:
 .word 5000    ; 03 ETHER
 .word 50000   ; 04 ELIXIR
 .word 0075    ; 05 PURE
-.word 0800    ; 06 FLOWINGBELL
+.word 0800    ; 06 SOFT
 .word 20000   ; 07 PHOENIX DOWN
 .word 0075    ; 08 TENT
 .word 0250    ; 09 CABIN

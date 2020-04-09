@@ -7826,6 +7826,7 @@ AddGPToParty:
 ;;  12 xx = draw stat code 'xx' for character 2
 ;;  13 xx = draw stat code 'xx' for character 3
 ;;  14-19 = unused (default to single line break)
+;;  16    = skip drawing this
 ;;
 ;;   stat codes (for use with control codes $10-13) are as follows:
 ;;
@@ -7953,9 +7954,11 @@ ComplexStringControlCode:
     CMP #$09
     BEQ ComplexString_SpaceString
 
-  ;; 0A to 0F do nothing        
-  
-    CMP #$14 ;; check if its equal to or over $14 ... if not, then it is either invalid (0A-0F) or a character stat code ($10-$13)
+  ;; 0A to 0F do nothing     
+    CMP #$16 ; see if its exactly $16, and skip drawing if it is
+    BNE :+    
+        JMP ComplexString_GetNext
+  : CMP #$14 ;; check if its equal to or over $14 ... if not, then it is either invalid (0A-0F) or a character stat code ($10-$13)
     BCS ComplexString_SingleLineBreak
     JMP ComplexString_CharacterStatCode
   
@@ -8132,22 +8135,22 @@ ComplexString_CharCode_AilmentIcon:
     LSR A
     BCC :+
     LDA #$E9  ; dead -- note, different tile than the battle version of this code uses
-    RTS       ; since battles use a black backdrop and menus use a coloured one
+    BNE @DrawIcon
   : LSR A
     BCC :+    
-    LDA #$EA  ; stone
-    RTS
+    LDA #$ED  ; stone
+    BNE @DrawIcon
   : LSR A
     BCC :+
     LDA #$EB  ; poison
-    RTS
+    BNE @DrawIcon
   : LSR A  
-    BCC @Healthy
-    LDA #$F4  ; blind
-    BNE :+
-
- @Healthy:
-    LDA #$E8
+    BCC :+
+    LDA #$EC  ; blind
+    BNE @DrawIcon
+   @Healthy: 
+    LDA #$E8  ; healthy!
+   @DrawIcon:
     JMP ComplexString_DrawAndResume
 
 ComplexString_CharCode_NumericalStat:
@@ -11004,7 +11007,7 @@ LoadBattleSpritePalettes:
       RTS
 
 @BattleSpritePalettes:
-  .BYTE $0F,$18,$21,$28,  $0F,$16,$30,$36,   $0F,$08,$17,$28,  $0F,$30,$10,$00
+  .BYTE $0F,$18,$21,$28,  $0F,$16,$30,$36,   $0F,$08,$17,$28,  $0F,$00,$10,$30
 
 
 
@@ -11091,14 +11094,14 @@ DrawOBSprite:
     BNE @Standing
     
   @Stoned: 
-    ;LDA #$03              ; otherwise (ailment byte = 2), character is stoned
-    ;STA tmp+1             ;  change palette byte to 3 (stoned palette)
+    LDA #$03              ; otherwise (ailment byte = 2), character is stoned
+    STA tmp+1             ;  change palette byte to 3 (stoned palette)
    
-    LDA tmp+1
-    ORA #$40
-    STA tmp+1
-    LDA #$14              
-    BNE @Standing
+    ;LDA tmp+1
+    ;ORA #$40
+    ;STA tmp+1            ; JIGS - this would reverse the sprite direction I think?
+    ;LDA #$14             ; and draw them kneeling
+    ;BNE @Standing
    
   @SwapReady:
     LDA #$0E              ; draw cheering  
@@ -12607,6 +12610,7 @@ DrawMagicBox_String:
     STA tmp+3               ; magic list counter
     STA tmp+2               ; string position
     
+    
    @MagicRowLoop: 
     LDX tmp+2
     LDA #$95                ; L
@@ -12689,8 +12693,12 @@ DrawMagicBox_String:
     ORA #$80
     STA btl_unformattedstringbuf+5, X
     
-    LDA #01               ; and end the row with the line break
+    LDA #$16              ; tells BattleFormatString to do a VBlank wait
     STA btl_unformattedstringbuf+6, X
+    
+    LDA #01               ; and end the row with the line break
+    STA btl_unformattedstringbuf+7, X
+
 
     ;; all this should print:   
     ;; L#_MAGIC-1_MAGIC-2_MAGIC-3#(#/#)
@@ -12698,7 +12706,7 @@ DrawMagicBox_String:
     INC tmp+5
     TXA 
     CLC
-    ADC #7
+    ADC #8
     STA tmp+2
     LDA tmp+4
     CMP #24             ; stop at 24 spells, 8 rows
@@ -12707,7 +12715,7 @@ DrawMagicBox_String:
     
    @Finish:
     LDA #0
-    STA btl_unformattedstringbuf+123
+    STA btl_unformattedstringbuf+127
     JMP SetCReturnBank
 
 
@@ -13260,6 +13268,10 @@ DrawBattleString_ControlCode:
     BEQ @PrintClassSkill        ; code:  14
     CMP #$15
     BEQ @DrawPlayerMP           ; code:  15
+
+    ;; and if its 16-47, do a VBlank.
+    JMP DrawBox_WaitForVBlank
+    
 
   @Exit:
     RTS

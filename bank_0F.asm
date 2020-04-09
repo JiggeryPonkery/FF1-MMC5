@@ -470,8 +470,8 @@ lut_StealList:
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 31 Grey W          
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 32 EYE             
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 33 PHANTOM         
-.byte $01, FLOWCLOCK  , $00, $00, $00, $00         ; Flowing Clock  ,      ,                 ; 34 MEDUSA          
-.byte $01, FLOWCLOCK  , $00, $00, $00, $00         ; Flowing Clock  ,      ,                 ; 35 GrMEDUSA        
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA          
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA        
 .byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN          
 .byte $03, MG_FIR2    , $00, $00, $00, $00         ; Fire 2 scroll  ,      ,                 ; 37 MANCAT          
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 38 PEDE            
@@ -482,7 +482,7 @@ lut_StealList:
 .byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP          
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3E GARGOYLE        
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3F R`GOYLE         
-.byte $01, FLOWCLOCK  , $00, $00, $00, $00         ; Flowing Clock  ,      ,                 ; 40 EARTH           
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH           
 .byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE            
 .byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D         
 .byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D           
