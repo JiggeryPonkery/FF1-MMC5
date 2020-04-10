@@ -12465,6 +12465,7 @@ DrawCombatBox:
     JSR DrawBox_WaitForVBlank
     JSR FormatBattleString     ; decompress the string to the box's innards in RAM    
     JSR DrawBox_WaitForVBlank
+   ; JSR BattleWaitForVBlank
     JSR JigsBoxDrawToBuffer    ; copy the box to the screen buffer
     ;; also first copies the screen buffer to backup RAM
     ;; so that undrawing restores the exact tiles "behind" the box
@@ -13969,17 +13970,33 @@ WaitForVBlank:
     
     LDA InBattle
     BEQ OnIRQ
-        LDA #159   
+        LDA #30
         STA $5203
 
 OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
-    LDA $5204      ; JIGS - high bit set when scanling #159 is being drawn
+    LDA $5204      ; JIGS - high bit set when scanling #163 is being drawn
     BPL @ContinueLooping
     
-    LDX #$11       ; waits for H-blank so as not to draw weird dots on the screen
-  : DEX
-    BNE :-
+
+ 
+   @ScanlineCheck:
+    LDA InBattle   ; When 1, it should do Scanline_30 things. When 2, it does Scanline_163 things
+    LSR A
+    BNE @Scanline_163
+ 
+   @Scanline_30:
+    INC InBattle   ; Set InBattle to 2
+    LDY #$10       ; set Y to light grey palette byte
+    JSR WaitForHBlank
+    LDA #163-30    ; -30 since turning the PPU off resets the scanline counter?
+    STA $5203      ; Set the next trigger to occur on scanline 163      
+    JMP @LoopForever
+   
+   @Scanline_163:   
+    DEC InBattle   ; Set InBattle to 1
+    LDY BattleBGColor
+    JSR WaitForHBlank
     
     LDA soft2000
     ORA #$90       ; make background tiles use the sprites!
@@ -13987,8 +14004,32 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     
     LDA #$00       
     STA $5203      ; Clear trigger 
+
    @ContinueLooping: 
     JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
+    
+WaitForHBlank:
+    LDX #$07 ;11       ; waits for H-blank so as not to draw weird dots on the screen
+  : DEX
+    BNE :-    
+    LDA $2002  ; reset PPU Addr toggle
+    LDA #$3F   ; set PPU addr to point to palette
+    STA $2006
+    LDA #$0E
+    STA $2006
+    LDA #0
+    STA $2001
+    STY $2007  ; write Y to palette $3F0E
+    
+    LDA #$1E
+    STX $2006  ; reset scroll to 0? 
+    STA $2005
+    LDA #$80
+    STX $2005  ; write X scroll (0)
+    STA $2006
+    LDA #$1E
+    STA $2001
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -14821,46 +14862,54 @@ JigsBoxDrawToBuffer:
     STA BattleTmpPointer2+1   ; save address high (screen buffer)
     STA tmp+3
     LDY #0
+    LDX #1
 
    @TransferBoxTile:
-    LDA RAMSwap
-    BMI @HPUpdate
+    LDA RAMSwap               ; check this variable to see if we're undrawing or drawing a box
+    BMI @HPUpdate             ; or if the high bit is set, only updating HP text
     BNE @Undraw
     
    @NormalBox:
     LDA (tmp+2), Y            ; copy screen buffer to backup box
     LDX #1
-    STX $5113                 ; swap to backup RAM
+    STX $5113                 ; X = 1 : swap to backup RAM
     STA (tmp), Y              ; save the screen buffer tile to backup RAM box buffer
-    LDA #0
-    STA $5113                 ; swap to normal RAM
+    LDX #0
+    STX $5113
+    ;STY $5113                 ; Y = 0 : swap to normal RAM
+    
+   @HPUpdate:                 ; (for HP updating, only copy new text over)
     LDA (tmp), Y              ; then copy box to draw it to the screen buffer
     STA (tmp+2), Y
     BNE @INC_pointer
 
-   @HPUpdate:
-    LDA (tmp), Y             ; for HP updating, only copy new text over
-    STA (tmp+2), Y
-    BNE @INC_pointer
-
    @Undraw:
-    LDA #1                  ; Get the tile from the backup RAM
-    STA $5113
-    LDA (tmp), Y
+    LDX #1
+    STX $5113               ; X = 1 : swap to backup RAM
+    LDA (tmp), Y            ; Get the tile from the backup RAM
     LDX #0
-    STX $5113               ; swap back to normal RAM
+    STX $5113
+    ;STY $5113               ; Y = 0 : swap to normal RAM
     STA (tmp+2), Y
 
-   @INC_pointer:
-    INC tmp
+  @INC_pointer:
+    INY
     BNE :+
         INC tmp+1
-  : INC tmp+2
-    BNE :+
         INC tmp+3
-
   : DEC tmp+10
     BNE @TransferBoxTile
+
+;   @INC_pointer:
+;    INC tmp
+;    BNE :+
+;        INC tmp+1
+;  : INC tmp+2
+;    BNE :+
+;        INC tmp+3
+;
+;  : DEC tmp+10
+;    BNE @TransferBoxTile
    
    @NextRow:   
     LDA #32                 ; screen width

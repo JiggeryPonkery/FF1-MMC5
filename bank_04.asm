@@ -401,8 +401,8 @@ LoadSprite_Bank04:
     BCC LoadAttackCloud     ; 08
 
 BattleCharStonePositions_LUT:
-   .byte $0E,$00    ; character 0 
-   .byte $0E,$80    ; character 1 
+   .byte $0D,$00    ; character 0 
+   .byte $0D,$80    ; character 1 
    .byte $0E,$00    ; character 2 
    .byte $0E,$80    ; character 3 
    
