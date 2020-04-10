@@ -13899,32 +13899,7 @@ OnReset:
     ;JSR SwapPRG        ;   anything in bank 6
     JMP GameStart_L    ; jump to the start of the game!
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;   NMI Vector [$FE9C :: 0x3FEAC] 
-;;
-;;     This is called when an NMI occurs.  FF1 has a bizarre way
-;;    of doing NMIs.  It calls a Wait for VBlank routine, which enables
-;;    NMIs, and does an infinite JMP loop.  When an NMI is triggered,
-;;    It does not RTI (since that would put it back in that infinite
-;;    loop).  Instead, it tosses the RTI address and does an RTS, which
-;;    returns to the area in code that called the Wait for Vblank routine
-;;
-;;     Changes to this routine can impact the timing of various raster effects,
-;;    potentially breaking them.  It is recommended that you don't change this
-;;    routine unless you're very careful.  Unedited, this routine exits no earlier
-;;    than 37 cycles after NMI (30 cycles used in this routine, plus 7 for the NMI)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-OnNMI:
-    LDA soft2000
-    STA $2000      ; set the PPU state
-    LDA $2002      ; clear VBlank flag and reset 2005/2006 toggle
-    PLA
-    PLA
-    PLA            ; pull the RTI return info off the stack
-    RTS            ; return to the game
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13970,34 +13945,38 @@ WaitForVBlank:
     
     LDA InBattle
     BEQ OnIRQ
-        LDA #30
+        LDA #160
         STA $5203
 
 OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
     LDA $5204      ; JIGS - high bit set when scanling #163 is being drawn
-    BPL @ContinueLooping
+    BPL @LoopForever
     
-
- 
-   @ScanlineCheck:
-    LDA InBattle   ; When 1, it should do Scanline_30 things. When 2, it does Scanline_163 things
-    LSR A
-    BNE @Scanline_163
- 
-   @Scanline_30:
-    INC InBattle   ; Set InBattle to 2
-    LDY #$10       ; set Y to light grey palette byte
-    JSR WaitForHBlank
-    LDA #163-30    ; -30 since turning the PPU off resets the scanline counter?
-    STA $5203      ; Set the next trigger to occur on scanline 163      
-    JMP @LoopForever
-   
    @Scanline_163:   
-    DEC InBattle   ; Set InBattle to 1
+    LDX #10       ; waits for H-blank so as not to draw weird dots on the screen
+  : DEX
+    BNE :-    
     LDY BattleBGColor
-    JSR WaitForHBlank
-    
+  ;  LDA $2002  ; reset PPU Addr toggle (necessary?)
+    LDA #$3F   ; set PPU addr to point to palette
+    STA $2006
+    LDA #$0E
+    STA $2006
+    STX $2001 ; X = 0, turn off screen 
+    STY $2007  ; write Y to palette $3F0E
+
+    ;; scroll setting
+    ;; X position is 0, in X 
+    LDY #$A0   ; Y position
+    LDA #$80   ; Finalthing: Y position AND $F8, left shifted twice; then ORA with 0 position right shifted 3 times
+    STX $2006  ; Nametable 0 
+    STY $2005  ; Set Y pos
+    STX $2005  ; Set X pos (0)
+    STA $2006  ; Set Finalthing
+    LDA #$1E
+    STA $2001  ; turn on screen
+
     LDA soft2000
     ORA #$90       ; make background tiles use the sprites!
     STA $2000
@@ -14008,28 +13987,46 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
    @ContinueLooping: 
     JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
     
-WaitForHBlank:
-    LDX #$07 ;11       ; waits for H-blank so as not to draw weird dots on the screen
-  : DEX
-    BNE :-    
-    LDA $2002  ; reset PPU Addr toggle
-    LDA #$3F   ; set PPU addr to point to palette
-    STA $2006
-    LDA #$0E
-    STA $2006
-    LDA #0
-    STA $2001
-    STY $2007  ; write Y to palette $3F0E
-    
-    LDA #$1E
-    STX $2006  ; reset scroll to 0? 
-    STA $2005
-    LDA #$80
-    STX $2005  ; write X scroll (0)
-    STA $2006
-    LDA #$1E
-    STA $2001
-    RTS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;   NMI Vector [$FE9C :: 0x3FEAC] 
+;;
+;;     This is called when an NMI occurs.  FF1 has a bizarre way
+;;    of doing NMIs.  It calls a Wait for VBlank routine, which enables
+;;    NMIs, and does an infinite JMP loop.  When an NMI is triggered,
+;;    It does not RTI (since that would put it back in that infinite
+;;    loop).  Instead, it tosses the RTI address and does an RTS, which
+;;    returns to the area in code that called the Wait for Vblank routine
+;;
+;;     Changes to this routine can impact the timing of various raster effects,
+;;    potentially breaking them.  It is recommended that you don't change this
+;;    routine unless you're very careful.  Unedited, this routine exits no earlier
+;;    than 37 cycles after NMI (30 cycles used in this routine, plus 7 for the NMI)
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+OnNMI:
+    ;; if in Battle, set the one palette to grey at the start of VBlank
+    LDA InBattle
+    BEQ :+
+        LDY #$10    
+        LDA #$3F   ; set PPU addr to point to palette
+        STA $2006
+        LDA #$0E
+        STA $2006
+        STX $2001 ; X = 0, turn off screen 
+        LDA #$20
+        STY $2007  ; write Y to palette $3F0E
+        LDA #$1E
+        STA $2001  ; turn on screen
+
+  : LDA soft2000
+    STA $2000      ; set the PPU state
+    LDA $2002      ; clear VBlank flag and reset 2005/2006 toggle
+    PLA
+    PLA
+    PLA            ; pull the RTI return info off the stack
+    RTS            ; return to the game
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
