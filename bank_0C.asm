@@ -703,7 +703,7 @@ FinishBattlePrepAndFadeIn:
     ;; JIGS - adding battle turn reset:
     LDA #1
     STA BattleTurn    
-    JSR PrintBattleTurnNumber
+  ;  JSR PrintBattleTurnNumber
     JSR DrawCharacterStatus
     LDA #BOX_PLAYER
     JSR DrawCombatBox
@@ -4165,14 +4165,14 @@ lut_MainCombatBoxCursorPos:
   
   
 lut_ReadyCursorPos:
-  .BYTE $08, $C6 
-  .BYTE $08, $C6 
-  .BYTE $08, $C6 
-  .BYTE $08, $C6 
-  .BYTE $40, $C6
-  .BYTE $40, $C6
-  .BYTE $40, $C6 
-  .BYTE $40, $C6 
+  .BYTE $08, $CE 
+  .BYTE $08, $CE 
+  .BYTE $08, $CE 
+  .BYTE $08, $CE 
+  .BYTE $40, $CE
+  .BYTE $40, $CE
+  .BYTE $40, $CE 
+  .BYTE $40, $CE 
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5282,7 +5282,7 @@ ApplyEndOfRoundEffects:
     INC BattleTurn
     
     JSR DrawCharacterStatus     
-    JSR PrintBattleTurnNumber
+  ;  JSR PrintBattleTurnNumber
     JMP CheckForBattleEnd       ; poison may have killed the party -- check for battle end.
     
 ClearGuardBuffers:
@@ -5295,25 +5295,25 @@ ClearGuardBuffers:
     STA btl_charrush, X
     RTS
     
-PrintBattleTurnNumber:
-    JSR LongCall
-    .word PrintBattleTurn
-    .byte BANK_MENUS
-    
-    JSR BattleWaitForVBlank_L
-    
-    LDA #>$205D                  ; set PPU addr
-    STA $2006
-    LDA #<$205D
-    STA $2006
-    
-    LDA format_buf-2 ; tens
-    STA $2007
-    LDA format_buf-1 ; ones 
-    STA $2007
-    
-    JSR BattleUpdatePPU                 ; reset scroll 
-    JMP BattleUpdateAudio               ; update audio for the frame we just waited for
+;PrintBattleTurnNumber:
+;    JSR LongCall
+;    .word PrintBattleTurn
+;    .byte BANK_MENUS
+;    
+;    JSR BattleWaitForVBlank_L
+;    
+;    LDA #>$205D                  ; set PPU addr
+;    STA $2006
+;    LDA #<$205D
+;    STA $2006
+;    
+;    LDA format_buf-2 ; tens
+;    STA $2007
+;    LDA format_buf-1 ; ones 
+;    STA $2007
+;    
+;    JSR BattleUpdatePPU                 ; reset scroll 
+;    JMP BattleUpdateAudio               ; update audio for the frame we just waited for
     
     
 
