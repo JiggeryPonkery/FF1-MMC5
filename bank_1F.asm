@@ -13950,7 +13950,7 @@ WaitForVBlank:
 
 OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
-    LDA $5204      ; JIGS - high bit set when scanling #163 is being drawn
+    LDA $5204      ; JIGS - high bit set when scanline #160 is being drawn
     BPL @LoopForever
     
    @Scanline_163:   
@@ -13960,19 +13960,20 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     LDY BattleBGColor
   ;  LDA $2002  ; reset PPU Addr toggle (necessary?)
     LDA #$3F   ; set PPU addr to point to palette
-    STA $2006
+    STA $2006    
+    STX $2001 ; X = 0, turn off screen 
     LDA #$0E
     STA $2006
-    STX $2001 ; X = 0, turn off screen 
     STY $2007  ; write Y to palette $3F0E
 
     ;; scroll setting
     ;; X position is 0, in X 
-    LDY #$A0   ; Y position
-    LDA #$80   ; Finalthing: Y position AND $F8, left shifted twice; then ORA with 0 position right shifted 3 times
-    STX $2006  ; Nametable 0 
-    STY $2005  ; Set Y pos
-    STX $2005  ; Set X pos (0)
+    LDY #%00000010 ;$A0   ; Y position
+    LDA #%10000000 ;$80   ; Finalthing: Y position AND $F8, left shifted twice; then ORA with 0 position right shifted 3 times
+    ;STX $2006  ; Nametable 0 
+    ;STY $2005  ; Set Y pos
+    ;STX $2005  ; Set X pos (0)
+    STY $2006
     STA $2006  ; Set Finalthing
     LDA #$1E
     STA $2001  ; turn on screen
@@ -14009,6 +14010,7 @@ OnNMI:
     ;; if in Battle, set the one palette to grey at the start of VBlank
     LDA InBattle
     BEQ :+
+        LDX #0
         LDY #$10    
         LDA #$3F   ; set PPU addr to point to palette
         STA $2006

@@ -68,6 +68,7 @@
 .import ShowMapObject
 .import PlayDoorSFX
 .import BattleRNG_L
+.import ItemDescriptions
 
 .segment "BANK_0E"
 
@@ -4349,8 +4350,10 @@ CommonShopLoop_List:
     BNE @B_Pressed       ; check to see if A or B have been pressed
     LDA joy_a
     BNE @A_Pressed
-    ;LDA joy_start
-    ;BNE @Start_Pressed
+    LDA joy_start        ; or if start/select have been pressed
+    ORA joy_select
+    BNE @Start_Pressed    
+    
                          ; if neither pressed.. see if the cursor has been moved
     LDA joy              ; get joy
     AND #$0C             ; isolate up/down buttons
@@ -4373,7 +4376,7 @@ CommonShopLoop_List:
     LDA shop_selling
     BNE @ScrollListUp
     
-    @UpReturn:
+   @UpReturn:
     LDA cursor_max       ; otherwise (below zero), wrap to cursor_max-1
     SEC
     SBC #$01
@@ -4388,16 +4391,14 @@ CommonShopLoop_List:
 
     LDA shop_selling
     BNE @ScrollListDown
-    @DownReturn:
     
+   @DownReturn:
     LDA #0               ; if yes, wrap cursor to zero
 
   @MoveDone:             ; code reaches here when A is to be the new cursor position
     STA cursor           ; just write it back to the cursor
     JMP @Loop            ; and continue loop
  
-
-
   @B_Pressed:            ; if B pressed....
     SEC                  ; SEC to indicate player pressed B
                          ;  and proceed to @ButtonDone
@@ -4406,14 +4407,28 @@ CommonShopLoop_List:
     LDA #0
     STA joy_a            ; zero joy_a and joy_b so further buttons will be detected
     STA joy_b
-    ;STA joy_start       ; and select... but why?  select isn't used in shops?
     RTS
 
   @A_Pressed:            ; if A pressed...
     CLC                  ; CLC to indicate player pressed A
     BCC @ButtonDone      ;  and jump to @ButtonDone (always branches)
     
-;  @Start_Pressed:
+  @Start_Pressed:
+   LDA #$00
+   STA joy_start         
+   STA joy_select
+   JSR DrawShopBox       ; re-draw the dialogue box (clears text)
+   
+   LDX cursor
+   LDA item_box, X
+   STA shop_curitem
+   
+   JSR LongCall
+   .word ItemDescriptions
+   .byte BANK_ITEMDESC
+   JMP @Loop
+  
+  
 ;   JSR EnterMainMenu
 ;   JSR LoadShopCHRPal     ; load up the CHR and palettes (and the shop type)
 ;   JSR DrawShop           ; draw the shop  
