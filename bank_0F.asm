@@ -1513,7 +1513,7 @@ EnterTitleScreenNew:
     BEQ @OptionsMenu
         CMP #1                 
         RTS                   
-    @OptionsMenu:
+   @OptionsMenu:
     LDA #0
     STA $2001              
     STA menustall           
