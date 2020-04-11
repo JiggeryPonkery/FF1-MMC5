@@ -175,6 +175,7 @@
 .import LoadSprite_Bank04
 .import lut_MenuTextCHR
 .import LoadStoneSprites
+.import lut_CommonStringPtrTbl
 
 .segment "BANK_FIXED"
 
@@ -7816,7 +7817,7 @@ AddGPToParty:
 ;;  03 xx = price of item 'xx'
 ;;  04    = current GP amount
 ;;  05    = single line break
-;;  06    = JIGS - Battle turn number
+;;  06    = JIGS - Common substring
 ;;  07 xx = JIGS - Weapon/Armor item name
 ;;  08    = JIGS - Decrement X
 ;;  09    = JIGS - print spaces
@@ -7943,10 +7944,10 @@ ComplexStringControlCode:
     BEQ ComplexString_PlayerGold
     CMP #$05
     BEQ ComplexString_SingleLineBreak
-
- ;; $06 does nothing actually
-
-    CMP #$07
+    CMP #$06
+    BNE :+
+        JMP ComplexString_CommonSubString
+  : CMP #$07
     BNE :+
         JMP ComplexString_WeaponArmorName
   : CMP #$08
@@ -8010,7 +8011,8 @@ ComplexString_ItemName:
     JSR ComplexString_GetNextByte        ;; get the item ID
     
 ComplexString_ItemName_FromCharCode:    
-    JSR ComplexString_DrawItemPrep       ;; swaps to the Item name bank, saves the pointer, and checks if the item = bottle
+    JSR ComplexString_DrawItemPrep       ;; swaps to the Item name bank, saves the pointer
+    JSR DumbBottleThing                  ;; checks if the item = bottle
     BCS @itemHigh                        ; if doubling A caused a carry (item ID >= $80)... jump ahead
       LDA lut_ItemNamePtrTbl, X          ;  if item ID was < $80... read pointer from first half of pointer table
       STA text_ptr                       ;  low byte of pointer
@@ -8025,6 +8027,14 @@ ComplexString_ItemName_FromCharCode:
   : STA text_ptr+1                       ; finally write high byte of pointer
     JSR ComplexString_GetNext            ; recursively draw the substring
     JMP ComplexString_RestoreTextPointer ; then restore original string and continue
+
+ComplexString_CommonSubString:
+    JSR ComplexString_GetNextByte
+    JSR ComplexString_DrawItemPrep
+      LDA lut_CommonStringPtrTbl, X   
+      STA text_ptr                       
+      LDA lut_CommonStringPtrTbl+1, X 
+      JMP :-
 
 ComplexString_WeaponArmorName:
     JSR ComplexString_GetNextByte
@@ -8057,7 +8067,6 @@ ComplexString_DrawItemPrep: ;; support routine for item names
     TAX                     ;; backup item ID
     LDA #BANK_ITEMS
     JSR ComplexString_SaveTextPointer_Swap
-    JSR DumbBottleThing
     TXA                     ; get item ID
     ASL A                   ; double it (for pointer table lookup)
     TAX                     ; put low byte in X for indexing   
@@ -11932,13 +11941,12 @@ EnterBattle:
     LDY #3<<2
     JSR DrawBattleBackdropRow   ; 4 rows total
     
-    
-    LDA #28                    ; box at 1,1
-    STA box_x                  ; with dims 16,18
-    LDA #1                   
-    LDX #4                     ;  this draws the battle turn box
-    LDY #3
-    JSR BattleBox_vAXY
+   ; LDA #28                    ; box at 1,1
+   ; STA box_x                  ; with dims 16,18
+   ; LDA #1                   
+   ; LDX #4                     ;  this draws the battle turn box
+   ; LDY #3
+   ; JSR BattleBox_vAXY
 
     LDA #BANK_BATTLE           ; swap in the battle bank
     STA battle_bank
@@ -12068,7 +12076,7 @@ lut_BtlAttrTbl:
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 ;  .BYTE $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
 
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$FF
+  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
   .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
   .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
   .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
@@ -12106,9 +12114,11 @@ BattleScreenShake:
       
       JSR BattleRNG
       AND #$03          ; get a random number betwee 0-3
+      STA tmp+11
       STA $2005         ; use as X scroll
       JSR BattleRNG
       AND #$03          ; another random number
+      STA tmp+12
       STA $2005         ; for Y scroll
       
       DEC ScreenShakeCounter
@@ -12867,13 +12877,19 @@ EtherBoxString:
 .BYTE $95,$84,$FF,$FF,$15,$03,$FF,$95,$88,$FF,$FF,$15,$07,$00
 
 ConfirmTurn:
-.byte $01, $0F, BTLMSG_READY,         $01, $01, $0F, BTLMSG_YESNO,        $00 
+.byte $01, $0F, BTLMSG_TURN, $17, $01, $01
+.byte $0F, BTLMSG_READY, $01
+.byte $0F, BTLMSG_YESNO, $00 
 
 ConfirmCharge: 
-.byte $01, $0F, BTLMSG_CHARGE,        $01, $01, $0F, BTLMSG_YESNO_EMPH,   $00
+.byte $01, $0F, BTLMSG_TURN, $17, $01, $01
+.byte $0F, BTLMSG_CHARGE, $01
+.byte $0F, BTLMSG_YESNO_EMPH, $00
 
 ConfirmRunAway:
-.byte $01, $0F, BTLMSG_RUNAWAY_QUERY, $01, $01, $0F, BTLMSG_YESNO_UNSURE, $00        
+.byte $01, $0F, BTLMSG_TURN, $17, $01, $01
+.byte $0F, BTLMSG_RUNAWAY_QUERY, $01
+.byte $0F, BTLMSG_YESNO_UNSURE, $00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12884,7 +12900,7 @@ ConfirmRunAway:
 ;;    The source string can contain the following control codes:
 ;;
 ;;  00       = null terminator (marks end of string)
-;;  01       = double line break
+;;  01       = SINGLE line break
 ;;  02       = print attacker's name
 ;;  03       = print defender's name
 ;;  04       = print character 0's name
@@ -12909,6 +12925,8 @@ ConfirmRunAway:
 ;;  13 xx yy = print character stat, xx = character ID, yy = stat
 ;;  14       = print skill text based on battle_class variable
 ;;  15 xx    = print defender's MP stat, where xx = stat to print
+;;  16       = force a VBlank wait before continuing
+;;  17       = print battle turn
 ;;
 ;;  Values >= $48 are printed as normal tiles.
 ;;
@@ -12955,13 +12973,14 @@ FormatBattleString:
       LDA #0
       ADC btldraw_dst+1         ; and add the carry
       STA btldraw_dst+1
+      JSR SetBtlDrawWidthCounter ; and reset the width counter
       JMP @IncPtr    
   : CMP #$48
     BCS :+
       JSR DrawBattleString_ControlCode    ; if <  #$48
       JMP @IncPtr
     : JSR DrawBattleString_ExpandChar
-      
+
    @IncPtr:
     JSR DrawBattle_IncSrcPtr    ; Inc the source pointer and continue looping
     JMP @Loop
@@ -13042,10 +13061,10 @@ DrawBattleString_IncDstPtr:
     BNE DrawBattleString_IncDst_Real
 
 DrawBattleString_IncRow:
-        JSR SetBtlDrawWidthCounter ; resets the width counter
-        JSR DrawBattleString_IncDst_Real ; 1...
-        JSR DrawBattleString_IncDst_Real ; 2...
-        ;; flow: inc by 3 to start drawing to the next line (only 2 tiles of box sides to draw over, plus the current tile)
+    JSR SetBtlDrawWidthCounter ; resets the width counter
+    JSR DrawBattleString_IncDst_Real ; 1...
+    JSR DrawBattleString_IncDst_Real ; 2...
+    ;; flow: inc by 3 to start drawing to the next line (only 2 tiles of box sides to draw over, plus the current tile)
 
 DrawBattleString_IncDst_Real:
     INC btldraw_dst
@@ -13108,8 +13127,8 @@ DrawBattle_Division:
     
 
 DrawPlayerHP:
-    LDA #8
-    STA tmp+9 ; DrawPlayerHPCounter
+  ;  LDA #8
+  ;  STA tmp+9 ; DrawPlayerHPCounter
 
     JSR DrawBattle_IncSrcPtr
     LDA (btldraw_src), Y     ; get the char index from the string
@@ -13124,8 +13143,14 @@ DrawPlayerHP:
     LDA format_buf-2
     JSR DrawBattleString_DrawChar
     LDA format_buf-1
-    ;JMP DrawBattleString_DrawChar   ; and print it
-    JSR DrawBattleString_DrawChar
+    JMP DrawBattleString_DrawChar   ; and print it
+    ;JSR DrawBattleString_DrawChar
+    
+    ;; JIGS - ...wait, how did this fix the issue?
+    ;; If it was loading 8 into tmp+9 every time this was called?
+    ;; Since this routine only does 3 tiles?!
+    ;; Meaning its called twice per HP update (current and max)...
+    ;; so it would never really decrement 8 times...!? Wah
     
     ;; fix for dropped music frames:
     ;; Player HP is converted 8 times (4 characters, current HP / Max HP)
@@ -13135,16 +13160,180 @@ DrawPlayerHP:
     ;; So every time an HP number is converted from hex to decimal,
     ;; It decreases the counter from 8, and when it hits 0, it forces a frame/audio update
     
-    DEC tmp+9 ; DrawPlayerHPCounter
-    BNE :+
+ ;   DEC tmp+9 ; DrawPlayerHPCounter
+ ;   BNE :+
+ ;   
+ ;   JSR WaitForVBlank
+ ;   JSR CallMusicPlay
+ ;   
+ ; : RTS
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  DrawBattleString_ControlCode  [$FB96 :: 0x3FBA6]
+;;
+;;    Print a control code.  See FormatBattleString for details
+;;  A = the control code
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ 
+
+
+DrawBattleString_ControlCode:
+    CMP #$02
+    BEQ @PrintAttacker             ; code:  02
+    CMP #$03
+    BEQ @PrintDefender             ; code:  03
+    CMP #$08
+    BCC @PrintCharacterName        ; codes: 04-07
+    CMP #$0C
+    BCC @PrintRoster               ; codes: 08-0B
+    BEQ @DrawBattleNumber_Indirect ; code:  0C
+    CMP #$0D
+    BEQ @PrintEquipmentName        ; code:  0D
+    CMP #$0E
+    BEQ @PrintAttackName           ; code:  0E
+    JMP @DrawBattleString_ControlCode_2
     
-    JSR WaitForVBlank
-    JSR CallMusicPlay
+  @PrintAttacker:       ; code: 02
+    LDA btl_attacker
+    JMP DrawEntityName
+  @PrintDefender:       ; code: 03
+    LDA btl_defender
+    JMP DrawEntityName
+  @PrintDefenderIndex:  ; code: 12 
+    LDA btl_defender_index  
+    JMP :+
+  
+  @PrintCharacterName:  ; codes:  04-07
+    SEC
+    SBC #$04            ; subtract 4 to make it zero based
+  : ORA #$80            ; OR with $80 to make it a character entity ID
+    JMP DrawEntityName  ; then print it as an entity
+
+    ; Print an entry on the enemy roster
+  @PrintRoster:             ; codes: 08-0B
+    SEC                     ; subtract 8 to make it zero based
+    SBC #$08
+    TAX
+    LDA btl_enemyroster, X  ; get the roster entry
+    CMP #$FF
+    BEQ @Exit               ; if 'FF', that signals an empty slot, so don't print anything.
+    JSR DrawEnemyName       ; then draw that enemy's name
+    JMP DrawEnemyNumber        
+   @Exit:
+    RTS 
     
-  : RTS
+  @DrawBattleNumber_Indirect:  ; print a number (indirect)
+    JSR DrawBattle_IncSrcPtr
+    LDA (btldraw_src), Y       ; pointer to a pointer to the number to print
+    STA btldraw_subsrc
+    JSR DrawBattle_IncSrcPtr
+    LDA (btldraw_src), Y
+    STA btldraw_subsrc+1
+    JMP DrawBattle_Number      ; flow into this routine
+  
+  @PrintEquipmentName:     ; code:  0D
+    LDA #BANK_ITEMS
+    JSR SwapPRG_L
+    LDA #>lut_WeaponArmorNamePtrTbl
+    LDX #<lut_WeaponArmorNamePtrTbl
+    JMP @DrawAttackName
     
-;;  DrawBattleString_Code11  [$FB1E :: 0x3FB2E]
-DrawBattleString_Code11:            ; print a number 
+  @PrintAttackName:     ; code:  0E
+    LDA #BANK_ITEMS
+    JSR SwapPRG_L
+    ;LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
+    ;BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
+    ;; JIGS - kind of pointless... also now items can do enemy attacks?
+    
+    LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
+    CMP #ENEMY_ATTACK_START         ; if it's >= then it's a special enemy attack, C is set
+    BCC @PrintAttackName_AsItem
+    
+    LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
+    LDX #<lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ;   index starts at $41
+    BEQ @DrawAttackName ;; low byte is 0 since its at the start of the bank?    
+
+   @PrintAttackName_AsItem: ; attack is less than $42
+    LDA #>lut_ItemNamePtrTbl
+    LDX #<lut_ItemNamePtrTbl
+   
+   @DrawAttackName:   
+    JSR BattleDrawLoadSubSrcPtr
+    JMP DrawBattleSubString_Max8
+
+@DrawBattleString_ControlCode_2:
+    CMP #$0F
+    BEQ @DrawBattleMessage        ; code:  0F
+    CMP #$10
+    BEQ @DrawString_SpaceRun      ; code:  10
+    CMP #$11
+    BEQ @DrawBattleString_Code11  ; code:  11
+    CMP #$12
+    BEQ @PrintDefenderIndex       ; code:  12
+    CMP #$13
+    BEQ @DrawPlayerHP             ; code:  13
+    CMP #$14
+    BEQ @PrintClassSkill          ; code:  14
+    CMP #$15
+    BEQ @DrawPlayerMP             ; code:  15
+    CMP #$17
+    BEQ @PrintBattleTurnNumber
+    ;; and if its 16-47, do a VBlank.
+    JMP DrawBox_WaitForVBlank
+  
+  @DrawBattleMessage:
+    LDA #BANK_BTLMESSAGES
+    JSR SwapPRG_L
+    LDA #>(data_BattleMessages - 2)     ; -2 because battle message is 1-based
+    LDX #<(data_BattleMessages - 2)
+    JSR BattleDrawLoadSubSrcPtr
+    LDA #$3F 
+    STA btldraw_max
+    JMP DrawBattleSubString  
+
+  @DrawString_SpaceRun:
+    JSR DrawBattle_IncSrcPtr    ; inc ptr
+    LDA (btldraw_src), Y        ; get the run length
+    TAX
+    LDA #$FF                    ; blank space tile
+    : ;LDY #$00
+      STA (btldraw_dst), Y      ; print top/bottom portions as empty space
+      JSR DrawBattleString_IncDstPtr
+      DEX
+      BNE :-
+    RTS    
+    
+   @PrintClassSkill:
+    LDA #5
+    STA btldraw_subsrc           ; use the subsource pointer as a counter this time
+    LDA battle_class             ; get class ID
+    LDX #6
+    JSR MultiplyXA               ; multiply by 6
+    TAX
+  : LDA SkillText_LUT, X         ; use as index for the text string to print
+    JSR DrawBattleString_DrawChar
+    INX
+    DEC btldraw_subsrc           ; when 5 characters are copied over, exit
+    BNE :-
+    RTS
+    
+   @DrawPlayerHP:
+    JMP DrawPlayerHP
+
+  @PrintBattleTurnNumber:
+    LDA #BANK_MENUS
+    JSR SwapPRG_L
+    JSR PrintBattleTurn
+    LDA format_buf-2
+    JSR DrawBattleString_DrawChar 
+    LDA format_buf-1
+    JMP DrawBattleString_DrawChar 
+    
+  @DrawBattleString_Code11:            ; print a number 
     JSR DrawBattle_IncSrcPtr        ;   pointer to the number to print is in the source string
     LDA btldraw_src
     STA btldraw_subsrc              ; since the number is embedded in the source string, just use
@@ -13153,15 +13342,33 @@ DrawBattleString_Code11:            ; print a number
     JSR DrawBattle_IncSrcPtr
     JMP DrawBattle_Number
 
-;;  DrawBattleString_Code0C  [$FB2F :: 0x3FB3F]
-DrawBattleString_Code0C:            ; print a number (indirect)
-    JSR DrawBattle_IncSrcPtr
-    LDA (btldraw_src), Y            ; pointer to a pointer to the number to print
-    STA btldraw_subsrc
-    JSR DrawBattle_IncSrcPtr
-    LDA (btldraw_src), Y
-    STA btldraw_subsrc+1
-  ; JMP DrawBattle_Number           ; flow into this routine
+   @DrawPlayerMP:
+    ;LDA submenu_targ              ; set by the item box or opening the magic menu in battle
+    ;JSR ShiftLeft6
+    ;STA char_index
+    ;; should be set in BattleSubMenu_Magic now
+   
+    LDA #BANK_MENUS
+    JSR SwapPRG_L
+    JSR DrawBattle_IncSrcPtr      ; inc the pointer to get the spell level
+    LDA (btldraw_src), Y          ; load it
+    PHA                           ; back it up
+    CLC           
+    ADC #$2C                      ; add the current MP stat byte to it
+    JSR PrintCharStat
+    LDA format_buf-1
+    JSR DrawBattleString_DrawChar ; draws current MP 
+    LDA #$7A
+    JSR DrawBattleString_DrawChar ; draws / 
+    PLA                           ; spell level byte
+    CLC
+    ADC #$34                      ; add maximum MP stat byte to it
+    JSR PrintCharStat
+    LDA format_buf-1    
+    JMP DrawBattleString_DrawChar ; draws max MP 
+    
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13220,164 +13427,8 @@ DrawBattle_Number:
   @OnesDigit:
     LDA btltmp+6                    ; fetch the 1s digit
     ORA #$80
-    JMP DrawBattleString_DrawChar   ; and print it
-    
-;;  DrawBattleString_Code11_Short  [$FB93 :: 0x3FBA3]
-;;    Just jumps to the actual routine.  Only exists here because the routine is too
-;;  far away to branch to.
-DrawBattleString_Code11_Short:
-    JMP DrawBattleString_Code11
-    
+    JMP DrawBattleString_DrawChar   ; and print it    
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawBattleString_ControlCode  [$FB96 :: 0x3FBA6]
-;;
-;;    Print a control code.  See FormatBattleString for details
-;;  A = the control code
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawBattleString_ControlCode:
-    CMP #$02
-    BEQ @PrintAttacker          ; code:  02
-    CMP #$03
-    BEQ @PrintDefender          ; code:  03
-    CMP #$08
-    BCC @PrintCharacterName     ; codes: 04-07
-    CMP #$0C
-    BCC @PrintRoster            ; codes: 08-0B
-    BEQ DrawBattleString_Code0C ; code:  0C
-    CMP #$0D
-    BEQ @PrintEquipmentName     ; code:  0D
-    CMP #$0E
-    BEQ @PrintAttackName        ; code:  0E
-    CMP #$0F
-    ;BEQ DrawBattleMessage       ; code:  0F
-    BNE :+
-      JMP DrawBattleMessage
-  : CMP #$10
-    BNE :+
-      JMP DrawString_SpaceRun   ; code:  10
-  : CMP #$11
-    BEQ DrawBattleString_Code11_Short   ; code:  11
-    CMP #$12
-    BEQ @PrintDefenderIndex     ; code:  12
-    CMP #$13
-    BEQ @DrawPlayerHP           ; code:  13
-    CMP #$14
-    BEQ @PrintClassSkill        ; code:  14
-    CMP #$15
-    BEQ @DrawPlayerMP           ; code:  15
-
-    ;; and if its 16-47, do a VBlank.
-    JMP DrawBox_WaitForVBlank
-    
-
-  @Exit:
-    RTS
-
-  @PrintAttacker:       ; code: 02
-    LDA btl_attacker
-    JMP DrawEntityName
-  @PrintDefender:       ; code: 03
-    LDA btl_defender
-    JMP DrawEntityName
-  @PrintDefenderIndex:  ; code: 12 
-    LDA btl_defender_index  
-    JMP :+
-  
-  @PrintCharacterName:  ; codes:  04-07
-    SEC
-    SBC #$04            ; subtract 4 to make it zero based
-  : ORA #$80            ; OR with $80 to make it a character entity ID
-    JMP DrawEntityName  ; then print it as an entity
-    
-    ; Print an entry on the enemy roster
-  @PrintRoster:             ; codes: 08-0B
-    SEC                     ; subtract 8 to make it zero based
-    SBC #$08
-    TAX
-    LDA btl_enemyroster, X  ; get the roster entry
-    CMP #$FF
-    BEQ @Exit               ; if 'FF', that signals an empty slot, so don't print anything.
-    JSR DrawEnemyName       ; then draw that enemy's name
-    JMP DrawEnemyNumber    
-
-  @PrintEquipmentName:     ; code:  0D
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-    LDA #>lut_WeaponArmorNamePtrTbl
-    LDX #<lut_WeaponArmorNamePtrTbl
-    JMP @DrawAttackName
-    
-  @PrintAttackName:     ; code:  0E
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-    ;LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
-    ;BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
-    ;; JIGS - kind of pointless... also now items can do enemy attacks?
-    
-    LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
-    CMP #ENEMY_ATTACK_START         ; if it's >= then it's a special enemy attack, C is set
-    BCC @PrintAttackName_AsItem
-    
-    LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
-    LDX #<lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ;   index starts at $41
-    BEQ @DrawAttackName ;; low byte is 0 since its at the start of the bank?    
-
-   @PrintAttackName_AsItem: ; attack is less than $42
-    LDA #>lut_ItemNamePtrTbl
-    LDX #<lut_ItemNamePtrTbl
-   
-   @DrawAttackName:   
-    JSR BattleDrawLoadSubSrcPtr
-    JMP DrawBattleSubString_Max8
-    
-   @PrintClassSkill:
-    LDA #5
-    STA btldraw_subsrc           ; use the subsource pointer as a counter this time
-    LDA battle_class             ; get class ID
-    LDX #6
-    JSR MultiplyXA               ; multiply by 6
-    TAX
-  : LDA SkillText_LUT, X         ; use as index for the text string to print
-    JSR DrawBattleString_DrawChar
-    INX
-    DEC btldraw_subsrc           ; when 5 characters are copied over, exit
-    BNE :-
-    RTS
-    
-   @DrawPlayerHP:
-    JMP DrawPlayerHP
-
-   @DrawPlayerMP:
-    ;LDA submenu_targ              ; set by the item box or opening the magic menu in battle
-    ;JSR ShiftLeft6
-    ;STA char_index
-    ;; should be set in BattleSubMenu_Magic now
-   
-    LDA #BANK_MENUS
-    JSR SwapPRG_L
-    JSR DrawBattle_IncSrcPtr      ; inc the pointer to get the spell level
-    LDA (btldraw_src), Y          ; load it
-    PHA                           ; back it up
-    CLC           
-    ADC #$2C                      ; add the current MP stat byte to it
-    JSR PrintCharStat
-    LDA format_buf-1
-    JSR DrawBattleString_DrawChar ; draws current MP 
-    LDA #$7A
-    JSR DrawBattleString_DrawChar ; draws / 
-    PLA                           ; spell level byte
-    CLC
-    ADC #$34                      ; add maximum MP stat byte to it
-    JSR PrintCharStat
-    LDA format_buf-1    
-    JMP DrawBattleString_DrawChar ; draws max MP 
-    
-    
-    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  BattleDrawLoadSubSrcPtr  [$FC00 :: 0x3FC10]
@@ -13416,46 +13467,9 @@ BattleDrawLoadSubSrcPtr:
     LDA (btltmp+6), Y
     STA btldraw_subsrc+1
     
-    RTS
+    RTS    
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawBattleMessage  [$FC26 :: 0x3FC36]
-;;
-;;  control code $0F
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawBattleMessage:
-    LDA #BANK_BTLMESSAGES
-    JSR SwapPRG_L
-    LDA #>(data_BattleMessages - 2)     ; -2 because battle message is 1-based
-    LDX #<(data_BattleMessages - 2)
-    JSR BattleDrawLoadSubSrcPtr
-    LDA #$3F 
-    STA btldraw_max
-    JMP DrawBattleSubString
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawString_SpaceRun  [$FC39 :: 0x3FC49]
-;;
-;;  control code $10
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawString_SpaceRun:
-    JSR DrawBattle_IncSrcPtr    ; inc ptr
-    LDA (btldraw_src), Y        ; get the run length
-    TAX
-    LDA #$FF                    ; blank space tile
-    : ;LDY #$00
-      STA (btldraw_dst), Y      ; print top/bottom portions as empty space
-      JSR DrawBattleString_IncDstPtr
-      DEX
-      BNE :-
-    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13945,37 +13959,35 @@ WaitForVBlank:
     
     LDA InBattle
     BEQ OnIRQ
-        LDA #160
+        LDA #159
         STA $5203
+        LDX BattleBGColor
+        LDA BattleBackgroundColor_LUT, X
+        TAY
 
 OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
     LDA $5204      ; JIGS - high bit set when scanline #160 is being drawn
     BPL @LoopForever
     
-   @Scanline_163:   
+   @Scanline:   
     LDX #10       ; waits for H-blank so as not to draw weird dots on the screen
   : DEX
     BNE :-    
-    LDY BattleBGColor
-  ;  LDA $2002  ; reset PPU Addr toggle (necessary?)
+    LDA $2002  ; reset toggle
     LDA #$3F   ; set PPU addr to point to palette
     STA $2006    
-    STX $2001 ; X = 0, turn off screen 
+    STX $2001  ; X = 0, turn off screen 
     LDA #$0E
     STA $2006
     STY $2007  ; write Y to palette $3F0E
 
-    ;; scroll setting
-    ;; X position is 0, in X 
-    LDY #%00000010 ;$A0   ; Y position
-    LDA #%10000000 ;$80   ; Finalthing: Y position AND $F8, left shifted twice; then ORA with 0 position right shifted 3 times
-    ;STX $2006  ; Nametable 0 
-    ;STY $2005  ; Set Y pos
-    ;STX $2005  ; Set X pos (0)
+    ;; scroll setting?
+    LDY #%00000010 
+    LDA #%10000000 
     STY $2006
-    STA $2006  ; Set Finalthing
-    LDA #$1E
+    STA $2006  
+    LDA #$1E ; btl_soft2001
     STA $2001  ; turn on screen
 
     LDA soft2000
@@ -14009,7 +14021,7 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
 OnNMI:
     ;; if in Battle, set the one palette to grey at the start of VBlank
     LDA InBattle
-    BEQ :+
+    BEQ @NoBattle
         LDX #0
         LDY #$10    
         LDA #$3F   ; set PPU addr to point to palette
@@ -14019,10 +14031,19 @@ OnNMI:
         STX $2001 ; X = 0, turn off screen 
         LDA #$20
         STY $2007  ; write Y to palette $3F0E
-        LDA #$1E
+        LDA #$1E ; btl_soft2001
         STA $2001  ; turn on screen
+        LDY #$0
+        LDA ScreenShakeCounter ; is screen still shaking?
+        BEQ :+                 ; if yes...
+            LDY tmp+11         ; update scroll with these instead
+            LDX tmp+12
+      : STY $2005
+        STX $2005  ; update scroll
+        
 
-  : LDA soft2000
+   @NoBattle:
+    LDA soft2000
     STA $2000      ; set the PPU state
     LDA $2002      ; clear VBlank flag and reset 2005/2006 toggle
     PLA
@@ -14618,7 +14639,7 @@ SaveScreenHelper:
     
     
 BattleBackgroundColor_LUT:
-.byte $0F,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$2D,$25
+.byte $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$2D,$0F,$25
     
     
 
