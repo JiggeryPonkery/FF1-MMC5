@@ -13,6 +13,7 @@
 .export DumbBottleThing
 .export data_EnemyNames
 .export ScanEnemyString
+.export lut_CommonStringPtrTbl
 
 .import ConvertBattleNumber
 .import MultiplyXA
@@ -1895,7 +1896,7 @@ BTL_MESSAGE83:
 BTL_MESSAGE84:
 .byte $8A,$AF,$B5,$A8,$A4,$A7,$BC,$FF,$AB,$AC,$A7,$A7,$A8,$B1,$C4,$00 ; Already hidden!
 BTL_MESSAGE85:
-.byte $9C,$AC,$AA,$AB,$21,$23,$37,$35,$40,$C4,$00 ; Sight restored!
+.byte $FF,$FF,$9B,$B2,$B8,$B1,$A7,$FF,$FF,$00 ; __Round__
 BTL_MESSAGE86:
 .byte $9D,$1D,$31,$A8,$4E,$FF,$5C,$2A,$1E,$AF,$26,$A7,$AF,$BC,$69,$00 ; The bell rings loudly..
 BTL_MESSAGE87:
@@ -2297,28 +2298,325 @@ WeaponArmorPrices:
 .byte $00,$00 ; Armor 64
 
   
-DumbBottleThing:
-    LDY #0
-    DEC text_ptr
-    DEC text_ptr
-    LDA (text_ptr), Y
-    CMP #$07
-    BEQ @Exit
+  
+lut_CommonStringPtrTbl:
+.word CommonString_001
+.word CommonString_002
+.word CommonString_003
+.word CommonString_004
+.word CommonString_005
+.word CommonString_006
+.word CommonString_007
+.word CommonString_008
+.word CommonString_009
+.word CommonString_010
+.word CommonString_011
+.word CommonString_012
+.word CommonString_013
+.word CommonString_014
+.word CommonString_015
+.word CommonString_016
+.word CommonString_017
+.word CommonString_018
+.word CommonString_019
+.word CommonString_020
+.word CommonString_021
+.word CommonString_022
+.word CommonString_023
+.word CommonString_024
+.word CommonString_025
+.word CommonString_026
+.word CommonString_027
+.word CommonString_028
+.word CommonString_029
+.word CommonString_030
+.word CommonString_031
+.word CommonString_032
+.word CommonString_033
+.word CommonString_034
+.word CommonString_035
+.word CommonString_036
+.word CommonString_037
+.word CommonString_038
+.word CommonString_039
+.word CommonString_040
+.word CommonString_041
+.word CommonString_042
+.word CommonString_043
+.word CommonString_044
+.word CommonString_045
+.word CommonString_046
+.word CommonString_047
+.word CommonString_048
+.word CommonString_049
+.word CommonString_050
+.word CommonString_051
+.word CommonString_052
+.word CommonString_053
+.word CommonString_054
+.word CommonString_055
+.word CommonString_056
+.word CommonString_057
+.word CommonString_058
+.word CommonString_059
+.word CommonString_060
+.word CommonString_061
+.word CommonString_062
+.word CommonString_063
+.word CommonString_064
+.word CommonString_065
+.word CommonString_066
+.word CommonString_067
+.word CommonString_068
+.word CommonString_069
+.word CommonString_070
+.word CommonString_071
+.word CommonString_072
+.word CommonString_073
+.word CommonString_074
+.word CommonString_075
+.word CommonString_076
+.word CommonString_077
+.word CommonString_078
+.word CommonString_079
+.word CommonString_080
+.word CommonString_081
+.word CommonString_082
+.word CommonString_083
+.word CommonString_084
+.word CommonString_085
+.word CommonString_086
+.word CommonString_087
+.word CommonString_088
+.word CommonString_089
+.word CommonString_090
+.word CommonString_091
+.word CommonString_092
+.word CommonString_093
+.word CommonString_094
+.word CommonString_095
+.word CommonString_096
+.word CommonString_097
+.word CommonString_098
+.word CommonString_099
+.word CommonString_100
+.word CommonString_101
+.word CommonString_102
+.word CommonString_103
+.word CommonString_104
+.word CommonString_105
+.word CommonString_106
+.word CommonString_107
+.word CommonString_108
+.word CommonString_109
+.word CommonString_110
+.word CommonString_111
+.word CommonString_112
+.word CommonString_113
+.word CommonString_114
+.word CommonString_115
+.word CommonString_116
+.word CommonString_117
+.word CommonString_118
+.word CommonString_119
+.word CommonString_120
+.word CommonString_121
+.word CommonString_122
+.word CommonString_123
+.word CommonString_124
+.word CommonString_125
+.word CommonString_126
 
-    CPX #BOTTLE
+CommonString_001:
+CommonString_002:
+CommonString_003:
+CommonString_004:
+CommonString_005:
+CommonString_006:
+CommonString_007:
+CommonString_008:
+CommonString_009:
+CommonString_010:
+CommonString_011:
+CommonString_012:
+CommonString_013:
+CommonString_014:
+CommonString_015:
+CommonString_016:
+CommonString_017:
+CommonString_018:
+CommonString_019:
+CommonString_020:
+CommonString_021:  
+CommonString_022:
+CommonString_023:
+CommonString_024:
+CommonString_025:
+CommonString_026:
+CommonString_027:
+CommonString_028:
+CommonString_029:
+CommonString_030:
+CommonString_031:
+CommonString_032:
+CommonString_033:
+CommonString_034:
+CommonString_035:
+CommonString_036:
+CommonString_037:
+CommonString_038:
+CommonString_039:
+CommonString_040:
+CommonString_041:
+CommonString_042:  
+CommonString_043:
+CommonString_044:
+CommonString_045:
+CommonString_046:
+CommonString_047:
+CommonString_048:
+CommonString_049:
+CommonString_050:
+CommonString_051:
+CommonString_052:
+CommonString_053:
+CommonString_054:
+CommonString_055:
+CommonString_056:
+CommonString_057:
+CommonString_058:
+CommonString_059:
+CommonString_060:
+CommonString_061:
+CommonString_062:
+CommonString_063:  
+CommonString_064:
+CommonString_065:
+CommonString_066:
+CommonString_067:
+CommonString_068:
+CommonString_069:
+CommonString_070:
+CommonString_071:
+CommonString_072:
+CommonString_073:
+CommonString_074:
+CommonString_075:
+CommonString_076:
+CommonString_077:
+CommonString_078:
+CommonString_079:
+CommonString_080:
+CommonString_081:
+CommonString_082:
+CommonString_083:
+CommonString_084:  
+CommonString_085:
+CommonString_086:
+CommonString_087:
+CommonString_088:
+CommonString_089:
+CommonString_090:
+CommonString_091:
+CommonString_092:
+CommonString_093:
+CommonString_094:
+CommonString_095:
+CommonString_096:
+CommonString_097:
+CommonString_098:
+CommonString_099:
+CommonString_100:
+CommonString_101:
+CommonString_102:
+CommonString_103:
+CommonString_104:
+CommonString_105:  
+CommonString_106:
+CommonString_107:
+CommonString_108:
+CommonString_109:
+CommonString_110:
+CommonString_111:
+CommonString_112:
+CommonString_113:
+CommonString_114:
+CommonString_115:
+CommonString_116:
+CommonString_117:
+CommonString_118:
+CommonString_119:
+CommonString_120:
+CommonString_121:
+CommonString_122:
+CommonString_123:
+CommonString_124:
+CommonString_125:
+CommonString_126:   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+DumbBottleThing:
+    TXA
+    LSR A
+    CMP #BOTTLE
     BEQ @ChangeBottleName
-    CPX #LEWDS
+    CMP #LEWDS
     BEQ @ChangeLewdsName
+    
    @Exit: 
+    ASL A
+    TAX    
     RTS
 
    @ChangeBottleName:
-    LDX #BOTTLE_ALT
-    RTS
+    LDA #BOTTLE_ALT
+    BNE @Exit
 
    @ChangeLewdsName:
-    LDX #LEWDS_ALT
-    RTS
+    LDA #LEWDS_ALT
+    BNE @Exit
   
   
   
