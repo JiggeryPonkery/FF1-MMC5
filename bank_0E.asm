@@ -2563,7 +2563,7 @@ SelectAmount:
     LDA shop_selling        ; if selling...
     BEQ :+
        LDA #$26             ; display selling text
-       JMP :++
+       BNE :++
       
   : LDA #$0A                ; display buying text; "How many?" 
   : JSR DrawShopDialogueBox
@@ -4415,17 +4415,25 @@ CommonShopLoop_List:
     
   @Start_Pressed:
    LDA #$00
-   STA joy_start         
-   STA joy_select
+
    JSR DrawShopBox       ; re-draw the dialogue box (clears text)
    
-   LDX cursor
+   LDA cursor
+   CLC
+   ADC item_box_offset
+   TAX
    LDA item_box, X
    STA shop_curitem
    
    JSR LongCall
    .word ItemDescriptions
    .byte BANK_ITEMDESC
+
+   JSR ShopWaitForBtn
+   
+   LDX shop_type
+   LDA lut_ShopWhatWant, X
+   JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
    JMP @Loop
   
   
@@ -8367,15 +8375,8 @@ MoveItemMenuCurs:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MenuWaitForBtn_SFX:
-    JSR MenuFrame           ; do a frame
-    LDA joy_a               ;  check A and B buttons
-    ORA joy_b
-    BEQ MenuWaitForBtn_SFX  ;  if both are zero, keep looping.  Otherwise...
-    LDA #0
-    STA joy_a               ; clear both joy_a and joy_b
-    STA joy_b
+    JSR MenuWaitForBtn
     JMP PlaySFX_MenuSel     ; play the MenuSel sound effect, and exit
-
 
 MenuWaitForBtn:
     JSR MenuFrame           ; exactly the same -- only no call to PlaySFX_MenuSel at the end
@@ -8386,7 +8387,27 @@ MenuWaitForBtn:
     STA joy_a
     STA joy_b
     RTS
-    
+
+  : LDA joy
+    AND #$0F
+    CMP joy_prevdir
+    BNE :+
+   
+ShopWaitForBtn:
+    JSR MenuFrame           ; exactly the same -- only no call to PlaySFX_MenuSel at the end
+    LDA joy_a
+    ORA joy_start
+    ORA joy_select
+    ORA joy_b
+    BEQ :-
+    LDA #0
+    STA joy_a
+    STA joy_b
+    STA joy_start
+    STA joy_select
+  : RTS    
+  
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
