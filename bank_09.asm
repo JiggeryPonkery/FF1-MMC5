@@ -3887,9 +3887,9 @@ DESC_HEAL:
 .byte $FF,$FF,$2D,$29,$A5,$39,$B7,$45,$C0,$00
 
 DESC_X_HEAL:
-.byte $9B,$2C,$28,$23,$1E,$81,$88,$80,$FF,$91,$99,$C0,$01
-.byte $95,$2C,$1E,$A8,$A9,$A9,$A8,$A6,$57,$32,$01
-.byte $FF,$2D,$29,$A5,$39,$B7,$45,$C0,$00
+.byte $FF,$9B,$2C,$28,$23,$1E,$81,$88,$80,$FF,$91,$99,$C0,$01
+.byte $FF,$95,$2C,$1E,$A8,$A9,$A9,$A8,$A6,$57,$32,$01
+.byte $FF,$FF,$2D,$29,$A5,$39,$B7,$45,$C0,$00
 
 DESC_ETHER:
 .byte $FF,$8F,$B8,$4E,$4B,$23,$37,$35,$2C,$01
@@ -4168,6 +4168,6 @@ DESC_ARM61:
 DESC_ARM62: 
 DESC_ARM63: 
 DESC_ARM64:  
-.byte $9B,$2C,$28,$23,$1E,$83,$80,$FF,$91,$99,$C0,$00
+.byte $00
 
 .byte "END OF BANK STORY/PUZZLE (09)"
