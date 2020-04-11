@@ -391,6 +391,7 @@ actual_bank             = $96
 sprindex                = $97
 spr_x                   = $98
 spr_y                   = $99
+;btl_soft2001            = $9A ; 
 NTsoft2000              = $9A ; same as soft2000, but used to track coarse NT scroll
 soft2000                = $9B
 menustall               = $9C ; see MenuCondStall in bank $1F for explanation
