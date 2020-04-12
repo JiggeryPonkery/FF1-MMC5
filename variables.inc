@@ -637,6 +637,8 @@ LevelUp_StatByte    = $6002
 LevelUp_LevelIndex  = $6003
 LevelUp_StatIndex   = $6004
 LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
+
+TileShiftBuffer     = $6000
  
 TempSpellList        = $6000 ; to 6017 ; 24 bytes
 TempSpellListIndex   = $6018

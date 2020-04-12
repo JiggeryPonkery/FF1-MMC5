@@ -311,6 +311,117 @@ LoadBattleSpritesLUT_1:
    .byte $14,$20
    .word BlackWizSprites    
 
+
+ShiftTile:
+    LDA (tmp), Y
+    LSR A
+    ROR tmp+3    
+    LSR A    
+    ROR tmp+3    
+    LSR A    
+    ROR tmp+3           
+    LSR A    
+    ROR tmp+3        
+    RTS
+
+CHRLoadToAX_Shift:
+    LDY $2002         ; reset PPU Addr toggle
+    STA $2006         ; write high byte of dest address
+    STX $2006         ; write low byte
+    
+    LDA #<TileShiftBuffer
+    STA tmp+4
+    LDA #>TileShiftBuffer
+    STA tmp+5
+    
+    LDY #$FF
+    LDA #0
+  : STA (tmp+4), Y ; clear this out for safety
+    DEY
+    BNE :-
+   
+    LDA #3
+    STA tmp+2
+
+    LDA #$10 
+    STA tmp+6 ; for the other Y
+    
+   @Restart:
+    LDA #0
+    STA tmp+3
+    
+    LDX #$10 ; do 16 bytes
+    
+   @FirstTile:
+    JSR ShiftTile
+    STA (tmp+4), Y ; = [    ****] right 4 bits
+    
+    STY tmp+7
+    LDY tmp+6 ; +$10 to Y
+    
+    ; tmp+3 = [****    ] new left 4 bits
+    LDA tmp+3
+    STA (tmp+4), Y
+    
+    LDA #0
+    STA tmp+3 ; reset tmp+3
+    LDY tmp+7 ; -$10 to Y
+    
+    INY
+    INC tmp+6
+    DEX
+    BNE @FirstTile
+    
+    ; one tile is done! 
+
+    LDX #$10
+    
+   @SecondTile:
+    JSR ShiftTile 
+
+    ; get previous tile's left 4 bits
+    ORA (tmp+4), Y ; = [++++****] left 4 bits
+    STA (tmp+4), Y     
+    
+    STY tmp+7
+    LDY tmp+6 ; +$10 to Y
+    
+    ; tmp+3 = [****    ] new right 4 bits
+    LDA tmp+3
+    STA (tmp+4), Y
+    
+    LDA #0
+    STA tmp+3 ; reset tmp+3
+    LDY tmp+7 ; return Y to original position
+    
+    INY
+    INC tmp+6
+    DEX
+    BNE @SecondTile
+   
+   LDX #$10
+  @ThirdTile:
+    INC tmp+6
+    INY
+    DEC tmp
+    DEX    
+    BNE @ThirdTile
+    
+    DEC tmp+2
+    LDA tmp+2
+    BEQ :+ 
+      JMP @Restart
+    
+  : LDA #>TileShiftBuffer
+    STA tmp+1
+    LDA #<TileShiftBuffer
+    STA tmp
+
+    LDX #$90
+    LDY #0
+    JMP CHRLoad_Loop
+  
+
 LoadStoneSprites:
     LDA #$00
     STA char_index
@@ -337,8 +448,17 @@ LoadStoneSprites:
     LDA BattleCharStonePositions_LUT+1, Y
     TAX
     LDA BattleCharStonePositions_LUT, Y    
+    PHA
+    LDA char_index ; every second character, do this instead:
+    AND #$40
+    BEQ :+
+      PLA
+      JSR CHRLoadToAX_Shift
+      JMP :++
+    
+  : PLA
     JSR CHRLoadToAX                ; draw the cheer pose to background tiles
-    LDA char_index
+  : LDA char_index
     CLC
     ADC #$40
     STA char_index
@@ -381,7 +501,7 @@ CHRLoadToAX:
     STA $2006         ; write high byte of dest address
     STX $2006         ; write low byte
     LDY #$00
-    LDX tmp+2
+    LDX tmp+2         ; amount of writes to make
 CHRLoad_Loop:
     LDA (tmp), Y      ; read a byte from source pointer
     STA $2007         ; and write it to CHR-RAM
@@ -389,6 +509,11 @@ CHRLoad_Loop:
     DEX
     BNE CHRLoad_Loop  ; if we've loaded all requested tiles, exit.  Otherwise continue loading
     RTS
+
+
+
+    
+
     
 LoadSprite_Bank04:
     LDA MMC5_tmp
@@ -402,9 +527,9 @@ LoadSprite_Bank04:
 
 BattleCharStonePositions_LUT:
    .byte $0D,$00    ; character 0 
-   .byte $0D,$80    ; character 1 
+   .byte $0D,$70    ; character 1 
    .byte $0E,$00    ; character 2 
-   .byte $0E,$80    ; character 3 
+   .byte $0E,$70    ; character 3 
    
 BattleCharPositions_LUT:
    .byte $11,$00    ; character 0 
