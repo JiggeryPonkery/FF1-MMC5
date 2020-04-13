@@ -3676,12 +3676,14 @@ DrawShop:
     
     LDA #$08                     
     STA dest_y                   
-    LDA #$0C                     
-    STA dest_x
-    LDA #4
-    STA dest_wd
-    LDA #8
     STA dest_ht
+    LSR A
+    STA dest_wd
+    
+    LDA #$0C            
+    STA dest_x
+    ;LDA #4
+    ;STA dest_wd
     
     LDA #<lut_ShopkeepImage      ; get the pointer to the shopkeeper image
     STA image_ptr
@@ -8003,8 +8005,8 @@ StatusMenuAttributes:
 EnterStatusMenu:
     LDA #0
     STA $2001               ; turn off the PPU
-    LDA #0
     STA menustall           ; disable menu stalling
+    STA tmp+2
     JSR ClearNT             ; clear the NT
 
     ;LDA #$02                ; Upper left box
@@ -8018,7 +8020,9 @@ EnterStatusMenu:
     STA $2006
     
     LDX #8
+    STX dest_wd
     LDY #4
+    STY dest_y
    @AttributeLoop:
     LDA StatusMenuAttributes-1, X
     STA $2007
@@ -8038,16 +8042,17 @@ EnterStatusMenu:
     STA cur_pal+11
   
     
-    LDA #4
-    STA dest_y
+;    LDA #4
+;    STA dest_y
     LDA #20
     STA dest_x
-    LDA #8
-    STA dest_wd
-    LDA #10
+ ;   LDA #8
+ ;   STA dest_wd
+    ;LDA #10
+    LSR A
     STA dest_ht               ; 8 tiles wide and 10 tall
-    LDA #0 
-    STA tmp+2                 ; and no additive!
+   ; LDA #0 
+   ; STA tmp+2                 ; and no additive!
     
     LDA #<statusbox_scrollwork  ; get the pointer to the orb box scrollwork
     STA image_ptr            
@@ -9295,14 +9300,15 @@ DrawOrbBox:
     CPX #$60
     BNE @Scrollwork           ; the scrollwork is simply tiles $20-$5F in order
     
+    STX tmp+2
     LDA #$02                  ; X and Y positions are the same     
     STA dest_y                   
     STA dest_x
     LDA #8
     STA dest_wd
     STA dest_ht               ; 8 tiles wide and tall
-    LDA #0 
-    STA tmp+2                 ; and no additive!
+    ;LDA #0 
+    ;STA tmp+2                 ; and no additive!
     
     LDA #<orbbox_scrollwork  ; get the pointer to the orb box scrollwork
     STA image_ptr            

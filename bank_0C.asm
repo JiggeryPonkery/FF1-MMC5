@@ -49,6 +49,7 @@
 .import DrawItemBox_String
 .import DrawMagicBox_String
 .import DrawEquipBox_String
+.import DrawImageRect
 
 BANK_THIS = $0C
 
@@ -2315,6 +2316,7 @@ DrawCharacter_LUT:
 
 DrawCharacter:
     LDA btl_charhidden, X
+    ORA btl_charstone, X
     BEQ @DrawThem          ; then just draw as normal
       
       LDA lut_CharacterOAMOffset, X   ; get character's OAM offset
@@ -2382,29 +2384,29 @@ DrawCharacter:
     JMP DrawCharacter_DeadRow
     
   @DrawNotDead:
-    ; Not dead, but see if they're stone
-    LDA btl_drawflagsB  ; low 4 bits indicate
-    AND #$0F            ;  which characters are stoned
-    AND DrawCharTmp
-    BEQ @DrawPraying     ; if not stoned, just draw them
-    
-    ; otherwise, if they're stone
-   ; LDA #$03
-   ; STA btl8x8spr_a             ; overwrite their attribute value to use the stone palette
-   
-    LDA btl8x8spr_a
-    ORA #$40
-    STA btl8x8spr_a
-
-    LDA btl8x8spr_x             
-    CLC
-    ADC #$08
-    STA btl8x8spr_x
-    STA btl8x8spr_x+1
-
-    LDA #CHARPOSE_NORM ; #CHARPOSE_CROUCH
-    STA btl_chardraw_pose, Y 
-    BNE @DrawChar
+;    ; Not dead, but see if they're stone
+;    LDA btl_drawflagsB  ; low 4 bits indicate
+;    AND #$0F            ;  which characters are stoned
+;    AND DrawCharTmp
+;    BEQ @DrawPraying     ; if not stoned, just draw them
+;    
+;    ; otherwise, if they're stone
+;   ; LDA #$03
+;   ; STA btl8x8spr_a             ; overwrite their attribute value to use the stone palette
+;   
+;    LDA btl8x8spr_a
+;    ORA #$40
+;    STA btl8x8spr_a
+;
+;    LDA btl8x8spr_x             
+;    CLC
+;    ADC #$08
+;    STA btl8x8spr_x
+;    STA btl8x8spr_x+1
+;
+;    LDA #CHARPOSE_CHEER ; #CHARPOSE_CROUCH
+;    STA btl_chardraw_pose, Y 
+;    BNE @DrawChar
     
   @DrawPraying:
     LDA btl_drawflags_tmp3
@@ -3461,6 +3463,8 @@ MenuSelection_2x4:
 
 SetNaturalPose:
     TAX
+    JSR @ClearStoneBGTiles       ; if they're not stoned, fix the BG tiles
+    TXA
     ASL A
     ASL A
     ;TAX                         ; X=%0000xx00  where 'xx' is character ID
@@ -3496,6 +3500,7 @@ SetNaturalPose:
        STA btl_charcover, X
        STA btl_charcover+4, X
        STA btl_charhidden, X
+       JSR @DrawStoneBGTiles ; make sure the right tiles are drawn to the background!
        LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
        LDA #LOADCHARPOSE_CHEER
        BNE @SetAndReturn
@@ -3553,7 +3558,90 @@ SetNaturalPose:
     STA btl_chardraw_pose, X
     PLA
     TAX ; reset X for checking btl_charactivepose
+   @End:   
     RTS
+    
+    
+@ClearStoneBGTiles:
+    LDA btl_charhidden, X
+    AND #$80              ; if high bit is set, the stone sprite is still drawn
+    BEQ @End              ; if not drawn, exit
+    LDA #0
+    STA btl_charhidden, X ; clear stone info; they're not stoned, we're undrawing it!
+    TXA
+    PHA                   ; backup X and push it
+    JSR @Load
+    LDA StoneBGTiles_LUT+4, X
+    STA tmp+2             ; then reset tile offset for blank BG
+   
+   @Draw: 
+    JSR WaitForVBlank_L
+    LDA #0
+    STA $2001             ; turn off screen
+    JSR DrawImageRect     ; draw the image rect
+    LDA #$1E
+    STA $2001             ; turn on screen
+    PLA                 
+    TAX                   ; restore X
+    RTS
+
+   @Load:
+    LDX #5
+    JSR MultiplyXA        ; multiply X by 5
+    TAX
+    LDA #<StoneBGTiles_Structure
+    STA image_ptr
+    LDA #>StoneBGTiles_Structure
+    STA image_ptr+1
+    LDA #03
+    STA dest_ht
+    LDA StoneBGTiles_LUT, X
+    STA dest_wd
+    LDA StoneBGTiles_LUT+1, X
+    STA dest_x
+    LDA StoneBGTiles_LUT+2, X
+    STA dest_y
+    LDA StoneBGTiles_LUT+3, X
+    STA tmp+2             ; tile offset for drawing sprite
+   @Load_End: 
+    RTS    
+
+@DrawStoneBGTiles:
+    LDA btl_charhidden, X
+    AND #$80              ; if high bit is set, the stone sprite is still drawn
+    BNE @Load_End         ; if still drawn, exit
+    LDA #$81              ; set both "stone is drawn" and "character is stone" flags
+    STA btl_charhidden, X
+    TXA
+    PHA                   ; backup X and push it
+    JSR @Load
+    JMP @Draw             ; then draw it
+
+
+
+StoneBGTiles_LUT:
+;; width, dest_x, dest_y, tile offset for drawing sprite, tile offset for blank BG
+    
+.byte $02,$19,$06,$00,$20  ;Character 1 
+.byte $03,$19,$09,$06,$26  ;Character 2
+.byte $02,$1A,$0C,$10,$20  ;Character 3
+.byte $03,$1A,$0F,$16,$26  ;Character 4
+    
+StoneBGTiles_Structure:
+.byte $D0,$D1,$D2,$D3,$D4,$D5,$D6,$D7,$D8,$D9
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7675,12 +7763,12 @@ DrawCharacterStatus_Fast:
         
   : LDA btl_charguard, Y
     BEQ :+
-        LDA #$EF
+        LDA #$8A
         STA btl_unformattedstringbuf+$53, X   ; start of second string
         
   : LDA btl_charpray, Y
     BEQ :+
-        LDA #$F4
+        LDA #$8D
         STA btl_unformattedstringbuf+$53, X   ; start of second string        
     
   : LDY #ch_head - ch_stats
@@ -7693,7 +7781,7 @@ DrawCharacterStatus_Fast:
     AND #$07                                ; get current amount of regeneration turns
     BEQ @NoState
        @Regen:
-        LDA #$F2
+        LDA #$8B
         STA btl_unformattedstringbuf+$50, X   ; start of first string
     
    @NoState: 
@@ -7798,7 +7886,7 @@ DrawCharacterStatus_Fast:
 .byte AIL_STUN   ; but if they're stunned they can't act, so show that instead
 
 @AilmentIconLUT:
-.byte $7D, $7C, $7B, $7F, $EE, $EC, $F3, $ED ; poison, stone, dead, sleep, mute, dark, confuse, stun!
+.byte $7D, $F0, $7B, $96, $97, $94, $98, $95 ; poison, stone, dead, sleep, mute, dark, confuse, stun!
 
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

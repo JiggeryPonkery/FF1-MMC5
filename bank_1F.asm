@@ -13971,8 +13971,8 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     BPL @LoopForever
     
    @Scanline:   
-    LDX #10       ; waits for H-blank so as not to draw weird dots on the screen
-  : DEX
+    LDX #$0D   ; waits for H-blank so as not to draw weird dots on the screen
+  : DEX        ; $0D seems the best so far!
     BNE :-    
     LDA $2002  ; reset toggle
     LDA #$3F   ; set PPU addr to point to palette

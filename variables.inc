@@ -904,9 +904,10 @@ btl_charguard           = $6830 ; Guard status
 btl_charpray            = $6834 ; White Pray skill
 btl_charfocus           = $6838 ; Black Focus skill
 btl_charhidden          = $683C ; Hidden status
-btl_charreflect         = $6840 ; Reflection status
-btl_charrunic           = $6844 ; Red Runic skill
-btl_charrush            = $6848 ; Fighter Rush skill
+btl_charstone           = $6840 ; Stone status
+btl_charreflect         = $6844 ; Reflection status
+btl_charrunic           = $6848 ; Red Runic skill
+btl_charrush            = $684C ; Fighter Rush skill
 
 
 btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
