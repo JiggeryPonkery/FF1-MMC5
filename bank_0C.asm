@@ -806,7 +806,7 @@ ClearCommandBuffer:
 ClearCharBuffers:    
     LDY #$28
     LDA #$00
-    : STA btl_charparry-1, Y       ; clear all battle states
+    : STA btl_charparry-1, Y       ; clear all battle states, but not Stone
       DEY
       BNE :-
     RTS
@@ -1901,26 +1901,26 @@ EnterBattlePrepareSprites:
     
     ;; JIGS - since battle screen shifted, shifting positions! 
     
-    LDA #$C4+8
-    STA btl_chardraw_x + $0     ; put all characters in the $B0 column
-    LDA #$C8+8
+    LDA #208
+    STA btl_chardraw_x + $0     ; offset characters by 4 pixels each
+    LDA #212
     STA btl_chardraw_x + $4
-    LDA #$CC+8
+    LDA #216
     STA btl_chardraw_x + $8
-    LDA #$D0+8
+    LDA #220
     STA btl_chardraw_x + $C
     
-    LDA #$30                    ; set Y coords, starting at $30, and increasing by $18
-    STA btl_chardraw_y + $0     ; JIGS - and add an extra pixel, so $19
-    LDA #$49
+    LDA #48-1                    ; set Y coords, starting at $30, and increasing by $18
+    STA btl_chardraw_y + $0     
+    LDA #72-1
     STA btl_chardraw_y + $4
-    LDA #$62
+    LDA #96-1
     STA btl_chardraw_y + $8
-    LDA #$7B
+    LDA #120-1
     STA btl_chardraw_y + $C
     
-    LDA #$10 ;00                    ; graphics sets are pretty much fixed -- it's effectively just ID<<5
-    STA btl_chardraw_gfxset + $0
+    LDA #$10 ;00                    ; Character sprites are spaced 8 tiles apart now
+    STA btl_chardraw_gfxset + $0   
     LDA #$18 ;20
     STA btl_chardraw_gfxset + $4
     LDA #$20 ;40
@@ -1933,12 +1933,13 @@ EnterBattlePrepareSprites:
     STA btl_charactivepose+1
     STA btl_charactivepose+2
     STA btl_charactivepose+3
-    JSR LoadAllCharacterSprites 
+    ;JSR LoadAllCharacterSprites 
     ;; this is to load the walking legs, the only 2 tiles that don't get over-written
     ;; this allows loading each new character pose to only need to load up 6 tiles
     ;; since 8 is cutting it too close to the next frame
     
-    JSR SetAllNaturalPose
+    ;JSR SetAllNaturalPose
+    ;; JIGS - ah, this will happen later 
     
 LoadAllCharacterSprites:    
     LDA #0
@@ -3463,8 +3464,6 @@ MenuSelection_2x4:
 
 SetNaturalPose:
     TAX
-    JSR @ClearStoneBGTiles       ; if they're not stoned, fix the BG tiles
-    TXA
     ASL A
     ASL A
     ;TAX                         ; X=%0000xx00  where 'xx' is character ID
@@ -3474,7 +3473,22 @@ SetNaturalPose:
     ASL A                       ; Y=%xx000000  where 'xx' is character ID
     TAY                         ;   Y can now be used as an index for character stats
     
-    LDA ch_ailments, Y          ; check this character's ailment
+    LDA ch_ailments, Y          
+    AND #AIL_STOP        
+    JSR @StoneBGTiles       ; if they're not stoned, fix the BG tiles
+    BEQ :+ 
+       STA ch_ailments, Y        ;; JIGS - same goes for stone! But leave their HP alone 
+       LDA #0
+       STA btl_charguard, X
+       STA btl_charcover, X
+       STA btl_charcover+4, X
+       STA btl_charhidden, X
+       LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
+       LDA #LOADCHARPOSE_CHEER
+       BNE @SetAndReturn
+       ;; JIGS - reflect and regen can remain... use your stoned guy as a shield!
+    
+  : LDA ch_ailments, Y          ; check this character's ailment
     AND #AIL_DEAD
     BEQ :+                      ; if they're dead
       STA ch_ailments, Y        ;; JIGS - if they're dead, it should be their ONLY ailment!
@@ -3490,21 +3504,6 @@ SetNaturalPose:
       LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
       LDA #LOADCHARPOSE_DEAD
       BNE @SetAndReturn
-      
-  : LDA ch_ailments, Y          ;; JIGS - same goes for stone! But leave their HP alone
-    AND #AIL_STOP        
-    BEQ :+ 
-       STA ch_ailments, Y        
-       LDA #0
-       STA btl_charguard, X
-       STA btl_charcover, X
-       STA btl_charcover+4, X
-       STA btl_charhidden, X
-       JSR @DrawStoneBGTiles ; make sure the right tiles are drawn to the background!
-       LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
-       LDA #LOADCHARPOSE_CHEER
-       BNE @SetAndReturn
-       ;; JIGS - reflect and regen can remain... use your stoned guy as a shield!
        
  ; : LDA btl_charhidden, X     
  ;   BNE @DoCrouching
@@ -3558,35 +3557,43 @@ SetNaturalPose:
     STA btl_chardraw_pose, X
     PLA
     TAX ; reset X for checking btl_charactivepose
-   @End:   
     RTS
     
+
     
-@ClearStoneBGTiles:
-    LDA btl_charhidden, X
-    AND #$80              ; if high bit is set, the stone sprite is still drawn
-    BEQ @End              ; if not drawn, exit
-    LDA #0
-    STA btl_charhidden, X ; clear stone info; they're not stoned, we're undrawing it!
-    TXA
-    PHA                   ; backup X and push it
+   @StoneBGTiles:
+    JSR SaveAXY
+    BEQ @NotStone         ; jump if character does NOT have the stone ailment!
+    LDA btl_charstone, X  ; here if character DOES have the stone ailment
+    BNE @Return           ; if still drawn, exit
+    LDA #01               ; set the "stone is drawn" flag
+    STA btl_charstone, X
     JSR @Load
-    LDA StoneBGTiles_LUT+4, X
-    STA tmp+2             ; then reset tile offset for blank BG
+    JMP @Draw             ; then draw it
+    
+   @NotStone:    
+    LDA btl_charstone, X  ; check if the flag is set.
+    BEQ @Return           ; if no flag, safe to return.
+
+   @ClearTiles:
+    LDA #0
+    STA btl_charstone, X  ; clear stone info; they're not stoned, we're undrawing it!
+    JSR @Load
+    LDA StoneBGTiles_LUT+4, X ; then reset tile offset for blank BG   
    
    @Draw: 
+    STA tmp+2             ; tile offset for drawing sprite
     JSR WaitForVBlank_L
     LDA #0
     STA $2001             ; turn off screen
     JSR DrawImageRect     ; draw the image rect
     LDA #$1E
     STA $2001             ; turn on screen
-    PLA                 
-    TAX                   ; restore X
-    RTS
+   @Return:    
+    JMP RestoreAXY        ; when it restores A, it pulls the result of ch_ailments, Y AND #AIL_STOP 
 
    @Load:
-    LDX #5
+    LDA #5
     JSR MultiplyXA        ; multiply X by 5
     TAX
     LDA #<StoneBGTiles_Structure
@@ -3602,30 +3609,19 @@ SetNaturalPose:
     LDA StoneBGTiles_LUT+2, X
     STA dest_y
     LDA StoneBGTiles_LUT+3, X
-    STA tmp+2             ; tile offset for drawing sprite
-   @Load_End: 
     RTS    
 
-@DrawStoneBGTiles:
-    LDA btl_charhidden, X
-    AND #$80              ; if high bit is set, the stone sprite is still drawn
-    BNE @Load_End         ; if still drawn, exit
-    LDA #$81              ; set both "stone is drawn" and "character is stone" flags
-    STA btl_charhidden, X
-    TXA
-    PHA                   ; backup X and push it
-    JSR @Load
-    JMP @Draw             ; then draw it
+
 
 
 
 StoneBGTiles_LUT:
 ;; width, dest_x, dest_y, tile offset for drawing sprite, tile offset for blank BG
     
-.byte $02,$19,$06,$00,$20  ;Character 1 
-.byte $03,$19,$09,$06,$26  ;Character 2
-.byte $02,$1A,$0C,$10,$20  ;Character 3
-.byte $03,$1A,$0F,$16,$26  ;Character 4
+.byte $02,$1A,$06,$00,$20  ;Character 1 
+.byte $03,$1A,$09,$07,$26  ;Character 2
+.byte $02,$1B,$0C,$10,$20  ;Character 3
+.byte $03,$1B,$0F,$17,$26  ;Character 4
     
 StoneBGTiles_Structure:
 .byte $D0,$D1,$D2,$D3,$D4,$D5,$D6,$D7,$D8,$D9
@@ -4462,9 +4458,21 @@ lut_WeaponSwingTSA:
 ;;
 ;;  lut for assigning palettes to in-battle char sprites  [$A03C :: 0x3204C]
 ;;
+
+;; JIGS - palette is second number. $20 is set on all so sprites are behind the background. This is so when the screen shakes and some characters are turned to BG tiles while stoned, the 3d effect is mostly preserved.
 lut_InBattleCharPaletteAssign:
-  .BYTE 1, 2, 0, 1, 1, 0
-  .BYTE 1, 2, 0, 1, 1, 0
+  .BYTE $21 ; Fighter
+  .BYTE $22 ; Thief
+  .BYTE $20 ; BBelt
+  .BYTE $21 ; RMage
+  .BYTE $21 ; WMage
+  .BYTE $20 ; BMage
+  .BYTE $21 ; 
+  .BYTE $22 ; 
+  .BYTE $20 ; 
+  .BYTE $21 ; 
+  .BYTE $21 ; 
+  .BYTE $20 ; 
   
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4596,9 +4604,9 @@ UndrawAllKnownBoxes_NoSave:
     ;JSR RespondDelay
     
 RestoreAXY:
-    LDA MMC5_tmp+5
     LDY MMC5_tmp+6
     LDX MMC5_tmp+7
+    LDA MMC5_tmp+5
     RTS  
     
 SaveAXY:
@@ -7802,9 +7810,9 @@ DrawCharacterStatus_Fast:
     
     ;; btl_unformattedstringbuf should now be $1C bytes long, with two $00s at the end.
 
-    LDA #<$20DD                       ; position to begin printing
+    LDA #<$20DE                       ; position to begin printing
     STA BattleTmpPointer
-    LDA #>$20DD
+    LDA #>$20DE
     STA BattleTmpPointer+1
     
     JSR BattleWaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
@@ -11216,8 +11224,7 @@ BtlMag_Effect_Slow:
     INC btlmag_defender_numhitsmult ;   ... INC it to undo it.  (This is where the 'bug' is, btlmag_spellconnected should be zero'd here)
         
     ;; JIGS - fixing bug:
-    LDA #0
-    STA btlmag_spellconnected  
+    DEC btlmag_spellconnected  
   
   @Done:
   ; RTS                             ; <- Flow into

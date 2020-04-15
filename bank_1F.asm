@@ -8071,7 +8071,7 @@ ComplexString_DrawItemPrep: ;; support routine for item names
     ASL A                   ; double it (for pointer table lookup)
     TAX                     ; put low byte in X for indexing   
     RTS  
-
+    
 ComplexString_CharacterStatCode:
     ;;;; Control Codes $10-13
     ;;;;   These control codes indicate to draw a stat of a specific character
