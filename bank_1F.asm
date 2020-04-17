@@ -7821,7 +7821,8 @@ AddGPToParty:
 ;;  07 xx = JIGS - Weapon/Armor item name
 ;;  08    = JIGS - Decrement X
 ;;  09    = JIGS - print spaces
-;;  0A-0F = unused (default to single line break)
+;;  0A    = JIGS - Increment X (invisible tile basically!)
+;;  0B-0F = unused (default to single line break)
 ;;  10 xx = draw stat code 'xx' for character 0
 ;;  11 xx = draw stat code 'xx' for character 1
 ;;  12 xx = draw stat code 'xx' for character 2
@@ -7879,6 +7880,8 @@ DrawComplexString:
 
 ComplexString_CheckMenuStall:
     JSR MenuCondStall ; See if it needs to wait for VBlank or not; will wait if it does (menustall = $01)
+    
+ComplexString_SetDest:    
     LDX $2002         ; reset PPU toggle
     LDX ppu_dest+1    ;  load and set desired PPU address
     STX $2006         ;  do this with X, as to not disturb A, which is still our character
@@ -7955,6 +7958,8 @@ ComplexStringControlCode:
     BEQ ComplexString_Backspace
     CMP #$09
     BEQ ComplexString_SpaceString
+    CMP #$0A
+    BEQ ComplexString_Forward
 
   ;; 0A to 0F do nothing     
     CMP #$16 ; see if its exactly $16, and skip drawing if it is
@@ -7984,10 +7989,14 @@ ComplexString_DoubleLineBreak:
     ADC #0           ; catch any carry for the high byte
     STA ppu_dest+1
     JMP ComplexString_CheckMenuStall   ; continue processing text
+    
+ComplexString_Forward:
+    INC ppu_dest
+    JMP ComplexString_SetDest
   
 ComplexString_Backspace:
-    DEC ppu_dest              ;; Important to note that it doesn't dec the high byte. 
-    JMP ComplexString_GetNext ;; Only use this when you know its not gonna mess up!
+    DEC ppu_dest                     ;; Important to note that it doesn't dec the high byte. 
+    JMP ComplexString_SetDest ;; Only use this when you know its not gonna mess up!
 
 ComplexString_SpaceString:    ;; prints spaces! Simple
     JSR ComplexString_GetNextByte
@@ -11360,17 +11369,17 @@ DrawEquipMenuStrings:
     ADC MMC5_tmp                 ; X is now Character Index + start of equipment + loop counter
     TAX                          ; then move it to X
     PLA                          ; restore loop counter
-    ASL A
+    ;ASL A
     TAY                          ; and move it*2 to Y
     
-    LDA lut_EquipStringPositions, Y     ; use Y to index a positioning LUT
+    LDA #$12 ; lut_EquipStringPositions, Y     ; use Y to index a positioning LUT
     STA dest_x                          ;  load up x,y coords for this string
-    LDA lut_EquipStringPositions+1, Y
+    LDA lut_EquipStringPositions, Y
     STA dest_y
 
-    LDA #>(str_buf+$40)          ; 
+    LDA #>(str_buf+$40)      ; 
     STA text_ptr+1           ; 
-    LDA #<(str_buf+$40)          ; 
+    LDA #<(str_buf+$40)      ; 
     STA text_ptr             ;
     
     LDA #BANK_ITEMS
@@ -11379,16 +11388,26 @@ DrawEquipMenuStrings:
     LDA ch_stats, X
     BNE @LoadName                ; if nonzero, load up the other name...
 
-      LDA #$FF                   ; otherwise (zero), slot is empty, just fill the string with spaces
-      STA str_buf+$40
-      STA str_buf+$41
-      STA str_buf+$42
-      STA str_buf+$43
-      STA str_buf+$44
-      STA str_buf+$45
-      STA str_buf+$46
-      STA str_buf+$47
-      BNE @NotEquipped           ; then skip ahead (always branches)
+      LDX #8
+      LDA #$FF
+     @miniloop: 
+      STA str_buf+$3F, X
+      DEX
+      BNE @miniloop
+      BEQ @NotEquipped
+      
+     ; if every STA is 3 bytes of code, this ^ should be less space 
+
+     ; LDA #$FF                   ; otherwise (zero), slot is empty, just fill the string with spaces
+     ; STA str_buf+$40
+     ; STA str_buf+$41
+     ; STA str_buf+$42
+     ; STA str_buf+$43
+     ; STA str_buf+$44
+     ; STA str_buf+$45
+     ; STA str_buf+$46
+     ; STA str_buf+$47
+     ; BNE @NotEquipped           ; then skip ahead (always branches)
 
   @LoadName:                     ; if the slot is not empty....
     ASL A                        ; double it
@@ -11428,14 +11447,14 @@ DrawEquipMenuStrings:
 ;;   X,Y positions for equipment text to be printed in equip menus
 
 lut_EquipStringPositions:
-.byte $12, $07
-.byte $12, $09
-.byte $12, $0B
-.byte $12, $0D
-.byte $12, $0F
-.byte $12, $11
-.byte $12, $13
-.byte $12, $15
+.byte $06
+.byte $08
+.byte $0A
+.byte $0C
+.byte $0E
+.byte $10
+.byte $12
+.byte $14
 
 
 

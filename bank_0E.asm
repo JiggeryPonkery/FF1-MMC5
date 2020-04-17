@@ -223,7 +223,7 @@ ShopArmorDescription:
 .byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01          ; __Defense:_______|   
 ;.byte $FF,$FF,$8E,$B9,$3F,$AC,$3C,$E4,$FF,$C2,$09,$05,$01 ; __Evasion:_-_____| 
 .byte $FF,$FF,$A0,$A8,$AC,$AA,$AB,$B7,$E4,$09,$08,$01      ; __Weight:________|
-.byte $FF,$FF,$96,$A4,$AA,$C0,$8D,$A8,$A9,$E4,$00          ; __Mag.Def:       |
+.byte $FF,$FF,$96,$C0,$8E,$B9,$A4,$A7,$A8,$E4,$00          ; __M.Evade:       |
 
 ShopWeaponDescription:
 .byte $09,$03,$8D,$A4,$B0,$A4,$66,$E4,$09,$07,$01         ; ___Damage:_______|
@@ -649,8 +649,8 @@ M_EquipStats:
 .byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$3E,$01          ; Defense__##
 .byte $8A,$A6,$A6,$55,$5E,$4B,            $10,$3D,$FF,$FF      ; Accuracy_##__
 .byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$3F,$01          ; Evasion__##
-.byte $8C,$5C,$57,$51,$AF,$E4,$FF,        $10,$44,$FF,$FF      ; Critical_##__
-.byte $96,$A4,$AA,$C0,$8D,$A8,$A9,$C0,$FF,$10,$41,$00          ; Mag.Def._## 
+.byte $8C,$5C,$57,$51,$AF,$FF,            $10,$44,$FF,$FF      ; Critical_##__
+.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00          ; M.Evade__## 
 
 M_MP_List_Level:  
 .byte $95,$81,$01
@@ -941,22 +941,13 @@ M_MagicMenuMPTitle:
 ;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
 .byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
 
-M_EquipStats_Blank:
-.byte $8D,$A4,$B0,$A4,$66,$09,$08              ; Damage
-.byte $8D,$A8,$A9,$3A,$3E,$09,$05,$01          ; Defense
-.byte $8A,$A6,$A6,$55,$5E,$4B,$09,$05          ; Accuracy
-.byte $8E,$B9,$3F,$AC,$3C,$09,$05,$01          ; Evasion
-.byte $8C,$5C,$57,$51,$AF,$E4,$09,$03          ; Critical
-.byte $96,$A4,$AA,$C0,$8D,$A8,$A9,$C0,$00      ; Mag.Def. 
-
-;.byte $FF,$95,$81,$C2,$10,$2C,$7A,$10,$34
-;.byte $FF,$95,$82,$C2,$10,$2D,$7A,$10,$35
-;.byte $FF,$95,$83,$C2,$10,$2E,$7A,$10,$36
-;.byte $FF,$95,$84,$C2,$10,$2F,$7A,$10,$37,$01
-;.byte $FF,$95,$85,$C2,$10,$30,$7A,$10,$38
-;.byte $FF,$95,$86,$C2,$10,$31,$7A,$10,$39
-;.byte $FF,$95,$87,$C2,$10,$32,$7A,$10,$3A
-;.byte $FF,$95,$88,$C2,$10,$33,$7A,$10,$3B,$00
+M_EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
+.byte $8D,$A4,$B0,$A4,$66,$08                 ; Damage___###__ ; later on, stats are added in the # slots
+.byte $8D,$A8,$A9,$3A,$3E,$05,$01             ; Defense__###
+.byte $8A,$A6,$A6,$55,$5E,$BC,$06             ; Accuracy_###__
+.byte $8E,$B9,$3F,$AC,$3C,$05,$01             ; Evasion__###
+.byte $8C,$5C,$57,$51,$AF,$06                 ; Critical_###__
+.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$05,$00     ; Mag.Def._###
 
 M_EquipInventoryWeapon:
 .byte $C1,$FF,$A0,$2B,$B3,$3C,$B6,$FF,$C7,$00 ; Weapons
@@ -965,8 +956,8 @@ M_EquipInventoryArmor:
 .byte $C1,$FF,$FF,$8A,$B5,$B0,$35,$FF,$FF,$C7,$00 ; Armor
 
 M_EquipInventorySelect:
-.byte $9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$35,$FF,$9C,$B7,$2F,$21,$28,$24,$BA,$5B,$A6,$AB,$01
-.byte $FF,$31,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Select or Start to switch between weapons and armor.
+.byte $9E,$3E,$FF,$9C,$B7,$2F,$B7,$7A,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$01
+.byte $A5,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Start/Select to switch between weapons and armor.
 
 M_LampMagic:
 .byte $8A,$24,$B3,$A8,$4E,$1B,$2E,$23,$37,$35,$1A,$B6,$AC,$AA,$AB,$B7,$C4,$00
@@ -1049,7 +1040,7 @@ PrintCharStat:
     
 @CodeAbove3B:
     CMP #$42
-    BCS @ExpToNext     ; see if ID is >= $42
+    BCS :+                ; see if ID is >= $42
 
     ;;; code reaches here if ID is between $3C-41  (prints substats, like Damage, Hit%, etc)
       SEC
@@ -1062,6 +1053,10 @@ PrintCharStat:
       LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
       STA tmp+1           ;  and print as 3 digits
       JMP PrintNumber_3Digit
+      
+   : CMP #$44   
+     BNE @ExpToNext
+        LDABRA <ch_critrate, @Stat3Digit        
 
     ;;; all other codes default to Exp to Next level
 @ExpToNext:
@@ -1069,12 +1064,10 @@ PrintCharStat:
       .word PrintEXPToNext_B
       .byte BANK_BTLDATA
       JMP PrintNumber_5Digit
-      
 
 @Exp:
     LDABRA <ch_exp, @Stat6Digit    ; put low byte of address of desired stat in A, then BRA to @Stat6Digit
                                    ;  see macros.inc for this macro
-
 @CurHP:
     LDABRA <ch_curhp, @Stat3Digit
 
@@ -9537,6 +9530,7 @@ lut_MainItemBoxes:
 	.BYTE   $01,$01,$1E,$1C ; 13 ; Equip Menu
     .BYTE   $00,$03,$10,$13 ; 14 ; Magic Learning menu left side
     .BYTE   $10,$03,$10,$13 ; 15 ; Magic Learning menu right side
+  	.BYTE   $00,$15,$20,$08 ; 16 ; Equip Stats Box
    ; .BYTE   $01,$0A,$0A,$03 ; 16 ; Main menu gold box
    ; .BYTE   $01,$0C,$0A,$10 ; 17 ; Main menu option box
     
@@ -9999,7 +9993,7 @@ EnterEquipMenu:
 EquipMenuSprite:
    LDA #$78
    STA spr_x
-   LDA #$17
+   LDA #$10
    STA spr_y
    LDA CharacterIndexBackup 
    JMP DrawOBSprite        ; then draw this character's OB sprite    
@@ -10019,7 +10013,7 @@ EnterEquipInventory:
     JSR DrawEquipInventory ; Draws everything
     JSR TurnMenuScreenOn_ClearOAM
     
-    @Loop:
+   @Loop:
     JSR ClearOAM
     JSR DrawEquipInventoryCursor
     LDA cursor_change
@@ -10104,9 +10098,9 @@ EquipStatsDescBoxNumbers:
     STA char_index
     JSR @FetchStats
     
-    LDA #03
+    LDA #3
     STA dest_x
-    LDA #24
+    LDA #23
     STA dest_y
     
     LDA #1
@@ -10119,7 +10113,7 @@ EquipStatsDescBoxNumbers:
     JMP DrawComplexString
     
    @FetchStats:    
-    LDX #$08        
+    LDX #$08       
     LDY #$3C         ; damage
     JSR @TheThing
   
@@ -10127,18 +10121,22 @@ EquipStatsDescBoxNumbers:
     LDY #$3E         ; defense
     JSR @TheThing
     
-    LDX #$1E
+    LDX #$1F
     LDY #$3D         ; accuracy
     JSR @TheThing
    
-    LDX #$2A
+    LDX #$2B
     LDY #$3F         ; evasion
+    JSR @TheThing
+    
+    LDX #$35
+    LDY #$44         ; critical
+    JSR @TheThing
+    
+    LDX #$43
+    LDY #$41         ; magic defense    
    
    @TheThing:
-;    LDA equipoffset
-;    CMP #06
-;    BCS @DashStats
-
     LDA equip_impossible
     BEQ :+
    
@@ -10149,15 +10147,6 @@ EquipStatsDescBoxNumbers:
     STA str_buf+1, X
     STA str_buf+2, X
     RTS   
-    
-;   @DashStats: 
-;    LDX tmp+7
-;    LDA #$FF
-;    STA str_buf, X
-;    LDA #$C2
-;    STA str_buf+1, X
-;    STA str_buf+2, X
-;    RTS  
   
    @WrongSlot: 
     LDA #$FF
@@ -10171,10 +10160,12 @@ EquipStatsDescBoxNumbers:
     CMP slotcheck
     BNE @WrongSlot 
   
+    TXA
+    PHA
     TYA
-    STX tmp+7
     JSR PrintCharStat
-    LDX tmp+7
+    PLA
+    TAX
     LDY #0
     
    @Loop:
@@ -10213,26 +10204,59 @@ EquipStatsDescBoxString:
    @DrawExplanation:   
     INC dest_y
     INC dest_y
-    LDA #01
+    LDA #03
     STA dest_x
     
     LDA #84
     JMP DrawMenuString
 
-  : LDA #81
+    ;; jump here if doing stats
+  :  
+    ;; fil the string buffer with...
+ ;   LDX #$20
+ ;   LDA #$0A           ; the control code for "don't draw this, and skip ahead one tile!"
+ ; : STA str_buf, X     ; later on, stat numbers get drawn inside and written over the blank equip stat words!
+ ;   DEX
+ ;   BNE :-
+ ;   
+ ;   LDA #01
+ ;   STA str_buf+17          ; 1 = double line breaks
+ ;   STA str_buf+35
+ ;   STX str_buf+53          ; 0
+ ;   LDA #03
+ ;   STA dest_x
+ ;   
+ ;   LDA #81                 ; Blank equip stats ID
+ ;   JMP DrawMenuString
+ 
+    ;; JIGS so this is weird... somehow drawing this WHOLE text thing every time you move the cursor is faster
+    ;; than just drawing the numbers alone and skipping over tiles with the special control code $0A...
+    ;; It could be that the skipping thing is taking a lot of CPU time, or...
+    ;; ... I just realized it was doing a frame for every single blank tile and fixed it...
+    ;; but at this point I already re-did the "slower" version to work so...
+ 
+    LDA #81 
     ASL A                   ; double A (pointers are 2 bytes)
     TAX                     ; put in X to index menu string pointer table
     LDA lut_MenuText, X
     STA text_ptr
     LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
     STA text_ptr+1
-
-    LDY #0
-   @Loop:
+ 
+    LDY #0                  ; copy it to str_buf for some reason, instead of just printing it normally
+    LDX #0
+   @Loop:                   
     LDA (text_ptr), Y
-    STA str_buf, Y
-    INY 
-    CPY #$2E
+    BEQ :+
+    CMP #01
+    BEQ :+
+    CMP #$09
+    BCC @FillSpaces
+    
+  : STA str_buf, X
+    INX
+  : INY 
+    CPY #42
     BNE @Loop
     
     INC dest_x
@@ -10243,6 +10267,18 @@ EquipStatsDescBoxString:
     LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
     STA text_ptr+1
     JMP DrawComplexString
+    
+   @FillSpaces:               ; this little loop saves having to put like 40 blank spaces in M_EquipStats_Blank
+    STY tmp
+    TAY
+    LDA #$FF
+  : STA str_buf, X
+    INX
+    DEY
+    BNE :-
+    LDY tmp
+    JMP :--
+    
 
 
 UpdateEquipInventoryStats_CheckViable:
@@ -10373,9 +10409,13 @@ lut_EquipInventoryPageTitle:
 .byte $04, $05, $06, $4E 
     
 DrawEquipInventory:
+    LDA #16                ; Equip Stats Box
+    JSR DrawMainItemBox
+    JSR EquipStatsDescBoxString ; base string, no stats
+
     LDA #08                ; Inventory List
     JSR DrawMainItemBox
-
+    
     LDA #06                ; Name
     JSR DrawMainItemBox
     DEC dest_y
@@ -10383,10 +10423,6 @@ DrawEquipInventory:
     LDA #07
     JSR DrawCharMenuString
    
-    LDA #09                ; Description box
-    JSR DrawMainItemBox
-    JSR EquipStatsDescBoxString ; base string, no stats
-
     LDA #07
     JSR DrawMainItemBox    ; sub menu box
     DEC dest_y
@@ -10479,12 +10515,11 @@ DrawEquipInventory:
     LDY #0
     JMP @Loop
     
-    @DrawRightSide:
-    
+   @DrawRightSide:
     LDA #19
     STA dest_x 
     JMP DrawComplexString  ; Draw all the item names
-        
+
    @SkipOne:
     INX  ; skip this item
     STX MMC5_tmp+2
@@ -10749,19 +10784,19 @@ DrawEquipMenuCurs:
     LDA #$18                   ; all slots are on same X coordinate
     STA spr_x                  ; 
     LDX cursor                 ; get primary cursor
-    LDA @lut_EquipMenuCurs, X   ; then fetch
-    STA spr_y                    ;    and record Y coord
-    JMP DrawCursor               ; draw the cursor, and exit
+    LDA @lut_EquipMenuCurs, X  ; then fetch
+    STA spr_y                  ; and record Y coord
+    JMP DrawCursor             ; draw the cursor, and exit
 
   @lut_EquipMenuCurs:
-  .BYTE $38
-  .BYTE $48    
-  .BYTE $58
-  .BYTE $68
-  .BYTE $78
-  .BYTE $88
-  .BYTE $98
-  .BYTE $A8
+  .BYTE $30
+  .BYTE $40    
+  .BYTE $50
+  .BYTE $60
+  .BYTE $70
+  .BYTE $80
+  .BYTE $90
+  .BYTE $A0
   
   
 
@@ -10779,7 +10814,7 @@ MoveEquipInventoryCursor:
     CMP #$01               ; otherwise, check for left/right
     BNE @Left
     
-    @Right:
+   @Right:
     INC cursor
     LDX cursor
     LDA @CursorSwapPage_LUT, X
@@ -10790,14 +10825,14 @@ MoveEquipInventoryCursor:
     
     DEC cursor
     
-    @Done:
+   @Done:
     INC cursor_change
     JMP PlaySFX_MenuMove
     
-    @Exit:
+   @Exit:
     RTS ; do this if no buttons were pressed, so as not to close the message box
     
-    @Left:
+   @Left:
     DEC cursor
     LDX cursor
     LDA @CursorSwapPage_LUT, X
@@ -10811,11 +10846,11 @@ MoveEquipInventoryCursor:
     INC cursor
     JMP @Done
     
-    @SwapPageLeft:
+   @SwapPageLeft:
     DEC item_pageswap
     JMP :+
     
-    @SwapPageRight:
+   @SwapPageRight:
     INC item_pageswap
     
   : JSR PlaySFX_MenuMove
@@ -10829,10 +10864,10 @@ MoveEquipInventoryCursor:
     ;    ; page 1  ; page 2  ; page 3  ; page 4  ; 
     .byte $02, $01, $00, $01, $00, $01, $00, $01, $FF
     
-    @UpDown:         ; if we pressed up or down... see which
+   @UpDown:         ; if we pressed up or down... see which
     BNE @Up
 
-    @Down:      
+   @Down:      
     INC cursor_max
     LDA cursor_max
     CMP #8
@@ -10842,7 +10877,7 @@ MoveEquipInventoryCursor:
     STA cursor_max
     JMP @UpDownDone
     
-    @Up:
+   @Up:
     DEC cursor_max
     LDA cursor_max
     CMP #$FF
@@ -10851,7 +10886,7 @@ MoveEquipInventoryCursor:
     LDA #7
     STA cursor_max
     
-    @UpDownDone:
+   @UpDownDone:
     INC cursor_change
     JMP PlaySFX_MenuMove
 
@@ -10882,12 +10917,12 @@ DrawEquipMenu:
    LDA #11
    JSR DrawCharMenuString   ; Name and Class
    
-   LDA #$07
+   LDA #$06
    STA dest_y
    LDA #12
    JSR DrawMenuString       ; Equipment
    
-   LDA #$18
+   LDA #$17
    STA dest_y
    LDA #$03
    STA dest_x

@@ -3112,6 +3112,7 @@ DESC_MG_XXXX:
   
   
 DumbBottleThing:
+    BCS @NoTouchyExit ; if carry is set, can't be the bottle
     TXA
     LSR A
     CMP #BOTTLE
@@ -3122,6 +3123,7 @@ DumbBottleThing:
    @Exit: 
     ASL A
     TAX    
+   @NoTouchyExit: 
     RTS
 
    @ChangeBottleName:
