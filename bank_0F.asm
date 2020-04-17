@@ -17,6 +17,7 @@
 .export StealFromEnemyZ
 .export AssignMapTileDamage_Z
 .export LoadPlayerDefenderStats_ForEnemyAttack
+.export WeaponArmorShopStats
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -171,76 +172,77 @@ lut_ArmorData:
 
 ;      v ------------------- Evade penalty
 ;          v --------------- Absorb boost
-;              v ----------- Elemental defense
-;                        v - Elemental weakness 
-;                                   v - Status defense
+;              v ----------- Magic Defense Boost
+;                 v ----------- Elemental defense
+;                           v - Elemental weakness 
+;                                      v - Status defense
 
-;.byte $02,$01,%00000000,%00000000,%00000000 ; Cloth T ;; original
-.byte $00,$02,%00000000,%00000000,%00000000 ; Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
-.byte $08,$04,%00000000,%00000000,%00000000 ; Wooden armor
-.byte $0F,$0F,%00000000,%00000000,%00000000 ; Chain armor
-.byte $17,$18,%00000000,%00000000,%00000000 ; Iron armor
-.byte $21,$22,%00000000,%00000000,%00010000 ; Steel armor
-.byte $08,$12,%00000000,%00000000,%00000000 ; Silver armor
-.byte $0A,$22,%00100000,%00010000,%00000000 ; Flame armor
-.byte $0A,$22,%00010000,%00100000,%00000000 ; Ice armor
-.byte $0A,$2A,%01000000,%00000000,%00000000 ; Opal armor
-.byte $0A,$2A,%01110000,%00000000,%00000000 ; Dragon armor
-.byte $01,$04,%00000000,%00000000,%00000000 ; Copper Q
-.byte $01,$0F,%00000000,%00000000,%00000000 ; Silver Q
-.byte $01,$18,%00000000,%00000000,%00000000 ; Gold Q
-.byte $01,$22,%00000000,%00000000,%00000000 ; Opal Q
-.byte $02,$18,%00011000,%00000000,%00011000 ; white T        - casts INVIS 2
-.byte $02,$18,%00100100,%00000000,%00100100 ; Black T        - casts ICE 2
-.byte $00,$02,%00000000,%00000000,%00000000 ; Wooden shield
-.byte $00,$04,%00000000,%00000000,%00000000 ; Iron shield
-.byte $00,$08,%00000000,%00000000,%00000000 ; Silver shield
-.byte $00,$0C,%00100000,%00010000,%00000000 ; Flame shield
-.byte $00,$0C,%00010000,%00100000,%00000000 ; Ice shield
-.byte $00,$10,%00000100,%00000000,%00000000 ; Opal shield
-.byte $00,$10,%00000010,%00000000,%11000000 ; Aegis shield
-.byte $00,$02,%00000000,%00000000,%00000000 ; Buckler
-.byte $02,$08,%00000000,%00000000,%00000001 ; Protect cape
-.byte $01,$01,%00000000,%00000000,%00000000 ; Cap
-.byte $03,$03,%00000000,%00000000,%00000000 ; Wooden helm
-.byte $05,$05,%00000000,%00000000,%00000000 ; Iron helm
-.byte $03,$06,%00000000,%00000000,%00000000 ; Silver helm
-.byte $03,$08,%00000000,%00000000,%00000000 ; Opal helm
-.byte $03,$06,%00000000,%00000000,%00000000 ; Heal helm      - casts HEAL
-.byte $01,$01,%00000000,%00000000,%11111111; Ribbon
-.byte $01,$01,%00000000,%00000000,%00000000 ; Gloves
-.byte $03,$02,%00000000,%00000000,%00000000 ; Copper Gauntlet
-.byte $05,$04,%00000000,%00000000,%00000000 ; Iron Gauntlet
-.byte $03,$06,%00000000,%00000000,%00000000 ; Silver Gauntlet
-.byte $03,$06,%00000000,%00000000,%00010000 ; Zeus Gauntlet  - casts BOLT 2
-.byte $03,$06,%00000000,%00000000,%00000000 ; Power Gauntlet - casts SABER
-.byte $03,$08,%00000000,%00000000,%00000000 ; Opal Gauntlet
-.byte $01,$08,%00001000,%00000000,%00000001 ; Protect Ring
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00
+;.byte $02,$01,$00,%00000000,%00000000,%00000000 ; Cloth T ;; original
+.byte $00,$02,$00,%00000000,%00000000,%00000000 ; Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
+.byte $08,$04,$00,%00000000,%00000000,%00000000 ; Wooden armor
+.byte $0F,$0F,$00,%00000000,%00000000,%00000000 ; Chain armor
+.byte $17,$18,$00,%00000000,%00000000,%00000000 ; Iron armor
+.byte $21,$22,$00,%00000000,%00000000,%00010000 ; Steel armor
+.byte $08,$12,$00,%00000000,%00000000,%00000000 ; Silver armor
+.byte $0A,$22,$00,%00100000,%00010000,%00000000 ; Flame armor
+.byte $0A,$22,$00,%00010000,%00100000,%00000000 ; Ice armor
+.byte $0A,$2A,$00,%01000000,%00000000,%00000000 ; Opal armor
+.byte $0A,$2A,$00,%01110000,%00000000,%00000000 ; Dragon armor
+.byte $01,$04,$00,%00000000,%00000000,%00000000 ; Copper Q
+.byte $01,$0F,$00,%00000000,%00000000,%00000000 ; Silver Q
+.byte $01,$18,$00,%00000000,%00000000,%00000000 ; Gold Q
+.byte $01,$22,$00,%00000000,%00000000,%00000000 ; Opal Q
+.byte $02,$18,$00,%00011000,%00000000,%00011000 ; white T        - casts INVIS 2
+.byte $02,$18,$00,%00100100,%00000000,%00100100 ; Black T        - casts ICE 2
+.byte $00,$02,$00,%00000000,%00000000,%00000000 ; Wooden shield
+.byte $00,$04,$00,%00000000,%00000000,%00000000 ; Iron shield
+.byte $00,$08,$00,%00000000,%00000000,%00000000 ; Silver shield
+.byte $00,$0C,$00,%00100000,%00010000,%00000000 ; Flame shield
+.byte $00,$0C,$00,%00010000,%00100000,%00000000 ; Ice shield
+.byte $00,$10,$00,%00000100,%00000000,%00000000 ; Opal shield
+.byte $00,$10,$00,%00000010,%00000000,%11000000 ; Aegis shield
+.byte $00,$02,$00,%00000000,%00000000,%00000000 ; Buckler
+.byte $02,$08,$00,%00000000,%00000000,%00000001 ; Protect cape
+.byte $01,$01,$00,%00000000,%00000000,%00000000 ; Cap
+.byte $03,$03,$00,%00000000,%00000000,%00000000 ; Wooden helm
+.byte $05,$05,$00,%00000000,%00000000,%00000000 ; Iron helm
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Silver helm
+.byte $03,$08,$00,%00000000,%00000000,%00000000 ; Opal helm
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Heal helm      - casts HEAL
+.byte $01,$01,$00,%00000000,%00000000,%11111111; Ribbon
+.byte $01,$01,$00,%00000000,%00000000,%00000000 ; Gloves
+.byte $03,$02,$00,%00000000,%00000000,%00000000 ; Copper Gauntlet
+.byte $05,$04,$00,%00000000,%00000000,%00000000 ; Iron Gauntlet
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Silver Gauntlet
+.byte $03,$06,$00,%00000000,%00000000,%00010000 ; Zeus Gauntlet  - casts BOLT 2
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Power Gauntlet - casts SABER
+.byte $03,$08,$00,%00000000,%00000000,%00000000 ; Opal Gauntlet
+.byte $01,$08,$00,%00001000,%00000000,%00000001 ; Protect Ring
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
+.byte $00,$00,$00,$00,$00,$00
 
 
 
@@ -3527,12 +3529,12 @@ UnadjustEquipStats:
  
   : JSR UnadjustBBEquipStats  ; do a few adjustments for BB/MAs... and zero absorb for all
  
- LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
- CLC
- ADC #$40
- STA equipmenu_tmp
- BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
- RTS 
+    LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
+    CLC
+    ADC #$40
+    STA equipmenu_tmp
+    BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
+    RTS 
  
   @AdjustWeapon:
     JSR GetWeaponDataPointer
@@ -3597,23 +3599,54 @@ UnadjustEquipStats:
     ADC (tmp), Y        ; add the armor's evade penalty rate (removing the penalty)
     STA ch_evasion, X   ; and write back
     
+    INY                 ; skip over absorb--it just gets set to 0 since we're removing all armour
+    INY                 ; Y now points to magic defense
+    LDA ch_magicdefense, X
+    SEC
+    ADC (tmp), Y
+    STA ch_magicdefense, X 
+    
     ;LDX equipmenu_tmp   ; then restore X to equipment source index
     RTS                 ; and exit
 
 GetPointerToArmorData:
+;    SEC
+;    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
+;    STA tmp
+;    ASL A
+;    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
+;    CLC                 ; (A= armor_id*8)
+;    ADC tmp             ; multiply by 5
+;    ADC #<lut_ArmorData ; add A to desired pointer
+;    STA tmp             ;  and store pointer to (tmp)
+;    LDA #0
+;    TAY
+;    ADC #>lut_ArmorData
+;    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
+;    RTS
+
     SEC
-    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
-    STA tmp
-    ASL A
-    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
-    CLC                 ; (A= armor_id*8)
-    ADC tmp             ; multiply by 5
-    ADC #<lut_ArmorData ; add A to desired pointer
-    STA tmp             ;  and store pointer to (tmp)
-    LDA #0
-    TAY
-    ADC #>lut_ArmorData
-    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
+    SBC #ARMORSTART+1
+    TAY                    ; save A
+    TXA                    ; then push X to stack
+    PHA
+    TYA                    ; restore A
+    LDX #6
+    JSR MultiplyXA
+    CLC
+    ADC #<lut_ArmorData    ; add low byte of our pointer 
+    STA tmp                ; put in tmp as low byte of our pointer
+    TXA
+    CLC
+    ADC #>lut_ArmorData    ; add high byte of our pointer 
+    STA tmp+1              ; fill tmp+1 to complete our pointer
+    PLA
+    TAX                    ; then restore X
+    LDY #0                 ; and set Y to 0 for later
+    RTS
+
+
+
     
     
 ;;;;;;;;;;;;;;;;;;;
@@ -3772,25 +3805,31 @@ ReadjustEquipStats:
     SEC
     SBC (tmp), Y           ; subtract armor evade penalty
     STA ch_evasion, X      ; and write it back
+    
     INY                    ; inc source index
-
     LDA ch_defense, X      ; get absorb
     CLC
     ADC (tmp), Y           ; add absorb bonus
     STA ch_defense, X      ; and write back
 
+    INY
+    LDA ch_magicdefense, X
+    CLC
+    ADC (tmp), Y
+    STA ch_magicdefense, X
+    
+    INY                     ; inc source index
     LDA ch_elementresist, X ; get elemental resistence
-    INY                     ;   inc source index
     ORA (tmp), Y            ; combine this armor's elemental resistence
     STA ch_elementresist, X ; and write back
-    
+
+    INY    
     LDA ch_elementweak, X   ; get elemental weakness
-    INY
     ORA (tmp), Y            ; combine this armor's elemental weakness
     STA ch_elementweak, X   ; and write back
     
-    LDA ch_statusresist, X
     INY
+    LDA ch_statusresist, X
     ORA (tmp), Y
     STA ch_statusresist, X
     RTS
@@ -3891,10 +3930,78 @@ ReadjustBBEquipStats:
     CLC
     ADC #$01
     STA ch_defense, X         ; Unequipped BB's absorb=level
-     
+
   @Exit:
     RTS                       ; and exit
 
+
+
+
+
+WeaponArmorShopStats:
+    LDA #$FF
+    LDX #12
+  : STA bigstr_buf-1, X
+    DEX
+    BNE :-
+    
+    STX bigstr_buf+11 ; null-terminate main string
+    
+    LDA #$01
+    STA bigstr_buf+3 ; put line break in
+    STA bigstr_buf+7
+    
+    LDA #14
+    STA dest_x
+    LDA #20
+    STA dest_y
+    
+    LDA shop_curitem
+    CMP #ARMORSTART+1
+    BCS @Armor
+    
+   @Weapon:
+    TAX
+    JSR GetWeaponDataPointer   ; Y = 0, also preserves X
+    
+    LDA (tmp), Y ; Hit Rate
+    STA bigstr_buf+16
+    INY
+    LDA (tmp), Y ; Damage
+    CPX #CHICKEN_KNIFE+1
+    BNE :+
+        LDA battlesrun
+        BNE @SaveWeaponDamage
+        
+  : CPX #BRAVE_BLADE+1
+    BNE @SaveWeaponDamage
+   
+    LDA battleswon   
+    
+   @SaveWeaponDamage: 
+    STA bigstr_buf+12            ; space stats 3 bytes apart    
+    INY
+    LDA (tmp), Y ; Critical
+    STA bigstr_buf+20
+    RTS
+    
+   @Armor:
+   ; CLC
+   ; ADC #1 ; the following JSR subtracts +1 too many, but needs to stay doing that for other routines
+    JSR GetPointerToArmorData   
+    
+    LDA (tmp), Y ; Evade penalty
+    STA bigstr_buf+16
+    INY
+    LDA (tmp), Y ; Absorb    
+    STA bigstr_buf+12
+    INY
+    LDA (tmp), Y ; Magic Defense
+    STA bigstr_buf+20
+    RTS
+    
+    
+    
     
     
 

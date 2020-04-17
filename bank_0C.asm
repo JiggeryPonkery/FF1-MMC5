@@ -3587,8 +3587,7 @@ SetNaturalPose:
     LDA #0
     STA $2001             ; turn off screen
     JSR DrawImageRect     ; draw the image rect
-    LDA #$1E
-    STA $2001             ; turn on screen
+    JSR BattleUpdatePPU   ; turn on screen, set scroll
    @Return:    
     JMP RestoreAXY        ; when it restores A, it pulls the result of ch_ailments, Y AND #AIL_STOP 
 

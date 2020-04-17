@@ -7856,7 +7856,8 @@ AddGPToParty:
 ;;  41    = Mag Def
 ;;  42    = Exp to Next Level
 ;;  43    = name (variable width)
-;;  44-FF = unused (default to same as $42)
+;;  44    = Critical hit rate
+;;  45-FF = unused (default to same as $42)
 ;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -8195,7 +8196,7 @@ ComplexString_RestoreTextPointer:
     JMP ComplexString_GetNext  ;  and continue with text processing
 
 ComplexString_SaveTextPointer_Swap:
-    STA cur_bank 
+   ; STA cur_bank 
     JSR SwapPRG_L              ; swap to the bank set in A
 
 ComplexString_SaveTextPointer:
@@ -12482,8 +12483,8 @@ DrawCombatBox:
     JSR BattleDrawMessageBuffer
 
 DrawBox_WaitForVBlank:
-    JSR BattleWaitForVBlank    ; Wait for V Blank and do audio before trying to decompress the string
-    JMP Battle_UpdatePPU_UpdateAudio_FixedBank
+    JSR Battle_UpdatePPU_UpdateAudio_FixedBank
+    JMP BattleWaitForVBlank    ; Wait for V Blank and do audio before trying to decompress the string
 
 
 

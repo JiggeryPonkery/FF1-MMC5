@@ -69,6 +69,7 @@
 .import PlayDoorSFX
 .import BattleRNG_L
 .import ItemDescriptions
+.import WeaponArmorShopStats
 
 .segment "BANK_0E"
 
@@ -107,10 +108,15 @@ lut_ShopStrings:
 .word ShopThankYouWhatElse ;16 confirmed transaction    
 .word ShopTooBadWhatElse   ;17 canceled transaction
 
-.word ShopWhatWant         ;18 what do you want? (item, equip)
-.word ShopWhatScroll       ;19 what do you want? (magic)
-.word ShopWhatToSell       ;1A what do you have to sell? (item, equip)
-.word ShopMagicToSell      ;1B what do you have to sell? (magic)
+;.word ShopWhatWant         ;18 what do you want? (item, equip)
+;.word ShopWhatScroll       ;19 what do you want? (magic)
+;.word ShopWhatToSell       ;1A what do you have to sell? (item, equip)
+;.word ShopMagicToSell      ;1B what do you have to sell? (magic)
+.word ShopArmorDescription  ;18
+.word ShopArmorDescription
+.word ShopWeaponDescription ;1A
+.word ShopWeaponDescription
+
 
 .word ShopEquipNow         ;1C do you want to equip it
 .word ShopWhoWillTake      ;1D who is it for
@@ -200,18 +206,34 @@ ShopTooBadWhatElse:
 .byte $8E,$AB,$BF,$20,$AF,$5C,$AA,$AB,$21,$1C,$3A,$C0,$01
 .byte $FF,$8A,$B1,$BC,$1C,$1F,$47,$A8,$AF,$3E,$C5,$00 ; Eh, alright then. Anything else?
 
-ShopWhatWant:
-.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00 ; What'll it be?
-ShopWhatScroll:
-.byte $FF,$A0,$3D,$A6,$AB,$24,$A6,$4D,$4E,$67,$B2,$01
-.byte $09,$03,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
-ShopWhatToSell:
-.byte $FF,$A0,$A8,$4E,$BF,$33,$41,$21,$A7,$BE,$BC,$A4,$01
-.byte $09,$03,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
-ShopMagicToSell:
-.byte $FF,$FF,$92,$33,$61,$58,$B6,$55,$A8,$AF,$BC,$01
-.byte $FF,$38,$2F,$1A,$A9,$35,$50,$26,$B5,$01
-.byte $FF,$24,$A6,$4D,$4E,$1E,$60,$4E,$C0,$00 ; I will surely care for your scrolls well.
+;ShopWhatWant:
+;.byte $FF,$A0,$41,$B7,$BE,$4E,$2D,$21,$62,$C5,$00 ; What'll it be?
+;ShopWhatScroll:
+;.byte $FF,$A0,$3D,$A6,$AB,$24,$A6,$4D,$4E,$67,$B2,$01
+;.byte $09,$03,$56,$64,$23,$B4,$B8,$AC,$23,$C5,$00 ; Which scroll do you require?
+;ShopWhatToSell:
+;.byte $FF,$A0,$A8,$4E,$BF,$33,$41,$21,$A7,$BE,$BC,$A4,$01
+;.byte $09,$03,$AA,$B2,$21,$A9,$35,$42,$A8,$C5,$00 ; Well, what d'ya got for me?
+;ShopMagicToSell:
+;.byte $FF,$FF,$92,$33,$61,$58,$B6,$55,$A8,$AF,$BC,$01
+;.byte $FF,$38,$2F,$1A,$A9,$35,$50,$26,$B5,$01
+;.byte $FF,$24,$A6,$4D,$4E,$1E,$60,$4E,$C0,$00 ; I will surely care for your scrolls well.
+
+ShopArmorDescription:
+.byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01          ; __Defense:_______|   
+;.byte $FF,$FF,$8E,$B9,$3F,$AC,$3C,$E4,$FF,$C2,$09,$05,$01 ; __Evasion:_-_____| 
+.byte $FF,$FF,$A0,$A8,$AC,$AA,$AB,$B7,$E4,$09,$08,$01      ; __Weight:________|
+.byte $FF,$FF,$96,$A4,$AA,$C0,$8D,$A8,$A9,$E4,$00          ; __Mag.Def:       |
+
+ShopWeaponDescription:
+.byte $09,$03,$8D,$A4,$B0,$A4,$66,$E4,$09,$07,$01         ; ___Damage:_______|
+.byte $FF,$FF,$8A,$A6,$A6,$55,$5E,$BC,$E4,$09,$06,$01     ; __Accuracy:______|
+.byte $FF,$FF,$8C,$5C,$57,$51,$AF,$E4,$00                 ; __Critical:      |
+
+
+
+
+
 
 ShopEquipNow:
 .byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01
@@ -623,10 +645,12 @@ M_EquipmentSlots:
 .byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$FF,$D8,$00       ; BATTLE_ITEM_[________]_*
 
 M_EquipStats:
-.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$FF,$FF      ; Damage
-.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01          ; Defense
-.byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$FF,$FF          ; Accuracy
-.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$00          ; Evasion
+.byte $8D,$A4,$B0,$A4,$66,$09,$03,        $10,$3C,$FF,$FF      ; Damage___##__
+.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$3E,$01          ; Defense__##
+.byte $8A,$A6,$A6,$55,$5E,$4B,            $10,$3D,$FF,$FF      ; Accuracy_##__
+.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$3F,$01          ; Evasion__##
+.byte $8C,$5C,$57,$51,$AF,$E4,$FF,        $10,$44,$FF,$FF      ; Critical_##__
+.byte $96,$A4,$AA,$C0,$8D,$A8,$A9,$C0,$FF,$10,$41,$00          ; Mag.Def._## 
 
 M_MP_List_Level:  
 .byte $95,$81,$01
@@ -918,10 +942,12 @@ M_MagicMenuMPTitle:
 .byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
 
 M_EquipStats_Blank:
-.byte $8D,$A4,$B0,$A4,$66,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF  ;13; Damage
-.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$FF,$FF,$FF,$01          ;11; Defense
-.byte $8A,$A6,$A6,$55,$5E,$4B,$FF,$FF,$FF,$FF,$FF          ;11; Accuracy
-.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$FF,$FF,$FF,$00          ;11; Evasion
+.byte $8D,$A4,$B0,$A4,$66,$09,$08              ; Damage
+.byte $8D,$A8,$A9,$3A,$3E,$09,$05,$01          ; Defense
+.byte $8A,$A6,$A6,$55,$5E,$4B,$09,$05          ; Accuracy
+.byte $8E,$B9,$3F,$AC,$3C,$09,$05,$01          ; Evasion
+.byte $8C,$5C,$57,$51,$AF,$E4,$09,$03          ; Critical
+.byte $96,$A4,$AA,$C0,$8D,$A8,$A9,$C0,$00      ; Mag.Def. 
 
 ;.byte $FF,$95,$81,$C2,$10,$2C,$7A,$10,$34
 ;.byte $FF,$95,$82,$C2,$10,$2D,$7A,$10,$35
@@ -1870,6 +1896,7 @@ EnterShop:
     STA joy_b              ; erase joypad A and B buttons
     STA joy_a
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
+    STA shop_descriptionset ; zero shop_spell and shop_descriptionset (shared)
     
     LDX #$B0
    @ClearLoop:
@@ -1921,25 +1948,25 @@ lut_ShopWelcome: ; uses shop_type to pick what lut_ShopStrings text to display
 .byte $0F ; item shop
 .byte $0F ; caravan
 
-lut_ShopWhatWant: 
-.byte $18 ; weapons
-.byte $18 ; armor
-.byte $19 ; white magic
-.byte $19 ; black magic
-.byte $00 ; clinic (not used; clinics do their own logic)
-.byte $00 ; inn    (not used; inns do their own logic)
-.byte $18 ; item shop
-.byte $18 ; caravan
-
-lut_ShopWhatSell: 
-.byte $1A ; weapons
-.byte $1A ; armor
-.byte $1B ; white magic
-.byte $1B ; black magic
-.byte $00 ; clinic (not used; clinics do their own logic)
-.byte $00 ; inn    (not used; inns do their own logic)
-.byte $1A ; item shop
-.byte $00 ; caravan (not used; caravan won't buy your things)
+;lut_ShopWhatWant: 
+;.byte $18 ; weapons
+;.byte $18 ; armor
+;.byte $19 ; white magic
+;.byte $19 ; black magic
+;.byte $00 ; clinic (not used; clinics do their own logic)
+;.byte $00 ; inn    (not used; inns do their own logic)
+;.byte $18 ; item shop
+;.byte $18 ; caravan
+;
+;lut_ShopWhatSell: 
+;.byte $1A ; weapons
+;.byte $1A ; armor
+;.byte $1B ; white magic
+;.byte $1B ; black magic
+;.byte $00 ; clinic (not used; clinics do their own logic)
+;.byte $00 ; inn    (not used; inns do their own logic)
+;.byte $1A ; item shop
+;.byte $00 ; caravan (not used; caravan won't buy your things)
 
 lut_ShopMaxAmount:
 .byte $10 ; weapons
@@ -2120,9 +2147,11 @@ ExitShop:
     RTS
 
 ShopBuy:
-    LDX shop_type
-    LDA lut_ShopWhatWant, X
-    JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
+ ;   LDX shop_type
+ ;   LDA lut_ShopWhatWant, X
+ ;   JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
+    LDA #$03
+    JSR EraseShopBox         ; erase shop box #3 (command box)
     JSR ResetShopListAttributes
     JSR ResetScroll
     
@@ -2274,9 +2303,11 @@ ShopSell:
     BNE :+
     JMP NothingToSell 
     
-  : LDX shop_type
-    LDA lut_ShopWhatSell, X
-    JSR DrawShopDialogueBox     ; "what do you have to sell?"
+  : ;LDX shop_type
+    ;LDA lut_ShopWhatSell, X
+    ;JSR DrawShopDialogueBox     ; "what do you have to sell?"
+    LDA #$03
+    JSR EraseShopBox         ; erase shop box #3 (command box)
     JSR ResetShopListAttributes
     JSR ResetScroll
 
@@ -2290,13 +2321,15 @@ ShopSell_Loop:
   : JSR ShopCursor_Slot1
     LDA #0
     STA cursor
-    LDA #1
-    STA shop_selling
+  ; LDA #1
+  ; STA shop_selling
+    INC shop_selling
 
     JSR ShopSelectItem
     BCC :+
-    LDA #0
-    STA shop_selling
+  ; LDA #0
+  ; STA shop_selling
+    DEC shop_selling
     JMP RestartShopLoop
     
   : JSR ShopCheckInventory
@@ -2370,8 +2403,7 @@ NothingToSell:
     JSR DrawShopDialogueBox
     JSR MenuWaitForBtn
   : LDA #$02
-    JSR LoadShopBoxDims         ; erase shop box 2 (inventory)
-    JSR EraseBox
+    JSR EraseShopBox            ; erase shop box 2 (inventory)
 	LDA #$0
     STA shop_selling
     STA shop_listdrawn
@@ -2688,6 +2720,7 @@ ShopLoadPrice_Complex:
     JSR LoadPrice          ; gets the base price of the item you're trying to buy
     
     LDA shop_selling
+    AND #$01
     BEQ :+
     
     LSR tmp+2              ; if selling, divide the base price by 2
@@ -3008,8 +3041,7 @@ EnterInn:
     JSR DrawShopDialogueBox     ; "Remember to save" dialogue
 
     LDA #$03
-    JSR LoadShopBoxDims         ; erase shop box 3 (command box)
-    JSR EraseBox
+    JSR EraseShopBox            ; erase shop box 3 (command box)
 
     JSR ShopFrameNoCursor 
     JSR FadeOutBatSprPalettes   ; and fade the party out
@@ -3041,8 +3073,7 @@ EnterInn:
     
   @Exit:
     LDA #$03
-    JSR LoadShopBoxDims         ; erase shop box 3 (command box)
-    JSR EraseBox    
+    JSR EraseShopBox            ; erase shop box 3 (command box)
 
     LDA #$21
     JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue 
@@ -3112,8 +3143,7 @@ EnterClinic:
     JSR DrawShopDialogueBox    ; "Warrior!  Return to life!"  dialogue
 
     LDA #$03
-    JSR LoadShopBoxDims        ; erase shop box 3 (command box)
-    JSR EraseBox
+    JSR EraseShopBox           ; erase shop box 3 (command box)
 
   @ReviveLoop:
     JSR ShopFrameNoCursor      ; do a frame
@@ -3621,7 +3651,7 @@ ShopFrameNoCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 EquippedMark_LUT:  
-.byte $60,$00,$60,$60,$60,$60,$60,$00  ; reversed
+.byte $60,$00,$60,$60,$60,$60,$60,$00,$60,$00,$60,$60,$60,$60,$60,$00  ; reversed
 
 LoadEquippedMark:
     LDA #>$1FF0
@@ -3629,20 +3659,14 @@ LoadEquippedMark:
     LDA #<$1FF0
     STA $2006
     
-    LDX #8
+    LDX #$10
    @Loop:   
     LDA EquippedMark_LUT-1, X
     STA $2007
     DEX
     BNE @Loop
-
-    TXA
-    LDX #8
-   @0_Loop:
-    STA $2007
-    DEX
-    BNE @0_Loop
     RTS
+
     ;; this all draws a ! to the sprite CHR at tile $FF
 
 DrawShop:
@@ -3922,8 +3946,7 @@ EquipMenu_BuildSellBox:
 ShopSelectItem:
     JSR UpdateShopList 
     LDA #$03
-    JSR LoadShopBoxDims
-    JSR EraseBox             ; erase shop box #3 (command box)
+    JSR EraseShopBox         ; erase shop box #3 (command box)
     LDA #1
     STA shop_listactive
     STA shop_cursorchange  
@@ -4325,6 +4348,7 @@ CommonShopLoop_List:
     STA shop_cursor_ptr        ; only have (shop_cursor_ptr) point to a different LUT
     LDA #>lut_ShopCurs_List
     STA shop_cursor_ptr+1
+    JMP DisplayDescription    ; display the first item's description
 
       ; both flavors of this routine meet up here, after filling (shop_cursor_ptr)
       ;   with a pointer to a LUT containing the cursor positions.
@@ -4352,9 +4376,9 @@ CommonShopLoop_List:
     BNE @B_Pressed       ; check to see if A or B have been pressed
     LDA joy_a
     BNE @A_Pressed
-    LDA joy_start        ; or if start/select have been pressed
-    ORA joy_select
-    BNE @Start_Pressed    
+  ;  LDA joy_start        ; or if start/select have been pressed
+  ;  ORA joy_select
+  ;  BNE @Start_Pressed    
     
                          ; if neither pressed.. see if the cursor has been moved
     LDA joy              ; get joy
@@ -4373,7 +4397,7 @@ CommonShopLoop_List:
 
   @Up:
     DEC cursor           ; if up pressed, decrement the cursor by 1
-    BPL @Loop            ; if it hasn't gone below zero, that's all -- continue loop
+    BPL DisplayDescription ;@Loop            ; if it hasn't gone below zero, that's all -- continue loop
 
     LDA shop_selling
     BNE @ScrollListUp
@@ -4399,7 +4423,7 @@ CommonShopLoop_List:
 
   @MoveDone:             ; code reaches here when A is to be the new cursor position
     STA cursor           ; just write it back to the cursor
-    JMP @Loop            ; and continue loop
+    JMP DisplayDescription ; @Loop            ; and continue loop
  
   @B_Pressed:            ; if B pressed....
     SEC                  ; SEC to indicate player pressed B
@@ -4409,45 +4433,13 @@ CommonShopLoop_List:
     LDA #0
     STA joy_a            ; zero joy_a and joy_b so further buttons will be detected
     STA joy_b
+    STA shop_descriptionset
     RTS
 
   @A_Pressed:            ; if A pressed...
     CLC                  ; CLC to indicate player pressed A
     BCC @ButtonDone      ;  and jump to @ButtonDone (always branches)
-    
-  @Start_Pressed:
-   LDA #$00
-
-   JSR DrawShopBox       ; re-draw the dialogue box (clears text)
-   
-   LDA cursor
-   CLC
-   ADC item_box_offset
-   TAX
-   LDA item_box, X
-   STA shop_curitem
-   
-   JSR LongCall
-   .word ItemDescriptions
-   .byte BANK_ITEMDESC
-
-   JSR ShopWaitForBtn
-   
-   LDX shop_type
-   LDA lut_ShopWhatWant, X
-   JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
-   JMP @Loop
-  
-  
-;   JSR EnterMainMenu
-;   JSR LoadShopCHRPal     ; load up the CHR and palettes (and the shop type)
-;   JSR DrawShop           ; draw the shop  
-;   LDA ShopCursorBackup
-;   STA cursor
-;   LDA ShopDialogueBackup
-;   JSR DrawShopDialogueBox
-;   JMP @Loop
-
+ 
 
 @ScrollListDown:
     LDX item_box_offset
@@ -4484,6 +4476,91 @@ CommonShopLoop_List:
     STA cursor
     JMP ShopSelectItem
 
+DisplayDescription:
+   LDA shop_listactive
+   BEQ @Exit
+  
+   LDA cursor
+   CLC
+   ADC item_box_offset
+   TAX
+   LDA item_box, X
+   STA shop_curitem
+   
+   LDA #20
+   STA dest_y
+   
+   LDA shop_type
+   CMP #2
+   BCS @NotEquipment
+   
+   LDA shop_descriptionset
+   BNE @OnlyUpdateStats
+   
+   LDA shop_type
+   BEQ @Weapon
+   
+  @Armor:
+   LDA #$18
+   BNE :+
+  
+  @Weapon:  
+   LDA #$1A
+ : JSR DrawShopString 
+   LDA #1
+   STA shop_descriptionset
+   
+  @OnlyUpdateStats:
+   JSR LongCall
+   .word WeaponArmorShopStats
+   .byte BANK_EQUIPSTATS
+   
+   LDY #0
+  @Loop: 
+   LDA bigstr_buf+12, Y ; second loop grabs bigstr_buf+16, as Y will = 4 by then--then 3rd loop gets +20
+   STA tmp
+   LDA #0
+   STA tmp+1
+   JSR PrintNumber_3Digit
+   LDA format_buf-3
+   STA bigstr_buf, Y
+   INY 
+   LDA format_buf-2
+   STA bigstr_buf, Y
+   INY 
+   LDA format_buf-1
+   STA bigstr_buf, Y
+   INY                    ; skip over the line breaks
+   INY
+   CPY #4
+   BEQ @Loop
+   CPY #8
+   BEQ @Loop
+   
+ ; bigstr_buf now looks like: 
+ ; Stat1Digit1, Stat1Digit2, Stat1Digit3, #01
+ ; Stat2Digit1, Stat2Digit2, Stat2Digit3, #01
+ ; Stat3Digit1, Stat3Digit2, Stat3Digit3, #00
+ 
+   LDA #<bigstr_buf
+   STA text_ptr
+   LDA #>bigstr_buf
+   STA text_ptr+1
+ 
+  JSR DrawComplexString
+  JMP _CommonShopLoop_Main  
+   
+  @NotEquipment:
+   JSR LongCall
+   .word ItemDescriptions
+   .byte BANK_ITEMDESC
+   
+  @Exit:
+   JMP _CommonShopLoop_Main
+
+
+
+
 ;ClearShopkeeperTextBox:
 ;    JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
@@ -4496,8 +4573,7 @@ CommonShopLoop_List:
 ;    STA joy_a
 
 ;    LDA #$00
-;    JSR LoadShopBoxDims
-;    JMP EraseBox           ; erase shop box #3 (command box)
+;    JSR EraseShopBox        ; erase shop box #3 (command box)
 
 
 
@@ -4626,8 +4702,7 @@ lut_ShopCurs_List:   ; cursor positions for the inventory list box
 ;    JSR DrawShopComplexString   ; and draw it
 
 ;    LDA #$03
-;    JSR LoadShopBoxDims         ; then erase shop box 3 (command box)
-;    JSR EraseBox
+;    JSR EraseShopBox           ; then erase shop box 3 (command box)
 
 ;    JMP CommonShopLoop_List     ; and have the user select an option from the shop inventory list
 
@@ -4763,6 +4838,10 @@ DrawShopBox:
     JSR LoadShopBoxDims      ; load the dims
     JMP DrawBox              ; draw it, then exit
 
+EraseShopBox:
+    JSR LoadShopBoxDims      
+    JMP EraseBox
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Load Shop Box Dims  [$AA41 :: 0x3AA51]
@@ -4805,8 +4884,6 @@ DrawShopDialogueBox:
     JSR DrawShopBox      ; draw shop box ID 0 (the dialogue box)
     PLA                  ; pull our dialogue string
     JMP DrawShopString   ; draw it, then exit
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8393,24 +8470,24 @@ MenuWaitForBtn:
     STA joy_b
     RTS
 
-  : LDA joy
-    AND #$0F
-    CMP joy_prevdir
-    BNE :+
+;  : LDA joy
+;    AND #$0F
+;    CMP joy_prevdir
+;    BNE :+
    
-ShopWaitForBtn:
-    JSR MenuFrame           ; exactly the same -- only no call to PlaySFX_MenuSel at the end
-    LDA joy_a
-    ORA joy_start
-    ORA joy_select
-    ORA joy_b
-    BEQ :-
-    LDA #0
-    STA joy_a
-    STA joy_b
-    STA joy_start
-    STA joy_select
-  : RTS    
+;ShopWaitForBtn:
+;    JSR MenuFrame           ; exactly the same -- only no call to PlaySFX_MenuSel at the end
+;    LDA joy_a
+;    ORA joy_start
+;    ORA joy_select
+;    ORA joy_b
+;    BEQ :-
+;    LDA #0
+;    STA joy_a
+;    STA joy_b
+;    STA joy_start
+;    STA joy_select
+;  : RTS    
   
   
 
@@ -9300,15 +9377,14 @@ DrawOrbBox:
     CPX #$60
     BNE @Scrollwork           ; the scrollwork is simply tiles $20-$5F in order
     
-    STX tmp+2
     LDA #$02                  ; X and Y positions are the same     
     STA dest_y                   
     STA dest_x
     LDA #8
     STA dest_wd
     STA dest_ht               ; 8 tiles wide and tall
-    ;LDA #0 
-    ;STA tmp+2                 ; and no additive!
+    LDA #0 
+    STA tmp+2                 ; and no additive!
     
     LDA #<orbbox_scrollwork  ; get the pointer to the orb box scrollwork
     STA image_ptr            
@@ -9504,15 +9580,15 @@ lut_MainItemBoxes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawCharDescBox:
-    PHA                  
-    LDA #1               
-    STA menustall
-    LDA #09             
-    JSR DrawMainItemBox
-    PLA                  
-    INC descboxopen      
-    JMP DrawCharMenuString    ; JIGS - because it contains HP/MP or other character-related stats
+;DrawCharDescBox:
+;    PHA                  
+;    LDA #1               
+;    STA menustall
+;    LDA #09             
+;    JSR DrawMainItemBox
+;    PLA                  
+;    INC descboxopen      
+;    JMP DrawCharMenuString    ; JIGS - because it contains HP/MP or other character-related stats
 
 DrawItemDescBox_Fanfare:
     LDX #$54              ; play music track $54 (special event fanfare)
@@ -10043,23 +10119,19 @@ EquipStatsDescBoxNumbers:
     JMP DrawComplexString
     
    @FetchStats:    
-    LDA #$08        
-    STA tmp+7
+    LDX #$08        
     LDY #$3C         ; damage
     JSR @TheThing
   
-    LDA #$14
-    STA tmp+7
+    LDX #$14
     LDY #$3E         ; defense
     JSR @TheThing
     
-    LDA #$1E
-    STA tmp+7
+    LDX #$1E
     LDY #$3D         ; accuracy
     JSR @TheThing
    
-    LDA #$2A
-    STA tmp+7        
+    LDX #$2A
     LDY #$3F         ; evasion
    
    @TheThing:
@@ -10071,7 +10143,6 @@ EquipStatsDescBoxNumbers:
     BEQ :+
    
    @XStats: 
-    LDX tmp+7
     LDA #$FF
     STA str_buf, X
     LDA #$F0
@@ -10089,7 +10160,6 @@ EquipStatsDescBoxNumbers:
 ;    RTS  
   
    @WrongSlot: 
-    LDX tmp+7
     LDA #$FF
     STA str_buf, X
     LDA #$C4
@@ -10102,6 +10172,7 @@ EquipStatsDescBoxNumbers:
     BNE @WrongSlot 
   
     TYA
+    STX tmp+7
     JSR PrintCharStat
     LDX tmp+7
     LDY #0
