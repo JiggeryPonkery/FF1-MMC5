@@ -2611,6 +2611,9 @@ ProcessSMInput:
       LDA facing               ; use the direction the player is facing
       JSR GetSMTargetCoords    ;  as the direction to get SM target coords
 
+      LDA mapspritehide        ; player sprite is hidden; either under a bridge or in water
+      BNE @TalkToTile          ; so restrict talking to NPCs
+
       JSR CanTalkToMapObject   ; see if there's a map object at those target coords
       STX talkobj              ; store the index to that object (if any) in talkobj
       PHP                      ; back up the C flag (whether or not there was an object to talk to)
