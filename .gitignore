@@ -1,0 +1,31 @@
+
+Atlas/Atlas.bat
+Atlas/Atlas.exe
+Atlas/Atlas.pdf
+Atlas/SCRIPT.BIN
+Atlas/SCRIPT.txt
+Atlas/src/Atlas.sln
+Atlas/src/Atlas.sln.old
+Atlas/src/Atlas.suo
+Atlas/src/Atlas.suo.old
+Atlas/src/Atlas.vcproj
+Atlas/src/Atlas.vcproj.8.00.old
+Atlas/src/Atlas.vcproj.HIKARI.Steve.user
+Atlas/src/AtlasCore.cpp
+Atlas/src/AtlasCore.h
+Atlas/src/AtlasExtension.cpp
+Atlas/src/AtlasExtension.h
+Atlas/src/AtlasFile.cpp
+*.h
+*.cpp
+Atlas/src/ReadMe.txt
+Atlas/src/UpgradeLog.XML
+Atlas/src/UpgradeLog2.XML
+Atlas/table_dte.tbl
+Atlas/table_standard.tbl
+Enemy Steal List.txt
+FinalFantasy.nes
+Mesen_P.exe - Shortcut.lnk
+NotepadSession.txt
+yychr.exe - Shortcut.lnk
+zFFHackster.exe - Shortcut.lnk
