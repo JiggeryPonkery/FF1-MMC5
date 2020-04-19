@@ -1049,6 +1049,7 @@ PrintCharStat:
       ADC char_index      ; add character index
       TAX
       LDA ch_substats, X  ; get the substat
+     @LikeASubStat: 
       STA tmp             ; write it as low byte
       LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
       STA tmp+1           ;  and print as 3 digits
@@ -1056,7 +1057,8 @@ PrintCharStat:
       
    : CMP #$44   
      BNE @ExpToNext
-        LDABRA <ch_critrate, @Stat3Digit        
+        LDA ch_critrate
+        JMP @LikeASubStat
 
     ;;; all other codes default to Exp to Next level
 @ExpToNext:
