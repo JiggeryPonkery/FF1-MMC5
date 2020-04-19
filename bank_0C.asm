@@ -12,7 +12,7 @@
 .import BattleOver_ProcessResult_L
 .import BattleRNG_L
 .import BattleScreenShake_L
-.import BattleWaitForVBlank_L
+.import WaitForVBlank_L
 .import CallMusicPlay_L
 .import ClearBattleMessageBuffer_L
 .import ClericCheck
@@ -680,32 +680,34 @@ FinishBattlePrepAndFadeIn:
     JSR LongCall
     .word LoadEnemyStats              ; this is all pretty self explanitory
     .byte BANK_ENEMYSTATS
-    
-    JSR EnterBattlePrepareSprites
+   
     JSR BackupCharacterBattleStats
-    
-    LDA #01
-    STA InBattle
-    
-    JSR BattleUpdatePPU
-    
-    LDA #$08                        ; enable BG drawing, but not sprites
-    STA btl_soft2000
-    LDA #$0E
-    STA btl_soft2001
-    
     JSR ClearBattleMessageBuffer_L
     JSR ClearCharBuffers
+    JSR EnterBattlePrepareSprites
+    ;; this clears shadow OAM, sets the buffers for location, then laods the sprites up.
+    JSR DrawCharacterStatus    
+    ;; this sets their natural pose (crouching/standing/dead) and updates the background tiles if stone, does a frame with those sprites, and then updates the ailment BG tiles behind the party.
+
+    ;JSR BattleFrame             ; VBlank, OAM DMA, Update Audio
+    ;; ^ done at the end of DrawCharacterStatus
+  
+    LDA #$08               ; enable BG drawing, but not sprites
+    STA soft2000
+    LDA #$1E ;0E           ;; JIGS - enable sprites
+    STA btl_soft2001    
+
+    LDA #01                ; turn on the switch that makes the boxes coloured in
+    STA InBattle           ; this also copies btl_soft2001 to $2001 after each frame
+    STA BattleTurn         ; since the screen has to be off mid-frame to update palettes
+    ; This also has to be on in order to reset the grey for stone characters
+    ; at the end of VBlank
+   
     JSR BattleFadeIn
     
-    LDA #$1E
-    STA btl_soft2001                ; enable BG and sprites
+  ;  LDA #$1E
+  ;  STA btl_soft2001                ; enable BG and sprites
     
-    ;; JIGS - adding battle turn reset:
-    LDA #1
-    STA BattleTurn    
-  ;  JSR PrintBattleTurnNumber
-    JSR DrawCharacterStatus
     LDA #BOX_PLAYER
     JSR DrawCombatBox
     DEC BattleBoxBufferCount ; but don't count it!
@@ -728,7 +730,7 @@ FinishBattlePrepAndFadeIn:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 WaitFrames_BattleResult:
-    JSR BattleWaitForVBlank_L ; wait a frame
+    JSR WaitForVBlank_L ; wait a frame
     
     LDA #$00                ; burn a bunch of CPU time -- presumably so that 
     : SEC                   ;  WaitForVBlank isn't called again so close to start of
@@ -1893,8 +1895,8 @@ EnterBattlePrepareSprites:
     STA btlattackspr_nodraw              
     
     JSR BattleClearOAM      ; clear shadow OAM
-    JSR BattleFrame         ; do a frame with oam updated to clear actual oam)
-    JSR BattleUpdatePPU     ; reset scroll and stuffs
+    ;JSR BattleFrame         ; do a frame with oam updated to clear actual oam)
+    ;JSR BattleUpdatePPU     ; reset scroll and stuffs
     
     ;;  Prep all the character drawing stuff
     ;LDA #$B0
@@ -1945,7 +1947,11 @@ LoadAllCharacterSprites:
     LDA #0
     STA char_index
   : LDA #01
-    JSR LoadSprite 
+    STA MMC5_tmp
+    JSR LongCall
+    .word LoadSprite_Bank04
+    .byte $04
+    ;JSR LoadSprite 
     INC char_index
     LDA char_index
     CMP #04
@@ -1999,7 +2005,7 @@ BattleUpdatePPU:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleFrame:
-    JSR BattleWaitForVBlank_L   ; Wait for VBlank 
+    JSR WaitForVBlank_L   ; Wait for VBlank 
     LDA $2002
     LDA #>oam
     STA $4014                   ; Do OAM DMA
@@ -2069,7 +2075,7 @@ DoFrame_WithInput:
     DEY
     BNE @Loop           ; repeat for all buttons
     
-    JSR DoMiniFrame     ; do a frame
+    JSR BattleFrame     ; do a frame
     LDA btl_input       ; reload the controller state, now in A
     RTS
     
@@ -2301,7 +2307,7 @@ UpdateCharacterSprite: ; In: X = 00, 01, 02, 03
     LDA #1
 LoadSprite:
     STA MMC5_tmp
-    JSR BattleWaitForVBlank_L
+    JSR WaitForVBlank_L
     JSR LongCall
     .word LoadSprite_Bank04
     .byte $04
@@ -3831,7 +3837,7 @@ PlayFanfareAndCheer:
     LDA #0
     STA $4015             ; silence APU
     STA $5015           ; and silence the MMC5 APU. (JIGS)
-    JSR BattleWaitForVBlank_L
+    JSR WaitForVBlank_L
     ;; I have no idea how to stop the fanfare from starting with a noise crunchy sound...
     ;; but this seems to do the trick?
 
@@ -4508,7 +4514,7 @@ DoMagicFlash:
     JMP DoFrame_UpdatePalette
     
   @FrameNoPaletteChange:
-    JSR BattleWaitForVBlank_L
+    JSR WaitForVBlank_L
     JSR BattleUpdatePPU
   ; JMP BattleUpdateAudio  ; <- code flows into this routine
     
@@ -4574,7 +4580,7 @@ UndrawBoxes:
      LDA #BTLMSG_TERMINATED 
      JSR DrawMessageBox         ; print TERMINATED (game broke!) and loop forever here.
    @Loop: 
-     JSR BattleWaitForVBlank_L
+     JSR WaitForVBlank_L
      JMP @Loop
     
   : LDA tmp                      ; otherwise, everything is fine; get the number to undraw and do it!
@@ -4872,7 +4878,7 @@ RespondDelay_ClearCombatBoxes:
 RespondDelay:
     LDA btl_responddelay        ; get the delay
     STA btl_respondrate_tmp     ; stuff it in temp ram as loop counter
-    : JSR BattleWaitForVBlank_L ; wait that many frames
+    : JSR WaitForVBlank_L ; wait that many frames
       JSR BattleUpdateAudio     ; updating audio each frame
       DEC btl_respondrate_tmp
       BNE :-
@@ -5395,7 +5401,7 @@ ClearGuardBuffers:
 ;    .word PrintBattleTurn
 ;    .byte BANK_MENUS
 ;    
-;    JSR BattleWaitForVBlank_L
+;    JSR WaitForVBlank_L
 ;    
 ;    LDA #>$205D                  ; set PPU addr
 ;    STA $2006
@@ -7814,7 +7820,7 @@ DrawCharacterStatus_Fast:
     LDA #>$20DE
     STA BattleTmpPointer+1
     
-    JSR BattleWaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
+    JSR WaitForVBlank_L         ; since we're about to do some drawing, wait for VBlank
     LDA $2002                         ; clear toggle
     
     LDX #0
@@ -7896,20 +7902,7 @@ DrawCharacterStatus_Fast:
 .byte $7D, $F0, $7B, $96, $97, $94, $98, $95 ; poison, stone, dead, sleep, mute, dark, confuse, stun!
 
   
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DoMiniFrame  [$AB29 :: 0x32B39]
-;;
-;;    This is a strange little routine that does some typical frame work.  I'm sort of at a loss
-;;  to even describe it in a meaningful way.
-;;
-;;    What's especially strange is that it DOES use the Battle audio routine, but NOT the BattleVBlank routine
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DoMiniFrame:
-    JSR BattleWaitForVBlank_L
-    JMP BattleUpdateAudio
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7957,7 +7950,10 @@ UpdateVariablePalette:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DoFrame_UpdatePalette:
-    JSR BattleWaitForVBlank_L       ; wait for VBlank
+    JSR WaitForVBlank_L       ; wait for VBlank
+    
+    LDA #>oam               ; and do Sprite DMA
+    STA $4014             
     
     LDA #$3F            ; set PPU addr to point to palettes
     STA $2006
@@ -8010,19 +8006,8 @@ ResetUsePalette:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleFadeIn:
-    JSR BattleClearOAM          ; Clear OAM
-    LDA #$00
-    STA soft2000                ; clear other PPU settings
-    STA $2001                   ; including disabling rendering, though since btl_soft2001 has
-                                ;   rendering enabled, rendering will be re-enabled when palettes are updated
-    
-    JSR WaitForVBlank_L         ; wait for VBlank
-    LDA $2002
-    LDA #>oam
-    STA $4014                   ; Do DMA (clearing actual PPU OAM)
     LDA #$04
     STA btl_another_loopctr     ; loop downcounter.  Looping 4 times -- once for each shade
-    JSR BattleUpdateAudio       ; since we just did a frame, keep audio updated
     
     ; This fades in by using the fadeout routine.  Basically it will reset the palette each iteration
     ;   fading it out less and less each time, giving the appearance that it is fading it.
@@ -8084,10 +8069,10 @@ FadeOutOneShade:
         BNE @SetColor
     : SEC                   ; otherwise, subtract $10 to take it down a shade
       SBC #$10
-      STA btl_various_tmp          ; save new brightness to temp ram
+      STA btl_various_tmp   ; save new brightness to temp ram
       LDA btl_palettes, Y   ; get the original color
       AND #$CF              ; remove brightness
-      ORA btl_various_tmp             ; apply new brightness
+      ORA btl_various_tmp   ; apply new brightness
       
     @SetColor:
       STA btl_usepalette, Y ; write new color to usepalette
@@ -8108,9 +8093,10 @@ FadeOutOneShade:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Do3Frames_UpdatePalette:
-    JSR DoMiniFrame
     JSR DoFrame_UpdatePalette
-    JMP DoMiniFrame
+    JSR BattleFrame
+    JSR BattleFrame ; JIGS - added another one
+    JMP BattleFrame
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12021,7 +12007,7 @@ DrawEnemyEffect:
     STA explode_max_x
     
   @EraseLoop:
-      JSR BattleWaitForVBlank_L     ; Vblank
+      JSR WaitForVBlank_L     ; Vblank
       LDA explode_max_x             ; Set PPU Addr
       STA $2006
       LDA explode_min_y
@@ -12058,7 +12044,7 @@ DrawEnemyEffect:
 
 VBlank_SetPPUAddr:
     PHA                         ; backup A
-    JSR BattleWaitForVBlank_L   ; VBlank
+    JSR WaitForVBlank_L   ; VBlank
     LDA btltmp+$B               ; set ppu addr
     STA $2006
     LDA btltmp+$A
@@ -12368,10 +12354,11 @@ DrawExplosions:
       DEY
       BNE :-
       
-    JSR BattleWaitForVBlank_L ; Do one more frame
-    LDA #>oam                 ; so we can update sprite data in the PPU
-    STA $4014
-    JMP BattleUpdateAudio     ; update audio since we did a frame
+    ;JSR WaitForVBlank_L ; Do one more frame
+    ;LDA #>oam                 ; so we can update sprite data in the PPU
+    ;STA $4014
+    ;JMP BattleUpdateAudio     ; update audio since we did a frame
+    JMP BattleFrame
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12426,10 +12413,11 @@ DrawExplosion_Frame:
       DEX
       BNE :-
       
-    JSR BattleWaitForVBlank_L   ; do a frame
-    LDA #>oam                   ; where OAM is updated
-    STA $4014
-    JMP BattleUpdateAudio       ; update music/sfx during this frame as well
+    ;JSR WaitForVBlank_L   ; do a frame
+    ;LDA #>oam                   ; where OAM is updated
+    ;STA $4014
+    ;JMP BattleUpdateAudio       ; update music/sfx during this frame as well
+    JMP BattleFrame
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12640,7 +12628,7 @@ DisplayAttackIndicator:
   STA tmp+6
    
  @Begin:
-  JSR BattleWaitForVBlank_L
+  JSR WaitForVBlank_L
   LDY tmp+7  
  @Loop:
   JSR @SetAddress
@@ -12676,8 +12664,8 @@ DisplayAttackIndicator:
  @MiniFrame:
   JSR BattleUpdatePPU         ; set scroll
   JSR BattleUpdateAudio       ; update audio
-  JSR DoMiniFrame
-  JMP DoMiniFrame             ; wait for vblank/then do audio (2 frames)
+  JSR BattleFrame
+  JMP BattleFrame             ; wait for vblank/then do audio (2 frames)
   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

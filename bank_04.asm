@@ -16,7 +16,7 @@
 .import LongCall
 .import CHRLoad
 .import CallMusicPlay_L
-.import BattleWaitForVBlank_L
+.import WaitForVBlank_L
 
 
 .segment "BANK_04"
@@ -633,7 +633,7 @@ LoadMagicSprite:
     JSR CallMusicPlay_L     ; Call music playback to keep it playing
     ;; does not update battle sfx, so make sure this is called before SFX begin
     
-    JSR BattleWaitForVBlank_L
+    JSR WaitForVBlank_L
     
     LDA #$40
     STA tmp+2

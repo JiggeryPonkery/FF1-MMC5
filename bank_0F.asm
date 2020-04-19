@@ -21,7 +21,7 @@
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
-.import RandAX, HushTriangle, BattleWaitForVBlank_L, GameStart_L, GameStart2, LoadPtyGenBGCHRAndPalettes, IntroTitlePrepare, LoadBridgeSceneGFX_Menu
+.import RandAX, HushTriangle, WaitForVBlank_L, GameStart_L, GameStart2, LoadPtyGenBGCHRAndPalettes, IntroTitlePrepare, LoadBridgeSceneGFX_Menu
 .import DrawComplexString, ClearOAM, DrawPalette, CallMusicPlay, UpdateJoy, DrawSimple2x3Sprite, Draw2x2Sprite, CHRLoad, CHRLoadToA
 .import DrawCursor, WaitForVBlank_L, DrawBox, LoadMenuCHRPal, MenuCondStall, CoordToNTAddr, LoadBorderPalette_Blue
 .import UndrawBattleBlock, ShiftSpriteHightoLow, PlaySFX_Error

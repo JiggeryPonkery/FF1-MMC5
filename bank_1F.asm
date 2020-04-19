@@ -7,7 +7,7 @@
 .export BattleCrossPageJump_L
 .export BattleRNG_L
 .export BattleScreenShake_L
-.export BattleWaitForVBlank_L
+.export WaitForVBlank_L
 .export Battle_ReadPPUData_L
 ;.export Battle_WritePPUData_L
 .export CHRLoad
@@ -2707,7 +2707,6 @@ ProcessSMInput:
       ;LDA #BANK_MENUS
       ;JSR SwapPRG_L
       ;JSR EnterLineupMenu      ; but since they pressed select -- enter lineup menu, not main menu
-      ;JSR APUOFF               ;; JIGS - not sure why I added this honestly... do some testing with/without it!
       ;JMP ReenterStandardMap
       JMP PauseGame
       
@@ -7872,6 +7871,10 @@ DrawComplexString_Exit:
     LDA ret_bank   ; swap back to original bank
     JMP SwapPRG_L  ;   then return
 
+ComplexString_Backspace:
+    DEC ppu_dest              ;; Important to note that it doesn't dec the high byte. 
+    JMP ComplexString_SetDest ;; Only use this when you know its not gonna mess up!
+
 DrawComplexString_L:
 DrawComplexString:
     LDA cur_bank
@@ -7970,6 +7973,14 @@ ComplexStringControlCode:
     JMP ComplexString_CharacterStatCode
   
 ;; now the control code routines!  
+
+ComplexString_Forward:            ;; Get the next byte, the number of tiles to skip...
+    JSR ComplexString_GetNextByte ;; and skip that many tiles! So you can draw stuff 
+    TAX                           ;; between words without drawing the words again.
+  : INC ppu_dest
+    DEX
+    BNE :-
+    JMP ComplexString_SetDest
   
 ComplexString_SingleLineBreak:
     LDX #$20         ;  X=20 for a single line break (control code $05)
@@ -7990,24 +8001,13 @@ ComplexString_DoubleLineBreak:
     STA ppu_dest+1
     JMP ComplexString_CheckMenuStall   ; continue processing text
     
-ComplexString_Forward:
-    INC ppu_dest
-    JMP ComplexString_SetDest
-  
-ComplexString_Backspace:
-    DEC ppu_dest                     ;; Important to note that it doesn't dec the high byte. 
-    JMP ComplexString_SetDest ;; Only use this when you know its not gonna mess up!
-
 ComplexString_SpaceString:    ;; prints spaces! Simple
     JSR ComplexString_GetNextByte
-    STA spaceruns
-  
+    TAX
     LDA #$FF
-   @PrintSpaces:
-    JSR ComplexString_JustDraw
-    
-    DEC spaceruns
-    BNE @PrintSpaces
+  : JSR ComplexString_JustDraw
+    DEX
+    BNE :-
     JMP ComplexString_GetNext
 
 ComplexString_PlayerGold:
@@ -11883,7 +11883,9 @@ EnterBattle:
 
     LDA #0
     STA menustall             ; disable menu stalling
-    JSR Battle_PPUOff         ; turn PPU off
+    STA soft2000              ; clear soft2000
+    STA $2000                 ; disable NMIs
+    STA $2001                 ; and turn off PPU
     LDA $2002                 ; reset PPU toggle
     
     JSR JigsBox_Start ; clear box buffers and draw empty boxes to RAM
@@ -11918,13 +11920,19 @@ EnterBattle:
     LDX #>$23C0
     LDA #<$23C0
     JSR SetPPUAddr_XA     ; set PPU Address to $23C0 (start of attribute table)
-    LDX #0
+    LDX #$28
   @AttrLoop:
-      LDA lut_BtlAttrTbl, X   ; copy over attribute bytes
+      LDA lut_BtlAttrTbl-1, X   ; copy over attribute bytes
       STA $2007
-      INX
-      CPX #$40
-      BNE @AttrLoop           ; loop until all $40 bytes copied
+      DEX
+      BNE @AttrLoop           ; loop until all $28 bytes copied
+    
+    LDX #$18  
+    LDA #$FF
+   @AttrLoop_2:
+      STA $2007
+      DEX
+      BNE @AttrLoop_2         ; the last 3 rows of the nametable are $FF
 
   ;; Load palettes
 
@@ -11961,13 +11969,6 @@ EnterBattle:
     LDY #3<<2
     JSR DrawBattleBackdropRow   ; 4 rows total
     
-   ; LDA #28                    ; box at 1,1
-   ; STA box_x                  ; with dims 16,18
-   ; LDA #1                   
-   ; LDX #4                     ;  this draws the battle turn box
-   ; LDY #3
-   ; JSR BattleBox_vAXY
-
     LDA #BANK_BATTLE           ; swap in the battle bank
     STA battle_bank
     JSR SwapPRG_L
@@ -12026,6 +12027,7 @@ DrawBattleBackdropRow:
   ;; JIGS ^ is a neat layout I guess!
   ;.BYTE 1,2,3,4,3,4,1,2,1,2,3,4,3,4
 
+;; JIGS - I kinda want to randomize this... move it to Bank B for that though.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12041,40 +12043,6 @@ SetPPUAddr_XA:
     RTS
 
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Battle_Box_vAXY   [$F3E2 :: 0x3F3F2]
-;;
-;;     Draws a box at coords v,A (where 'v' is box_x) and with dims X,Y
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-BattleBox_vAXY:
-    STA box_y         ; just dump A,X,Y to box_y, box_wd, and box_ht
-    STX box_wd
-    STY box_ht
-    JSR Battle_PPUOff   ; turn the PPU off
-    JMP DrawBox_L       ; then draw the box
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Battle_PPUOff  [$F3F1 :: 0x3F401]
-;;
-;;    Used to turn the PPU off for Battles.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Battle_PPUOff:
-    LDA #0
-    STA soft2000     ; clear soft2000
-    ;STA unk_FE       ; ?? I don't think this is ever used
-    STA $2000          ; disable NMIs
-    STA $2001          ; and turn off PPU
-    RTS
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Battle Screen Attribute table LUT  [$F400 :: 0x3F410]
@@ -12087,25 +12055,24 @@ Battle_PPUOff:
 
 
 lut_BtlAttrTbl:
-;  .BYTE $3F,$0F,$0F,$0F,$3F,$0F,$FF,$FF
-;  .BYTE $33,$00,$00,$00,$33,$00,$FF,$FF
-;  .BYTE $33,$00,$00,$00,$33,$00,$FF,$FF
-;  .BYTE $33,$00,$00,$00,$33,$00,$FF,$FF
-;  .BYTE $F3,$F0,$F0,$F0,$F3,$F0,$FF,$FF
+;  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+;  .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
+;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
+;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
+;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
-
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
-  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
   
   ;; JIGS - this table better fits the new layout!
+  ;; But lets reverse it for loading with less bytes.
+  ;; and the last 3 lines will be done by code.
+
+.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
+.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
+.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
+.BYTE $F0,$F0,$00,$00,$00,$00,$00,$00  
+.BYTE $00,$00,$00,$00,$00,$00,$00,$00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12144,13 +12111,11 @@ BattleScreenShake:
       DEC ScreenShakeCounter
       BNE @Loop
     
-    
-    LDA btl_soft2001
-    AND #$DF
+    ;LDA btl_soft2001
+    ;AND #$DF
+    LDA #$1E
     STA btl_soft2001     ; JIGS - turn off red emphasis
-    
     JMP Battle_UpdatePPU_UpdateAudio_FixedBank  ; 1 more frame (with reset scroll)
-    
     
   @Stall2Frames:
     JSR @Frame          ; do 1 frame
@@ -12299,7 +12264,7 @@ BattleDrawMessageBuffer:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_DrawMessageRow_VBlank:
-    JSR BattleWaitForVBlank
+    JSR WaitForVBlank
     
 Battle_DrawMessageRow:
     LDA btldraw_dst+1
@@ -12495,7 +12460,7 @@ DrawCombatBox:
     JSR DrawBox_WaitForVBlank
     JSR FormatBattleString     ; decompress the string to the box's innards in RAM    
     JSR DrawBox_WaitForVBlank
-   ; JSR BattleWaitForVBlank
+   ; JSR WaitForVBlank
     JSR JigsBoxDrawToBuffer    ; copy the box to the screen buffer
     ;; also first copies the screen buffer to backup RAM
     ;; so that undrawing restores the exact tiles "behind" the box
@@ -12503,7 +12468,7 @@ DrawCombatBox:
 
 DrawBox_WaitForVBlank:
     JSR Battle_UpdatePPU_UpdateAudio_FixedBank
-    JMP BattleWaitForVBlank    ; Wait for V Blank and do audio before trying to decompress the string
+    JMP WaitForVBlank    ; Wait for V Blank and do audio before trying to decompress the string
 
 
 
@@ -13936,20 +13901,6 @@ OnReset:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  BattleWaitForVBlank  [$F4A1 :: 0x3F4B1]
-;;
-;;  Identical to WaitForVBlank, but uses btl_soft2000 instead of the regular soft2000
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-BattleWaitForVBlank_L:
-BattleWaitForVBlank:
-    LDA btl_soft2000
-    STA soft2000
-;    JMP WaitForVBlank_L
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;   Wait for VBlank [$FEA8 :: 0x3FEB8]
@@ -14007,7 +13958,7 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     LDA #%10000000 
     STY $2006
     STA $2006  
-    LDA #$1E ; btl_soft2001
+    LDA btl_soft2001 ;#$1E
     STA $2001  ; turn on screen
 
     LDA soft2000
@@ -14051,8 +14002,8 @@ OnNMI:
         STX $2001 ; X = 0, turn off screen 
         LDA #$20
         STY $2007  ; write Y to palette $3F0E
-        LDA #$1E ; btl_soft2001
-        STA $2001  ; turn on screen
+        LDA btl_soft2001
+        STA $2001  ; turn on screen, or whatever btl_soft2001 is set to do (it is off before fade in)
         LDY #$0
         LDA ScreenShakeCounter ; is screen still shaking?
         BEQ :+                 ; if yes...
@@ -14633,13 +14584,7 @@ EncounterRateOption:
     RTS     
   
 
-;;JIGS - game does this so much, I guess I figure why not make it simpler? But then...
-;; I only ended up using it twice! Oops.
-APUOFF:
-    LDA #0
-    STA $4014
-    STA $4015
-    RTS    
+
 
 SaveScreenHelper: 
   ;  JSR LoadMenuCHRPal
@@ -14650,12 +14595,6 @@ SaveScreenHelper:
 	JSR LoadBorderPalette_Blue
     LDA #BANK_Z
     JMP SwapPRG    
-    
-    
-    
-    
-    
-    
     
     
 BattleBackgroundColor_LUT:
