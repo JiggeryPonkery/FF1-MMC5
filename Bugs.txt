@@ -1,11 +1,12 @@
 Map:
 * Treasure chests will swap back to closed when the dialogue box is drawn. (Needs to be confirmed, footage is from old version.)
-* Cannot walk under a bridge an NPC is standing on top of.
+- Cannot walk under a bridge an NPC is standing on top of. : Fixed by disallowing NPCs to walk on bridges.
+* Should not be able to talk to people while under a bridge! (or in water?)
 
 
 Battle:
 * Using a Soft tried to cast "Bolt" then crashed the game. Test all items.
-* Weapon sprite loading takes too long and causes stoned characters to flicker blue for a frame.
+- Weapon sprite loading takes too long and causes stoned characters to flicker blue for a frame. : Fixed -- was actually the loading of the palette, since the player's chosen background colour was put into the default palette, which was reset after WaitForVBlank's exit turned it grey.
 * Weapon animations lag 1 frame behind character movements.
 * Cheering after battle needs to be adjusted to be a few frames quicker.
 * Spells need to be tested to cast properly.
@@ -26,3 +27,5 @@ Ideas:
 * Battle Graphics: Randomize the LUT that draws the background. Compare randomized number against previous 2 numbers: If last random numbers were 1, then 1, then third number must be 3. After each random number: 2 must follow 1, 4 must follow 3. Move background drawing to Bank B to make more fixed bank space.
 
 * Variable Magic: Spells that can either target 1 enemy, all enemies (reduced potency), 1 player, or all players (reduced potency). Will this require drawing shimmering glovehands when highlighting multiple targets?
+
+* Shop: Characterse pose when able to learn a spell.

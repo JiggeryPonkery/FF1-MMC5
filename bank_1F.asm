@@ -9708,10 +9708,18 @@ CanMapObjMove:             ; first thing to check is the map
     LDA tileset_data, Y    ; fetch the first byte of properties for this tile
     AND #TP_TELE_MASK | TP_NOMOVE | TP_HIDESPRITE | TP_SPEC_DOOR ; see if this tile is a teleport tile, or a tile you can't move on
     BEQ :+                 ; if either teleport or nomove, NPCs can't walk here, so 
+   @AlsoBridge: 
       SEC                  ;  SEC to indicate failure (can't move)
       RTS                  ; and exit
 
-:   LDA sm_player_x        ; now check to see if they're trying to move on top of the player
+:   LDA tileset_data, Y
+    CMP #TP_SPEC_BRIDGEHORZ
+    BEQ @AlsoBridge
+    CMP #TP_SPEC_BRIDGEVERT
+    BEQ @AlsoBridge
+    ;; this should stop NPCs from walking on a bridge
+
+    LDA sm_player_x        ; now check to see if they're trying to move on top of the player
     CMP tmp+4
     BNE :+
     LDA sm_player_y
@@ -10934,8 +10942,9 @@ LoadBorderPalette_Blue:
     BNE :+         ; always branches
 
 LoadBorderPalette_Color:
-    LDX BattleBGColor
-    LDA BattleBackgroundColor_LUT, X
+  ;  LDX BattleBGColor
+  ;  LDA BattleBackgroundColor_LUT, X
+    LDA #$10         
  :  STA cur_pal+$E   ; Black or Blue goes to color 2
     LDA #$0F
     STA cur_pal+$C   ; Black always to color 0
