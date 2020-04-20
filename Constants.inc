@@ -695,8 +695,8 @@ BOTTLE         = $1E ; vanishes on use
 OXYALE         = $1F
 CANOE          = $20
 LEWDS          = $21
-BOTTLE_ALT     = $2A ; for shops
-LEWDS_ALT      = $2B
+BOTTLE_ALT     = $2A ; for inventory description
+LEWDS_ALT      = $2B ; for inventory description
 
 KEYITEM_MAX    = $12 ; 18 key items
 

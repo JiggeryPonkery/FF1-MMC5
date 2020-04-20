@@ -29,22 +29,22 @@ BANK_THIS = $0A
 ;; First, monster attacks:
 lut_EnemyAttack:
 
-.word EnemyAttack1   ; 0 
-.word EnemyAttack2   ; 1 
-.word EnemyAttack3   ; 2 
-.word EnemyAttack4   ; 3 
-.word EnemyAttack5   ; 4 
-.word EnemyAttack6   ; 5 
-.word EnemyAttack7   ; 6 
-.word EnemyAttack8   ; 7 
-.word EnemyAttack9   ; 8 
-.word EnemyAttack10  ; 9 
-.word EnemyAttack11  ; A 
-.word EnemyAttack12  ; B 
-.word EnemyAttack13  ; C 
-.word EnemyAttack14  ; D 
-.word EnemyAttack15  ; E 
-.word EnemyAttack16  ; F 
+.word EnemyAttack1   ; 0
+.word EnemyAttack2   ; 1
+.word EnemyAttack3   ; 2
+.word EnemyAttack4   ; 3
+.word EnemyAttack5   ; 4
+.word EnemyAttack6   ; 5
+.word EnemyAttack7   ; 6
+.word EnemyAttack8   ; 7
+.word EnemyAttack9   ; 8
+.word EnemyAttack10  ; 9
+.word EnemyAttack11  ; A
+.word EnemyAttack12  ; B
+.word EnemyAttack13  ; C
+.word EnemyAttack14  ; D
+.word EnemyAttack15  ; E
+.word EnemyAttack16  ; F
 .word EnemyAttack17  ; 10
 .word EnemyAttack18  ; 11
 .word EnemyAttack19  ; 12
@@ -117,105 +117,105 @@ EnemyAttack27:
 ;;  Enemy names [$94E0 :: 0x2D4F0]
 data_EnemyNames:
 
-.word ENEMYNAME1  
-.word ENEMYNAME2  
-.word ENEMYNAME3  
-.word ENEMYNAME4  
-.word ENEMYNAME5  
-.word ENEMYNAME6  
-.word ENEMYNAME7  
-.word ENEMYNAME8  
-.word ENEMYNAME9  
-.word ENEMYNAME10 
-.word ENEMYNAME11 
-.word ENEMYNAME12 
-.word ENEMYNAME13 
-.word ENEMYNAME14 
-.word ENEMYNAME15 
-.word ENEMYNAME16 
-.word ENEMYNAME17 
-.word ENEMYNAME18 
-.word ENEMYNAME19 
-.word ENEMYNAME20 
-.word ENEMYNAME21 
-.word ENEMYNAME22 
-.word ENEMYNAME23 
-.word ENEMYNAME24 
-.word ENEMYNAME25 
-.word ENEMYNAME26 
-.word ENEMYNAME27 
-.word ENEMYNAME28 
-.word ENEMYNAME29 
-.word ENEMYNAME30 
-.word ENEMYNAME31 
-.word ENEMYNAME32 
-.word ENEMYNAME33 
-.word ENEMYNAME34 
-.word ENEMYNAME35 
-.word ENEMYNAME36 
-.word ENEMYNAME37 
-.word ENEMYNAME38 
-.word ENEMYNAME39 
-.word ENEMYNAME40 
-.word ENEMYNAME41 
-.word ENEMYNAME42 
-.word ENEMYNAME43 
-.word ENEMYNAME44 
-.word ENEMYNAME45 
-.word ENEMYNAME46 
-.word ENEMYNAME47 
-.word ENEMYNAME48 
-.word ENEMYNAME49 
-.word ENEMYNAME50 
-.word ENEMYNAME51 
-.word ENEMYNAME52 
-.word ENEMYNAME53 
-.word ENEMYNAME54 
-.word ENEMYNAME55 
-.word ENEMYNAME56 
-.word ENEMYNAME57 
-.word ENEMYNAME58 
-.word ENEMYNAME59 
-.word ENEMYNAME60 
-.word ENEMYNAME61 
-.word ENEMYNAME62 
-.word ENEMYNAME63 
-.word ENEMYNAME64 
-.word ENEMYNAME65 
-.word ENEMYNAME66 
-.word ENEMYNAME67 
-.word ENEMYNAME68 
-.word ENEMYNAME69 
-.word ENEMYNAME70 
-.word ENEMYNAME71 
-.word ENEMYNAME72 
-.word ENEMYNAME73 
-.word ENEMYNAME74 
-.word ENEMYNAME75 
-.word ENEMYNAME76 
-.word ENEMYNAME77 
-.word ENEMYNAME78 
-.word ENEMYNAME79 
-.word ENEMYNAME80 
-.word ENEMYNAME81 
-.word ENEMYNAME82 
-.word ENEMYNAME83 
-.word ENEMYNAME84 
-.word ENEMYNAME85 
-.word ENEMYNAME86 
-.word ENEMYNAME87 
-.word ENEMYNAME88 
-.word ENEMYNAME89 
-.word ENEMYNAME90 
-.word ENEMYNAME91 
-.word ENEMYNAME92 
-.word ENEMYNAME93 
-.word ENEMYNAME94 
-.word ENEMYNAME95 
-.word ENEMYNAME96 
-.word ENEMYNAME97 
-.word ENEMYNAME98 
-.word ENEMYNAME99 
+.word ENEMYNAME1
+.word ENEMYNAME2
+.word ENEMYNAME3
+.word ENEMYNAME4
+.word ENEMYNAME5
+.word ENEMYNAME6
+.word ENEMYNAME7
+.word ENEMYNAME8
+.word ENEMYNAME9
+.word ENEMYNAME10
+.word ENEMYNAME11
+.word ENEMYNAME12
+.word ENEMYNAME13
+.word ENEMYNAME14
+.word ENEMYNAME15
+.word ENEMYNAME16
+.word ENEMYNAME17
+.word ENEMYNAME18
+.word ENEMYNAME19
+.word ENEMYNAME20
+.word ENEMYNAME21
+.word ENEMYNAME22
+.word ENEMYNAME23
+.word ENEMYNAME24
+.word ENEMYNAME25
+.word ENEMYNAME26
+.word ENEMYNAME27
+.word ENEMYNAME28
+.word ENEMYNAME29
+.word ENEMYNAME30
+.word ENEMYNAME31
+.word ENEMYNAME32
+.word ENEMYNAME33
+.word ENEMYNAME34
+.word ENEMYNAME35
+.word ENEMYNAME36
+.word ENEMYNAME37
+.word ENEMYNAME38
+.word ENEMYNAME39
+.word ENEMYNAME40
+.word ENEMYNAME41
+.word ENEMYNAME42
+.word ENEMYNAME43
+.word ENEMYNAME44
+.word ENEMYNAME45
+.word ENEMYNAME46
+.word ENEMYNAME47
+.word ENEMYNAME48
+.word ENEMYNAME49
+.word ENEMYNAME50
+.word ENEMYNAME51
+.word ENEMYNAME52
+.word ENEMYNAME53
+.word ENEMYNAME54
+.word ENEMYNAME55
+.word ENEMYNAME56
+.word ENEMYNAME57
+.word ENEMYNAME58
+.word ENEMYNAME59
+.word ENEMYNAME60
+.word ENEMYNAME61
+.word ENEMYNAME62
+.word ENEMYNAME63
+.word ENEMYNAME64
+.word ENEMYNAME65
+.word ENEMYNAME66
+.word ENEMYNAME67
+.word ENEMYNAME68
+.word ENEMYNAME69
+.word ENEMYNAME70
+.word ENEMYNAME71
+.word ENEMYNAME72
+.word ENEMYNAME73
+.word ENEMYNAME74
+.word ENEMYNAME75
+.word ENEMYNAME76
+.word ENEMYNAME77
+.word ENEMYNAME78
+.word ENEMYNAME79
+.word ENEMYNAME80
+.word ENEMYNAME81
+.word ENEMYNAME82
+.word ENEMYNAME83
+.word ENEMYNAME84
+.word ENEMYNAME85
+.word ENEMYNAME86
+.word ENEMYNAME87
+.word ENEMYNAME88
+.word ENEMYNAME89
+.word ENEMYNAME90
+.word ENEMYNAME91
+.word ENEMYNAME92
+.word ENEMYNAME93
+.word ENEMYNAME94
+.word ENEMYNAME95
+.word ENEMYNAME96
+.word ENEMYNAME97
+.word ENEMYNAME98
+.word ENEMYNAME99
 .word ENEMYNAME100
 .word ENEMYNAME101
 .word ENEMYNAME102
@@ -248,19 +248,19 @@ data_EnemyNames:
 
 
 ENEMYNAME1:
-.byte $92,$96,$99,$00                       ; IMP	
+.byte $92,$96,$99,$00                       ; IMP
 ENEMYNAME2:
-.byte $90,$B5,$92,$96,$99,$00               ; GrIMP	
+.byte $90,$B5,$92,$96,$99,$00               ; GrIMP
 ENEMYNAME3:
-.byte $A0,$98,$95,$8F,$00                   ; WOLF	
+.byte $A0,$98,$95,$8F,$00                   ; WOLF
 ENEMYNAME4:
-.byte $90,$B5,$A0,$98,$95,$8F,$00           ; GrWolf	
+.byte $90,$B5,$A0,$98,$95,$8F,$00           ; GrWolf
 ENEMYNAME5:
-.byte $A0,$B5,$A0,$98,$95,$8F,$00           ; WrWolf     
+.byte $A0,$B5,$A0,$98,$95,$8F,$00           ; WrWolf
 ENEMYNAME6:
-.byte $8F,$B5,$A0,$98,$95,$8F,$00           ; FrWOLF     
+.byte $8F,$B5,$A0,$98,$95,$8F,$00           ; FrWOLF
 ENEMYNAME7:
-.byte $92,$90,$9E,$8A,$97,$8A,$00           ; IGUANA     
+.byte $92,$90,$9E,$8A,$97,$8A,$00           ; IGUANA
 ENEMYNAME8:
 .byte $8A,$90,$8A,$96,$8A,$00               ; AGAMA
 ENEMYNAME9:
@@ -336,7 +336,7 @@ ENEMYNAME43:
 ENEMYNAME44:
 .byte $A3,$98,$96,$8B,$92,$8E,$00           ; ZOMBIE
 ENEMYNAME45:
-.byte $90,$91,$98,$9E,$95,$00               ; GHOUL 
+.byte $90,$91,$98,$9E,$95,$00               ; GHOUL
 ENEMYNAME46:
 .byte $90,$8E,$92,$9C,$9D,$00               ; GEIST
 ENEMYNAME47:
@@ -494,27 +494,27 @@ ENEMYNAME122:
 ENEMYNAME123:
 .byte $9D,$92,$8A,$96,$8A,$9D,$00            ; TIAMAT
 ENEMYNAME124:
-.byte $8C,$91,$8A,$98,$9C,$00                ; CHAOS  
+.byte $8C,$91,$8A,$98,$9C,$00                ; CHAOS
 
 ; But here's all the items and some more!
 ; When the game looks up an item name, it first gets the pointer--the two byte .word names here--and then looks that up from a table of sorts?
-; I sorted all this out so you can rename items and *re-organize* them easier, which FFHackster lacks the ability to do. 
-; And there was just so much wasted space. So much. Now you can fill it with 8-letter item names. 
+; I sorted all this out so you can rename items and *re-organize* them easier, which FFHackster lacks the ability to do.
+; And there was just so much wasted space. So much. Now you can fill it with 8-letter item names.
 
 ;  .ALIGN  $100
 
 lut_ItemNamePtrTbl:
-.word BLANK             ; 00 
-.word NAME_HEAL         ; 01 
+.word BLANK             ; 00
+.word NAME_HEAL         ; 01
 .word NAME_X_HEAL       ; 02
 .word NAME_ETHER        ; 03
 .word NAME_ELIXIR       ; 04
 .word NAME_PURE         ; 05
 .word NAME_SOFT         ; 06
 .word NAME_P_DOWN       ; 07
-.word NAME_TENT         ; 08 
-.word NAME_CABIN        ; 09 
-.word NAME_HOUSE        ; 0A 
+.word NAME_TENT         ; 08
+.word NAME_CABIN        ; 09
+.word NAME_HOUSE        ; 0A
 .word NAME_EYEDROPS     ; 0B
 .word NAME_SMOKEBOMB    ; 0C
 .word NAME_ALARMCLOCK   ; 0D
@@ -522,15 +522,15 @@ lut_ItemNamePtrTbl:
 .word BLANK             ; 0F
 
 ;; Key Items
-.word NAME_LUTE         ; 10 
-.word NAME_CROWN        ; 11 
-.word NAME_CRYSTAL      ; 12 
-.word NAME_HERB         ; 13 
-.word NAME_KEY          ; 14 
-.word NAME_TNT          ; 15 
-.word NAME_ADAMANT      ; 16 
-.word NAME_SLAB         ; 17 
-.word NAME_RUBY         ; 18 
+.word NAME_LUTE         ; 10
+.word NAME_CROWN        ; 11
+.word NAME_CRYSTAL      ; 12
+.word NAME_HERB         ; 13
+.word NAME_KEY          ; 14
+.word NAME_TNT          ; 15
+.word NAME_ADAMANT      ; 16
+.word NAME_SLAB         ; 17
+.word NAME_RUBY         ; 18
 .word NAME_ROD          ; 19
 .word NAME_FLOATER      ; 1A
 .word NAME_CHIME        ; 1B
@@ -555,70 +555,70 @@ lut_ItemNamePtrTbl:
 .word ORB3              ; 2E
 .word ORB4              ; 2F
 
-.word SPELL1       ; 30 ;  MG_CURE  
-.word SPELL2       ; 31 ;  MG_HARM 
-.word SPELL3       ; 32 ;  MG_FOG  
-.word SPELL4       ; 33 ;  MG_RUSE 
-.word SPELL5       ; 34 ;  MG_FIRE 
-.word SPELL6       ; 35 ;  MG_SLEP 
-.word SPELL7       ; 36 ;  MG_LOCK 
-.word SPELL8       ; 37 ;  MG_LIT  
-.word SPELL9       ; 38 ;  MG_LAMP 
-.word SPELL10      ; 39 ;  MG_MUTE 
-.word SPELL11      ; 3A ;  MG_ALIT 
-.word SPELL12      ; 3B ;  MG_INVS 
-.word SPELL13      ; 3C ;  MG_ICE  
-.word SPELL14      ; 3D ;  MG_DARK 
-.word SPELL15      ; 3E ;  MG_TMPR 
-.word SPELL16      ; 3F ;  MG_SLOW 
-.word SPELL17      ; 40 ;  MG_CUR2 
-.word SPELL18      ; 41 ;  MG_HRM2 
-.word SPELL19      ; 42 ;  MG_AFIR 
-.word SPELL20      ; 43 ;  MG_HEAL 
-.word SPELL21      ; 44 ;  MG_FIR2 
-.word SPELL22      ; 45 ;  MG_HOLD 
-.word SPELL23      ; 46 ;  MG_LIT2 
-.word SPELL24      ; 47 ;  MG_LOK2 
-.word SPELL25      ; 48 ;  MG_PURE 
-.word SPELL26      ; 49 ;  MG_FEAR 
-.word SPELL27      ; 4A ;  MG_AICE 
-.word SPELL28      ; 4B ;  MG_AMUT 
-.word SPELL29      ; 4C ;  MG_SLP2 
-.word SPELL30      ; 4D ;  MG_FAST 
-.word SPELL31      ; 4E ;  MG_CONF 
-.word SPELL32      ; 4F ;  MG_ICE2 
-.word SPELL33      ; 50 ;  MG_CUR3 
-.word SPELL34      ; 51 ;  MG_LIFE 
-.word SPELL35      ; 52 ;  MG_HRM3 
-.word SPELL36      ; 53 ;  MG_HEL2 
-.word SPELL37      ; 54 ;  MG_FIR3 
-.word SPELL38      ; 55 ;  MG_BANE 
-.word SPELL39      ; 56 ;  MG_WARP 
-.word SPELL40      ; 57 ;  MG_SLO2 
-.word SPELL41      ; 58 ;  MG_SOFT 
-.word SPELL42      ; 59 ;  MG_EXIT 
-.word SPELL43      ; 5A ;  MG_FOG2 
-.word SPELL44      ; 5B ;  MG_INV2 
-.word SPELL45      ; 5C ;  MG_LIT3 
-.word SPELL46      ; 5D ;  MG_RUB  
-.word SPELL47      ; 5E ;  MG_QAKE 
-.word SPELL48      ; 5F ;  MG_STUN 
-.word SPELL49      ; 60 ;  MG_CUR4 
-.word SPELL50      ; 61 ;  MG_HRM4 
-.word SPELL51      ; 62 ;  MG_ARUB 
-.word SPELL52      ; 63 ;  MG_HEL3 
-.word SPELL53      ; 64 ;  MG_ICE3 
-.word SPELL54      ; 65 ;  MG_BRAK 
-.word SPELL55      ; 66 ;  MG_SABR 
-.word SPELL56      ; 67 ;  MG_BLND 
-.word SPELL57      ; 68 ;  MG_LIF2 
-.word SPELL58      ; 69 ;  MG_FADE 
-.word SPELL59      ; 6A ;  MG_WALL 
-.word SPELL60      ; 6B ;  MG_XFER 
-.word SPELL61      ; 6C ;  MG_NUKE 
-.word SPELL62      ; 6D ;  MG_STOP 
-.word SPELL63      ; 6E ;  MG_ZAP  
-.word SPELL64      ; 6F ;  MG_XXXX 
+.word SPELL1       ; 30 ;  MG_CURE
+.word SPELL2       ; 31 ;  MG_HARM
+.word SPELL3       ; 32 ;  MG_FOG
+.word SPELL4       ; 33 ;  MG_RUSE
+.word SPELL5       ; 34 ;  MG_FIRE
+.word SPELL6       ; 35 ;  MG_SLEP
+.word SPELL7       ; 36 ;  MG_LOCK
+.word SPELL8       ; 37 ;  MG_LIT
+.word SPELL9       ; 38 ;  MG_LAMP
+.word SPELL10      ; 39 ;  MG_MUTE
+.word SPELL11      ; 3A ;  MG_ALIT
+.word SPELL12      ; 3B ;  MG_INVS
+.word SPELL13      ; 3C ;  MG_ICE
+.word SPELL14      ; 3D ;  MG_DARK
+.word SPELL15      ; 3E ;  MG_TMPR
+.word SPELL16      ; 3F ;  MG_SLOW
+.word SPELL17      ; 40 ;  MG_CUR2
+.word SPELL18      ; 41 ;  MG_HRM2
+.word SPELL19      ; 42 ;  MG_AFIR
+.word SPELL20      ; 43 ;  MG_HEAL
+.word SPELL21      ; 44 ;  MG_FIR2
+.word SPELL22      ; 45 ;  MG_HOLD
+.word SPELL23      ; 46 ;  MG_LIT2
+.word SPELL24      ; 47 ;  MG_LOK2
+.word SPELL25      ; 48 ;  MG_PURE
+.word SPELL26      ; 49 ;  MG_FEAR
+.word SPELL27      ; 4A ;  MG_AICE
+.word SPELL28      ; 4B ;  MG_AMUT
+.word SPELL29      ; 4C ;  MG_SLP2
+.word SPELL30      ; 4D ;  MG_FAST
+.word SPELL31      ; 4E ;  MG_CONF
+.word SPELL32      ; 4F ;  MG_ICE2
+.word SPELL33      ; 50 ;  MG_CUR3
+.word SPELL34      ; 51 ;  MG_LIFE
+.word SPELL35      ; 52 ;  MG_HRM3
+.word SPELL36      ; 53 ;  MG_HEL2
+.word SPELL37      ; 54 ;  MG_FIR3
+.word SPELL38      ; 55 ;  MG_BANE
+.word SPELL39      ; 56 ;  MG_WARP
+.word SPELL40      ; 57 ;  MG_SLO2
+.word SPELL41      ; 58 ;  MG_SOFT
+.word SPELL42      ; 59 ;  MG_EXIT
+.word SPELL43      ; 5A ;  MG_FOG2
+.word SPELL44      ; 5B ;  MG_INV2
+.word SPELL45      ; 5C ;  MG_LIT3
+.word SPELL46      ; 5D ;  MG_RUB
+.word SPELL47      ; 5E ;  MG_QAKE
+.word SPELL48      ; 5F ;  MG_STUN
+.word SPELL49      ; 60 ;  MG_CUR4
+.word SPELL50      ; 61 ;  MG_HRM4
+.word SPELL51      ; 62 ;  MG_ARUB
+.word SPELL52      ; 63 ;  MG_HEL3
+.word SPELL53      ; 64 ;  MG_ICE3
+.word SPELL54      ; 65 ;  MG_BRAK
+.word SPELL55      ; 66 ;  MG_SABR
+.word SPELL56      ; 67 ;  MG_BLND
+.word SPELL57      ; 68 ;  MG_LIF2
+.word SPELL58      ; 69 ;  MG_FADE
+.word SPELL59      ; 6A ;  MG_WALL
+.word SPELL60      ; 6B ;  MG_XFER
+.word SPELL61      ; 6C ;  MG_NUKE
+.word SPELL62      ; 6D ;  MG_STOP
+.word SPELL63      ; 6E ;  MG_ZAP
+.word SPELL64      ; 6F ;  MG_XXXX
 
 .word BATTLESPELL1  ;  70
 .word BATTLESPELL2  ;  71
@@ -881,9 +881,9 @@ NAME_P_DOWN:
 .byte $99,$AB,$B2,$A8,$B1,$AC,$BB,$E2,$00 ; PhoenixF
 NAME_TENT:
 .byte $9D,$A8,$B1,$B7,$FF,$FF,$FF,$FF,$00 ; Tent____
-NAME_CABIN: 
+NAME_CABIN:
 .byte $8C,$A4,$A5,$AC,$B1,$FF,$FF,$FF,$00 ; Cabin___
-NAME_HOUSE:    
+NAME_HOUSE:
 .byte $91,$B2,$B8,$B6,$A8,$FF,$FF,$FF,$00 ; House___
 NAME_EYEDROPS:
 .byte $8E,$BC,$A8,$A7,$B5,$B2,$B3,$B6,$00 ; Eyedrops
@@ -903,7 +903,7 @@ BLANK:
 
 
 ;; KEY ITEMS
-NAME_LUTE: 
+NAME_LUTE:
 .byte $95,$B8,$B7,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; LUTE
 NAME_CROWN:
 .byte $8C,$B5,$B2,$BA,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CROWN
@@ -1042,7 +1042,7 @@ SPELL25:
 ;.byte $99,$9E,$9B,$8E,$00 ; PURE
 .byte $99,$9E,$9B,$8E,$FF,$FF,$FF,$00  ;  PURE___
 SPELL26:
-;.byte $8F,$8E,$8A,$9B,$00 ; FEAR 
+;.byte $8F,$8E,$8A,$9B,$00 ; FEAR
 .byte $8F,$8E,$8A,$9B,$FF,$FF,$FF,$00  ;  FEAR___
 SPELL27:
 ;.byte $8A,$92,$8C,$8E,$00 ; AICE
@@ -1158,7 +1158,7 @@ SPELL63:
 ;.byte $A3,$8A,$99,$C4,$00 ; ZAP!
 .byte $8B,$8A,$97,$92,$9C,$91,$FF,$00  ;  BANISH_
 SPELL64:
-;.byte $A1,$A1,$A1,$A1,$00 ; XXXX 
+;.byte $A1,$A1,$A1,$A1,$00 ; XXXX
 .byte $8D,$8E,$8A,$9D,$91,$FF,$FF,$00  ;  DEATH__
 
 
@@ -1171,12 +1171,12 @@ BATTLESPELL3: ; CE
 BATTLESPELL4: ; CF
 .byte $99,$9B,$8A,$A2,$8E,$9B,$FF,$00  ;  PRAYER
 BATTLESPELL5: ; D0
-.BYTE $9B,$8E,$8F,$95,$8E,$8C,$9D,$00  ;  REFLECT 
+.BYTE $9B,$8E,$8F,$95,$8E,$8C,$9D,$00  ;  REFLECT
 BATTLESPELL6: ; D1
-.BYTE $9B,$8E,$8F,$95,$8C,$9D,$82,$00  ;  REFLCT2 
-BATTLESPELL7: ; D2 
-BATTLESPELL8: ; D3 
-BATTLESPELL9: ; D4 
+.BYTE $9B,$8E,$8F,$95,$8C,$9D,$82,$00  ;  REFLCT2
+BATTLESPELL7: ; D2
+BATTLESPELL8: ; D3
+BATTLESPELL9: ; D4
 BATTLESPELL10: ; D5
 BATTLESPELL11: ; D6
 BATTLESPELL12: ; D7
@@ -1193,9 +1193,9 @@ BATTLESPELL16: ; DB
 ;gold in chests
 ;; Note this is only the text data. Actual amount given is in the price list at the start of Bank 9
 MoneyChest1:
-.byte $81,$80,$FF,$90,$00 ; 10 
+.byte $81,$80,$FF,$90,$00 ; 10
 MoneyChest2:
-.byte $82,$80,$FF,$90,$00 ; 20 
+.byte $82,$80,$FF,$90,$00 ; 20
 MoneyChest3:
 .byte $82,$85,$FF,$90,$00 ; 25
 MoneyChest4:
@@ -1362,7 +1362,7 @@ MoneyChest80:
 CLASS1:
 .byte $8F,$92,$90,$91,$9D,$8E,$9B,$00 ; FIGHTER
 CLASS2:
-.byte $9D,$91,$92,$8E,$8F,$FF,$FF,$00 ; THIEF__ 
+.byte $9D,$91,$92,$8E,$8F,$FF,$FF,$00 ; THIEF__
 CLASS3:
 .byte $8B,$AF,$C0,$8B,$8E,$95,$9D,$00 ; Bl.BELT
 CLASS4:
@@ -1374,7 +1374,7 @@ CLASS6:
 CLASS7:
 .byte $94,$97,$92,$90,$91,$9D,$FF,$00 ; KNIGHT_
 CLASS8:
-.byte $97,$92,$97,$93,$8A,$FF,$FF,$00 ; NINJA__ 
+.byte $97,$92,$97,$93,$8A,$FF,$FF,$00 ; NINJA__
 CLASS9:
 .byte $96,$8A,$9C,$9D,$8E,$9B,$FF,$00 ; MASTER_
 CLASS10:
@@ -1392,7 +1392,7 @@ CLASS12:
 ;; WEAPONS AND ARMORS
 ;; Note that the names I wrote by the bytes are not exactly what the bytes say
 ;; as I've tried to do in the other lists. Since I didn't edit anything that I can remember... it should all be vanilla.
-;; so the names are fancy! 
+;; so the names are fancy!
 
 Weapon1: ; 00
 .BYTE $A0,$B2,$B2,$A7,$A8,$B1,$D9,$FF,$00 ; Wooden Nunchucks
@@ -1581,35 +1581,35 @@ Armor39: ; 66
 .byte $98,$B3,$A4,$AF,$FF,$FF,$DD,$FF,$00 ; Opal Gauntlet
 Armor40: ; 67
 .byte $99,$B5,$B2,$9B,$AC,$B1,$AA,$FF,$00 ; Protect Ring
-Armor41: ; 68  
-Armor42: ; 69  
-Armor43: ; 6A  
-Armor44: ; 6B  
-Armor45: ; 6C  
-Armor46: ; 6D  
-Armor47: ; 6E  
-Armor48: ; 6F  
-Armor49: ; 70  
-Armor50: ; 71  
-Armor51: ; 72  
-Armor52: ; 73  
-Armor53: ; 74  
-Armor54: ; 75  
-Armor55: ; 76  
-Armor56: ; 77  
-Armor57: ; 78  
-Armor58: ; 79  
-Armor59: ; 7A  
-Armor60: ; 7B  
-Armor61: ; 7C  
-Armor62: ; 7D  
-Armor63: ; 7E  
-Armor64: ; 7F  
+Armor41: ; 68
+Armor42: ; 69
+Armor43: ; 6A
+Armor44: ; 6B
+Armor45: ; 6C
+Armor46: ; 6D
+Armor47: ; 6E
+Armor48: ; 6F
+Armor49: ; 70
+Armor50: ; 71
+Armor51: ; 72
+Armor52: ; 73
+Armor53: ; 74
+Armor54: ; 75
+Armor55: ; 76
+Armor56: ; 77
+Armor57: ; 78
+Armor58: ; 79
+Armor59: ; 7A
+Armor60: ; 7B
+Armor61: ; 7C
+Armor62: ; 7D
+Armor63: ; 7E
+Armor64: ; 7F
 
 
 
 
- 
+
 
 
 
@@ -1692,10 +1692,10 @@ data_BattleMessages:
 .word BTL_MESSAGE75
 .word BTL_MESSAGE76
 .word BTL_MESSAGE77
-.word BTL_MESSAGE78 
-.word BTL_MESSAGE79 
-.word BTL_MESSAGE80 
-.word BTL_MESSAGE81 
+.word BTL_MESSAGE78
+.word BTL_MESSAGE79
+.word BTL_MESSAGE80
+.word BTL_MESSAGE81
 .word BTL_MESSAGE82
 .word BTL_MESSAGE83
 .word BTL_MESSAGE84
@@ -1726,10 +1726,10 @@ data_BattleMessages:
 .word BTL_MESSAGE109
 .word BTL_MESSAGE110
 .word BTL_MESSAGE111
-  
-BTL_MESSAGE1:  
+
+BTL_MESSAGE1:
 .byte $91,$99,$FF,$B8,$B3,$C4,$00  ; HP up!
-BTL_MESSAGE2:  
+BTL_MESSAGE2:
 .byte $8A,$B5,$B0,$B2,$B5,$FF,$B8,$B3,$00   ; Armor up
 BTL_MESSAGE3:
 .byte $8E,$A4,$B6,$BC,$FF,$B7,$B2,$FF,$A7,$B2,$A7,$AA,$A8,$00 ; Easy to dodge
@@ -1856,7 +1856,7 @@ BTL_MESSAGE62:
 BTL_MESSAGE63:
 .byte $9D,$A8,$B5,$B0,$AC,$B1,$A4,$B7,$A8,$A7,$00 ; Terminated
 BTL_MESSAGE64:
-.byte $96,$AC,$B6,$B6,$A8,$A7,$C4,$00 ; Missed! 
+.byte $96,$AC,$B6,$B6,$A8,$A7,$C4,$00 ; Missed!
 BTL_MESSAGE65:
 .byte $FF,$FF,$FF,$FF,$00 ; ____
 BTL_MESSAGE66:
@@ -1940,7 +1940,7 @@ BTL_MESSAGE104:
 BTL_MESSAGE105:
 .byte $97,$2E,$60,$A4,$B3,$3C,$FF,$A8,$B4,$B8,$AC,$B3,$B3,$40,$C4,$00 ; No weapon equipped!
 BTL_MESSAGE106:
-.byte $FF,$FF,$FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$00 ;   Ready? 
+.byte $FF,$FF,$FF,$FF,$9B,$A8,$A4,$A7,$BC,$C5,$FF,$FF,$FF,$00 ;   Ready?
 BTL_MESSAGE107:
 .byte $FF,$FF,$FF,$8C,$AB,$A4,$B5,$AA,$A8,$C5,$C4,$FF,$FF,$00 ;  Charge?!
 BTL_MESSAGE108:
@@ -1960,7 +1960,7 @@ BTL_MESSAGE111:
 
 
  ;; You can use normal numbers to set the price if you use .word, as exampled by Heal and Pure below
- ;; Just don't go over 65535! 
+ ;; Just don't go over 65535!
 ;                      297000 - the cost of 99 houses... for reference...
 .ALIGN  $100
 
@@ -1980,7 +1980,7 @@ lut_ItemPrices:
 .word 2000    ; 0C SMOKEBOMB
 .word 0750    ; 0D ALARMCLOCK
 .word 0000    ; 0F nothing
-.word 0000    ; 0F nothing 
+.word 0000    ; 0F nothing
 
 ;; key items
 .word 0000    ; 10 LUTE
@@ -1991,7 +1991,7 @@ lut_ItemPrices:
 .word 0000    ; 15 TNT
 .word 0000    ; 16 ADAMANT
 .word 0000    ; 17 SLAB
-.word 0000    ; 18 RUBY 
+.word 0000    ; 18 RUBY
 .word 0000    ; 19 ROD
 .word 0000    ; 1A FLOATER
 .word 0000    ; 1B CHIME
@@ -2003,14 +2003,14 @@ lut_ItemPrices:
 .word 5000    ; 21 LEWDS
 .word 5000    ; 22 ??? Book
 .word 0000    ; 23 nothing
-.word 0000    ; 24 nothing 
+.word 0000    ; 24 nothing
 .word 0000    ; 25 nothing
-.word 0000    ; 26 nothing 
+.word 0000    ; 26 nothing
 .word 0000    ; 27 nothing
-.word 0000    ; 28 nothing 
+.word 0000    ; 28 nothing
 .word 0000    ; 29 nothing
-.word 0000    ; 2A nothing 
-.word 0000    ; 2B nothing 
+.word 0000    ; 2A nothing
+.word 0000    ; 2B nothing
 .word 0000    ; 2C ORB 1
 .word 0000    ; 2D ORB 2
 .word 0000    ; 2E ORB 3
@@ -2169,7 +2169,7 @@ lut_ItemPrices:
 .ALIGN  $100
 
 WeaponArmorPrices:
-.byte $0A,$00 ; Weapon 1 
+.byte $0A,$00 ; Weapon 1
 .byte $05,$00 ; Weapon 2
 .byte $05,$00 ; Weapon 3
 .byte $0A,$00 ; Weapon 4
@@ -2299,8 +2299,8 @@ WeaponArmorPrices:
 .byte $00,$00 ; Armor 63
 .byte $00,$00 ; Armor 64
 
-  
-  
+
+
 lut_CommonStringPtrTbl:
 .word CommonString_00
 .word CommonString_01
@@ -2432,63 +2432,63 @@ lut_CommonStringPtrTbl:
 .word CommonString_7F
 
 CommonString_00:
-.byte $FF,$95,$AC,$AA,$AB,$B7,$AF,$4B,$23,$A6,$B2,$32,$44,$00      ; _Lightly recover |
-CommonString_01:                                                  
-.byte $9C,$B7,$4D,$2A,$AF,$4B,$23,$A6,$B2,$32,$44,$FF,$00          ; Strongly recover_|
-CommonString_02:                                                  
-.byte $FF,$90,$23,$39,$AF,$4B,$23,$A6,$B2,$32,$44,$FF,$00          ; _Greatly recover_|
-CommonString_03:                                                  
-.byte $FF,$9B,$A8,$A6,$B2,$32,$44,$B3,$2F,$B7,$BC,$BE,$1E,$FF,$00  ; _Recover party's_|
-CommonString_04:                                                  
-.byte $FF,$FF,$9B,$A8,$A6,$B2,$32,$44,$A9,$4D,$B0,$09,$03,$00      ; __Recover from___|
-CommonString_05:                                                  
+.byte $FF,$95,$AC,$AA,$AB,$B7,$AF,$4B,$23,$A6,$B2,$32,$44,$00         ; _Lightly recover |
+CommonString_01:
+.byte $9C,$B7,$4D,$2A,$AF,$4B,$23,$A6,$B2,$32,$44,$00                 ; Strongly recover_|
+CommonString_02:
+.byte $FF,$90,$23,$39,$AF,$4B,$23,$A6,$B2,$32,$44,$00                 ; _Greatly recover_|
+CommonString_03:
+.byte $FF,$9B,$A8,$A6,$B2,$32,$44,$B3,$2F,$B7,$BC,$BE,$1E,$00         ; _Recover party's_|
+CommonString_04:
+.byte $FF,$FF,$9B,$A8,$A6,$B2,$32,$44,$A9,$4D,$B0,$09,$03,$00         ; __Recover from___|
+CommonString_05:
 .byte $FF,$95,$AC,$AA,$AB,$B7,$AF,$4B,$A7,$A4,$B0,$A4,$66,$FF,$FF,$00 ; _Lightly damage__|
-CommonString_06:                                                  
-.byte $FF,$9C,$B7,$4D,$2A,$AF,$4B,$A7,$A4,$B0,$A4,$66,$FF,$00      ; _Strongly damage_|
-CommonString_07:                                                  
-.byte $FF,$91,$2B,$B9,$61,$4B,$A7,$A4,$B0,$A4,$66,$FF,$FF,$00      ; _Heavily damage__|
-CommonString_08:                                                  
-.byte $96,$3F,$B6,$AC,$32,$AF,$4B,$A7,$A4,$B0,$A4,$66,$FF,$00      ; Massively damage_|
-CommonString_09:     
-.byte $09,$03,$36,$5A,$FF,$3A,$A8,$B0,$BC,$09,$04,$00              ; ____one enemy____|
-CommonString_0A:                                                  
-.byte $99,$4D,$53,$A6,$21,$1C,$1A,$B3,$2F,$B7,$BC,$00              ; Protect the party|
-CommonString_0B:                                                  
-.byte $9B,$A8,$B7,$55,$29,$1C,$1A,$B3,$2F,$B7,$BC,$FF,$00          ; Return the party_|
-CommonString_0C:                                                  
-.byte $FF,$4F,$2F,$B7,$4B,$34,$B0,$62,$B5,$C0,$FF,$FF,$00          ; __party member.__|
-CommonString_0D:                                                  
-.byte $FF,$FF,$9C,$68,$AA,$AB,$21,$A6,$41,$B1,$48,$FF,$FF,$00      ; __Slight chance__|
-CommonString_0E:                                                  
-.byte $FF,$90,$23,$39,$25,$38,$41,$B1,$48,$FF,$FF,$00              ; _Greater chance__|
-CommonString_0F:                                                  
-.byte $09,$03,$36,$5A,$FF,$3A,$A8,$B0,$BC,$00                      ; ____one enemy    |
-CommonString_10:                                                  
-.byte $FF,$FF,$20,$4E,$FF,$3A,$A8,$B0,$AC,$2C,$00                  ; ___all enemies   |
-CommonString_11:                                                  
-.byte $FF,$B8,$3B,$2B,$27,$3A,$A8,$B0,$AC,$2C,$FF,$FF,$00          ; _undead enemies__|
-CommonString_12:                                                  
-.byte $33,$1D,$29,$91,$99,$2D,$1E,$AF,$46,$C0,$FF,$00              ; _when HP is low._|
-CommonString_13:                                                  
-.byte $FF,$FF,$91,$99,$36,$32,$44,$57,$34,$C0,$FF,$FF,$00          ; __HP over time.__| 
-CommonString_14:                                                  
-.byte $09,$03,$91,$99,$43,$35,$36,$5A,$09,$04,$00                  ; ___HP for one____|
-CommonString_15:                                                  
-.byte $09,$03,$33,$5B,$AB,$43,$AC,$23,$C0,$09,$03,$00              ; ____with fire.___|
-CommonString_16:                                                  
-.byte $33,$5B,$AB,$65,$AC,$AA,$AB,$B7,$B1,$1F,$AA,$C0,$FF,$00      ; _with lightning._|
-CommonString_17:                                                  
-.byte $09,$03,$33,$5B,$AB,$2D,$48,$C0,$09,$04,$00                  ; ____with ice.____|
+CommonString_06:
+.byte $FF,$9C,$B7,$4D,$2A,$AF,$4B,$A7,$A4,$B0,$A4,$66,$FF,$00         ; _Strongly damage_|
+CommonString_07:
+.byte $FF,$91,$2B,$B9,$61,$4B,$A7,$A4,$B0,$A4,$66,$FF,$FF,$00         ; _Heavily damage__|
+CommonString_08:
+.byte $96,$3F,$B6,$AC,$32,$AF,$4B,$A7,$A4,$B0,$A4,$66,$FF,$00         ; Massively damage_|
+CommonString_09:
+.byte $09,$03,$36,$5A,$FF,$3A,$A8,$B0,$BC,$09,$04,$00                 ; ____one enemy____|
+CommonString_0A:
+.byte $99,$4D,$53,$A6,$21,$1C,$1A,$B3,$2F,$B7,$BC,$00                 ; Protect the party|
+CommonString_0B:
+.byte $9B,$A8,$B7,$55,$29,$1C,$1A,$B3,$2F,$B7,$BC,$FF,$00             ; Return the party_|
+CommonString_0C:
+.byte $FF,$4F,$2F,$B7,$4B,$34,$B0,$62,$B5,$C0,$FF,$FF,$00             ; __party member.__|
+CommonString_0D:
+.byte $FF,$FF,$9C,$68,$AA,$AB,$21,$A6,$41,$B1,$48,$FF,$FF,$00         ; __Slight chance__|
+CommonString_0E:
+.byte $FF,$90,$23,$39,$25,$38,$41,$B1,$48,$FF,$FF,$00                 ; _Greater chance__|
+CommonString_0F:
+.byte $09,$03,$36,$5A,$FF,$3A,$A8,$B0,$BC,$00                         ; ____one enemy    |
+CommonString_10:
+.byte $FF,$FF,$20,$4E,$FF,$3A,$A8,$B0,$AC,$2C,$00                     ; ___all enemies   |
+CommonString_11:
+.byte $FF,$B8,$3B,$2B,$27,$3A,$A8,$B0,$AC,$2C,$FF,$FF,$00             ; _undead enemies__|
+CommonString_12:
+.byte $33,$1D,$29,$91,$99,$2D,$1E,$AF,$46,$C0,$FF,$00                 ; _when HP is low._|
+CommonString_13:
+.byte $FF,$FF,$91,$99,$36,$32,$44,$57,$34,$C0,$FF,$FF,$00             ; __HP over time.__|
+CommonString_14:
+.byte $09,$03,$91,$99,$43,$35,$36,$5A,$09,$04,$00                     ; ___HP for one____|
+CommonString_15:
+.byte $09,$03,$33,$5B,$AB,$43,$AC,$23,$C0,$09,$03,$00                 ; ____with fire.___|
+CommonString_16:
+.byte $33,$5B,$AB,$65,$AC,$AA,$AB,$B7,$B1,$1F,$AA,$C0,$FF,$00         ; _with lightning._|
+CommonString_17:
+.byte $09,$03,$33,$5B,$AB,$2D,$48,$C0,$09,$04,$00                     ; ____with ice.____|
 CommonString_18:
-.byte $33,$5B,$AB,$59,$B2,$AF,$4B,$B0,$A4,$AA,$AC,$A6,$C0,$00      ; _with holy magic.|
+.byte $33,$5B,$AB,$59,$B2,$AF,$4B,$B0,$A4,$AA,$AC,$A6,$C0,$00         ; _with holy magic.|
 CommonString_19:
-.byte $FF,$B5,$A4,$30,$1F,$47,$A7,$A8,$A9,$3A,$3E,$C0,$00          ; _raising defense.|
-CommonString_1A:                                                 
-.byte $FF,$B5,$A4,$30,$1F,$47,$A8,$B9,$3F,$AC,$3C,$C0,$00          ; _raising evasion.|
-CommonString_1B:                                                 
-.byte $AF,$46,$25,$1F,$47,$A8,$B9,$3F,$AC,$3C,$C0,$00              ; lowering evasion.|
+.byte $FF,$B5,$A4,$30,$1F,$47,$A7,$A8,$A9,$3A,$3E,$C0,$00             ; _raising defense.|
+CommonString_1A:
+.byte $FF,$B5,$A4,$30,$1F,$47,$A8,$B9,$3F,$AC,$3C,$C0,$00             ; _raising evasion.|
+CommonString_1B:
+.byte $AF,$46,$25,$1F,$47,$A8,$B9,$3F,$AC,$3C,$C0,$00                 ; lowering evasion.|
 CommonString_1C:
-.byte $09,$11,$00                                                  ; _________________|
+.byte $09,$11,$00                                                     ; _________________|
 CommonString_1D:
 CommonString_1E:
 CommonString_1F:
@@ -2502,7 +2502,7 @@ CommonString_26:
 CommonString_27:
 CommonString_28:
 CommonString_29:
-CommonString_2A:  
+CommonString_2A:
 CommonString_2B:
 CommonString_2C:
 CommonString_2D:
@@ -2523,7 +2523,7 @@ CommonString_3B:
 CommonString_3C:
 CommonString_3D:
 CommonString_3E:
-CommonString_3F:  
+CommonString_3F:
 CommonString_40:
 CommonString_41:
 CommonString_42:
@@ -2544,7 +2544,7 @@ CommonString_50:
 CommonString_51:
 CommonString_52:
 CommonString_53:
-CommonString_54:  
+CommonString_54:
 CommonString_55:
 CommonString_56:
 CommonString_57:
@@ -2565,7 +2565,7 @@ CommonString_65:
 CommonString_66:
 CommonString_67:
 CommonString_68:
-CommonString_69:  
+CommonString_69:
 CommonString_6A:
 CommonString_6B:
 CommonString_6C:
@@ -2586,49 +2586,49 @@ CommonString_7A:
 CommonString_7B:
 CommonString_7C:
 CommonString_7D:
-CommonString_7E:   
-CommonString_7F:  
-  
-  
-  
-  
-  
-  
-  
+CommonString_7E:
+CommonString_7F:
+
+
+
+
+
+
+
 ItemDescriptions:
    LDA shop_curitem
-   CMP #$2A       ; if its bottle, set to $0E
+   CMP #BOTTLE    ; if its bottle, set to $0E
    BNE :+
     LDA #$0E
     BNE @Items
- : CMP #$2B       ; if its lewds, set to $0F
+ : CMP #LEWDS     ; if its lewds, set to $0F
    BNE :+
-    LDA #$0F        
+    LDA #$0F
     BNE @Items
  : CMP #$30       ; if its magic, subtract #$30 and use a different table
    BCC @Items
-   
-   ;Carry is set already...   
+
+   ;Carry is set already...
    SBC #MG_START
    ASL A
    TAX
-   LDA lut_MagicDescStrings, X 
+   LDA lut_MagicDescStrings, X
    STA text_ptr
    LDA lut_MagicDescStrings+1, X
    JMP @DoText
-  
-  @Items:  
+
+  @Items:
    SEC
-   SBC #01 ; set item ID to -1 
+   SBC #01 ; set item ID to -1
    ASL A
    TAX
-   LDA lut_ItemDescStrings, X 
+   LDA lut_ItemDescStrings, X
    STA text_ptr
    LDA lut_ItemDescStrings+1, X
    JMP @DoText
-   
+
   @DoText:
-   STA text_ptr+1 
+   STA text_ptr+1
    LDA #BANK_MENUS
    STA ret_bank
    LDA #BANK_ITEMDESC
@@ -2653,21 +2653,21 @@ lut_ItemDescStrings:
  .word DESC_ALARMCLOCK
  .word DESC_BOTTLE
  .word DESC_LEWDS
- 
+
 lut_MagicDescStrings:
  .word DESC_MG_CURE
  .word DESC_MG_HARM
- .word DESC_MG_FOG 
+ .word DESC_MG_FOG
  .word DESC_MG_RUSE
  .word DESC_MG_FIRE
  .word DESC_MG_SLEP
  .word DESC_MG_LOCK
- .word DESC_MG_LIT 
+ .word DESC_MG_LIT
  .word DESC_MG_LAMP
  .word DESC_MG_MUTE
  .word DESC_MG_ALIT
  .word DESC_MG_INVS
- .word DESC_MG_ICE 
+ .word DESC_MG_ICE
  .word DESC_MG_DARK
  .word DESC_MG_TMPR
  .word DESC_MG_SLOW
@@ -2700,7 +2700,7 @@ lut_MagicDescStrings:
  .word DESC_MG_FOG2
  .word DESC_MG_INV2
  .word DESC_MG_LIT3
- .word DESC_MG_RUB 
+ .word DESC_MG_RUB
  .word DESC_MG_QAKE
  .word DESC_MG_STUN
  .word DESC_MG_CUR4
@@ -2717,80 +2717,80 @@ lut_MagicDescStrings:
  .word DESC_MG_XFER
  .word DESC_MG_NUKE
  .word DESC_MG_STOP
- .word DESC_MG_ZAP 
+ .word DESC_MG_ZAP
  .word DESC_MG_XXXX
 
- 
+
 DESC_HEAL:
-.byte $FF,$9B,$2C,$28,$23,$1E,$83,$80,$FF,$91,$99,$C0,$FF,$01    ; _Restores 30 HP._|
-.byte $FF,$95,$2C,$1E,$A8,$A9,$A9,$A8,$A6,$57,$32,$FF,$FF,$01    ; _Less effective__|
-.byte $FF,$FF,$FF,$2D,$29,$A5,$39,$B7,$45,$C0,$FF,$FF,$FF,$00    ; ____in battle.___|
+.byte $FF,$9B,$2C,$28,$23,$1E,$83,$80,$FF,$91,$99,$C0,$FF,$01  ; _Restores 30 HP._|
+.byte $FF,$95,$2C,$1E,$A8,$A9,$A9,$A8,$A6,$57,$32,$FF,$FF,$01  ; _Less effective__|
+.byte $09,$03,$2D,$29,$A5,$39,$B7,$45,$C0,$09,$03,$00          ; ____in battle.___|
 
 DESC_X_HEAL:
-.byte $FF,$9B,$2C,$28,$23,$1E,$81,$88,$80,$FF,$91,$99,$C0,$01    ; _Restores 180 HP.|
-.byte $FF,$95,$2C,$1E,$A8,$A9,$A9,$A8,$A6,$57,$32,$FF,$FF,$01    ; _Less effective__|
-.byte $FF,$FF,$FF,$2D,$29,$A5,$39,$B7,$45,$C0,$FF,$FF,$FF,$00    ; ____in battle.___|
+.byte $FF,$9B,$2C,$28,$23,$1E,$81,$88,$80,$FF,$91,$99,$C0,$01  ; _Restores 180 HP.|
+.byte $FF,$95,$2C,$1E,$A8,$A9,$A9,$A8,$A6,$57,$32,$FF,$FF,$01  ; _Less effective__|
+.byte $09,$03,$2D,$29,$A5,$39,$B7,$45,$C0,$09,$03,$00          ; ____in battle.___|
 
 DESC_ETHER:
-.byte $FF,$8F,$B8,$4E,$4B,$23,$37,$35,$2C,$FF,$FF,$01             ; _Fully restores__|
-.byte $FF,$FF,$FF,$96,$99,$43,$35,$36,$5A,$FF,$FF,$01             ; ___MP for one____|
-.byte $FF,$FF,$B6,$B3,$A8,$4E,$BE,$1E,$45,$32,$AF,$C0,$FF,$00     ; __spell's level._|
+.byte $FF,$8F,$B8,$4E,$4B,$23,$37,$35,$2C,$FF,$FF,$01          ; _Fully restores__|
+.byte $09,$03,$96,$99,$43,$35,$36,$5A,$FF,$FF,$01              ; ___MP for one____|
+.byte $FF,$FF,$B6,$B3,$A8,$4E,$BE,$1E,$45,$32,$AF,$C0,$FF,$00  ; __spell's level._|
 
 DESC_ELIXIR:
-.byte $FF,$8F,$B8,$4E,$4B,$23,$37,$35,$2C,$FF,$FF,$01             ; _Fully restores__|
-.byte $FF,$5F,$58,$91,$99,$20,$3B,$FF,$96,$99,$C0,$FF,$FF,$01     ; _all HP and MP.__|
+.byte $FF,$8F,$B8,$4E,$4B,$23,$37,$35,$2C,$FF,$FF,$01          ; _Fully restores__|
+.byte $FF,$5F,$58,$91,$99,$20,$3B,$FF,$96,$99,$C0,$FF,$FF,$01  ; _all HP and MP.__|
 .byte $06,$1C,$00
 
 DESC_PURE:
-.byte $FF,$FF,$8C,$55,$2C,$4F,$B2,$30,$3C,$C0,$FF,$FF,$01         ; __Cures poison.__|
+.byte $FF,$FF,$8C,$55,$2C,$4F,$B2,$30,$3C,$C0,$FF,$FF,$01      ; __Cures poison.__|
 .byte $06,$1C,$01
 .byte $06,$1C,$00
 
 DESC_SOFT:
-.byte $FF,$FF,$FF,$8C,$55,$2C,$24,$28,$5A,$C0,$FF,$FF,$01         ; ___Cures stone.__|
+.byte $09,$03,$8C,$55,$2C,$24,$28,$5A,$C0,$FF,$FF,$01          ; ___Cures stone.__|
 .byte $06,$1C,$01
 .byte $06,$1C,$00
 
 DESC_PHOENIXDOWN:
-.byte $FF,$FF,$FF,$8C,$55,$2C,$67,$2B,$1C,$C0,$FF,$FF,$01         ; ___Cures death.__|
+.byte $09,$03,$8C,$55,$2C,$67,$2B,$1C,$C0,$FF,$FF,$01          ; ___Cures death.__|
 .byte $06,$1C,$01
 .byte $06,$1C,$00
 
 DESC_TENT:
 DESC_CABIN:
-.byte $FF,$9E,$3E,$36,$B8,$B7,$B6,$AC,$A7,$1A,$28,$FF,$FF,$01     ; _Use outside to__|
-.byte $FF,$FF,$FF,$23,$A6,$B2,$32,$44,$91,$99,$FF,$FF,$FF,$FF,$01 ; ___recover HP____|
-.byte $FF,$FF,$FF,$43,$35,$20,$4E,$C0,$09,$05,$00                 ; ____for all._____|
+.byte $FF,$9E,$3E,$36,$B8,$B7,$B6,$AC,$A7,$1A,$28,$FF,$FF,$01  ; _Use outside to__|
+.byte $09,$03,$23,$A6,$B2,$32,$44,$91,$99,$09,$04,$01          ; ___recover HP____|
+.byte $09,$03,$43,$35,$20,$4E,$C0,$09,$05,$00                  ; ____for all._____|
 
 DESC_HOUSE:
-.byte $FF,$9E,$3E,$36,$B8,$B7,$B6,$AC,$A7,$1A,$28,$FF,$FF,$01     ; _Use outside to__|
-.byte $FF,$23,$A6,$B2,$32,$44,$91,$99,$20,$3B,$FF,$FF,$01         ; _recover HP and__|
-.byte $FF,$FF,$FF,$96,$99,$43,$35,$20,$4E,$C0,$FF,$FF,$FF,$00     ; ___MP for all.___|
+.byte $FF,$9E,$3E,$36,$B8,$B7,$B6,$AC,$A7,$1A,$28,$FF,$FF,$01  ; _Use outside to__|
+.byte $FF,$23,$A6,$B2,$32,$44,$91,$99,$20,$3B,$FF,$FF,$01      ; _recover HP and__|
+.byte $09,$03,$96,$99,$43,$35,$20,$4E,$C0,$09,$03,$00          ; ___MP for all.___|
 
 DESC_EYEDROPS:
-.byte $FF,$8C,$55,$2C,$31,$68,$3B,$5A,$B6,$B6,$C0,$00             ; _Cures blindness.|
+.byte $FF,$8C,$55,$2C,$31,$68,$3B,$5A,$B6,$B6,$C0,$00          ; _Cures blindness.|
 .byte $06,$1C,$01
 .byte $06,$1C,$00
 
-DESC_SMOKEBOMB:                                                   ;                  |
-.byte $FF,$9E,$3E,$1B,$2E,$3D,$A7,$1A,$1F,$01                     ;                  |
-.byte $FF,$FF,$A5,$39,$B7,$45,$BF,$36,$44,$28,$01                 ;                  |
-.byte $FF,$A4,$B9,$B2,$AC,$27,$3A,$A8,$B0,$AC,$2C,$C0,$00         ;
+DESC_SMOKEBOMB:                                              
+.byte $FF,$9E,$3E,$1B,$2E,$3D,$A7,$1A,$1F,$FF,$FF,$01             ; _Use to hide in__|
+.byte $FF,$FF,$A5,$39,$B7,$45,$BF,$36,$44,$28,$FF,$FF,$01         ; __battle, or to__|
+.byte $FF,$A4,$B9,$B2,$AC,$27,$3A,$A8,$B0,$AC,$2C,$C0,$FF,$FF,$00 ; _avoid enemies.__|
 
 DESC_ALARMCLOCK:
-.byte $FF,$FF,$9E,$3E,$1B,$2E,$A4,$5D,$AE,$3A,$01                 ;                  |
-.byte $1B,$1D,$4F,$2F,$B7,$4B,$A9,$4D,$B0,$01                     ;                  |
-.byte $B6,$45,$A8,$B3,$2D,$29,$A5,$39,$B7,$45,$C0,$00             ;                  |
+.byte $FF,$FF,$9E,$3E,$1B,$2E,$A4,$5D,$AE,$3A,$FF,$FF,$01      ; __Use to awaken__|
+.byte $FF,$1B,$1D,$4F,$2F,$B7,$4B,$A9,$4D,$B0,$FF,$FF,$01      ; _the party from__|
+.byte $FF,$B6,$45,$A8,$B3,$2D,$29,$A5,$39,$B7,$45,$C0,$00      ; _sleep in battle.|
 
 DESC_BOTTLE:
-.byte $FF,$95,$B2,$B2,$AE,$C4,$FF,$9D,$1D,$23,$BE,$B6,$01         ;                  |
-.byte $B6,$49,$A8,$1C,$1F,$47,$51,$B8,$AA,$AB,$B7,$01             ;                  |
-.byte $2D,$B1,$B6,$AC,$A7,$1A,$5B,$69,$C5,$00                     ;                  |
+.byte $FF,$FF,$95,$B2,$B2,$AE,$C4,$FF,$9D,$1D,$23,$BE,$B6,$FF,$FF,$01  ; __Look! There's__|
+.byte $B6,$49,$A8,$1C,$1F,$47,$51,$B8,$AA,$AB,$B7,$FF,$01              ; something caught_|
+.byte $FF,$FF,$2D,$B1,$B6,$AC,$A7,$1A,$5B,$69,$C5,$FF,$FF,$00          ; __inside it...?__|
 
 DESC_LEWDS:
-.byte $FF,$A2,$26,$38,$22,$BE,$21,$23,$A4,$A7,$01                 ;                  |
-.byte $1C,$39,$FF,$B8,$B1,$45,$B6,$1E,$56,$B8,$01                 ;                  |
-.byte $31,$B8,$4B,$5B,$43,$AC,$63,$B7,$C4,$00                     ;                  |
+.byte $FF,$A2,$26,$38,$22,$BE,$21,$23,$A4,$A7,$FF,$FF,$01      ; _You can't read__|
+.byte $FF,$1C,$39,$FF,$B8,$B1,$45,$B6,$1E,$56,$B8,$FF,$01      ; _that unless you_|
+.byte $FF,$31,$B8,$4B,$5B,$43,$AC,$63,$B7,$C4,$FF,$FF,$00      ; __buy it first!__|
 
 
 
@@ -2809,12 +2809,10 @@ DESC_MG_HARM:
 .byte $06,$11,$01                                              ; _undead enemies  |
 .byte $06,$18,$00                                              ; _with holy magic.|
 
-
-
 DESC_MG_FOG:
-.byte $FF,$FF,$FF,$8E,$B1,$A6,$41,$B1,$21,$3C,$1A,$FF,$FF,$01     ; ___Enchant one___|
-.byte $1B,$2F,$66,$B7,$BE,$1E,$2F,$B0,$35,$BF,$FF,$01             ; _target's armor,_|
-.byte $06,$19,$00                                                 ; _raising defense.|
+.byte $09,$03,$8E,$B1,$A6,$41,$B1,$21,$3C,$1A,$FF,$FF,$01      ; ___Enchant one___|
+.byte $1B,$2F,$66,$B7,$BE,$1E,$2F,$B0,$35,$BF,$FF,$01          ; _target's armor,_|
+.byte $06,$19,$00                                              ; _raising defense.|
 
 DESC_MG_RUSE:
 .byte $FF,$8C,$23,$39,$A8,$20,$FF,$AA,$AB,$B2,$37,$FF,$FF,$01  ; _Create a ghost__|
@@ -2828,36 +2826,38 @@ DESC_MG_FIRE:
 
 DESC_MG_SLEP:
 .byte $06,$0D,$01                                              ; __Slight chance  |
-.byte $FF,$FF,$FF,$1B,$2E,$B6,$45,$A8,$B3,$09,$05,$01          ; ____to sleep_____|
+.byte $09,$03,$1B,$2E,$B6,$45,$A8,$B3,$09,$05,$01              ; ____to sleep_____|
 .byte $06,$10,$C0,$FF,$FF,$00                                  ; ___all enemies.__|
 
 DESC_MG_LOCK:
 .byte $FF,$8C,$41,$B1,$48,$1B,$2E,$B7,$B5,$A4,$B3,$FF,$FF,$01  ; _Chance to trap  |
-.byte $06,$0F,$BF,$FF,$FF,$FF,$01                              ; ____one enemy,   |
+.byte $06,$0F,$BF,$09,$03,$01                                  ; ____one enemy,   |
 .byte $06,$1B,$00                                              ; lowering evasion.|
 
 DESC_MG_LIT:
 .byte $06,$05,$01                                              ; _Lightly damage  |
-.byte $06,$0F,$01                                              ; ____one enemy    |
+.byte $06,$09,$01                                              ; ____one enemy    |
 .byte $06,$16,$00                                              ; _with lightning. |
 
 DESC_MG_LAMP:
 .byte $06,$04,$01                                              ; __Recover from   |
-.byte $FF,$FF,$FF,$31,$68,$3B,$5A,$B6,$B6,$C0,$FF,$FF,$FF,$00  ; ____blindness.___|
+.byte $09,$03,$31,$68,$3B,$5A,$B6,$B6,$C0,$09,$03,$01          ; ____blindness.___|
+.byte $06,$1C,$00
 
 DESC_MG_MUTE:
 .byte $06,$0D,$01                                              ; __Slight chance  |
-.byte $FF,$FF,$1B,$2E,$B6,$61,$3A,$48,$FF,$FF,$FF,$FF,$01      ; ___to silence____|
+.byte $FF,$FF,$1B,$2E,$B6,$61,$3A,$48,$09,$04,$01              ; ___to silence____|
 .byte $06,$10,$C0,$FF,$FF,$00                                  ; ___all enemies.__|
 
 DESC_MG_ALIT:
 .byte $06,$0A,$01                                              ; Protect the party|
-.byte $43,$4D,$B0,$65,$AC,$AA,$AB,$B7,$B1,$1F,$AA,$C0,$FF,$00  ; _from lightning._|
+.byte $43,$4D,$B0,$65,$AC,$AA,$AB,$B7,$B1,$1F,$AA,$C0,$FF,$01  ; _from lightning._|
+.byte $06,$1C,$00
 
 DESC_MG_INVS:
-.byte $FF,$9D,$55,$29,$1C,$1A,$B7,$2F,$66,$21,$FF,$01             ; _Turn the target_|
-.byte $FF,$FF,$FF,$2D,$B1,$B9,$30,$AC,$A5,$45,$BF,$FF,$FF,$FF,$01 ; ____invisible,___|
-.byte $06,$1A,$00                                                 ; _raising evasion.|
+.byte $FF,$9D,$55,$29,$1C,$1A,$B7,$2F,$66,$21,$01              ; _Turn the target_|
+.byte $09,$03,$2D,$B1,$B9,$30,$AC,$A5,$45,$BF,$09,$03,$01      ; ____invisible,___|
+.byte $06,$1A,$00                                              ; _raising evasion.|
 
 DESC_MG_ICE:
 .byte $06,$05,$01                                              ; _Lightly damage  |
@@ -2866,17 +2866,18 @@ DESC_MG_ICE:
 
 DESC_MG_DARK:
 .byte $06,$0D,$01                                              ; __Slight chance  |
-.byte $FF,$FF,$FF,$1B,$2E,$A5,$68,$3B,$FF,$FF,$FF,$FF,$FF,$01  ; ____to blind     |
+.byte $09,$03,$1B,$2E,$A5,$68,$3B,$09,$05,$01                  ; ____to blind     |
 .byte $06,$10,$C0,$FF,$FF,$00                                  ; ___all enemies.__|
 
 DESC_MG_TMPR:
-.byte $FF,$FF,$FF,$91,$2F,$A7,$3A,$1B,$1D,$FF,$FF,$FF,$FF,$01  ; ___Harden the    | 
-.byte $1B,$2F,$66,$B7,$BE,$1E,$60,$A4,$B3,$3C,$00              ; _target's weapon.|
+.byte $09,$03,$91,$2F,$A7,$3A,$1B,$1D,$09,$04,$01              ; ___Harden the    |
+.byte $1B,$2F,$66,$B7,$BE,$1E,$60,$A4,$B3,$3C,$C0,$01          ; _target's weapon.|
+.byte $06,$1C,$00
 
 DESC_MG_SLOW:
-.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$68,$B0,$5B,$FF,$01                 ; _Chance to limit_|
-.byte $06,$10,$BE,$FF,$FF,$01                                         ; ___all enemies'__|
-.byte $FF,$FF,$FF,$FF,$20,$B7,$B7,$5E,$AE,$B6,$C0,$FF,$FF,$FF,$FF,$00 ; _____attacks.____|
+.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$68,$B0,$5B,$FF,$01          ; _Chance to limit_|
+.byte $06,$10,$BE,$FF,$FF,$01                                  ; ___all enemies'__|
+.byte $09,$04,$20,$B7,$B7,$5E,$AE,$B6,$C0,$09,$04,$00          ; _____attacks.____|
 
 DESC_MG_CUR2:
 .byte $06,$01,$01                                              ; Strongly recover |
@@ -2890,26 +2891,27 @@ DESC_MG_HRM2:
 
 DESC_MG_AFIR:
 .byte $06,$0A,$01                                              ; Protect the party|
-.byte $FF,$FF,$FF,$43,$4D,$B0,$43,$AC,$23,$C0,$FF,$FF,$FF,$00  ; ____from fire.___|
+.byte $09,$03,$43,$4D,$B0,$43,$AC,$23,$C0,$09,$03,$01          ; ____from fire.___|
+.byte $06,$1C,$00
 
 DESC_MG_REGN:
 .byte $06,$03,$01                                              ; _Recover party's |
-.byte $06,$13,$01                                              ; __HP over time.  | 
+.byte $06,$13,$01                                              ; __HP over time.  |
 .byte $FF,$C8,$95,$3F,$B7,$1E,$83,$1B,$55,$B1,$B6,$C9,$FF,$00  ; _[Lasts 3 turns]_|
 
 DESC_MG_FIR2:
 .byte $06,$06,$01                                              ; _Strongly damage |
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $06,$15,$00                                              ; ____with fire.   |
 
 DESC_MG_HOLD:
-.byte $06,$0D,$01                                                 ; __Slight chance  |
-.byte $FF,$FF,$FF,$FF,$1B,$2E,$37,$B8,$29,$FF,$FF,$FF,$FF,$FF,$01 ; _____to stun_____|
-.byte $06,$0F,$C0,$FF,$FF,$FF,$00                                 ; ____one enemy.___|
+.byte $06,$0D,$01                                              ; __Slight chance  |
+.byte $09,$04,$1B,$2E,$37,$B8,$29,$09,$04,$01                  ; _____to stun_____|
+.byte $06,$0F,$C0,$09,$03,$00                                  ; ____one enemy.___|
 
 DESC_MG_LIT2:
 .byte $06,$06,$01                                              ; _Strongly damage |
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $06,$16,$00                                              ; _with lightning. |
 
 DESC_MG_LOK2:
@@ -2919,50 +2921,54 @@ DESC_MG_LOK2:
 
 DESC_MG_PURE:
 .byte $06,$04,$01                                              ; __Recover from  |
-.byte $FF,$FF,$FF,$FF,$4F,$B2,$30,$3C,$C0,$FF,$FF,$FF,$FF,$00  ; _____poison.____|
+.byte $09,$04,$4F,$B2,$30,$3C,$C0,$09,$05,$01                  ; _____poison.____|
+.byte $06,$1C,$00
 
 DESC_MG_FEAR:
 .byte $FF,$8C,$41,$B1,$48,$1B,$2E,$B6,$51,$23,$FF,$01          ; _Chance to scare_|
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $FF,$2D,$B1,$28,$43,$45,$A8,$1F,$AA,$C0,$FF,$FF,$00      ; __into fleeing.__|
 
 DESC_MG_AICE:
 .byte $06,$0A,$01                                              ; Protect the party|
-.byte $FF,$FF,$FF,$43,$4D,$B0,$2D,$48,$C0,$FF,$FF,$FF,$FF,$00  ; ____from ice.____|
-  
+.byte $09,$03,$43,$4D,$B0,$2D,$48,$C0,$09,$04,$01              ; ____from ice.____|
+.byte $06,$1C,$00
+
 DESC_MG_AMUT:
 .byte $06,$04,$01                                              ; __Recover from   |
-.byte $B0,$A4,$AA,$AC,$51,$58,$B0,$B8,$53,$5A,$B6,$B6,$C0,$00  ; magical muteness.|
+.byte $B0,$A4,$AA,$AC,$51,$58,$B0,$B8,$53,$5A,$B6,$B6,$C0,$01  ; magical muteness.|
+.byte $06,$1C,$00
 
 DESC_MG_SLP2:
-.byte $06,$0E,$01                                                     ; _Greater chance  |
-.byte $FF,$FF,$FF,$FF,$1B,$2E,$B6,$45,$A8,$B3,$FF,$FF,$FF,$FF,$FF,$01 ;_____to sleep_____|
-.byte $06,$0F,$C0,$FF,$FF,$FF,$00                                     ; ____one enemy.___|
+.byte $06,$0E,$01                                              ; _Greater chance  |
+.byte $09,$04,$1B,$2E,$B6,$45,$A8,$B3,$09,$04,$01              ;_____to sleep_____|
+.byte $06,$0F,$C0,$09,$03,$00                                  ; ____one enemy.___|
 
 DESC_MG_FAST:
-.byte $90,$B5,$22,$21,$1C,$1A,$B7,$2F,$66,$21,$FF,$01          ; Grant the target_|
+.byte $FF,$90,$AC,$B9,$A8,$FF,$1C,$1A,$B7,$2F,$66,$21,$01      ; _Give the target_|
 .byte $42,$35,$1A,$A6,$41,$B1,$48,$1E,$28,$FF,$01              ; _more chances to_|
 .byte $20,$B7,$B7,$5E,$AE,$4F,$25,$1B,$55,$B1,$C0,$00          ; _attack per turn.|
 
 DESC_MG_CONF:
 .byte $FF,$FF,$8C,$41,$B1,$48,$1B,$2E,$32,$BB,$FF,$FF,$01      ; __Chance to vex__|
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $FF,$2D,$B1,$28,$2D,$B1,$B6,$22,$5B,$BC,$C0,$FF,$00      ; __into insanity._|
- 
+
 DESC_MG_ICE2:
 .byte $06,$06,$01                                              ; _Strongly damage |
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $06,$17,$00                                              ; ____with ice.    |
-  
+
 DESC_MG_CUR3:
 .byte $06,$02,$01                                              ; _Greatly recover |
 .byte $06,$14,$01                                              ; ___HP for one    |
 .byte $06,$0C,$00                                              ; __party member.  |
 
 DESC_MG_LIFE:
-.byte $06,$04,$01                                                 ; __Recover from   |
-.byte $FF,$FF,$FF,$FF,$FF,$67,$2B,$1C,$C0,$FF,$FF,$FF,$FF,$FF,$00 ; ______death._____|
-   
+.byte $06,$04,$01                                              ; __Recover from   |
+.byte $09,$04,$FF,$67,$2B,$1C,$C0,$09,$04,$FF,$01              ; ______death._____|
+.byte $06,$1C,$00
+
 DESC_MG_HRM3:
 .byte $06,$07,$01                                              ; _Heavily damage  |
 .byte $06,$11,$01                                              ; _undead enemies  |
@@ -2970,69 +2976,72 @@ DESC_MG_HRM3:
 
 DESC_MG_RGN2:
 .byte $06,$03,$01                                              ; _Recover party's |
-.byte $06,$13,$01                                              ; __HP over time.  | 
+.byte $06,$13,$01                                              ; __HP over time.  |
 .byte $FF,$C8,$95,$3F,$B7,$1E,$84,$1B,$55,$B1,$B6,$C9,$FF,$00  ; _[Lasts 4 turns]_|
 
 DESC_MG_FIR3:
 .byte $06,$07,$01                                              ; _Heavily damage  |
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $06,$15,$00                                              ; ____with fire.   |
- 
+
 DESC_MG_BANE:
-.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$AE,$61,$58,$FF,$FF,$01      ; _Chance to kill__|
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$AE,$61,$58,$FF,$01          ; _Chance to kill__|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $FF,$FF,$33,$5B,$AB,$4F,$B2,$30,$3C,$C0,$FF,$FF,$00      ; ___with poison.__|
 
 DESC_MG_WARP:
 .byte $06,$0B,$01                                              ; Return the party |
-.byte $1B,$2E,$1C,$1A,$B3,$23,$B9,$AC,$26,$1E,$FF,$01          ; _to the previous_|
+.byte $1B,$2E,$1C,$1A,$B3,$23,$B9,$AC,$26,$1E,$01              ; _to the previous_|
 .byte $65,$A8,$32,$AF,$BF,$36,$44,$A8,$BB,$5B,$C0,$FF,$00      ; _level, or exit._|
- 
+
 DESC_MG_SLO2:
 .byte $06,$0E,$01                                              ; _Greater chance  |
-.byte $FF,$1B,$2E,$68,$B0,$5B,$36,$5A,$FF,$FF,$FF,$01          ; __to limit one___|
+.byte $FF,$1B,$2E,$68,$B0,$5B,$36,$5A,$09,$03,$01              ; __to limit one___|
 .byte $FF,$3A,$A8,$B0,$BC,$BE,$1E,$39,$B7,$5E,$AE,$B6,$C0,$00  ; _enemy's attacks.|
 
 DESC_MG_SOFT:
-.byte $06,$04,$01                                                  ; __Recover from   | 
-.byte $FF,$FF,$FF,$FF,$FF,$24,$28,$5A,$C0,$FF,$FF,$FF,$FF,$FF,$00  ; ______stone._____|
-   
+.byte $06,$04,$01                                              ; __Recover from   |
+.byte $09,$05,$24,$28,$5A,$C0,$09,$05,$01                      ; ______stone._____|
+.byte $06,$1C,$00
+
 DESC_MG_EXIT:
 .byte $06,$0B,$01                                              ; Return the party |
-.byte $FF,$FF,$1B,$2E,$1C,$1A,$A8,$BB,$5B,$C0,$FF,$FF,$00      ; ___to the exit.__|
+.byte $FF,$FF,$1B,$2E,$1C,$1A,$A8,$BB,$5B,$C0,$FF,$FF,$01      ; ___to the exit.__|
+.byte $06,$1C,$00
 
 DESC_MG_FOG2:
-.byte $FF,$FF,$FF,$8E,$B1,$A6,$41,$B1,$21,$1C,$1A,$FF,$FF,$FF,$01  ; ___Enchant the___| 
-.byte $FF,$4F,$2F,$B7,$BC,$BE,$1E,$A4,$B5,$B0,$35,$BF,$FF,$01      ; __party's armor,_|
-.byte $06,$19,$00                                                  ; _raising defense.|
+.byte $09,$03,$8E,$B1,$A6,$41,$B1,$21,$1C,$1A,$FF,$FF,$01      ; ___Enchant the___|
+.byte $FF,$4F,$2F,$B7,$BC,$BE,$1E,$A4,$B5,$B0,$35,$BF,$FF,$01  ; __party's armor,_|
+.byte $06,$19,$00                                              ; _raising defense.|
 
 DESC_MG_INV2:
-.byte $FF,$9D,$55,$29,$1C,$1A,$B3,$2F,$B7,$4B,$FF,$FF,$01         ; _Turn the party__|
-.byte $FF,$FF,$FF,$2D,$B1,$B9,$30,$AC,$A5,$45,$BF,$FF,$FF,$FF,$01 ; ____invisible,___|
-.byte $06,$1A,$00                                                 ; _raising evasion.|
+.byte $FF,$9D,$55,$29,$1C,$1A,$B3,$2F,$B7,$4B,$FF,$01          ; _Turn the party__|
+.byte $09,$03,$2D,$B1,$B9,$30,$AC,$A5,$45,$BF,$09,$03,$01      ; ____invisible,___|
+.byte $06,$1A,$00                                              ; _raising evasion.|
 
 DESC_MG_LIT3:
 .byte $06,$07,$01                                              ; _Heavily damage  |
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $06,$16,$00                                              ; _with lightning. |
- 
+
 DESC_MG_RUB:
-.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$25,$3F,$1A,$FF,$01          ; _Chance to erase_|
-.byte $06,$0F,$C0,$FF,$FF,$FF,$00                              ; ____one enemy.___|
- 
+.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$25,$3F,$1A,$01              ; _Chance to erase_|
+.byte $06,$0F,$C0,$09,$03,$01                                  ; ____one enemy.___|
+.byte $06,$1C,$00
+
 DESC_MG_QAKE:
 .byte $FF,$8C,$41,$B1,$48,$1B,$2E,$3E,$3B,$FF,$FF,$01          ; _Chance to send__|
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies___|
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies___|
 .byte $2D,$B1,$28,$1B,$1D,$FF,$2B,$B5,$1C,$C0,$FF,$00          ; _into the earth._|
- 
+
 DESC_MG_STUN:
 .byte $FF,$92,$B1,$A9,$68,$A6,$21,$37,$B8,$29,$3C,$FF,$01      ; _Inflict stun on_|
 .byte $06,$09,$01                                              ; ____one enemy    |
 .byte $06,$12,$00                                              ; _when HP is low. |
- 
+
 DESC_MG_CUR4:
-.byte $FF,$9B,$A8,$A6,$B2,$32,$44,$5F,$58,$91,$99,$01          ; _Recover all HP  |
-.byte $22,$27,$61,$AF,$1E,$A9,$35,$36,$5A,$01                  ; and ills for one |
+.byte $FF,$9B,$A8,$A6,$B2,$32,$44,$5F,$58,$91,$99,$FF,$FF,$01  ; _Recover all HP  |
+.byte $22,$27,$61,$AF,$1E,$A9,$35,$36,$5A,$FF,$01              ; and ills for one |
 .byte $06,$0C,$00                                              ; __party member.  |
 
 DESC_MG_HRM4:
@@ -3042,75 +3051,78 @@ DESC_MG_HRM4:
 
 DESC_MG_ARUB:
 .byte $06,$0A,$01                                              ; Protect the party|
-.byte $FF,$FF,$43,$4D,$B0,$67,$2B,$1C,$C0,$00                  ; ___from death.   |
-  
+.byte $FF,$FF,$43,$4D,$B0,$67,$2B,$1C,$C0,$09,$03,$01          ; ___from death.___|
+.byte $06,$1C,$00
+
 DESC_MG_RGN3:
 .byte $06,$03,$01                                              ; _Recover party's |
-.byte $06,$13,$01                                              ; __HP over time.  | 
-.byte $FF,$C8,$95,$3F,$B7,$1E,$85,$1B,$55,$B1,$B6,$C9,$00      ; _[Lasts 5 turns] |
+.byte $06,$13,$01                                              ; __HP over time.  |
+.byte $FF,$C8,$95,$3F,$B7,$1E,$85,$1B,$55,$B1,$B6,$C9,$FF,$00  ; _[Lasts 5 turns] |
 
 DESC_MG_ICE3:
 .byte $06,$07,$01                                              ; _Heavily damage  |
-.byte $06,$10,$FF,$FF,$FF,$01                                  ; ___all enemies   | 
+.byte $06,$10,$09,$03,$01                                      ; ___all enemies   |
 .byte $06,$17,$00                                              ; ____with ice.    |
-  
+
 DESC_MG_BRAK:
-.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$B7,$55,$29,$FF,$FF,$01      ; _Chance to turn__|
+.byte $FF,$8C,$41,$B1,$48,$1B,$2E,$B7,$55,$29,$FF,$01          ; _Chance to turn__|
 .byte $06,$09,$01                                              ; ____one enemy    |
-.byte $FF,$FF,$2D,$B1,$28,$24,$28,$5A,$C0,$FF,$FF,$FF,$00      ; ___into stone.___|
- 
+.byte $FF,$FF,$2D,$B1,$28,$24,$28,$5A,$C0,$09,$03,$00          ; ___into stone.___|
+
 DESC_MG_SABR:
-.byte $FF,$FF,$FF,$91,$2F,$A7,$3A,$1B,$1D,$FF,$FF,$FF,$FF,$01  ; ___Harden the____|
-.byte $38,$3F,$53,$B5,$BE,$1E,$60,$A4,$B3,$3C,$C0,$00          ; _caster's weapon.|
+.byte $09,$03,$91,$2F,$A7,$3A,$1B,$1D,$09,$04,$01              ; ___Harden the____|
+.byte $38,$3F,$53,$B5,$BE,$1E,$60,$A4,$B3,$3C,$C0,$01          ; _caster's weapon.|
+.byte $06,$1C,$00
 
 DESC_MG_BLND:
-.byte $92,$B1,$A9,$68,$A6,$21,$A5,$68,$3B,$36,$29,$FF,$01      ; Inflict blind on_|
+.byte $92,$B1,$A9,$68,$A6,$21,$A5,$68,$3B,$36,$29,$01          ; Inflict blind on_|
 .byte $06,$09,$01                                              ; ____one enemy    |
 .byte $06,$12,$00                                              ; _when HP is low. |
- 
+
 DESC_MG_LIF2:
-.byte $06,$04,$01                                                     ; __Recover from   | 
-.byte $FF,$FF,$67,$2B,$1C,$33,$5B,$AB,$FF,$FF,$FF,$FF,$01             ; ___death with____|
-.byte $FF,$FF,$FF,$43,$B8,$4E,$FF,$91,$99,$C0,$FF,$FF,$FF,$FF,$FF,$00 ; ____full HP._____|
-  
+.byte $06,$04,$01                                              ; __Recover from   |
+.byte $FF,$FF,$67,$2B,$1C,$33,$5B,$AB,$09,$04,$01              ; ___death with____|
+.byte $09,$03,$43,$B8,$4E,$FF,$91,$99,$C0,$09,$05,$00          ; ____full HP._____|
+
 DESC_MG_FADE:
 .byte $06,$07,$01                                              ; _Heavily damage  |
-.byte $06,$10,$01                                              ; ___all enemies   |
+.byte $06,$10,$C0,$FF,$FF,$01                                  ; ___all enemies   |
 .byte $06,$18,$00                                              ; _with holy magic.|
 
 DESC_MG_WALL:
-.byte $06,$0A,$01                                                     ; Protect the party|
-.byte $FF,$FF,$FF,$43,$4D,$B0,$20,$4E,$FF,$FF,$FF,$FF,$FF,$01         ; ____from all_____| 
-.byte $FF,$FF,$FF,$FF,$A8,$45,$34,$B1,$B7,$B6,$C0,$FF,$FF,$FF,$FF,$00 ; ____elements.____|
-  
+.byte $06,$0A,$01                                              ; Protect the party|
+.byte $09,$03,$43,$4D,$B0,$20,$4E,$09,$05,$01                  ; ____from all_____|
+.byte $09,$04,$A8,$45,$34,$B1,$B7,$B6,$C0,$09,$04,$00          ; ____elements.____|
+
 DESC_MG_XFER:
 .byte $9B,$A8,$B0,$B2,$32,$FF,$23,$B6,$30,$B7,$22,$48,$01      ; Remove resistance|
 .byte $28,$FF,$A8,$45,$34,$B1,$B7,$1E,$A9,$4D,$B0,$FF,$01      ; to elements from_|
-.byte $06,$0F,$C0,$FF,$FF,$FF,$00                              ; ____one enemy.___|
- 
+.byte $06,$0F,$C0,$09,$03,$00                                  ; ____one enemy.___|
+
 DESC_MG_NUKE:
 .byte $06,$08,$01                                              ; Massively damage |
-.byte $06,$10,$C0,$FF,$FF,$00                                  ; ___all enemies.__|
+.byte $06,$10,$C0,$FF,$FF,$01                                  ; ___all enemies.__|
+.byte $06,$1C,$00
 
 DESC_MG_STOP:
-.byte $06,$0D,$01                                                 ; __Slight chance  |
-.byte $FF,$FF,$FF,$FF,$1B,$2E,$37,$B8,$29,$FF,$FF,$FF,$FF,$FF,$01 ; _____to stun_____|
-.byte $06,$10,$C0,$FF,$FF,$00                                     ; ___all enemies.__|
+.byte $06,$0D,$01                                              ; __Slight chance  |
+.byte $09,$04,$1B,$2E,$37,$B8,$29,$09,$04,$01                  ; _____to stun_____|
+.byte $06,$10,$C0,$FF,$FF,$00                                  ; ___all enemies.__|
 
 DESC_MG_ZAP:
-.byte $06,$0D,$01                                                  ; __Slight chance  |
-.byte $FF,$FF,$FF,$FF,$1B,$2E,$AE,$61,$58,$FF,$FF,$FF,$FF,$FF,$01  ; _____to kill_____|     
-.byte $06,$10,$C0,$FF,$FF,$00                                      ; ___all enemies.__|
+.byte $06,$0D,$01                                              ; __Slight chance  |
+.byte $09,$04,$1B,$2E,$AE,$61,$58,$09,$04,$01                  ; _____to kill_____|
+.byte $06,$10,$C0,$FF,$FF,$00                                  ; ___all enemies.__|
 
 DESC_MG_XXXX:
-.byte $FF,$92,$B1,$37,$22,$B7,$AF,$4B,$AE,$61,$AF,$1E,$FF,$01  ; _Instantly kills_|
+.byte $FF,$92,$B1,$37,$22,$B7,$AF,$4B,$AE,$61,$AF,$1E,$01      ; _Instantly kills_|
 .byte $06,$09,$01                                              ; ____one enemy    |
 .byte $06,$12,$00                                              ; _when HP is low. |
 
-  
-  
-  
-  
+
+
+
+
 DumbBottleThing:
     BCS @NoTouchyExit ; if carry is set, can't be the bottle
     TXA
@@ -3119,11 +3131,11 @@ DumbBottleThing:
     BEQ @ChangeBottleName
     CMP #LEWDS
     BEQ @ChangeLewdsName
-    
-   @Exit: 
+
+   @Exit:
     ASL A
-    TAX    
-   @NoTouchyExit: 
+    TAX
+   @NoTouchyExit:
     RTS
 
    @ChangeBottleName:
@@ -3133,34 +3145,34 @@ DumbBottleThing:
    @ChangeLewdsName:
     LDA #LEWDS_ALT
     BNE @Exit
-  
-  
-  
-  
-;Example message: 
+
+
+
+
+;Example message:
 ;[Enemy  Name    HP-####/####   ]
-;[Lvl-## Defense-### Attack-### ] 
+;[Lvl-## Defense-### Attack-### ]
 ;[Type-Mending   Affliction-@@  ]
 ;[Weak-@@@@@@@@  Defy-@@@@@@@@  ]
-  
-  
+
+
 ScanEnemyString:
     LDX #0
-    
+
     LDA #0
     STA tmp+8
     ;; tmp+9 is index for the ShortStringList
-    
+
     LDY #120
    @FillString:
-    LDA #$FF   
+    LDA #$FF
     STA bigstr_buf, Y
     DEY
     BNE @FillString
     ;; fill the string with blank spaces to start with
-    
+
     LDY #en_enemyid
-    LDA (EnemyRAMPointer), Y 
+    LDA (EnemyRAMPointer), Y
     ASL A
     TAY
     LDA data_EnemyNames, Y
@@ -3170,21 +3182,21 @@ ScanEnemyString:
     LDA #11
     JSR @AddToString
     ;; draw enemy name into the string
-    
+
     INX
     INX
 
-    JSR @GetNextShortString ; Lvl- 
+    JSR @GetNextShortString ; Lvl-
     LDA #1
-    STA MMC5_tmp+2          ; MMC5_tmp+2 is kind of a brancher for later. 
+    STA MMC5_tmp+2          ; MMC5_tmp+2 is kind of a brancher for later.
     LDY #en_level             ; bit 1 set = 2 numbers, bit 2 = 3 numbers, bit 4 = 4 numbers
-    LDA (EnemyRAMPointer), Y 
+    LDA (EnemyRAMPointer), Y
     LDY #0
     JSR @ConvertNumber
     ;; print Lvl- ##
-    
+
     DEX
-   
+
     JSR @GetNextShortString ; Attack-
     LDA #2
     STA MMC5_tmp+2
@@ -3192,32 +3204,32 @@ ScanEnemyString:
     LDY #0
     JSR @ConvertNumber
     ;; print Attack- ###
-    
+
     JSR @GetNextShortString ; HP-
     LDA #4
     STA MMC5_tmp+2
     LDA btlmag_defender_hp
     LDY btlmag_defender_hp+1
     JSR @ConvertNumber
-    LDA #$7A                 ; / 
+    LDA #$7A                 ; /
     STA bigstr_buf, X
     INX
     LDA btlmag_defender_hpmax
     LDY btlmag_defender_hpmax+1
     JSR @ConvertNumber
     ; print HP- ####/####
-    
+
     INX
-    
+
     JSR @GetNextShortString ; Hit-
     LDA #1
     STA MMC5_tmp+2
     LDA btlmag_defender_numhitsmult
     LDY #0
     JSR @ConvertNumber
-    
-    LDX #51  
-    
+
+    LDX #51
+
     JSR @GetNextShortString ; Defend-
     LDA #2
     STA MMC5_tmp+2
@@ -3225,20 +3237,20 @@ ScanEnemyString:
     LDY #0
     JSR @ConvertNumber
     ;; print Defense- ###
-    
+
     LDX #62
-    
+
     JSR @GetNextShortString ; Type-
     ;; Now because each enemy can have more than one category
     ;; but Categories can't be represented by icons
     ;; then we need to choose ONE category that most accurately represents an enemy
     ;; So there's a list further below of just ONE category per enemy ID
     ;; which is then doubled into an index for the word to print
-    
+
     LDY #en_enemyid
-    LDA (EnemyRAMPointer), Y 
+    LDA (EnemyRAMPointer), Y
     TAY
-    LDA @SingleCategory, Y 
+    LDA @SingleCategory, Y
     ASL A                   ; multiply by 2
     TAY
     LDA @CategoryName_LUT, Y
@@ -3246,10 +3258,10 @@ ScanEnemyString:
     LDA @CategoryName_LUT+1, Y
     STA tmp+1
     LDA #8
-    JSR @AddToString    
-    
+    JSR @AddToString
+
     LDX #77
-    
+
     JSR @GetNextShortString ; Caution-
     LDY #en_attackail
     LDA (EnemyRAMPointer), Y
@@ -3257,21 +3269,21 @@ ScanEnemyString:
     DEX
     JSR @UnrollStatByte
     ;; this only supports 4 ailments, which is already too damn much. 2 is too damn much!
-    
+
     LDX #91
-    
+
     JSR @GetNextShortString ; Weak-
     LDA btlmag_defender_elementweakness
     LDY #$CA
     JSR @UnrollElementByte
-    
+
     LDX #106
-    
+
     JSR @GetNextShortString ; Defy-
     LDA btlmag_defender_elementresist
     LDY #$CA
     JSR @UnrollElementByte
-   
+
    @EndString:
     LDA #$05
     STA bigstr_buf+30
@@ -3287,11 +3299,11 @@ ScanEnemyString:
     STA menustall
     STA dest_x
     LDA #24
-    STA dest_y    
+    STA dest_y
     RTS
-    
-   @UnrollStatByte:   
-    LSR A 
+
+   @UnrollStatByte:
+    LSR A
     BCC :+
       LDY #$CD ; death
       JSR @PrintStatBitIcon
@@ -3330,29 +3342,9 @@ ScanEnemyString:
     BCC :+
       LDY #$CA ; confusion
       JSR @PrintStatBitIcon
-  : RTS  
-  
-  @UnrollElementByte:  
-    LSR A 
-    BCC :+
-      JSR @PrintElementBitIcon
-  : INX
-    INY
-    LSR A
-    BCC :+
-      JSR @PrintElementBitIcon
-  : INX
-    INY
-    LSR A
-    BCC :+
-      JSR @PrintElementBitIcon
-  : INX
-    INY
-    LSR A
-    BCC :+
-      JSR @PrintElementBitIcon
-  : INX
-    INY  
+  : RTS
+
+  @UnrollElementByte:
     LSR A
     BCC :+
       JSR @PrintElementBitIcon
@@ -3371,22 +3363,42 @@ ScanEnemyString:
     LSR A
     BCC :+
       JSR @PrintElementBitIcon
-  : RTS  
-   
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : INX
+    INY
+    LSR A
+    BCC :+
+      JSR @PrintElementBitIcon
+  : RTS
+
    @PrintStatBitIcon:
     INX
     JSR @PrintElementBitIcon
     LDY #$C4
     INX
-    
+
    @PrintElementBitIcon:
     PHA
     TYA
     STA bigstr_buf, X
     PLA
-    RTS    
-    
-   @GetNextShortString: 
+    RTS
+
+   @GetNextShortString:
     LDA tmp+8
     ASL A
     TAY
@@ -3398,30 +3410,30 @@ ScanEnemyString:
     LDA #9                  ; set tmp+8 to 9, the longest ShortString
     BNE @AddToString
     ;; this gets the next ShortString and prints it to the Big string
-    
+
    @ConvertNumber:
     STA MMC5_tmp
     STY MMC5_tmp+1
     TXA
     PHA
-   
+
     JSR LongCall
     .word ConvertBattleNumber
     .byte $0E
-    
+
     PLA
-    TAX    
+    TAX
     LDA text_ptr
     STA tmp
     LDA text_ptr+1
     STA tmp+1
     LDA #4
     ;; this converts hex numbers (enemy stats) into decimal, and prints it
-    
+
    @AddToString:
     STA tmp+2
     LDY #0
-   @AddToString_Loop: 
+   @AddToString_Loop:
     LDA (tmp), Y
     BEQ @FinishOffName      ; when it gets to the end of an enemy name, move the X pointer to the end of #11
     CMP #$FE                ; when it gets to the end of a ShortString
@@ -3432,20 +3444,20 @@ ScanEnemyString:
     DEC tmp+2
     BNE @AddToString_Loop
   : RTS
-   
+
    @FinishOffName:
     INX
     DEC tmp+2
     BNE @FinishOffName
     RTS
-   
-   @MoveXOver: 
+
+   @MoveXOver:
     INX
     DEY
     BNE @MoveXOver
     RTS
 
-@ShortStringList:    
+@ShortStringList:
 .word @Level
 .word @Attack
 .word @HP
@@ -3455,15 +3467,15 @@ ScanEnemyString:
 .word @Caution
 .word @Weak
 .word @Defy
-    
-@Level:    
-.byte $95,$B9,$AF,$C2,$FE 
+
+@Level:
+.byte $95,$B9,$AF,$C2,$FE
 
 @HP:
-.byte $91,$99,$C2,$FE 
+.byte $91,$99,$C2,$FE
 
 @Hit:
-.byte $91,$AC,$B7,$C2,$FE 
+.byte $91,$AC,$B7,$C2,$FE
 
 @Defend:
 .byte $8D,$A8,$A9,$A8,$B1,$A7,$C2,$FE
@@ -3498,52 +3510,52 @@ ScanEnemyString:
 @TYPE_NOTHING:
 .byte $97,$B2,$B7,$AB,$AC,$B1,$AA,$FE ; Nothing
 @TYPE_UNKNOWN:
-.byte $9E,$B1,$AE,$B1,$B2,$BA,$B1,$FE ; Unknown 
+.byte $9E,$B1,$AE,$B1,$B2,$BA,$B1,$FE ; Unknown
 @TYPE_DRAGON:
-.byte $8D,$B5,$A4,$AA,$B2,$B1,$FE,$00 ; Dragon 
+.byte $8D,$B5,$A4,$AA,$B2,$B1,$FE,$00 ; Dragon
 @TYPE_GIANT:
 .byte $90,$AC,$A4,$B1,$B7,$FE,$00,$00 ; Giant
 @TYPE_UNDEAD:
-.byte $9E,$B1,$A7,$A8,$A4,$A7,$FE,$00 ; Undead 
+.byte $9E,$B1,$A7,$A8,$A4,$A7,$FE,$00 ; Undead
 @TYPE_BEASTLY:
-.byte $8B,$A8,$A4,$B6,$B7,$AF,$BC,$FE ; Beastly 
+.byte $8B,$A8,$A4,$B6,$B7,$AF,$BC,$FE ; Beastly
 @TYPE_AQUATIC:
-.byte $8A,$B4,$B8,$A4,$B7,$AC,$A6,$FE ; Aquatic 
+.byte $8A,$B4,$B8,$A4,$B7,$AC,$A6,$FE ; Aquatic
 @TYPE_MAGICAL:
-.byte $96,$A4,$AA,$AC,$A6,$A4,$AF,$FE ; Magical 
+.byte $96,$A4,$AA,$AC,$A6,$A4,$AF,$FE ; Magical
 @TYPE_MENDING:
 .byte $96,$A8,$B1,$A7,$AC,$B1,$AA,$FE ; Mending
 
 @SingleCategory:
-.byte TYPE_GIANT ;00 IMP	
-.byte TYPE_GIANT ;01 GrIMP	
-.byte $00 ;02 WOLF	
-.byte $00 ;03 GrWolf	
-.byte TYPE_WERE ;04 WrWolf 
-.byte $00 ;05 FrWOLF 
-.byte TYPE_DRAGON ;06 IGUANA 
+.byte TYPE_GIANT ;00 IMP
+.byte TYPE_GIANT ;01 GrIMP
+.byte $00 ;02 WOLF
+.byte $00 ;03 GrWolf
+.byte TYPE_WERE ;04 WrWolf
+.byte $00 ;05 FrWOLF
+.byte TYPE_DRAGON ;06 IGUANA
 .byte TYPE_DRAGON ;07 AGAMA
 .byte TYPE_DRAGON ;08 SAURIA
-.byte TYPE_GIANT ;09 GIANT  
-.byte TYPE_GIANT ;0A FrGIANT  
-.byte TYPE_GIANT ;0B R`GIANT  
-.byte TYPE_WATER ;0C SAHAG  
-.byte TYPE_WATER ;0D R`SAHAG  
-.byte TYPE_WATER ;0E WzSAHAG  
-.byte $00 ;0F PIRATE  
-.byte $00 ;10 KYZOKU  
-.byte TYPE_WATER ;11 SHARK  
-.byte TYPE_WATER ;12 GrSHARK  
-.byte $00 ;13 OddEYE  
-.byte TYPE_WATER ;14 BigEYE  
-.byte TYPE_UNDEAD ;15 BONE  
-.byte TYPE_UNDEAD ;16 R`BONE  
-.byte $00 ;17 CREEP  
-.byte $00 ;18 CRAWL  
-.byte $00 ;19 HYENA  
-.byte $00 ;1A CEREBUS  
-.byte TYPE_GIANT ;1B OGRE  
-.byte TYPE_GIANT ;1C GrOGRE  
+.byte TYPE_GIANT ;09 GIANT
+.byte TYPE_GIANT ;0A FrGIANT
+.byte TYPE_GIANT ;0B R`GIANT
+.byte TYPE_WATER ;0C SAHAG
+.byte TYPE_WATER ;0D R`SAHAG
+.byte TYPE_WATER ;0E WzSAHAG
+.byte $00 ;0F PIRATE
+.byte $00 ;10 KYZOKU
+.byte TYPE_WATER ;11 SHARK
+.byte TYPE_WATER ;12 GrSHARK
+.byte $00 ;13 OddEYE
+.byte TYPE_WATER ;14 BigEYE
+.byte TYPE_UNDEAD ;15 BONE
+.byte TYPE_UNDEAD ;16 R`BONE
+.byte $00 ;17 CREEP
+.byte $00 ;18 CRAWL
+.byte $00 ;19 HYENA
+.byte $00 ;1A CEREBUS
+.byte TYPE_GIANT ;1B OGRE
+.byte TYPE_GIANT ;1C GrOGRE
 .byte TYPE_GIANT ;1D WzOGRE
 .byte TYPE_DRAGON ;1E ASP
 .byte TYPE_DRAGON ;1F COBRA
@@ -3559,7 +3571,7 @@ ScanEnemyString:
 .byte TYPE_UNDEAD ;29 WRAITH
 .byte TYPE_UNDEAD ;2A GHOST
 .byte TYPE_UNDEAD ;2B ZOMBIE
-.byte TYPE_UNDEAD ;2C GHOUL 
+.byte TYPE_UNDEAD ;2C GHOUL
 .byte TYPE_UNDEAD ;2D GEIST
 .byte TYPE_UNDEAD ;2E SPECTER
 .byte $00 ;2F WORM
