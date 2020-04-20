@@ -18,6 +18,8 @@
 .export AssignMapTileDamage_Z
 .export LoadPlayerDefenderStats_ForEnemyAttack
 .export WeaponArmorShopStats
+.export WeaponArmorSpecialDesc
+.export GetEquipmentSpell
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -169,7 +171,6 @@ lut_WeaponData:
 ;;  Spell LUT is in Bank C on its own now
 
 lut_ArmorData:
-
 ;      v ------------------- Evade penalty
 ;          v --------------- Absorb boost
 ;              v ----------- Magic Defense Boost
@@ -244,12 +245,145 @@ lut_ArmorData:
 .byte $00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00
 
+lut_EquipmentSpells:
+.byte $00     ;00; Wooden nunchucks
+.byte $00     ;01; Small knife 
+.byte $00     ;02; Wooden staff
+.byte $00     ;03; Rapier
+.byte $00     ;04; Iron hammer
+.byte $00     ;05; Short sword
+.byte $00     ;06; Hand axe
+.byte $00     ;07; Scimitar
+.byte $00     ;08; Iron nunchucks
+.byte $00     ;09; Large knife
+.byte $00     ;0A; Iron Staff
+.byte $00     ;0B; Sabre
+.byte $00     ;0C; Long sword
+.byte $00     ;0D; Great axe
+.byte $00     ;0E; Falchion
+.byte $00     ;0F; Silver knife
+.byte $00     ;10; Silver Sword
+.byte $00     ;11; Silver Hammer
+.byte $00     ;12; Silver Axe
+.byte $00     ;13; Flame sword
+.byte $00     ;14; Ice sword
+.byte $00     ;15; Dragon sword
+.byte $00     ;16; Giant sword
+.byte $00     ;17; Sun sword
+.byte $00     ;18; Coral sword
+.byte $00     ;19; Were sword
+.byte $00     ;1A; Rune sword
+.byte $00     ;1B; Power staff
+.byte MG_HRM2 ;1C; $12 ; Light axe       - casts HARM 2
+.byte MG_HEAL ;1D; $14 ; Heal staff      - casts HEAL
+.byte MG_FIR2 ;1E; $15 ; Mage staff      - casts FIRE 2
+.byte MG_FOG  ;1F; $04 ; Defense swrd    - casts SHIELD
+.byte MG_CONF ;20; $1F ; Wizard staff    - casts CONFUSE
+.byte $00     ;21; Vorpal sword
+.byte $00     ;22; CatClaw
+.byte MG_LIT2 ;23; $17 ; Thor Hammer     - casts BOLT 2
+.byte MG_BANE ;24; $26 ; Bane sword      - casts BANE
+.byte $00     ;25; Katana
+.byte $00     ;26; Excalibur
+.byte $00     ;27; Masamune
+.byte $00     ;28; Chicken Knife    
+.byte $00     ;29; Brave Blade
+.byte $00     ;2A;  
+.byte $00     ;2B;  
+.byte $00     ;2C;  
+.byte $00     ;2D;  
+.byte $00     ;2E;  
+.byte $00     ;2F;  
+.byte $00     ;30;  
+.byte $00     ;31;  
+.byte $00     ;32;  
+.byte $00     ;33;  
+.byte $00     ;34;  
+.byte $00     ;35;  
+.byte $00     ;36;  
+.byte $00     ;37;  
+.byte $00     ;38;  
+.byte $00     ;39;  
+.byte $00     ;3A;  
+.byte $00     ;3B;  
+.byte $00     ;3C;  
+.byte $00     ;3D; 
+.byte $00     ;3E; 
+.byte $00     ;3F; 
 
+.byte $00 ; Cloth T 
+.byte $00 ; Wooden armor
+.byte $00 ; Chain armor
+.byte $00 ; Iron armor
+.byte $00 ; Steel armor
+.byte $00 ; Silver armor
+.byte $00 ; Flame armor
+.byte $00 ; Ice armor
+.byte $00 ; Opal armor
+.byte $00 ; Dragon armor
+.byte $00 ; Copper Q
+.byte $00 ; Silver Q
+.byte $00 ; Gold Q
+.byte $00 ; Opal Q
+.byte MG_INV2 ; 44  ;$2C ; white T        - casts INVIS 2
+.byte MG_ICE2 ; 32  ;$20 ; Black T        - casts ICE 2
+.byte $00 ; Wooden shield
+.byte $00 ; Iron shield
+.byte $00 ; Silver shield
+.byte $00 ; Flame shield
+.byte $00 ; Ice shield
+.byte $00 ; Opal shield
+.byte $00 ; Aegis shield
+.byte $00 ; Buckler
+.byte $00 ; Protect cape
+.byte $00 ; Cap
+.byte $00 ; Wooden helm
+.byte $00 ; Iron helm
+.byte $00 ; Silver helm
+.byte $00 ; Opal helm
+.byte MG_HEAL ; 20  ;$14 ; Heal helm      - casts HEAL
+.byte $00 ; Ribbon
+.byte $00 ; Gloves
+.byte $00 ; Copper Gauntlet
+.byte $00 ; Iron Gauntlet
+.byte $00 ; Silver Gauntlet
+.byte MG_LIT2 ; 23  ;$17 ; Zeus Gauntlet  - casts BOLT 2
+.byte MG_SABR ; 55  ;$37 ; Power Gauntlet - casts SABER
+.byte $00 ; Opal Gauntlet
+.byte $00 ; Protect Ring
+.byte $00 ;     
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
 
+;; As you can see here, to set a spell, you can abandon the $ and just use the number of the spell. 
+;; Reference Bank A for the spell list in normal people numbers, or Constants.inc for hex!
 
-
-
-
+GetEquipmentSpell:
+    LDX tmp+10
+    LDA lut_EquipmentSpells, X
+    STA tmp+10
+    RTS
   
 data_EnemyStats:
 
@@ -2666,19 +2800,19 @@ DrawOptions:
   STA dest_y
   LDX ExpGainOption
   LDA lut_LowNormalHigh, X
-  JSR DrawCharMenuString
+  JSR DrawZ_MenuString
   
   LDA #10
   STA dest_y
   LDX MoneyGainOption
   LDA lut_LowNormalHigh, X
-  JSR DrawCharMenuString
+  JSR DrawZ_MenuString
   
   LDA #12
   STA dest_y
   LDX EncRateOption
   LDA lut_LowNormalHigh, X
-  JSR DrawCharMenuString
+  JSR DrawZ_MenuString
  
   JSR LongCall
   .word BattleBGColorDigits
@@ -2712,13 +2846,13 @@ DrawOptions:
   STA dest_y
   LDX AutoTargetOption
   LDA lut_OnOff, X
-  JSR DrawCharMenuString
+  JSR DrawZ_MenuString
   
   LDA #20
   STA dest_y
   LDX MuteSFXOption
   LDA lut_OnOff, X
-  JMP DrawCharMenuString
+  JMP DrawZ_MenuString
   
   
 OptionsMenu:
@@ -2746,7 +2880,7 @@ OptionsMenu:
     LDA #7           
     STA cursor_max    
     LDA #0
-    JSR DrawCharMenuString      ; draws the static list of changable things
+    JSR DrawZ_MenuString      ; draws the static list of changable things
     
     JSR TurnMenuScreenOn_ClearOAM    
     
@@ -3323,71 +3457,27 @@ SoundTest_DrawSongName:
     LDA #$0C
     STA dest_y   
     LDA soundtest      ; 0-24 
-    LDX #24            ; each song name is 24 bytes across
-    JSR MultiplyXA     ; output of A is low byte of multiplication
-    CLC
-    ADC #<lut_SongNamesLong
+    ASL A
+    TAX
+    LDA lut_SongNames, X
     STA text_ptr
-    TXA
-    ADC #>lut_SongNamesLong   ; note:  no CLC here, we want the carry from the low byte
+    LDA lut_SongNames+1, X  
     STA text_ptr+1
     
 DrawSongName:
     LDA #1
-    STA menustall         ; enable to write while PPU is on?
-    JSR CoordToNTAddr
-    JSR MenuCondStall
-   
-   @Draw:
-    LDY #0            ; zero Y -- we don't want to use it as an index.  Rather, the pointer is updated
-    LDA (text_ptr), Y ;   after each fetch
-    BEQ @DrawSongName_Exit   ; if the character is 0  (null terminator), exit the routine
-
-    INC text_ptr      ; otherwise, inc source pointer
-    BNE :+
-      INC text_ptr+1  ;   inc high byte if low byte wrapped
-
-:   CMP #$1A          ; values below $1A are control codes.  See if this is a control code
-    BCC @ControlCode  ;   if it is, jump ahead
+    STA menustall         ; enable to write while PPU is on
+    JMP DrawComplexString
     
-    LDX $2002         ; reset PPU toggle
-    LDX ppu_dest+1    ;  load and set desired PPU address
-    STX $2006         ;  do this with X, as to not disturb A, which is still our character
-    LDX ppu_dest
-    STX $2006
-
-    STA $2007         ; draw the character as-is
-    INC ppu_dest      ; increment dest PPU address
-    JMP @Draw         ; and repeat the process until terminated
-    
-    @ControlCode:
-    LDA #$04
-    STA dest_x
-    INC dest_y
-    JMP DrawSongName
-  
-   @DrawSongName_Exit:
-    LDA #$00          ; reset scroll to 0
-    STA $2005
-    STA $2005
-    STA menustall     ; and disable menu stalling again
-    RTS
-
-  SoundTest_DrawInstructions:
+SoundTest_DrawInstructions:
     LDA #$04
     STA dest_x
     LDA #$16
     STA dest_y   
-    LDA #<SoundTestInstructions
-    STA text_ptr
-    LDA #>SoundTestInstructions 
-    STA text_ptr+1
-    JMP DrawSongName
-
-Zheep:
-.byte $A3,$AB,$B3,$C4,$00  ; Zhp! (It's the sound weasels make.)
+    LDA #$0C
+    JMP DrawZ_MenuString
   
-   DrawWeasel:  
+DrawWeasel:  
     LDA #$01
     LDX #$1B
     JSR RandAX
@@ -3397,13 +3487,10 @@ Zheep:
     JSR RandAX
     STA dest_y
     DEC weasels
-    LDA #<Zheep
-    STA text_ptr
-    LDA #>Zheep
-    STA text_ptr+1
-    JSR DrawSongName
+    LDA #$0D
+    JMP DrawZ_MenuString
     
-    WeaselSprite:
+WeaselSprite:
     LDA weasels
     CMP #$F0          ; if less than 9, stop drawing weasels (oawoo)
     BCS @Yes
@@ -3730,12 +3817,12 @@ ReadjustEquipStats:
  
   : JSR ReadjustBBEquipStats  ; do a few adjustments for BB/MAs... 
  
- LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
- CLC
- ADC #$40
- STA equipmenu_tmp
- BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
- RTS 
+   LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
+   CLC
+   ADC #$40
+   STA equipmenu_tmp
+   BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
+   RTS 
 
   @AdjustWeapon:
     JSR GetWeaponDataPointer ; this sets Y to 0
@@ -3999,16 +4086,251 @@ WeaponArmorShopStats:
     LDA (tmp), Y ; Magic Defense
     STA bigstr_buf+20
     RTS
-    
-    
-    
-    
-    
 
 
 
-  
+M_EquipDescBox_Weapon:
+.byte $8A,$61,$34,$B1,$B7,$E4,$FE,$01     ; Ailment: 
+.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
+.byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__ 
+
+M_EquipDescBox_Armor:
+.byte $99,$4D,$53,$A6,$B7,$E4,$FE,$01     ; Protect: 
+.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
+.byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__ 
+
+SillyWeaponArmorSpecialDesc_LUT:
+    .word M_EquipDescBox_Weapon
+    .word M_EquipDescBox_Armor    
+    
+WeaponArmorSpecialDesc:
+    LDA #23
+    STA dest_y
+    LDA #03
+    STA dest_x
+    
+    LDX ItemToEquip
+    BNE :+
+      RTS            ; save time and just return
+
+  : DEX
+    STX tmp+10
+    CPX #ARMORSTART
+    BCS @Armor
+    
+   @Weapon:
+    LDX #0
+    BEQ :+
    
+   @Armor:
+    LDX #2
+  : LDA SillyWeaponArmorSpecialDesc_LUT, X
+    STA text_ptr
+    LDA SillyWeaponArmorSpecialDesc_LUT+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+    
+    LDY #0
+    LDX #0
+   @Loop:                   
+    LDA (text_ptr), Y
+    CMP #$FE
+    BEQ @FillSpaces
+    STA str_buf+$80, X
+    INX
+   @Resume: 
+    INY 
+    CPY #$18
+    BNE @Loop
+    BEQ @SortOutBytes
+
+   @FillSpaces:
+    STY tmp 
+    LDY #18 
+    LDA #$FF    
+  : STA str_buf+$80, X
+    INX
+    DEY
+    BNE :-
+    LDY tmp
+    JMP @Resume
+
+   @SortOutBytes:
+    LDA ItemToEquip
+    CMP #ARMORSTART+1
+    BCS @ArmorBytes
+
+   @WeaponBytes:
+    JSR GetWeaponDataPointer
+    JMP :+
+   
+   @ArmorBytes:
+    JSR GetPointerToArmorData 
+  : LDY #3
+    LDA (tmp), Y ; Ailment to inflict (weapon) / Status defended against (armor)
+    STA tmp+11
+    INY
+    INY
+    LDA (tmp), Y ; Element to attack with (weapon) / Element resisted (armor)
+    STA tmp+12    
+
+    JSR GetEquipmentSpell
+    BEQ @NoSpell
+    
+    STA str_buf+$BB   ; spell ID
+    LDA #$02           
+    STA str_buf+$BA   ; control code for item name, before spell ID
+    LDA #$0A
+    STA str_buf+$BD   ; amount of spaces after spell
+    BNE @FinishUp
+    
+   @NoSpell:
+    LDA #$02
+    STA str_buf+$BD   ; amount of spaces after "no spell"
+    LDA #$06
+    STA str_buf+$BA   ; control code for common string
+    LDA #$1D
+    STA str_buf+$BB   ; followed by the string for "no spell"
+    
+   @FinishUp: 
+    LDA #$09
+    STA str_buf+$BC   ; next byte is # of spaces
+    LDA #0
+    STA str_buf+$BE   ; terminate the string properly
+    STA joy_start     ; and zero this for the next loop of the screen!
+    LDA #1
+    STA menustall     ; and set this to draw with the screen on
+    
+    ;; str_buf+$80 is 26 tiles wide each row, with +1 for the line breaks
+    ;; three rows for 81 total. Spell names are 7 tiles.
+    ;; all spaces must be preserved to overwrite common equipment stats!
+    ;; But with the spell name decompressed, that's 7 spaces too many...
+    
+    ;; visually, it should look like this, if there is a spell:
+    ;; Ailment:_*_*_*_*_*_*_*_*__ 01
+    ;; Element:_*_*_*_*_*_*_*_*__ 01
+    ;; Spell:___XXXXXXX__________ 00
+    ;; it may look messier in RAM.
+    ;; Spell: FF FF FF 02 XX 09 09 00 
+
+    ;; now to convert the bits in the other two stats into tiles!
+    
+    LDA tmp+11 ; start with ailment
+    LDX #$07   ; how far into the string to print the icons
+    LDY #$F1   ; tile for fancy tiny X to indicate nothing in that slot
+
+   @UnrollStatByte:
+    LSR A
+    BCC :+
+      LDY #$E9 ; death
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$ED ; stone
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$EB ; poison
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$EC ; darkness
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$75 ; sleep
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$71 ; stun
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$76 ; mute
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$70 ; confusion
+  : JSR @PrintIcon
+
+  ;; and then the element icon
+    LDA tmp+12
+    LDX #$20
+
+  @UnrollElementByte:
+    LSR A
+    BCC :+
+      LDY #$70 ; status element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$71 ; stun element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$EB ; poison element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$E9 ; death element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$72 ; fire element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$73 ; ice element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$74 ; lightning element  
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$ED ; earth element
+  : JSR @PrintIcon
+  
+    LDA #<(str_buf+$80)
+    STA text_ptr
+    LDA #>(str_buf+$80)     
+    STA text_ptr+1
+    RTS
+   
+   ;; string should be ready to go; jump back and print it!
+
+   @PrintIcon:
+    PHA
+    TYA
+    STA str_buf+$80, X
+    INX 
+    INX ; add spaces between icons
+    LDY #$F1
+    PLA
+    RTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
    
 
@@ -4255,7 +4577,7 @@ SaveScreen:
     LDA #02
     STA cursor_max          ; and Cursor max!
     LDA #$06
-    JSR DrawCharMenuString ; Draw Save slot text: SAVE 1, SAVE 2, SAVE 3
+    JSR DrawZ_MenuString ; Draw Save slot text: SAVE 1, SAVE 2, SAVE 3
     JSR DrawSaveScreenNames 
     LDA weasels
     BNE SaveGameStuff
@@ -4263,14 +4585,14 @@ SaveScreen:
 LoadGameStuff:
     JSR SaveScreenTitleTextPosition
     LDA #$07
-    JSR DrawCharMenuString
+    JSR DrawZ_MenuString
     JSR TurnMenuScreenOn_ClearOAM 
     JMP SaveScreenLoop
     
 SaveGameStuff: 
     JSR SaveScreenTitleTextPosition
     LDA #$08
-    JSR DrawCharMenuString
+    JSR DrawZ_MenuString
     JSR TurnMenuScreenOn_ClearOAM 
     JSR SaveScreenLoop
     LDA #0
@@ -4360,7 +4682,7 @@ SaveScreenLoop:
     LDA #01
     STA menustall
     LDA #10
-    JSR DrawCharMenuString
+    JSR DrawZ_MenuString
     JSR ConfirmDelete
     BCS JumpSaveScreen ; if B pressed, redraw screen
 
@@ -4406,7 +4728,7 @@ GameSaved:
     LDA #01
     STA menustall
     LDA #09
-    JSR DrawCharMenuString
+    JSR DrawZ_MenuString
     JSR DrawSaveScreenNames
     JMP SaveScreenLoop
   
@@ -4659,7 +4981,7 @@ GameDeleted:
     LDA #01
     STA menustall
     LDA #11
-    JSR DrawCharMenuString
+    JSR DrawZ_MenuString
     JSR DrawSaveScreenNames
     JSR PlayDoorSFX
     JSR WaitForButton
@@ -5770,59 +6092,19 @@ UpdateBattleSFX_Noise:
   @Exit:
     RTS
 
-;SwapBattleSFXBytes:
-;    LDX #$00                    ; loop up-counter
-;    LDY #$10                    ; loop down-counter (copy $10 bytes)
-;  @Loop:
-;      LDA btlsfx_frontseat, X   ; swap front and back bytes
-;      PHA
-;      LDA btlsfx_backseat, X
-;      STA btlsfx_frontseat, X
-;      PLA
-;      STA btlsfx_backseat, X
-;      
-;      INX                       ; update loop counter and keep looping until all bytes swapped
-;      DEY
-;      BNE @Loop
-;    RTS    
 
 
-    
-;DrawCharMenuString:
-;    LDY #$7F                ; set length to default 7F
-
-DrawCharMenuString: ;_Len:
-    LDY #0
+DrawZ_MenuString: ;_Len:
     ASL A                   ; double menu string ID
     TAX                     ; put in X
     LDA lut_ZMenuText, X     ; and load up the pointer into (tmp)
-    STA tmp
-    LDA lut_ZMenuText+1, X
-    STA tmp+1
-
-    LDA #<bigstr_buf        ; set the text pointer to our bigstring buffer
     STA text_ptr
-    LDA #>bigstr_buf
+    LDA lut_ZMenuText+1, X
     STA text_ptr+1
-
-  @Loop:                    ; now step through each byte of the string....
-    LDA (tmp), Y            ; get the byte
-    CMP #$10                ; compare it to $10 (charater stat control code)
-    BNE :+                  ;   if it equals...
-      ORA submenu_targ      ;   OR with desired character ID to draw desired character's stats
-:   STA bigstr_buf, Y       ; copy the byte to the big string buffer
-    INY                     ; then decrement Y
-    CPY #$FF                ; check to see if it wrapped
-    BNE @Loop               ; and keep looping until it has
-
-                                ; once the loop is complete and our big string buffer has been filled
     LDA #BANK_THIS
     STA cur_bank          ; set data bank (string to draw is on this bank -- or is in RAM)
     STA ret_bank          ; set return bank (we want it to RTS to this bank when complete)
     JMP DrawComplexString ;  Draw Complex String, then exit!
-    
-    
-
 
 
     
@@ -5921,7 +6203,8 @@ lut_ZMenuText:
 .word Saved                  ; 9
 .word AreYouSure             ; A ; 10
 .word Deleted                ; B ; 11
-
+.word SoundTestInstructions  ; C ; 12
+.word Zheep                  ; D ; 13
 
 
 OptionOn:
@@ -5954,6 +6237,8 @@ SoundTestInstructions:
 .byte $B6,$AC,$A6,$05,$9E,$B3,$F2,$8D,$B2,$BA,$B1,$FF,$C2,$FF,$9C,$A8,$AF,$A8,$A6,$B7,$FF,$9C,$B2
 .byte $B1,$AA,$05,$9C,$B7,$A4,$B5,$B7,$FF,$C2,$FF,$91,$B8,$AA,$FF,$A4,$FF,$BA,$A8,$A4,$B6,$A8,$AF,$FF,$E8,$D3,$E8,$00
 
+Zheep:
+.byte $A3,$AB,$B3,$C4,$00
 
 M_SaveSlots:
 .byte $8F,$92,$95,$8E,$FF,$81,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$82,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$83,$00 
@@ -5974,36 +6259,90 @@ Deleted:
 .byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00
 
 
+lut_SongNames:
+.word Song1
+.word Song2
+.word Song3
+.word Song4
+.word Song5
+.word Song6
+.word Song7
+.word Song8
+.word Song9
+.word Song10
+.word Song11
+.word Song12
+.word Song13
+.word Song14
+.word Song15
+.word Song16
+.word Song17
+.word Song18
+.word Song19
+.word Song20
+.word Song21
+.word Song22
+.word Song22
+.word Song23
+.word Song24
 
 
-lut_SongNamesLong:
-.byte $99,$B5,$A8,$AF,$B8,$A7,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Prelude
-.byte $99,$B5,$B2,$AF,$B2,$AA,$B8,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Prologue
-.byte $8E,$B3,$AC,$AF,$B2,$AA,$B8,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Epilogue
-.byte $98,$B9,$A8,$B5,$BA,$B2,$B5,$AF,$A7,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Overworld
-.byte $9C,$A4,$AC,$AF,$AC,$B1,$AA,$FF,$9C,$AB,$AC,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sailing Ship
-.byte $8A,$AC,$B5,$B6,$AB,$AC,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Airship
-.byte $9D,$B2,$BA,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Town
-.byte $8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Castle
-.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$FF,$FF,$FF,$FF,$FF,$00 ; Earth Cave / Gurgu 
-.byte $96,$A4,$B7,$B2,$BC,$A4,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Matoya
-.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$97,$A8,$BA,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (New)
-.byte $9D,$A8,$B0,$B3,$AF,$A8,$FF,$B2,$A9,$FF,$8F,$AC,$A8,$B1,$A7,$B6,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Temple of Fiends
-.byte $9C,$AE,$BC,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sky Castle
-.byte $9C,$A8,$A4,$FF,$9C,$AB,$B5,$AC,$B1,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Sea Shrine
-.byte $9C,$AB,$B2,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Shop
-.byte $8B,$A4,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Battle
-.byte $96,$A8,$B1,$B8,$FF,$7A,$FF,$92,$B1,$B1,$FF,$7A,$FF,$96,$A4,$B3,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Menu / Inn / Map
-.byte $9C,$AF,$A4,$AC,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Slain
-.byte $8F,$A4,$B1,$A9,$A4,$B5,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fanfare
-.byte $94,$A8,$BC,$FF,$92,$B7,$A8,$B0,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Key Item
-.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$98,$AF,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Marsh Cave (Old)
-.byte $9C,$A4,$B9,$AC,$B1,$AA,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Saving
-.byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Healing (Unused)
-.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Treasure (Unused)
-.byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle
-.byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Fiend Battle 2
-.byte $9B,$B8,$AC,$B1,$A8,$A7,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; Ruined Castle
+;                      13  12  11  10  0F  0E  0D  0C  0B  0A                         
+lut_SongNamesLong:  ;  19  18  17  16  15  14  13  12  11  10  9   8   7   6   5   4   3   2   1   0 -- spaces needed
+Song1:  
+.byte $99,$B5,$A8,$AF,$B8,$A7,$A8,$09,$10,$00                                             ; Prelude
+Song2:  
+.byte $99,$B5,$B2,$AF,$B2,$AA,$B8,$A8,$09,$0F,$00                                         ; Prologue
+Song3:  
+.byte $8E,$B3,$AC,$AF,$B2,$AA,$B8,$A8,$09,$0F,$00                                         ; Epilogue
+Song4:  
+.byte $98,$B9,$A8,$B5,$BA,$B2,$B5,$AF,$A7,$09,$0D,$00                                     ; Overworld
+Song5:  
+.byte $9C,$A4,$AC,$AF,$AC,$B1,$AA,$FF,$9C,$AB,$AC,$B3,$09,$0B,$00                         ; Sailing Ship
+Song6:  
+.byte $8A,$AC,$B5,$B6,$AB,$AC,$B3,$09,$10,$00                                             ; Airship
+Song7:  
+.byte $9D,$B2,$BA,$B1,$09,$13,$00                                                         ; Town
+Song8:  
+.byte $8C,$A4,$B6,$B7,$AF,$A8,$09,$11,$00                                                 ; Castle
+Song9:  
+.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$09,$05,$00 ; Earth Cave / Gurgu 
+Song10: 
+.byte $96,$A4,$B7,$B2,$BC,$A4,$09,$11,$00                                                 ; Matoya
+Song11: 
+.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$97,$A8,$BA,$C9,$09,$07,$00         ; Marsh Cave (New)
+Song12: 
+.byte $9D,$A8,$B0,$B3,$AF,$A8,$FF,$B2,$A9,$FF,$8F,$AC,$A8,$B1,$A7,$B6,$09,$07,$00         ; Temple of Fiends
+Song13: 
+.byte $9C,$AE,$BC,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$09,$0C,$00                                 ; Sky Castle
+Song14: 
+.byte $9C,$A8,$A4,$FF,$9C,$AB,$B5,$AC,$B1,$A8,$09,$0C,$00                                 ; Sea Shrine
+Song15: 
+.byte $9C,$AB,$B2,$B3,$09,$13,$00                                                         ; Shop
+Song16: 
+.byte $8B,$A4,$B7,$B7,$AF,$A8,$09,$11,$00                                                 ; Battle
+Song17: 
+.byte $96,$A8,$B1,$B8,$FF,$7A,$FF,$92,$B1,$B1,$FF,$7A,$FF,$96,$A4,$B3,$09,$07,$00         ; Menu / Inn / Map
+Song18: 
+.byte $9C,$AF,$A4,$AC,$B1,$09,$12,$00                                                     ; Slain
+Song19: 
+.byte $8F,$A4,$B1,$A9,$A4,$B5,$A8,$09,$10,$00                                             ; Fanfare
+Song20: 
+.byte $94,$A8,$BC,$FF,$92,$B7,$A8,$B0,$09,$0E,$00                                         ; Key Item
+Song21: 
+.byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$98,$AF,$A7,$C9,$09,$07,$00         ; Marsh Cave (Old)
+Song22: 
+.byte $9C,$A4,$B9,$AC,$B1,$AA,$09,$11,$00                                                 ; Saving
+Song23: 
+.byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$09,$07,$00         ; Healing (Unused)
+Song24: 
+.byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$09,$06,$00     ; Treasure (Unused)
+Song25: 
+.byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$09,$0B,$00                         ; Fiend Battle
+Song26: 
+.byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$09,$09,$00                 ; Fiend Battle 2
+Song27: 
+.byte $9B,$B8,$AC,$B1,$A8,$A7,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$09,$0A,$00                     ; Ruined Castle
 
 
 
