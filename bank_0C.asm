@@ -5784,28 +5784,6 @@ RegenDivision:
 
 WalkForwardAndCastMagic:
     STX btlattackspr_nodraw     ; write nodraw flag
-    ;PHA                         ; (backup character index)
-    ;ASL A
-    ;TAY                         ; *2 char index in Y, to get their magic graphic
-    ;LDX btlcmd_magicgfx, Y
- ;   LDX btlmag_gfx
-    
-  ;; updating colours is done when preparing the spell's data  
-  ; TXA                         ; graphic in X & pushed to stack
-  ; PHA
-  ; TYA 
-  ; PHA                         ; push 2*char index  (pointless)
-  ; 
-  ; LDA btlcmd_magicgfx+1, Y    ; A = palette
-  ; LDX #$01                    ; X = nonzero to indicate magic palette
-  ; JSR UpdateVariablePalette   ; update the palette
-  ; 
-  ; PLA
-  ; TAY                         ; retore 2*char index in Y  (pointless because we never use it)
-  ; PLA
-  ; TAX                         ; restore graphic ID in X
-  
-    ;PLA                         ; restore character index in A
     LDY #$01                    ; Y = nonzero to indicate doing the magic effect
     JSR WalkForwardAndStrike    ; walk forward and strike with magic!!!
     
@@ -9569,8 +9547,8 @@ Runic_MP_LUT: ; 0-based level for MP to be given to, so  7 = level 8
 
 Player_DoItem:
     STA btl_attackid            ; record the attack ID
-    ;LDA #$01                    ; source = Item
-    ;STA btlmag_magicsource      ; record the source
+    LDA #$01                    ; source = Item
+    STA btlmag_magicsource      ; record the source
     
     TYA                         ; Y = attacker, put attacker in A
     AND #$03
@@ -9601,6 +9579,7 @@ Player_DoItem:
     
   : TXA
     ASL A
+    TAX
     LDA UseItem_JumpTable-2, X  ; -2 because there is no item with a 0
     STA tmp
     LDA UseItem_JumpTable-1, X  ; so 1*2 is looking at Heal instead of XHeal now

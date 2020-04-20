@@ -6,6 +6,9 @@ Map:
 
 Battle:
 * Using a Soft tried to cast "Bolt" then crashed the game. Test all items.
+	Using an item will not load the "Cheer" pose after walking forward?
+	Using an ailment cure will always target the first character. Also somehow took 10 HP from them?
+
 - Weapon sprite loading takes too long and causes stoned characters to flicker blue for a frame. : Fixed -- was actually the loading of the palette, since the player's chosen background colour was put into the default palette, which was reset after WaitForVBlank's exit turned it grey.
 * Weapon animations lag 1 frame behind character movements.
 * Cheering after battle needs to be adjusted to be a few frames quicker.
