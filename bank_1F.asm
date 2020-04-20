@@ -7822,15 +7822,16 @@ AddGPToParty:
 ;;  06    = JIGS - Common substring
 ;;  07 xx = JIGS - Weapon/Armor item name
 ;;  08    = JIGS - Decrement X
-;;  09    = JIGS - print spaces
-;;  0A    = JIGS - Increment X (invisible tile basically!)
-;;  0B-0F = unused (default to single line break)
+;;  09    = JIGS - print spaces (# of spaces in next byte)
+;;  0A    = JIGS - Increment X (# of increments in next byte) (invisible tile basically!)
+;;  0B    = JIGS - Do next-next tile ID by next byte's amount. ($0B,$09,$FF would do 9 $FFs)
+;;  0C-0F = unused (default to single line break)
 ;;  10 xx = draw stat code 'xx' for character 0
 ;;  11 xx = draw stat code 'xx' for character 1
 ;;  12 xx = draw stat code 'xx' for character 2
 ;;  13 xx = draw stat code 'xx' for character 3
 ;;  14-19 = unused (default to single line break)
-;;  16    = skip drawing this
+;;  16    = JIGS - skip drawing this
 ;;
 ;;   stat codes (for use with control codes $10-13) are as follows:
 ;;
@@ -7946,8 +7947,9 @@ ComplexStringControlCode:
     CMP #$01
     BEQ ComplexString_DoubleLineBreak
     CMP #$02
-    BEQ ComplexString_ItemName
-    CMP #$03
+    BNE :+
+        JMP ComplexString_ItemName
+  : CMP #$03
     BNE :+
         JMP ComplexString_ItemPrice  
   : CMP #$04
@@ -7966,6 +7968,8 @@ ComplexStringControlCode:
     BEQ ComplexString_SpaceString
     CMP #$0A
     BEQ ComplexString_Forward
+    CMP #$0B
+    BEQ ComplexString_DoTileABunch
 
   ;; 0A to 0F do nothing     
     CMP #$16 ; see if its exactly $16, and skip drawing if it is
@@ -7984,6 +7988,15 @@ ComplexString_Forward:            ;; Get the next byte, the number of tiles to s
     DEX
     BNE :-
     JMP ComplexString_SetDest
+    
+ComplexString_DoTileABunch:    
+    JSR ComplexString_GetNextByte ;; Amount of tiles to do
+    TAX
+    JSR ComplexString_GetNextByte ;; Tile to draw
+  : JSR ComplexString_JustDraw
+    DEX
+    BNE :-    
+    JMP ComplexString_GetNext
   
 ComplexString_SingleLineBreak:
     LDX #$20         ;  X=20 for a single line break (control code $05)
