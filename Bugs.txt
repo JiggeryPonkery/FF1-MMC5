@@ -1,7 +1,5 @@
 Map:
 * Treasure chests will swap back to closed when the dialogue box is drawn. (Needs to be confirmed, footage is from old version.)
-- Cannot walk under a bridge an NPC is standing on top of. : Fixed by disallowing NPCs to walk on bridges.
-* Should not be able to talk to people while under a bridge! (or in water?)
 
 
 Battle:
@@ -9,7 +7,6 @@ Battle:
 	Using an item will not load the "Cheer" pose after walking forward?
 	Using an ailment cure will always target the first character. Also somehow took 10 HP from them?
 
-- Weapon sprite loading takes too long and causes stoned characters to flicker blue for a frame. : Fixed -- was actually the loading of the palette, since the player's chosen background colour was put into the default palette, which was reset after WaitForVBlank's exit turned it grey.
 * Weapon animations lag 1 frame behind character movements.
 * Cheering after battle needs to be adjusted to be a few frames quicker.
 * Spells need to be tested to cast properly.
@@ -20,8 +17,11 @@ Battle:
 * Focus seems to mis-draw boxes.
 
 
-Shops:
-* Adjust text strings for items and spells to make sure they will overwrite previous item's decriptions.
+Menu:
+* Fix sound test menu.
+
+Banks:
+* Go over old code in Bank Z 
 
 
 Ideas:

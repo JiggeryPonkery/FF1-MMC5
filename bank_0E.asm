@@ -70,6 +70,7 @@
 .import BattleRNG_L
 .import ItemDescriptions
 .import WeaponArmorShopStats
+.import WeaponArmorSpecialDesc
 
 .segment "BANK_0E"
 
@@ -221,7 +222,6 @@ ShopTooBadWhatElse:
 
 ShopArmorDescription:
 .byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01          ; __Defense:_______|   
-;.byte $FF,$FF,$8E,$B9,$3F,$AC,$3C,$E4,$FF,$C2,$09,$05,$01 ; __Evasion:_-_____| 
 .byte $FF,$FF,$A0,$A8,$AC,$AA,$AB,$B7,$E4,$09,$08,$01      ; __Weight:________|
 .byte $FF,$FF,$96,$C0,$8E,$B9,$A4,$A7,$A8,$E4,$00          ; __M.Evade:       |
 
@@ -581,7 +581,7 @@ lut_MenuText:
 .word M_MagicMenuOrbs         ; 4C ; 76
 .word M_MagicNameLearned      ; 4D ; 77
 .word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
-.word Battle_Ether_MPList     ; 4F ; 79 ; unused now
+.word M_FixInventoryWindow    ; 4F ; 79 ; 
 .word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
 .word M_EquipStats_Blank      ; 51 ; 81 ; 
 .word M_EquipInventoryWeapon  ; 52 ; 82 ; 
@@ -589,6 +589,7 @@ lut_MenuText:
 .word M_EquipInventorySelect  ; 54 ; 84 ; 
 .word M_KeyItem18_Desc        ; 55 ; 85 ; 
 .word M_LampMagic             ; 56 ; 86 ; LAMP magic
+.word M_EquipInventoryClear   ; 57 ; 87 ; 
 
 M_Gold: 
 .byte $04,$FF,$90,$00 ; _G - for gold on menu
@@ -889,9 +890,9 @@ M_CannotUseMagic:
 .byte $B7,$AB,$A4,$21,$B6,$B3,$A8,$4E,$FF,$1D,$23,$C0,$00 ; Sorry, you cannot use[enter]that spell here.
 
 M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape and timer box...
-.byte $74,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$75,$01
+.byte $6C,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$6D,$01
 .byte $7B,$7E,$7E,$7E,$7E,$7E,$7E,$7E,$7E,$7C,$01,$01,$01,$01,$01,$01,$01
-.byte $74,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$75,$00
+.byte $6C,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$6D,$00
 
 M_ItemSubmenu:
 .byte $FF,$FF,$9E,$3E,$09,$03,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
@@ -930,12 +931,10 @@ M_MagicMenuOrbs:
 M_MagicNameLearned:
 .byte $FF,$10,$43,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
 
-Battle_Ether_MPList:
-;; not used anymore
-;.byte $95,$81,$FF,$FF,$10,$2C,$7A,$10,$34,$FF,$95,$85,$FF,$FF,$10,$30,$7A,$10,$38,$01
-;.byte $95,$82,$FF,$FF,$10,$2D,$7A,$10,$35,$FF,$95,$86,$FF,$FF,$10,$31,$7A,$10,$39,$01
-;.byte $95,$83,$FF,$FF,$10,$2E,$7A,$10,$36,$FF,$95,$87,$FF,$FF,$10,$32,$7A,$10,$3A,$01
-;.byte $95,$84,$FF,$FF,$10,$2F,$7A,$10,$37,$FF,$95,$88,$FF,$FF,$10,$33,$7A,$10,$3B,$00
+M_FixInventoryWindow:
+.byte $7B,$0B,$07,$7E,$6A,$6B,$0B,$15,$7E,$7C    ; connect name and submenu title boxes
+.byte $01,$01,$01,$01,$01,$01,$01,$01,$05        ; line break to the bottom...
+.byte $7B,$0B,$1E,$7E,$7C,$00                    ; and connect the stat window
 
 M_MagicMenuMPTitle:
 ;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
@@ -956,11 +955,14 @@ M_EquipInventoryArmor:
 .byte $C1,$FF,$FF,$8A,$B5,$B0,$35,$FF,$FF,$C7,$00 ; Armor
 
 M_EquipInventorySelect:
-.byte $9E,$3E,$FF,$9C,$B7,$2F,$B7,$7A,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$01
+.byte $09,$03,$9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$09,$05,$01
 .byte $A5,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Start/Select to switch between weapons and armor.
 
 M_LampMagic:
 .byte $8A,$24,$B3,$A8,$4E,$1B,$2E,$23,$37,$35,$1A,$B6,$AC,$AA,$AB,$B7,$C4,$00
+
+M_EquipInventoryClear:
+.byte $09,$1A,$00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9396,19 +9398,19 @@ DrawOrbBox:
 
       ; Water Orb
     LDX #$86           ; dest ppu address       = $2086
-    LDY #$68           ; lit orb tiles start at = $68
+    LDY #$04           ; lit orb tiles start at = $68
     LDA orb_water      ; water orb status
     JSR @DrawOrb
 
       ; Air Orb
     LDX #$C4           ; dest ppu address       = $20C4
-    LDY #$6C           ; lit orb tiles start at = $6C
+    LDY #$10           ; lit orb tiles start at = $6C
     LDA orb_air        ; air orb status
     JSR @DrawOrb
 
       ; Earth Orb
     LDX #$C6           ; dest ppu address       = $20C6
-    LDY #$70           ; lit orb tiles start at = $70
+    LDY #$14           ; lit orb tiles start at = $70
     LDA orb_earth      ; earth orb status
     JSR @DrawOrb
 
@@ -10028,13 +10030,15 @@ EnterEquipInventory:
     LDA joy_b
     BNE @B_Pressed            ; or B
     LDA joy_start
-    ORA joy_select
+    BNE @Start_Pressed
+    LDA joy_select
     BNE @Select_Pressed
 
     JSR MoveEquipInventoryCursor   ; if neither A nor B pressed, move the mode cursor
     JMP @Loop                      ; and loop until one of them is pressed
     
   @B_Pressed:                 ; if B pressed....
+    JSR PlaySFX_MenuSel  
     JSR UnEquipStats
     LDA equipoffset
     CLC 
@@ -10047,8 +10051,17 @@ EnterEquipInventory:
     DEX
     DEC inv_weapon, X        ; and if it was more than 0, take it out of inventory again
   : JMP ReEquipStats
+
+  @ResetSelectLoop:
+    LDA #0
+    STA joy_select
+    BEQ @Loop
   
   @Select_Pressed:
+    LDA equipoffset
+    CMP #6
+    BCC @ResetSelectLoop
+    
     LDA battleitemslot
     BEQ @SwitchToArmor
     
@@ -10059,6 +10072,7 @@ EnterEquipInventory:
        @SwitchToArmor:
         INC battleitemslot
        @DoneSwitch:  
+        JSR PlaySFX_MenuSel
         JMP EnterEquipInventory
     
   @A_Pressed:
@@ -10068,10 +10082,15 @@ EnterEquipInventory:
     LDX ItemToEquip          ; get the new weapon
     DEX
     DEC inv_weapon, X        ; remove it from inventory
-    RTS
+    JMP PlaySFX_MenuSel
     
    @Error: 
     JSR PlaySFX_Error        ; kr-kow if not equippable
+    JMP @Loop
+  
+   @Start_Pressed: 
+    JSR PlaySFX_MenuSel
+    JSR EquipStatsDescBoxString_Special
     JMP @Loop
 
     
@@ -10257,7 +10276,8 @@ EquipStatsDescBoxString:
     
   : STA str_buf, X
     INX
-  : INY 
+   @Resume: 
+    INY 
     CPY #42
     BNE @Loop
     
@@ -10269,19 +10289,50 @@ EquipStatsDescBoxString:
     LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
     STA text_ptr+1
     JMP DrawComplexString
-    
+   
    @FillSpaces:               ; this little loop saves having to put like 40 blank spaces in M_EquipStats_Blank
-    STY tmp
+    STY tmp                   ; Can't use the $09 code to draw spaces, as putting numbers between would ruin it!
     TAY
-    LDA #$FF
+    LDA #$FF                  
   : STA str_buf, X
     INX
     DEY
     BNE :-
     LDY tmp
-    JMP :--
-    
+    JMP @Resume
 
+;; Again, copy this string to str_bug (+$80 this time) and do a fancy thing to fill it with a TON of blank space.
+;; this then jumps to get some weapon/armor stats to fill those spaces in with.
+;; ran out of room in this bank so the whole thing is moved over here:
+
+EquipStatsDescBoxString_Special:
+    JSR LongCall
+    .word WeaponArmorSpecialDesc
+    .byte BANK_Z
+    
+    LDA ItemToEquip
+    BEQ @Error
+    JSR DrawComplexString    
+    LDA equipoffset
+    CMP #06 
+    BCC @Return
+    
+    JSR MenuWaitForBtn
+    LDA #03
+    STA dest_x
+    LDA #23
+    STA dest_y    
+    LDA #$57
+    JSR DrawMenuString
+    
+    JMP EquipStatsDescBoxString
+    
+   @Return:
+    RTS
+    
+    
+   @Error:
+    JMP PlaySFX_Error
 
 UpdateEquipInventoryStats_CheckViable:
     LDA #0
@@ -10433,6 +10484,13 @@ DrawEquipInventory:
     LDX item_pageswap
     LDA lut_EquipInventoryPageTitle, X
     JSR DrawMenuString         ; draw page number and arrows
+    
+    LDA #0
+    STA dest_x
+    LDA #3
+    STA dest_y
+    LDA #79
+    JSR DrawMenuString
   
     LDA item_pageswap
     ASL A
