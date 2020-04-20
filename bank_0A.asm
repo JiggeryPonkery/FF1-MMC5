@@ -904,17 +904,17 @@ BLANK:
 
 ;; KEY ITEMS
 NAME_LUTE:
-.byte $95,$B8,$B7,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; LUTE
+.byte $95,$B8,$B7,$A8,$09,$08,$00                         ; LUTE
 NAME_CROWN:
-.byte $8C,$B5,$B2,$BA,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CROWN
+.byte $8C,$B5,$B2,$BA,$B1,$09,$07,$00                     ; CROWN
 NAME_CRYSTAL:
 .byte $8C,$B5,$BC,$B6,$B7,$A4,$AF,$FF,$8E,$BC,$A8,$FF,$00 ; CRYSTAL
 NAME_HERB:
-.byte $91,$A8,$B5,$A5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; HERB
+.byte $91,$A8,$B5,$A5,$09,$08,$00                         ; HERB
 NAME_KEY:
 .byte $96,$BC,$B6,$B7,$AC,$A6,$FF,$94,$A8,$BC,$FF,$FF,$00 ; KEY
 NAME_TNT:
-.byte $9D,$97,$9D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; TNT
+.byte $9D,$97,$9D,$09,$09,$00                             ; TNT
 NAME_ADAMANT:
 .byte $8A,$A7,$A4,$B0,$A4,$B1,$B7,$AC,$B1,$A8,$FF,$FF,$00 ; ADAMANT
 NAME_SLAB:
@@ -926,19 +926,19 @@ NAME_ROD:
 NAME_FLOATER:
 .byte $95,$A8,$B9,$AC,$B6,$B7,$B2,$B1,$A8,$FF,$FF,$FF,$00 ; FLOATER
 NAME_CHIME:
-.byte $8C,$AB,$AC,$B0,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CHIME
+.byte $8C,$AB,$AC,$B0,$A8,$09,$07,$00                     ; CHIME
 NAME_TAIL:
 .byte $9B,$A4,$B7,$BE,$B6,$FF,$9D,$A4,$AC,$AF,$FF,$FF,$00 ; TAIL
 NAME_CUBE:
 .byte $A0,$A4,$B5,$B3,$FF,$8C,$B8,$A5,$A8,$FF,$FF,$FF,$00 ; CUBE
 NAME_BOTTLE:
-.byte $8B,$B2,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; BOTTLE
+.byte $8B,$B2,$B7,$B7,$AF,$A8,$09,$06,$00                 ; BOTTLE
 NAME_BOTTLE_ALT:
 .byte $8B,$B2,$B7,$B7,$AF,$A8,$00                         ; BOTTLE
 NAME_OXYALE:
-.byte $98,$BB,$BC,$A4,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; OXYALE
+.byte $98,$BB,$BC,$A4,$AF,$A8,$09,$06,$00                 ; OXYALE
 NAME_CANOE:
-.byte $8C,$A4,$B1,$B2,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00 ; CANOE
+.byte $8C,$A4,$B1,$B2,$A8,$09,$07,$00                     ; CANOE
 NAME_LEWDS:
 .byte $95,$A8,$BA,$A7,$FF,$9D,$A8,$BB,$B7,$B6,$FF,$FF,$00 ; Lewd Texts
 NAME_LEWDS_ALT:
@@ -2490,6 +2490,7 @@ CommonString_1B:
 CommonString_1C:
 .byte $09,$11,$00                                                     ; _________________|
 CommonString_1D:
+.byte $96,$A4,$AA,$AC,$51,$4E,$4B,$1F,$25,$B7,$C0,$00                 ; Magically inert.
 CommonString_1E:
 CommonString_1F:
 CommonString_20:
@@ -3307,37 +3308,30 @@ ScanEnemyString:
     BCC :+
       LDY #$CD ; death
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$D1 ; stone
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$CC ; poison
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$EB ; darkness
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$D2 ; sleep
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$CB ; stun
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$D3 ; mute
       JSR @PrintStatBitIcon
-      INX
   : LSR A
     BCC :+
       LDY #$CA ; confusion
