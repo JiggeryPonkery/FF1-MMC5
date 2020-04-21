@@ -932,9 +932,9 @@ M_MagicNameLearned:
 .byte $FF,$10,$43,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
 
 M_FixInventoryWindow:
-.byte $7B,$0B,$07,$7E,$6A,$6B,$0B,$15,$7E,$7C    ; connect name and submenu title boxes
-.byte $01,$01,$01,$01,$01,$01,$01,$01,$05        ; line break to the bottom...
-.byte $7B,$0B,$1E,$7E,$7C,$00                    ; and connect the stat window
+;.byte $7B,$0B,$07,$7E,$6A,$6B,$0B,$15,$7E,$7C    ; connect name and submenu title boxes
+;.byte $01,$01,$01,$01,$01,$01,$01,$01,$05        ; line break to the bottom...
+;.byte $7B,$0B,$1E,$7E,$7C,$00                    ; and connect the stat window
 
 M_MagicMenuMPTitle:
 ;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
@@ -955,7 +955,8 @@ M_EquipInventoryArmor:
 .byte $C1,$FF,$FF,$8A,$B5,$B0,$35,$FF,$FF,$C7,$00 ; Armor
 
 M_EquipInventorySelect:
-.byte $09,$03,$9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$09,$05,$01
+.byte $9E,$3E,$FF,$9C,$B7,$2F,$B7,$7A,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$01
+;.byte $09,$03,$9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$09,$05,$01
 .byte $A5,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Start/Select to switch between weapons and armor.
 
 M_LampMagic:
@@ -9534,7 +9535,7 @@ lut_MainItemBoxes:
 	.BYTE   $01,$01,$1E,$1C ; 13 ; Equip Menu
     .BYTE   $00,$03,$10,$13 ; 14 ; Magic Learning menu left side
     .BYTE   $10,$03,$10,$13 ; 15 ; Magic Learning menu right side
-  	.BYTE   $00,$15,$20,$08 ; 16 ; Equip Stats Box
+  	.BYTE   $00,$16,$20,$07 ; 16 ; Equip Stats Box
    ; .BYTE   $01,$0A,$0A,$03 ; 16 ; Main menu gold box
    ; .BYTE   $01,$0C,$0A,$10 ; 17 ; Main menu option box
     
@@ -10010,6 +10011,8 @@ EnterEquipInventory:
     STA joy_select
     STA joy_start
     STA menustall         ; and turn off menu stalling (since the PPU is off)
+    STA tmp+13            ; and make sure this is 0, to keep
+    ;; the battle items description box from flickering when passing over empty slots!
     LDA #1
     STA cursor_change
    
@@ -10022,7 +10025,7 @@ EnterEquipInventory:
     JSR DrawEquipInventoryCursor
     LDA cursor_change
     BEQ :+
-    JSR UpdateEquipInventoryStats
+        JSR UpdateEquipInventoryStats
   : JSR MenuFrame ;EquipMenuFrame
     
     LDA joy_a
@@ -10089,6 +10092,10 @@ EnterEquipInventory:
     JMP @Loop
   
    @Start_Pressed: 
+    LDA equipoffset
+    CMP #06 
+    BCS @Select_Pressed
+   
     JSR PlaySFX_MenuSel
     JSR EquipStatsDescBoxString_Special
     JMP @Loop
@@ -10108,11 +10115,15 @@ UpdateEquipInventoryStats:
 ;; Pressing A will equip the item set by UpdateEquipInventoryStats_CheckViable
 ;; If there is 0 amount of an item, it will equip you with nothing
 ;; or else give an error if the item set cannot be equipped
+
+    LDA #1
+    STA menustall
     
     LDA equipoffset
     CMP #6
     BCC EquipStatsDescBoxNumbers   ; don't display this stuff if on battle item slot
-        RTS 
+        JMP EquipStatsDescBoxString_Special
+        ; RTS
     
 EquipStatsDescBoxNumbers:
     LDA CharacterIndexBackup
@@ -10123,9 +10134,6 @@ EquipStatsDescBoxNumbers:
     STA dest_x
     LDA #23
     STA dest_y
-    
-    LDA #1
-    STA menustall
     
     LDA #<(str_buf)
     STA text_ptr
@@ -10200,13 +10208,27 @@ EquipStatsDescBoxNumbers:
     
 
 EquipStatsDescBoxString:
-    LDA equipoffset
-    CMP #6
-    BCC :+
-    
-    ;; if in battle item slots...
     LDA #23
     STA dest_y
+
+    LDA equipoffset
+    CMP #6
+    BCC @Stats
+
+    ;; if in battle item slots...    
+    
+    LDA tmp+13 ; check to see if the usual "press start/select to switch" text is already drawn or not
+    BEQ :+
+        RTS
+    
+  : LDA #03
+    STA dest_x
+    LDA #87
+    JSR DrawMenuString
+    ;; clear out this row with $FFs first.
+    
+    ;LDA #23
+    ;STA dest_y
     LDA #10
     STA dest_x
     
@@ -10215,24 +10237,24 @@ EquipStatsDescBoxString:
     
    @DrawArmor:    
     LDA #83
-    JSR DrawMenuString
-    JMP @DrawExplanation
+    BNE @DrawExplanation
     
    @DrawWeapon:
     LDA #82
-    JSR DrawMenuString
-   
+
    @DrawExplanation:   
+    JSR DrawMenuString
     INC dest_y
     INC dest_y
     LDA #03
     STA dest_x
     
+    INC tmp+13
+    
     LDA #84
     JMP DrawMenuString
 
     ;; jump here if doing stats
-  :  
     ;; fil the string buffer with...
  ;   LDX #$20
  ;   LDA #$0A           ; the control code for "don't draw this, and skip ahead one tile!"
@@ -10255,7 +10277,8 @@ EquipStatsDescBoxString:
     ;; It could be that the skipping thing is taking a lot of CPU time, or...
     ;; ... I just realized it was doing a frame for every single blank tile and fixed it...
     ;; but at this point I already re-did the "slower" version to work so...
- 
+
+   @Stats: 
     LDA #81 
     ASL A                   ; double A (pointers are 2 bytes)
     TAX                     ; put in X to index menu string pointer table
@@ -10312,27 +10335,16 @@ EquipStatsDescBoxString_Special:
     
     LDA ItemToEquip
     BEQ @Error
-    JSR DrawComplexString    
+    JMP DrawComplexString    
+ 
+   @Error:
     LDA equipoffset
     CMP #06 
-    BCC @Return
-    
-    JSR MenuWaitForBtn
-    LDA #03
-    STA dest_x
-    LDA #23
-    STA dest_y    
-    LDA #$57
-    JSR DrawMenuString
-    
-    JMP EquipStatsDescBoxString
-    
-   @Return:
-    RTS
-    
-    
-   @Error:
+    BCS @Instructions
     JMP PlaySFX_Error
+    
+   @Instructions:
+    JMP EquipStatsDescBoxString   
 
 UpdateEquipInventoryStats_CheckViable:
     LDA #0
@@ -10464,7 +10476,12 @@ lut_EquipInventoryPageTitle:
 DrawEquipInventory:
     LDA #16                ; Equip Stats Box
     JSR DrawMainItemBox
-    JSR EquipStatsDescBoxString ; base string, no stats
+    LDA equipoffset
+    CMP #6
+    BCC :+
+       DEC cursor_change        ; decrement this to NOT update the description box immediately!
+    
+  : JSR EquipStatsDescBoxString ; base string, no stats
 
     LDA #08                ; Inventory List
     JSR DrawMainItemBox
@@ -10485,12 +10502,13 @@ DrawEquipInventory:
     LDA lut_EquipInventoryPageTitle, X
     JSR DrawMenuString         ; draw page number and arrows
     
-    LDA #0
-    STA dest_x
-    LDA #3
-    STA dest_y
-    LDA #79
-    JSR DrawMenuString
+   ; LDA #0
+   ; STA dest_x
+   ; LDA #3
+   ; STA dest_y
+   ; LDA #79
+   ; JSR DrawMenuString
+   ;; this would draw box connectors, if the string's data was also enabled
   
     LDA item_pageswap
     ASL A

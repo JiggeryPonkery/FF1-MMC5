@@ -4197,6 +4197,7 @@ WeaponArmorSpecialDesc:
     LDA #0
     STA str_buf+$BE   ; terminate the string properly
     STA joy_start     ; and zero this for the next loop of the screen!
+    STA tmp+13
     LDA #1
     STA menustall     ; and set this to draw with the screen on
     
