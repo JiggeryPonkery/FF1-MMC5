@@ -9754,7 +9754,6 @@ Battle_CastMagicOnPlayer_NoLoad:
     AND #$03
     TAX
     PHA
-    PHA
     LDA btl_charhidden, X
     BEQ @NotHidden                  ; if they're not hidden, skip all this 
     
@@ -9776,7 +9775,6 @@ Battle_CastMagicOnPlayer_NoLoad:
     PLA
     JSR FlashCharacterSprite        ; flash this character's graphic
     JSR BtlMag_PerformSpellEffect
-    PLA
     JMP BtlMag_SavePlayerDefenderStats
     
     
@@ -10104,6 +10102,8 @@ BtlMag_SaveEnemyDefenderStats:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_SavePlayerDefenderStats:
+    LDA btl_defender
+    AND #$03
     TAX
     JSR HideCharacter
     JSR PrepCharStatPointers
