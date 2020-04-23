@@ -123,40 +123,41 @@ lut_WeaponData:
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 40  
 
 
-; Here's the element and category bytes shown in binary.
-; Good luck trying to know what setting each byte actually does.
-; I read somewhere that ice/fire armour or weapons are backwards 
-; and those are the only ones that do anything with elements here...
-;    
-;                 Element   Category    
-; Flame Sword   ; 0001,0000 1000,1000
-; Ice sword     ; 0020,0000 1000,1100 
-; Dragon sword  ; 0000,0000 0000,0010
-; Giant sword   ; 0000,0000 0000,0100
-; Sun sword     ; 0000,0000 1000,1100
-; Coral sword   ; 0000,0000 0010,0000
-; Were sword    ; 0000,0000 0001,0000
-; Rune Sword    ; 0000,0000 0011,0000
-; Excalibur     ; 1111,1111 1111,1111
-;                 ^^^^ ^^^^ ^^^^ ^^^^
-;                 |||| |||| |||| |||╘???  
-;                 |||| |||| |||| ||╘Dragon  
-;                 |||| |||| |||| |╘Giant  
-;                 |||| |||| |||| ╘Undead  
-;                 |||| |||| |||╘Were 
-;                 |||| |||| ||╘Water  
-;                 |||| |||| |╘Magic  
-;                 |||| |||| ╘Regenerative  
-;                 |||| |||╘Instant death?  
-;                 |||| ||╘Stun?  
-;                 |||| |╘Poison?
-;                 |||| ╘Rub?  
-;                 |||╘Fire  
-;                 ||╘Ice  
-;                 |╘Lightning  
-;                 ╘Earth?  
-;
-; Best guesses taken from FF Hackster!
+
+
+
+; Status defense bits: 
+;*------- > Confusion
+;-*------ > Mute
+;--*----- > Stun
+;---*---- > Sleep
+;----*--- > Blindness
+;-----*-- > Poison
+;------*- > Stone
+;-------* > Death
+
+; Elemental defense/weakness bits: 
+;*------- > Earth
+;-*------ > Lightning
+;--*----- > Ice
+;---*---- > Fire
+;----*--- > Deathy stuff  / WATER
+;-----*-- > Poisony stuff / WIND
+;------*- > Stunny stuff  / HOLY
+;-------* > ??            / DARK
+;; JIGS - these last 4 are kind of weird? Vanilla FF uses like... status as elements or something. 
+;; FF Hackster lists them as things like Time, Status, Death... 
+;; I forget why Constants.inc has them listed as the caps versions shown here.
+
+; Category bits:
+;*------- > Regenerative
+;-*------ > Magic
+;--*----- > Water
+;---*---- > Were
+;----*--- > Undead
+;-----*-- > Giant
+;------*- > Dragon
+;-------* > Unknown
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -166,9 +167,11 @@ lut_WeaponData:
 ;;
 ;;  byte 0:  Evade penality
 ;;  byte 1:  Absorb boost
-;;  byte 2:  Elemental defense
-;;  byte 3:  Spell cast -- JIGS - now elemental weakness
-;;  Spell LUT is in Bank C on its own now
+;;  byte 2:  Magic evade boost
+;;  byte 3:  Elemental defense
+;;  byte 4:  Elemental weakness
+;;  byte 5:  Status defense
+;;  Spell LUT is seperated
 
 lut_ArmorData:
 ;      v ------------------- Evade penalty
@@ -179,46 +182,46 @@ lut_ArmorData:
 ;                                      v - Status defense
 
 ;.byte $02,$01,$00,%00000000,%00000000,%00000000 ; Cloth T ;; original
-.byte $00,$02,$00,%00000000,%00000000,%00000000 ; Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
-.byte $08,$04,$00,%00000000,%00000000,%00000000 ; Wooden armor
-.byte $0F,$0F,$00,%00000000,%00000000,%00000000 ; Chain armor
-.byte $17,$18,$00,%00000000,%00000000,%00000000 ; Iron armor
-.byte $21,$22,$00,%00000000,%00000000,%00010000 ; Steel armor
-.byte $08,$12,$00,%00000000,%00000000,%00000000 ; Silver armor
-.byte $0A,$22,$00,%00100000,%00010000,%00000000 ; Flame armor
-.byte $0A,$22,$00,%00010000,%00100000,%00000000 ; Ice armor
-.byte $0A,$2A,$00,%01000000,%00000000,%00000000 ; Opal armor
-.byte $0A,$2A,$00,%01110000,%00000000,%00000000 ; Dragon armor
-.byte $01,$04,$00,%00000000,%00000000,%00000000 ; Copper Q
-.byte $01,$0F,$00,%00000000,%00000000,%00000000 ; Silver Q
-.byte $01,$18,$00,%00000000,%00000000,%00000000 ; Gold Q
-.byte $01,$22,$00,%00000000,%00000000,%00000000 ; Opal Q
-.byte $02,$18,$00,%00011000,%00000000,%00011000 ; white T        - casts INVIS 2
-.byte $02,$18,$00,%00100100,%00000000,%00100100 ; Black T        - casts ICE 2
-.byte $00,$02,$00,%00000000,%00000000,%00000000 ; Wooden shield
-.byte $00,$04,$00,%00000000,%00000000,%00000000 ; Iron shield
-.byte $00,$08,$00,%00000000,%00000000,%00000000 ; Silver shield
-.byte $00,$0C,$00,%00100000,%00010000,%00000000 ; Flame shield
-.byte $00,$0C,$00,%00010000,%00100000,%00000000 ; Ice shield
-.byte $00,$10,$00,%00000100,%00000000,%00000000 ; Opal shield
-.byte $00,$10,$00,%00000010,%00000000,%11000000 ; Aegis shield
-.byte $00,$02,$00,%00000000,%00000000,%00000000 ; Buckler
-.byte $02,$08,$00,%00000000,%00000000,%00000001 ; Protect cape
-.byte $01,$01,$00,%00000000,%00000000,%00000000 ; Cap
-.byte $03,$03,$00,%00000000,%00000000,%00000000 ; Wooden helm
-.byte $05,$05,$00,%00000000,%00000000,%00000000 ; Iron helm
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Silver helm
-.byte $03,$08,$00,%00000000,%00000000,%00000000 ; Opal helm
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Heal helm      - casts HEAL
-.byte $01,$01,$00,%00000000,%00000000,%11111111; Ribbon
-.byte $01,$01,$00,%00000000,%00000000,%00000000 ; Gloves
-.byte $03,$02,$00,%00000000,%00000000,%00000000 ; Copper Gauntlet
-.byte $05,$04,$00,%00000000,%00000000,%00000000 ; Iron Gauntlet
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Silver Gauntlet
-.byte $03,$06,$00,%00000000,%00000000,%00010000 ; Zeus Gauntlet  - casts BOLT 2
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; Power Gauntlet - casts SABER
-.byte $03,$08,$00,%00000000,%00000000,%00000000 ; Opal Gauntlet
-.byte $01,$08,$00,%00001000,%00000000,%00000001 ; Protect Ring
+.byte $00,$02,$00,%00000000,%00000000,%00000000 ; 00 Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
+.byte $08,$04,$00,%00000000,%00000000,%00000000 ; 01 Wooden armor
+.byte $0F,$0F,$00,%00000000,%00000000,%00000000 ; 02 Chain armor
+.byte $17,$18,$00,%00000000,%00000000,%00000000 ; 03 Iron armor
+.byte $21,$22,$00,%00000000,%00000000,%00010000 ; 04 Steel armor
+.byte $08,$12,$00,%00000000,%00000000,%00000000 ; 05 Silver armor
+.byte $0A,$22,$00,%00100000,%00010000,%00000000 ; 06 Flame armor
+.byte $0A,$22,$00,%00010000,%00100000,%00000000 ; 07 Ice armor
+.byte $0A,$2A,$00,%01000000,%00000000,%00000000 ; 08 Opal armor
+.byte $0A,$2A,$00,%01110000,%00000000,%00000000 ; 09 Dragon armor
+.byte $01,$04,$00,%00000000,%00000000,%00000000 ; 0A Copper Q
+.byte $01,$0F,$00,%00000000,%00000000,%00000000 ; 0B Silver Q
+.byte $01,$18,$00,%00000000,%00000000,%00000000 ; 0C Gold Q
+.byte $01,$22,$00,%00000000,%00000000,%00000000 ; 0D Opal Q
+.byte $02,$18,$00,%00011000,%00000000,%00011000 ; 0E white T        - casts INVIS 2
+.byte $02,$18,$00,%00100100,%00000000,%00100100 ; 0F Black T        - casts ICE 2
+.byte $00,$02,$00,%00000000,%00000000,%00000000 ; 10 Wooden shield
+.byte $00,$04,$00,%00000000,%00000000,%00000000 ; 11 Iron shield
+.byte $00,$08,$00,%00000000,%00000000,%00000000 ; 12 Silver shield
+.byte $00,$0C,$00,%00100000,%00010000,%00000000 ; 13 Flame shield
+.byte $00,$0C,$00,%00010000,%00100000,%00000000 ; 14 Ice shield
+.byte $00,$10,$00,%00000100,%00000000,%00000000 ; 15 Opal shield
+.byte $00,$10,$00,%00000010,%00000000,%11000000 ; 16 Aegis shield
+.byte $00,$02,$00,%00000000,%00000000,%00000000 ; 17 Buckler
+.byte $02,$08,$00,%00000000,%00000000,%00000001 ; 18 Protect cape
+.byte $01,$01,$00,%00000000,%00000000,%00000000 ; 19 Cap
+.byte $03,$03,$00,%00000000,%00000000,%00000000 ; 1A Wooden helm
+.byte $05,$05,$00,%00000000,%00000000,%00000000 ; 1B Iron helm
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 1C Silver helm
+.byte $03,$08,$00,%00000000,%00000000,%00000000 ; 1D Opal helm
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 1E Heal helm      - casts HEAL
+.byte $01,$01,$00,%00000000,%00000000,%11111111 ; 1F Ribbon
+.byte $01,$01,$00,%00000000,%00000000,%00000000 ; 20 Gloves
+.byte $03,$02,$00,%00000000,%00000000,%00000000 ; 21 Copper Gauntlet
+.byte $05,$04,$00,%00000000,%00000000,%00000000 ; 22 Iron Gauntlet
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 23 Silver Gauntlet
+.byte $03,$06,$00,%00000000,%00000000,%00010000 ; 24 Zeus Gauntlet  - casts BOLT 2
+.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 25 Power Gauntlet - casts SABER
+.byte $03,$08,$00,%00000000,%00000000,%00000000 ; 26 Opal Gauntlet
+.byte $01,$08,$00,%00001000,%00000000,%00000001 ; 27 Protect Ring
 .byte $00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00
@@ -3696,41 +3699,7 @@ UnadjustEquipStats:
     ;LDX equipmenu_tmp   ; then restore X to equipment source index
     RTS                 ; and exit
 
-GetPointerToArmorData:
-;    SEC
-;    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
-;    STA tmp
-;    ASL A
-;    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
-;    CLC                 ; (A= armor_id*8)
-;    ADC tmp             ; multiply by 5
-;    ADC #<lut_ArmorData ; add A to desired pointer
-;    STA tmp             ;  and store pointer to (tmp)
-;    LDA #0
-;    TAY
-;    ADC #>lut_ArmorData
-;    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
-;    RTS
 
-    SEC
-    SBC #ARMORSTART+1
-    TAY                    ; save A
-    TXA                    ; then push X to stack
-    PHA
-    TYA                    ; restore A
-    LDX #6
-    JSR MultiplyXA
-    CLC
-    ADC #<lut_ArmorData    ; add low byte of our pointer 
-    STA tmp                ; put in tmp as low byte of our pointer
-    TXA
-    CLC
-    ADC #>lut_ArmorData    ; add high byte of our pointer 
-    STA tmp+1              ; fill tmp+1 to complete our pointer
-    PLA
-    TAX                    ; then restore X
-    LDY #0                 ; and set Y to 0 for later
-    RTS
 
 
 
@@ -3925,7 +3894,6 @@ ReadjustEquipStats:
 GetWeaponDataPointer:    
    ; SEC
    ; SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
-    
     TAY                    ; save A
     DEY                    ; NOW subtract 1 from the Equip ID!
     TXA                    ; then push X to stack
@@ -3933,20 +3901,54 @@ GetWeaponDataPointer:
     TYA                    ; restore A
     LDX #9
     JSR MultiplyXA
-  ;  ASL A
-  ;  ASL A                  ; multiply by 4 
-  ;  ASL A                  ; multiply by another 2 (A now = weapon_id * 8)
-  
+    ; I think nomally we'd add the low byte of the pointer, but since the weapon data is 
+    ; at the very start of the bank, we'd just be adding 0.
+    CLC
+    ;ADC #<lut_WeaponData    
+    
     STA tmp                ; put in tmp as low byte of our pointer
     TXA
-    CLC
     ADC #>lut_WeaponData   ; add high byte of our pointer 
     STA tmp+1              ; fill tmp+1 to complete our pointer
-    
     PLA
     TAX                    ; then restore X
     LDY #0                 ; and set Y to 0 for later
     RTS
+    
+GetPointerToArmorData:
+;    SEC
+;    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
+;    STA tmp
+;    ASL A
+;    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
+;    CLC                 ; (A= armor_id*8)
+;    ADC tmp             ; multiply by 5
+;    ADC #<lut_ArmorData ; add A to desired pointer
+;    STA tmp             ;  and store pointer to (tmp)
+;    LDA #0
+;    TAY
+;    ADC #>lut_ArmorData
+;    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
+;    RTS
+
+    SEC
+    SBC #ARMORSTART+1
+    TAY                    ; save A
+    TXA                    ; then push X to stack
+    PHA
+    TYA                    ; restore A
+    LDX #6
+    JSR MultiplyXA
+    CLC
+    ADC #<lut_ArmorData    ; add low byte of our pointer 
+    STA tmp                ; put in tmp as low byte of our pointer
+    TXA
+    ADC #>lut_ArmorData    ; add high byte of our pointer 
+    STA tmp+1              ; fill tmp+1 to complete our pointer
+    PLA
+    TAX                    ; then restore X
+    LDY #0                 ; and set Y to 0 for later
+    RTS    
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -4166,14 +4168,24 @@ WeaponArmorSpecialDesc:
    @ArmorBytes:
     JSR GetPointerToArmorData 
   : LDY #3
-    LDA (tmp), Y ; Ailment to inflict (weapon) / Status defended against (armor)
+    LDA (tmp), Y ; Ailment to inflict (weapon) / Element resisted (armor)
     STA tmp+11
     INY
     INY
-    LDA (tmp), Y ; Element to attack with (weapon) / Element resisted (armor)
+    LDA (tmp), Y ; Element to attack with (weapon) / Status defended against (armor)
     STA tmp+12    
+    
+    LDA ItemToEquip
+    CMP #ARMORSTART+1
+    BCC :+
+    
+   @FixArmorBytes:
+    LDX tmp+12
+    LDY tmp+11
+    STX tmp+11
+    STY tmp+12
 
-    JSR GetEquipmentSpell
+  : JSR GetEquipmentSpell
     BEQ @NoSpell
     
     STA str_buf+$BB   ; spell ID
