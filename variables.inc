@@ -898,7 +898,7 @@ btl_charcmdconsumetype  = $6814 ;
 btl_charcmdconsumeid    = $6818 ; 
 btl_charhitmult         = $681C ; Hit multiplyer
 btl_charparry           = $6820 ; BB/Master Parry skill
-btl_charcover           = $6828 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
+btl_charcover           = $6824 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
 btl_charregen           = $682C ; Regeneration status
 btl_charguard           = $6830 ; Guard status
 btl_charhidden          = $6834 ; Hidden status
