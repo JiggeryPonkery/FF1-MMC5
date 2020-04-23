@@ -7158,7 +7158,7 @@ DrawCharacterStatus_Fast:
     ; 6 7 x - the tiles will be laid out like this, where 2, 5, and 7 are null terminators
     
     ; 0 = regenerating
-    ; 3 = guarding / praying
+    ; 3 = guarding
     ; 6 = hidden
     ; 1 = heavy ailment
     ; 4 = light ailment
