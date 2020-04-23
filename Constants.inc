@@ -654,56 +654,7 @@ WEAPONSTART       = $0
 ARMORSTART        = $40
 
 
-;;;;;;;;;;;;;;;;;;
-;;  Items
 
-HEAL           = $01
-X_HEAL         = $02
-ETHER          = $03
-ELIXIR         = $04
-PURE           = $05
-SOFT           = $06
-PHOENIXDOWN    = $07
-TENT           = $08
-CABIN          = $09
-HOUSE          = $0A
-EYEDROPS       = $0B
-SMOKEBOMB      = $0C
-ALARMCLOCK     = $0D
-
-SMOKEBOMB_EFFECT  = $32 ; 50 steps
-BTL_HEAL_POTENCY  = $10 ; 16
-BTL_XHEAL_POTENCY = $60 ; 96
-HEAL_POTENCY      = $1E ; 30
-XHEAL_POTENCY     = $B4 ; 180
-
-LUTE           = $10
-CROWN          = $11
-CRYSTAL        = $12 ; vanishes on use
-HERB           = $13 ; vanishes on use
-KEY            = $14
-TNT            = $15 ; vanishes on use
-ADAMANT        = $16 ; vanishes on use
-SLAB           = $17
-RUBY           = $18 ; vanishes on use
-ROD            = $19
-FLOATER        = $1A
-CHIME          = $1B
-TAIL           = $1C
-CUBE           = $1D
-BOTTLE         = $1E ; vanishes on use
-OXYALE         = $1F
-CANOE          = $20
-LEWDS          = $21
-BOTTLE_ALT     = $2A ; for inventory description
-LEWDS_ALT      = $2B ; for inventory description
-
-KEYITEM_MAX    = $12 ; 18 key items
-
-FIREORB        = $2C
-WATERORB       = $2D
-AIRORB         = $2E
-EARTHORB       = $2F
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -842,91 +793,58 @@ ARM63 = $7E
 ARM64 = $7F  
 
 
+
+
 ;;;;;;;;;;;;;;;;;;
-;; gold in chests
+;;  Items
 
-GOLD1  = $70 ; 10 
-GOLD2  = $71 ; 20 
-GOLD3  = $72 ; 25 
-GOLD4  = $73 ; 30 
-GOLD5  = $74 ; 55 
-GOLD6  = $75 ; 70 
-GOLD7  = $76 ; 85 
-GOLD8  = $77 ; 110 
-GOLD9  = $78 ; 135 
-GOLD10 = $79 ; 155 
-GOLD11 = $7A ; 160 
-GOLD12 = $7B ; 180 
-GOLD13 = $7C ; 240 
-GOLD14 = $7D ; 255 
-GOLD15 = $7E ; 260 
-GOLD16 = $7F ; 295 
-GOLD17 = $80 ; 300 
-GOLD18 = $81 ; 315 
-GOLD19 = $82 ; 330 
-GOLD20 = $83 ; 350 
-GOLD21 = $84 ; 385 
-GOLD22 = $85 ; 400 
-GOLD23 = $86 ; 450 
-GOLD24 = $87 ; 500 
-GOLD25 = $88 ; 530 
-GOLD26 = $89 ; 575 
-GOLD27 = $8A ; 620 
-GOLD28 = $8B ; 680 
-GOLD29 = $8C ; 750 
-GOLD30 = $8D ; 795 
-GOLD31 = $8E ; 880 
-GOLD32 = $8F ; 1020 
-GOLD33 = $90 ; 1250 
-GOLD34 = $91 ; 1455 
-GOLD35 = $92 ; 1520 
-GOLD36 = $93 ; 1760 
-GOLD37 = $94 ; 1975 
-GOLD38 = $95 ; 2000 
-GOLD39 = $96 ; 2750 
-GOLD40 = $97 ; 3400 
-GOLD41 = $98 ; 4150 
-GOLD42 = $99 ; 5000 
-GOLD43 = $9A ; 5450 
-GOLD44 = $9B ; 6400 
-GOLD45 = $9C ; 6720 
-GOLD46 = $9D ; 7340 
-GOLD47 = $9E ; 7690 
-GOLD48 = $9F ; 7900 
-GOLD49 = $A0 ; 8135 
-GOLD50 = $A1 ; 9000 
-GOLD51 = $A2 ; 9300 
-GOLD52 = $A3 ; 9500 
-GOLD53 = $A4 ; 9900 
-GOLD54 = $A5 ; 10000
-GOLD55 = $A6 ; 12350
-GOLD56 = $A7 ; 13000
-GOLD57 = $A8 ; 13450
-GOLD58 = $A9 ; 14050
-GOLD59 = $AA ; 14720
-GOLD60 = $AB ; 15000
-GOLD61 = $AC ; 17490
-GOLD62 = $AD ; 18010
-GOLD63 = $AE ; 19990
-GOLD64 = $AF ; 20000
-GOLD65 = $B0 ; 20010
-GOLD66 = $B1 ; 26000
-GOLD67 = $B2 ; 45000
-GOLD68 = $B3 ; 65000
-GOLD69 = $B4 ; 
-GOLD70 = $B5 ; 
-GOLD71 = $B6 ; 
-GOLD72 = $B7 ; 
-GOLD73 = $B8 ; 
-GOLD74 = $B9 ; 
-GOLD75 = $BA ; 
-GOLD76 = $BB ; 
-GOLD77 = $BC ; 
-GOLD78 = $BD ; 
-GOLD79 = $BE ; 
-GOLD80 = $BF ; 
+HEAL           = $01
+X_HEAL         = $02
+ETHER          = $03
+ELIXIR         = $04
+PURE           = $05
+SOFT           = $06
+PHOENIXDOWN    = $07
+TENT           = $08
+CABIN          = $09
+HOUSE          = $0A
+EYEDROPS       = $0B
+SMOKEBOMB      = $0C
+ALARMCLOCK     = $0D
 
+SMOKEBOMB_EFFECT  = $32 ; 50 steps
+BTL_HEAL_POTENCY  = $10 ; 16
+BTL_XHEAL_POTENCY = $60 ; 96
+HEAL_POTENCY      = $1E ; 30
+XHEAL_POTENCY     = $B4 ; 180
 
+LUTE           = $10
+CROWN          = $11
+CRYSTAL        = $12 ; vanishes on use
+HERB           = $13 ; vanishes on use
+KEY            = $14
+TNT            = $15 ; vanishes on use
+ADAMANT        = $16 ; vanishes on use
+SLAB           = $17
+RUBY           = $18 ; vanishes on use
+ROD            = $19
+FLOATER        = $1A
+CHIME          = $1B
+TAIL           = $1C
+CUBE           = $1D
+BOTTLE         = $1E ; vanishes on use
+OXYALE         = $1F
+CANOE          = $20
+LEWDS          = $21
+BOTTLE_ALT     = $2A ; for inventory description
+LEWDS_ALT      = $2B ; for inventory description
+
+KEYITEM_MAX    = $12 ; 18 key items
+
+FIREORB        = $2C
+WATERORB       = $2D
+AIRORB         = $2E
+EARTHORB       = $2F
 
 ;;;;;;;;;;;;;;;;;;
 ;;  magic spells
@@ -1018,6 +936,91 @@ MG_START = $30
 BATTLESPELLS_START = BATTLESPELLS - MG_START
 BATTLESPELLS_END   = BATTLESPELLS_START + $10
 ENEMY_ATTACK_START = BATTLESPELLS_END
+
+;;;;;;;;;;;;;;;;;;
+;; gold in chests
+
+GOLD1  = $80 ; 10 
+GOLD2  = $81 ; 20 
+GOLD3  = $82 ; 25 
+GOLD4  = $83 ; 30 
+GOLD5  = $84 ; 55 
+GOLD6  = $85 ; 70 
+GOLD7  = $86 ; 85 
+GOLD8  = $87 ; 110 
+GOLD9  = $88 ; 135 
+GOLD10 = $89 ; 155 
+GOLD11 = $8A ; 160 
+GOLD12 = $8B ; 180 
+GOLD13 = $8C ; 240 
+GOLD14 = $8D ; 255 
+GOLD15 = $8E ; 260 
+GOLD16 = $8F ; 295 
+GOLD17 = $90 ; 300 
+GOLD18 = $91 ; 315 
+GOLD19 = $92 ; 330 
+GOLD20 = $93 ; 350 
+GOLD21 = $94 ; 385 
+GOLD22 = $95 ; 400 
+GOLD23 = $96 ; 450 
+GOLD24 = $97 ; 500 
+GOLD25 = $98 ; 530 
+GOLD26 = $99 ; 575 
+GOLD27 = $9A ; 620 
+GOLD28 = $9B ; 680 
+GOLD29 = $9C ; 750 
+GOLD30 = $9D ; 795 
+GOLD31 = $9E ; 880 
+GOLD32 = $9F ; 1020 
+GOLD33 = $A0 ; 1250 
+GOLD34 = $A1 ; 1455 
+GOLD35 = $A2 ; 1520 
+GOLD36 = $A3 ; 1760 
+GOLD37 = $A4 ; 1975 
+GOLD38 = $A5 ; 2000 
+GOLD39 = $A6 ; 2750 
+GOLD40 = $A7 ; 3400 
+GOLD41 = $A8 ; 4150 
+GOLD42 = $A9 ; 5000 
+GOLD43 = $AA ; 5450 
+GOLD44 = $AB ; 6400 
+GOLD45 = $AC ; 6720 
+GOLD46 = $AD ; 7340 
+GOLD47 = $AE ; 7690 
+GOLD48 = $AF ; 7900 
+GOLD49 = $B0 ; 8135 
+GOLD50 = $B1 ; 9000 
+GOLD51 = $B2 ; 9300 
+GOLD52 = $B3 ; 9500 
+GOLD53 = $B4 ; 9900 
+GOLD54 = $B5 ; 10000
+GOLD55 = $B6 ; 12350
+GOLD56 = $B7 ; 13000
+GOLD57 = $B8 ; 13450
+GOLD58 = $B9 ; 14050
+GOLD59 = $BA ; 14720
+GOLD60 = $BB ; 15000
+GOLD61 = $BC ; 17490
+GOLD62 = $BD ; 18010
+GOLD63 = $BE ; 19990
+GOLD64 = $BF ; 20000
+GOLD65 = $C0 ; 20010
+GOLD66 = $C1 ; 26000
+GOLD67 = $C2 ; 45000
+GOLD68 = $C3 ; 65000
+GOLD69 = $C4 ; 
+GOLD70 = $C5 ; 
+GOLD71 = $C6 ; 
+GOLD72 = $C7 ; 
+GOLD73 = $C8 ; 
+GOLD74 = $C9 ; 
+GOLD75 = $CA ; 
+GOLD76 = $CB ; 
+GOLD77 = $CC ; 
+GOLD78 = $CD ; 
+GOLD79 = $CE ; 
+GOLD80 = $CF ; 
+
   
 ;;;;;;;;;;;;;;;;;;
 ;;  Map IDs and Banks

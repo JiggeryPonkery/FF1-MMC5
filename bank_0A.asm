@@ -2082,89 +2082,107 @@ lut_ItemPrices:
 .byte $60,$EA
 .byte $60,$EA
 
+;; Battle spells... so nothing. Waste of space!
+.word 0000    ; $70
+.word 0000    ; $71
+.word 0000    ; $72
+.word 0000    ; $73
+.word 0000    ; $74
+.word 0000    ; $75
+.word 0000    ; $76
+.word 0000    ; $77
+.word 0000    ; $78
+.word 0000    ; $79
+.word 0000    ; $7A
+.word 0000    ; $7B
+.word 0000    ; $7C
+.word 0000    ; $7D
+.word 0000    ; $7E
+.word 0000    ; $7F
+
 ;; gold in chests
 ;              chest number
 ;              |    item ID (not price ID)
-.word  0010  ; 1  ; 70
-.word  0020  ; 2  ; 71
-.word  0025  ; 3  ; 72
-.word  0030  ; 4  ; 73
-.word  0055  ; 5  ; 74
-.word  0070  ; 6  ; 75
-.word  0085  ; 7  ; 76
-.word  0110  ; 8  ; 77
-.word  0135  ; 9  ; 78
-.word  0155  ; 10 ; 79
-.word  0160  ; 11 ; 7A
-.word  0180  ; 12 ; 7B
-.word  0240  ; 13 ; 7C
-.word  0255  ; 14 ; 7D
-.word  0260  ; 15 ; 7E
-.word  0295  ; 16 ; 7F
-.word  0300  ; 17 ; 80
-.word  0315  ; 18 ; 81
-.word  0330  ; 19 ; 82
-.word  0350  ; 20 ; 83
-.word  0385  ; 21 ; 84
-.word  0400  ; 22 ; 85
-.word  0450  ; 23 ; 86
-.word  0500  ; 24 ; 87
-.word  0530  ; 25 ; 88
-.word  0575  ; 26 ; 89
-.word  0620  ; 27 ; 8A
-.word  0680  ; 28 ; 8B
-.word  0750  ; 29 ; 8C
-.word  0795  ; 30 ; 8D
-.word  0880  ; 31 ; 8E
-.word  1020  ; 32 ; 8F
-.word  1250  ; 33 ; 90
-.word  1455  ; 34 ; 91
-.word  1520  ; 35 ; 92
-.word  1760  ; 36 ; 93
-.word  1975  ; 37 ; 94
-.word  2000  ; 38 ; 95
-.word  2750  ; 39 ; 96
-.word  3400  ; 40 ; 97
-.word  4150  ; 41 ; 98
-.word  5000  ; 42 ; 99
-.word  5450  ; 43 ; 9A
-.word  6400  ; 44 ; 9B
-.word  6720  ; 45 ; 9C
-.word  7340  ; 46 ; 9D
-.word  7690  ; 47 ; 9E
-.word  7900  ; 48 ; 9F
-.word  8135  ; 49 ; A0
-.word  9000  ; 50 ; A1
-.word  9300  ; 51 ; A2
-.word  9500  ; 52 ; A3
-.word  9900  ; 53 ; A4
-.word  10000 ; 54 ; A5
-.word  12350 ; 55 ; A6
-.word  13000 ; 56 ; A7
-.word  13450 ; 57 ; A8
-.word  14050 ; 58 ; A9
-.word  14720 ; 59 ; AA
-.word  15000 ; 60 ; AB
-.word  17490 ; 61 ; AC
-.word  18010 ; 62 ; AD
-.word  19990 ; 63 ; AE
-.word  20000 ; 64 ; AF
-.word  20010 ; 65 ; B0
-.word  26000 ; 66 ; B1
-.word  45000 ; 67 ; B2
-.word  65000 ; 68 ; B3
-.word  65000 ; 69 ; B4
-.word  65000 ; 70 ; B5
-.word  65000 ; 71 ; B6
-.word  65000 ; 72 ; B7
-.word  65000 ; 73 ; B8
-.word  65000 ; 74 ; B9
-.word  65000 ; 75 ; BA
-.word  65000 ; 76 ; BB
-.word  65000 ; 77 ; BC
-.word  65000 ; 78 ; BD
-.word  65000 ; 79 ; BE
-.word  65000 ; 80 ; BF
+.word  0010  ; 1  ; $80
+.word  0020  ; 2  ; $81
+.word  0025  ; 3  ; $82
+.word  0030  ; 4  ; $83
+.word  0055  ; 5  ; $84
+.word  0070  ; 6  ; $85
+.word  0085  ; 7  ; $86
+.word  0110  ; 8  ; $87
+.word  0135  ; 9  ; $88
+.word  0155  ; 10 ; $89
+.word  0160  ; 11 ; $8A
+.word  0180  ; 12 ; $8B
+.word  0240  ; 13 ; $8C
+.word  0255  ; 14 ; $8D
+.word  0260  ; 15 ; $8E
+.word  0295  ; 16 ; $8F
+.word  0300  ; 17 ; $90
+.word  0315  ; 18 ; $91
+.word  0330  ; 19 ; $92
+.word  0350  ; 20 ; $93
+.word  0385  ; 21 ; $94
+.word  0400  ; 22 ; $95
+.word  0450  ; 23 ; $96
+.word  0500  ; 24 ; $97
+.word  0530  ; 25 ; $98
+.word  0575  ; 26 ; $99
+.word  0620  ; 27 ; $9A
+.word  0680  ; 28 ; $9B
+.word  0750  ; 29 ; $9C
+.word  0795  ; 30 ; $9D
+.word  0880  ; 31 ; $9E
+.word  1020  ; 32 ; $9F
+.word  1250  ; 33 ; $A0
+.word  1455  ; 34 ; $A1
+.word  1520  ; 35 ; $A2
+.word  1760  ; 36 ; $A3
+.word  1975  ; 37 ; $A4
+.word  2000  ; 38 ; $A5
+.word  2750  ; 39 ; $A6
+.word  3400  ; 40 ; $A7
+.word  4150  ; 41 ; $A8
+.word  5000  ; 42 ; $A9
+.word  5450  ; 43 ; $AA
+.word  6400  ; 44 ; $AB
+.word  6720  ; 45 ; $AC
+.word  7340  ; 46 ; $AD
+.word  7690  ; 47 ; $AE
+.word  7900  ; 48 ; $AF
+.word  8135  ; 49 ; $B0
+.word  9000  ; 50 ; $B1
+.word  9300  ; 51 ; $B2
+.word  9500  ; 52 ; $B3
+.word  9900  ; 53 ; $B4
+.word  10000 ; 54 ; $B5
+.word  12350 ; 55 ; $B6
+.word  13000 ; 56 ; $B7
+.word  13450 ; 57 ; $B8
+.word  14050 ; 58 ; $B9
+.word  14720 ; 59 ; $BA
+.word  15000 ; 60 ; $BB
+.word  17490 ; 61 ; $BC
+.word  18010 ; 62 ; $BD
+.word  19990 ; 63 ; $BE
+.word  20000 ; 64 ; $BF
+.word  20010 ; 65 ; $C0
+.word  26000 ; 66 ; $C1
+.word  45000 ; 67 ; $C2
+.word  65000 ; 68 ; $C3
+.word  65000 ; 69 ; $C4
+.word  65000 ; 70 ; $C5
+.word  65000 ; 71 ; $C6
+.word  65000 ; 72 ; $C7
+.word  65000 ; 73 ; $C8
+.word  65000 ; 74 ; $C9
+.word  65000 ; 75 ; $CA
+.word  65000 ; 76 ; $CB
+.word  65000 ; 77 ; $CC
+.word  65000 ; 78 ; $CD
+.word  65000 ; 79 ; $CE
+.word  65000 ; 80 ; $CF
 
 .ALIGN  $100
 

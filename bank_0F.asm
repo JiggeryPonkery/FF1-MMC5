@@ -753,14 +753,14 @@ StealFromEnemyZ:
         LDA #15
         STA MMC5_tmp+2
   : LDY #en_level
-    LDA (EnemyRAMPointer), Y        ; get their level
+    LDA (EnemyRAMPointer), Y        ; get enemy level
     STA tmp+1
-    LDA MMC5_tmp
+    LDA MMC5_tmp                    ; load thief's level (was saved in Bank C)
     CLC
-    ADC #50
+    ADC #50                         ; add 50
     ADC MMC5_tmp+2                  ; add 15 if hidden
     SEC 
-    SBC tmp+1 
+    SBC tmp+1                       ; subtract enemy level
     SBC MMC5_tmp+1                  ; subtract 30 if blind
     STA MMC5_tmp                    ; if neither hidden or blind, then StealValue = Level + 50 - Enemy's level
     BCC @Fail                       ; Carry clear = StealValue is less than 0 
