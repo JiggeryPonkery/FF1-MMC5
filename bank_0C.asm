@@ -748,6 +748,7 @@ BattleSubMenu_Skill:
   : TAX
     INC btl_charcover, X            ; set target to be covered
     LDA btlcmd_curchar
+    ORA #$80
     STA btl_charcover+4, X          ; and put fighter/knight's index in the second half 
     
    @SetSkill:

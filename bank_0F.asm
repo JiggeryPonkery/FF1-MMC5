@@ -5805,6 +5805,7 @@ CoverStuff:
     ;; important to note: this is used by the DefenderBox drawing thing, but not really used for players otherwise!
     ;; everything else uses btl_defender_index... so btl_defender is now the ORIGINAL target
     LDA btl_charcover+4, X         ; get the knight doing the covering
+    AND #$03
     STA btl_defender_index         ; and set as the new defender    
 
    @NoCover:   
