@@ -15,10 +15,18 @@ Battle:
 * Parry needs to be tested.
 * Stealing seems to mis-draw boxes.
 * Focus seems to mis-draw boxes.
+* Enemies strike first will still have all your characters (with poison) poison-damaged before their turn.
+* Check: Will a character who is hidden and poisoned flash their sprite when damaged?
+
+Stats:
+Unequipping and re-equipping gear does not cap stats, and maybe should?
 
 
 Menu:
 * Fix sound test menu.
+
+MiniMap:
+* Check: Adding a new teleport location may not add a glowy pixel to the map.
 
 Banks:
 * Go over old code in Bank Z 

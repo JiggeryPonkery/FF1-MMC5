@@ -6629,7 +6629,6 @@ DoPhysicalAttack_NoAttackerBox:
     
     LDA btl_defender_index      ; get character index
     JSR UnhideCharacter         ; unhide them
-    JSR UpdateSprites_BattleFrame
     LDA btl_defender_index      ; get character index in X
     JSR FlashCharacterSprite    ; flash their character sprite (JIGS; even if dead)
     JSR RestoreCoverSprite
@@ -9015,7 +9014,7 @@ UseItem_JumpTable:
     .word UseItem_Ether         ; 3
     .word UseItem_Elixir        ; 4
     .word UseItem_Pure          ; 5
-    .word Useitem_Soft          ; 6
+    .word UseItem_Soft          ; 6
     .word UseItem_PhoenixDown   ; 7
     NOP                         
     NOP                         ; 8 
@@ -9077,7 +9076,6 @@ UseItem_Elixir:
    JSR BtlMag_SetHPToMax
    
     LDA btl_defender
-    AND #$03
     JSR ShiftLeft6
     CLC
     ADC #ch_mp - ch_stats    ; $0, $40, $80, or $C0 + $30
@@ -9115,7 +9113,7 @@ UseItem_Pure:
     LDA #BTLMSG_NEUTRALIZED
     JMP UseItem_CommonCode
 
-Useitem_Soft:
+UseItem_Soft:
     JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_STOP
     STA btlmag_effectivity
@@ -9244,8 +9242,9 @@ UseItem_CommonCode:
     JSR PlayBattleSFX  
     LDA btl_defender
     AND #$03
-    TAX
+    PHA
     JSR UnhideCharacter
+    PLA
     JSR FlashCharacterSprite
     JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
     PLA
