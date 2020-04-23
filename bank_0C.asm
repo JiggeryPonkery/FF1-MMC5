@@ -5017,7 +5017,7 @@ DrawPoisonAsAttack:                 ; Who is getting poisoned
     STA btl_unformattedstringbuf+1
     LDA #0
     STA btl_unformattedstringbuf+2
-    LDA #02
+    LDA #BOX_ATTACK
     JSR DrawMessageBox_Prebuilt
 	JMP DrawDamageBox               ; print damage    
    
@@ -5477,7 +5477,7 @@ StealFromEnemy:
     BNE :+
     
    @StealHit: 
-    LDA #$04                          ; draw it in combat box 4
+    LDA #BOX_MESSAGE
     JSR DrawMessageBox_Prebuilt
     
   : JSR DoFrame_WithInput     
@@ -5569,7 +5569,7 @@ FocusSkill:
     STA btl_unformattedstringbuf+3
     ;; Int. up
     
-    LDA #$04                          ; draw it in combat box 4
+    LDA #BOX_MESSAGE
     JSR DrawMessageBox_Prebuilt
     JMP RespondDelay_ClearCombatBoxes
 
@@ -6444,7 +6444,7 @@ DoPhysicalAttack_NoAttackerBox:
     STA btl_unformattedstringbuf+2 ; message
     LDA #0
     STA btl_unformattedstringbuf+3 ; terminator
-    LDA #4
+    LDA #BOX_MESSAGE
     JSR DrawMessageBox_Prebuilt
     BNE @Cover
 
@@ -8882,7 +8882,7 @@ DoRunic_OK:
     STA btl_unformattedstringbuf+2
     LDA #0
     STA btl_unformattedstringbuf+3
-    LDA #04
+    LDA #BOX_MESSAGE
     JSR DrawMessageBox_Prebuilt
     JSR Delay_UndrawOneBox            ; undraw the message, and then undraw the "Runic" and defender box
     JSR UndrawAllButTwoBoxes          ; even if the same name is going to be drawn again
