@@ -174,10 +174,10 @@ lut_WeaponData:
 ;;  Spell LUT is seperated
 
 lut_ArmorData:
-;      v ------------------- Evade penalty
-;          v --------------- Absorb boost
-;              v ----------- Magic Defense Boost
-;                 v ----------- Elemental defense
+;      v - Evade penalty
+;          v - Absorb boost
+;              v - Magic Defense Boost
+;                 v - Elemental defense
 ;                           v - Elemental weakness 
 ;                                      v - Status defense
 
@@ -203,8 +203,8 @@ lut_ArmorData:
 .byte $00,$08,$00,%00000000,%00000000,%00000000 ; 12 Silver shield
 .byte $00,$0C,$00,%00100000,%00010000,%00000000 ; 13 Flame shield
 .byte $00,$0C,$00,%00010000,%00100000,%00000000 ; 14 Ice shield
-.byte $00,$10,$00,%00000100,%00000000,%00000000 ; 15 Opal shield
-.byte $00,$10,$00,%00000010,%00000000,%11000000 ; 16 Aegis shield
+.byte $00,$10,$00,%01000000,%00000000,%00000000 ; 15 Opal shield
+.byte $00,$10,$00,%00000100,%00000000,%11000000 ; 16 Aegis shield
 .byte $00,$02,$00,%00000000,%00000000,%00000000 ; 17 Buckler
 .byte $02,$08,$00,%00000000,%00000000,%00000001 ; 18 Protect cape
 .byte $01,$01,$00,%00000000,%00000000,%00000000 ; 19 Cap
@@ -5780,9 +5780,9 @@ PlayerAttackPlayer_PhysicalZ:
 CoverStuff:
     LDA btl_charcover, X
     BEQ @NoCover
-    
-    LDA btl_charcover+4, X         ; get the knight doing the covering
-    CMP btl_attacker
+
+    LDA btl_attacker    
+    CMP btl_charcover+4, X         ; get the knight doing the covering
     BEQ @NoCover                   ; skip if the knight is confused and doing the attacking!
     
     JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
