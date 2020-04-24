@@ -3291,9 +3291,8 @@ PlayFanfareAndCheer:
   : LDA #$80                    ; loop counter
     STA btl_walkloopctr
   @Loop:
-      LDA btl_walkloopctr
       AND #$0F
-      CMP #$08                 ; alternate between CHEER/STAND poses every 8 loop iterations
+      CMP #$0C                 ; alternate between CHEER/STAND poses every 8 loop iterations
       BNE @NoUpdate
       INC MMC5_tmp+2
       
@@ -3326,16 +3325,16 @@ PlayFanfareAndCheer:
         LDA MMC5_tmp+1
         CMP #$04
         BNE @CharLoop
-        
+
+     @NoUpdate:         
         LDA btl_walkloopctr
         SEC
-        SBC #4
+        SBC #2
         STA btl_walkloopctr         ; remove 4 frames, since that's how many it took to load the next pose
       
-     @NoUpdate: 
       JSR UpdateSprites_TwoFrames   ; draw!
       
-      DEC btl_walkloopctr
+      LDA btl_walkloopctr
       BNE @Loop
       
     ;JSR SetAllNaturalPose           ; afterwards, give everyone their natural pose
@@ -8986,11 +8985,13 @@ Player_DoItem:
     JSR DrawAttackBox           ; Draw the spell name box
     
     INC HiddenMagic
+    DEC btlmag_magicsource      ; with the attack box drawn, trick WalkForwardAndStrike to think its a spell!
     
     LDA btl_attacker
     AND #$7F
     LDX #1 ;btlmag_magicsource
-    JSR WalkForwardAndCastMagic
+    STA PlayMagicSound ; because I did a dumb thing with Confusion and this will
+    JSR WalkForwardAndCastMagic ; trick < this < into loading the Cheer pose...
     
     LDX btl_attackid
     LDA items, X
