@@ -9,7 +9,7 @@
 .export lut_OrbCHR
 .export LoadStatusBoxScrollWork
 .export EnterMinimap
-
+.export Bridge_LoadPalette
 
 .import DrawComplexString_L, DrawBox_L, UpdateJoy_L, DrawPalette_L
 .import WaitForVBlank_L, lut_RNG
@@ -1116,12 +1116,14 @@ EnterMiniGame:
    ; load the desired palette
    ;
 
-    LDX #$0F
-  @LoadPalLoop:
-    LDA lut_BridgeBGPal, X ; copy $10 colors (full BG palette)
-    STA cur_pal, X         ;  from the Bridge scene palette LUT
-    DEX                    ; seems wasteful to do this here -- there's a routine
-    BPL @LoadPalLoop       ;   you can JSR to that does this (Bridge_LoadPalette)
+ ;   LDX #$0F
+ ; @LoadPalLoop:
+ ;   LDA lut_BridgeBGPal, X ; copy $10 colors (full BG palette)
+ ;   STA cur_pal, X         ;  from the Bridge scene palette LUT
+ ;   DEX                    ; seems wasteful to do this here -- there's a routine
+ ;   BPL @LoadPalLoop       ;   you can JSR to that does this (Bridge_LoadPalette)
+ 
+    JSR Bridge_LoadPalette
 
     LDA #$30               ; and a few sprite palettes as well
     STA cur_pal+$13        ; the white for the backs of the puzzle pieces
