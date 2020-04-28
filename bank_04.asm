@@ -11,6 +11,7 @@
 .export lut_BackdropPal
 .export lut_BtlBackdrops
 .export LoadStoneSprites
+.export LoadCursorOnly
 
 .import WaitForVBlank_L
 .import LongCall
@@ -234,26 +235,29 @@ lut_BtlBackdrops:
 
 
 LoadShopCHRForBank_Z: ;; JIGS - Its either put this here or copy all of lut_ShopCHR to Bank Z as well.
-    LDA #>lut_ShopCHR
-    STA tmp+1        
-    LDA #<lut_ShopCHR
-    STA tmp
-    LDX #16    
-    JSR CHRLoad
-;    
+    LDA #$08
+    STA soft2000           ; 
+    LDA $2002              ; reset toggle
+    LDA #0
+    STA $2001              ; turn off the PPU
+    STA $2006              ; set write address to $0000
+    STA $2006
+
+    JSR LoadShopCHR
+
     LDA $2002          ; Set address to $1000 
     LDA #>$1000
     STA $2006
     LDA #<$1000
     STA $2006
-;
+    
+LoadShopCHR:
     LDA #>lut_ShopCHR
     STA tmp+1        
     LDA #<lut_ShopCHR
     STA tmp
     LDX #16    
-    JMP CHRLoad
-    
+    JMP CHRLoad    
     
 LoadBattleSpritesForBank_Z: 
     LDA $2002  
@@ -565,6 +569,20 @@ LoadAttackCloud:
 	JMP LoadBlackTiles_Sprite
    
 LoadWeaponSprite:
+    JSR LoadMagicWeaponSprite    
+    LDA #$10
+    LDX #$00
+    JMP CHRLoadToAX
+    
+LoadCursorOnly:
+    LDA #$F0
+    STA btlattackspr_gfx
+    JSR LoadMagicWeaponSprite    
+    LDA #$1F
+    LDX #$00
+    JMP CHRLoadToAX   
+
+LoadMagicWeaponSprite:    
     LDA #0
     STA tmp+1
     LDA btlattackspr_gfx
@@ -584,36 +602,18 @@ LoadWeaponSprite:
     ADC tmp+1
     STA tmp+1
     LDA #$40
-    STA tmp+2
-    LDA #$10
-    LDX #$00
-    JMP CHRLoadToAX
+    STA tmp+2    
+    RTS
+    
     
 LoadMagicSprite:
-    LDA #0
-    STA tmp+1
-    LDA btlattackspr_gfx
-    CLC
-    ROL A
-    ROL tmp+1
-    ROL A
-    ROL tmp+1
-    ROL A
-    ROL tmp+1
-    ROL A
-    ROL tmp+1               ; this should convert something like $A8 into $0A80
-    CLC
-    ADC #<MagicWeaponSprites
-    STA tmp
-    LDA #>MagicWeaponSprites
-    ADC tmp+1
-    STA tmp+1
+    JSR LoadMagicWeaponSprite    
+    LDA tmp+1
     PHA
     LDA tmp
     PHA
-    LDA #$40
-    STA tmp+2
-    LDA #$13
+    
+    LDA #$13                
     LDX #$00
     JSR CHRLoadToAX    
     ;; do the first 4 tiles

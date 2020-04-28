@@ -7,7 +7,7 @@
 .export ClericCheck, CritCheck
 .export SoundTestZ
 .export OptionsMenu, DrawSaveScreenNames, DrawSaveScreenSprites
-.export EnterTitleScreenNew
+.export EnterTitleScreen
 .export JigsIntro
 .export SaveScreen
 .export ReadjustEquipStats
@@ -37,6 +37,9 @@
 .import BattleRNG_L
 .import lutClassBatSprPalette
 .import PlayDoorSFX
+.import Bridge_LoadPalette
+.import LoadCursorOnly
+.import LoadShopCHRForBank_Z
 
 
 
@@ -57,7 +60,7 @@ lut_WeaponData:
 ;                                      v - Palette
 
 .byte $00,$0C,$0A,$00,$00,$00,$00,$A8,$27 ; 00  Wooden nunchucks
-.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20 ; 01  Small knife 
+.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20 ; 01  Small knife
 .byte $00,$06,$01,$00,$00,$00,$00,$A0,$27 ; 02  Wooden staff
 .byte $05,$09,$0A,$00,$00,$00,$00,$90,$20 ; 03  Rapier
 .byte $00,$09,$01,$00,$00,$00,$00,$94,$27 ; 04  Iron hammer
@@ -95,38 +98,38 @@ lut_WeaponData:
 .byte $14,$16,$0A,$04,$14,$00,$00,$90,$22 ; 24  Bane sword      - casts BANE, might cause POISON
 .byte $23,$21,$1E,$00,$00,$00,$00,$98,$27 ; 25  Katana
 .byte $23,$2D,$05,$00,$00,$FF,$FF,$8C,$28 ; 26  Excalibur
-.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20 ; 27  Masamune    
+.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20 ; 27  Masamune
 .byte $28,$00,$0A,$00,$FF,$00,$14,$98,$28 ; 28  Chicken Knife
 .byte $20,$00,$05,$00,$00,$00,$0A,$8C,$2A ; 29  Brave Blade
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2A  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2B  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2C  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2D  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2E  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2F  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 30  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 31  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 32  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 33  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 34  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 35  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 36  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 37  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 38  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 39  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3A  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3B  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3C  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3D  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3E  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3F  
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 40  
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2A
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2B
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2C
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2D
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2E
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2F
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 30
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 31
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 32
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 33
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 34
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 35
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 36
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 37
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 38
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 39
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3A
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3B
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3C
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3D
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3E
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3F
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 40
 
 
 
 
 
-; Status defense bits: 
+; Status defense bits:
 ;*------- > Confusion
 ;-*------ > Mute
 ;--*----- > Stun
@@ -136,7 +139,7 @@ lut_WeaponData:
 ;------*- > Stone
 ;-------* > Death
 
-; Elemental defense/weakness bits: 
+; Elemental defense/weakness bits:
 ;*------- > Earth
 ;-*------ > Lightning
 ;--*----- > Ice
@@ -145,8 +148,8 @@ lut_WeaponData:
 ;-----*-- > Poisony stuff / WIND
 ;------*- > Stunny stuff  / HOLY
 ;-------* > ??            / DARK
-;; JIGS - these last 4 are kind of weird? Vanilla FF uses like... status as elements or something. 
-;; FF Hackster lists them as things like Time, Status, Death... 
+;; JIGS - these last 4 are kind of weird? Vanilla FF uses like... status as elements or something.
+;; FF Hackster lists them as things like Time, Status, Death...
 ;; I forget why Constants.inc has them listed as the caps versions shown here.
 
 ; Category bits:
@@ -178,7 +181,7 @@ lut_ArmorData:
 ;          v - Absorb boost
 ;              v - Magic Defense Boost
 ;                 v - Elemental defense
-;                           v - Elemental weakness 
+;                           v - Elemental weakness
 ;                                      v - Status defense
 
 ;.byte $02,$01,$00,%00000000,%00000000,%00000000 ; Cloth T ;; original
@@ -250,7 +253,7 @@ lut_ArmorData:
 
 lut_EquipmentSpells:
 .byte $00     ;00; Wooden nunchucks
-.byte $00     ;01; Small knife 
+.byte $00     ;01; Small knife
 .byte $00     ;02; Wooden staff
 .byte $00     ;03; Rapier
 .byte $00     ;04; Iron hammer
@@ -289,32 +292,32 @@ lut_EquipmentSpells:
 .byte $00     ;25; Katana
 .byte $00     ;26; Excalibur
 .byte $00     ;27; Masamune
-.byte $00     ;28; Chicken Knife    
+.byte $00     ;28; Chicken Knife
 .byte $00     ;29; Brave Blade
-.byte $00     ;2A;  
-.byte $00     ;2B;  
-.byte $00     ;2C;  
-.byte $00     ;2D;  
-.byte $00     ;2E;  
-.byte $00     ;2F;  
-.byte $00     ;30;  
-.byte $00     ;31;  
-.byte $00     ;32;  
-.byte $00     ;33;  
-.byte $00     ;34;  
-.byte $00     ;35;  
-.byte $00     ;36;  
-.byte $00     ;37;  
-.byte $00     ;38;  
-.byte $00     ;39;  
-.byte $00     ;3A;  
-.byte $00     ;3B;  
-.byte $00     ;3C;  
-.byte $00     ;3D; 
-.byte $00     ;3E; 
-.byte $00     ;3F; 
+.byte $00     ;2A;
+.byte $00     ;2B;
+.byte $00     ;2C;
+.byte $00     ;2D;
+.byte $00     ;2E;
+.byte $00     ;2F;
+.byte $00     ;30;
+.byte $00     ;31;
+.byte $00     ;32;
+.byte $00     ;33;
+.byte $00     ;34;
+.byte $00     ;35;
+.byte $00     ;36;
+.byte $00     ;37;
+.byte $00     ;38;
+.byte $00     ;39;
+.byte $00     ;3A;
+.byte $00     ;3B;
+.byte $00     ;3C;
+.byte $00     ;3D;
+.byte $00     ;3E;
+.byte $00     ;3F;
 
-.byte $00 ; Cloth T 
+.byte $00 ; Cloth T
 .byte $00 ; Wooden armor
 .byte $00 ; Chain armor
 .byte $00 ; Iron armor
@@ -354,32 +357,32 @@ lut_EquipmentSpells:
 .byte MG_SABR ; 55  ;$37 ; Power Gauntlet - casts SABER
 .byte $00 ; Opal Gauntlet
 .byte $00 ; Protect Ring
-.byte $00 ;     
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
-.byte $00 ; 
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
 
-;; As you can see here, to set a spell, you can abandon the $ and just use the number of the spell. 
+;; As you can see here, to set a spell, you can abandon the $ and just use the number of the spell.
 ;; Reference Bank A for the spell list in normal people numbers, or Constants.inc for hex!
 
 GetEquipmentSpell:
@@ -387,12 +390,159 @@ GetEquipmentSpell:
     LDA lut_EquipmentSpells, X
     STA tmp+10
     RTS
-  
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  LUT for Enemy AI [$9020 :: 0x31030]
+;;
+;;    $10 bytes per AI
+;;
+;;  byte      0 = chance to cast spell         ($00-80)
+;;  byte      1 = chance to use special attack ($00-80)
+;;  bytes   2-9 = magic spells available.  Each entry 0-based.  Or 'FF' for nothing.
+;;  bytes $B-$F = special attacks (0 based), or 'FF' for nothing.
+
+EnemyAIData:
+
+;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+.byte $00,$05,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$FF,$FF,$FF,$FF ;00 IMP	   ; [IMP PUNCH]
+.byte $00,$15,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$1A,$1A,$1A,$1A ;01 GrIMP	   ; [IMP PUNCH x5]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;02 WOLF	   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;03 GrWolf   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;04 WrWolf   ;
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ;05 FrWOLF   ; [FROST x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;06 IGUANA   ;
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ;07 AGAMA    ; [HEAT x4]
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ;08 SAURIA   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;09 GIANT    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0A FrGIANT  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0B R`GIANT  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0C SAHAG    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0D R`SAHAG  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0E WzSAHAG  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0F PIRATE   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;10 KYZOKU   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;11 SHARK    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;12 GrSHARK  ;
+.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ;13 OddEYE   ; [GAZE x4]
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ;14 BigEYE   ; [GAZE, FLASH, GAZE, FLASH]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;15 BONE     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;16 R`BONE   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;17 CREEP    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;18 CRAWL    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;19 HYENA    ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ;1A CEREBUS  ; [SCORCH x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1B OGRE     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1C GrOGRE   ;
+.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1D WzOGRE   ; <RUSE, DARK, SLEP, HOLD, ICE2>
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1E ASP      ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1F COBRA    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;20 SeaSNAKE ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;21 SCORPION ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;22 LOBSTER  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;23 BULL     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;24 ZomBULL  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;25 TROLL    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;26 SeaTROLL ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;27 SHADOW   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;28 IMAGE    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;29 WRAITH   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2A GHOST    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2B ZOMBIE   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2C GHOUL    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2D GEIST    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2E SPECTER  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2F WORM     ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ;30 Sand W   ; [CRACK x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;31 Grey W   ;
+.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ;32 EYE      ; <XXXX, BRAK, RUB, LIT2, HOLD, MUTE, SLOW, SLEP> [GLANCE, SQUINT, GAZE, STARE]
+.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ;33 PHANTOM  ; <STOP, ZAP!, XFER, BRAK, RUB, HOLD, MUTE, SLOW> [GLARE x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;34 MEDUSA   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;35 GrMEDUSA ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;36 CATMAN   ;
+.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ;37 MANCAT   ; <FIR2, SLOW, DARK, SLEP, FIRE, LIT, CURE, SLEP>
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;38 PEDE     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;39 GrPEDE   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3A TIGER    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3B Saber T  ;
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ;3C VAMPIRE  ; [DAZZLE x4]
+.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ;3D WzVAMP   ; <AFIR, MUTE, ICE2 x2, LIT2 x2, FIR2 x2> [DAZZLE x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3E GARGOYLE ;
+.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3F R`GOYLE  ; <FIR2, HOLD, FIRE x2>
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;40 EARTH    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;41 FIRE     ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ;42 Frost D  ; [BLIZZARD x3]
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ;43 Red D    ; [BLAZE x3]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;44 ZombieD  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;45 SCUM     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;46 MUCK     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;47 OOZE     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;48 SLIME    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;49 SPIDER   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4A ARACHNID ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ;4B MANTICOR ; [STINGER x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4C SPHINX   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4D R`ANKYLO ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4E ANKYLO   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4F MUMMY    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;50 WzMUMMY  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;51 COCTRICE ;
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ;52 PERILISK ; [SQUINT x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;53 WYVERN   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;54 WYRM     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;55 TYRO     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;56 T REX    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;57 CARIBE   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;58 R`CARIBE ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;59 GATOR    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5A FrGATOR  ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5B OCHO     ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5C NAOCHO   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5D HYDRA    ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ;5E R`HYDRA  ; [CREMATE x2]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5F GAURD    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;60 SENTRY   ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;61 WATER    ;
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;62 AIR      ;
+.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ;63 NAGA     ; <LIT2, LOCK, SLEP, LIT, LIT2, HOLD, SLOW, DARK>
+.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ;64 GrNAGA   ; <RUSE, MUTE, SLOW, DARK, SLEP, FIRE, LIT, HEAL>
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ;65 CHIMERA  ; [CREMATE x3]
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ;66 JIMERA   ; [CREMATE, POISON, CREMATE, POISON]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;67 WIZARD   ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ;68 SORCERER ; [TRANCE x4]
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;69 GARLAND  ;
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ;6A Gas D    ; [POISON x3]
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ;6B Blue D   ; [THUNDER x3]
+.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6C MudGOL   ; <FAST>
+.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ;6D RockGOL  ; <SLOW x8>
+.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ;6E IronGOL  ; [TOXIC x4]
+.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6F BADMAN   ; <XFER, NUKE, XFER, XXXX, BLND>
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;70 EVILMAN  ;
+.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ;71 ASTOS    ; <RUB, SLO2, FAST, FIR2, LIT2, SLOW, DARK, SLEP>
+.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ;72 MAGE     ; <RUB, LIT3 ,FIR3 ,BANE, SLO2, FIR3, STUN, LIT3>
+.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ;73 FIGHTER  ; <WALL, XFER, HEL3, FOG2, INV2, CUR4 ,HEL2, CUR3>
+.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;74 MADPONY  ;
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ;75 NITEMARE ; [SNORTING x4]
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ;76 WarMECH  ; [NUCLEAR x4]
+.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ;77 LICH     ; <ICE2, SLP2, FAST, LIT2, HOLD, FIR2, SLOW, SLEP>
+.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ;78 LICH 2   ; <NUKE, STOP, ZAP!, XXXX>
+.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ;79 KARY     ; <FIR2, DARK, FIR2, DARK, FIR2, HOLD, FIR2, HOLD>
+.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ;7A KARY 2   ; <FIR3, RUB>
+.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ;7B KRAKEN   ; [INK x4]
+.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ;7C KRAKEN 2 ; [INK x4]
+.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ;7D TIAMAT   ; [THUNDER, POISON, BLIZZARD, BLAZE]
+.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ;7E TIAMAT 2 ; <BANE, ICE2, LIT2, FIR2, BANE, ICE2, LIT2, FIR2> [THUNDER, POISON, BLIZZARD, BLAZE]
+.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ;7F CHAOS    ; <ICE3, LIT3, SLO2, CUR4, FIR3, ICE2, FAST, NUKE> [CRACK, INFERNO, SWIRL, TORNADO]
+
+
+
+
 data_EnemyStats:
 
-;; I just stole all this again from the FFbytes docs by Dienyddiwr Da - http://www.romhacking.net/documents/81/ ! 
+;; I just stole all this again from the FFbytes docs by Dienyddiwr Da - http://www.romhacking.net/documents/81/ !
 
-;     ENROMSTAT_EXP       
+;     ENROMSTAT_EXP
 ;     |       ENROMSTAT_GP
 ;     |       |       ENROMSTAT_HPMAX
 ;     |       |       |      ENROMSTAT_MORALE
@@ -406,22 +556,22 @@ data_EnemyStats:
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_SPECIAL (attack chance)
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ATTACKAIL
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_CATEGORY
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_MAGDEF 
+;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_MAGDEF
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMWEAK
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMRESIST
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMATTACK
 ;     2   1   2   1   2   1   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  ENROMSTAT_SPEED
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   ENROMSTAT_LEVEL
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   ENROMSTAT_ITEM  
+;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   ENROMSTAT_ITEM
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   |    ENROMSTAT_BLANK
-;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__|__ |__ |__  |__  ID Name   
-.byte $06,$00,$06,$00,$08,$00,$6A,$00,$06,$04,$11,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$01,$01,$00 ;00 IMP	
-.byte $12,$00,$12,$00,$10,$00,$78,$00,$09,$06,$11,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00,$08,$02,$01,$00 ;01 GrIMP	
-.byte $18,$00,$06,$00,$14,$00,$69,$00,$24,$00,$11,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00,$07,$01,$00,$00 ;02 WOLF	
-.byte $5D,$00,$16,$00,$48,$00,$6C,$00,$36,$00,$11,$12,$0E,$01,$00,$00,$00,$2E,$00,$00,$00,$09,$02,$00,$00 ;03 GrWolf	
-.byte $87,$00,$43,$00,$44,$00,$78,$04,$2A,$06,$11,$11,$0E,$01,$02,$04,$91,$2D,$00,$00,$04,$0C,$04,$00,$00 ;04 WrWolf 
-.byte $92,$01,$C8,$00,$5C,$00,$C8,$00,$36,$00,$11,$17,$19,$01,$00,$00,$00,$37,$10,$20,$20,$10,$0C,$00,$00 ;05 FrWOLF 
-.byte $99,$00,$32,$00,$5C,$00,$86,$00,$18,$0C,$11,$17,$12,$0A,$00,$00,$02,$37,$00,$00,$00,$05,$03,$00,$00 ;06 IGUANA 
+;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__|__ |__ |__  |__  ID Name
+.byte $06,$00,$06,$00,$08,$00,$6A,$00,$06,$04,$11,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$01,$01,$00 ;00 IMP
+.byte $12,$00,$12,$00,$10,$00,$78,$00,$09,$06,$11,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00,$08,$02,$01,$00 ;01 GrIMP
+.byte $18,$00,$06,$00,$14,$00,$69,$00,$24,$00,$11,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00,$07,$01,$00,$00 ;02 WOLF
+.byte $5D,$00,$16,$00,$48,$00,$6C,$00,$36,$00,$11,$12,$0E,$01,$00,$00,$00,$2E,$00,$00,$00,$09,$02,$00,$00 ;03 GrWolf
+.byte $87,$00,$43,$00,$44,$00,$78,$04,$2A,$06,$11,$11,$0E,$01,$02,$04,$91,$2D,$00,$00,$04,$0C,$04,$00,$00 ;04 WrWolf
+.byte $92,$01,$C8,$00,$5C,$00,$C8,$00,$36,$00,$11,$17,$19,$01,$00,$00,$00,$37,$10,$20,$20,$10,$0C,$00,$00 ;05 FrWOLF
+.byte $99,$00,$32,$00,$5C,$00,$86,$00,$18,$0C,$11,$17,$12,$0A,$00,$00,$02,$37,$00,$00,$00,$05,$03,$00,$00 ;06 IGUANA
 .byte $A8,$09,$B0,$04,$28,$01,$C8,$00,$24,$12,$12,$4A,$1F,$01,$00,$00,$02,$8F,$20,$10,$10,$0C,$00,$00,$00 ;07 AGAMA
 .byte $B9,$07,$92,$02,$C4,$00,$C8,$00,$18,$14,$11,$36,$1E,$01,$00,$00,$02,$5B,$00,$00,$00,$10,$00,$00,$00 ;08 SAURIA
 .byte $6F,$03,$6F,$03,$F0,$00,$88,$00,$30,$0C,$11,$3C,$26,$01,$00,$00,$04,$78,$00,$00,$00,$0C,$00,$01,$00 ;09 GIANT
@@ -459,7 +609,7 @@ data_EnemyStats:
 .byte $B0,$01,$B0,$01,$72,$00,$A0,$8F,$6C,$0C,$11,$1D,$28,$01,$01,$10,$09,$43,$10,$AB,$01,$16,$10,$00,$00 ;29 WRAITH
 .byte $DE,$03,$DE,$03,$B4,$00,$B8,$8F,$24,$1E,$11,$2D,$5D,$01,$01,$10,$09,$55,$10,$AB,$01,$24,$20,$00,$00 ;2A GHOST
 .byte $18,$00,$0C,$00,$14,$00,$78,$31,$06,$00,$11,$05,$0A,$01,$00,$00,$08,$19,$10,$AB,$08,$02,$05,$01,$00 ;2B ZOMBIE
-.byte $5D,$00,$32,$00,$30,$00,$7C,$31,$0C,$06,$13,$0C,$08,$01,$01,$10,$08,$24,$10,$2B,$08,$04,$08,$01,$00 ;2C GHOUL 
+.byte $5D,$00,$32,$00,$30,$00,$7C,$31,$0C,$06,$13,$0C,$08,$01,$01,$10,$08,$24,$10,$2B,$08,$04,$08,$01,$00 ;2C GHOUL
 .byte $75,$00,$75,$00,$38,$00,$A0,$31,$2E,$0A,$13,$0E,$08,$01,$01,$10,$08,$28,$10,$2B,$08,$0D,$12,$01,$00 ;2D GEIST
 .byte $96,$00,$96,$00,$34,$00,$A0,$31,$2A,$0C,$11,$0D,$14,$01,$01,$10,$08,$2D,$10,$2B,$08,$18,$15,$01,$00 ;2E SPECTER
 .byte $F8,$10,$E8,$03,$00,$01,$C8,$00,$24,$0A,$11,$70,$41,$0A,$00,$00,$00,$C8,$00,$80,$80,$10,$15,$00,$00 ;2F WORM
@@ -543,148 +693,357 @@ data_EnemyStats:
 .byte $78,$15,$70,$17,$E8,$03,$FF,$FB,$48,$50,$24,$50,$31,$01,$00,$80,$02,$C8,$02,$F0,$41,$40,$28,$81,$00 ;7D TIAMAT
 .byte $D0,$07,$01,$00,$4C,$04,$FF,$FF,$5A,$5A,$24,$55,$4B,$01,$00,$80,$42,$C8,$00,$F0,$41,$48,$30,$81,$00 ;7E TIAMAT (reprise)
 .byte $00,$00,$00,$00,$D0,$07,$FF,$FF,$64,$64,$12,$C8,$64,$01,$01,$10,$00,$C8,$00,$FF,$0F,$3F,$35,$81,$00 ;7F CHAOS
-   
-   
+
+DoesEnemyXExist:
+    LDA btl_enemyIDs, X
+    CMP #$FF
+    RTS
+
+GetEnemyRAMPtr:
+    LDX #28                ; multiply enemy index by $1C  (number of bytes per enemy)
+    JSR MultiplyXA
+    CLC                     ; then add btl_enemystats to the result
+    ADC #<btl_enemystats                ;; FB
+    STA EnemyRAMPointer
+    TXA
+    ADC #>btl_enemystats                ;; 6B
+    STA EnemyRAMPointer+1
+    RTS
+
+LoadEnemyStats:
+    LDA #0
+    LDY #0
+    @ClearLoop:
+    STA btl_enemystats, Y
+    STA btl_enemystats+$24, Y
+    DEY
+    BNE @ClearLoop
+
+    LDA #$09
+    STA btl_loadenstats_count              ; loop down-counter
+    LDA #$00
+    STA btl_loadenstats_index               ; loop up-counter / enemy index
+
+    LDA #0
+    STA tmp
+    STA tmp+1
+   @EnemyLoop:
+    LDA btl_loadenstats_index               ; Put a pointer to the current enemy's stat RAM
+    JSR GetEnemyRAMPtr                         ;    in btltmp+A
+
+    LDX btl_loadenstats_index              ; Check to see if this enemy even exists
+    JSR DoesEnemyXExist
+    BNE :+
+
+      LDA tmp
+      CLC
+      ADC #4
+      STA tmp
+      LDA tmp+1
+      CLC
+      ADC #28
+      STA tmp+1
+      JMP @NextEnemy        ; if it doesn't, skip ahead...
+
+  : LDX #25                ; multiply current enemy ID by #25  (25 bytes of data per enemy)
+    JSR MultiplyXA          ;   add the result to data_EnemyStats to generate a pointer to the enemy
+    CLC                     ;   data in ROM.
+    ADC #<data_EnemyStats
+    STA EnemyROMPointer
+    TXA
+    ADC #>data_EnemyStats
+    STA EnemyROMPointer+1
+
+    LDX tmp
+    LDY #0
+   @RewardLoop:
+    LDA (EnemyROMPointer), Y
+    STA btl_enemyrewards, X
+    INX
+    INY
+    CPY #4
+    BNE @RewardLoop
+
+    STX tmp
+    LDX tmp+1
+
+   @Loop:
+    LDA (EnemyROMPointer), Y
+    STA btl_enemystats, X
+    INX
+    INY
+    CPY #25               ; copy the next 21 bytes of ROM data into RAM.
+    BNE @Loop
+
+    TXA
+    CLC
+    ADC #7                ; add 8 to the "btl_enemystats, X" position, 'cos adding 7 more stats with Y instead
+    STA tmp+1             ;
+
+    TYA                   ; now using Y to save, so subtract 4 since Y is 4 past the RAM pointer
+    SEC
+    SBC #4
+    TAY
+
+    LDA #0
+    STA (EnemyRAMPointer), Y ; <- en_aimagpos
+    INY
+    STA (EnemyRAMPointer), Y ; <- en_aiatkpos
+    INY
+    LDA #$01
+    STA (EnemyRAMPointer), Y ; en_numhitsmult, default to hit multiplier of 1
+
+    INY
+    LDA #0
+    STA (EnemyRAMPointer), Y ; <- en_ailments
+
+    LDY #04
+    LDA (EnemyROMPointer), Y ; load max HP low byte
+    PHA                      ; push low byte
+    INY
+    LDA (EnemyROMPointer), Y ; load max HP high byte
+
+    LDY #en_hp+1
+    STA (EnemyRAMPointer), Y ; save as current HP high byte
+    PLA                      ; pull low byte
+    DEY
+    STA (EnemyRAMPointer), Y ; save as current HP low byte
+
+    LDX btl_loadenstats_index   ; get the enemy ID
+    LDA btl_enemyIDs, X
+    LDY #en_enemyid
+    STA (EnemyRAMPointer), Y
+
+    LDY #en_level               ; get enemy level
+    LDA (EnemyROMPointer), Y
+    STA tmp+2                   ; save in tmp+2
+
+    LDA #0
+    LDX #255
+    JSR RandAX                  ; random number between 0-255
+    CMP #255
+    BCC :+
+        DEC tmp+2               ; if its exactly 255, decrease the level
+  : CMP #180
+    BCC :+                      ; if its over 200, decrease the level
+        DEC tmp+2
+        JMP @SaveLevel
+
+  : CMP #0
+    BNE :+
+        INC tmp+2               ; if its exactly 0, increase the level
+
+  : CMP #85                     ; if its under 85, increase the level
+    BCS @NextEnemy
+
+    INC tmp+2
+  @SaveLevel:
+    LDA tmp+2
+    STA (EnemyROMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
+
+  @NextEnemy:
+    INC btl_loadenstats_index           ; inc up-counter to look at next enemy
+    DEC btl_loadenstats_count           ; dec down-counter
+    BEQ :+
+      JMP @EnemyLoop    ; loop until all 9 enemies processed
+
+ : LDX #0
+  @FillPlayerHitMultiplyer:
+   TXA
+   JSR PrepCharStatPointers
+   LDY #ch_class - ch_stats
+   LDA (CharStatsPointer), Y
+   AND #$0F
+   AND #CLS_BB | CLS_MA              ; see if the player character is BB or Master
+   BEQ :+
+       LDY #ch_righthand - ch_stats
+       LDA (CharStatsPointer), Y     ; then see if they have a weapon equipped
+       BNE :+
+        LDA #02                      ; if no weapon, they have 2 fists, so a hit multiplyer of 2
+        BNE :++
+ : LDA #01                           ; everyone else gets 1
+ : STA btl_charhitmult, X
+   INX
+   CPX #4
+   BNE @FillPlayerHitMultiplyer
+
+   ;; JIGS - and now on to filling the enemy's AI RAM!!
+
+   LDA #0
+   STA tmp+2                ; enemy ID counter
+   STA tmp+3                ; AI index for writing to RAM
+  @EnemyAI_Loop:
+   JSR GetEnemyRAMPtr
+   LDY #en_enemyid
+   LDA (EnemyRAMPointer), Y
+   AND #$7F                 ; cap at $7F, in case not enough enemies were loaded and old data wasn't overwritten with the right values here
+   LDX #$10
+   JSR MultiplyXA
+   CLC
+   ADC #<EnemyAIData
+   STA EnemyROMPointer
+   TXA
+   ADC #>EnemyAIData
+   STA EnemyROMPointer+1    ; ROM pointer now points to their AI data
+
+   LDY #0
+   LDX tmp+3
+  @FillAI:
+   LDA (EnemyROMPointer), Y
+   STA lut_EnemyAi, X
+   INX
+   INY
+   CPY #$10
+   BNE @FillAI
+
+   STX tmp+3                ; save RAM write position
+   INC tmp+2                ; inc tmp+2 for next enemy
+   LDA tmp+2
+   CMP #$09
+   BNE @EnemyAI_Loop
+   RTS
+
+
 ;;
-;; For the enemy's ITEM byte above: 
-;; $01 = has item, $10 = has secondary item, $80 = has special item 
+;; For the enemy's ITEM byte above:
+;; $01 = has item, $10 = has secondary item, $80 = has special item
 ;; So $91 means has all 3 items to steal
-;;   
+;;
 ;; First byte: item type  -- $00: gold, $01: consumable, $02: weapon/armor, $03: spell
 ;; almost just like treasure chests!
 ;;
 ;; Second byte: item name; for gold, its the index for the money chests
-;;    
+;;
 
-lut_StealList:              
-.byte $00, GOLD1      , $00, $00, $00, $00         ; 10 gold        ,      ,                 ; 00 IMP	            
-.byte $02, ARM26      , $00, $00, $00, $00         ; cap            ,      ,                 ; 01 GrIMP	        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 02 WOLF	        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 03 GrWolf	        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 04 WrWolf          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 05 FrWOLF          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 06 IGUANA          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 07 AGAMA           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 08 SAURIA          
-.byte $02, ARM11      , $00, $00, $00, $00         ; Copper bracelet,      ,                 ; 09 GIANT           
-.byte $02, ARM12      , $00, $00, $00, $00         ; Silver bracelet,      ,                 ; 0A FrGIANT         
-.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0B R`GIANT         
-.byte $01, HEAL       , $00, $00, $00, $00         ; Heal           ,      ,                 ; 0C SAHAG           
-.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 0D R`SAHAG         
-.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0E WzSAHAG         
-.byte $02, WEP8       , $00, $00, $00, $00         ; Scimitar       ,      ,                 ; 0F PIRATE          
-.byte $02, WEP15      , $00, $00, $00, $00         ; Falchion       ,      ,                 ; 10 KYZOKU          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 11 SHARK           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 12 GrSHARK         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 13 OddEYE          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 14 BigEYE          
-.byte $02, WEP3       , $00, $00, $00, $00         ; Wooden staff   ,      ,                 ; 15 BONE            
-.byte $02, WEP11      , $00, $00, $00, $00         ; Iron staff     ,      ,                 ; 16 R`BONE          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 17 CREEP           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 18 CRAWL           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 19 HYENA           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1A CEREBUS         
-.byte $02, WEP5       , $00, $00, $00, $00         ; Iron hammer    ,      ,                 ; 1B OGRE            
-.byte $02, WEP18      , $00, $00, $00, $00         ; Silver hammer  ,      ,                 ; 1C GrOGRE          
-.byte $03, MG_ICE2    , $00, $00, $00, $00         ; Ice 2 scroll   ,      ,                 ; 1D WzOGRE          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1E ASP             
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1F COBRA           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 20 SeaSNAKE        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 21 SCORPION        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 22 LOBSTER         
-.byte $00, GOLD13     , $00, $00, $00, $00         ; 240 gold -     ,      ,                 ; 23 BULL            
-.byte $03, MG_AICE    , $00, $00, $00, $00         ; AICE scroll    ,      ,                 ; 24 ZomBULL         
-.byte $00, GOLD14     , $00, $00, $00, $00         ; 255 gold       ,      ,                 ; 25 TROLL           
-.byte $00, GOLD31     , $00, $00, $00, $00         ; 880 gold       ,      ,                 ; 26 SeaTROLL        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 27 SHADOW          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 28 IMAGE           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 29 WRAITH          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2A GHOST           
-.byte $02, ARM1       , $00, $00, $00, $00         ; Cloth T        ,      ,                 ; 2B ZOMBIE          
-.byte $00, GOLD5      , $00, $00, $00, $00         ; 55 gold        ,      ,                 ; 2C GHOUL           
-.byte $00, GOLD7      , $00, $00, $00, $00         ; 85 gold        ,      ,                 ; 2D GEIST           
-.byte $00, GOLD12     , $00, $00, $00, $00         ; 180 gold       ,      ,                 ; 2E SPECTER         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2F WORM            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 30 Sand W          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 31 Grey W          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 32 EYE             
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 33 PHANTOM         
-.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA          
-.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA        
-.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN          
-.byte $03, MG_FIR2    , $00, $00, $00, $00         ; Fire 2 scroll  ,      ,                 ; 37 MANCAT          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 38 PEDE            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 39 GrPEDE          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3A TIGER           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3B Saber T         
-.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 3C VAMPIRE         
-.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3E GARGOYLE        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3F R`GOYLE         
-.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH           
-.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE            
-.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D         
-.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D           
-.byte $00, GOLD41     , $00, $00, $00, $00         ; 5000 gold      ,      ,                 ; 44 ZombieD         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 45 SCUM            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 46 MUCK            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 47 OOZE            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 48 SLIME           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 49 SPIDER          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4A ARACHNID        
-.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 4B MANTICOR        
-.byte $00, GOLD36     , $00, $00, $00, $00         ; 1760 gold      ,      ,                 ; 4C SPHINX          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4D R`ANKYLO        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4E ANKYLO          
-.byte $01, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 4F MUMMY           
-.byte $01, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 50 WzMUMMY         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 51 COCTRICE        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 52 PERILISK        
-.byte $00, GOLD32     , $00, $00, $00, $00         ; 1020 gold      ,      ,                 ; 53 WYVERN          
-.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 54 WYRM            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 55 TYRO            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 56 T REX           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 57 CARIBE          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 58 R`CARIBE        
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 59 GATOR           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5A FrGATOR         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5B OCHO            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5C NAOCHO          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5D HYDRA           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5E R`HYDRA         
-.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 5F GAURD           
-.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 60 SENTRY          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 61 WATER           
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 62 AIR             
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 63 NAGA            
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 64 GrNAGA          
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 65 CHIMERA         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 66 JIMERA          
-.byte $03, MG_LIT     , $00, $00, $00, $00         ; Bolt 2 scroll  ,      ,                 ; 67 WIZARD          
-.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 68 SORCERER        
-.byte $02, WEP6       , $00, $00, $00, $00         ; Short sword    ,      ,                 ; 69 GARLAND         
-.byte $00, GOLD45     , $00, $00, $00, $00         ; 6720 gold      ,      ,                 ; 6A Gas D           
-.byte $00, GOLD47     , $00, $00, $00, $00         ; 7690 gold      ,      ,                 ; 6B Blue D          
-.byte $03, MG_FAST    , $00, $00, $00, $00         ; Fast scroll    ,      ,                 ; 6C MudGOL          
-.byte $03, MG_SLOW    , $00, $00, $00, $00         ; Slow scroll    ,      ,                 ; 6D RockGOL         
-.byte $02, ARM4       , $00, $00, $00, $00         ; Iron armor     ,      ,                 ; 6E IronGOL         
-.byte $02, ARM6       , $00, $00, $00, $00         ; Silver armor   ,      ,                 ; 6F BADMAN          
-.byte $02, WEP17      , $00, $00, $00, $00         ; Silver sword   ,      ,                 ; 70 EVILMAN         
-.byte $03, MG_RUB     , $00, $00, $00, $00         ; Rub scroll     ,      ,                 ; 71 ASTOS           
-.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 72 MAGE            
-.byte $03, MG_FOG2    , $00, $00, $00, $00         ; Fog 2 scroll   ,      ,                 ; 73 FIGHTER         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 74 MADPONY         
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 75 NITEMARE        
-.byte $01, ELIXIR     , $00, $00, $00, $00         ; Elixir         ,      ,                 ; 76 WarMECH         
-.byte $01, PHOENIXDOWN, $00, $00, $03, MG_QAKE     ; Phoenix Down   ,      , Quake scroll    ; 77 LICH            
-.byte $01, PHOENIXDOWN, $00, $00, $02, ARM23       ; Phoenix Down   ,      , Aegis Shield    ; 78 LICH (reprise)  
-.byte $03, MG_FIR3    , $00, $00, $02, ARM20       ; Fire 3 scroll  ,      , Flame Shield    ; 79 KARY            
-.byte $01, SMOKEBOMB  , $00, $00, $02, ARM32       ; Smokebomb      ,      , Ribbon          ; 7A KARY (reprise)  
-.byte $02, ARM14      , $00, $00, $02, ARM25       ; Opal bracelet  ,      , Protect Cape    ; 7B KRAKEN          
+lut_StealList:
+.byte $00, GOLD1      , $00, $00, $00, $00         ; 10 gold        ,      ,                 ; 00 IMP
+.byte $02, ARM26      , $00, $00, $00, $00         ; cap            ,      ,                 ; 01 GrIMP
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 02 WOLF
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 03 GrWolf
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 04 WrWolf
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 05 FrWOLF
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 06 IGUANA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 07 AGAMA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 08 SAURIA
+.byte $02, ARM11      , $00, $00, $00, $00         ; Copper bracelet,      ,                 ; 09 GIANT
+.byte $02, ARM12      , $00, $00, $00, $00         ; Silver bracelet,      ,                 ; 0A FrGIANT
+.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0B R`GIANT
+.byte $01, HEAL       , $00, $00, $00, $00         ; Heal           ,      ,                 ; 0C SAHAG
+.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 0D R`SAHAG
+.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0E WzSAHAG
+.byte $02, WEP8       , $00, $00, $00, $00         ; Scimitar       ,      ,                 ; 0F PIRATE
+.byte $02, WEP15      , $00, $00, $00, $00         ; Falchion       ,      ,                 ; 10 KYZOKU
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 11 SHARK
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 12 GrSHARK
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 13 OddEYE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 14 BigEYE
+.byte $02, WEP3       , $00, $00, $00, $00         ; Wooden staff   ,      ,                 ; 15 BONE
+.byte $02, WEP11      , $00, $00, $00, $00         ; Iron staff     ,      ,                 ; 16 R`BONE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 17 CREEP
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 18 CRAWL
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 19 HYENA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1A CEREBUS
+.byte $02, WEP5       , $00, $00, $00, $00         ; Iron hammer    ,      ,                 ; 1B OGRE
+.byte $02, WEP18      , $00, $00, $00, $00         ; Silver hammer  ,      ,                 ; 1C GrOGRE
+.byte $03, MG_ICE2    , $00, $00, $00, $00         ; Ice 2 scroll   ,      ,                 ; 1D WzOGRE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1E ASP
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1F COBRA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 20 SeaSNAKE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 21 SCORPION
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 22 LOBSTER
+.byte $00, GOLD13     , $00, $00, $00, $00         ; 240 gold -     ,      ,                 ; 23 BULL
+.byte $03, MG_AICE    , $00, $00, $00, $00         ; AICE scroll    ,      ,                 ; 24 ZomBULL
+.byte $00, GOLD14     , $00, $00, $00, $00         ; 255 gold       ,      ,                 ; 25 TROLL
+.byte $00, GOLD31     , $00, $00, $00, $00         ; 880 gold       ,      ,                 ; 26 SeaTROLL
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 27 SHADOW
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 28 IMAGE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 29 WRAITH
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2A GHOST
+.byte $02, ARM1       , $00, $00, $00, $00         ; Cloth T        ,      ,                 ; 2B ZOMBIE
+.byte $00, GOLD5      , $00, $00, $00, $00         ; 55 gold        ,      ,                 ; 2C GHOUL
+.byte $00, GOLD7      , $00, $00, $00, $00         ; 85 gold        ,      ,                 ; 2D GEIST
+.byte $00, GOLD12     , $00, $00, $00, $00         ; 180 gold       ,      ,                 ; 2E SPECTER
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2F WORM
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 30 Sand W
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 31 Grey W
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 32 EYE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 33 PHANTOM
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA
+.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN
+.byte $03, MG_FIR2    , $00, $00, $00, $00         ; Fire 2 scroll  ,      ,                 ; 37 MANCAT
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 38 PEDE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 39 GrPEDE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3A TIGER
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3B Saber T
+.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 3C VAMPIRE
+.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3E GARGOYLE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3F R`GOYLE
+.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH
+.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE
+.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D
+.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D
+.byte $00, GOLD41     , $00, $00, $00, $00         ; 5000 gold      ,      ,                 ; 44 ZombieD
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 45 SCUM
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 46 MUCK
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 47 OOZE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 48 SLIME
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 49 SPIDER
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4A ARACHNID
+.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 4B MANTICOR
+.byte $00, GOLD36     , $00, $00, $00, $00         ; 1760 gold      ,      ,                 ; 4C SPHINX
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4D R`ANKYLO
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4E ANKYLO
+.byte $01, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 4F MUMMY
+.byte $01, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 50 WzMUMMY
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 51 COCTRICE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 52 PERILISK
+.byte $00, GOLD32     , $00, $00, $00, $00         ; 1020 gold      ,      ,                 ; 53 WYVERN
+.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 54 WYRM
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 55 TYRO
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 56 T REX
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 57 CARIBE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 58 R`CARIBE
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 59 GATOR
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5A FrGATOR
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5B OCHO
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5C NAOCHO
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5D HYDRA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5E R`HYDRA
+.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 5F GAURD
+.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 60 SENTRY
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 61 WATER
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 62 AIR
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 63 NAGA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 64 GrNAGA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 65 CHIMERA
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 66 JIMERA
+.byte $03, MG_LIT     , $00, $00, $00, $00         ; Bolt 2 scroll  ,      ,                 ; 67 WIZARD
+.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 68 SORCERER
+.byte $02, WEP6       , $00, $00, $00, $00         ; Short sword    ,      ,                 ; 69 GARLAND
+.byte $00, GOLD45     , $00, $00, $00, $00         ; 6720 gold      ,      ,                 ; 6A Gas D
+.byte $00, GOLD47     , $00, $00, $00, $00         ; 7690 gold      ,      ,                 ; 6B Blue D
+.byte $03, MG_FAST    , $00, $00, $00, $00         ; Fast scroll    ,      ,                 ; 6C MudGOL
+.byte $03, MG_SLOW    , $00, $00, $00, $00         ; Slow scroll    ,      ,                 ; 6D RockGOL
+.byte $02, ARM4       , $00, $00, $00, $00         ; Iron armor     ,      ,                 ; 6E IronGOL
+.byte $02, ARM6       , $00, $00, $00, $00         ; Silver armor   ,      ,                 ; 6F BADMAN
+.byte $02, WEP17      , $00, $00, $00, $00         ; Silver sword   ,      ,                 ; 70 EVILMAN
+.byte $03, MG_RUB     , $00, $00, $00, $00         ; Rub scroll     ,      ,                 ; 71 ASTOS
+.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 72 MAGE
+.byte $03, MG_FOG2    , $00, $00, $00, $00         ; Fog 2 scroll   ,      ,                 ; 73 FIGHTER
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 74 MADPONY
+.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 75 NITEMARE
+.byte $01, ELIXIR     , $00, $00, $00, $00         ; Elixir         ,      ,                 ; 76 WarMECH
+.byte $01, PHOENIXDOWN, $00, $00, $03, MG_QAKE     ; Phoenix Down   ,      , Quake scroll    ; 77 LICH
+.byte $01, PHOENIXDOWN, $00, $00, $02, ARM23       ; Phoenix Down   ,      , Aegis Shield    ; 78 LICH (reprise)
+.byte $03, MG_FIR3    , $00, $00, $02, ARM20       ; Fire 3 scroll  ,      , Flame Shield    ; 79 KARY
+.byte $01, SMOKEBOMB  , $00, $00, $02, ARM32       ; Smokebomb      ,      , Ribbon          ; 7A KARY (reprise)
+.byte $02, ARM14      , $00, $00, $02, ARM25       ; Opal bracelet  ,      , Protect Cape    ; 7B KRAKEN
 .byte $01, ETHER      , $00, $00, $02, ARM38       ; Ether          ,      , Power Gauntlet  ; 7C KRAKEN (reprise)
-.byte $01, ELIXIR     , $00, $00, $02, ARM10       ; Elixir         ,      , Dragon armor    ; 7D TIAMAT          
+.byte $01, ELIXIR     , $00, $00, $02, ARM10       ; Elixir         ,      , Dragon armor    ; 7D TIAMAT
 .byte $01, ELIXIR     , $00, $00, $02, WEP40       ; Elixir         ,      , Masamune        ; 7E TIAMAT (reprise)
-.byte $01, ELIXIR     , $00, $00, $01, PHOENIXDOWN ; Elixir         ,      , Elixer          ; 7F CHAOS           
+.byte $01, ELIXIR     , $00, $00, $01, PHOENIXDOWN ; Elixir         ,      , Elixer          ; 7F CHAOS
 
 ;
 ; JIGS - tried to copy the stealing algorithm from FF6, as seen in MasterZed's faq:
@@ -712,9 +1071,9 @@ lut_StealList:
 ;
 ;9. If the monster doesn't have an item to steal in that slot, then you fail to
 ;   steal; otherwise, you successfully steal that item.
-;   
-   
-   
+;
+
+
 StealFromEnemyZ:
     LDA #$0F
     STA btl_unformattedstringbuf ; message code
@@ -722,21 +1081,21 @@ StealFromEnemyZ:
     STA btl_unformattedstringbuf+1 ; message "Stole"
     LDA #$0E
     STA btl_unformattedstringbuf+2 ; put the item name code into the message buffer
-    
+
     LDA #0
     STA btl_unformattedstringbuf+4 ; 44 must be 0'd if its a normal item
-    STA btl_unformattedstringbuf+6 ; if its a scroll, 44 and 45 are written over, so end at 46    
+    STA btl_unformattedstringbuf+6 ; if its a scroll, 44 and 45 are written over, so end at 46
     STA MMC5_tmp+2
     STA MMC5_tmp+1
     STA battle_stealsuccess
 
     LDA btl_defender
-    JSR GetEnemyRAMPtr    
-    
+    JSR GetEnemyRAMPtr
+
     LDY #en_item
     LDA (EnemyRAMPointer), Y        ; get their "has item" byte
     BEQ @Nothing                    ; battle_stealsuccess remains 0
-    
+
     PHA                             ; backup their "has item" byte
     LDA btl_attacker
     AND #03
@@ -759,29 +1118,29 @@ StealFromEnemyZ:
     CLC
     ADC #50                         ; add 50
     ADC MMC5_tmp+2                  ; add 15 if hidden
-    SEC 
+    SEC
     SBC tmp+1                       ; subtract enemy level
     SBC MMC5_tmp+1                  ; subtract 30 if blind
     STA MMC5_tmp                    ; if neither hidden or blind, then StealValue = Level + 50 - Enemy's level
-    BCC @Fail                       ; Carry clear = StealValue is less than 0 
+    BCC @Fail                       ; Carry clear = StealValue is less than 0
     CMP #100
     BCS @Success                    ; StealValue is maxed
-    
+
     LDA #0
-    LDX #99                         ; get 1-99 
+    LDX #99                         ; get 1-99
     JSR RandAX
     CMP MMC5_tmp                    ; Carry set on fail: StealValue is higher than the roll
     BCC @Success
-   
+
   @Fail:
     PLA                             ; undo the push
-  @Fail_NoPush:  
+  @Fail_NoPush:
     DEC battle_stealsuccess
-    
+
   @Nothing:
     RTS
 
-  @Success:  
+  @Success:
     LDY #en_enemyid
     LDA (EnemyRAMPointer), Y        ; get the enemy's index
     LDX #6
@@ -792,61 +1151,61 @@ StealFromEnemyZ:
     TXA
     ADC #>lut_StealList
     STA tmp+1                       ; (tmp) now points to the first byte in their inventory
-    
+
     PLA                             ; get the enemy's backed up "Has Item" byte
     BPL @StealNormal                ; if the high bit was NOT set, they have no special items
-    
+
     JSR BattleRNG_L
     AND #$07                        ; 1 in 8 chance that it pulls a 0 now
     BEQ @StealSpecial
-  
-   @StealNormal:  
+
+   @StealNormal:
     LDY #en_item
     LDA (EnemyRAMPointer), Y
     AND #$11
     BEQ @Fail_NoPush
-    
+
     LDA (EnemyRAMPointer), Y
-    PHA                             ; push it again... 
+    PHA                             ; push it again...
     AND #~$11
-    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
-    
+    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen
+
     PLA                             ; and pull to see if they ever had a secondary item
     AND #$10
-    BEQ @StealNormal_1              ; they have no secondary item to steal 
-    
+    BEQ @StealNormal_1              ; they have no secondary item to steal
+
     JSR BattleRNG_L
     AND #01
     BNE @StealNormal_2
-   
+
    @StealNormal_1:
     LDY #0
     BEQ @FindItem
-   
+
    @StealNormal_2:
     LDY #2
     BNE @FindItem
-    
+
    @StealSpecial:
     LDY #en_item
     LDA (EnemyRAMPointer), Y
     AND #~$80
-    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen 
+    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen
     LDY #4
-    
+
    @FindItem:
     INC battle_stealsuccess
     LDA (tmp), Y
     BEQ @StealGold
-    
+
     CMP #1
     BEQ @StealItem
-    
+
     CMP #2
     BEQ @StealEquipment
-    
+
    @StealMagic:                     ; do all the different ways of putting items in your inventory
-    INY 
+    INY
     LDA (tmp), Y
     STA btl_unformattedstringbuf+3  ; put the item name next in the message buffer
     SEC
@@ -858,11 +1217,11 @@ StealFromEnemyZ:
     LDA #BTLMSG_SCROLL
     STA btl_unformattedstringbuf+5  ; and put _scroll at the end of the message
     RTS
-    
+
    @StealEquipment:
     LDA #$0D
     STA btl_unformattedstringbuf+2   ; here, re-write the item name byte with equipment name byte
-    INY 
+    INY
     LDA (tmp), Y
     TAX
     STX btl_unformattedstringbuf+3
@@ -870,7 +1229,7 @@ StealFromEnemyZ:
     RTS
 
    @StealItem:
-    INY 
+    INY
     LDA (tmp), Y
     STA btl_unformattedstringbuf+3
     TAX
@@ -880,15 +1239,1436 @@ StealFromEnemyZ:
    @StealGold:
     LDA #3
     STA shop_type                    ; needed to make sure LoadPrice works right
-   
-    INY 
+
+    INY
     LDA (tmp), Y
     STA btl_unformattedstringbuf+3
     JSR LoadPriceZ                   ; get the price of the item (the amount of gold stolen)
     JSR AddGPToParty                 ; add that to the party's GP
     RTS
-    
-    
+
+
+
+;; This checks if the player attacker is a cleric, and doubles their crit chance against undead enemies.
+;; JIGS - leaving this here as proof of concept... My hack idea originally turned fighters/knights into undead-slayers. You can do the same!
+
+ ClericCheck:
+;    LDA battle_defenderisplayer     ; is it player attacking?
+;    BNE @return
+;    LDA btl_defender_class
+;    BEQ :+                          ; if fighter
+;    CMP #$06                        ; or knight
+;    BNE @return
+;  : LDA btl_defender_category
+;    AND #CATEGORY_UNDEAD+CATEGORY_WERE
+;    BEQ @return
+;    ASL math_critchance             ; *2 Crit chance against undead/cursed
+;    @return:
+;    RTS
+
+;; This checks if the player attacker is a given class, and gives a status effect to their critical hits.
+
+CritCheck:
+    LDA #0
+    STA MMC5_tmp
+    LDA battle_attackerisplayer
+    BEQ @CritReturn                 ; don't do any of these if confusedly attacking another character
+
+    LDA btl_attacker
+    JSR PrepCharStatPointers
+    LDY #ch_speed - ch_stats        ;
+    LDA (CharStatsPointer), Y       ; get speed (luck)
+    ASL A
+    LDX #100                        ;
+    JSR RandAX                      ; Random number between speed/luck and 100
+    CMP #75                         ; Gotta roll over 75 to do the thing
+    BCC @CritReturn
+
+    LDA btl_attacker_class
+    AND #$0F             ;; JIGS - cut off high bits (hidden state)
+    CMP #$01                        ; IF thief, goto CritCrit
+    BEQ @CritCrit
+    CMP #$07                        ; IF ninja, goto CritCrit
+    BEQ @CritCrit
+    CMP #$02                        ; IF bbelt, goto CritStun
+    BEQ @CritStun
+    CMP #$08                        ; IF master, goto CritStun
+    BEQ @CritStun
+    CMP #$03                        ; IF redmage, goto CritSlow
+    BEQ @CritSlow
+    CMP #$09                        ; IF redwiz, goto CritSlow
+    BEQ @CritSlow
+    CMP #$05                        ; IF blackmage, goto CritConfuse
+    BEQ @CritConfuse
+    CMP #$0B                        ; IF blackwiz, goto CritConfuse
+    BEQ @CritConfuse
+    CMP #$04                        ; IF whitemage, goto CritStrength
+    BEQ @CritStrength
+    CMP #$0A                        ; IF whitewiz, goto CritStrength
+    BEQ @CritStrength
+   @CritReturn:
+    RTS
+
+   @CritCrit:
+    LDA btl_attacker_critrate
+    CLC
+    ADC #4
+    BCC :+
+      LDA #$FF
+ : 	LDY #ch_critrate - ch_stats
+    STA (CharStatsPointer), Y
+    LDA #BTLMSG_CRITUP
+    STA MMC5_tmp
+    RTS
+
+   @CritStun:
+    LDA btl_defender_elementresist
+    AND #$01
+    BEQ :+                          ; if defender resists the special attack's element (stun 01)
+    RTS                             ; cancel specialty
+  : LDA #BTLMSG_PARALYZED
+    STA MMC5_tmp
+    LDA #AIL_STUN                   ; Stun ailment as used by STUN's effectivity in original game
+    JMP @CritAddAilment
+
+   @CritSlow:
+    LDA btl_defender
+    LDY #en_numhitsmult
+    LDA (EnemyRAMPointer), Y        ; hit multiplier from RAM stats
+    STA MMC5_tmp
+    DEC MMC5_tmp                    ; Decrease their hit multiplier
+    LDA MMC5_tmp
+    BNE :+
+        RTS                         ; if it went to 0, don't save it
+
+ :  STA (EnemyRAMPointer), Y
+    LDA #BTLMSG_LOSTINTELLIGENCE
+    STA MMC5_tmp
+    RTS
+
+   @CritStrength:
+    LDA btl_attacker_damage
+    CLC
+    ADC #4
+    BCC :+
+      LDA #$FF
+ : 	LDY #ch_damage - ch_stats
+    STA (CharStatsPointer), Y
+    LDA #BTLMSG_WEAPONSSTRONGER
+    STA MMC5_tmp
+    RTS
+
+   @CritConfuse:
+    LDA btl_defender_elementresist
+    AND #$08
+    BEQ :+                          ; if defender resists the special attack's element (dark/confuses 08)
+    RTS                             ; cancel specialty
+  : LDA #BTLMSG_CONFUSED
+    STA MMC5_tmp
+    LDA #AIL_CONF                   ; Confuse ailment as used by CONF's effectivity in original game
+    JMP @CritAddAilment
+
+   @CritAddAilment:
+    BIT btl_defender_ailments
+    BNE @noailment
+    ORA btl_defender_ailments    ; add to existing ailments
+    STA btl_defender_ailments
+    LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
+
+   @noailment:
+    RTS
+
+
+
+ThiefHiddenCheck:
+    LDA btl_attacker_class   ; high bits = hidden
+    AND #$F0
+    BEQ @Return
+
+    LDA btl_attacker_hitrate ; regardless of class, double their hit rate
+    ASL A
+    BCC :+
+    LDA #$FF                  ; cap at FF
+ : 	STA btl_attacker_hitrate
+
+    LDA btl_attacker_critrate ; regardless of class, 1.5x their crit rate
+    LSR A                     ; halve it, then add in original value
+    CLC
+    ADC btl_attacker_critrate
+    BCC :+
+    LDA #$FF                  ; cap at FF
+ : 	STA btl_attacker_critrate
+
+    LDA btl_attacker_class
+    AND #$0F
+    CMP #$01                     ; if thief
+    BEQ @HiddenBoost
+    CMP #$07                     ; if ninja
+    BEQ @HiddenBoost
+   @Return:
+       RTS
+
+   @HiddenBoost:
+    LDA btl_attacker_damage
+    LSR A                        ; divide by 2
+    CLC
+    ADC btl_attacker_damage
+    BCC :+
+    LDA #$FF                     ; cap at FF
+ : 	STA btl_attacker_damage      ; I think this should basically make the strength 50% higher, or x1.5
+
+    LDA btl_attacker_attackailment
+    CLC
+    ADC btl_attacker_critrate
+    BCC :+
+    LDA #$FF                     ; cap at FF
+ : 	STA btl_attacker_critrate    ; Thieves get x2 CritRate
+    RTS
+
+
+
+
+CoverStuff:
+    LDA btl_charcover, X
+    BEQ @NoCover
+
+    LDA btl_attacker
+    CMP btl_charcover+4, X         ; get the knight doing the covering
+    BEQ @NoCover                   ; skip if the knight is confused and doing the attacking!
+
+    JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
+    BNE @NoCover                   ; the knight is immobile and can't help!
+    LDA (CharStatsPointer), Y
+    AND #AIL_STUN
+    BEQ @Cover
+        JSR BattleRNG_L
+        AND #01
+        BEQ @NoCover               ; the knight is stunned, 50/50 chance to perform action
+
+   @Cover:
+    INC attackblocked              ; set to 1
+    LDA btl_defender_index         ; get the original target
+    ORA #$80                       ; convert to ID
+    STA btl_defender
+    ;; important to note: this is used by the DefenderBox drawing thing, but not really used for players otherwise!
+    ;; everything else uses btl_defender_index... so btl_defender is now the ORIGINAL target
+    LDA btl_charcover+4, X         ; get the knight doing the covering
+    AND #$03
+    STA btl_defender_index         ; and set as the new defender
+
+   @NoCover:
+    LDA btl_defender_index
+    RTS
+
+
+    ;; this is stuff copied over from Bank C so there's more room to play around with more interesting things.
+
+   EnemyExistLoop:
+    LDA #$00
+    LDX #$08
+    JSR RandAX
+    TAX                     ; random enemy slot [0,8]
+
+   CheckTargetLoop:
+    LDA btl_enemyIDs, X
+    CMP #$FF
+    BEQ EnemyExistLoop               ; if no, then loop to find one
+    RTS
+
+PrepCharStatPointers:
+    ASL A                               ; 2* for pointer lut
+    TAY
+    LDA lut_IBCharStatsPtrTable, Y      ; copy pointers from pointer luts
+    STA CharBackupStatsPointer
+    LDA lut_IBCharStatsPtrTable+1, Y
+    STA CharBackupStatsPointer+1
+    LDA lut_CharStatsPtrTable, Y
+    STA CharStatsPointer
+    LDA lut_CharStatsPtrTable+1, Y
+    STA CharStatsPointer+1
+    RTS
+
+PlayerAttackEnemy_PhysicalZ:
+    LDA BattleCharID
+    ORA #$80
+    STA btl_attacker
+
+    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_CONF
+    BEQ :+
+       JSR EnemyExistLoop
+
+  : LDA AutoTargetOption
+    BNE @SkipAutoTarget
+
+    JSR CheckTargetLoop             ; JIGS - doublecheck the enemy you're attacking exists!
+
+   @SkipAutoTarget:
+    STX btl_defender_index       ; set defender index
+    STX btl_defender
+
+    TXA
+    JSR GetEnemyRAMPtr
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Attacker/PLAYER stats
+    LDA #$00                        ; clear this value to zero to indicate the defender
+    STA battle_defenderisplayer     ;   is an enemy
+    LDA #1
+    STA battle_attackerisplayer
+
+    LDY #ch_class - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #$0F                        ;; cut off high bits to get class
+    STA btl_attacker_class
+    LDA (CharStatsPointer), Y
+    AND #$F0                        ;; JIGS cut off low bits to get sprite
+    JSR ShiftSpriteHightoLow
+    STA btl_attacker_sprite
+
+    LDA btl_attacker
+    AND #$03
+    TAX
+    LDA btl_charhidden, X          ;; get hidden state
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    ORA btl_attacker_class
+    STA btl_attacker_class
+
+    LDA btl_charhitmult, X
+    STA btl_attacker_numhitsmult
+
+    LDY #ch_damage - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_damage
+
+    INY ; ch_hitrate
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_hitrate
+
+    LDY #ch_weaponsprite - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_graphic
+
+    INY ; ch_weaponpal
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_varplt
+
+    INY ; ch_weaponelement
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_element
+
+    INY ; ch_weaponcategory
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_category
+
+    INY ; ch_numhits
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_numhits
+
+    INY ; ch_critrate
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_critrate
+
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailments
+
+    LDY #ch_attackailment - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_attackailment
+
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailmentchance
+
+    LDA btl_charrush, X
+    BEQ :+
+        LDA btl_attacker_hitrate
+        LSR A
+        LSR A
+        STA btl_attacker_hitrate ; one quarter hit rate
+
+        LDY #ch_level - ch_stats
+        LDA (CharStatsPointer), Y
+        ASL A
+        CLC
+        ADC btl_attacker_damage ; level * 2 on top of damage. That's 100 extra damage at level 50!
+        STA btl_attacker_damage
+
+        LDA #0
+        STA btl_charrush, X
+
+  : JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
+    ;; 2x hit rate
+    ;; 1.5x crit rate (2x for thief/ninja)
+    ;; 1.5x damage for thief/ninja
+
+    LDA btl_attacker_graphic
+    BEQ @Defender
+    CMP #$AC
+    BNE @Defender
+
+
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Defender/ENEMY stats
+   @Defender:
+    LDY #en_ailments                ; ailment from RAM
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_ailments
+
+    LDY #en_category
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_category
+
+    LDY #en_statusresist
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_statusresist
+
+    LDY #en_elemweakness             ;
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_elementweakness ;
+
+    LDY #en_evade                   ; evade from RAM
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_evasion
+
+    LDY #en_defense                 ; absorb/defense from RAM
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_defense
+
+    LDY #en_hp                      ; HP from RAM
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_hp
+    INY
+    LDA (EnemyRAMPointer), Y
+    STA btl_defender_hp+1
+
+    LDA #0
+    STA btl_defender_class
+    RTS
+
+
+
+PlayerAttackPlayer_PhysicalZ:
+    LDA BattleCharID
+    ORA #$80
+    STA btl_attacker
+    ;; ^ this might not be necessary, as the attacker drawing box sets it when confused
+
+   ; AND #$03
+   ; JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Attacker/PLAYER stats
+
+    LDA #1
+    STA battle_attackerisplayer
+    STA battle_defenderisplayer
+
+    LDY #ch_class - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #$0F                        ;; cut off high bits to get class
+    STA btl_attacker_class
+
+    LDA btl_attacker
+    AND #$03
+    TAX
+    LDA btl_charhidden, X          ;; get hidden state
+    BEQ :+
+    LDA btl_attacker_class
+    ORA #$10
+    STA btl_attacker_class
+
+  : LDA btl_charhitmult, X
+    STA btl_attacker_numhitsmult
+
+    LDY #ch_damage - ch_stats
+    LDA (CharStatsPointer), Y
+    LSR A                           ;; damage for player > player is half
+    STA btl_attacker_damage
+
+    INY ; ch_hitrate
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_hitrate
+
+    LDY #ch_weaponsprite - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_graphic
+
+    INY ; ch_weaponpal
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_varplt
+
+    INY ; ch_weaponelement
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_element
+
+    INY ; ch_weaponcategory
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_category
+
+    INY ; ch_numhits
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_numhits
+
+    INY ; ch_critrate
+    LDA (CharStatsPointer), Y
+    LSR A                           ;; crit rate for player > player is half
+    STA btl_attacker_critrate
+
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailments
+
+    LDY #ch_attackailment - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_attackailment
+
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_attacker_ailmentchance
+
+    JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
+    ;; 2x hit rate
+    ;; 1.5x crit rate (2x for thief/ninja)
+    ;; 1.5x damage for thief/ninja
+
+   @Loop:
+    JSR BattleRNG_L
+    AND #$03
+    STA btl_defender_index
+    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
+
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #AIL_DEAD | AIL_STOP
+    BNE @Loop
+
+    LDA btl_defender_index       ; record the defender index
+    TAX
+    ORA #$80
+    STA btl_defender
+
+    JSR CoverStuff
+    JMP PlayerDefenderStats
+
+
+;;  input:
+;;    A = defending player index
+;;    X = attacking enemy slot index
+
+ EnemyAttackPlayer_PhysicalZ:
+    LDA btl_attacker
+    JSR GetEnemyRAMPtr
+
+    ;;;;;;;;;;;;;;;;;;;;;
+    ; Attacker ENEMY stats
+
+    LDA #$01                    ; mark that the defender is a player and not an enemy
+    STA battle_defenderisplayer
+
+    LDA #0
+    STA btl_attacker_class
+    STA battle_attackerisplayer
+
+    LDY #en_strength
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_damage
+
+    LDY #en_category
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_category
+
+    LDY #en_elemattack
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_element
+
+    LDY #en_hitrate
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_hitrate
+
+    LDY #en_numhitsmult
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_numhitsmult
+
+    LDY #en_numhits
+    LDA (EnemyRAMPointer), Y
+    AND #$0F
+    STA btl_attacker_numhits
+
+    LDA (EnemyRAMPointer), Y
+    AND #$F0
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    STA btl_attacker_limbs
+
+    LDY #en_critrate
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_critrate
+
+    LDY #en_attackail
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_attackailment
+
+    LDY #en_ailments
+    LDA (EnemyRAMPointer), Y
+    STA btl_attacker_ailments
+
+LoadPlayerDefenderStats_ForEnemyAttack:
+    LDA btl_randomplayer
+
+    AND #$03
+    STA btl_defender_index       ; record the defender index
+    TAX
+    ORA #$80
+    STA btl_defender
+
+    JSR CoverStuff
+    JSR PrepCharStatPointers        ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
+
+PlayerDefenderStats:
+    LDA #$00
+    STA btl_defender_category
+    STA GuardDefense
+
+    LDY #(ch_class - ch_stats)
+    LDA (CharStatsPointer), Y
+    AND #$0F                         ;; cut off high bits to get class
+    STA btl_defender_class
+
+    INY ; #(ch_ailments - ch_stats) ; check if stunned
+    LDA (CharStatsPointer), Y
+    STA btl_defender_ailments
+
+    LDY #(ch_evasion - ch_stats)
+    LDA (CharStatsPointer), Y
+    STA btl_defender_evasion
+
+    LDX btl_defender_index
+    LDA btl_charhidden, X
+    BEQ :+
+    LDA btl_defender_class
+    ORA #$10
+    STA btl_defender_class
+
+  : LDA btl_charguard, X          ; check battlestate for Guarding
+    BEQ :++                       ; if not guarding, resume as normal
+
+    LDA btl_defender_ailments
+    AND #AIL_STUN
+    BEQ :+
+
+    JSR BattleRNG_L               ; 50/50 chance for guarding to fail
+    AND #01                       ; if stunned
+    BEQ :+
+
+    LDX btl_defender_index
+    DEC btl_charguard, X
+
+  : LDY #(ch_level - ch_stats)
+    LDA (CharStatsPointer), Y     ; guard defense is level * 2
+    ASL A
+    STA GuardDefense
+
+  : LDY #(ch_defense - ch_stats)
+    LDA (CharStatsPointer), Y
+    CLC
+    ADC GuardDefense
+    STA btl_defender_defense
+
+    LDY #(ch_magicdefense - ch_stats)
+    LDA (CharStatsPointer), Y
+    STA btl_defender_magicdefense
+
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_defender_statusresist
+
+    INY ;LDY #(ch_elementresist - ch_stats)
+    LDA (CharStatsPointer), Y
+    STA btl_defender_elementresist
+
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_defender_elementweakness
+
+    LDY #(ch_curhp - ch_stats)
+    LDA (CharStatsPointer), Y
+    STA btl_defender_hp
+    INY
+    LDA (CharStatsPointer), Y
+    STA btl_defender_hp+1
+
+    RTS
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Unadjust Equipment stats  [$ED92 :: 0x3EDA2]
+;;
+;;    This is called when you enter the weapon or armor menu.  It edits all the characters
+;;  stats to reflect what they would be if they removed all their equipment.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+UnadjustEquipStats:
+ LDA #0
+ STA equipmenu_tmp
+
+ @Loop:
+ AND #$C0
+ TAX
+
+    LDA ch_righthand, X
+    BEQ :+
+    JSR @AdjustWeapon
+
+  : LDA ch_lefthand, X
+    BEQ :+
+    JSR @AdjustArmor  ; left hand
+
+  : LDA ch_head, X
+    BEQ :+
+    JSR @AdjustArmor  ; head
+
+  : LDA ch_body, X
+    BEQ :+
+    JSR @AdjustArmor  ; body
+
+  : LDA ch_hands, X
+    BEQ :+
+    JSR @AdjustArmor  ; hands
+
+  : LDA ch_accessory, X
+    BEQ :+
+    JSR @AdjustArmor  ; accessory
+
+  : JSR UnadjustBBEquipStats  ; do a few adjustments for BB/MAs... and zero absorb for all
+
+    LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
+    CLC
+    ADC #$40
+    STA equipmenu_tmp
+    BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
+    RTS
+
+  @AdjustWeapon:
+    JSR GetWeaponDataPointer
+
+    LDA ch_hitrate, X   ; get character's hit rate
+    SEC
+    SBC (tmp), Y        ; subtract the weapon's hit rate bonus
+    STA ch_hitrate, X   ; and write back to character's hit rate
+    ;; JIGS - some battle stat prep added in:
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    CLC
+    ADC #$01
+    STA ch_numhits, X
+    ;;
+
+    INY                 ; inc source index
+
+  @SpecialWeapons:
+    LDA ch_righthand, X
+    CMP #CHICKEN_KNIFE+1
+    BEQ @Restore
+    CMP #BRAVE_BLADE+1
+    BNE @Done
+
+  @Restore:
+    LDA ch_damagebackup, X
+    STA ch_damage, X
+
+   @Done:
+    LDA ch_damage, X       ; get char's dmg
+    SEC
+    SBC (tmp), Y           ; subtract weapon's damage bonus
+    STA ch_damage, X       ; and write back
+
+    LDA #00               ;; JIGS - clear these out
+    STA ch_critrate, X
+    STA ch_weaponelement, X
+    STA ch_weaponcategory, X
+    STA ch_weaponsprite, X
+    STA ch_weaponpal, X
+    STA ch_attackailment, X
+    STA ch_attackailproc, X
+
+   ; LDA #$01
+   ; STA ch_numhitsmult, X ;; JIGS - this is always 1, weapon equipped or not.
+
+    ;LDX equipmenu_tmp   ; restore X to the equipment source index
+    RTS
+
+  @AdjustArmor:
+    JSR GetPointerToArmorData
+
+    ;LDX tmp+7           ; get char index in X
+    ;LDY #0              ; zero our source index Y
+
+    LDA ch_evasion, X   ; get character's evade
+    CLC
+    ADC (tmp), Y        ; add the armor's evade penalty rate (removing the penalty)
+    STA ch_evasion, X   ; and write back
+
+    INY                 ; skip over absorb--it just gets set to 0 since we're removing all armour
+    INY                 ; Y now points to magic defense
+    LDA ch_magicdefense, X
+    SEC
+    ADC (tmp), Y
+    STA ch_magicdefense, X
+
+    ;LDX equipmenu_tmp   ; then restore X to equipment source index
+    RTS                 ; and exit
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;
+;;
+;;  UnadjustBBEquipStats  [$EEB7 :: 0x3EEC7]
+;;
+;;    This is sort of a continuation of above 'UnadjustEquipStats' routine
+;;
+;;    Here, the dmg stat for BB/MAs is zerod.. or the absorb and elemental resistence
+;;  for all classes is zerod.
+;;
+;;;;;;;;;;;;;;;;;;;
+
+UnadjustBBEquipStats:
+    ;LDX tmp+7           ; get char index into X
+    LDA ch_class, X     ; get the char's class
+    AND #$0F            ;; JIGS - cut off high bits (sprite)
+
+    CMP #CLS_BB         ; check if he's a black belt or master
+    BEQ @BlackBelt      ;  if he isn't, just exit
+    CMP #CLS_MA         ; if he is...
+    BNE @Armor
+
+  @BlackBelt:
+    LDA #0              ; zero his damage stat
+    STA ch_damage, X
+
+  @Armor:               ; for armor...
+    LDA #0
+    ;LDX tmp+7               ; get char index
+    STA ch_defense, X       ; zero absorb
+    STA ch_elementresist, X ; and elemental resistence
+    STA ch_elementweak, X   ; JIGS - and elemental weakness why not
+    STA ch_statusresist, X
+    RTS                     ; then exit
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Readjust Equipment stats  [$ED92 :: 0x3EDA2]
+;;
+;;    This is called when you EXIT the weapon or armor menu.  It edits all the characters
+;;  stats to reflect the changes made by their equipment.
+;;
+;;    This is very similar in format to above UnadjustEquipmentStats routine
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+ReadjustEquipStats:
+ LDA #0
+ STA equipmenu_tmp
+
+ @Loop:
+ AND #$C0
+ TAX
+
+    LDA ch_righthand, X
+    BEQ :+
+    JSR @AdjustWeapon
+
+  : LDA ch_lefthand, X
+    BEQ :+
+    JSR @AdjustArmor  ; left hand
+
+  : LDA ch_head, X
+    BEQ :+
+    JSR @AdjustArmor  ; head
+
+  : LDA ch_body, X
+    BEQ :+
+    JSR @AdjustArmor  ; body
+
+  : LDA ch_hands, X
+    BEQ :+
+    JSR @AdjustArmor  ; hands
+
+  : LDA ch_accessory, X
+    BEQ :+
+    JSR @AdjustArmor  ; accessory
+
+  : JSR ReadjustBBEquipStats  ; do a few adjustments for BB/MAs...
+
+   LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
+   CLC
+   ADC #$40
+   STA equipmenu_tmp
+   BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
+   RTS
+
+  @AdjustWeapon:
+    JSR GetWeaponDataPointer ; this sets Y to 0
+
+    LDA ch_hitrate, X      ; get char's hit rate
+    CLC
+    ADC (tmp), Y           ; add to it the weapon's hit bonus
+    STA ch_hitrate, X      ; and write it back
+
+    INY                    ; inc source index
+
+    LDA ch_damage, X       ; get char's damage
+    CLC
+    ADC (tmp), Y           ; add weapon's damage bonus
+    STA ch_damage, X       ; and write back
+
+    ;; JIGS - and do other battle stat prepping here
+
+    INY
+    LDA (tmp), Y
+    STA ch_critrate, X
+    INY
+    LDA (tmp), Y
+    STA ch_attackailment, X
+    INY
+    LDA (tmp), Y
+    STA ch_attackailproc, X
+    INY
+    LDA (tmp), Y
+    STA ch_weaponelement, X
+    INY
+    LDA (tmp), Y
+    STA ch_weaponcategory, X
+    INY
+    LDA (tmp), Y
+    STA ch_weaponsprite, X
+    INY
+    LDA (tmp), Y
+    STA ch_weaponpal, X
+
+  @SpecialWeapons:
+    LDA ch_righthand, X
+    CMP #CHICKEN_KNIFE+1
+    BEQ @ChickenKnife
+    CMP #BRAVE_BLADE+1
+    BNE @Done
+
+  @BraveBlade:
+    LDA ch_damage, X
+    STA ch_damagebackup, X
+    LDA battleswon
+    JMP :+
+
+  @ChickenKnife:
+    LDA ch_damage, X
+    STA ch_damagebackup, X
+    LDA battlesrun
+  : STA ch_damage, X
+
+  @Done:
+    RTS
+
+  @AdjustArmor:            ; A = armor_id * 4
+    JSR GetPointerToArmorData
+
+    LDA ch_evasion, X      ; get char's evade
+    SEC
+    SBC (tmp), Y           ; subtract armor evade penalty
+    STA ch_evasion, X      ; and write it back
+
+    INY                    ; inc source index
+    LDA ch_defense, X      ; get absorb
+    CLC
+    ADC (tmp), Y           ; add absorb bonus
+    STA ch_defense, X      ; and write back
+
+    INY
+    LDA ch_magicdefense, X
+    CLC
+    ADC (tmp), Y
+    STA ch_magicdefense, X
+
+    INY                     ; inc source index
+    LDA ch_elementresist, X ; get elemental resistence
+    ORA (tmp), Y            ; combine this armor's elemental resistence
+    STA ch_elementresist, X ; and write back
+
+    INY
+    LDA ch_elementweak, X   ; get elemental weakness
+    ORA (tmp), Y            ; combine this armor's elemental weakness
+    STA ch_elementweak, X   ; and write back
+
+    INY
+    LDA ch_statusresist, X
+    ORA (tmp), Y
+    STA ch_statusresist, X
+    RTS
+
+
+GetWeaponDataPointer:
+   ; SEC
+   ; SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
+    TAY                    ; save A
+    DEY                    ; NOW subtract 1 from the Equip ID!
+    TXA                    ; then push X to stack
+    PHA
+    TYA                    ; restore A
+    LDX #9
+    JSR MultiplyXA
+    ; I think nomally we'd add the low byte of the pointer, but since the weapon data is
+    ; at the very start of the bank, we'd just be adding 0.
+    CLC
+    ;ADC #<lut_WeaponData
+
+    STA tmp                ; put in tmp as low byte of our pointer
+    TXA
+    ADC #>lut_WeaponData   ; add high byte of our pointer
+    STA tmp+1              ; fill tmp+1 to complete our pointer
+    PLA
+    TAX                    ; then restore X
+    LDY #0                 ; and set Y to 0 for later
+    RTS
+
+GetPointerToArmorData:
+;    SEC
+;    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
+;    STA tmp
+;    ASL A
+;    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
+;    CLC                 ; (A= armor_id*8)
+;    ADC tmp             ; multiply by 5
+;    ADC #<lut_ArmorData ; add A to desired pointer
+;    STA tmp             ;  and store pointer to (tmp)
+;    LDA #0
+;    TAY
+;    ADC #>lut_ArmorData
+;    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
+;    RTS
+
+    SEC
+    SBC #ARMORSTART+1
+    TAY                    ; save A
+    TXA                    ; then push X to stack
+    PHA
+    TYA                    ; restore A
+    LDX #6
+    JSR MultiplyXA
+    CLC
+    ADC #<lut_ArmorData    ; add low byte of our pointer
+    STA tmp                ; put in tmp as low byte of our pointer
+    TXA
+    ADC #>lut_ArmorData    ; add high byte of our pointer
+    STA tmp+1              ; fill tmp+1 to complete our pointer
+    PLA
+    TAX                    ; then restore X
+    LDY #0                 ; and set Y to 0 for later
+    RTS
+
+
+;;;;;;;;;;;;;;;;;;;
+;;
+;;  ReadjustBBEquipStats  [$EEDB :: 0x3EEEB]
+;;
+;;    This is sort of a continuation of above 'ReadjustEquipStats' routine
+;;  This checks BlackBelts to see if they have equipment equipped, and adjusts their
+;;  stats appropriately (since they have special bonuses for being unequipped).
+;;
+;;;;;;;;;;;;;;;;;;;
+
+ReadjustBBEquipStats:
+    LDA ch_hitrate, X
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    CLC
+    ADC #$01
+    STA ch_numhits, X  ; figure out numhits! for everyone!
+
+  ;  LDA #$01                  ; always 1 until a spell changes it
+  ;  STA ch_numhitsmult, X
+
+    LDA ch_class, X    ; get this char's class
+    AND #$0F             ;; JIGS - cut off high bits (sprite)
+
+    CMP #CLS_BB        ; see if he's a black belt or master... if yes, jump ahead
+    BEQ @BlackBelt     ; otherwise, exit
+    CMP #CLS_MA
+    BNE @Exit
+
+  @BlackBelt:
+    LDA ch_righthand, X
+    BEQ @NoWeaponEquipped     ; if zero, we know this BB has no weapon equipped
+
+  @WeaponEquipped:
+    LDA ch_strength, X        ; if a weapon is equipped... get strength stat
+    LSR A                     ;  /2
+    ;CLC ;; JIGS  - fixes rounding error, if its a bug?
+    ADC ch_damage, X          ; and add to damage
+    STA ch_damage, X
+    JMP @Armor ;RTS                       ; equipped BB's dmg = (str/2 + weapon)
+
+  @NoWeaponEquipped:
+    LDA ch_level, X           ; if unequipped, get current experience level
+    CLC
+    ADC #$01                  ; add 1 (levels are stored 0 based in RAM -- ie '0' is really level 1)
+    ASL A                     ; multiply by 2
+    STA ch_damage, X          ; and set dmg.  Unequipped BB's dmg = (level*2)
+    STA ch_critrate, X        ; JIGS - so is crit rate
+
+    ;; - adding numhits, since battle prep doesn't do it anymore!
+    LDA #$AC
+    STA ch_weaponsprite, X ; and give fisties sprite
+
+    LDA ch_numhits, X ; and double numhits
+    ASL A
+    STA ch_numhits, X
+
+  @Armor:                     ; for armor....
+    LDA ch_defense, X         ; get absorb
+    BNE @Exit                 ; if nonzero he has something equipped (absorb would be 0 otherwise), so just exit
+
+    LDA ch_level, X           ; otherwise, get level + 1
+    CLC
+    ADC #$01
+    STA ch_defense, X         ; Unequipped BB's absorb=level
+
+  @Exit:
+    RTS                       ; and exit
+
+
+
+
+
+WeaponArmorShopStats:
+    LDA #$FF
+    LDX #12
+  : STA bigstr_buf-1, X
+    DEX
+    BNE :-
+
+    STX bigstr_buf+11 ; null-terminate main string
+
+    LDA #$01
+    STA bigstr_buf+3 ; put line break in
+    STA bigstr_buf+7
+
+    LDA #14
+    STA dest_x
+    LDA #20
+    STA dest_y
+
+    LDA shop_curitem
+    CMP #ARMORSTART+1
+    BCS @Armor
+
+   @Weapon:
+    TAX
+    JSR GetWeaponDataPointer   ; Y = 0, also preserves X
+
+    LDA (tmp), Y ; Hit Rate
+    STA bigstr_buf+16
+    INY
+    LDA (tmp), Y ; Damage
+    CPX #CHICKEN_KNIFE+1
+    BNE :+
+        LDA battlesrun
+        BNE @SaveWeaponDamage
+
+  : CPX #BRAVE_BLADE+1
+    BNE @SaveWeaponDamage
+
+    LDA battleswon
+
+   @SaveWeaponDamage:
+    STA bigstr_buf+12            ; space stats 3 bytes apart
+    INY
+    LDA (tmp), Y ; Critical
+    STA bigstr_buf+20
+    RTS
+
+   @Armor:
+   ; CLC
+   ; ADC #1 ; the following JSR subtracts +1 too many, but needs to stay doing that for other routines
+    JSR GetPointerToArmorData
+
+    LDA (tmp), Y ; Evade penalty
+    STA bigstr_buf+16
+    INY
+    LDA (tmp), Y ; Absorb
+    STA bigstr_buf+12
+    INY
+    LDA (tmp), Y ; Magic Defense
+    STA bigstr_buf+20
+    RTS
+
+
+
+M_EquipDescBox_Weapon:
+.byte $8A,$61,$34,$B1,$B7,$E4,$FE,$01     ; Ailment:
+.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
+.byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__
+
+M_EquipDescBox_Armor:
+.byte $99,$4D,$53,$A6,$B7,$E4,$FE,$01     ; Protect:
+.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
+.byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__
+
+SillyWeaponArmorSpecialDesc_LUT:
+    .word M_EquipDescBox_Weapon
+    .word M_EquipDescBox_Armor
+
+WeaponArmorSpecialDesc:
+    LDA #23
+    STA dest_y
+    LDA #03
+    STA dest_x
+
+    LDX ItemToEquip
+    BNE :+
+      RTS            ; save time and just return
+
+  : DEX
+    STX tmp+10
+    CPX #ARMORSTART
+    BCS @Armor
+
+   @Weapon:
+    LDX #0
+    BEQ :+
+
+   @Armor:
+    LDX #2
+  : LDA SillyWeaponArmorSpecialDesc_LUT, X
+    STA text_ptr
+    LDA SillyWeaponArmorSpecialDesc_LUT+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+
+    LDY #0
+    LDX #0
+   @Loop:
+    LDA (text_ptr), Y
+    CMP #$FE
+    BEQ @FillSpaces
+    STA str_buf+$80, X
+    INX
+   @Resume:
+    INY
+    CPY #$18
+    BNE @Loop
+    BEQ @SortOutBytes
+
+   @FillSpaces:
+    STY tmp
+    LDY #18
+    LDA #$FF
+  : STA str_buf+$80, X
+    INX
+    DEY
+    BNE :-
+    LDY tmp
+    JMP @Resume
+
+   @SortOutBytes:
+    LDA ItemToEquip
+    CMP #ARMORSTART+1
+    BCS @ArmorBytes
+
+   @WeaponBytes:
+    JSR GetWeaponDataPointer
+    JMP :+
+
+   @ArmorBytes:
+    JSR GetPointerToArmorData
+  : LDY #3
+    LDA (tmp), Y ; Ailment to inflict (weapon) / Element resisted (armor)
+    STA tmp+11
+    INY
+    INY
+    LDA (tmp), Y ; Element to attack with (weapon) / Status defended against (armor)
+    STA tmp+12
+
+    LDA ItemToEquip
+    CMP #ARMORSTART+1
+    BCC :+
+
+   @FixArmorBytes:
+    LDX tmp+12
+    LDY tmp+11
+    STX tmp+11
+    STY tmp+12
+
+  : JSR GetEquipmentSpell
+    BEQ @NoSpell
+
+    STA str_buf+$BB   ; spell ID
+    LDA #$02
+    STA str_buf+$BA   ; control code for item name, before spell ID
+    LDA #$0A
+    STA str_buf+$BD   ; amount of spaces after spell
+    BNE @FinishUp
+
+   @NoSpell:
+    LDA #$02
+    STA str_buf+$BD   ; amount of spaces after "no spell"
+    LDA #$06
+    STA str_buf+$BA   ; control code for common string
+    LDA #$1D
+    STA str_buf+$BB   ; followed by the string for "no spell"
+
+   @FinishUp:
+    LDA #$09
+    STA str_buf+$BC   ; next byte is # of spaces
+    LDA #0
+    STA str_buf+$BE   ; terminate the string properly
+    STA joy_start     ; and zero this for the next loop of the screen!
+    STA tmp+13
+    LDA #1
+    STA menustall     ; and set this to draw with the screen on
+
+    ;; str_buf+$80 is 26 tiles wide each row, with +1 for the line breaks
+    ;; three rows for 81 total. Spell names are 7 tiles.
+    ;; all spaces must be preserved to overwrite common equipment stats!
+    ;; But with the spell name decompressed, that's 7 spaces too many...
+
+    ;; visually, it should look like this, if there is a spell:
+    ;; Ailment:_*_*_*_*_*_*_*_*__ 01
+    ;; Element:_*_*_*_*_*_*_*_*__ 01
+    ;; Spell:___XXXXXXX__________ 00
+    ;; it may look messier in RAM.
+    ;; Spell: FF FF FF 02 XX 09 09 00
+
+    ;; now to convert the bits in the other two stats into tiles!
+
+    LDA tmp+11 ; start with ailment
+    LDX #$07   ; how far into the string to print the icons
+    LDY #$F1   ; tile for fancy tiny X to indicate nothing in that slot
+
+   @UnrollStatByte:
+    LSR A
+    BCC :+
+      LDY #$E9 ; death
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$ED ; stone
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$EB ; poison
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$EC ; darkness
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$75 ; sleep
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$71 ; stun
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$76 ; mute
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$70 ; confusion
+  : JSR @PrintIcon
+
+  ;; and then the element icon
+    LDA tmp+12
+    LDX #$20
+
+  @UnrollElementByte:
+    LSR A
+    BCC :+
+      LDY #$70 ; status element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$71 ; stun element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$EB ; poison element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$E9 ; death element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$72 ; fire element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$73 ; ice element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$74 ; lightning element
+  : JSR @PrintIcon
+    LSR A
+    BCC :+
+      LDY #$ED ; earth element
+  : JSR @PrintIcon
+
+    LDA #<(str_buf+$80)
+    STA text_ptr
+    LDA #>(str_buf+$80)
+    STA text_ptr+1
+    RTS
+
+   ;; string should be ready to go; jump back and print it!
+
+   @PrintIcon:
+    PHA
+    TYA
+    STA str_buf+$80, X
+    INX
+    INX ; add spaces between icons
+    LDY #$F1
+    PLA
+    RTS
+
+
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -937,344 +2717,14 @@ AssignMapTileDamage_Z:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-  
   lut_IntroStoryText:
 
 ;; JIGS - the original used DTE, which my routine can not... so I did my best to re-make it with some fancy tweaks.
 ;; Since every letter is a sprite as well, we can't use control codes. So the routine uses $78 (sprite the same colour as the background)
-;; and reads them as double line breaks. 
+;; and reads them as double line breaks.
 ;; The screen is 32 tiles wide, so...
-     ; 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32  
-     
+     ; 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
+
 .byte $FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$B9,$A8,$AC,$AF,$A8,$A7,$FF,$AC,$B1,$78
 .byte $FF,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$C0,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$AC,$B1,$A7,$FF,$B6,$B7,$B2,$B3,$B6,$BF,$78
 .byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$B7,$AB,$A8,$FF,$B6,$A8,$A4,$FF,$AC,$B6,$FF,$BA,$AC,$AF,$A7,$BF,$78
@@ -1285,61 +2735,37 @@ AssignMapTileDamage_Z:
 .byte $FF,$FF,$FF,$8F,$B2,$B8,$B5,$FF,$A0,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B0,$A8,$C3,$79,$78,$78
 .byte $FF,$FF,$FF,$FF,$FF,$8A,$A9,$B7,$A8,$B5,$FF,$A4,$FF,$AF,$B2,$B1,$AA,$FF,$AD,$B2,$B8,$B5,$B1,$A8,$BC,$BF,$78
 .byte $FF,$FF,$A9,$B2,$B8,$B5,$FF,$BC,$B2,$B8,$B1,$AA,$FF,$BA,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$A4,$B5,$B5,$AC,$B9,$A8,$BF,$78
-.byte $FF,$FF,$FF,$FF,$FF,$A8,$A4,$A6,$AB,$FF,$AB,$B2,$AF,$A7,$AC,$B1,$AA,$FF,$A4,$B1,$FF,$98,$9B,$8B,$C0,$00 
-;; It's the intro text... I'm not gonna spell it out here. :I I just made some edits to spiff it up a bit. Some spaces here, a better ... there, added in a proper ` for the quotation part... 
- 
- 
+.byte $FF,$FF,$FF,$FF,$FF,$A8,$A4,$A6,$AB,$FF,$AB,$B2,$AF,$A7,$AC,$B1,$AA,$FF,$A4,$B1,$FF,$98,$9B,$8B,$C0,$00
+;; It's the intro text... I'm not gonna spell it out here. :I I just made some edits to spiff it up a bit. Some spaces here, a better ... there, added in a proper ` for the quotation part...
+
+
 JigsIntro:
-    LDA #$08               ; set soft2000 so that sprites use right pattern
-    STA soft2000           ; table while BG uses left
-    LDA #0
-    STA $2001              ; turn off the PPU
-        
-    LDA $2002              ; Set address to $0000 
-    LDA #>$0000
-    STA $2006
-    LDA #<$0000
-    STA $2006
-    
+    ;; some prep work done in LoadShopCHRForBank_Z in Bank $04 -- turns off screen, sets soft2000, and loads Shop graphics (intro sprites as well)
+    ;; The shop graphics have the extra .' tile this screen uses, as well as loading the menu text.
     JSR LongCall
     .word LoadShopCHRForBank_Z
     .byte BANK_MENUCHR
-    
-;;   JIGS - this saves having to have the lut_ShopCHR copy-pasted in this bank.
-    
-    
 
-    
-    LDA #0
-    STA joy_a              ; clear A, B, Start button catchers
-    STA joy_b
-    STA joy_start
+    LDA #$FF
+    STA MMC5_tmp
+    JSR ClearNT_Color
+    JSR ClearButtons
     STA cursor
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
 
     LDA $2002           ; reset PPU toggle and set PPU address to $2000
-    LDA #>$2000         ;   (start of nametable)
+    LDA #>$23C0         ;   (start of nametable)
     STA $2006
-    LDA #<$2000
+    LDA #<$23C0
     STA $2006
-
-    LDX #($03C0 / 4)    ; Fill the nametable with tile $FF (blank space)
-    LDA #$FF            ;  this loop does a full $03C0 writes
-  @NTLoop:
-      STA $2007
-      STA $2007
-      STA $2007
-      STA $2007
-      DEX
-      BNE @NTLoop
 
     LDX #$40            ; Next, fill the attribute table so that all tiles use
-    LDA #$00; 1010101      ;  palette 0.  
-  @AttrLoop:            ;  
-      STA $2007         ;  
+    LDA #$00            ;  palette 0.
+  @AttrLoop:            ;
+      STA $2007         ;
       DEX
       BNE @AttrLoop
-      
+
     LDA #$0F
     STA cur_pal
     STA cur_pal+$10
@@ -1348,91 +2774,96 @@ JigsIntro:
     STA cur_pal+$12
     LDA #$30
     STA cur_pal+3
-     
+
     LDA #<lut_IntroStoryText  ; load up the pointer to the intro story text
     STA text_ptr
     LDA #>lut_IntroStoryText
     STA text_ptr+1
-    
-    LDA #2                  ; Text coordinates
-    STA dest_y
-    LDA #1
-    STA dest_x
-    
-    LDA #$09; 08
-    STA MMC5_tmp+3
-    LDA #$10; 0F
-    STA MMC5_tmp+4
-     
-    JSR TurnOnScreen
-        
+
+    LDA #$0D ; 09                ; starting sprite coordinates
+    STA spr_x
+    LDA #$14 ; 10
+    STA spr_y
+
+    LDX #2                  ; Text coordinates
+    STX dest_y
+    DEX ; #1
+    STX dest_x
+
+    JSR TurnMenuScreenOn_ClearOAM
+
 IntroLoop:
     LDA #4
-    STA MMC5_tmp+6
-    JSR IntroLoopFrames
-    JSR IntroStory_Joy    
-    JSR DrawText
+    STA tmp+6
+
+   @loop:
+    JSR NextLetter           ; gets the next tile to print, set it up in OAM, updates the sprite palette
+    JSR TurnOnScreen         ; does all the frame work! Loads the new palette, updates sprites, sets scroll, does music...
+
+    DEC tmp+6
+    BNE @loop
+    ;; Do 4 frames, then...
+
+    JSR UpdateJoy         ; Update joypad data
+    LDA joy
+    AND #BTN_START        ; see if start was pressed
+    BEQ :+                ; if not, skip ahead.
+        LDA #0
+        STA $2001              ; turn off the PPU
+        STA joy_a              ; clear A, B, Start button catchers
+        STA joy_b
+        STA joy_start
+        STA cursor
+        STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
+        JMP GameStart2
+
+  : JSR IntroStoryText
     JMP IntroLoop
-    
-    
-ClearOldLetters:
-    LDA MMC5_tmp+7
-    CMP #3
-    BNE @nope
-    LDA #0
-    STA MMC5_tmp+7
-    JSR ClearOAM       
-    @nope:
-    RTS
-    
+
+
 NextLetter:
-    LDY #0         
-    LDA (text_ptr), Y 
-    STA MMC5_tmp+2
-    LDA MMC5_tmp+3
-    STA spr_x
-    LDA MMC5_tmp+4
-    STA spr_y
-    
     LDX sprindex     ; get the sprite index in X
-
-    LDA spr_y        ; load up desired Y coord
-    STA oam+$0, X    ;  set UL and UR sprite Y coords
-    STA oam+$8, X
-    CLC
-    ADC #$08         ; add 8 to Y coord
-    STA oam+$4, X    ;  set DL and DR Y coords
-    STA oam+$C, X
-
-    LDA spr_x        ; load up X coord
-    STA oam+$3, X    ;  set UL and DL X coords
-    STA oam+$7, X
-    CLC
-    ADC #$08         ; add 8
-    STA oam+$B, X    ;  and set UR and DR X coords
-    STA oam+$F, X
-
-    LDA MMC5_tmp     ; get UL tile from the buffer
-    CLC
-    ADC MMC5_tmp+2   ; add the tile offset to the tile ID
+    LDY #0
+    LDA (text_ptr), Y
     STA oam+$1, X    ; write it to oam
+
+    DEC spr_y        ; DEC the coordinates every frame to give it that "popping out" effect
+    LDA spr_y
+    STA oam+$0, X    ;  set Y coords
+    DEC spr_x
+    LDA spr_x
+    STA oam+$3, X    ;  set X coords
+
     LDA #$04
     STA oam+$2, X    ; write to oam
-  
-    RTS              ; and exit!
+    ;; flow into
 
-    
-   
-DrawText:
+IntroSpritePalette:
+    LDA tmp+6
+    CMP #03         ; on frame 1 and 2 (loop counter = 4 or 3), do dark
+    BCS @Darkest
+
+   @Darker:          ; on frame 3 and 4 (loop counter = 2 or 1), do light
+    LDA #$21
+    STA cur_pal+19
+    RTS
+
+   @Darkest:
+    LDA #$11
+    STA cur_pal+19
+    RTS
+
+
+IntroStoryText:
     LDA #1
     STA menustall         ; enable to write while PPU is on?
     JSR CoordToNTAddr
     JSR MenuCondStall
-   
+
    @Draw:
     LDY #0            ; zero Y -- we don't want to use it as an index.  Rather, the pointer is updated
     LDA (text_ptr), Y ;   after each fetch
-    BEQ @Finish   ; if the character is 0  (null terminator), exit the routine
+    BEQ @Finish       ; if the character is 0  (null terminator), exit the routine
 
     INC text_ptr      ; otherwise, inc source pointer
     BNE :+
@@ -1440,7 +2871,7 @@ DrawText:
 
 :   CMP #$78
     BEQ @ControlCode  ;   if it is, jump ahead
-    
+
     LDX $2002         ; reset PPU toggle
     LDX ppu_dest+1    ;  load and set desired PPU address
     STX $2006         ;  do this with X, as to not disturb A, which is still our character
@@ -1450,118 +2881,58 @@ DrawText:
     STA $2007          ; draw the character as-is
     INC ppu_dest       ; increment dest PPU address
     JMP @DrawText_Exit ; and finish after printing one letter
-    
-    @ControlCode:
+
+   @ControlCode:
     LDA #1
     STA dest_x
     INC dest_y
     INC dest_y
-    LDA MMC5_tmp+4
+    LDA spr_y
     CLC
-    ADC #$10
-    STA MMC5_tmp+4    ; update sprite Y coordinates to next line
-    LDA #$09; 8
-    STA MMC5_tmp+3    ; and reset sprite X 
+    ADC #$14 ; 10
+    STA spr_y         ; update sprite Y coordinates to next line
+    LDA #$0D ; 9
+    STA spr_x         ; and reset sprite X
     JMP @Finish
-  
+
    @DrawText_Exit:
     INC dest_x
     INC MMC5_tmp+7
-    
-    LDA MMC5_tmp+3
+
+    LDA spr_y
     CLC
-    ADC #$08
-    STA MMC5_tmp+3
-    
-   @Finish:    
+    ADC #$4
+    STA spr_y
+
+    LDA spr_x
+    CLC
+    ADC #$0C ; 08
+    STA spr_x
+
+   @Finish:
     LDA #$00          ; reset scroll to 0
     STA $2005
     STA $2005
-    STA menustall     ; and disable menu stalling again
-    RTS    
-    
-    
-    
-    
-IntroLoopFrames:
-   @loop:
-    JSR WaitForVBlank_L      ; wait for VBlank (don't want to turn the screen on midway through the frame)
-    JSR IntroSpritePalette
-    JSR DrawPalette          ; draw/apply the current palette
-    JSR NextLetter
-    LDA #>oam                ; do Sprite DMA
-    STA $4014
-        
-    LDA #$08
-    STA soft2000             ; set $2000 and soft2000 appropriately
-    STA $2000                ;  (no NT scroll, BG uses left pattern table, sprites use right, etc)
-
-    LDA #$1E
-    STA $2001                ; enable BG and sprite rendering
-    LDA #0
-    STA $2005
-    STA $2005                ; reset scroll
-
-    LDA #BANK_THIS           ; record current bank and CallMusicPlay
-    STA cur_bank
-    JSR CallMusicPlay
-    
-    DEC MMC5_tmp+6
-    BNE @loop
     RTS
-    
-    
-IntroStory_Joy:
-    JSR UpdateJoy         ; Update joypad data
-    LDA joy
-    AND #BTN_START        ; see if start was pressed
-    BNE :+                ;  if not, just exit
-      RTS
-:   
-    LDA #0
-    STA $2001              ; turn off the PPU
 
+
+ClearButtons:
+    LDA #0
     STA joy_a              ; clear A, B, Start button catchers
     STA joy_b
     STA joy_start
-    STA cursor
-    STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
-    JMP GameStart2
-    
-    
-IntroSpritePalette:
-    LDA #0
-    STA $2001
+    STA joy_select
+    RTS
 
-    LDA MMC5_tmp+6
-    CMP #04
-    BCS @Darkest
-    CMP #02
-    BCS @Darker
-      LDA #$21
-      STA cur_pal+19
-      RTS
-        
-    @Darker:  
-    LDA #$11
-    STA cur_pal+19
-    RTS
-    
-    @Darkest:  
-    LDA #$01
-    STA cur_pal+19
-    RTS
- 
- 
- 
+
 TurnMenuScreenOn_ClearOAM:
-    JSR ClearOAM  
-TurnOnScreen: 
+    JSR ClearOAM
+TurnOnScreen:
     JSR WaitForVBlank_L      ; wait for VBlank (don't want to turn the screen on midway through the frame)
     LDA #>oam                ; do Sprite DMA
     STA $4014
     JSR DrawPalette          ; draw/apply the current palette
-    
+
     LDA #$08
     STA soft2000             ; set $2000 and soft2000 appropriately
     STA $2000                ;  (no NT scroll, BG uses left pattern table, sprites use right, etc)
@@ -1575,212 +2946,184 @@ TurnOnScreen:
     LDA #BANK_THIS           ; record current bank and CallMusicPlay
     STA cur_bank
     JMP CallMusicPlay
- 
- 
- 
-EnterTitleScreenNew:
-    JSR IntroTitlePrepare_BankZ    ; clear NT, start music, etc, ; JISG - also ends up drawing the Bridge Scene
-    JSR TitleScreenPalette
-    JSR DrawTitleWords
-    
-    BIT $2002                       ;  reset PPU toggle
-    
-    JSR TurnMenuScreenOn_ClearOAM  
-    
-    LDA #3
-    STA cursor_max
-    
-   @Loop:
-    JSR ClearOAM       
 
-    JSR CheckTitleCursor
-    JSR WaitForVBlank_L
-       
-    LDA #>oam          
-    STA $4014          
-    LDA #0             
-    STA $2005
-    STA $2005
 
-    JSR UpdateJoy          
-    LDA #BANK_THIS       
-    STA cur_bank
 
-    JSR CallMusicPlay
-    LDA joy_a
-    ORA joy_start         
-    BNE @OptionChosen      
+EnterTitleScreen:
+    LDA #$08               ; set soft2000 so that sprites use right pattern
+    STA soft2000           ;   table while BG uses left
 
-    LDA joy                
-    AND #$0C 
-    CMP joy_prevdir         
-    BEQ @Loop              
-
-    STA joy_prevdir       
-    CMP #0            
-    BEQ @Loop         
-
-    CMP #$04         
-    BNE @Up
-
-  @Down:           
-    LDA cursor      
-    CLC
-    ADC #$01
-    CMP cursor_max   
-    BCC @Move        
-    LDA #0          
-    BEQ @Move       
-
-  @Up:               
-    LDA cursor       
-    SEC
-    SBC #$01
-    BPL @Move        
-    LDA cursor_max   
-    SEC
-    SBC #$01
-
-  @Move:
-    STA cursor          
-    JSR PlaySFX_MenuMove 
-    JMP @Loop
-
-@OptionChosen:           
-    LDA cursor              
-    CMP #2
-    BEQ @OptionsMenu
-        CMP #1                 
-        RTS                   
-   @OptionsMenu:
-    LDA #0
-    STA $2001              
-    STA menustall           
-    LDX BattleBGColor
-    LDA BattleBackgroundColor_LUT, X
-    STA cur_pal+14
-    JSR ClearNT_FillBackground    
-    JSR OptionsMenu
-    JMP EnterTitleScreenNew
-    
-    
-CheckTitleCursor:
-    LDY cursor          ; put the cursor in Y
-
-    LDA lut_TitleCursor_Y, Y
-    STA spr_y
-    LDA #$38
-    STA spr_x
-    
-    JMP DrawCursor               ; draw it!  and exit
-    
-   lut_TitleCursor_Y:   
-   .BYTE $38,$48,$58
-   
-
-    
-
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  IntroTitlePrepare  [$A219 :: 0x3A229]
-;;
-;;    Does various preparation things for the intro story and title screen.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; JIGS - This is now just for the title screen, not the intro story. LoadMenuCHRPal ends with swapping to bank 9, so the commented-out parts are done there.
-;;        Then returns to this bank to finish doing stuff!
-
-IntroTitlePrepare_BankZ:
-  
-    JSR LongCall
-    .word IntroTitlePrepare
-    .byte BANK_MENUS    
-
-    LDA #0
-    STA joy_a              ; clear A, B, Start button catchers
-    STA joy_b
-    STA joy_start
+    JSR ClearButtons       ; resets all buttons and A = 0
+    STA $2001              ; turn off the PPU
     STA cursor
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
-    RTS
 
-    
+    JSR LongCall
+    .word IntroTitlePrepare
+    .byte BANK_MENUS
+    ;; Draw the bridge scene, and load sprite palettes
+
+    JSR LongCall
+    .word Bridge_LoadPalette
+    .byte BANK_BRIDGESCENE
+    ;; and load the palette
+
+    JSR LongCall
+    .word LoadCursorOnly
+    .byte BANK_MENUCHR
+
+    JSR DrawTitleWords
+    JSR TurnMenuScreenOn_ClearOAM
+
+    LDA #3
+    STA cursor_max
+
+   @Loop:
+    JSR ClearOAM
+    JSR DrawTitleCursor
+    JSR WaitForVBlank_L
+    LDA #>oam
+    STA $4014
+    LDA #0
+    STA $2005
+    STA $2005
+
+    LDA #BANK_THIS
+    STA cur_bank
+    JSR CallMusicPlay
+
+    JSR UpdateJoy
+    LDA joy_a
+    ORA joy_start
+    BNE @OptionChosen
+
+    LDA joy
+    AND #$0C          ; isolate Up/down directions
+    CMP joy_prevdir   ; if its the same as last frame, do nothing
+    BEQ @Loop
+
+    STA joy_prevdir   ; save the new direction press
+    CMP #0            ; see if the change was buttons being pressed or lifted
+    BEQ @Loop         ; if buttons were being lifted, do nothing (keep looping)
+
+    CMP #$04          ; see if it was down
+    BNE @Up
+
+   @Down:
+    INC cursor
+    LDA cursor
+    CMP cursor_max
+    BCC @MoveOK
+    LDA #0
+    BEQ @MoveOK
+
+   @Up:
+    DEC cursor
+    LDA cursor
+    BPL @MoveOK
+    LDX cursor_max
+    DEX
+    TXA             ; A = 1 less than cursor_max
+
+   @MoveOK:
+    STA cursor
+    JSR PlaySFX_MenuMove
+    JMP @Loop
+
+   @OptionChosen:
+    LDA cursor
+    CMP #2
+    BEQ @OptionsMenu
+    CMP #1           ; this will set C, indicating new game or continue
+    RTS              ; then return to the GameStart stuff to decide what to load next
+
+   @OptionsMenu:
+    LDA #0
+    STA $2001                         ; turn off the screen and menustall
+    STA menustall
+    LDX BattleBGColor                 ; Options screen uses the battle BG color (so you can see what you're choosing!)
+    LDA BattleBackgroundColor_LUT, X
+    STA cur_pal+14
+    JSR ClearNT_FillBackground        ; Clear and fill the background with a tile other than $00
+    JSR OptionsMenu                   ; Do the options menu!
+    JMP EnterTitleScreen              ; and re-draw the Title screen
+
+
+DrawTitleCursor:
+    LDY cursor                   ; put the cursor in Y
+    LDA lut_TitleCursor_Y, Y     ; get the Y position
+    STA spr_y
+    LDA #$38                     ; X position is always the same
+    STA spr_x
+    JMP DrawCursor               ; draw it!  and exit
+
+lut_TitleCursor_Y:
+   .BYTE $38,$48,$58
+
+
+
+
+
+
+
+;; This is for the Options menu on the title mostly.
+;; Because it doesn't need to reset the Bridge Scene graphics, and tile $00 is a piece of hillside for some reason.
 ClearNT_FillBackground:
     LDA #$7E
     STA MMC5_tmp
-    JMP ClearNT_Color
-    
+    BNE ClearNT_Color
+
 ClearNT:
     LDA #$00
     STA MMC5_tmp
+
 ClearNT_Color:
     LDA $2002     ; reset PPU toggle
     LDA #$20
     STA $2006
     LDA #$00
     STA $2006     ; set PPU addr to $2000 (start of NT)
-    TAY
     LDA MMC5_tmp
-    LDX #$03      
+    LDX #$F0      ; $03C0 / 4 = $F0.
+    LDY #$40
 
 @Loop:            ; first loop clears the first $0300 bytes of the NT
       STA $2007
-      INY
-      BNE @Loop      ; once Y wraps
-        DEX          ;  decrement X
-        BNE @Loop    ;  and stop looping once X expires (total $0300 iterations)
-
-@Loop2:           ; next loop clears the next $00C0 (up to the attribute table)
       STA $2007
-      INY
-      CPY #$C0       ; loop until Y reaches #$C0
-      BCC @Loop2
-
+      STA $2007
+      STA $2007
+      DEX          ;  decrement X
+      BNE @Loop    ;  and stop looping once X expires
 
     LDA #$FF      ; A=FF (this is what we will fill attribute table with
-@Loop3:           ;  3rd and final loop fills the last $40 bytes (attribute table) with FF
+@Loop2:           ;  2nd loop fills the last $40 bytes (attribute table) with FF
       STA $2007
-      INY
-      BNE @Loop3
-
+      DEY
+      BNE @Loop2
     RTS
 
-    
 
-TitleScreenPalette:
-    LDX #$0F
-  @LoadPalLoop:
-    LDA lut_BridgeBGPal, X ; copy $10 colors (full BG palette)
-    STA cur_pal, X         ;  from the Bridge scene palette LUT
-    DEX                    ; seems wasteful to do this here -- there's a routine
-    BPL @LoadPalLoop       ;   you can JSR to that does this (Bridge_LoadPalette)
-RTS 
- 
-lut_BridgeBGPal:
-  .BYTE $0F,$00,$02,$30,  $0F,$3B,$11,$24,  $0F,$3B,$0B,$2B,  $0F,$00,$0F,$30 
- 
- 
- 
+
+
+
+
 DrawTitleWords:
- DrawCopyright:
     LDX #0
-    JSR @DrawString         ; JSR to the @DrawString to draw the first one
-                            ;  then just let code flow into it to draw a second one (2 strings total)
+    JSR @DrawString
+    ; JSR to the @DrawString to draw the first one, then just let code flow into it to draw a second one
     JSR @DrawString
     ;; JIGS -- draw 1 more, 3 in total. Added some stuff below.
 
   @DrawString:
-    LDA @lut_Copyright+1, X ; get the Target PPU address from the LUT
+    LDA @lut_TitleText+1, X ; get the Target PPU address from the LUT
     STA $2006
-    LDA @lut_Copyright, X
+    LDA @lut_TitleText, X
     STA $2006
     INX                     ; move X past the address we just read
     INX
 
   @Loop:
-    LDA @lut_Copyright, X   ; get the next character in the string
+    LDA @lut_TitleText, X   ; get the next character in the string
     BEQ @Exit               ;  if it's zero, exit (null terminator
     STA $2007               ; otherwise, draw the character
     INX                     ; INX to move to next character
@@ -1793,7 +3136,7 @@ DrawTitleWords:
  ;; LUT for the copyright text.  Simply a 2-byte target PPU address, followed by a
  ;;  null terminated string.  Two strings total.
 
-@lut_Copyright:
+@lut_TitleText:
    .WORD $20E9
    .BYTE $8C,$98,$97,$9D,$92,$97,$9E,$8E,$00 ; CONTINUE
    .WORD $2129
@@ -1804,14 +3147,14 @@ DrawTitleWords:
    ;.BYTE $8C,$FF,$81,$89,$88,$87,$FF,$9C,$9A,$9E,$8A,$9B,$8E,$00  ; "C 1987 SQUARE  "
    ;.WORD $2348
    ;.BYTE $8C,$FF,$81,$89,$89,$80,$FF,$97,$92,$97,$9D,$8E,$97,$8D,$98,$00  ; "C 1990 NINTENDO"
-   
+
    ;; JIGS - using the bridge scene, it already has this info.
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  NewGamePartyGeneration  [$9C54 :: 0x39C64]
@@ -1829,19 +3172,14 @@ NewGamePartyGeneration:
     STA $2001
 
     JSR LoadMenuCHRPal_Z
-    ;JSR LoadPtyGenBGCHRAndPalettes
-    
+    ;; This loads up the menu text, as well as each class's sprites -- even the job changes!
+
     LDX #$4B        ; Initialize the ptygen buffer!
-    ;;  JIGS - bigger buffer! Buff buff.
+    ;;  JIGS - bigger buffer! Buff buffer.
     : LDA lut_PtyGenBuf, X  ;  all $40 bytes!  ($10 bytes per character)
       STA ptygen, X
       DEX
       BPL :-
-      
-  ;  LDA #$00        ; This null-terminates the draw buffer for when the character's
-  ;  STA $50         ;   name is drawn on the name input screen.  Why this is done here
-                     ;   and not with the actual drawing makes no sense to me.
-    
 
   @Char_0:                      ; To Character generation for each of the 4 characters
     LDA #$00                    ;   branching back to the previous char if the user
@@ -1855,17 +3193,17 @@ NewGamePartyGeneration:
     JSR DoPartyGen_OnCharacter
     BCS @Char_0
   @Char_2:
-    LDA #$26  
+    LDA #$26
     STA char_index
     JSR DoPartyGen_OnCharacter
     BCS @Char_1
   @Char_3:
-    LDA #$39  
+    LDA #$39
     STA char_index
     JSR DoPartyGen_OnCharacter
     BCS @Char_2
-    
-    
+
+
     ; Once all 4 characters have been generated and named...
     JSR PtyGen_DrawScreen       ; Draw the screen one more time
     JSR ClearOAM                ; Clear OAM
@@ -1873,16 +3211,16 @@ NewGamePartyGeneration:
     JSR WaitForVBlank_L         ; Do a frame
     LDA #>oam                   ;   with a proper OAM update
     STA $4014
-    
+
     JSR MenuWaitForBtn_SFX      ; Wait for the user to press A (or B) again, to
     LDA joy                     ;  confirm their party decisions.
     AND #$40
     BNE @Char_3                 ; If they pressed B, jump back to Char 3 generation
-    
+
     ;;  Otherwise, they've pressed A!  Party confirmed!
     LDA #$00
     STA $2001                   ; shut the PPU off
-    
+
     LDX #$00                    ; Move class and name selection
     JSR @RecordClassAndName     ;  out of the ptygen buffer and into the actual character stats
     LDX #$13
@@ -1890,44 +3228,44 @@ NewGamePartyGeneration:
     LDX #$26
     JSR @RecordClassAndName
     LDX #$39
-    
+
   @RecordClassAndName:
     TXA                     ; X is the ptygen source index  ($10 bytes per character)
 
   ;; JIGS - X needs to be 0, 13, 26, and 39
-  ;;        Y needs to be 0, 10, 20, and 30, ASL A'd twice    
+  ;;        Y needs to be 0, 10, 20, and 30, ASL A'd twice
     AND #$F0                ; - so cut off low byte!
-    
+
     ASL A
     ASL A
     TAY                     ; Y is the ch_stats dest index  ($40 bytes per character)
-    
+
     LDA ptygen_sprite, X ; get sprite
     ASL A                ; shift the low bits into the high bits
     ASL A
     ASL A
-    ASL A    
+    ASL A
     ORA ptygen_class, X  ; combine with class bits
     STA ch_class, Y      ; and save!
-    
+
     LDA #7
     STA tmp
-    
-   @NameLoop: 
+
+   @NameLoop:
     LDA ptygen_name, X ; then save name!
     STA ch_name, Y
     INY
     INX
     DEC tmp
     BNE @NameLoop
-    
+
     LDA #0
     STA playtimer
     STA playtimer+1
     STA playtimer+2
     STA playtimer+3   ; and reset the timer to 0
     RTS
-    
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1941,16 +3279,14 @@ NewGamePartyGeneration:
 PtyGen_DrawScreen:
     LDA #$08
     STA soft2000          ; set BG/Spr pattern table assignments
-    LDA #0
+    JSR ClearButtons      ; A = 0
+    STA cursor
+    STA joy_prevdir       ; as well as resetting the cursor and previous joy direction
     STA $2001             ; turn off PPU
-    STA joy_a             ;  clear various joypad catchers
-    STA joy_b
-    STA joy
-    STA joy_prevdir
 
     JSR ClearNT ;_FillBackground      ; Fill the background with colour instead of boxes
-    JSR PtyGen_DrawBoxes    
-    JSR PtyGen_DrawText     
+    JSR PtyGen_DrawBoxes
+    JSR PtyGen_DrawText
     JMP TurnMenuScreenOn_ClearOAM
 
 
@@ -1970,7 +3306,7 @@ PtyGen_DrawScreen:
 
 DoPartyGen_OnCharacter:
     JSR PtyGen_DrawScreen           ; Draw the Party generation screen
-    
+
     ; Then enter the main logic loop
   @MainLoop:
     JSR PtyGen_Frame              ; Do a frame and update joypad input
@@ -1981,17 +3317,17 @@ DoPartyGen_OnCharacter:
       ; if B pressed -- just SEC and exit
       SEC
       RTS
-    
+
     ; Code reaches here if A/B were not pressed
   : LDA joy
     AND #$0F
     CMP joy_prevdir
     BEQ @MainLoop             ; if there was no change in directional input, loop to another frame
-    
+
     STA joy_prevdir           ; otherwise, record new directional input as prevdir
     CMP #$00                  ; if directional input released (rather than pressed)
     BEQ @MainLoop             ;   loop to another frame.
-    
+
     ;; JIGS-- Left/Right now change the class, Up/Down change the sprite.
     CMP #$02  ; if left is pressed
       BEQ @ReverseCharThing
@@ -2000,7 +3336,7 @@ DoPartyGen_OnCharacter:
     CMP #$08  ; or if up is pressed
       BEQ @ReverseCharSpriteThing
 
-  
+
    ; Otherwise, if any direction was pressed:
     LDX char_index
     CLC
@@ -2010,7 +3346,7 @@ DoPartyGen_OnCharacter:
     BCC :+
       LDA #0                  ; wrap 5->0
   : STA ptygen_class, X
- 
+
     LDA #$01                  ; set menustall (drawing while PPU is on)
     STA menustall
     LDX char_index            ; then update the on-screen class name
@@ -2020,34 +3356,34 @@ DoPartyGen_OnCharacter:
    @ReverseCharThing:
     LDX char_index
     LDA ptygen_class, X       ; Subtract 1 from the class ID of the current character.
-    SEC 
+    SEC
     SBC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes 
+    CMP #6                    ; JIGS - change this to 12 for all classes
     BCC :-
     LDA #5                    ; JIGS - and then change this to 11
     BNE :-
-  
+
    @CharSpriteThing:
     LDX char_index
-    LDA ptygen_sprite, X 
+    LDA ptygen_sprite, X
     CLC
     ADC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes 
+    CMP #6                    ; JIGS - change this to 12 for all classes
     BCC :+
        LDA #0
-  : STA ptygen_sprite, X    
+  : STA ptygen_sprite, X
     JMP @MainLoop
-      
+
    @ReverseCharSpriteThing:
     LDX char_index
     LDA ptygen_sprite, X      ; Subtract 1 from the sprite ID of the current character.
-    SEC 
+    SEC
     SBC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes   
+    CMP #6                    ; JIGS - change this to 12 for all classes
     BCC :-
-    LDA #5                    ; JIGS - and then change this to 11  
-    BNE :-  
-  
+    LDA #5                    ; JIGS - and then change this to 11
+    BNE :-
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  DoNameInput  [$9D50 :: 0x39D60]
@@ -2064,25 +3400,25 @@ DoPartyGen_OnCharacter:
 DoNameInput:
     LDA #$00                ; Turn off the PPU (for drawing)
     STA $2001
-    
+
     STA menustall           ; zero a bunch of misc vars being used here
     STA joy_a
     STA joy_b
     STA joy_start
     STA joy
     STA joy_prevdir
-    
+
    ; STA cursor              ; letter of the name we're inputting (0-3)
     STA namecurs_x          ; X position of letter selection cursor (0-9)
     STA namecurs_y          ; Y position (0-6)
-    
+
     ; Some local temp vars
     @selectedtile   = tmp
-    
+
     JSR ClearNT ;_FillBackground
     JSR DrawNameInputScreen
     JSR NameInput_DrawName
-    
+
     ;Write $00 to $1C97
     LDY $2002
     LDX #$1C
@@ -2091,11 +3427,11 @@ DoNameInput:
     STY $2006
     LDA #0
     STA $2007
-    ;; JIGS - this turns part of the beam spell graphic into a white _ 
-    
+    ;; JIGS - this turns part of the beam spell graphic into a white _
+
     JSR TurnMenuScreenOn_ClearOAM   ; now that everything is drawn, turn the screen on
 
-    LDX char_index    
+    LDX char_index
     LDY #0
    @FindCursorLoop:
     LDA ptygen_name, X
@@ -2103,15 +3439,15 @@ DoNameInput:
     BEQ :+
     INX
     INY
-    CPX #7    
+    CPX #7
     BNE @FindCursorLoop
   : STY cursor
-    
+
     INC menustall
     ;LDA #$01                ; Set menustall, as future drawing will
     ;STA menustall           ;  be with the PPU on
     JMP @MainLoop
-    
+
     ;;;;;;;;;;;;;;;;;;
 
 
@@ -2121,40 +3457,40 @@ DoNameInput:
     STY joy_start
     CLC                 ; CLC to indicate name was successfully input
     RTS
-    
+
   @MainLoop:
     JSR CharName_Frame      ; Do a frame & get input
 
     LDA joy_start
-    BNE @Start_Pressed    
+    BNE @Start_Pressed
     LDA joy_a
     BNE @A_Pressed          ; Check if A or B pressed
     LDA joy_b
     BNE @B_Pressed
-    
+
     LDA joy                 ; Otherwise see if D-pad state has changed
     AND #$0F
     CMP joy_prevdir
     BEQ @MainLoop           ; no change?  Jump back
     STA joy_prevdir
-    
+
     ; D-pad state has changed, see what it changed to
     CMP #$00
     BEQ @MainLoop           ; if released, do nothing and loop
-    
+
     CMP #$04
     BCC @Left_Or_Right      ; if < 4, L or R pressed
-    
+
     CMP #$08                ; otherwise, if == 8, Up pressed
     BNE @Down               ; otherwise, if != 8, Down pressed
-    
+
    @Up:
     DEC namecurs_y          ; DEC cursor Y position
     BPL @MainLoop
     LDA #$06                ; wrap 0->6
     STA namecurs_y
     JMP @MainLoop
-    
+
    @Down:
     INC namecurs_y          ; INC cursor Y position
     LDA namecurs_y
@@ -2163,18 +3499,18 @@ DoNameInput:
     LDA #$00
     STA namecurs_y
     JMP @MainLoop
-    
+
    @Left_Or_Right:
     CMP #$02                ; if D-pad state == 2, Left pressed
     BNE @Right              ; else, Right pressed
-    
+
    @Left:
     DEC namecurs_x          ; DEC cursor X position
     BPL @MainLoop
     LDA #$09                ; wrap 0->9
     STA namecurs_x
     JMP @MainLoop
-    
+
    @Right:
     INC namecurs_x          ; INC cursor X position
     LDA namecurs_x
@@ -2183,26 +3519,26 @@ DoNameInput:
     LDA #$00
     STA namecurs_x
     JMP @MainLoop
-    
+
    @B_Pressed:
     LDA #$FF                ; if B was pressed, erase the previous tile
     STA @selectedtile       ;   by setting selectedtile to be a space
-    
+
     LDA cursor              ; then by pre-emptively moving the cursor back
     SEC                     ;   so @SetTile will overwrite the prev char
     SBC #$01                ;   instead of the next one
       STA cursor
       CMP #$FF
       BEQ @B_RTS
-        
+
     LDA #$00                ; set cursoradd to 0 so @SetTile doesn't change
     STA cursoradd           ; the cursor
     STA joy_b               ; clear joy_b as well
     BEQ @SetTile            ; (always branches)
-    
+
    @B_RTS:
-    JMP DoPartyGen_OnCharacter      
-    
+    JMP DoPartyGen_OnCharacter
+
     ;;;;;;;;;;;;;;;;;;
    @A_Pressed:
     LDX namecurs_y                  ; when A is pressed, clear joy_a
@@ -2217,7 +3553,7 @@ DoNameInput:
     STA @selectedtile               ; record selected tile
     LDA #$01
     STA cursoradd                   ; set cursoradd to 1 to indicate we want @SetTile to move the cursor forward
-    
+
     LDA cursor                      ; check current cursor position
     CMP #$07                        ;  If we've already input 7 letters for this name....
     BCS @Done                       ;  .. then we're done.  Branch ahead
@@ -2230,16 +3566,16 @@ DoNameInput:
     TAX
     LDA @selectedtile
     STA ptygen_name, X          ; and write the selected tile
-    
+
     JSR NameInput_DrawName      ; Redraw the name as it appears on-screen
-    
+
     LDA cursor                  ; Then add to our cursor
     CLC
     ADC cursoradd
     STA cursor
- 
+
     JMP @MainLoop               ; And keep going!
-    
+
    @Done:
     CLC                 ; CLC to indicate name was successfully input
     RTS
@@ -2269,7 +3605,7 @@ PtyGen_Frame:
 
     JMP PtyGen_Joy         ; and update joy data!
 
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  CharName_Frame  [$9E4E :: 0x39E5E]
@@ -2284,26 +3620,26 @@ Blinker_LUT:
 CharName_Frame:
     JSR ClearOAM           ; wipe OAM then draw the cursor
     JSR CharName_DrawCursor
-    
-    INC framecounter       ; set up framecounter 
+
+    INC framecounter       ; set up framecounter
     LDA framecounter       ; game is at at 60 frames a second...
     CMP #60                ; if it hits 60, reset it to 0
     BNE :+
       LDA #0
       STA framecounter
-    
+
   : CMP #30                ; depending on if its the first or second half of the second, skip displaying the blinker
     BCC :+
 
     LDX cursor
     LDA Blinker_LUT, X
-    
+
     LDX sprindex
     STA oam+$3, X          ; upper left horizontal coordinate
     LDA #$22
     STA oam+$0, X          ; upper left vertical coordinate
     LDA #$C9
-    STA oam+$1, X          ; graphic: _ 
+    STA oam+$1, X          ; graphic: _
     LDA #$01
     STA oam+$2, X          ; attribute
 
@@ -2321,7 +3657,7 @@ CharName_Frame:
     STA cur_bank
     JSR CallMusicPlay
 
-      ; then update joy by running seamlessly into PtyGen_Joy
+    ; then update joy by running seamlessly into PtyGen_Joy
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2410,14 +3746,14 @@ PtyGen_DrawText:
      CLC                ; and increase it to point to next character's data
      ADC #$13
      CMP #$4C
-     
+
      BCC @MainLoop      ;  loop until all 4 chars drawn
     RTS
 
   @DrawOne:
     TAX                 ; put the ptygen index in X for upcoming routine
 
-      ; no JMP or RTS -- code flows seamlessly into PtyGen_DrawOneText
+    ; no JMP or RTS -- code flows seamlessly into PtyGen_DrawOneText
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2451,9 +3787,9 @@ PtyGen_DrawOneText:
     BEQ :+
     CMP #07                 ; and the NINJA if its ever set to print here
     BNE :++
-    
+
   : INC dest_x
-        
+
   : CLC
     ADC #ITEM_CLASSSTART    ; add $F0 to select the class' "item name"
     STA format_buf-1        ;  store that as 2nd byte in format string
@@ -2476,9 +3812,9 @@ PtyGen_DrawOneText:
     JSR DrawComplexString   ; draw the string
     PLA
     TAX                     ; and restore our index
- 
-    LDA ptygen_name, X      
-    STA format_buf-7        
+
+    LDA ptygen_name, X
+    STA format_buf-7
     LDA ptygen_name+1, X
     STA format_buf-6
     LDA ptygen_name+2, X
@@ -2491,14 +3827,14 @@ PtyGen_DrawOneText:
     STA format_buf-2
     LDA ptygen_name+6, X
     STA format_buf-1
- 
+
     LDA ptygen_name_x, X    ; set destination coords appropriately
     STA dest_x
     LDA ptygen_name_y, X
     STA dest_y
-    
+
     ;; JIGS - for longer names
-    
+
     LDA #<(format_buf-7)    ; set pointer to start of 4-byte string
     STA text_ptr
     LDA #>(format_buf-7)
@@ -2546,7 +3882,7 @@ CharName_DrawCursor:
     CLC
     ADC #$20
     STA spr_x
-    
+
     LDA namecurs_y      ; Y position = (cursy * 16) + $50
     ASL A
     ASL A
@@ -2555,7 +3891,7 @@ CharName_DrawCursor:
     CLC
     ADC #$50
     STA spr_y
-    
+
     JMP DrawCursor
 
 
@@ -2578,7 +3914,7 @@ PtyGen_DrawChars:
     LDX #$26
     JSR @DrawOne
     LDX #$39
-    
+
 
   @DrawOne:
     LDA ptygen_spr_x, X   ; load desired X,Y coords for the sprite
@@ -2615,7 +3951,7 @@ PtyGen_DrawChars:
 NameInput_DrawName:
             @buf  = $59 ; $5C     ; local - buffer to hold the name for printing
             ;; JIGS ^ move the buffer further in, but its okay! Not overwriting anything. I think.
-            
+
     LDX char_index          ; copy the character's name to our temp @buf
     LDA ptygen_name, X
     STA @buf
@@ -2627,17 +3963,17 @@ NameInput_DrawName:
     STA @buf+3              ; The code assumes @buf+4 is 0
     ;; JIGS - adding more letters ^ this is still correct, but 7 instead of 4
     LDA ptygen_name+4, X
-    STA @buf+4          
+    STA @buf+4
     LDA ptygen_name+5, X
-    STA @buf+5           
+    STA @buf+5
     LDA ptygen_name+6, X
-    STA @buf+6              
-    
+    STA @buf+6
+
     LDA #>@buf              ; Set the text pointer
     STA text_ptr+1
     LDA #<@buf
     STA text_ptr
-    
+
     LDA #BANK_THIS          ; set cur/ret banks
     STA cur_bank
     STA ret_bank
@@ -2646,12 +3982,12 @@ NameInput_DrawName:
     STA dest_x
     LDA #$04
     STA dest_y
-    
+
     LDA #$01                ; drawing while PPU is on, so set menustall
     STA menustall
-    
+
     JMP DrawComplexString   ; Then draw the name and exit!
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  DrawNameInputScreen  [$9FB0 :: 0x39FC0]
@@ -2664,12 +4000,12 @@ NameInput_DrawName:
 
 DrawNameInputScreen:
     LDA $2002               ; clear PPU toggle
-    
+
 ;    LDA #>$23C0             ; set PPU addr to the attribute table
 ;    STA $2006
 ;    LDA #<$23C0
 ;    STA $2006
-    
+
 ;    LDA #$00                ; set $10 bytes of the attribute table to use palette 0
 ;    LDX #$10                ;  $10 bytes = 8 rows of tiles (32 pixels)
 ;    : STA $2007             ; This makes the top box the orangish color instead of the normal blue
@@ -2680,7 +4016,7 @@ DrawNameInputScreen:
 
     LDA #0
     STA menustall           ; no menustall (PPU is off at this point)
-    
+
     LDA #$04                ; Draw the big box containing input
     STA box_x
     LDA #$08
@@ -2700,7 +4036,7 @@ DrawNameInputScreen:
     LDA #$05 ; 04
     STA box_ht
     JSR DrawBox
-    
+
     LDA #<lut_NameInput     ; Print the NameInput lut as a string.  This will fill
     STA text_ptr            ;  the bottom box with the characters the user can select.
     LDA #>lut_NameInput
@@ -2713,8 +4049,8 @@ DrawNameInputScreen:
     STA cur_bank
     STA ret_bank
     JMP DrawComplexString
-    
-    
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Name Input Row Start lut  [$A00A :: 0x3A01A]
@@ -2724,7 +4060,7 @@ DrawNameInputScreen:
 lut_NameInputRowStart:
   .BYTE  0, 10, 20, 30, 40, 50, 60  ; 10 characters of data per row
                                     ;  (which is actually 20 bytes, because they have spaces between them)
-  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Name Input lut  [$A011 :: 0x3A021]
@@ -2743,11 +4079,11 @@ lut_NameInput:
   .BYTE $B8, $FF, $B9, $FF, $BA, $FF, $BB, $FF, $BC, $FF, $BD, $FF, $C2, $FF, $C3, $FF, $C4, $FF, $C5, $01  ; u - z - .. ! ?
   ;.BYTE $01
   ;.BYTE $FF, $FF, $FF, $9C, $8E, $95, $8E, $8C, $9D, $FF, $FF, $97, $8A, $96, $8E, $00                      ;   SELECT  NAME
-  
+
   ;; JIGS - I think this looks nicer:
-  
+
   .BYTE $05
-  .BYTE $97,$8A,$96,$8E,$FF,$A2,$98,$9E,$9B,$FF,$8C,$91,$8A,$9B,$8A,$8C,$9D,$8E,$9B,$00 
+  .BYTE $97,$8A,$96,$8E,$FF,$A2,$98,$9E,$9B,$FF,$8C,$91,$8A,$9B,$8A,$8C,$9D,$8E,$9B,$00 ; NAME YOUR CHARACTER
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2783,19 +4119,19 @@ lut_PtyGenBuf:
 ; ptygen_spr_x   = 13
 ; ptygen_spr_y   = 14
 ; ptygen_box_x   = 15
-; ptygen_box_y   = 16 
+; ptygen_box_y   = 16
 ; ptygen_curs_x  = 17
 ; ptygen_curs_y  = 18
 ; ptygen_sprite  = 19
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
 DrawOptions:
   LDA #24
   STA dest_x
@@ -2804,23 +4140,23 @@ DrawOptions:
   LDX ExpGainOption
   LDA lut_LowNormalHigh, X
   JSR DrawZ_MenuString
-  
+
   LDA #10
   STA dest_y
   LDX MoneyGainOption
   LDA lut_LowNormalHigh, X
   JSR DrawZ_MenuString
-  
+
   LDA #12
   STA dest_y
   LDX EncRateOption
   LDA lut_LowNormalHigh, X
   JSR DrawZ_MenuString
- 
+
   JSR LongCall
   .word BattleBGColorDigits
   .byte BANK_MENUS
-  
+
   LDA $2002          ; PPU toggle... needed or not?
   LDA #>$221A        ; Color is drawn here
   STA $2006
@@ -2830,7 +4166,7 @@ DrawOptions:
   STA $2007
   LDA format_buf-1
   STA $2007
-  
+
   LDA #>$21DB        ; Respond rate is drawn here
   STA $2006
   LDA #<$21DB
@@ -2838,11 +4174,11 @@ DrawOptions:
   LDA BattleTextSpeed ; get the current respond rate (which is zero based)
   CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
   ADC #$80+1          ;  for the desired digit to print, and +1 to convert it from zero
-  STA $2007           ;  based to 1 based (so it's printed as 1-8 instead of 0-7)  
+  STA $2007           ;  based to 1 based (so it's printed as 1-8 instead of 0-7)
   LDA #$00            ; reset scroll to 0 (very important!)
   STA $2005
   STA $2005
- 
+
   LDA #24
   STA dest_x
   LDA #18
@@ -2850,26 +4186,25 @@ DrawOptions:
   LDX AutoTargetOption
   LDA lut_OnOff, X
   JSR DrawZ_MenuString
-  
+
   LDA #20
   STA dest_y
   LDX MuteSFXOption
   LDA lut_OnOff, X
   JMP DrawZ_MenuString
-  
-  
+
+
 OptionsMenu:
-    LDA #0
+    JSR ClearButtons          ; A = 0
+    STA cursor
+    STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
     STA $2001
-    STA joy
-    STA joy_prevdir
-    STA cursor                  ; turn off screen and clear some button stuff
     STA menustall
-    
+
     LDX BattleBGColor
     LDA BattleBackgroundColor_LUT, X
     STA cur_pal+14
-  
+
     LDA #1
     STA box_x
     LDA #6
@@ -2878,16 +4213,16 @@ OptionsMenu:
     STA box_wd
     LDA #17
     STA box_ht
-    JSR DrawBox                 ; draws the options box
-    
-    LDA #7           
-    STA cursor_max    
+    JSR DrawBox                ; draws the options box
+
+    LDA #7
+    STA cursor_max
     LDA #0
-    JSR DrawZ_MenuString      ; draws the static list of changable things
-    
-    JSR TurnMenuScreenOn_ClearOAM    
-    
-ReenterOptionsMenu:      
+    JSR DrawZ_MenuString       ; draws the static list of changable things
+
+    JSR TurnMenuScreenOn_ClearOAM
+
+ReenterOptionsMenu:
     LDA #1
     STA menustall              ; turn menustall back on
     JSR DrawOptions            ; and draw the option variables (off, on, high, low, etc)
@@ -2896,27 +4231,27 @@ OptionsLoop:
   JSR ClearOAM
   JSR DrawOptionsCursor        ; draw the cursor
   JSR OptionsMenuFrame         ; Do a frame
-  
-  LDA joy_a                     ; check to see if A has been pressed
+
+  LDA joy_a                    ; check to see if A has been pressed
   BNE @A_Pressed
-  LDA joy_b                     ; then see if B has been pressed
+  LDA joy_b                    ; then see if B has been pressed
   BNE @B_Pressed
   JSR @OptionDirections
-  JMP OptionsLoop               
-    
+  JMP OptionsLoop
+
   @B_Pressed:
-   RTS  
-   
-  @A_Pressed: 
+   RTS
+
+  @A_Pressed:
     LDA #0                  ; enter ChangeOption with A = 0, as if right was pressed
     JSR ChangeOption
     ;PLA
     ;PLA
     JMP ReenterOptionsMenu
-  
-  @OptionDirections: 
+
+  @OptionDirections:
     LDA joy                 ; mask out the directional buttons from the joy data
-    AND #$0F 
+    AND #$0F
     CMP joy_prevdir         ; see if the state of any directional buttons changed
     BEQ @Return             ; if not, keep looping
 
@@ -2930,7 +4265,7 @@ OptionsLoop:
   @UpDown:
     CMP #DOWN
     BNE @Up
-      
+
    @Down:              ; moving down...
     LDA cursor         ;  get cursor, and increment by 1
     CLC
@@ -2952,25 +4287,25 @@ OptionsLoop:
    @Move:
     STA cursor            ; set cursor to changed value
     JMP PlaySFX_MenuMove  ; then play that hideous sound effect and exit
-  
+
    @Return:
     RTS
-  
+
    @LeftRight:
     CMP #RIGHT
     BEQ :+
       LDA #1              ; enter ChangeOption with A = 1 if left was pressed
       JMP :++
-    
+
   : LDA #0                ; enter ChangeOption with A = 0 if right was pressed
   : JSR ChangeOption
     PLA
     PLA
     JMP ReenterOptionsMenu
-   
-ChangeOption: 
+
+ChangeOption:
     PHA                   ; backup direction
-    JSR PlaySFX_MenuSel  
+    JSR PlaySFX_MenuSel
     LDA cursor
     BEQ @ExpGain
     CMP #1
@@ -2980,137 +4315,137 @@ ChangeOption:
     CMP #3
     BEQ @BattleTextSpeed
     CMP #4
-    BEQ @JMP_BattleBackground    
+    BEQ @JMP_BattleBackground
     CMP #5
     BEQ @JMP_AutoTarget
     PLA                   ; pull direction and toss it
-  
+
    @MenuSFX:
     LDA MuteSFXOption     ; whether left or right is pressed, all you can do is switch it on/off
     BEQ :+
       DEC MuteSFXOption
       RTS
-    
+
   : INC MuteSFXOption
     RTS
-   
+
    @JMP_BattleBackground:
    JMP BattleBackgroundColor
-   
+
    @JMP_MoneyGain:
    JMP @MoneyGain
-   
+
    @JMP_EncounterRate:
    JMP @EncounterRate
 
    @BattleTextSpeed:
-    PLA                     ; pull direction and branch 
-    BEQ @IncreaseBattleTextSpeed 
-        
+    PLA                     ; pull direction and branch
+    BEQ @IncreaseBattleTextSpeed
+
        DEC BattleTextSpeed
        LDA BattleTextSpeed
        BPL @Return         ; if the result didn't wrap (still positive), return
        LDA #8
        STA BattleTextSpeed
        RTS
-    
+
    @IncreaseBattleTextSpeed:
     LDA BattleTextSpeed
     CMP #8
     BNE :+                  ; if its not over the limit, increase it
-       LDA #0 
+       LDA #0
        STA BattleTextSpeed
        RTS
-    
+
   : INC BattleTextSpeed
-   @Return:  
+   @Return:
     RTS
-    
+
    @JMP_AutoTarget:
-    JMP @AutoTarget       
-    
+    JMP @AutoTarget
+
    @ExpGain:
-   PLA 
-   BEQ @IncreaseExpGain 
-        
+   PLA
+   BEQ @IncreaseExpGain
+
        DEC ExpGainOption
        LDA ExpGainOption
        BPL @Return         ; if the result didn't wrap (still positive), return
        LDA #2
        STA ExpGainOption
        RTS
-    
+
    @IncreaseExpGain:
     LDA ExpGainOption
     CMP #2
     BNE :+                  ; if its not over the limit, increase it
-       LDA #0 
+       LDA #0
        STA ExpGainOption
        RTS
-    
+
   : INC ExpGainOption
-    RTS 
-    
+    RTS
+
     @MoneyGain:
-    PLA 
+    PLA
     BEQ @IncreaseMoneyGain
-        
+
        DEC MoneyGainOption
        LDA MoneyGainOption
        BPL @Return         ; if the result didn't wrap (still positive), return
        LDA #2
        STA MoneyGainOption
        RTS
-    
+
    @IncreaseMoneyGain:
     LDA MoneyGainOption
     CMP #2
     BNE :+                  ; if its not over the limit, increase it
-       LDA #0 
+       LDA #0
        STA MoneyGainOption
        RTS
-      
+
   : INC MoneyGainOption
-    RTS 
-   
+    RTS
+
    @EncounterRate:
-    PLA 
+    PLA
     BEQ @IncreaseEncounterRate
-        
+
        DEC EncRateOption
        LDA EncRateOption
        BPL @Return         ; if the result didn't wrap (still positive), return
        LDA #2
        STA EncRateOption
        RTS
-    
+
    @IncreaseEncounterRate:
     LDA EncRateOption
     CMP #2
     BNE :+                  ; if its not over the limit, increase it
-       LDA #0 
+       LDA #0
        STA EncRateOption
        RTS
-      
+
   : INC EncRateOption
-    RTS 
-    
+    RTS
+
    @AutoTarget:
     PLA                      ; pull direction and toss it
     LDA AutoTargetOption     ; whether left or right is pressed, all you can do is switch it on/off
     BEQ :+
       DEC AutoTargetOption
       RTS
-    
-  : INC AutoTargetOption
-    RTS 
 
-   
+  : INC AutoTargetOption
+    RTS
+
+
 BattleBackgroundColor:
-    PLA 
+    PLA
     BEQ @NextColor
-    
-    @PreviousColor:
+
+   @PreviousColor:
     DEC BattleBGColor
     LDA BattleBGColor
     CMP #$FF
@@ -3118,17 +4453,17 @@ BattleBackgroundColor:
     LDA #14
     STA BattleBGColor
     JMP @Return
-    
-    @NextColor:
+
+   @NextColor:
     LDA BattleBGColor
     CMP #14
     BNE :+
        LDA #0
        STA BattleBGColor
        JMP @Return
-  
+
   : INC BattleBGColor
-    
+
    @Return:
     LDA #0
     STA $2002
@@ -3137,7 +4472,7 @@ BattleBackgroundColor:
     STA cur_pal+14
     JMP TurnOnScreen
 
-   
+
 DrawOptionsCursor:
     LDY cursor                   ; get current cursor selection
     LDA lut_OptionsCursor_Y, Y   ;  use cursor as an index to get the desired Y coord
@@ -3145,19 +4480,19 @@ DrawOptionsCursor:
     LDA #$B0                     ; X coord for options menu cursor is always 22
     STA spr_x
     JMP DrawCursor               ; draw it!  and exit
-    
-  lut_OptionsCursor_Y:          
-   .BYTE  $40,$50,$60,$70,$80,$90,$A0   
+
+lut_OptionsCursor_Y:
+   .BYTE  $40,$50,$60,$70,$80,$90,$A0
 
 OptionsMenuFrame:
     LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
-    BEQ :+                    
+    BEQ :+
     JSR HushTriangle
-   
+
  :  JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
-    
+
     LDA soft2000           ; reset scroll and PPU data
     STA $2000
     LDA #0
@@ -3178,115 +4513,109 @@ OptionsMenuFrame:
     LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
     STA joy_a              ;   nonzero state
     STA joy_b
-    JMP UpdateJoy          ; update joypad info, then exit    
-    
-    
-  
-    
-  
-  
+    JMP UpdateJoy          ; update joypad info, then exit
+
+
+
+
+
+
 SoundTestClearNT:
-    LDA $2002     ; reset PPU toggle
-    LDA #$20
-    STA $2006
-    LDA #$00
-    STA $2006     ; set PPU addr to $2000 (start of NT)
-    LDY #$00      ; zero out A and Y
-    TYA           ;   Y will be the low byte of our counter
-    LDX #$03      ; X=3 -- this is the high byte of our counter (loop $0300 times)
-
-@Loop:            ; first loop clears the first $0300 bytes of the NT
-      STA $2007
-      INY
-      BNE @Loop      ; once Y wraps
-        DEX          ;  decrement X
-        BNE @Loop    ;  and stop looping once X expires (total $0300 iterations)
-
-@Loop2:           ; next loop clears the next $00C0 (up to the attribute table)
-      STA $2007
-      INY
-      CPY #$C0       ; loop until Y reaches #$C0
-      BCC @Loop2
+    JSR ClearNT
 
     LDX #>$23C0
     LDA #<$23C0
     STX $2006   ; write X as high byte
     STA $2006   ; A as low byte
-    
-    LDX #0
-  @AttrLoop:
-      LDA lut_SoundtestAttTable, X   ; copy over attribute bytes
-      STA $2007
-      INX
-      CPX #$40
-      BNE @AttrLoop           ; loop until all $40 bytes copied
-      
-      @Loop3:
-      LDA $FF
-      STA $2007
-      INX 
-      CPX #$40
-      BNE @Loop3
-    
-    LDA $2002              ; Set address to $1000 
+
+    LDA #0
+    LDX #$10
+   @Loop1:
+    STA $2007
+    DEX
+    BNE @Loop1
+
+    LDA #$F0
+    LDX #$8
+   @Loop2:
+    STA $2007
+    DEX
+    BNE @Loop2
+
+    LDA #$FF
+    LDX #$28
+   @Loop3:
+    STA $2007
+    DEX
+    BNE @Loop3
+
+;; that should set the attributes to look like this:
+;  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+;  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+;  .BYTE $F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+
+    LDA $2002              ; Set address to $1000
     LDA #>$1000
     STA $2006
     LDA #<$1000
-    STA $2006    
-      
+    STA $2006
+
     LDA #>WeaselChr
-    STA tmp+1        
+    STA tmp+1
     LDA #<WeaselChr
     STA tmp
-    LDX #$40
-    LDY #0
 
-CHRLoad_Cont_2:
+    LDY #0
+    LDX #$40
+  @LoadWeaselLoop:
     LDA (tmp), Y      ; read a byte from source pointer
     STA $2007         ; and write it to CHR-RAM
     INY               ; inc our source index
     DEX
-    BNE CHRLoad_Cont_2
-    RTS 
-  
-  lut_SoundtestAttTable:
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  
-  
+    BNE @LoadWeaselLoop
+    RTS
 
-    SoundTestZ:
+
+
+
+
+SoundTestZ:
     LDA #BANK_THIS           ; record current bank and CallMusicPlay
     STA cur_bank
-        
-    JSR SoundTestClearNT               ; clear the nametable
-   
-    LDA #$02                        
-    STA box_x                       
+
+    JSR SoundTestClearNT     ; clear the nametable, set the attributes, load weasel sprite
+    STX menustall            ; X = 0
+
+    LDA #$02
+    STA box_x
     LDA #$0A
     STA box_y
     LDA #$1C
     STA box_wd
     LDA #$05
     STA box_ht
-    JSR DrawBox        
-    LDA #$02                        
-    STA box_x                       
+    JSR DrawBox              ; draw the song name box
+
+    LDA #$02
+    STA box_x
     LDA #$14
     STA box_y
     LDA #$1C
     STA box_wd
     LDA #$08
     STA box_ht
-    JSR DrawBox        
-  
-   ; Weasel colours! 
+    JSR DrawBox              ; draw the instructions box
+
+    INC dest_x
+    LDA #$0C
+    JSR DrawZ_MenuString            ; draw the instructions
+
+   ; Weasel colours!
     LDA #$38
     STA cur_pal+17
     LDA #$36
@@ -3294,83 +4623,91 @@ CHRLoad_Cont_2:
     LDA #$17
     STA cur_pal+19
     STA cur_pal+22
-    
+
     LDA #$07
     STA cur_pal+21
     LDA #$0F
     STA cur_pal+23
     STA cur_pal+2
-      
+    LDA #$20
+    STA cur_pal+3
+
     JSR TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen on
-    
-  SoundTestMenuLoop:    
+
+SoundTest_NewSong:
+    LDA #1
+    STA menustall         ; enable to write while PPU is on
+    LDA #$05
+    STA dest_x
+    LDA #$0C
+    STA dest_y
+    LDA soundtest         ; 0-24, or however many songs there are
+    CLC
+    ADC #$10              ; all song names are after $10 in the lut_ZMenuText table
+    JSR DrawZ_MenuString
+
+SoundTestMenuLoop:
     JSR ClearOAM                  ; clear OAM (erasing    all existing sprites)
     JSR DrawSoundTestCursor       ; draw the cursor
     JSR DrawSoundTestHole
     JSR WeaselSprite
-    JSR SoundTest_DrawSongName
-    JSR SoundTest_DrawInstructions
     JSR SoundTestFrame            ; Do a frame
-        
+
     LDA joy_a                     ; check to see if A has been pressed
     BNE @A_Pressed
     LDA joy_b                     ; then see if B has been pressed
     BNE @B_Pressed
-    LDA joy_start     
+    LDA joy_start
     BNE @Start_Pressed
     LDA joy_select
     BNE @Zoom
     JSR SoundTestSelect
-    JMP SoundTestMenuLoop         ;  rinse, repeat
+    BCC SoundTest_NewSong         ; carry set if new song chosen (only prints text, doesn't update music)
+    JMP SoundTestMenuLoop         ; rinse, repeat
 
-  @B_Pressed:
-    LDA #0            ; turn PPU off
+   @B_Pressed:
+    JSR ClearButtons
+    STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
     STA $2001
     STA $4015           ; and silence the APU.  Music sill start next time MusicPlay is called.
     STA $5015           ; and silence the MMC5 APU.
-    STA joy_a         ; flush A, B, and Start joypad recordings
-    STA joy_b
-    STA joy_start
-    STA joy_select
     STA soundtesthelper
     STA dlgmusic_backup
     STA soundtest
     RTS               ; and exit the main menu (by RTSing out of its loop)
 
-  @A_Pressed:
+   @A_Pressed:
     LDA soundtesthelper
-    CMP #1
-    BCC @MusicOn
+    BEQ @MusicOn
       LDA #0
       STA soundtesthelper
       STA $4015             ; silence APU
       STA $5015             ; and silence the MMC5 APU. (JIGS)
-      
+
       ;LDA #$80           ; If yes, write $80 to the music track to mark that the song is over
       ;STA music_track    ;  All channels will be silenced next frame
       JMP SoundTestMenuLoop          ; then return to main menu loop
-      
-    @MusicOn:  
+
+   @MusicOn:
     LDA #0
     STA $4015             ; silence APU
     STA $5015             ; and silence the MMC5 APU. (JIGS)
     JSR WaitForVBlank_L
-    LDA #1
-    STA soundtesthelper
+    INC soundtesthelper
     LDA soundtest
     CLC
     ADC #$41
-    STA music_track  
+    STA music_track
     JMP SoundTestMenuLoop          ; then return to main menu loop
-    
-    @Start_Pressed:
-    JSR DrawWeasel
+
+   @Start_Pressed:
+    JSR DrawZheepText
     JMP SoundTestMenuLoop
-    
-    @Zoom:
+
+   @Zoom:
     JSR WeaselZoomStart
     JMP SoundTestMenuLoop
-   
+
 SoundTestFrame:
     JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
@@ -3385,16 +4722,17 @@ SoundTestFrame:
     LDA #BANK_THIS           ; record current bank and CallMusicPlay
     STA cur_bank
     JSR CallMusicPlay
-    
-    INC framecounter       ; increment the frame counter to count this frame
 
-    LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
-    STA joy_a              ;   nonzero state
-    STA joy_b
-    STA joy_start
-    STA joy_select
+    LDA playtimer          ; pause the play timer while in the sound test!
+    CMP #59                ; but if its about to hit 60, don't touch it
+    BEQ :+                 ; or else every frame here will count as a second for total playtime
+        DEC playtimer
+
+  : INC framecounter       ; increment the frame counter to count this frame
+
+    JSR ClearButtons
     JMP UpdateJoy          ; update joypad info, then exit
- 
+
 SoundTestSelect:
     LDA joy           ; get joypad data
     AND #$0C          ;  isolate up/down buttons
@@ -3410,35 +4748,38 @@ SoundTestSelect:
 
   @Down:              ; moving down...
     LDA #0
-    STA soundtesthelper    
+    STA soundtesthelper
     DEC soundtest
-    LDA soundtest     
+    LDA soundtest
     CMP #$FF
     BNE :+
       LDA #26
       STA soundtest
-      CLC
- :  RTS
+  : CLC
+    RTS
 
   @Up:                ; up is the same deal...
     LDA #0
-    STA soundtesthelper    
+    STA soundtesthelper
     INC soundtest
     LDA soundtest
     CMP #27
-    BNE @Exit
-      LDA #00
-      STA soundtest      
-      
- @Exit:
+    BNE :+
+      LDA #0
+      STA soundtest
+  : CLC
     RTS
+
+ @Exit:
+  SEC
+  RTS
 
 DrawSoundTestCursor:
     LDA #$16
     STA spr_x              ; set cursor X coord to $58
     LDA #$60
     STA spr_y              ; and that's the cursor Y coord
-    JMP DrawCursor         ; draw the cursor and exit    
+    JMP DrawCursor         ; draw the cursor and exit
 
 DrawSoundTestHole:
     LDA #$08
@@ -3453,35 +4794,9 @@ DrawSoundTestHole:
     STA tmp+2
     JMP Draw2x2Sprite
 
-    
-SoundTest_DrawSongName:
-    LDA #$05
-    STA dest_x
-    LDA #$0C
-    STA dest_y   
-    LDA soundtest      ; 0-24 
-    ASL A
-    TAX
-    LDA lut_SongNames, X
-    STA text_ptr
-    LDA lut_SongNames+1, X  
-    STA text_ptr+1
-    
-DrawSongName:
-    LDA #1
-    STA menustall         ; enable to write while PPU is on
-    JMP DrawComplexString
-    
-SoundTest_DrawInstructions:
-    LDA #$04
-    STA dest_x
-    LDA #$16
-    STA dest_y   
-    LDA #$0C
-    JMP DrawZ_MenuString
-  
-DrawWeasel:  
+DrawZheepText:
     LDA #$01
+    STA menustall
     LDX #$1B
     JSR RandAX
     STA dest_x
@@ -3492,7 +4807,7 @@ DrawWeasel:
     DEC weasels
     LDA #$0D
     JMP DrawZ_MenuString
-    
+
 WeaselSprite:
     LDA weasels
     CMP #$F0          ; if less than 9, stop drawing weasels (oawoo)
@@ -3500,11 +4815,12 @@ WeaselSprite:
       LDA #0
       STA weasels
       RTS
-     
-    @Yes:
+
+   @Yes:
     LDX #$0F
     JSR MultiplyXA
-    WeaselSpriteZoom:
+
+WeaselSpriteZoom:
     STA spr_x
     LDA #$83
     STA spr_y
@@ -3515,29 +4831,28 @@ WeaselSprite:
     LDA #$00          ; weasel tiles start at $00
     STA tmp+2
     JMP Draw2x2Sprite
-    
-   lutWeasel:
+
+lutWeasel:
    .BYTE $00, $04      ; UL sprite = tile 0, palette 3
    .BYTE $02, $04      ; DL sprite = tile 2, palette 3
    .BYTE $01, $04      ; UR sprite = tile 1, palette 3
    .BYTE $03, $04      ; DR sprite = tile 3, palette 3
-   
-   lutHole:
+
+lutHole:
    .BYTE $00, $05      ; UL sprite = tile 0, palette 3
    .BYTE $02, $05      ; DL sprite = tile 2, palette 3
    .BYTE $01, $05      ; UR sprite = tile 1, palette 3
    .BYTE $03, $05      ; DR sprite = tile 3, palette 3
-  
-  
-   WeaselZoomStart:
+
+
+WeaselZoomStart:
    LDA weasels              ; load variable "weasels"; if the weasel is on screen, this will be anything but 0
-   CMP #0                   ; 
    BNE WeaselZoomBegin      ; if "weasels" is NOT 0, weasel is printed, so skip ahead to set it in motion
      LDA #245               ; if "weasels" is 0, weasel has not been printed yet; so load 245
      STA weasels            ; and save as "weasels", to start printing on the right side of the screen
-     JMP WeaselZoomFrame   
-     
-   WeaselZoom:
+     JMP WeaselZoomFrame
+
+WeaselZoom:
    DEC weasels
    DEC weasels
    DEC weasels
@@ -3547,12 +4862,12 @@ WeaselSprite:
        LDA #0
        STA weasels
        RTS
-       
-   WeaselZoomBegin:
+
+WeaselZoomBegin:
    LDA spr_x
-   STA weasels   
-   
-   WeaselZoomFrame:
+   STA weasels
+
+WeaselZoomFrame:
    JSR WeaselSpriteZoom
    JSR DrawSoundTestCursor       ; draw the cursor
    JSR DrawSoundTestHole
@@ -3568,966 +4883,39 @@ WeaselSprite:
    JSR CallMusicPlay
    JSR ClearOAM                  ; clear OAM (erasing all existing sprites)
    JMP WeaselZoom
-  
+
 WeaselChr:
-  .INCBIN "chr/weasel.chr"   
+  .INCBIN "chr/weasel.chr"
 
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Unadjust Equipment stats  [$ED92 :: 0x3EDA2]
-;;
-;;    This is called when you enter the weapon or armor menu.  It edits all the characters
-;;  stats to reflect what they would be if they removed all their equipment.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-UnadjustEquipStats:
- LDA #0
- STA equipmenu_tmp
- 
- @Loop:
- AND #$C0
- TAX
- 
-    LDA ch_righthand, X
-    BEQ :+
-    JSR @AdjustWeapon
-    
-  : LDA ch_lefthand, X
-    BEQ :+
-    JSR @AdjustArmor  ; left hand
-    
-  : LDA ch_head, X
-    BEQ :+
-    JSR @AdjustArmor  ; head
-    
-  : LDA ch_body, X
-    BEQ :+
-    JSR @AdjustArmor  ; body
-    
-  : LDA ch_hands, X
-    BEQ :+
-    JSR @AdjustArmor  ; hands
-    
-  : LDA ch_accessory, X
-    BEQ :+
-    JSR @AdjustArmor  ; accessory
- 
-  : JSR UnadjustBBEquipStats  ; do a few adjustments for BB/MAs... and zero absorb for all
- 
-    LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
-    CLC
-    ADC #$40
-    STA equipmenu_tmp
-    BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
-    RTS 
- 
-  @AdjustWeapon:
-    JSR GetWeaponDataPointer
-    
-    LDA ch_hitrate, X   ; get character's hit rate
-    SEC
-    SBC (tmp), Y        ; subtract the weapon's hit rate bonus
-    STA ch_hitrate, X   ; and write back to character's hit rate
-    ;; JIGS - some battle stat prep added in:
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    CLC
-    ADC #$01
-    STA ch_numhits, X
-    ;;   
-  
-    INY                 ; inc source index
-  
-  @SpecialWeapons:
-    LDA ch_righthand, X
-    CMP #CHICKEN_KNIFE+1
-    BEQ @Restore
-    CMP #BRAVE_BLADE+1
-    BNE @Done
-  
-  @Restore:
-    LDA ch_damagebackup, X
-    STA ch_damage, X
-  
-   @Done:
-    LDA ch_damage, X       ; get char's dmg
-    SEC
-    SBC (tmp), Y           ; subtract weapon's damage bonus
-    STA ch_damage, X       ; and write back
-   
-    LDA #00               ;; JIGS - clear these out
-    STA ch_critrate, X
-    STA ch_weaponelement, X
-    STA ch_weaponcategory, X
-    STA ch_weaponsprite, X
-    STA ch_weaponpal, X      
-    STA ch_attackailment, X
-    STA ch_attackailproc, X
-    
-   ; LDA #$01
-   ; STA ch_numhitsmult, X ;; JIGS - this is always 1, weapon equipped or not.
-    
-    ;LDX equipmenu_tmp   ; restore X to the equipment source index
-    RTS
-    
-  @AdjustArmor:  
-    JSR GetPointerToArmorData
-  
-    ;LDX tmp+7           ; get char index in X
-    ;LDY #0              ; zero our source index Y
-  
-    LDA ch_evasion, X   ; get character's evade
-    CLC
-    ADC (tmp), Y        ; add the armor's evade penalty rate (removing the penalty)
-    STA ch_evasion, X   ; and write back
-    
-    INY                 ; skip over absorb--it just gets set to 0 since we're removing all armour
-    INY                 ; Y now points to magic defense
-    LDA ch_magicdefense, X
-    SEC
-    ADC (tmp), Y
-    STA ch_magicdefense, X 
-    
-    ;LDX equipmenu_tmp   ; then restore X to equipment source index
-    RTS                 ; and exit
 
 
 
 
 
-    
-    
-;;;;;;;;;;;;;;;;;;;
-;;
-;;  UnadjustBBEquipStats  [$EEB7 :: 0x3EEC7]
-;;
-;;    This is sort of a continuation of above 'UnadjustEquipStats' routine
-;;
-;;    Here, the dmg stat for BB/MAs is zerod.. or the absorb and elemental resistence
-;;  for all classes is zerod.
-;;
-;;;;;;;;;;;;;;;;;;;
 
-UnadjustBBEquipStats:
-    ;LDX tmp+7           ; get char index into X
-    LDA ch_class, X     ; get the char's class
-    AND #$0F            ;; JIGS - cut off high bits (sprite)
 
-    CMP #CLS_BB         ; check if he's a black belt or master
-    BEQ @BlackBelt      ;  if he isn't, just exit
-    CMP #CLS_MA         ; if he is...
-    BNE @Armor
 
-  @BlackBelt:
-    LDA #0              ; zero his damage stat
-    STA ch_damage, X
 
-  @Armor:               ; for armor...
-    LDA #0
-    ;LDX tmp+7               ; get char index
-    STA ch_defense, X       ; zero absorb
-    STA ch_elementresist, X ; and elemental resistence
-    STA ch_elementweak, X   ; JIGS - and elemental weakness why not
-    STA ch_statusresist, X
-    RTS                     ; then exit      
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Readjust Equipment stats  [$ED92 :: 0x3EDA2]
-;;
-;;    This is called when you EXIT the weapon or armor menu.  It edits all the characters
-;;  stats to reflect the changes made by their equipment.
-;;
-;;    This is very similar in format to above UnadjustEquipmentStats routine
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-ReadjustEquipStats:
- LDA #0
- STA equipmenu_tmp
- 
- @Loop:
- AND #$C0
- TAX
- 
-    LDA ch_righthand, X
-    BEQ :+
-    JSR @AdjustWeapon
-    
-  : LDA ch_lefthand, X
-    BEQ :+
-    JSR @AdjustArmor  ; left hand
-    
-  : LDA ch_head, X
-    BEQ :+
-    JSR @AdjustArmor  ; head
-    
-  : LDA ch_body, X
-    BEQ :+
-    JSR @AdjustArmor  ; body
-    
-  : LDA ch_hands, X
-    BEQ :+
-    JSR @AdjustArmor  ; hands
-    
-  : LDA ch_accessory, X
-    BEQ :+
-    JSR @AdjustArmor  ; accessory
- 
-  : JSR ReadjustBBEquipStats  ; do a few adjustments for BB/MAs... 
- 
-   LDA equipmenu_tmp         ; add $40 to the source index (look at next character)
-   CLC
-   ADC #$40
-   STA equipmenu_tmp
-   BCC @Loop                 ; keep looping until source index wraps (wraps after 4 characters)
-   RTS 
 
-  @AdjustWeapon:
-    JSR GetWeaponDataPointer ; this sets Y to 0
-    
-    LDA ch_hitrate, X      ; get char's hit rate
-    CLC
-    ADC (tmp), Y           ; add to it the weapon's hit bonus
-    STA ch_hitrate, X      ; and write it back
 
-    INY                    ; inc source index
 
-    LDA ch_damage, X       ; get char's damage
-    CLC
-    ADC (tmp), Y           ; add weapon's damage bonus
-    STA ch_damage, X       ; and write back
-    
-    ;; JIGS - and do other battle stat prepping here
-    
-    INY
-    LDA (tmp), Y
-    STA ch_critrate, X
-    INY
-    LDA (tmp), Y
-    STA ch_attackailment, X
-    INY 
-    LDA (tmp), Y
-    STA ch_attackailproc, X
-    INY 
-    LDA (tmp), Y
-    STA ch_weaponelement, X
-    INY
-    LDA (tmp), Y
-    STA ch_weaponcategory, X
-    INY
-    LDA (tmp), Y
-    STA ch_weaponsprite, X
-    INY
-    LDA (tmp), Y
-    STA ch_weaponpal, X
-    
-  @SpecialWeapons:
-    LDA ch_righthand, X
-    CMP #CHICKEN_KNIFE+1
-    BEQ @ChickenKnife
-    CMP #BRAVE_BLADE+1
-    BNE @Done
-    
-  @BraveBlade:
-    LDA ch_damage, X
-    STA ch_damagebackup, X
-    LDA battleswon
-    JMP :+
-    
-  @ChickenKnife: 
-    LDA ch_damage, X
-    STA ch_damagebackup, X
-    LDA battlesrun
-  : STA ch_damage, X
-   
-  @Done:
-    RTS
 
-  @AdjustArmor:            ; A = armor_id * 4
-    JSR GetPointerToArmorData
-    
-    LDA ch_evasion, X      ; get char's evade
-    SEC
-    SBC (tmp), Y           ; subtract armor evade penalty
-    STA ch_evasion, X      ; and write it back
-    
-    INY                    ; inc source index
-    LDA ch_defense, X      ; get absorb
-    CLC
-    ADC (tmp), Y           ; add absorb bonus
-    STA ch_defense, X      ; and write back
 
-    INY
-    LDA ch_magicdefense, X
-    CLC
-    ADC (tmp), Y
-    STA ch_magicdefense, X
-    
-    INY                     ; inc source index
-    LDA ch_elementresist, X ; get elemental resistence
-    ORA (tmp), Y            ; combine this armor's elemental resistence
-    STA ch_elementresist, X ; and write back
 
-    INY    
-    LDA ch_elementweak, X   ; get elemental weakness
-    ORA (tmp), Y            ; combine this armor's elemental weakness
-    STA ch_elementweak, X   ; and write back
-    
-    INY
-    LDA ch_statusresist, X
-    ORA (tmp), Y
-    STA ch_statusresist, X
-    RTS
 
 
-GetWeaponDataPointer:    
-   ; SEC
-   ; SBC #$01               ; subtract 1 from the equip ID (equipment is 1 based -- 0 is an empty slot)
-    TAY                    ; save A
-    DEY                    ; NOW subtract 1 from the Equip ID!
-    TXA                    ; then push X to stack
-    PHA
-    TYA                    ; restore A
-    LDX #9
-    JSR MultiplyXA
-    ; I think nomally we'd add the low byte of the pointer, but since the weapon data is 
-    ; at the very start of the bank, we'd just be adding 0.
-    CLC
-    ;ADC #<lut_WeaponData    
-    
-    STA tmp                ; put in tmp as low byte of our pointer
-    TXA
-    ADC #>lut_WeaponData   ; add high byte of our pointer 
-    STA tmp+1              ; fill tmp+1 to complete our pointer
-    PLA
-    TAX                    ; then restore X
-    LDY #0                 ; and set Y to 0 for later
-    RTS
-    
-GetPointerToArmorData:
-;    SEC
-;    SBC #ARMORSTART+1   ; subtract 41 from the equipment ID (they're 1-based, not 0-based... 0 is empty slot)
-;    STA tmp
-;    ASL A
-;    ASL A               ; then multiply by 4 (A = equip_id*4) -- high bit (equipped) is lost here, no need to mask it out
-;    CLC                 ; (A= armor_id*8)
-;    ADC tmp             ; multiply by 5
-;    ADC #<lut_ArmorData ; add A to desired pointer
-;    STA tmp             ;  and store pointer to (tmp)
-;    LDA #0
-;    TAY
-;    ADC #>lut_ArmorData
-;    STA tmp+1           ; (tmp) is now a pointer to stats for this armor
-;    RTS
 
-    SEC
-    SBC #ARMORSTART+1
-    TAY                    ; save A
-    TXA                    ; then push X to stack
-    PHA
-    TYA                    ; restore A
-    LDX #6
-    JSR MultiplyXA
-    CLC
-    ADC #<lut_ArmorData    ; add low byte of our pointer 
-    STA tmp                ; put in tmp as low byte of our pointer
-    TXA
-    ADC #>lut_ArmorData    ; add high byte of our pointer 
-    STA tmp+1              ; fill tmp+1 to complete our pointer
-    PLA
-    TAX                    ; then restore X
-    LDY #0                 ; and set Y to 0 for later
-    RTS    
 
 
-;;;;;;;;;;;;;;;;;;;
-;;
-;;  ReadjustBBEquipStats  [$EEDB :: 0x3EEEB]
-;;
-;;    This is sort of a continuation of above 'ReadjustEquipStats' routine
-;;  This checks BlackBelts to see if they have equipment equipped, and adjusts their
-;;  stats appropriately (since they have special bonuses for being unequipped).
-;;
-;;;;;;;;;;;;;;;;;;;
-
-ReadjustBBEquipStats:
-    LDA ch_hitrate, X
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    CLC
-    ADC #$01
-    STA ch_numhits, X  ; figure out numhits! for everyone!
-    
-  ;  LDA #$01                  ; always 1 until a spell changes it
-  ;  STA ch_numhitsmult, X
-    
-    LDA ch_class, X    ; get this char's class
-    AND #$0F             ;; JIGS - cut off high bits (sprite)
-
-    CMP #CLS_BB        ; see if he's a black belt or master... if yes, jump ahead
-    BEQ @BlackBelt     ; otherwise, exit
-    CMP #CLS_MA
-    BNE @Exit
-
-  @BlackBelt:
-    LDA ch_righthand, X      
-    BEQ @NoWeaponEquipped     ; if zero, we know this BB has no weapon equipped
-
-  @WeaponEquipped:
-    LDA ch_strength, X        ; if a weapon is equipped... get strength stat
-    LSR A                     ;  /2
-    ;CLC ;; JIGS  - fixes rounding error, if its a bug?
-    ADC ch_damage, X          ; and add to damage
-    STA ch_damage, X
-    JMP @Armor ;RTS                       ; equipped BB's dmg = (str/2 + weapon)
-
-  @NoWeaponEquipped:
-    LDA ch_level, X           ; if unequipped, get current experience level
-    CLC
-    ADC #$01                  ; add 1 (levels are stored 0 based in RAM -- ie '0' is really level 1)
-    ASL A                     ; multiply by 2
-    STA ch_damage, X          ; and set dmg.  Unequipped BB's dmg = (level*2)
-    STA ch_critrate, X        ; JIGS - so is crit rate
-    
-    ;; - adding numhits, since battle prep doesn't do it anymore!
-    LDA #$AC
-    STA ch_weaponsprite, X ; and give fisties sprite
-    
-    LDA ch_numhits, X ; and double numhits
-    ASL A
-    STA ch_numhits, X
-
-  @Armor:                     ; for armor....
-    LDA ch_defense, X         ; get absorb
-    BNE @Exit                 ; if nonzero he has something equipped (absorb would be 0 otherwise), so just exit
-
-    LDA ch_level, X           ; otherwise, get level + 1
-    CLC
-    ADC #$01
-    STA ch_defense, X         ; Unequipped BB's absorb=level
-
-  @Exit:
-    RTS                       ; and exit
-
-
-
-
-
-WeaponArmorShopStats:
-    LDA #$FF
-    LDX #12
-  : STA bigstr_buf-1, X
-    DEX
-    BNE :-
-    
-    STX bigstr_buf+11 ; null-terminate main string
-    
-    LDA #$01
-    STA bigstr_buf+3 ; put line break in
-    STA bigstr_buf+7
-    
-    LDA #14
-    STA dest_x
-    LDA #20
-    STA dest_y
-    
-    LDA shop_curitem
-    CMP #ARMORSTART+1
-    BCS @Armor
-    
-   @Weapon:
-    TAX
-    JSR GetWeaponDataPointer   ; Y = 0, also preserves X
-    
-    LDA (tmp), Y ; Hit Rate
-    STA bigstr_buf+16
-    INY
-    LDA (tmp), Y ; Damage
-    CPX #CHICKEN_KNIFE+1
-    BNE :+
-        LDA battlesrun
-        BNE @SaveWeaponDamage
-        
-  : CPX #BRAVE_BLADE+1
-    BNE @SaveWeaponDamage
-   
-    LDA battleswon   
-    
-   @SaveWeaponDamage: 
-    STA bigstr_buf+12            ; space stats 3 bytes apart    
-    INY
-    LDA (tmp), Y ; Critical
-    STA bigstr_buf+20
-    RTS
-    
-   @Armor:
-   ; CLC
-   ; ADC #1 ; the following JSR subtracts +1 too many, but needs to stay doing that for other routines
-    JSR GetPointerToArmorData   
-    
-    LDA (tmp), Y ; Evade penalty
-    STA bigstr_buf+16
-    INY
-    LDA (tmp), Y ; Absorb    
-    STA bigstr_buf+12
-    INY
-    LDA (tmp), Y ; Magic Defense
-    STA bigstr_buf+20
-    RTS
-
-
-
-M_EquipDescBox_Weapon:
-.byte $8A,$61,$34,$B1,$B7,$E4,$FE,$01     ; Ailment: 
-.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
-.byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__ 
-
-M_EquipDescBox_Armor:
-.byte $99,$4D,$53,$A6,$B7,$E4,$FE,$01     ; Protect: 
-.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
-.byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__ 
-
-SillyWeaponArmorSpecialDesc_LUT:
-    .word M_EquipDescBox_Weapon
-    .word M_EquipDescBox_Armor    
-    
-WeaponArmorSpecialDesc:
-    LDA #23
-    STA dest_y
-    LDA #03
-    STA dest_x
-    
-    LDX ItemToEquip
-    BNE :+
-      RTS            ; save time and just return
-
-  : DEX
-    STX tmp+10
-    CPX #ARMORSTART
-    BCS @Armor
-    
-   @Weapon:
-    LDX #0
-    BEQ :+
-   
-   @Armor:
-    LDX #2
-  : LDA SillyWeaponArmorSpecialDesc_LUT, X
-    STA text_ptr
-    LDA SillyWeaponArmorSpecialDesc_LUT+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
-    STA text_ptr+1
-    
-    LDY #0
-    LDX #0
-   @Loop:                   
-    LDA (text_ptr), Y
-    CMP #$FE
-    BEQ @FillSpaces
-    STA str_buf+$80, X
-    INX
-   @Resume: 
-    INY 
-    CPY #$18
-    BNE @Loop
-    BEQ @SortOutBytes
-
-   @FillSpaces:
-    STY tmp 
-    LDY #18 
-    LDA #$FF    
-  : STA str_buf+$80, X
-    INX
-    DEY
-    BNE :-
-    LDY tmp
-    JMP @Resume
-
-   @SortOutBytes:
-    LDA ItemToEquip
-    CMP #ARMORSTART+1
-    BCS @ArmorBytes
-
-   @WeaponBytes:
-    JSR GetWeaponDataPointer
-    JMP :+
-   
-   @ArmorBytes:
-    JSR GetPointerToArmorData 
-  : LDY #3
-    LDA (tmp), Y ; Ailment to inflict (weapon) / Element resisted (armor)
-    STA tmp+11
-    INY
-    INY
-    LDA (tmp), Y ; Element to attack with (weapon) / Status defended against (armor)
-    STA tmp+12    
-    
-    LDA ItemToEquip
-    CMP #ARMORSTART+1
-    BCC :+
-    
-   @FixArmorBytes:
-    LDX tmp+12
-    LDY tmp+11
-    STX tmp+11
-    STY tmp+12
-
-  : JSR GetEquipmentSpell
-    BEQ @NoSpell
-    
-    STA str_buf+$BB   ; spell ID
-    LDA #$02           
-    STA str_buf+$BA   ; control code for item name, before spell ID
-    LDA #$0A
-    STA str_buf+$BD   ; amount of spaces after spell
-    BNE @FinishUp
-    
-   @NoSpell:
-    LDA #$02
-    STA str_buf+$BD   ; amount of spaces after "no spell"
-    LDA #$06
-    STA str_buf+$BA   ; control code for common string
-    LDA #$1D
-    STA str_buf+$BB   ; followed by the string for "no spell"
-    
-   @FinishUp: 
-    LDA #$09
-    STA str_buf+$BC   ; next byte is # of spaces
-    LDA #0
-    STA str_buf+$BE   ; terminate the string properly
-    STA joy_start     ; and zero this for the next loop of the screen!
-    STA tmp+13
-    LDA #1
-    STA menustall     ; and set this to draw with the screen on
-    
-    ;; str_buf+$80 is 26 tiles wide each row, with +1 for the line breaks
-    ;; three rows for 81 total. Spell names are 7 tiles.
-    ;; all spaces must be preserved to overwrite common equipment stats!
-    ;; But with the spell name decompressed, that's 7 spaces too many...
-    
-    ;; visually, it should look like this, if there is a spell:
-    ;; Ailment:_*_*_*_*_*_*_*_*__ 01
-    ;; Element:_*_*_*_*_*_*_*_*__ 01
-    ;; Spell:___XXXXXXX__________ 00
-    ;; it may look messier in RAM.
-    ;; Spell: FF FF FF 02 XX 09 09 00 
-
-    ;; now to convert the bits in the other two stats into tiles!
-    
-    LDA tmp+11 ; start with ailment
-    LDX #$07   ; how far into the string to print the icons
-    LDY #$F1   ; tile for fancy tiny X to indicate nothing in that slot
-
-   @UnrollStatByte:
-    LSR A
-    BCC :+
-      LDY #$E9 ; death
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$ED ; stone
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$EB ; poison
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$EC ; darkness
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$75 ; sleep
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$71 ; stun
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$76 ; mute
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$70 ; confusion
-  : JSR @PrintIcon
-
-  ;; and then the element icon
-    LDA tmp+12
-    LDX #$20
-
-  @UnrollElementByte:
-    LSR A
-    BCC :+
-      LDY #$70 ; status element
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$71 ; stun element
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$EB ; poison element
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$E9 ; death element
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$72 ; fire element
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$73 ; ice element
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$74 ; lightning element  
-  : JSR @PrintIcon
-    LSR A
-    BCC :+
-      LDY #$ED ; earth element
-  : JSR @PrintIcon
-  
-    LDA #<(str_buf+$80)
-    STA text_ptr
-    LDA #>(str_buf+$80)     
-    STA text_ptr+1
-    RTS
-   
-   ;; string should be ready to go; jump back and print it!
-
-   @PrintIcon:
-    PHA
-    TYA
-    STA str_buf+$80, X
-    INX 
-    INX ; add spaces between icons
-    LDY #$F1
-    PLA
-    RTS
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-;; This checks if the player attacker is a cleric, and doubles their crit chance against undead enemies. 
-;; JIGS - leaving this here as proof of concept... My hack idea originally turned fighters/knights into undead-slayers. You can do the same!
-    
- ClericCheck:         
-;    LDA battle_defenderisplayer     ; is it player attacking?
-;    BNE @return
-;    LDA btl_defender_class
-;    BEQ :+                          ; if fighter
-;    CMP #$06                        ; or knight
-;    BNE @return
-;  : LDA btl_defender_category        
-;    AND #CATEGORY_UNDEAD+CATEGORY_WERE 
-;    BEQ @return
-;    ASL math_critchance             ; *2 Crit chance against undead/cursed
-;    @return:
-;    RTS
- 
-
-
-
-    
-;; This checks if the player attacker is a given class, and gives a status effect to their critical hits.
-    
-CritCheck:
-    LDA #0
-    STA MMC5_tmp
-    LDA battle_attackerisplayer
-    BEQ @CritReturn                 ; don't do any of these if confusedly attacking another character
-    
-    LDA btl_attacker
-    JSR PrepCharStatPointers
-    LDY #ch_speed - ch_stats        ; 
-    LDA (CharStatsPointer), Y       ; get speed (luck)
-    ASL A
-    LDX #100                        ; 
-    JSR RandAX                      ; Random number between speed/luck and 100
-    CMP #75                         ; Gotta roll over 75 to do the thing
-    BCC @CritReturn
-
-    LDA btl_attacker_class  
-    AND #$0F             ;; JIGS - cut off high bits (hidden state)
-    CMP #$01                        ; IF thief, goto CritCrit
-    BEQ @CritCrit                   
-    CMP #$07                        ; IF ninja, goto CritCrit
-    BEQ @CritCrit                   
-    CMP #$02                        ; IF bbelt, goto CritStun
-    BEQ @CritStun
-    CMP #$08                        ; IF master, goto CritStun
-    BEQ @CritStun
-    CMP #$03                        ; IF redmage, goto CritSlow
-    BEQ @CritSlow
-    CMP #$09                        ; IF redwiz, goto CritSlow
-    BEQ @CritSlow
-    CMP #$05                        ; IF blackmage, goto CritConfuse
-    BEQ @CritConfuse
-    CMP #$0B                        ; IF blackwiz, goto CritConfuse
-    BEQ @CritConfuse
-    CMP #$04                        ; IF whitemage, goto CritStrength
-    BEQ @CritStrength
-    CMP #$0A                        ; IF whitewiz, goto CritStrength
-    BEQ @CritStrength
-   @CritReturn:
-    RTS
-
-   @CritCrit:
-    LDA btl_attacker_critrate
-    CLC
-    ADC #4
-    BCC :+
-      LDA #$FF
- : 	LDY #ch_critrate - ch_stats
-    STA (CharStatsPointer), Y
-    LDA #BTLMSG_CRITUP
-    STA MMC5_tmp    
-    RTS    
-    
-   @CritStun:
-    LDA btl_defender_elementresist
-    AND #$01
-    BEQ :+                          ; if defender resists the special attack's element (stun 01)
-    RTS                             ; cancel specialty
-  : LDA #BTLMSG_PARALYZED
-    STA MMC5_tmp
-    LDA #AIL_STUN                   ; Stun ailment as used by STUN's effectivity in original game
-    JMP @CritAddAilment
-
-   @CritSlow:
-    LDA btl_defender
-    LDY #en_numhitsmult  
-    LDA (EnemyRAMPointer), Y        ; hit multiplier from RAM stats
-    STA MMC5_tmp
-    DEC MMC5_tmp                    ; Decrease their hit multiplier
-    LDA MMC5_tmp
-    BNE :+                          
-        RTS                         ; if it went to 0, don't save it
-
- :  STA (EnemyRAMPointer), Y        
-    LDA #BTLMSG_LOSTINTELLIGENCE
-    STA MMC5_tmp
-    RTS
-
-   @CritStrength:                  
-    LDA btl_attacker_damage
-    CLC
-    ADC #4
-    BCC :+
-      LDA #$FF
- : 	LDY #ch_damage - ch_stats
-    STA (CharStatsPointer), Y
-    LDA #BTLMSG_WEAPONSSTRONGER    
-    STA MMC5_tmp    
-    RTS 
-    
-   @CritConfuse:
-    LDA btl_defender_elementresist
-    AND #$08
-    BEQ :+                          ; if defender resists the special attack's element (dark/confuses 08)
-    RTS                             ; cancel specialty
-  : LDA #BTLMSG_CONFUSED 
-    STA MMC5_tmp
-    LDA #AIL_CONF                   ; Confuse ailment as used by CONF's effectivity in original game
-    JMP @CritAddAilment
-    
-   @CritAddAilment:
-    BIT btl_defender_ailments
-    BNE @noailment
-    ORA btl_defender_ailments    ; add to existing ailments
-    STA btl_defender_ailments    
-    LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
-
-   @noailment:
-    RTS
-
-    
-    
-ThiefHiddenCheck:
-    LDA btl_attacker_class   ; high bits = hidden
-    AND #$F0
-    BEQ @Return    
-    
-    LDA btl_attacker_hitrate ; regardless of class, double their hit rate
-    ASL A 
-    BCC :+
-    LDA #$FF                  ; cap at FF
- : 	STA btl_attacker_hitrate 
-    
-    LDA btl_attacker_critrate ; regardless of class, 1.5x their crit rate
-    LSR A                     ; halve it, then add in original value
-    CLC
-    ADC btl_attacker_critrate
-    BCC :+
-    LDA #$FF                  ; cap at FF
- : 	STA btl_attacker_critrate 
-    
-    LDA btl_attacker_class
-    AND #$0F
-    CMP #$01                     ; if thief   
-    BEQ @HiddenBoost
-    CMP #$07                     ; if ninja
-    BEQ @HiddenBoost
-   @Return: 
-       RTS
-
-   @HiddenBoost:
-    LDA btl_attacker_damage
-    LSR A                        ; divide by 2 
-    CLC
-    ADC btl_attacker_damage
-    BCC :+
-    LDA #$FF                     ; cap at FF
- : 	STA btl_attacker_damage      ; I think this should basically make the strength 50% higher, or x1.5
-
-    LDA btl_attacker_attackailment
-    CLC
-    ADC btl_attacker_critrate
-    BCC :+
-    LDA #$FF                     ; cap at FF
- : 	STA btl_attacker_critrate    ; Thieves get x2 CritRate
-    RTS
 
 
 
@@ -4556,8 +4944,8 @@ SaveScreen:
     JSR ClearNT              ; clear the NT
     LDA #1
     STA $5113                ; swap battery-backed PRG RAM
-    JSR SaveScreenHelper  
-    
+    JSR SaveScreenHelper
+
     LDA #1
     STA box_x
     LDA #4
@@ -4582,7 +4970,7 @@ SaveScreen:
     LDA #3
     STA box_ht
     JSR DrawBox             ; Draw Save/Load title box
-    
+
     LDA #07
     STA dest_y
     LDA #04
@@ -4591,27 +4979,27 @@ SaveScreen:
     STA cursor_max          ; and Cursor max!
     LDA #$06
     JSR DrawZ_MenuString ; Draw Save slot text: SAVE 1, SAVE 2, SAVE 3
-    JSR DrawSaveScreenNames 
+    JSR DrawSaveScreenNames
     LDA weasels
     BNE SaveGameStuff
-  
+
 LoadGameStuff:
     JSR SaveScreenTitleTextPosition
     LDA #$07
     JSR DrawZ_MenuString
-    JSR TurnMenuScreenOn_ClearOAM 
+    JSR TurnMenuScreenOn_ClearOAM
     JMP SaveScreenLoop
-    
-SaveGameStuff: 
+
+SaveGameStuff:
     JSR SaveScreenTitleTextPosition
     LDA #$08
     JSR DrawZ_MenuString
-    JSR TurnMenuScreenOn_ClearOAM 
+    JSR TurnMenuScreenOn_ClearOAM
     JSR SaveScreenLoop
     LDA #0
     STA weasels
     RTS
-  
+
 SaveScreenLoop:
     JSR ClearOAM
     JSR DrawSaveScreenCursor
@@ -4622,45 +5010,45 @@ SaveScreenLoop:
     LDA joy_a
     BNE @A_Pressed       ; if neither pressed.. see if the cursor has been moved
     LDA joy              ; get joy
-    CMP #$30            
-    BEQ @Select_Pressed    
+    CMP #$30
+    BEQ @Select_Pressed
     AND #$0C             ; isolate up/downbuttons
     CMP joy_prevdir      ; compare to previous buttons to see if button state has changed
     BEQ SaveScreenLoop   ; if no change.. do nothing, and continue loop
- 
+
     STA joy_prevdir      ; otherwise, record changes
 
     CMP #0               ; then check to see if buttons have been pressed or not
     BEQ SaveScreenLoop   ; if not.. do thing, and continue loop
-    
+
     CMP #$08             ; if up was pressed
     BEQ @Previous
 
    @Next:
     INC cursor
-    LDA cursor           ; if Up pressed, increase amount 
+    LDA cursor           ; if Up pressed, increase amount
     CMP #3
     BNE @MoveDone        ; if not, jump ahead to @MoveDone
     LDA #0               ; if yes, wrap limit to 1
-    JMP @MoveDone        ; 
-    
+    JMP @MoveDone        ;
+
     @Previous:           ; otherwise, it was down
     DEC cursor
     LDA cursor
     CMP #$FF
     BNE @MoveDone        ; if it hasn't gone below 0, that's all -- continue loop
     LDA cursor_max       ; otherwise (below 0), wrap to max
-    
+
    @MoveDone:             ; code reaches here when A is to be the new amount to buy
     STA cursor
     JMP SaveScreenLoop   ; and continue loop
 
    @B_Pressed:            ; if B pressed....
     LDA #0
-    STA $5113            ; swap battery-backed PRG RAM into $6000 page   
+    STA $5113            ; swap battery-backed PRG RAM into $6000 page
     SEC                  ; set C to tell the title screen we didn't load a game
-    RTS                  ; 
- 
+    RTS                  ;
+
    @A_Pressed:            ; if A pressed...
     LDA cursor
     CMP #02
@@ -4668,25 +5056,25 @@ SaveScreenLoop:
     CMP #01
     BEQ @SecondSaveSlot
     LDA weasels
-    BEQ :+    
+    BEQ :+
     JSR SaveFirstSlot
     JMP GameSaved
-  : JMP LoadFirstSlot    
-    
+  : JMP LoadFirstSlot
+
    @ThirdSaveSlot:
     LDA weasels
-    BEQ :+    
+    BEQ :+
     JSR SaveThirdSlot
     JMP GameSaved
-  : JMP LoadThirdSlot    
-    
+  : JMP LoadThirdSlot
+
    @SecondSaveSlot:
     LDA weasels
-    BEQ :+    
+    BEQ :+
     JSR SaveSecondSlot
     JMP GameSaved
-  : JMP LoadSecondSlot        
-    
+  : JMP LoadSecondSlot
+
    @Select_Pressed:
     LDA #02
     STA dest_y
@@ -4705,16 +5093,16 @@ SaveScreenLoop:
     CMP #01
     BEQ @DeleteSecondSaveSlot
     JMP DeleteFirstSave
-    
+
    @DeleteThirdSaveSlot:
     JMP DeleteThirdSave
-    
+
    @DeleteSecondSaveSlot:
     JMP DeleteSecondSave
-    
+
 JumpSaveScreen:
     JMP SaveScreen
-    
+
 ConfirmDelete:
     JSR SaveScreenFrame
     LDA joy_a
@@ -4723,15 +5111,15 @@ ConfirmDelete:
     BEQ ConfirmDelete  ;  if both are zero, keep looping.  Otherwise...
     SEC
     RTS
-    
+
    @DoDelete:
     CLC
     RTS
-    
-    
+
+
 GameSaved:
     LDA #$56
-    STA music_track      
+    STA music_track
     STA SaveGameMusic
     LDY cursor
     LDA SavedTextYLUT, Y
@@ -4744,11 +5132,11 @@ GameSaved:
     JSR DrawZ_MenuString
     JSR DrawSaveScreenNames
     JMP SaveScreenLoop
-  
+
 SavedTextYLUT:
   .byte $09,$11,$19
-    
-    
+
+
 SaveOverworldInfo:
     LDX #0            ; zero X for upcoming loop
     LDA ow_scroll_x           ; copy over OW information
@@ -4756,9 +5144,9 @@ SaveOverworldInfo:
     LDA ow_scroll_y
     STA unsram_ow_scroll_y
     LDA vehicle
-    STA unsram_vehicle  
-    RTS    
-    
+    STA unsram_vehicle
+    RTS
+
 SaveFirstSlot:
     JSR SaveOverworldInfo
 
@@ -4795,7 +5183,7 @@ SaveFirstSlot:
     STA sram_checksum ;  and write it to the checksum byte.  Checksum calculations will now result in FF
     RTS
 
-    
+
 SaveSecondSlot:
     JSR SaveOverworldInfo
 
@@ -4868,8 +5256,8 @@ SaveSecondSlot:
                        ; after loop, A is now what the checksum computes to
     EOR #$FF           ;  to force it to compute to FF, invert the value
     STA sram3_checksum ;  and write it to the checksum byte.  Checksum calculations will now result in FF
-    RTS    
-    
+    RTS
+
     LoadFirstSlot:
     LDA sram_assert_55              ; check sram assertion values to make sure
     CMP #$55                        ;  sram is not corrupt.  If they are not what are expected...
@@ -4877,10 +5265,10 @@ SaveSecondSlot:
     LDA sram_assert_AA
     CMP #$AA
     BNE UhOhNewGame
-    
+
     JSR VerifyChecksum1              ; Then verify checksum to ensure save game integrity
     BCS UhOhNewGame                    ;  if it failed, do a new game
-    
+
     LDX #$00
     : LDA   sram, X                 ; Copy all of SRAM to unsram
       STA unsram, X
@@ -4893,10 +5281,10 @@ SaveSecondSlot:
       INX
       BNE :-
     LDA #0
-    STA $5113         ; swap battery-backed PRG RAM into $6000 page  
+    STA $5113         ; swap battery-backed PRG RAM into $6000 page
     STA MenuHush
     JMP GameLoaded
-    
+
     LoadSecondSlot:
     LDA sram2_assert_55              ; check sram assertion values to make sure
     CMP #$55                        ;  sram is not corrupt.  If they are not what are expected...
@@ -4904,10 +5292,10 @@ SaveSecondSlot:
     LDA sram2_assert_AA
     CMP #$AA
     BNE UhOhNewGame
-    
+
     JSR VerifyChecksum2              ; Then verify checksum to ensure save game integrity
     BCS UhOhNewGame                    ;  if it failed, do a new game
-    
+
     LDX #$00
     : LDA   sram2, X                 ; Copy all of SRAM to unsram
       STA unsram, X
@@ -4920,13 +5308,13 @@ SaveSecondSlot:
       INX
       BNE :-
     LDA #0
-    STA $5113         ; swap battery-backed PRG RAM into $6000 page  
+    STA $5113         ; swap battery-backed PRG RAM into $6000 page
     STA MenuHush
     JMP GameLoaded
-    
+
 UhOhNewGame:
     JMP StartNewGame
-    
+
 LoadThirdSlot:
     LDA sram3_assert_55              ; check sram assertion values to make sure
     CMP #$55                        ;  sram is not corrupt.  If they are not what are expected...
@@ -4934,10 +5322,10 @@ LoadThirdSlot:
     LDA sram3_assert_AA
     CMP #$AA
     BNE UhOhNewGame
-    
+
     JSR VerifyChecksum3              ; Then verify checksum to ensure save game integrity
     BCS UhOhNewGame                    ;  if it failed, do a new game
-    
+
     LDX #$00
     : LDA   sram3, X                 ; Copy all of SRAM to unsram
       STA unsram, X
@@ -4950,10 +5338,10 @@ LoadThirdSlot:
       INX
       BNE :-
     LDA #0
-    STA $5113         ; swap battery-backed PRG RAM into $6000 page  
+    STA $5113         ; swap battery-backed PRG RAM into $6000 page
     STA MenuHush
     JMP GameLoaded
-    
+
 DeleteFirstSave:
     LDA #0
     TAX
@@ -4964,7 +5352,7 @@ DeleteFirstSave:
       INX
       BNE :-
       JMP GameDeleted
-      
+
 DeleteSecondSave:
     LDA #0
     TAX
@@ -4974,8 +5362,8 @@ DeleteSecondSave:
       STA sram2+$300, X
       INX
       BNE :-
-      JMP GameDeleted  
-      
+      JMP GameDeleted
+
 DeleteThirdSave:
     LDA #0
     TAX
@@ -4985,7 +5373,7 @@ DeleteThirdSave:
       STA sram3+$300, X
       INX
       BNE :-
-        
+
 GameDeleted:
     ;LDA #02
     ;STA dest_y
@@ -4999,20 +5387,20 @@ GameDeleted:
     JSR PlayDoorSFX
     JSR WaitForButton
     JMP SaveScreen
-    
+
 WaitForButton:
     JSR SaveScreenFrame
     LDA joy_a
     ORA joy_b
     BEQ WaitForButton
     RTS
-    
-    
+
+
 SaveScreenFrame:
     LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
     BEQ :+                    ; otherwise, in Inn or Loading screen
     JSR HushTriangle
-    
+
   : JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
@@ -5029,27 +5417,23 @@ SaveScreenFrame:
 
     INC framecounter       ; increment the frame counter to count this frame
 
-    LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
-    STA joy_a              ;   nonzero state
-    STA joy_b
-    STA joy_select
-    STA joy_start
+    JSR ClearButtons
     JMP UpdateJoy          ; update joypad info, then exit
-    
-    
-    
+
+
+
 DrawSaveScreenCursor:
-    LDX cursor            
-    LDA @lut, X           
-    STA spr_y             
+    LDX cursor
+    LDA @lut, X
+    STA spr_y
     LDA #$10
-    STA spr_x             
-    JMP DrawCursor        
+    STA spr_x
+    JMP DrawCursor
 
   @lut:
   .BYTE $38,$78,$B8
 
-  
+
 SaveScreenTitleTextPosition:
     LDA #02
     STA dest_y
@@ -5057,16 +5441,16 @@ SaveScreenTitleTextPosition:
     STA dest_x
     RTS
 
- 
+
 DrawSaveScreenNames:
     LDX #0
     STX MMC5_tmp
     LDA MMC5_tmp
-    
+
    @LoopStart:
     JSR SaveScreenCharPointer
-    LDY #2 ; 0 is class, 1 is ailments, 2 is start of name 
-    
+    LDY #2 ; 0 is class, 1 is ailments, 2 is start of name
+
    @Loop:
     LDA (CharStatsPointer), Y  ; get name byte
     CMP #0
@@ -5077,9 +5461,9 @@ DrawSaveScreenNames:
     INX
     CPY #9 ; name is 7 letters
     BNE @Loop
-    
+
     INX ; make a space for control codes and ... spaces!
-    INX 
+    INX
     INX ; inc X until its 10, 10 bytes per character = 120 bytes
     INC MMC5_tmp
     LDA MMC5_tmp  ; 12 characters yet?
@@ -5090,7 +5474,7 @@ DrawSaveScreenNames:
 
     LDA #$FF ; spaces to put between names on the same line, or just to fill blank space
     ; because every character has 10 letters in this
-    STA SaveScreenCharBuf+7   ; character 1 
+    STA SaveScreenCharBuf+7   ; character 1
     STA SaveScreenCharBuf+8
     STA SaveScreenCharBuf+9
     STA SaveScreenCharBuf+27  ; character 3
@@ -5108,29 +5492,29 @@ DrawSaveScreenNames:
     STA SaveScreenCharBuf+107 ; character 11
     STA SaveScreenCharBuf+108
     STA SaveScreenCharBuf+109
-    
+
     LDA #01 ; two lines breaks
     STA SaveScreenCharBuf+37 ; character 4
-    STA SaveScreenCharBuf+38 
+    STA SaveScreenCharBuf+38
     STA SaveScreenCharBuf+77 ; character 8
-    STA SaveScreenCharBuf+78 
-    
+    STA SaveScreenCharBuf+78
+
     LDA #05 ; one line break
-    STA SaveScreenCharBuf+17 ; character 2 
-    STA SaveScreenCharBuf+18 ; character 2 
-    STA SaveScreenCharBuf+19 ; character 2 
+    STA SaveScreenCharBuf+17 ; character 2
+    STA SaveScreenCharBuf+18 ; character 2
+    STA SaveScreenCharBuf+19 ; character 2
     STA SaveScreenCharBuf+39 ; character 4
-    STA SaveScreenCharBuf+57 ; character 6 
-    STA SaveScreenCharBuf+58 ; character 6 
+    STA SaveScreenCharBuf+57 ; character 6
+    STA SaveScreenCharBuf+58 ; character 6
     STA SaveScreenCharBuf+59 ; character 6
     STA SaveScreenCharBuf+79 ; character 8
-    STA SaveScreenCharBuf+97 ; character 10 
-    STA SaveScreenCharBuf+98 ; character 10 
-    STA SaveScreenCharBuf+99 ; character 10 
-    
-    LDA #0 ; end 
+    STA SaveScreenCharBuf+97 ; character 10
+    STA SaveScreenCharBuf+98 ; character 10
+    STA SaveScreenCharBuf+99 ; character 10
+
+    LDA #0 ; end
     STA SaveScreenCharBuf+117 ; character 12
-    
+
     LDA #13
     STA dest_x
     LDA #06
@@ -5139,13 +5523,13 @@ DrawSaveScreenNames:
     STA text_ptr
     LDA #>SaveScreenCharBuf
     STA text_ptr+1
-    JMP DrawComplexString 
+    JMP DrawComplexString
 
 
 SaveScreenChar_LUT:
 .word SaveScreenChar1  ; 0, 1
 .word SaveScreenChar2  ; 2, 3
-.word SaveScreenChar3  ; 4, 5 
+.word SaveScreenChar3  ; 4, 5
 .word SaveScreenChar4  ; 6, 7
 .word SaveScreenChar5  ; 8, 9
 .word SaveScreenChar6  ; A, B
@@ -5159,12 +5543,12 @@ SaveScreenChar_LUT:
 SaveScreenCharPointer:
     ASL A
     TAY
-    LDA SaveScreenChar_LUT, Y         
+    LDA SaveScreenChar_LUT, Y
     STA CharStatsPointer
     LDA SaveScreenChar_LUT+1, Y
     STA CharStatsPointer+1
-    RTS     
-    
+    RTS
+
 DrawSaveScreenSprites:
     LDA #0
     STA MMC5_tmp               ; loop counter
@@ -5189,12 +5573,12 @@ DrawSaveScreenSprites:
     STA spr_y
     INX
     STX MMC5_tmp+1
-    
+
     LDY #0
     LDA (CharStatsPointer), Y  ; get sprite from different save slots
     AND #$F0                  ; knock off class bits
     JSR ShiftSpriteHightoLow
-    TAY                       
+    TAY
     LDA lutClassBatSprPalette, Y ; get sprite palette
     STA tmp+1
     LDA lutClassBatSpriteID, Y ; get tile ID in CHR
@@ -5205,7 +5589,7 @@ DrawSaveScreenSprites:
     LDA MMC5_tmp
     CMP #4                     ; only draw 4 sprites
     BNE @LoopStart
-    
+
    @RTS:
     RTS
 
@@ -5237,8 +5621,8 @@ VerifyChecksum1:
     LDX #$00      ; and X
     CLC           ; and C!
 @Loop:
-      ADC sram, X   
-      ADC sram+$100, X   
+      ADC sram, X
+      ADC sram+$100, X
       ADC sram+$200, X
       ADC sram+$300, X
       INX
@@ -5250,8 +5634,8 @@ VerifyChecksum2:
     LDX #$00      ; and X
     CLC           ; and C!
 @Loop:
-      ADC sram2, X   
-      ADC sram2+$100, X   
+      ADC sram2, X
+      ADC sram2+$100, X
       ADC sram2+$200, X
       ADC sram2+$300, X
       INX
@@ -5263,8 +5647,8 @@ VerifyChecksum3:
     LDX #$00      ; and X
     CLC           ; and C!
 @Loop:
-      ADC sram3, X   
-      ADC sram3+$100, X   
+      ADC sram3, X
+      ADC sram3+$100, X
       ADC sram3+$200, X
       ADC sram3+$300, X
       INX
@@ -5285,827 +5669,6 @@ ChecksumFail:
 
 
 
-  
-  
-  
-LoadEnemyStats:
-    LDA #0
-    LDY #0
-    @ClearLoop:
-    STA btl_enemystats, Y
-    STA btl_enemystats+$24, Y
-    DEY
-    BNE @ClearLoop
-    
-    LDA #$09
-    STA btl_loadenstats_count              ; loop down-counter
-    LDA #$00
-    STA btl_loadenstats_index               ; loop up-counter / enemy index
-    
-    LDA #0
-    STA tmp
-    STA tmp+1
-   @EnemyLoop:
-    LDA btl_loadenstats_index               ; Put a pointer to the current enemy's stat RAM
-    JSR GetEnemyRAMPtr                         ;    in btltmp+A
-    
-    LDX btl_loadenstats_index              ; Check to see if this enemy even exists
-    JSR DoesEnemyXExist
-    BNE :+
-      
-      LDA tmp
-      CLC
-      ADC #4
-      STA tmp
-      LDA tmp+1
-      CLC
-      ADC #28
-      STA tmp+1
-      JMP @NextEnemy        ; if it doesn't, skip ahead...
-      
-  : LDX #25                ; multiply current enemy ID by #25  (25 bytes of data per enemy)
-    JSR MultiplyXA          ;   add the result to data_EnemyStats to generate a pointer to the enemy
-    CLC                     ;   data in ROM.
-    ADC #<data_EnemyStats  
-    STA EnemyROMPointer
-    TXA
-    ADC #>data_EnemyStats
-    STA EnemyROMPointer+1
-
-    LDX tmp    
-    LDY #0
-   @RewardLoop:
-    LDA (EnemyROMPointer), Y
-    STA btl_enemyrewards, X
-    INX 
-    INY
-    CPY #4
-    BNE @RewardLoop
-    
-    STX tmp
-    LDX tmp+1
-    
-   @Loop:
-    LDA (EnemyROMPointer), Y    
-    STA btl_enemystats, X
-    INX
-    INY
-    CPY #25               ; copy the next 21 bytes of ROM data into RAM.
-    BNE @Loop
-    
-    TXA
-    CLC
-    ADC #7                ; add 8 to the "btl_enemystats, X" position, 'cos adding 7 more stats with Y instead
-    STA tmp+1             ; 
-   
-    TYA                   ; now using Y to save, so subtract 4 since Y is 4 past the RAM pointer
-    SEC
-    SBC #4
-    TAY
-   
-    LDA #0
-    STA (EnemyRAMPointer), Y ; <- en_aimagpos
-    INY                 
-    STA (EnemyRAMPointer), Y ; <- en_aiatkpos
-    INY 
-    LDA #$01
-    STA (EnemyRAMPointer), Y ; en_numhitsmult, default to hit multiplier of 1
-    
-    INY
-    LDA #0
-    STA (EnemyRAMPointer), Y ; <- en_ailments
-
-    LDY #04
-    LDA (EnemyROMPointer), Y ; load max HP low byte
-    PHA                      ; push low byte
-    INY
-    LDA (EnemyROMPointer), Y ; load max HP high byte
-    
-    LDY #en_hp+1
-    STA (EnemyRAMPointer), Y ; save as current HP high byte
-    PLA                      ; pull low byte
-    DEY
-    STA (EnemyRAMPointer), Y ; save as current HP low byte
-    
-    LDX btl_loadenstats_index   ; get the enemy ID
-    LDA btl_enemyIDs, X
-    LDY #en_enemyid
-    STA (EnemyRAMPointer), Y    
-    
-    LDY #en_level               ; get enemy level
-    LDA (EnemyROMPointer), Y
-    STA tmp+2                   ; save in tmp+2
-    
-    LDA #0
-    LDX #255
-    JSR RandAX                  ; random number between 0-255
-    CMP #255
-    BCC :+
-        DEC tmp+2               ; if its exactly 255, decrease the level
-  : CMP #180
-    BCC :+                      ; if its over 200, decrease the level
-        DEC tmp+2
-        JMP @SaveLevel
-    
-  : CMP #0
-    BNE :+
-        INC tmp+2               ; if its exactly 0, increase the level
-  
-  : CMP #85                     ; if its under 85, increase the level
-    BCS @NextEnemy
-    
-    INC tmp+2
-  @SaveLevel: 
-    LDA tmp+2
-    STA (EnemyROMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
-
-  @NextEnemy:
-    INC btl_loadenstats_index           ; inc up-counter to look at next enemy
-    DEC btl_loadenstats_count           ; dec down-counter
-    BEQ :+
-      JMP @EnemyLoop    ; loop until all 9 enemies processed
-
- : LDX #0   
-  @FillPlayerHitMultiplyer:
-   TXA
-   JSR PrepCharStatPointers
-   LDY #ch_class - ch_stats
-   LDA (CharStatsPointer), Y
-   AND #$0F
-   AND #CLS_BB | CLS_MA              ; see if the player character is BB or Master
-   BEQ :+
-       LDY #ch_righthand - ch_stats
-       LDA (CharStatsPointer), Y     ; then see if they have a weapon equipped
-       BNE :+
-        LDA #02                      ; if no weapon, they have 2 fists, so a hit multiplyer of 2
-        BNE :++
- : LDA #01                           ; everyone else gets 1
- : STA btl_charhitmult, X
-   INX
-   CPX #4
-   BNE @FillPlayerHitMultiplyer
-   
-   ;; JIGS - and now on to filling the enemy's AI RAM!!
-   
-   LDA #0
-   STA tmp+2                ; enemy ID counter
-   STA tmp+3                ; AI index for writing to RAM
-  @EnemyAI_Loop: 
-   JSR GetEnemyRAMPtr
-   LDY #en_enemyid
-   LDA (EnemyRAMPointer), Y
-   AND #$7F                 ; cap at $7F, in case not enough enemies were loaded and old data wasn't overwritten with the right values here
-   LDX #$10
-   JSR MultiplyXA
-   CLC
-   ADC #<EnemyAIData
-   STA EnemyROMPointer
-   TXA
-   ADC #>EnemyAIData
-   STA EnemyROMPointer+1    ; ROM pointer now points to their AI data
-  
-   LDY #0
-   LDX tmp+3
-  @FillAI:
-   LDA (EnemyROMPointer), Y
-   STA lut_EnemyAi, X
-   INX
-   INY
-   CPY #$10
-   BNE @FillAI
-
-   STX tmp+3                ; save RAM write position 
-   INC tmp+2                ; inc tmp+2 for next enemy 
-   LDA tmp+2
-   CMP #$09
-   BNE @EnemyAI_Loop   
-   RTS
-   
-  
-    
-
-    
-  
-  
-  
-  
-    
-    
-    ;; this is stuff copied over from Bank C so there's more room to play around with more interesting things.
-    
-   EnemyExistLoop:
-    LDA #$00
-    LDX #$08
-    JSR RandAX
-    TAX                     ; random enemy slot [0,8] 
-    
-   CheckTargetLoop:
-    LDA btl_enemyIDs, X
-    CMP #$FF   
-    BEQ EnemyExistLoop               ; if no, then loop to find one
-    RTS                            
-
-PlayerAttackEnemy_PhysicalZ:
-    LDA BattleCharID
-    ORA #$80
-    STA btl_attacker
-
-    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_CONF
-    BEQ :+
-       JSR EnemyExistLoop
-    
-  : LDA AutoTargetOption
-    BNE @SkipAutoTarget
-    
-    JSR CheckTargetLoop             ; JIGS - doublecheck the enemy you're attacking exists!
-    
-   @SkipAutoTarget:
-    STX btl_defender_index       ; set defender index
-    STX btl_defender
-
-    TXA
-    JSR GetEnemyRAMPtr     
-    
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Attacker/PLAYER stats
-    LDA #$00                        ; clear this value to zero to indicate the defender
-    STA battle_defenderisplayer     ;   is an enemy
-    LDA #1
-    STA battle_attackerisplayer
-    
-    LDY #ch_class - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #$0F                        ;; cut off high bits to get class
-    STA btl_attacker_class
-    LDA (CharStatsPointer), Y
-    AND #$F0                        ;; JIGS cut off low bits to get sprite
-    JSR ShiftSpriteHightoLow
-    STA btl_attacker_sprite
-
-    LDA btl_attacker
-    AND #$03
-    TAX
-    LDA btl_charhidden, X          ;; get hidden state
-    ASL A
-    ASL A
-    ASL A
-    ASL A
-    ORA btl_attacker_class
-    STA btl_attacker_class
-    
-    LDA btl_charhitmult, X
-    STA btl_attacker_numhitsmult
-    
-    LDY #ch_damage - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_damage
-    
-    INY ; ch_hitrate
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_hitrate
-    
-    LDY #ch_weaponsprite - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_graphic
-    
-    INY ; ch_weaponpal
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_varplt
-    
-    INY ; ch_weaponelement
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_element
-    
-    INY ; ch_weaponcategory
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_category
-    
-    INY ; ch_numhits
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_numhits
-
-    INY ; ch_critrate             
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_critrate
-    
-    LDY #ch_ailments - ch_stats   
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_ailments
-    
-    LDY #ch_attackailment - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_attackailment
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_ailmentchance
-    
-    LDA btl_charrush, X
-    BEQ :+
-        LDA btl_attacker_hitrate
-        LSR A
-        LSR A
-        STA btl_attacker_hitrate ; one quarter hit rate
-        
-        LDY #ch_level - ch_stats
-        LDA (CharStatsPointer), Y
-        ASL A
-        CLC
-        ADC btl_attacker_damage ; level * 2 on top of damage. That's 100 extra damage at level 50! 
-        STA btl_attacker_damage
-        
-        LDA #0
-        STA btl_charrush, X
-    
-  : JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
-    ;; 2x hit rate
-    ;; 1.5x crit rate (2x for thief/ninja)
-    ;; 1.5x damage for thief/ninja
-   
-    LDA btl_attacker_graphic
-    BEQ @Defender
-    CMP #$AC
-    BNE @Defender
-        
-    
-   
-   
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Defender/ENEMY stats
-   @Defender: 
-    LDY #en_ailments                ; ailment from RAM
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_ailments
-    
-    LDY #en_category
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_category
-    
-    LDY #en_statusresist
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_statusresist
-    
-    LDY #en_elemweakness             ; 
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_elementweakness ; 
-    
-    LDY #en_evade                   ; evade from RAM
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_evasion
-    
-    LDY #en_defense                 ; absorb/defense from RAM
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_defense
-    
-    LDY #en_hp                      ; HP from RAM
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_hp
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA btl_defender_hp+1
-    
-    LDA #0
-    STA btl_defender_class
-    RTS
-    
-
-
-PlayerAttackPlayer_PhysicalZ:
-    LDA BattleCharID
-    ORA #$80
-    STA btl_attacker
-    ;; ^ this might not be necessary, as the attacker drawing box sets it when confused
-    
-   ; AND #$03
-   ; JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
-    
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Attacker/PLAYER stats
-
-    LDA #1
-    STA battle_attackerisplayer
-    STA battle_defenderisplayer 
-    
-    LDY #ch_class - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #$0F                        ;; cut off high bits to get class
-    STA btl_attacker_class
-    
-    LDA btl_attacker
-    AND #$03
-    TAX
-    LDA btl_charhidden, X          ;; get hidden state
-    BEQ :+
-    LDA btl_attacker_class
-    ORA #$10
-    STA btl_attacker_class
-    
-  : LDA btl_charhitmult, X
-    STA btl_attacker_numhitsmult
-    
-    LDY #ch_damage - ch_stats
-    LDA (CharStatsPointer), Y
-    LSR A                           ;; damage for player > player is half
-    STA btl_attacker_damage
-    
-    INY ; ch_hitrate
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_hitrate
-    
-    LDY #ch_weaponsprite - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_graphic
-    
-    INY ; ch_weaponpal
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_varplt
-    
-    INY ; ch_weaponelement
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_element
-    
-    INY ; ch_weaponcategory
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_category
-    
-    INY ; ch_numhits
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_numhits
-    
-    INY ; ch_critrate             
-    LDA (CharStatsPointer), Y
-    LSR A                           ;; crit rate for player > player is half
-    STA btl_attacker_critrate
-    
-    LDY #ch_ailments - ch_stats   
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_ailments
-    
-    LDY #ch_attackailment - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_attackailment
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btl_attacker_ailmentchance
-    
-    JSR ThiefHiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
-    ;; 2x hit rate
-    ;; 1.5x crit rate (2x for thief/ninja)
-    ;; 1.5x damage for thief/ninja
-   
-   @Loop:    
-    JSR BattleRNG_L
-    AND #$03    
-    STA btl_defender_index
-    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
-    
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_DEAD | AIL_STOP
-    BNE @Loop
-    
-    LDA btl_defender_index       ; record the defender index
-    TAX
-    ORA #$80
-    STA btl_defender
-    
-    JSR CoverStuff
-    JMP PlayerDefenderStats    
-    
-    
-CoverStuff:
-    LDA btl_charcover, X
-    BEQ @NoCover
-
-    LDA btl_attacker    
-    CMP btl_charcover+4, X         ; get the knight doing the covering
-    BEQ @NoCover                   ; skip if the knight is confused and doing the attacking!
-    
-    JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
-    BNE @NoCover                   ; the knight is immobile and can't help!
-    LDA (CharStatsPointer), Y
-    AND #AIL_STUN
-    BEQ @Cover
-        JSR BattleRNG_L
-        AND #01
-        BEQ @NoCover               ; the knight is stunned, 50/50 chance to perform action
-    
-   @Cover: 
-    INC attackblocked              ; set to 1 
-    LDA btl_defender_index         ; get the original target
-    ORA #$80                       ; convert to ID
-    STA btl_defender               
-    ;; important to note: this is used by the DefenderBox drawing thing, but not really used for players otherwise!
-    ;; everything else uses btl_defender_index... so btl_defender is now the ORIGINAL target
-    LDA btl_charcover+4, X         ; get the knight doing the covering
-    AND #$03
-    STA btl_defender_index         ; and set as the new defender    
-
-   @NoCover:   
-    LDA btl_defender_index
-    RTS
-
-    
-;;  input:
-;;    A = defending player index
-;;    X = attacking enemy slot index    
-  
- EnemyAttackPlayer_PhysicalZ:
-    LDA btl_attacker
-    JSR GetEnemyRAMPtr     
-    
-    ;;;;;;;;;;;;;;;;;;;;;
-    ; Attacker ENEMY stats
-    
-    LDA #$01                    ; mark that the defender is a player and not an enemy
-    STA battle_defenderisplayer
-
-    LDA #0
-    STA btl_attacker_class
-    STA battle_attackerisplayer
-    
-    LDY #en_strength          
-    LDA (EnemyRAMPointer), Y
-    STA btl_attacker_damage
-    
-    LDY #en_category     
-    LDA (EnemyRAMPointer), Y  
-    STA btl_attacker_category
-    
-    LDY #en_elemattack
-    LDA (EnemyRAMPointer), Y  
-    STA btl_attacker_element  
-    
-    LDY #en_hitrate 
-    LDA (EnemyRAMPointer), Y
-    STA btl_attacker_hitrate
-    
-    LDY #en_numhitsmult       
-    LDA (EnemyRAMPointer), Y  
-    STA btl_attacker_numhitsmult
-    
-    LDY #en_numhits
-    LDA (EnemyRAMPointer), Y
-    AND #$0F
-    STA btl_attacker_numhits
-    
-    LDA (EnemyRAMPointer), Y  
-    AND #$F0
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    STA btl_attacker_limbs
-    
-    LDY #en_critrate
-    LDA (EnemyRAMPointer), Y
-    STA btl_attacker_critrate
-    
-    LDY #en_attackail
-    LDA (EnemyRAMPointer), Y
-    STA btl_attacker_attackailment
-    
-    LDY #en_ailments           
-    LDA (EnemyRAMPointer), Y
-    STA btl_attacker_ailments
-    
-LoadPlayerDefenderStats_ForEnemyAttack:
-    LDA btl_randomplayer
-    
-    AND #$03
-    STA btl_defender_index       ; record the defender index
-    TAX
-    ORA #$80
-    STA btl_defender
-   
-    JSR CoverStuff
-    JSR PrepCharStatPointers        ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
-
-PlayerDefenderStats:    
-    LDA #$00
-    STA btl_defender_category
-    STA GuardDefense
-
-    LDY #(ch_class - ch_stats)
-    LDA (CharStatsPointer), Y
-    AND #$0F                         ;; cut off high bits to get class
-    STA btl_defender_class
-    
-    INY ; #(ch_ailments - ch_stats) ; check if stunned
-    LDA (CharStatsPointer), Y
-    STA btl_defender_ailments
-    
-    LDY #(ch_evasion - ch_stats)
-    LDA (CharStatsPointer), Y
-    STA btl_defender_evasion
-    
-    LDX btl_defender_index
-    LDA btl_charhidden, X
-    BEQ :+
-    LDA btl_defender_class
-    ORA #$10
-    STA btl_defender_class
-    
-  : LDA btl_charguard, X          ; check battlestate for Guarding
-    BEQ :++                       ; if not guarding, resume as normal
-
-    LDA btl_defender_ailments
-    AND #AIL_STUN
-    BEQ :+
-    
-    JSR BattleRNG_L               ; 50/50 chance for guarding to fail
-    AND #01                       ; if stunned
-    BEQ :+
-    
-    LDX btl_defender_index
-    DEC btl_charguard, X
-    
-  : LDY #(ch_level - ch_stats)
-    LDA (CharStatsPointer), Y     ; guard defense is level * 2
-    ASL A
-    STA GuardDefense
-    
-  : LDY #(ch_defense - ch_stats)
-    LDA (CharStatsPointer), Y
-    CLC
-    ADC GuardDefense
-    STA btl_defender_defense
-    
-    LDY #(ch_magicdefense - ch_stats)
-    LDA (CharStatsPointer), Y
-    STA btl_defender_magicdefense
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btl_defender_statusresist
-    
-    INY ;LDY #(ch_elementresist - ch_stats)
-    LDA (CharStatsPointer), Y
-    STA btl_defender_elementresist
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btl_defender_elementweakness
-    
-    LDY #(ch_curhp - ch_stats)       
-    LDA (CharStatsPointer), Y
-    STA btl_defender_hp
-    INY
-    LDA (CharStatsPointer), Y
-    STA btl_defender_hp+1
-    
-    RTS
-  
-  
-    
-    
-    
-;; JIGS -- Below this point are copies of routines in other banks... It's easier to copy-paste them here than to meddle with LongCalls back and forth to JSR certain things.
-
-
-    
-PrepCharStatPointers:
-    ASL A                               ; 2* for pointer lut
-    TAY
-    LDA lut_IBCharStatsPtrTable, Y      ; copy pointers from pointer luts
-    STA CharBackupStatsPointer
-    LDA lut_IBCharStatsPtrTable+1, Y
-    STA CharBackupStatsPointer+1
-    LDA lut_CharStatsPtrTable, Y
-    STA CharStatsPointer
-    LDA lut_CharStatsPtrTable+1, Y
-    STA CharStatsPointer+1
-    RTS    
-  
-    
-GetEnemyRAMPtr:
-    LDX #28                ; multiply enemy index by $1C  (number of bytes per enemy)
-    JSR MultiplyXA
-    CLC                     ; then add btl_enemystats to the result
-    ADC #<btl_enemystats                ;; FB
-    STA EnemyRAMPointer
-    TXA
-    ADC #>btl_enemystats                ;; 6B
-    STA EnemyRAMPointer+1
-    RTS
-    
-GetEnemyRAMPtr_Minus4:
-    LDX #28                ; multiply enemy index by $1C  (number of bytes per enemy)
-    JSR MultiplyXA
-    CLC                     ; then add btl_enemystats to the result
-    ADC #<btl_enemystats-4                ;; FB
-    STA EnemyRAMPointer
-    TXA
-    ADC #>btl_enemystats               ;; 6B
-    STA EnemyRAMPointer+1
-    RTS    
-
-DoesEnemyXExist:
-    LDA btl_enemyIDs, X
-    CMP #$FF
-    RTS    
-    
-RespondDelay:
-    LDA btl_responddelay        ; get the delay
-    STA MMC5_tmp+2 ; $6AD0      ; stuff it in temp ram as loop counter
-    : JSR WaitForVBlank_L       ; wait that many frames
-      JSR BattleUpdateAudio     ; updating audio each frame
-      DEC MMC5_tmp+2        ;; JIGS - Respond Delay doesn't seem to work in this bank... trying a different counter.
-      BNE :-
-    RTS    
-    
-BattleUpdateAudio:
-    LDA #BANK_THIS
-    STA cur_bank          ; set the swap-back bank (necessary because music playback is in another bank)
-    LDA music_track
-    BPL :+                  ; if the high bit of the music track is set (indicating the current song is finished)...
-      LDA btl_followupmusic ;   then play the followup music
-      STA music_track
-:   JSR CallMusicPlay_L     ; Call music playback to keep it playing
-    ;JMP UpdateBattleSFX     ; and update sound effects to keep them playing    
-    
-UpdateBattleSFX:
-    ;JSR SwapBattleSFXBytes
-    LDA btlsfx_framectr
-    BEQ :+
-      JSR UpdateBattleSFX_Square
-      JSR UpdateBattleSFX_Noise
-      DEC btlsfx_framectr
-  : ;JSR SwapBattleSFXBytes
-    RTS
-
-UpdateBattleSFX_Square:
-    LDA btlsfxsq2_len
-    BEQ @Exit
-    DEC btlsfxsq2_framectr
-    BNE @Exit
-      LDY #$04
-      LDA (btlsfxsq2_ptr), Y
-      STA btlsfxsq2_framectr    ; byte [4] if the frame length of this portion
-      LDY #$00
-      LDA (btlsfxsq2_ptr), Y
-      STA $4004                 ; byte [0] is the volume/duty setting
-      INY
-      LDA (btlsfxsq2_ptr), Y
-      STA $4005                 ; byte [1] is the sweep setting
-      INY
-      LDA (btlsfxsq2_ptr), Y
-      STA $4006                 ; byte [2] is low 8 bits of F-value
-      INY
-      LDA (btlsfxsq2_ptr), Y
-      STA $4007                 ; byte [3] is high 3 bits of F-value + length counter
-    
-      CLC                       ; add 8 to the pointer (even though we only used 5 bytes of data)
-      LDA btlsfxsq2_ptr         ;   (the other 3 bytes are the noise sfx data?)
-      ADC #$08
-      STA btlsfxsq2_ptr
-      LDA btlsfxsq2_ptr+1
-      ADC #$00
-      STA btlsfxsq2_ptr+1
-    
-      DEC btlsfxsq2_len
-      RTS
-  @Exit:
-    RTS
-    
-UpdateBattleSFX_Noise:
-    LDA btlsfxnse_len           ; check the length of this sfx (if any)
-    BEQ @Exit                   ; if we've completed it, then just exit
-    DEC btlsfxnse_framectr      ; Count down our frame counter
-    BNE @Exit                   ; Once it expires, we update the sfx
-    
-      LDY #$02
-      LDA (btlsfxnse_ptr), Y
-      STA btlsfxnse_framectr    ; byte [2] if the frame length of this portion
-      LDY #$00
-      LDA (btlsfxnse_ptr), Y
-      STA $400C                 ; byte [0] is the volume setting
-      INY
-      LDA (btlsfxnse_ptr), Y
-      STA $400E                 ; byte [1] is the Freq/tone of the noise
-      LDA #$FF
-      STA $400F                 ; fixed value of FF used for length counter (keep noise playing for a long time)
-      
-      CLC                       ; add 8 to the noise pointer (even though we only used 3 bytes of data)
-      LDA btlsfxnse_ptr         ;   (the other 5 bytes are the square sfx data?)
-      ADC #$08
-      STA btlsfxnse_ptr
-      LDA btlsfxnse_ptr+1
-      ADC #$00
-      STA btlsfxnse_ptr+1
-      
-      DEC btlsfxnse_len         ; decrease the remaining data length of the sfx
-      RTS
-  @Exit:
-    RTS
-
 
 
 DrawZ_MenuString: ;_Len:
@@ -6121,7 +5684,7 @@ DrawZ_MenuString: ;_Len:
     JMP DrawComplexString ;  Draw Complex String, then exit!
 
 
-    
+
 MenuWaitForBtn_SFX:
     JSR MenuFrame           ; do a frame
     LDA joy_a               ;  check A and B buttons
@@ -6130,9 +5693,9 @@ MenuWaitForBtn_SFX:
     LDA #0
     STA joy_a               ; clear both joy_a and joy_b
     STA joy_b
-   ; JMP PlaySFX_MenuSel     ; play the MenuSel sound effect, and exit    
-    
-    
+   ; JMP PlaySFX_MenuSel     ; play the MenuSel sound effect, and exit
+
+
 PlaySFX_MenuSel:
     LDA MuteSFXOption
     BNE @Done
@@ -6142,9 +5705,9 @@ PlaySFX_MenuSel:
     STA $400F
     LDA #%00001010
     STA $400E
-    @Done:
+   @Done:
     LDA MMC5_tmp ;; JIGS - this routine is used by the options menu only...
-    RTS             
+    RTS
 
 
 PlaySFX_MenuMove:
@@ -6156,9 +5719,9 @@ PlaySFX_MenuMove:
     STA $400F
     LDA #$0
     STA $400E
-    @Done:
-    RTS            
-    
+   @Done:
+    RTS
+
 MenuFrame:
     JSR HushTriangle
     ;; JIGS ^ every frame, gosh
@@ -6184,18 +5747,14 @@ MenuFrame:
 
     INC framecounter       ; increment the frame counter to count this frame
 
-    LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
-    STA joy_a              ;   nonzero state
-    STA joy_b
-    STA joy_select
-    STA joy_start
-    JMP UpdateJoy          ; update joypad info, then exit    
-    
-    
-    
-    
-    
-;; JIGS - luts go down here:   
+    JSR ClearButtons
+    JMP UpdateJoy          ; update joypad info, then exit
+
+
+
+
+
+;; JIGS - luts go down here:
 
 
 lut_LowNormalHigh:
@@ -6212,14 +5771,46 @@ lut_ZMenuText:
 .word OptionOn               ; 4
 .word OptionOff              ; 5
 .word M_SaveSlots            ; 6
-.word M_SaveTitle            ; 7 
+.word M_SaveTitle            ; 7
 .word M_LoadTitle            ; 8
 .word Saved                  ; 9
 .word AreYouSure             ; A ; 10
 .word Deleted                ; B ; 11
 .word SoundTestInstructions  ; C ; 12
 .word Zheep                  ; D ; 13
+.word BLANK                  ; E ;
+.word BLANK                  ; F ;
+.word Song1                  ; 10
+.word Song2                  ; 11
+.word Song3                  ; 12
+.word Song4                  ; 13
+.word Song5                  ; 14
+.word Song6                  ; 15
+.word Song7                  ; 16
+.word Song8                  ; 17
+.word Song9                  ; 18
+.word Song10                 ; 19
+.word Song11                 ; 1A
+.word Song12                 ; 1B
+.word Song13                 ; 1C
+.word Song14                 ; 1D
+.word Song15                 ; 1E
+.word Song16                 ; 1F
+.word Song17                 ; 20
+.word Song18                 ; 21
+.word Song19                 ; 22
+.word Song20                 ; 23
+.word Song21                 ; 24
+.word Song22                 ; 25
+.word Song22                 ; 26
+.word Song23                 ; 27
+.word Song24                 ; 28
+.word Song25                 ; 29
+.word Song26                 ; 2A
+.word Song27                 ; 2B
 
+
+BLANK:
 
 OptionOn:
 .byte $98,$97,$FF,$00
@@ -6236,7 +5827,7 @@ OptNormal:
 OptHigh:
 .byte $91,$92,$90,$91,$FF,$FF,$00
 
-M_OptionsMenu:   ;3A
+M_OptionsMenu:
 .byte $8E,$A1,$99,$8E,$9B,$92,$8E,$97,$8C,$8E,$FF,$90,$8A,$92,$97,$01
 .byte $96,$98,$97,$8E,$A2,$FF,$90,$8A,$92,$97,$01
 .byte $8E,$97,$8C,$98,$9E,$97,$9D,$8E,$9B,$FF,$9B,$8A,$9D,$8E,$01
@@ -6245,7 +5836,7 @@ M_OptionsMenu:   ;3A
 .byte $8A,$9E,$9D,$98,$C2,$9D,$8A,$9B,$90,$8E,$9D,$01
 .byte $96,$8E,$97,$9E,$FF,$9C,$8F,$A1,$00
 
-    
+
 SoundTestInstructions:
 .byte $8B,$FF,$C2,$FF,$8E,$BB,$AC,$B7,$05,$8A,$FF,$C2,$FF,$9C,$B7,$A4,$B5,$B7,$F2,$9C,$B7,$B2,$B3,$FF,$96,$B8
 .byte $B6,$AC,$A6,$05,$9E,$B3,$F2,$8D,$B2,$BA,$B1,$FF,$C2,$FF,$9C,$A8,$AF,$A8,$A6,$B7,$FF,$9C,$B2
@@ -6255,7 +5846,7 @@ Zheep:
 .byte $A3,$AB,$B3,$C4,$00
 
 M_SaveSlots:
-.byte $8F,$92,$95,$8E,$FF,$81,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$82,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$83,$00 
+.byte $8F,$92,$95,$8E,$FF,$81,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$82,$01,$01,$01,$01,$8F,$92,$95,$8E,$FF,$83,$00
 
 M_SaveTitle:
 .byte $95,$98,$8A,$8D,$FF,$FF,$90,$8A,$96,$8E,$00
@@ -6273,89 +5864,61 @@ Deleted:
 .byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00
 
 
-lut_SongNames:
-.word Song1
-.word Song2
-.word Song3
-.word Song4
-.word Song5
-.word Song6
-.word Song7
-.word Song8
-.word Song9
-.word Song10
-.word Song11
-.word Song12
-.word Song13
-.word Song14
-.word Song15
-.word Song16
-.word Song17
-.word Song18
-.word Song19
-.word Song20
-.word Song21
-.word Song22
-.word Song22
-.word Song23
-.word Song24
-
-
-;                      13  12  11  10  0F  0E  0D  0C  0B  0A                         
-lut_SongNamesLong:  ;  19  18  17  16  15  14  13  12  11  10  9   8   7   6   5   4   3   2   1   0 -- spaces needed
-Song1:  
+;                      13  12  11  10  0F  0E  0D  0C  0B  0A
+;                      19  18  17  16  15  14  13  12  11  10  9   8   7   6   5   4   3   2   1   0 -- spaces needed
+Song1:
 .byte $99,$B5,$A8,$AF,$B8,$A7,$A8,$09,$10,$00                                             ; Prelude
-Song2:  
+Song2:
 .byte $99,$B5,$B2,$AF,$B2,$AA,$B8,$A8,$09,$0F,$00                                         ; Prologue
-Song3:  
+Song3:
 .byte $8E,$B3,$AC,$AF,$B2,$AA,$B8,$A8,$09,$0F,$00                                         ; Epilogue
-Song4:  
+Song4:
 .byte $98,$B9,$A8,$B5,$BA,$B2,$B5,$AF,$A7,$09,$0D,$00                                     ; Overworld
-Song5:  
+Song5:
 .byte $9C,$A4,$AC,$AF,$AC,$B1,$AA,$FF,$9C,$AB,$AC,$B3,$09,$0B,$00                         ; Sailing Ship
-Song6:  
+Song6:
 .byte $8A,$AC,$B5,$B6,$AB,$AC,$B3,$09,$10,$00                                             ; Airship
-Song7:  
+Song7:
 .byte $9D,$B2,$BA,$B1,$09,$13,$00                                                         ; Town
-Song8:  
+Song8:
 .byte $8C,$A4,$B6,$B7,$AF,$A8,$09,$11,$00                                                 ; Castle
-Song9:  
-.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$09,$05,$00 ; Earth Cave / Gurgu 
-Song10: 
+Song9:
+.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$09,$05,$00 ; Earth Cave / Gurgu
+Song10:
 .byte $96,$A4,$B7,$B2,$BC,$A4,$09,$11,$00                                                 ; Matoya
-Song11: 
+Song11:
 .byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$97,$A8,$BA,$C9,$09,$07,$00         ; Marsh Cave (New)
-Song12: 
+Song12:
 .byte $9D,$A8,$B0,$B3,$AF,$A8,$FF,$B2,$A9,$FF,$8F,$AC,$A8,$B1,$A7,$B6,$09,$07,$00         ; Temple of Fiends
-Song13: 
+Song13:
 .byte $9C,$AE,$BC,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$09,$0C,$00                                 ; Sky Castle
-Song14: 
+Song14:
 .byte $9C,$A8,$A4,$FF,$9C,$AB,$B5,$AC,$B1,$A8,$09,$0C,$00                                 ; Sea Shrine
-Song15: 
+Song15:
 .byte $9C,$AB,$B2,$B3,$09,$13,$00                                                         ; Shop
-Song16: 
+Song16:
 .byte $8B,$A4,$B7,$B7,$AF,$A8,$09,$11,$00                                                 ; Battle
-Song17: 
+Song17:
 .byte $96,$A8,$B1,$B8,$FF,$7A,$FF,$92,$B1,$B1,$FF,$7A,$FF,$96,$A4,$B3,$09,$07,$00         ; Menu / Inn / Map
-Song18: 
+Song18:
 .byte $9C,$AF,$A4,$AC,$B1,$09,$12,$00                                                     ; Slain
-Song19: 
+Song19:
 .byte $8F,$A4,$B1,$A9,$A4,$B5,$A8,$09,$10,$00                                             ; Fanfare
-Song20: 
+Song20:
 .byte $94,$A8,$BC,$FF,$92,$B7,$A8,$B0,$09,$0E,$00                                         ; Key Item
-Song21: 
+Song21:
 .byte $96,$A4,$B5,$B6,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$C8,$98,$AF,$A7,$C9,$09,$07,$00         ; Marsh Cave (Old)
-Song22: 
+Song22:
 .byte $9C,$A4,$B9,$AC,$B1,$AA,$09,$11,$00                                                 ; Saving
-Song23: 
+Song23:
 .byte $91,$A8,$A4,$AF,$AC,$B1,$AA,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$09,$07,$00         ; Healing (Unused)
-Song24: 
+Song24:
 .byte $9D,$B5,$A8,$A4,$B6,$B8,$B5,$A8,$FF,$C8,$9E,$B1,$B8,$B6,$A8,$A7,$C9,$09,$06,$00     ; Treasure (Unused)
-Song25: 
+Song25:
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$09,$0B,$00                         ; Fiend Battle
-Song26: 
+Song26:
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$09,$09,$00                 ; Fiend Battle 2
-Song27: 
+Song27:
 .byte $9B,$B8,$AC,$B1,$A8,$A7,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$09,$0A,$00                     ; Ruined Castle
 
 
@@ -6364,224 +5927,18 @@ lut_CharStatsPtrTable:
   .WORD ch_stats
   .WORD ch_stats+$40
   .WORD ch_stats+$80
-  .WORD ch_stats+$C0    
-    
+  .WORD ch_stats+$C0
+
 lut_IBCharStatsPtrTable:
   .WORD ch_backupstats
   .WORD ch_backupstats + (1*$10)
   .WORD ch_backupstats + (2*$10)
   .WORD ch_backupstats + (3*$10)
-  
-  
-;lut_UnformattedCombatBoxBuffer:
-;  .WORD btl_unformattedstringbuf
-;  .WORD btl_unformattedstringbuf + $10
-;  .WORD btl_unformattedstringbuf + $20
-;  .WORD btl_unformattedstringbuf + $30
-;  .WORD btl_unformattedstringbuf + $40  
-  
-  
-  
-  
-  
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for Enemy AI [$9020 :: 0x31030]
-;;
-;;    $10 bytes per AI
-;;
-;;  byte      0 = chance to cast spell         ($00-80)
-;;  byte      1 = chance to use special attack ($00-80)
-;;  bytes   2-9 = magic spells available.  Each entry 0-based.  Or 'FF' to mark end of spells
-;;  bytes $B-$E = special attacks (0 based), or 'FF' to mark end of attacks
-
-EnemyAIData:
-  
-;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  
-.byte $00,$05,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$FF,$FF,$FF,$FF ;00 IMP	
-.byte $00,$15,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$1A,$1A,$1A,$1A ;01 GrIMP	
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;02 WOLF	
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;03 GrWolf	
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;04 WrWolf 
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ;05 FrWOLF 
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;06 IGUANA 
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ;07 AGAMA
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ;08 SAURIA
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;09 GIANT
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0A FrGIANT
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0B R`GIANT
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0C SAHAG
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0D R`SAHAG
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0E WzSAHAG
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0F PIRATE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;10 KYZOKU
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;11 SHARK
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;12 GrSHARK
-.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ;13 OddEYE
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ;14 BigEYE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;15 BONE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;16 R`BONE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;17 CREEP
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;18 CRAWL
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;19 HYENA
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ;1A CEREBUS
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1B OGRE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1C GrOGRE
-.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1D WzOGRE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1E ASP
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1F COBRA
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;20 SeaSNAKE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;21 SCORPION
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;22 LOBSTER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;23 BULL
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;24 ZomBULL
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;25 TROLL
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;26 SeaTROLL
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;27 SHADOW
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;28 IMAGE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;29 WRAITH
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2A GHOST
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2B ZOMBIE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2C GHOUL 
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2D GEIST
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2E SPECTER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2F WORM
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ;30 Sand W
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;31 Grey W
-.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ;32 EYE
-.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ;33 PHANTOM
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;34 MEDUSA
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;35 GrMEDUSA
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;36 CATMAN
-.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ;37 MANCAT
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;38 PEDE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;39 GrPEDE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3A TIGER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3B Saber T
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ;3C VAMPIRE
-.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ;3D WzVAMP
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3E GARGOYLE
-.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3F R`GOYLE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;40 EARTH
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;41 FIRE
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ;42 Frost D
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ;43 Red D
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;44 ZombieD
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;45 SCUM
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;46 MUCK
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;47 OOZE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;48 SLIME
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;49 SPIDER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4A ARACHNID
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ;4B MATICOR
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4C SPHINX
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4D R`ANKYLO
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4E ANKYLO
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4F MUMMY
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;50 WzMUMMY
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;51 COCTRICE
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ;52 PERILISK
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;53 WYVERN
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;54 WYRM
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;55 TYRO
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;56 T REX
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;57 CARIBE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;58 R`CARIBE
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;59 GATOR
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5A FrGATOR
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5B OCHO
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5C NAOCHO
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5D HYDRA
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ;5E R`HYDRA
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5F GAURD
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;60 SENTRY
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;61 WATER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;62 AIR
-.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ;63 NAGA
-.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ;64 GrNAGA
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ;65 CHIMERA
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ;66 JIMERA
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;67 WIZARD
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ;68 SORCERER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;69 GARLAND
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ;6A Gas D
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ;6B Blue D
-.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6C MudGOL
-.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ;6D RockGOL
-.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ;6E IronGOL
-.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6F BADMAN
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;70 EVILMAN
-.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ;71 ASTOS
-.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ;72 MAGE
-.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ;73 FIGHTER
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;74 MADPONY
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ;75 NITEMARE
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ;76 WarMECH
-.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ;77 LICH
-.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ;78 LICH (reprise)
-.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ;79 KARY
-.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ;7A KARY (reprise)
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ;7B KRAKEN
-.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ;7C KRAKEN (reprise)
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ;7D TIAMAT
-.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ;7E TIAMAT (reprise)
-.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ;7F CHAOS
 
 
-;; From the FF Bytes documents 
-;  ##   Strat.      (Magics and Magic Cycle : Attack and Attack Cycle)
-;  00 = FrWOLF 	    (: FROST)
-;  01 = AGAMA 	    (: HEAT)
-;  02 = SAURIA 	    (: GLANCE)
-;  03 = OddEYE 	    (: GAZE)
-;  04 = BigEYE 	    (: GAZE, FLASH)
-;  05 = CERBERUS    (: SCORCH)
-;  06 = WzOGRE	    (RUSE, DARK, SLEP, HOLD, ICE2)
-;  07 = Sand W	    (: CRACK)
-;  08 = EYE  	    (XXXX, BRAK, RUB, LIT2, HOLD, MUTE, SLOW, SLEP : GLANCE, SQUINT, GAZE, STARE)
-;  09 = PHANTOM	    (STOP, ZAP!, XFER, BRAK, RUB, HOLD, MUTE, SLOW : GLARE)
-;  0A = MANCAT	    (FIR2, SLOW, DARK, SLEP, FIRE, LIT, CURE, SLEP)
-;  0B = VAMPIRE	    (: DAZZLE)
-;  0C = WzVAMP	    (AFIR, MUTE, ICE2[*2], LIT2[*2], FIR2[*2] : DAZZLE)
-;  0D = R`GOYLE	    (FIR2, HOLD, FIRE[*2])
-;  0E = Frost D	    (: BLIZZARD)
-;  0F = Red D	    (: BLAZE)
-;  10 = PERELISK    (: SQUINT)
-;  11 = R`HYDRA	    (: CREMATE)
-;  12 = NAGA	    (LIT2, LOCK, SLEP, LIT, LIT2, HOLD, SLOW, DARK)
-;  13 = GrNAGA	    (RUSE, MUTE, SLOW, DARK, SLEP, FIRE, LIT, HEAL)
-;  14 = CHIMERA	    (: CREMATE)
-;  15 = JIMERA	    (: CREMATE, POISON(pos))
-;  16 = SORCERER    (: TRANCE)
-;  17 = Gas D	    (: POISON(dmg))
-;  18 = Blue D	    (: THUNDER)
-;  19 = MudGOL	    (FAST)
-;  1A = RockGOL	    (SLOW)
-;  1B = IronGOL	    (: TOXIC)
-;  1C = BADMAN	    (XFER, NUKE, XFER, XXXX, BLND)
-;  1D = MAGE	    (RUB, LIT3 ,FIR3 ,BANE, SLO2, FIR3, STUN, LIT3)
-;  1E = FIGHTER	    (WALL, XFER, HEL3, FOG2, INV2, CUR4 ,HEL2, CUR3)
-;  1F = NITEMARE    (: SNORTING)
-;  20 = WarMECH	    (: NUCLEAR)
-;  21 = MANTICOR    (: STINGER) 
-;  22 = LICH	    (ICE2, SLP2, FAST, LIT2, HOLD, FIR2, SLOW, SLEP)
-;  23 = LICH 2	    (NUKE, STOP, ZAP!, XXXX)
-;  24 = KARY	    (FIR2, DARK, FIR2, DARK, FIR2, HOLD, FIR2, HOLD)
-;  25 = KARY 2	    (FIR3, RUB)
-;  26 = KRAKEN	    (: INK)
-;  27 = KRAKEN 2    (LIT2 : INK)
-;  28 = TIAMAT	    (: THUNDER, POISON(dmg), BLIZZARD, BLAZE)
-;  29 = TIAMAT 2    (BANE, ICE2, LIT2, FIR2 : THUNDER, POISON(dmg), BLIZZARD, BLAZE)
-;  2A = CHAOS	    (ICE3, LIT3, SLO2, CUR4, FIR3, ICE2, FAST, NUKE : CRACK, INFERNO, SWIRL, TORNADO)
-;  2B = ASTOS	    (RUB, SLO2, FAST, FIR2, LIT2, SLOW, DARK, SLEP)
-;  FF = None  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
 .byte "END OF BANK F"
