@@ -717,9 +717,10 @@ M_CharMainStats:
 M_CharSubStats: 
 .byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Damage
 .byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Accuracy
+.byte $8C,$5C,$57,$51,$AF,$FF,$10,$41,$01             ; Critical
 .byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Defense
 .byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Evasion
-.byte $96,$A4,$AA,$C0,$8D,$A8,$A9,$C0,$FF,$10,$41,$00 ; Mag. Def.
+.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00 ; M.Evade
 
 M_ItemNothing:
 .byte $A2,$B2,$64,$41,$B9,$1A,$B1,$B2,$1C,$1F,$AA,$C0,$00 ; You have nothing.
@@ -946,7 +947,7 @@ M_EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this strin
 .byte $8A,$A6,$A6,$55,$5E,$BC,$06             ; Accuracy_###__
 .byte $8E,$B9,$3F,$AC,$3C,$05,$01             ; Evasion__###
 .byte $8C,$5C,$57,$51,$AF,$06                 ; Critical_###__
-.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$05,$00     ; Mag.Def._###
+.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$05,$00     ; M.Evade__###
 
 M_EquipInventoryWeapon:
 .byte $C1,$FF,$A0,$2B,$B3,$3C,$B6,$FF,$C7,$00 ; Weapons
@@ -1849,16 +1850,9 @@ DrawCharacterName:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 IntroTitlePrepare:
-    LDA #$08               ; set soft2000 so that sprites use right pattern
-    STA soft2000           ;   table while BG uses left
-    LDA #0
-    STA $2001              ; turn off the PPU;
-
-    JSR LoadMenuCHRPal     ; Load necessary CHR and palettes
-    
+    ;JSR LoadMenuCHRPal     ; Load necessary CHR and palettes
+    JSR LoadBattleSpritePalettes
     JMP LoadBridgeSceneGFX_Menu ;
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8072,7 +8066,6 @@ DrawMPTargetMenu_Elixir_OneChar:
 
 
 StatusMenuAttributes:
-.byte $FA,$F5
 .byte $AA,$55
 .byte $AA,$55
 .byte $AA,$55
@@ -8081,23 +8074,16 @@ EnterStatusMenu:
     LDA #0
     STA $2001               ; turn off the PPU
     STA menustall           ; disable menu stalling
-    STA tmp+2
+    STA tmp+2               ; set additive for scrollwork
     JSR ClearNT             ; clear the NT
-
-    ;LDA #$02                ; Upper left box
-    ;JSR DrawMainItemBox
-    ;LDA #19
-    ;INC dest_x
     
     LDA #>$23C0
     STA $2006
     LDA #<$23C0
     STA $2006
     
-    LDX #8
-    STX dest_wd
+    LDX #6
     LDY #4
-    STY dest_y
    @AttributeLoop:
     LDA StatusMenuAttributes-1, X
     STA $2007
@@ -8111,23 +8097,17 @@ EnterStatusMenu:
     STA cur_pal+6
     LDA #$35
     STA cur_pal+9
-    ;LDA #$38
-    ;STA cur_pal+10
     LDA #$15
     STA cur_pal+11
-  
-    
-;    LDA #4
-;    STA dest_y
+
+    LDA #2
+    STA dest_y    
     LDA #20
     STA dest_x
- ;   LDA #8
- ;   STA dest_wd
-    ;LDA #10
-    LSR A
+    LSR A ; #10
     STA dest_ht               ; 8 tiles wide and 10 tall
-   ; LDA #0 
-   ; STA tmp+2                 ; and no additive!
+    LDA #8
+    STA dest_wd
     
     LDA #<statusbox_scrollwork  ; get the pointer to the orb box scrollwork
     STA image_ptr            
@@ -8136,30 +8116,37 @@ EnterStatusMenu:
     JSR DrawImageRect        ; draw the image rect
 
 @ReenterStatusMenu:
-    LDA #02
-    STA dest_x
-    LDA #04
-    STA dest_y
+    LDX #02
+    STX dest_x
+    INX ;#03
+    STX dest_y
     LDA #19
     JSR DrawCharMenuString
 
-    LDA #03                 ; lower left box
+    LDA #05 ; 03             ; lower left box - Correction, only box
     JSR DrawMainItemBox
     LDA #20
     INC dest_x
+    INC dest_y
     JSR DrawCharMenuString
     
-    LDA #04                 ; lower right box
-    JSR DrawMainItemBox
+   ; LDA #04                 ; lower right box
+   ; JSR DrawMainItemBox
+   ; INC dest_x
+    
+    LDA #17
+    STA dest_x
+    LDA #15
+    STA dest_y    
+    
     LDA #21
-    INC dest_x
     JSR DrawCharMenuString
     
     JSR ClearOAM            ; clear OAM
 
     LDA #$B8
     STA spr_x
-    LDA #$3C
+    LDA #$2C ;3C
     STA spr_y
 
     LDA submenu_targ        ; get target character ID
@@ -9517,14 +9504,15 @@ LoadMainItemBoxDims:
 
 lut_MainItemBoxes:
  
-    ;       X   Y   wid height
+    ;        X   Y   wid height
   ;  .BYTE   $01,$01,$0A,$0A ; 00 ; Main menu orb box
     .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb box
     .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
-    .BYTE   $08,$02,$10,$0D ; 02 ; Status Menu - Name, Class, Level, Exp., Exp to Next
-    .BYTE   $00,$0F,$10,$0D ; 03 ; Status Menu - main stats
-    .BYTE   $10,$0F,$10,$0D ; 04 ; Status Menu - sub stats
-	.BYTE   $10,$02,$10,$0D ; 05 ; Status Menu - extra box in case...
+    .BYTE   $08,$02,$10,$0D ; 02 ; Status Menu - Name, Class, Level, Exp., Exp to Next (UNUSED)
+    .BYTE   $00,$0F,$10,$0D ; 03 ; Status Menu - main stats (UNUSED)
+    .BYTE   $10,$0F,$10,$0D ; 04 ; Status Menu - sub stats (UNUSED)
+	;.BYTE   $10,$02,$10,$0D ; 05 ; Status Menu - extra box in case... (UNUSED)
+    .BYTE   $00,$0D,$20,$0F ; 05 ; Status Menu - New and only box.
     .BYTE   $00,$01,$09,$03 ; 06 ; Item title box (character name for magic screen)
 	.BYTE   $09,$01,$17,$03 ; 07 ; Magic/Item title submenu
     .BYTE   $00,$03,$20,$13 ; 08 ; Inventory box
