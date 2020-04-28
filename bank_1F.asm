@@ -100,7 +100,6 @@
 .import EnterMinimap
 .import EnterShop
 .import EnterTitleScreen
-.import EnterTitleScreenNew
 .import JigsIntro
 .import LoadBattleSpritesForBank_Z
 .import MinimapDecompress
@@ -270,7 +269,7 @@ GameStart:
         
     GameStart2:
     ;; JIGS - label required by JigsIntro! (Maybe I could have used PLA PLA to double RTS? Not sure... eh.)
-    JSR EnterTitleScreenNew
+    JSR EnterTitleScreen
     ;; JIGS ^ 
     
     BCS @NewGame                    ; Do a new game, if the user selected the New Game option

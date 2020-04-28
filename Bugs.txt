@@ -13,18 +13,18 @@ Battle:
 * Focus seems to mis-draw boxes.
 * Enemies strike first will still have all your characters (with poison) poison-damaged before their turn.
 * Check: Will a character who is hidden and poisoned flash their sprite when damaged?
+* Set "Mag.Def" to "M.Evade" in level up text.
 
 Stats:
 Unequipping and re-equipping gear does not cap stats, and maybe should?
 
 Menu:
-* Fix sound test menu.
+* Exiting the soundtest menu will scramble NPC sprites for a frame?
+* Adjust loading of backgrounds so that music is not stalled for several frames between screens.
 
 MiniMap:
 * Check: Adding a new teleport location may not add a glowy pixel to the map.
 
-Banks:
-* Go over old code in Bank Z 
 
 
 Ideas:
@@ -34,4 +34,4 @@ Ideas:
 
 * Variable Magic: Spells that can either target 1 enemy, all enemies (reduced potency), 1 player, or all players (reduced potency). Will this require drawing shimmering glovehands when highlighting multiple targets?
 
-* Shop: Characterse pose when able to learn a spell.
+* Shop: Characters pose when able to learn a spell.
