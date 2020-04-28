@@ -8100,11 +8100,12 @@ EnterStatusMenu:
     LDA #$15
     STA cur_pal+11
 
-    LDA #2
+    LDA #3
     STA dest_y    
     LDA #20
     STA dest_x
-    LSR A ; #10
+    ;LSR A ; #10
+    LDA #9
     STA dest_ht               ; 8 tiles wide and 10 tall
     LDA #8
     STA dest_wd
@@ -8134,7 +8135,7 @@ EnterStatusMenu:
    ; JSR DrawMainItemBox
    ; INC dest_x
     
-    LDA #17
+    LDA #18
     STA dest_x
     LDA #15
     STA dest_y    
@@ -8146,7 +8147,7 @@ EnterStatusMenu:
 
     LDA #$B8
     STA spr_x
-    LDA #$2C ;3C
+    LDA #$30 ;3C
     STA spr_y
 
     LDA submenu_targ        ; get target character ID
@@ -9380,13 +9381,13 @@ DrawOrbBox:
 
       ; Fire Orb
     LDX #$84           ; dest ppu address       = $2084
-    LDY #$64           ; lit orb tiles start at = $64
+    LDY #$08           ; lit orb tiles start at = $64
     LDA orb_fire       ; fire orb status
     JSR @DrawOrb
 
       ; Water Orb
     LDX #$86           ; dest ppu address       = $2086
-    LDY #$04           ; lit orb tiles start at = $68
+    LDY #$0C           ; lit orb tiles start at = $68
     LDA orb_water      ; water orb status
     JSR @DrawOrb
 
@@ -9424,7 +9425,7 @@ DrawOrbBox:
     CMP #0        ; check orb status
     BNE :+        ; if lit, skip ahead
 
-      LDY #$60    ; if orb not lit... replace tile with $76 (unlit orb graphics)
+      LDY #$04    ; if orb not lit... replace tile with $76 (unlit orb graphics)
       LDA #$C0    ; and OR #$C0 to our attribute byte
       ORA tmp+7   ;  unlit orbs use palette 3
       STA tmp+7   ;  lit orbs use palette 0 -- so this changes attributes accordingly
