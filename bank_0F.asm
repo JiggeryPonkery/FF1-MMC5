@@ -1480,28 +1480,29 @@ SpiritCalculations:
 
    ; player is attacker:
     LDA battle_defenderisplayer 
-    BEQ @Increment              ; defender is enemy
+    BEQ @IncreaseSpirit_Undead  ; defender is enemy
     
     JSR @SubtractSpirit         ; player vs player: subtract 1 from the defender
     LDA btl_attacker
     JSR PrepCharStatPointers
     JMP @SubtractSpirit         ; then subtract 1 from the attacker    
     
-   @Increment:
-    LDY #ch_spirit - ch_stats
-    LDA (CharStatsPointer), Y
-    CMP #$FF
-    BEQ @Exit
-        CLC
-        ADC #1
-        STA (CharStatsPointer), Y
-        RTS    
-    
     ; enemy is attacker
    @Decrement:
     LDA battle_defenderisplayer
     BEQ @Exit                    ; enemy vs enemy; do nothing
 
+   ; enemy vs player, so check if the player is covering someone else
+    LDX btl_defender_index
+    LDY #4
+  : LDA btl_charcover+4, X
+    CMP btl_defender
+    BEQ @IncrementCover     ; found the slot where the player is set to be covering someone!
+    INX                     ; so give a boost to spirit
+    DEY
+    BNE :-                  ; loop until all 4 slots checked
+
+   ; player defender isn't covering anyone, but are they doing anything else?
     LDX btl_defender_index
     LDA btl_charguard, X
     ORA btl_charparry, X
@@ -1510,7 +1511,7 @@ SpiritCalculations:
     ORA btl_charfocus, X
     ORA btl_charrush, X
     ORA btl_charhidden, X
-    BNE @Increment
+    BNE @IncrementNormal
     ; if doing ANY of these, increase spirit instead!
 
    @SubtractSpirit:
@@ -1524,10 +1525,32 @@ SpiritCalculations:
    @Exit:
     RTS
    
+   @IncreaseSpirit_Undead:
+    LDA btl_defender_category
+    AND #CATEGORY_UNDEAD
+    BEQ @IncrementNormal
+        LDA #3               ; 3 spirit for hitting an undead enemy
+        STA tmp
+        BNE @Increment
+        
+   @IncrementCover:
+    LDA #7                   ; 7 spirit for covering an ally and being hit while doing so
+    STA tmp
+    BNE @Increment
 
-
-
-
+   @IncrementNormal:
+    LDA #1
+    STA tmp
+    
+   @Increment:
+    LDY #ch_spirit - ch_stats
+    LDA (CharStatsPointer), Y
+    CMP #$FF
+    BEQ @Exit
+        CLC
+        ADC tmp
+        STA (CharStatsPointer), Y
+    RTS    
 
 
 

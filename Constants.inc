@@ -97,6 +97,11 @@ STATE_REFLECT      = $80
 STATE_REGENERATING = $07
 ;; low 3 bits are used for how many turns left to regenerate
 
+PRAY_FAILRATE      = $A0
+;; A random roll between Spirit and $FF must beat this for Pray to work.
+PRAY_COST          = $0A ; succeeding will use up 10 spirit
+PRAY_FAILVALUE     = $0A ; failing will give 10 spirit
+
 
 ;;;;;;;;;;;;;;;;;;
 ;;  enemy categories

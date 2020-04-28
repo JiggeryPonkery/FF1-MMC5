@@ -5593,6 +5593,9 @@ PraySkill:
   : LDY #ch_level - ch_stats
     LDA (CharStatsPointer), Y
     STA tmp+5                        ; save prayer's level
+    LDY #ch_spirit - ch_stats
+    LDA (CharStatsPointer), Y
+    STA tmp+6                        ; save prayer's spirit
     LDA BattleCharID
     JSR DrawCharacterNameAttackerBox
     
@@ -5680,12 +5683,6 @@ PraySkill:
     LDA #MG_PRAYER - MG_START
     BNE @DoSpell
   
-   @Fail:
-    JSR @ResetScan
-    JSR DrawSkillBox
-    LDA #BTLMSG_INEFFECTIVENOW
-    JMP DrawMessageBoxDelay_ThenClearAll
-  
    @RollDice:
     JSR BattleRNG_L
     AND #01
@@ -5741,14 +5738,51 @@ PraySkill:
    @DoSpell:
     STA btl_attackid
     JSR @ResetScan              ; clear all high bits again
-    JSR @RollDice
-    BEQ @Fail
+    ;JSR @RollDice
+    ;BEQ @Fail
+    
+    LDA tmp+6
+    LDX #$FF
+    JSR RandAX
+    CMP #PRAY_FAILRATE
+    BCC @Fail
+
+    ;; I set the PRAY_FAILRATE to #160 in Constants.inc
+    ;; Must roll higher than that to succeed. Spirit is the minimum you can roll.
+    ;; So a spirit of 155 will always succeed!
+    
+    LDY #ch_spirit - ch_stats
+    LDA tmp+6
+    SEC
+    SBC #PRAY_COST ; #10
+    BCS :+
+       LDA #0 ; cap at $0 if subtraction used up the carry 
+    
+  : STA (CharStatsPointer), Y    
+  
     LDA tmp                     ; get defender's ID (0-3)
     ORA #$80                      
     TAX                         ; put in X as 80-83
     LDY BattleCharID            ; Y = caster's ID 
     LDA #$FF                    ; and this will be btlmag_magicsource
     JMP Player_DoMagicEffect    ; to skip checking for mute status
+    
+   @Fail:
+    JSR @ResetScan
+    JSR DrawSkillBox
+    LDY #ch_spirit - ch_stats
+    LDA (CharStatsPointer), Y
+    CLC
+    ADC #PRAY_FAILVALUE ; #10
+    BCC :+
+       LDA #$FF ; cap at $FF if carry was set during addition
+    
+  : STA (CharStatsPointer), Y
+    ;; give them 10 spirit just for praying their li'l heart out
+    LDA #BTLMSG_INEFFECTIVENOW
+    JMP DrawMessageBoxDelay_ThenClearAll    
+    
+    
 
 ;; Explanation of Pray skill:
 ;; If praying character is mute, just try to cure it (and all other ailments but stop or death)
