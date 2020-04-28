@@ -123,7 +123,7 @@ ch_agility        = ch_stats + $12
 ch_intelligence   = ch_stats + $13 
 ch_vitality       = ch_stats + $14
 ch_speed          = ch_stats + $15
-ch_substats       = ch_stats + $16
+  ch_substats       = ch_stats + $16
 ch_damage         = ch_stats + $16
 ch_hitrate        = ch_stats + $17
 ch_defense        = ch_stats + $18
@@ -150,7 +150,7 @@ ch_weaponcategory = ch_stats + $2B ; effected by equipment, needs to refresh aft
 ch_numhits        = ch_stats + $2C ; effected by equipment, needs to refresh after battle
 ch_critrate       = ch_stats + $2D ; effected by equipment, needs to refresh after battle
 ch_damagebackup   = ch_stats + $2E ; effected by equipment
-;unused           = ch_stats + $2F 
+ch_spirit         = ch_stats + $2F 
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 

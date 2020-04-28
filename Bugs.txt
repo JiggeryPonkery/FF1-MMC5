@@ -35,3 +35,5 @@ Ideas:
 * Variable Magic: Spells that can either target 1 enemy, all enemies (reduced potency), 1 player, or all players (reduced potency). Will this require drawing shimmering glovehands when highlighting multiple targets?
 
 * Shop: Characters pose when able to learn a spell.
+
+* Failed Prayer raises spirit by 10.

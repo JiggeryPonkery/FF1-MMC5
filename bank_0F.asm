@@ -20,6 +20,7 @@
 .export WeaponArmorShopStats
 .export WeaponArmorSpecialDesc
 .export GetEquipmentSpell
+.export SpiritCalculations
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -1249,6 +1250,11 @@ StealFromEnemyZ:
 
 
 
+
+
+
+
+
 ;; This checks if the player attacker is a cleric, and doubles their crit chance against undead enemies.
 ;; JIGS - leaving this here as proof of concept... My hack idea originally turned fighters/knights into undead-slayers. You can do the same!
 
@@ -1462,6 +1468,80 @@ CoverStuff:
    @NoCover:
     LDA btl_defender_index
     RTS
+
+
+
+SpiritCalculations:
+    LDA battle_hitsconnected
+    BEQ @Exit                   ; attack was a miss
+
+    LDA battle_attackerisplayer
+    BEQ @Decrement              ; enemy is attacker
+
+   ; player is attacker:
+    LDA battle_defenderisplayer 
+    BEQ @Increment              ; defender is enemy
+    
+    JSR @SubtractSpirit         ; player vs player: subtract 1 from the defender
+    LDA btl_attacker
+    JSR PrepCharStatPointers
+    JMP @SubtractSpirit         ; then subtract 1 from the attacker    
+    
+   @Increment:
+    LDY #ch_spirit - ch_stats
+    LDA (CharStatsPointer), Y
+    CMP #$FF
+    BEQ @Exit
+        CLC
+        ADC #1
+        STA (CharStatsPointer), Y
+        RTS    
+    
+    ; enemy is attacker
+   @Decrement:
+    LDA battle_defenderisplayer
+    BEQ @Exit                    ; enemy vs enemy; do nothing
+
+    LDX btl_defender_index
+    LDA btl_charguard, X
+    ORA btl_charparry, X
+    ORA btl_charpray, X
+    ORA btl_charrunic, X
+    ORA btl_charfocus, X
+    ORA btl_charrush, X
+    ORA btl_charhidden, X
+    BNE @Increment
+    ; if doing ANY of these, increase spirit instead!
+
+   @SubtractSpirit:
+    LDY #ch_spirit - ch_stats
+    LDA (CharStatsPointer), Y
+    BEQ @Exit
+        SEC
+        SBC #1
+        STA (CharStatsPointer), Y
+ 
+   @Exit:
+    RTS
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     ;; this is stuff copied over from Bank C so there's more room to play around with more interesting things.

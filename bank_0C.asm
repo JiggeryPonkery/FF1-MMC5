@@ -51,6 +51,7 @@
 .import DrawEquipBox_String
 .import DrawImageRect
 .import GetEquipmentSpell
+.import SpiritCalculations
 
 BANK_THIS = $0C
 
@@ -2925,6 +2926,7 @@ SetNaturalPose:
       LDA #$00                  ; zero their hit points 
       STA ch_curhp, Y
       STA ch_curhp+1, Y
+      STA ch_spirit, Y          ;; and their spirit!
       STA btl_charguard, X      ;; JIGS - and zero everything else...
       STA btl_charregen, X
       STA btl_charcover, X
@@ -6916,6 +6918,9 @@ DoPhysicalAttack_NoAttackerBox:
 DoPhysicalAttack_Exit:
     LDX btl_defender_index
     JSR HideCharacter
+    JSR LongCall
+    .word SpiritCalculations
+    .byte BANK_Z
     JSR RespondDelay
     JMP UndrawAllKnownBoxes
     

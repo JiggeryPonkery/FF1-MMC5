@@ -7860,7 +7860,8 @@ AddGPToParty:
 ;;  42    = Exp to Next Level
 ;;  43    = name (variable width)
 ;;  44    = Critical hit rate
-;;  45-FF = unused (default to same as $42)
+;;  45    = spirit
+;;  46-FF = unused (default to same as $42)
 ;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -708,19 +708,27 @@ M_CharLevelStats:
 .byte $97,$A8,$BB,$B7,$09,$03,$10,$42,$00             ; Next  ##
 
 M_CharMainStats: 
-.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$01         ; Strength 
-.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$01         ; Agility  
-.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$09,$01         ; Intellect
-.byte $9F,$5B,$5F,$5B,$4B,$FF,$10,$0A,$01             ; Vitality 
-.byte $9C,$B3,$A8,$40,$09,$05,$10,$0B,$00             ; Speed    
+.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$09,$04,  $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Strength__##____Damage___###
+.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$09,$04,  $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Agility___##____Accuracy_###
+.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$09,$09,$04,  $8C,$5C,$57,$51,$AF,$FF,$10,$44,$01             ; Intellect_##____Critical_###
+.byte $9F,$5B,$5F,$5B,$4B,$FF,$10,$0A,$09,$04,      $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Vitality__##____Defense__###
+.byte $9C,$B3,$A8,$40,$09,$05,$10,$0B,$09,$04,      $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Speed_____##____Evasion__###
+.byte $9C,$B3,$AC,$5C,$21,$FF,$FF,$10,$45,$09,$04,  $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00 ; Spirit___###____M.Evade__###
 
+;.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$01         ; Strength__ 
+;.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$01         ; Agility___  
+;.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$09,$01         ; Intellect_
+;.byte $9F,$5B,$5F,$5B,$4B,$FF,$10,$0A,$01             ; Vitality__
+;.byte $9C,$B3,$A8,$40,$09,$05,$10,$0B,$01             ; Speed_____    
+;.byte $9C,$B3,$AC,$5C,$21,$FF,$FF,$00                 ; Spirit___
+;
 M_CharSubStats: 
-.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Damage
-.byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Accuracy
-.byte $8C,$5C,$57,$51,$AF,$FF,$10,$41,$01             ; Critical
-.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Defense
-.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Evasion
-.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00 ; M.Evade
+;.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Damage___###
+;.byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Accuracy_###
+;.byte $8C,$5C,$57,$51,$AF,$FF,$10,$44,$01             ; Critical_###
+;.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Defense__###
+;.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Evasion__###
+;.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00 ; M.Evade__###
 
 M_ItemNothing:
 .byte $A2,$B2,$64,$41,$B9,$1A,$B1,$B2,$1C,$1F,$AA,$C0,$00 ; You have nothing.
@@ -1007,69 +1015,69 @@ PrintCharStat:
     
     CMP #$2C ; JIGS - check if its equal to or above $2C, for current MP
     BCS @CurMP 
-       
+
     ;;  2C-33 = Cur MP
     ;;  34-3B = Max MP
     
     ;CMP #$2C
     BCC @ExpToNext   ; see if ID is < #$2C (should never happen)
-    
-      @CurMP: ;; JIGS - adding this
-      SEC
-      SBC #$0C         ; subtract #$C  ($20-2F -- index + $20)
-      CLC
-      ADC char_index   ; add character index
-      TAX
-      LDA ch_mp-$20, X ; get MP  (need to subtract $20 because index is +$20)
-      AND #$F0         ;; JIGS - gets current MP
-      LSR A            ; and move it to low bits
-      LSR A 
-      LSR A 
-      LSR A 
-      ;ORA #$80        ;  Or with $80 to get this digit's tile
-      STA tmp          ;  and print it as 1 Digit
-      JMP PrintNumber_1Digit
-    
-    ;;; code reaches here if the ID is between $2C-3B  (prints MP... cur or max)
-      @MaxMP:
-      SEC
-      SBC #$14         ; JIGS - originally subtract #$C  ($20-2F -- index + $20)
-      CLC
-      ADC char_index   ; add character index
-      TAX
-      LDA ch_mp-$20, X ; get MP  (need to subtract $20 because index is +$20)
-      AND #$0F         ;; JIGS - gets max MP
-      STA tmp          ;  and print it as 1 Digit
-      JMP PrintNumber_1Digit
+   
+   @CurMP: ;; JIGS - adding this
+    SEC
+    SBC #$0C         ; subtract #$C  ($20-2F -- index + $20)
+    CLC
+    ADC char_index   ; add character index
+    TAX
+    LDA ch_mp-$20, X ; get MP  (need to subtract $20 because index is +$20)
+    AND #$F0         ;; JIGS - gets current MP
+    LSR A            ; and move it to low bits
+    LSR A 
+    LSR A 
+    LSR A 
+    ;ORA #$80        ;  Or with $80 to get this digit's tile
+    STA tmp          ;  and print it as 1 Digit
+    JMP PrintNumber_1Digit
+   
+   ;; code reaches here if the ID is between $2C-3B  (prints MP... cur or max)
+   @MaxMP:
+    SEC
+    SBC #$14         ; JIGS - originally subtract #$C  ($20-2F -- index + $20)
+    CLC
+    ADC char_index   ; add character index
+    TAX
+    LDA ch_mp-$20, X ; get MP  (need to subtract $20 because index is +$20)
+    AND #$0F         ;; JIGS - gets max MP
+    STA tmp          ;  and print it as 1 Digit
+    JMP PrintNumber_1Digit
     
 @CodeAbove3B:
     CMP #$42
     BCS :+                ; see if ID is >= $42
 
-    ;;; code reaches here if ID is between $3C-41  (prints substats, like Damage, Hit%, etc)
-      SEC
-      SBC #$3C            ; subtract #$3C  ($00-05)
-      CLC
-      ADC char_index      ; add character index
-      TAX
-      LDA ch_substats, X  ; get the substat
-     @LikeASubStat: 
-      STA tmp             ; write it as low byte
-      LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
-      STA tmp+1           ;  and print as 3 digits
-      JMP PrintNumber_3Digit
-      
-   : CMP #$44   
-     BNE @ExpToNext
-        LDA ch_critrate
-        JMP @LikeASubStat
+  ;;; code reaches here if ID is between $3C-41  (prints substats, like Damage, Hit%, etc)
+    SEC
+    SBC #$3C            ; subtract #$3C  ($00-05)
+   @LikeASubStat: 
+    CLC
+    ADC char_index      ; add character index
+    TAX
+    LDA ch_substats, X  ; get the substat
+    STA tmp             ; write it as low byte
+    LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
+    STA tmp+1           ;  and print as 3 digits
+    JMP PrintNumber_3Digit
+    
+ : CMP #$44   
+   BEQ @Critrate
+   CMP #$45
+   BEQ @Spirit
 
     ;;; all other codes default to Exp to Next level
 @ExpToNext:
-      JSR LongCall
-      .word PrintEXPToNext_B
-      .byte BANK_BTLDATA
-      JMP PrintNumber_5Digit
+    JSR LongCall
+    .word PrintEXPToNext_B
+    .byte BANK_BTLDATA
+    JMP PrintNumber_5Digit
 
 @Exp:
     LDABRA <ch_exp, @Stat6Digit    ; put low byte of address of desired stat in A, then BRA to @Stat6Digit
@@ -1094,6 +1102,17 @@ PrintCharStat:
 
 @Luck:
     LDABRA <ch_speed, @Stat2Digit
+
+@Spirit:
+    LDA #ch_spirit
+    JMP @SetupLikeASubStat
+    
+@Critrate:
+    LDA #ch_critrate
+   @SetupLikeASubStat:
+    CLC
+    SBC #ch_substats - 1
+    JMP @LikeASubStat
 
 @Stat1Digit:       ; same as below routines -- but 1 byte, 1 digit
     CLC            ;  I do not believe this 1Digit code is ever called
@@ -8128,20 +8147,19 @@ EnterStatusMenu:
     JSR DrawMainItemBox
     LDA #20
     INC dest_x
-    INC dest_y
     JSR DrawCharMenuString
     
    ; LDA #04                 ; lower right box
    ; JSR DrawMainItemBox
    ; INC dest_x
     
-    LDA #18
-    STA dest_x
-    LDA #15
-    STA dest_y    
-    
-    LDA #21
-    JSR DrawCharMenuString
+  ;  LDA #18
+  ;  STA dest_x
+  ;  LDA #15
+  ;  STA dest_y    
+  ;  
+  ;  LDA #21
+  ;  JSR DrawCharMenuString
     
     JSR ClearOAM            ; clear OAM
 
