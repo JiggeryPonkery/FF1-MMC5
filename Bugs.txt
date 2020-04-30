@@ -1,10 +1,12 @@
 Map:
 * Treasure chests will swap back to closed when the dialogue box is drawn. (Needs to be confirmed, footage is from old version.)
 
+Shop:
+* Thank you, Anything else? dialogue is overwritten by immediately jumping back to the Buy/Sell option. Since buying things is just so easy now, I suggest returning to the Buy/Sell/Exit option after every purchase or sale? 
+
 
 Battle:
 * Using a Soft tried to cast "Bolt" then crashed the game. Test all items.
-* Weapon animations lag 1 frame behind character movements.
 * Spells need to be tested to cast properly.
 * Pray needs to be tested.
 * Cover needs to be tested.

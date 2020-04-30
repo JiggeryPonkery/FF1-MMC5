@@ -501,6 +501,15 @@ LoadBattleSprite:
    LDA BattleCharPositions_LUT, Y
    
 CHRLoadToAX:
+    ;; cut it as close as possible
+    PHA
+    TXA
+    PHA
+    JSR WaitForVBlank_L
+    PLA
+    TAX
+    PLA
+
     LDY $2002         ; reset PPU Addr toggle
     STA $2006         ; write high byte of dest address
     STX $2006         ; write low byte

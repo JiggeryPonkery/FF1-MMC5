@@ -1672,11 +1672,12 @@ UpdateSprites_BattleFrame:
       JSR DrawWeaponGraphicRow  ;    takes care of that
     
     LDA btlattackspr_hidell     ; See if we need to hide the lower-left tile
-    BEQ @DrawMagic
+    BEQ @Done ; DrawMagic   ;; JIGS - why try to draw magic if both weapon and magic are in slot 0?
       LDA #$FF                  ; if set hide the lower-left tile of the weapon sprite
       STA oam_y+8               ;   by moving of to the bottom of the screen.
       LDA #$00
       STA btlattackspr_hidell   ; then clear that flag
+      BEQ @Done ;; JIGS - and again... just in case, skip magic entirely if doing a weapon, for now
     
   @DrawMagic:
     LDA btl_drawflagsA
@@ -1706,7 +1707,15 @@ UpdateSprites_BattleFrame:
       JSR Draw16x8SpriteRow
   
   @Done:
+    LDA btl_drawflagsA
+    BPL @NormalFrame
+        JSR UpdateCharacterSprite_Preset
+        BMI @ClearDrawFlag      ; high bit still set, see LoadSprite right below
+   
+   @NormalFrame:   
     JSR BattleFrame             ; Lastly, do a frame
+    
+   @ClearDrawFlag: 
     LDA btl_drawflagsA          ; and clear drawflags (other than 'dead' bits)
     AND #$0F
     STA btl_drawflagsA
@@ -1729,16 +1738,22 @@ UpdateSprites_BattleFrame:
 
 UpdateCharacterSprite: ; In: X = 00, 01, 02, 03
     STX char_index
+UpdateCharacterSprite_Preset: ; char_index was set already
     LDA #1
 LoadSprite:
     STA MMC5_tmp
-    JSR WaitForVBlank_L
+    JSR BattleUpdateAudio
+  ;  JSR WaitForVBlank_L
     JSR LongCall
     .word LoadSprite_Bank04
     .byte $04
     JSR BattleUpdatePPU
-    JSR BattleUpdateAudio
-    JMP UpdateSprites_BattleFrame
+    LDA #>oam
+    STA $4014          ; Do OAM DMA
+    LDA btl_drawflagsA ; if high bit is set, this was called from inside UpdateSprites_BattleFrame!
+    BPL :+
+       RTS
+  : JMP UpdateSprites_BattleFrame
 
 CharacterPraySprite_Index:
     .byte $10, $20, $40, $80
@@ -3359,70 +3374,90 @@ PlayFanfareAndCheer:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadCheerPose:
-      LDX btl_animatingchar
-      LDA #LOADCHARPOSE_CHEER
-      STA btl_charactivepose, X
-      JMP UpdateCharacterSprite     
-      
-WalkForwardAndStrike:
-    STA btl_animatingchar       ; A = character to animate
-   ; STX btlattackspr_gfx        ; X = attack sprite graphic
-    STY btlattackspr_wepmag     ; Y = 0,1 to choose between weapon/magic
+    LDX btl_animatingchar
+    LDA #LOADCHARPOSE_CHEER
+    STA btl_charactivepose, X
+    JMP UpdateCharacterSprite     
 
-    ;; JIGS - adding: - note that after this, the character does not go back into hiding!
-    JSR UnhideCharacter
-    LDA #0
+WalkForwardAndStrike:
+    STA btl_animatingchar           ; A = character to animate
+    STY btlattackspr_wepmag         ; Y = 0 = weapon, 1 = magic
+   
+    JSR UnhideCharacter             ; 
+    LDA #0                          ; set Hidden to 0 to mark that the character will not hide after
     STA Hidden
-    STA Woosh ;; JIGS - ... it does a magic thing!
+    STA Woosh                       ; does a magic thing!
     
     LDA ActiveRunic                 ; if Runic, skip walking forward
-    BEQ :+
-       JSR LoadCheerPose
-       JMP :++
-    
-  : LDA #-2
-    STA btl_walkdirection                  ; walk the character to the left
+    BNE @CheerOnly                  ; and go right into cheering in place
+
+   @WalkForward: 
+    LDA #-2
+    STA btl_walkdirection           ; walk the character to the left
     
     JSR CharacterWalkAnimation
     
-    LDA PlayMagicSound              ; skip SFX, for confusion, so that player>player magic doesn't play the healing doodle when hurting them
-    BEQ :+
+    LDA #$08                        ; loop 8 times, alternating between 
+    STA btl_walkloopctr             ; animation frames every 2 iterations
+    
+    LDA btlattackspr_wepmag
+    BEQ @DoAttackAnimationLoop      ; nothing to load, skip ahead to animation
+    
     LDA btlmag_magicsource
-    BNE :+                          ; if zero, it's magic... so...
-      JSR LoadCheerPose
+    BNE @CheerOnly                  ; 0 if magic, 1 if item - if item, don't do SFX
+    LDA #$00                        ; ...play magic sfx.  
+    JSR PlayBattleSFX             
+
+   @CheerOnly: 
+    JSR LoadCheerPose               ; takes 1 frame to update  
+
+   @DoAttackAnimationLoop:
+    LDA btl_animatingchar
+    STA char_index
     
-      LDA #$00                      ; ...play magic sfx.  
-      STA PlayMagicSound
-      JSR PlayBattleSFX             ;  
+    LDA btlattackspr_wepmag         ; see if this is a weapon or a magic graphic
+    BEQ @WeaponLoop
     
-  : LDA #$08                            ; 6AA8 is the loop counter (loop 8 times), alternates between 
-    STA btl_walkloopctr                 ;   animation frames every 2 iterations.
+   @MagicLoop:
+    JSR Magic_AFrame
+    LDA btl_walkloopctr
+    AND #$02                        ; every other frame...
+    BNE @WaitFrames
+    ;; for the BFrame of Magic...
+    LDA #$04
+    STA btlattackspr_pose           ; just the SPRITE pose is different.
+    BNE @WaitFrames 
     
-  @DoAttackAnimationLoop:
-    LDA btl_drawflagsA                  ; set the "draw weapon" draw flag
-    ORA #$20                            ;  note:  for magic, this is changed in PrepAttackSprite call below
+   @WeaponLoop:
+    LDA btl_drawflagsA              ; set the "draw weapon" draw flag
+    ORA #$20                       
     STA btl_drawflagsA
     
     LDA btl_walkloopctr
-    AND #$02                            ; every other frame...
+    AND #$02                        ; every other frame...
     BEQ @BFrame
-        JSR PrepAttackSprite_AFrame     ; alternate between AFrame of animation
-        BCS :++                         ; carry clear if its Runic or Magic, set if its a weapon
-        BCC :+
-    @BFrame:                            
-      JSR PrepAttackSprite_BFrame       ; ... and BFrame of animation
-      BCC :++                           ; carry clear if its Runic or Magic, set if its a weapon
-    : JSR UpdateSprites_BattleFrame     ; only do one frame, since it took 1 frame to load the new character pose
-      JMP :++
-    : JSR UpdateSprites_TwoFrames       ; redraw sprites on screen, do 2 frames.
+
+    JSR Weapon_AFrame               ; alternate between AFrame of animation
+    JMP @WaitFrames
+
+   @BFrame:                            
+    JSR Weapon_BFrame               ; ... and BFrame of animation
+
+   @WaitFrames:
+    JSR SetCharacterSpriteUpdateFlag
+    JSR UpdateSprites_TwoFrames     ; redraw sprites on screen, do 2 frames.
     
-    : DEC btl_walkloopctr
-      BNE @DoAttackAnimationLoop        ; loop until counter expires
+    DEC btl_walkloopctr
+    BNE @DoAttackAnimationLoop      ; loop until counter expires
+   
+   @AnimationOver:    
+    JSR BattleClearVariableSprite   ; Finally, once attack animation complete, clear the weapon/magic sprite
+    JSR SetCharacterSpriteUpdateFlag
     
-    JSR BattleClearVariableSprite       ; Finally, once attack animation complete, clear the weapon/magic sprite
-    JSR BattleFrame                     ; Do another frame to make sure it's erased  (seems silly to do that here... since
-                                        ;   we do another frame shortly...)
-    LDA btl_animatingchar
+    LDX btl_animatingchar
+    LDA #LOADCHARPOSE_STAND
+    STA btl_charactivepose, X
+    TXA
     ASL A
     ASL A
     TAX
@@ -3440,10 +3475,14 @@ WalkForwardAndStrike:
   : LDA btl_animatingchar
     JSR SetNaturalPose                  ; reset character back to their natural pose
     JSR UpdateCharacterSprite
-    
-  ; JSR BattleClearVariableSprite       ; clear the wep/mag sprite (again?  Pointless to do here)
-  ;; JIGS - ^
-  ; JMP UpdateSprites_TwoFrames         ; <- flow into.  Update sprites and do 2 frames
+
+
+SetCharacterSpriteUpdateFlag:
+    LDA btl_drawflagsA              ; set the "update character sprite weird way" draw flag
+    ORA #$80
+    STA btl_drawflagsA
+    RTS
+
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3468,73 +3507,107 @@ UpdateSprites_TwoFrames:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-PrepAttackSprite_AFrame:
-    LDA ActiveRunic
-    BEQ :+
-Runic_AFrame:
-    JSR PrepAttackSprite_Weapon_AFrame 
+
+RunicFrame:
+    JSR PrepAttackSprite_AFrame
     LDA #CHARPOSE_NORM ; #CHARPOSE_CHEER
     STA btl_chardraw_pose, X       
     LDA btlattackspr_y                      ; weapon graphic is a bit higher
     SEC
     SBC #$04
     STA btlattackspr_y
-    CLC
-    RTS
+    RTS    
 
-  : LDA btlattackspr_wepmag                 ; see if this is a weapon or a magic graphic
-    BNE PrepAttackSprite_Magic_AFrame
-       JSR PrepAttackSprite_Weapon_AFrame
-       LDA #LOADCHARPOSE_ATTACK_1
-       LDX btl_animatingchar
-       STA btl_charactivepose, X
-       JSR UpdateCharacterSprite
-       SEC
-       RTS
+Weapon_AFrame:
+    LDA ActiveRunic
+    BNE RunicFrame
     
-    ;;  Support routine:  Sets the btlattackspr to the 'A' frame for magic    
-PrepAttackSprite_Magic_AFrame:
-    JSR PrepAttackSprite_Weapon_AFrame    ; magic AFrame is the same as weapon AFrame, but with some changes:
+    JSR PrepAttackSprite_AFrame
+    LDA #LOADCHARPOSE_ATTACK_1
+    LDX btl_animatingchar
+    STA btl_charactivepose, X
+    RTS
+    ;JMP UpdateCharacterSprite
+
+Weapon_BFrame:
+    LDA ActiveRunic
+    BNE RunicFrame
+
+    LDA btl_animatingchar       ; BFrame for weapons is different.  The weapon has to move
+    ASL A                       ;   back behind the player's head.
+    ASL A
+    TAX                         ; X=4*char index
+    
+    LDA btl_chardraw_x, X       ; weapon graphic is 8 pixels to the right of the character
+    CLC
+    ADC #$08
+    STA btlattackspr_x
+    
+    LDA btl_chardraw_y, X       ; and 8 pixels ABOVE the character
+    SEC
+    SBC #$08
+    STA btlattackspr_y
+
+    LDA #$08
+    STA btlattackspr_pose       
+
+    LDA #CHARPOSE_NORM ; #CHARPOSE_ATTACK_B      ; change the player's pose to backward attack
+    STA btl_chardraw_pose, X
+    
+    INC btlattackspr_hidell     ; set the hideLL flag to stop the graphic from drawing over the character's face
+    
+    LDX btl_animatingchar
+    LDA #LOADCHARPOSE_ATTACK_2
+    STA btl_charactivepose, X
+    RTS
+    ;JMP UpdateCharacterSprite    
+
+
+    
+Magic_AFrame:
+    JSR PrepAttackSprite_AFrame  ; magic AFrame is the same as weapon AFrame, but with some changes:
     LDA #CHARPOSE_NORM ; #CHARPOSE_CHEER
-    STA btl_chardraw_pose, X              ; player is cheering rather than swinging
+    STA btl_chardraw_pose, X     ; player is cheering rather than swinging
     
-    LDA btlattackspr_gfx ; check what kind of graphic it is
-    CMP #$E8             ; if its the little flare from the hands, don't move the sprite
-    BEQ :+
-    CMP #$E0             ; if its the "dust" sprite, float it up
+    LDA btlattackspr_gfx  ; check what kind of graphic it is
+    CMP #$E8              ; if its the little flare from the hands, don't move the sprite
+    BEQ @NoSpriteMovement
+    CMP #$E0              ; if its the "dust" sprite, float it up
     BEQ @MagicSpriteUp
     
    @MagicSpriteLeft:    
-    LDA btlattackspr_x  ; load the X spot
-    SEC                 ; set carry
-    SBC Woosh           ; subtract Woosh variable
-    STA btlattackspr_x  ; save X spot
-    JMP @Woosh
+    LDA btlattackspr_x    ; load the X spot
+    SEC                   ; set carry
+    SBC Woosh             ; subtract Woosh variable
+    STA btlattackspr_x    ; save X spot
+    BNE @Woosh
     
    @MagicSpriteUp:
     LDA btl_animatingchar
-    BEQ :+             ; skip moving the sprite up if the caster is in the top slot (no room)
+    BEQ @NoSpriteMovement ; skip moving the sprite up if the caster is in the top slot (no room)
     
-    LDA btlattackspr_y ; load Y spot, to make the magic float upwards
+    LDA btlattackspr_y    ; load Y spot, to make the magic float upwards
     SEC
     SBC Woosh
     STA btlattackspr_y
     
    @Woosh:
-    LDA Woosh           ; Load Woosh variable
-    CLC                 ; 
-    ADC #02             ; Add 2
-    STA Woosh           ; and save... so every 2 frames, the magic moves 2 pixels up or left
+    LDA Woosh             ; Load Woosh variable
+    CLC                   ; 
+    ADC #02               ; Add 2
+    STA Woosh             ; and save... so every 2 frames, the magic moves 2 pixels up or left
     
-  : LDA btl_drawflagsA                      ; turn on the magic drawflag bit, and turn off the weapon
-    ORA #$40                                ; drawflag bit.
-    AND #~$20                               ; this will cause the BG color to flash.
+   @NoSpriteMovement: 
+    LDA btl_drawflagsA    ; turn on the magic drawflag bit, and turn off the weapon
+    ORA #$40              ; drawflag bit.
+    ;AND #~$20             ; this will cause the BG color to flash.
     STA btl_drawflagsA
-    CLC
     RTS
     
-    ;;  Support routine:  Sets the btlattackspr to the 'A' frame for weapons    
-PrepAttackSprite_Weapon_AFrame:
+    
+    
+
+PrepAttackSprite_AFrame:
     LDA btl_animatingchar           ; use character*4 as index
     ASL A
     ASL A
@@ -3551,66 +3624,12 @@ PrepAttackSprite_Weapon_AFrame:
     LDA btl_chardraw_y, X           ; weapon graphic is at same Y position as char
     STA btlattackspr_y
     
-  ;  LDA btlattackspr_gfx            ; Set the tile to the appropriate graphic
-  ;  STA btlattackspr_t              ; And set the pose to scene 0
     LDA #$00
     STA btlattackspr_pose
     RTS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  PrepAttackSprite_BFrame [$9F15 :: 0x31F25]
-;;
-;;    Weapon and Magic attacks consist of 2 frames of animation.  This routine will
-;;  prep the 'BFrame' of animation.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-PrepAttackSprite_BFrame:
-    LDA ActiveRunic
-    BEQ :+                      ; if doing the Runic animation, no B frame
-        JMP Runic_AFrame
 
-  : LDA btlattackspr_wepmag                 ; weapon or magic?
-    BEQ :+                                  ; if magic...
-      JSR PrepAttackSprite_Magic_AFrame     ; Same setup as AFrame
-      LDA #$04
-      STA btlattackspr_pose                 ; just the SPRITE pose is different.
-      CLC
-      RTS
-
-  : LDA btl_animatingchar       ; BFrame for weapons is different.  The weapon has to move
-    ASL A                       ;   back behind the player's head.
-    ASL A
-    TAX                         ; X=4*char index
-    
-    LDA btl_chardraw_x, X       ; weapon graphic is 8 pixels to the right of the character
-    CLC
-    ADC #$08
-    STA btlattackspr_x
-    
-    LDA btl_chardraw_y, X       ; and 8 pixels ABOVE the character
-    SEC
-    SBC #$08
-    STA btlattackspr_y
-    
-  ;  LDA btlattackspr_gfx        ; copy graphic over
-  ;  STA btlattackspr_t
-    
-    LDA #$08
-    STA btlattackspr_pose       
-
-    LDA #CHARPOSE_NORM ; #CHARPOSE_ATTACK_B      ; change the player's pose to backward attack
-    STA btl_chardraw_pose, X
-    
-    INC btlattackspr_hidell     ; set the hideLL flag to stop the graphic from drawing over the character's face
-    
-    LDX btl_animatingchar
-    LDA #LOADCHARPOSE_ATTACK_2
-    STA btl_charactivepose, X
-    JSR UpdateCharacterSprite
-    SEC
-    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5555,8 +5574,8 @@ FocusSkill:
     
     LDA #$2F
     JSR UpdateVariablePalette
-    LDA #0
-    STA PlayMagicSound             ; this isn't a spell, don't do SFX!
+    ;LDA #0
+    ;STA PlayMagicSound             ; this isn't a spell, don't do SFX!
     STA btl_unformattedstringbuf+4 ; and terminate the upcoming message
     TAX                            ; X = 0, needed for WalkForwardAndCAstMagic
     PLA
@@ -6638,7 +6657,7 @@ DoPhysicalAttack_NoAttackerBox:
       INC btlattackspr_nodraw   ; set set the 'nodraw' flag for attack sprites
       
   : LDY #$00                    ; 0 to indicate swinging a weapon
-    STY PlayMagicSound
+    ;STY PlayMagicSound
     LDA btl_attacker
     AND #$03
     JSR WalkForwardAndStrike    ; Do the animation to walk the character forward, swing their weapon, and walk back
@@ -9017,20 +9036,17 @@ Player_DoItem:
     STA btl_attacker            ; make sure high bit is set, and record them as an attacker
     STX btl_defender            ; X contains the defender, record them as well
     
-    LDA #$00
-    STA btlmag_playerhitsfx     ; player->player magic plays the 'heal' sound effect (ID 0)
+   ; LDA #$00
+   ; STA btlmag_playerhitsfx     ; player->player magic plays the 'heal' sound effect (ID 0)
     
     JSR DrawAttackerBox         ; Draw the attacker name box
     JSR DrawAttackBox           ; Draw the spell name box
     
     INC HiddenMagic
-    DEC btlmag_magicsource      ; with the attack box drawn, trick WalkForwardAndStrike to think its a spell!
     
     LDA btl_attacker
-    AND #$7F
-    LDX #1 ;btlmag_magicsource
-    STA PlayMagicSound ; because I did a dumb thing with Confusion and this will
-    JSR WalkForwardAndCastMagic ; trick < this < into loading the Cheer pose...
+    AND #$7F      
+    JSR WalkForwardAndCastMagic 
     
     LDX btl_attackid
     LDA items, X
@@ -9259,7 +9275,7 @@ UseItem_Ether:
     ORA tmp+1       ; add max mp back in
     STA ch_stats, X ; and save it
     
-    LDA btlmag_playerhitsfx
+    LDA #0 ; btlmag_playerhitsfx
     JSR PlayBattleSFX     
     LDA btl_defender
     AND #$03
@@ -9279,7 +9295,7 @@ UseItem_Eyedrops:
 UseItem_CommonCode:
     PHA
     DEC items, X
-    LDA btlmag_playerhitsfx
+    LDA #0 ; btlmag_playerhitsfx
     JSR PlayBattleSFX  
     LDA btl_defender
     AND #$03
@@ -9407,7 +9423,7 @@ ClearSpecialMagicVariables:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_PlayerMagic_CastOnTarget:
-    INC PlayMagicSound
+   ; INC PlayMagicSound
     LDX btlmag_magicsource          ; X=0 for magic (indicating we should do magic casting animation)
     LDA btl_attacker
     AND #$7F
