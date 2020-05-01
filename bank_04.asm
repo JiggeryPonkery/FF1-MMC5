@@ -505,8 +505,10 @@ CHRLoadToAX:
     PHA
     TXA
     PHA
+    LDA InBattle      ; only wait once battle actually begins
+    BEQ :+            ; since the screen is off until then
     JSR WaitForVBlank_L
-    PLA
+  : PLA
     TAX
     PLA
 

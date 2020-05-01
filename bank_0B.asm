@@ -2915,8 +2915,8 @@ MusicPlay:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Battle_FlipAllChars:
-    LDA #$10                ; put a pointer to first character's OAM data in $8A
+Battle_FlipAllChars:        
+    LDA #$20 ; 10           ; put a pointer to first character's OAM data in $8A
     STA BattleBoxString     ;  start at $10 because the first 4 sprites are for the battle
     LDA #>oam               ;  cursor/weapon/magic sprite.
     STA BattleBoxString+1
@@ -2961,12 +2961,15 @@ Battle_FlipAllChars:
 Battle_FlipCharSprite:
     JSR Shift6TAX           ; convert char ID to index
     LDA ch_ailments, X      ; get ailment
-    CMP #$01
-    BEQ @Skip               ; if they're dead, skip them
-    CMP #$02
-    BEQ @Skip               ; if they're stone, skip them
-    CMP #$20             
-    BEQ @Skip               ; if they're asleep, skip them
+    AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
+    BNE @Skip
+    
+   ; CMP #$01
+   ; BEQ @Skip               ; if they're dead, skip them
+   ; CMP #$02
+   ; BEQ @Skip               ; if they're stone, skip them
+   ; CMP #$20             
+   ; BEQ @Skip               ; if they're asleep, skip them
     
     ; Otherwise, we're going to loop and flip each character sprite
     LDX #$03                ; X is loop down counter.  3 rows of tiles per character
