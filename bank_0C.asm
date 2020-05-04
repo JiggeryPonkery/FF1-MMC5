@@ -1075,7 +1075,8 @@ BattleSubMenu_Item_NoUndraw:
 
     LDA #BOX_ITEM
     JSR DrawCombatBox          ; otherwise (have at least 1 potion), draw the Item box
-  
+
+BattleSubMenu_Item_Select:  
     JSR MenuSelection_Item     ; get menu selection from the player  
     JSR UndrawOneBox
     CMP #$02
@@ -1116,7 +1117,7 @@ BattleSubMenu_Item_NoUndraw:
     CMP #ETHER                  ; if its an ether, gotta do another menu selection...
     BNE @SkipTarget
 
-    JSR UndrawOneBox            ; undraw the item box    
+   ; JSR UndrawOneBox            ; undraw the item box    
    @EtherManaMenu:
     LDA submenu_targ
     JSR ShiftLeft6
@@ -1170,11 +1171,12 @@ EtherManaSelection:
     JMP MenuSelection_2x4           ; and do the logic
     
 Ether_IsThereMP:
-    LDA submenu_targ
-    JSR ShiftLeft6
+    ;LDA submenu_targ
+    ;JSR ShiftLeft6
+    LDA char_index
     CLC
     ADC #ch_mp - ch_stats
-    ADC tmp
+    ADC battle_class ;tmp
     TAX
     LDA ch_stats, X
     AND #$0F
@@ -9089,8 +9091,9 @@ UseItem_JumpTable:
     .word UseItem_AlarmClock    ; 13 ; D 
 
 UseItem_AlarmClock: 
-    LDX #0
+    LDA #0
    @Loop: 
+    TAX
     LDA ch_ailments, X
     AND #~AIL_SLEEP ; $DF  ; clear out only the sleep ailment
     STA ch_ailments, X

@@ -12749,13 +12749,10 @@ DrawItemBox_String:
     LDA #$FF
    @FillBlanks:
      STA btl_unformattedstringbuf-1, X             
+     STA item_box, X ; holds item IDs
      DEX                           
      BNE @FillBlanks               
-     LDX #$10
-   : STA item_box, X ; holds item IDs
-     DEX
-     BNE :-
-
+    
     STX btl_unformattedstringbuf+$8F ; set a 0 null terminator just in case.
     LDY #1           ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
 
@@ -12780,7 +12777,7 @@ DrawItemBox_String:
 
   @StartDrawingItems:
     LDA #0
-    STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
+    ;STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
     STA tmp+3          ; also reset the loop counter
     LDA #2             
     STA tmp+2          ; 2 for the letter position counter
@@ -12791,7 +12788,8 @@ DrawItemBox_String:
   
     LDX tmp+3          ; get current loop counter and put it in X
     LDA item_box, X    ; index the item box to see what item name we're to draw
-    BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
+    ;BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
+    BMI @Exit          ; exit if it hits an $FF
 
     PHA                ; otherwise, back it up
     ASL A              ; then double the item ID
@@ -12841,6 +12839,7 @@ DrawItemBox_String:
     BNE @DrawItemLoop       ; continue the loop!
    
   @Exit:  
+    LDA #0
     STA btl_unformattedstringbuf+55
 
 SetCReturnBank:  

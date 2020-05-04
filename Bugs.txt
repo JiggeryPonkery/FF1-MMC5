@@ -6,16 +6,19 @@ Shop:
 
 
 Battle:
-* Using a Soft tried to cast "Bolt" then crashed the game. Test all items.
+* Soft      : Works, but doesn't flash sprite (since sprite does not exist. Flash stone tiles instead by toggling stone ailment on/off?)
+* Alarmclock : Works, but should flash ALL sprites?
+* The rest work fine!
+
 * Spells need to be tested to cast properly.
 * Pray needs to be tested.
 * Cover needs to be tested.
 * Parry needs to be tested.
-* Stealing seems to mis-draw boxes.
-* Focus seems to mis-draw boxes.
-* Enemies strike first will still have all your characters (with poison) poison-damaged before their turn.
+* Focus seems to be tested.
+* Enemies strike first will still have all your characters (with poison) poison-damaged before their turn. Is this a bug?
+* POISON WON'T DO THE THING!
 * Check: Will a character who is hidden and poisoned flash their sprite when damaged?
-* Set "Mag.Def" to "M.Evade" in level up text.
+* Set "Mag.Def" to "M.Evade" in level up text. (does it even show?)
 
 Stats:
 Unequipping and re-equipping gear does not cap stats, and maybe should?
@@ -30,6 +33,8 @@ MiniMap:
 
 
 Ideas:
+* Put Healed amount into a string then print it in HP Up messaging. 
+
 * Battle: Random chance for enemies who have more than 1 physical attack against another target per round, to do or not do the second, third, fourth, etc, attack.
 
 * Battle Graphics: Randomize the LUT that draws the background. Compare randomized number against previous 2 numbers: If last random numbers were 1, then 1, then third number must be 3. After each random number: 2 must follow 1, 4 must follow 3. Move background drawing to Bank B to make more fixed bank space.
