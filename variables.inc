@@ -767,6 +767,8 @@ btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathemati
 ;btl_defender_hpmax     = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)   ; $6062 ; 
     battle_totaldamage  = btl_mathbuf + (MATHBUF_TOTALDAMAGE*2)     ; $6064 ;  -- treated as part of math buffer by some code
     
+    btl_poisondamage    = btltmp_divLo
+    
     btltmp_divLo        = btl_mathbuf + (MATHBUF_REGENHP*2)         ; $6066 
     btltmp_divHi        = btl_mathbuf + (MATHBUF_REGENHP*2) + 1     ; $6067 
     btltmp_divV         = $6068 

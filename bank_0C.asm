@@ -1126,7 +1126,7 @@ BattleSubMenu_Item_Select:
     LDA #BOX_ETHER
     JSR DrawCombatBox
     
-    JSR EtherManaSelection      ; pressing A will set tmp 
+    JSR EtherManaSelection
     JSR UndrawOneBox
     CMP #$02
     BNE :+                      ; if they pressed B...
@@ -1137,8 +1137,13 @@ BattleSubMenu_Item_Select:
     ASL A
     ASL A                       ; x = 0 or 1, times 4
     ADC btlcurs_y               ;   + 0, 1, 2, or 3
-    STA battle_class            ; = spell level chosen (is also used for skills)
-    JSR Ether_IsThereMP         ; check that character for mana
+    STA battle_class            ; = spell level chosen; will be saved in SetCharacterBattleCommand for later
+    CLC
+    ADC char_index              ; add index ($0, $40, $80, $C0)
+    ADC #ch_mp - ch_stats       ; and mp offset
+    TAX
+    LDA ch_stats, X
+    AND #$0F                    ; cut out max MP (low byte)
     BNE @SkipTarget             ; if they have a high byte, do it
         JSR DoNothingMessageBox ; otherwise, print "Nothing" and jump back
         JMP @EtherManaMenu
@@ -1169,19 +1174,6 @@ EtherManaSelection:
       DEY
       BNE :-
     JMP MenuSelection_2x4           ; and do the logic
-    
-Ether_IsThereMP:
-    ;LDA submenu_targ
-    ;JSR ShiftLeft6
-    LDA char_index
-    CLC
-    ADC #ch_mp - ch_stats
-    ADC battle_class ;tmp
-    TAX
-    LDA ch_stats, X
-    AND #$0F
-    RTS   
-
 
 
 
@@ -1801,13 +1793,14 @@ DrawCharacter:
     STA btl8x8spr_y
     STA btl8x8spr_y+1       ; also store in temp as a backup
     
-    LDA DrawCharacter_LUT, X
-    STA DrawCharTmp
+    ;LDA DrawCharacter_LUT, X
+    ;STA DrawCharTmp
     
     LDA btl_drawflagsA      ; See if the character is dead
     ORA btl_drawflagsC              ; Or asleep!
     AND #$0F                ; 
-    AND DrawCharTmp         ; 
+    ;AND DrawCharTmp         ; 
+    AND DrawCharacter_LUT, X
     BEQ @DrawNotDead
 
     @DrawDead:     
@@ -1864,7 +1857,8 @@ DrawCharacter:
   @DrawPraying:
     LDA btl_drawflags_tmp3
     AND #$0F
-    AND DrawCharTmp
+    ;AND DrawCharTmp
+    AND DrawCharacter_LUT, X
     BEQ @DrawChar               ; do nothing weird
     LDA #CHARPOSE_NORM ; #CHARPOSE_CROUCH
    
@@ -4797,44 +4791,44 @@ ApplyEndOfRoundEffects:
     LDA #0
     STA EntityRegenID             ; record character ID
    @Loop: 
-    STA CharacterIndexBackup
+    STA char_index
+    PHA
     LDA EntityRegenID
     TAX
     ORA #$80
     STA btl_attacker
-    JSR ClearGuardBuffers
+    JSR ClearGuardBuffers   ;; clear out everything that only lasts 1 turn
     
+    ;; then do Focus stuff for black mages
     LDA btl_charfocus, X
-    BPL :+                  ; if Focus has high bit set, don't subtract it this turn
-      AND #$7F
-      STA btl_charfocus, X  ; just clear the high bit and save it
-      JMP @AfterFocusLoss
+    BEQ @AfterFocusLoss
+    BPL @FocusLoss          ; if Focus has high bit set, don't subtract it this turn
+      AND #$7F              ; just clear the high bit and save it
+      BNE @SaveFocus  
     
     ; else, divide Focus boost by 3
-  : TAX                  ; X is low byte
+   @FocusLoss: 
+    TAX                  ; X is low byte
     LDY #0               ; Y is high byte, clear
     LDA #3
     JSR YXDivideA        ; divide by 3?
-    
     LDX EntityRegenID
+    
+   @SaveFocus: 
     STA btl_charfocus, X
 
    @AfterFocusLoss: 
-    TXA
-    JSR PrepCharStatPointers
+    STX btl_defender
+    JSR BtlMag_LoadPlayerDefenderStats
     JSR ApplyRegenToPlayer
-    JSR ApplyPoisonToPlayer
     INC EntityRegenID
-    LDA CharacterIndexBackup
+    PLA                  ; pull char_index
     CLC
     ADC #$40
     BNE @Loop
     
     ;; JIGS - Updates the Battle Turn text and character sprites at the same time
     INC BattleTurn
-    
-    JSR DrawCharacterStatus     
-  ;  JSR PrintBattleTurnNumber
     JMP CheckForBattleEnd       ; poison may have killed the party -- check for battle end.
     
 ClearGuardBuffers:
@@ -4846,28 +4840,7 @@ ClearGuardBuffers:
     STA btl_charpray, X
     STA btl_charrush, X
     RTS
-    
-;PrintBattleTurnNumber:
-;    JSR LongCall
-;    .word PrintBattleTurn
-;    .byte BANK_MENUS
-;    
-;    JSR WaitForVBlank_L
-;    
-;    LDA #>$205D                  ; set PPU addr
-;    STA $2006
-;    LDA #<$205D
-;    STA $2006
-;    
-;    LDA format_buf-2 ; tens
-;    STA $2007
-;    LDA format_buf-1 ; ones 
-;    STA $2007
-;    
-;    JSR BattleUpdatePPU                 ; reset scroll 
-;    JMP BattleUpdateAudio               ; update audio for the frame we just waited for
-    
-    
+ 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4894,138 +4867,101 @@ ClearGuardBuffers:
 
 ApplyRegenToPlayer:
     LDX EntityRegenID
-    LDA btl_charregen, X            ; JIGS - not using $F here because that bit can be used for something else later!
-    AND #$07                        ;        which means regenerating spells can't last more than 7 turns (that's a lot still!)
-    BNE :+                          ; if regenerating, jump ahead
+    LDA btl_charregen, X           ; JIGS - not using $F here because that bit can be used for something else later!
+    AND #$07                       ;        which means regenerating spells can't last more than 7 turns (that's a lot still!)
+    BNE @GetRegenPotency           ; if regenerating, jump ahead
     
-    LDX CharacterIndexBackup
-    LDA ch_head, X                  ; if not, check helmet
-    CMP #ARM31+1                    ; (Heal Helm)
-    BEQ @HealHelmPotency            ; if helmet doesn't = Heal Helm, jump to poison stuff
+    LDX char_index
+    LDA ch_head, X                 ; if not, check helmet
+    CMP #ARM31+1                   ; (Heal Helm)
+    BEQ @HealHelmPotency           ; if helmet doesn't = Heal Helm, jump to poison stuff
     JMP ApplyPoisonToPlayer
 
-  : LDA btl_charregen, X
-    AND #STATE_REGENALL        ; clear out everything but potency ($10, $20, or $40)    
+   @GetRegenPotency:
+    LDA btl_charregen, X
+    AND #STATE_REGENALL            ; clear out everything but potency ($10, $20, or $40)    
     CMP #STATE_REGENLOW
-    BNE :+ 
-        @LowPotency:            ; 8%
-        LDY #12         
-        BNE @Divide
-        
-  : CMP #STATE_REGENMIDDLE
-    BNE :+    
-       @MiddlePotency:          ; 12.5%, or 12%
-        LDY #8
-        BNE @Divide
+    BEQ @LowPotency
+    CMP #STATE_REGENMIDDLE
+    BEQ @MiddlePotency
     
- : @HighPotency:                ; 5 = almost 20%
-    LDY #6                      ; 6 = 16.6 ... or 16%
+   @LowPotency:                    ; 8%
+    LDA #12         
+    BNE @Divide
+   
+   @MiddlePotency:                 ; 12.5%, or 12%
+    LDA #8
     BNE @Divide
     
-  @HealHelmPotency:
-    LDY #20                      ; 5%  
+   @HighPotency:                   ; 5 = almost 20%
+    LDA #6                         ; 6 = 16.6 ... or 16%
+    BNE @Divide
+    
+   @HealHelmPotency:
+    LDA #20                        ; 5%  
   
-  @Divide:
-    LDX CharacterIndexBackup
-    LDA ch_maxhp, X
-    STA btlmag_defender_hpmax
-    LDA ch_maxhp+1, X           
-    STA btlmag_defender_hpmax+1    ; btlmag_defender_hpmax is also part of math_buf ($09)
-    LDA ch_curhp, X
-    STA math_basedamage  
-    LDA ch_curhp+1, X
-    STA math_basedamage+1
-    TYA
-    
-    JSR RegenDivision
+   @Divide:
+    JSR DoRegenCalculations
 
-    LDX CharacterIndexBackup      ; move HP back to RAM stats
-    LDA math_basedamage
-    STA ch_curhp, X
-    LDA math_basedamage+1
-    STA ch_curhp+1, X
+    JSR DrawAttackerBox            ; draw the attacker box
     
-    JSR DrawAttackerBox           ; draw the attacker box
-    
-    LDA EntityRegenID             ; see if they're hidden
+    LDA EntityRegenID              ; see if they're hidden
     JSR UnhideCharacter
     LDA #0
-    JSR PlayBattleSFX             ; play heal SFX
-    JSR UpdateSprites_BattleFrame
+    JSR PlayBattleSFX              ; play heal SFX
     LDA EntityRegenID
     JSR FlashCharacterSprite
-    
-    LDX EntityRegenID
-    JSR HideCharacter
+    JSR BtlMag_SavePlayerDefenderStats ; will re-hide if needed
    
    @DecrementRegeneration:
     LDA btl_charregen, X
     SEC
     SBC #1
-    STA btl_charregen, X           ; subtract 1 from the regen state to mark this turn has been used up
+    STA btl_charregen, X            ; subtract 1 from the regen state to mark this turn has been used up
     AND #$0F
-    BNE @drawregenbox
+    BNE @DrawRegenBox               ; see if there's any turns left after this
     
-    LDA btl_charregen, X
-    AND #STATE_REFLECT             ; clear out all regen bits but keep Reflect up
+    LDA btl_charregen, X            ; no more turns; so clear potency out
+    AND #STATE_REFLECT              ; clear out all regen bits but keep Reflect up
     STA btl_charregen, X
     
-   @drawregenbox:
+   @DrawRegenBox:
 	LDA #BTLMSG_REGEN             
     JSR DrawMessageBoxDelay_ThenClearIt
 
 ApplyPoisonToPlayer:
-    LDX CharacterIndexBackup
-    LDA ch_ailments, X  ; get this character's ailments
+    LDA btlmag_defender_ailments
     AND #AIL_POISON
-    BEQ @Exit           ; if poison = no, then z = 1
+    BEQ @Exit                       ; if poison = no, then z = 1
     
-    LDA ch_ailments, X
-    AND # AIL_DEAD | AIL_STOP
-    BEQ @Exit           ; do not poison someone who is stone... or dead
+    LDA btlmag_defender_ailments
+    AND #AIL_DEAD | AIL_STOP
+    BNE @Exit                       ; do not poison someone who is stone... or dead
     
-	LDA ch_maxhp, X     ; move max HP to math_basedamage 
-    STA math_basedamage
-    LDA ch_maxhp+1, X
-    STA math_basedamage+1
+    LDA #8
+    JSR DoPoisonCalculations
     
-    LSR math_basedamage+1   ; divide it by 8 (12.5% of max HP)
-    ROR math_basedamage
-    LSR math_basedamage+1
-    ROR math_basedamage
-    LSR math_basedamage+1
-    ROR math_basedamage
-    
-    LDA ch_curhp, X
-    SEC
-    SBC math_basedamage
-    STA ch_curhp, X
-    LDA ch_curhp+1, X
-    SBC math_basedamage+1
-    STA ch_curhp+1, X      
-
-    BCC @Dead       ; if C is clear (HP is negative), they're dead
-    ORA ch_curhp, X ; if high and low are 0 
-    BNE :+
+    LDA btlmag_defender_hp
+    ORA btlmag_defender_hp+1   
+    BNE :+    
     
    @Dead:
-    LDA #0              ; clip their HP at zero... 
-    STA ch_curhp, X          
-    STA ch_curhp+1, X                  
     LDA #AIL_DEAD
-    STA ch_ailments, X        ; give them the DEAD ailment
+    STA btlmag_defender_ailments
     
   : JSR DrawPoisonAsAttack
+    LDA EntityRegenID                ; see if they're hidden
+    JSR UnhideCharacter
     LDA #1
     JSR PlayBattleSFX   
     JSR BattleScreenShake_L
     LDA btl_attacker
     AND #$03
-    ;; JIGS - need to test hiding with poison damage...
-    JSR FlashCharacterSprite        ; flash this character's graphic
+    JSR FlashCharacterSprite         ; flash this character's graphic
     JSR RespondDelay  
-    LDX CharacterIndexBackup
-    LDA ch_ailments, X
+    JSR BtlMag_SavePlayerDefenderStats
+    
+    LDA btlmag_defender_ailments
     AND #AIL_DEAD
     BEQ @Exit
    
@@ -5037,15 +4973,15 @@ ApplyPoisonToPlayer:
     JMP UpdatePlayerHP
    
 
-DrawPoisonAsAttack:                 ; Who is getting poisoned
-    JSR DrawAttackerBox
+DrawPoisonAsAttack:                 
+    JSR DrawAttackerBox             ; Who is getting poisoned
     LDA #$0F
     STA btl_unformattedstringbuf
     LDA #BTLMSG_POISONED            ; the message for poison
     STA btl_unformattedstringbuf+1
     LDA #0
     STA btl_unformattedstringbuf+2
-    LDA #BOX_ATTACK
+    LDA #BOX_DEFENDER
     JSR DrawMessageBox_Prebuilt
 	JMP DrawDamageBox               ; print damage    
    
@@ -5058,42 +4994,27 @@ ApplyPoisonToAllEnemies:
     STA btl_defender
   : JSR ApplyPoisonToEnemy
     DEC btl_defender
-    BMI :-
+    BPL :-
     RTS  
 
 ApplyPoisonToEnemy:
     LDA btl_defender
     STA btl_attacker
-    JSR GetEnemyRAMPtr
-    
-    LDY #en_ailments
-    LDA (EnemyRAMPointer), Y
+    JSR BtlMag_LoadEnemyDefenderStats
+
+    LDA btlmag_defender_ailments
     AND #AIL_POISON
     BEQ ApplyRegenToEnemy
-    
-  ;  LDY #en_category
-  ;  LDA (EnemyRAMPointer), Y
+
+  ;  LDA btlmag_defender_category
   ;  AND #CATEGORY_REGEN
   ;  BNE :- 
   ;; This would stop the enemy from being poisoned if they are regenerative
   ;; the idea being that poison would also cancel out regeneration
     
-    LDY #en_hpmax
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage
-    STA btlmag_defender_hpmax
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage+1
-    STA btlmag_defender_hpmax+1
-    
-    LSR math_basedamage+1   ; divide it by 8 (12.5% of max HP)
-    ROR math_basedamage
-    LSR math_basedamage+1
-    ROR math_basedamage
-    LSR math_basedamage+1
-    ROR math_basedamage
-    
+    LDA #8                       ; 12% of max HP
+    JSR DoPoisonCalculations
+
     LDA #$2A    
     LDX #01                      ; pretend its magic
     JSR UpdateVariablePalette    ; make the explosion effect yellowy-green      
@@ -5101,122 +5022,92 @@ ApplyPoisonToEnemy:
     JSR DrawPoisonAsAttack       ; do poison messaging      
     JSR RespondDelay      
 
-    LDY #en_hp
-    LDA (EnemyRAMPointer), Y
-    SEC
-    SBC math_basedamage
-    STA (EnemyRAMPointer), Y
-    STA tmp
-    INY
-    LDA (EnemyRAMPointer), Y
-    SBC math_basedamage+1
-    STA (EnemyRAMPointer), Y
-    
-    BCC @Dead                 ; if C is clear (HP is negative), they're dead
-    ORA tmp                   ; if high and low are 0 
-    BNE :+
+    LDA btlmag_defender_hp
+    ORA btlmag_defender_hp+1   
+    BNE :+    
  
    @Dead:
     LDA #AIL_DEAD
-    LDY #en_ailments
-    STA (EnemyRAMPointer), Y
+    STA btlmag_defender_ailments
+    JSR BtlMag_SaveEnemyDefenderStats
    
     LDA #BTLMSG_TERMINATED               
     JSR DrawMessageBoxDelay_ThenClearAll
     JSR EnemyDiedFromPoison
     JMP CheckForBattleEnd
     
-  : JSR UndrawAllButTwoBoxes ; undraw damage and "poisoned", but leave name up
-   
-;; JIGS - updated regeneration for enemies
-    
-;ApplyRegenToAllEnemies:
-;    LDA #8
-;    STA EntityRegenID
-;    
-;  @MainLoop:
-;    LDX EntityRegenID
-;    STX btl_attacker
-;	JSR DoesEnemyXExist
-;	BEQ @Next
-;    
-;    TXA
-;    JSR GetEnemyRAMPtr
+  : JSR UndrawAllButTwoBoxes      ; undraw damage and "poisoned", but leave name up
 
 ApplyRegenToEnemy:    
-    LDY #en_category              ; Get the enemy category, and see if they are
-    LDA (EnemyRAMPointer), Y      ;  regenerative
+    LDA btlmag_defender_category  ; Get the enemy category, and see if they are regenerative
     AND #CATEGORY_REGEN
     BEQ @Next                     ; If not, skip them -- go to next iteration
     
-  ; LDY #en_ailment               
-  ; LDA (EnemyRAMPointer), Y      
+  ; LDA btlmag_defender_ailments 
   ; AND #AIL_POISON
   ; BEQ @Next                     ; enabling this would cause it to skip regeneration if the enemy was poisoned
  
-    LDY #en_hpmax
-    LDA (EnemyRAMPointer), Y
-    STA btlmag_defender_hpmax
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA btlmag_defender_hpmax+1
-
-    LDY #en_hp
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA math_basedamage+1
-    
-    LDA #12                     ; 8% of max HP
-    JSR RegenDivision
-    
-    LDY #en_hp                  ; move HP back to RAM stats
-    LDA math_basedamage
-    STA (EnemyRAMPointer), Y
-    INY
-    LDA math_basedamage+1
-    STA (EnemyRAMPointer), Y
+    LDA #12                       ; 8% of max HP
+    JSR DoRegenCalculations
     
    @drawregenbox:
-	JSR DrawAttackerBox          ; draw the attacker box
+	JSR DrawAttackerBox           ; draw the attacker box
+    LDA #02
     JSR DisplayAttackIndicator
 
 	LDA #BTLMSG_REGEN      
     JMP DrawMessageBoxDelay_ThenClearAll
   
    @Next:  
+    JSR BtlMag_SaveEnemyDefenderStats
     JMP UndrawAllKnownBoxes
 
-; @Next:
-;   DEC EntityRegenID             ; loop until all enemies counted
-;   BPL @MainLoop
-;   RTS
 
+;; this is also used to do poison damage calculations
 RegenDivision:    
     LDX btlmag_defender_hpmax   ; now holds enemy's max HP low byte
     LDY btlmag_defender_hpmax+1 ; and max HP high byte
-    JSR YXDivideA               ; divides by effectivity and puts it in A 
-    ORA btltmp_divLo            ; 
+    JSR YXDivideA               ; divides by effectivity and puts it in A (divLo)
+    ;ORA btltmp_divLo            ; ?? 
+    ORA btltmp_divHi            
+    ;; JIGS - if YXDivideA outputs divLo in A, why ORA it here again?
+    
     BNE :+                      ; I assume this puts high byte and low byte together to see if 
     INC btltmp_divV             ; there is any HP left at all 
-  : LDA #MATHBUF_BASEDAMAGE
-    TAX
+  : LDX #MATHBUF_DEFENDERHP
     LDY #MATHBUF_REGENHP        ; REGENHP = btltmp_divLo + Hi 
-    JSR MathBuf_Add16           ; add 
+    ;LDA #MATHBUF_DEFENDERHP
+    TXA 
+    RTS
     
-    LDX #MATHBUF_DEFENDERMAXHP  ; compare max HP and base damage
-    LDY #MATHBUF_BASEDAMAGE     ; base damage contains how much HP to regen
+SwapPoisonDamage:
+    LDA btl_poisondamage        ; transfer poison damage to math_basedamage 
+    STA math_basedamage         ; to print how much it did
+    LDA btl_poisondamage+1
+    STA math_basedamage+1
+    RTS
+
+DoPoisonCalculations:
+    JSR RegenDivision           
+    JSR MathBuf_Sub16           ; subtract "regen" amount from HP 
+    JMP SwapPoisonDamage        ; and put the amount into the damage buffer for printing
+
+DoRegenCalculations:
+    JSR RegenDivision
+    JSR MathBuf_Add16           ; add regen amount to HP
+    JSR SwapPoisonDamage        ; and put the amount into the damage buffer for printing
+    ;; flow into:
+
+RegenCompare:    
+    LDX #MATHBUF_DEFENDERMAXHP  ; compare max HP to current HP
+    LDY #MATHBUF_DEFENDERHP     ; 
     JSR MathBuf_Compare         ; C will be set if Y >= X (HP >= HPMax)
     BCC :+                      ; cap at Max HP
       LDA btlmag_defender_hpmax
-      STA math_basedamage
+      STA btlmag_defender_hp
       LDA btlmag_defender_hpmax+1
-      STA math_basedamage+1
+      STA btlmag_defender_hp+1
   : RTS
-    
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5534,11 +5425,9 @@ ScanEnemy:
 
     JSR DrawSkillBox
 
-    DEC ConfusedMagic                  ; set this to $FF so that loading enemy stats flashes them
-    JSR BtlMag_LoadEnemyDefenderStats  ; twice, instead of exploding, which it does at the end...
-    JSR DisplayAttackIndicator         ; 3 times...
-    JSR DisplayAttackIndicator         ; 4 times! 
-    INC ConfusedMagic
+    JSR BtlMag_LoadEnemyDefenderStats   
+    LDA #06                           ; flash enemy 6 times
+    JSR DisplayAttackIndicator         
     
     JSR LongCall
     .word ScanEnemyString
@@ -6326,6 +6215,7 @@ Retaliate:
     BEQ @DontRetaliate          ;; Don't counter if enemy was killed in the last turn
     
     JSR DrawAttackerBox         ; draw the attacker box
+    LDA #02
     JSR DisplayAttackIndicator  ; flash the enemy
     JMP ChooseAndAttackPlayer
    
@@ -7924,46 +7814,6 @@ MathBuf_Compare:
     RTS
     
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Multiply X,A [$AE09 :: 0x32E19]
-;;
-;;    Does unsigned multiplication:  X*A
-;;  High 8 bits of result stored in X
-;;  Low  8 bits of result stored in A
-;;
-;;  There is a 100% identical routine in bank B at $9EFB.  It's duplicated here so its accessible in
-;; this bank as well.  Probably should have been put in the fixed bank.
-;;
-;;  And I mean 100% identical.  I actually copy/pasted that code here.  There is literally no difference
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;MultiplyXA:
-;    STA btltmp_multA    ; store the values we'll be multiplying
-;    STX btltmp_multB
-;    LDX #$08            ; Use x as a loop counter.  X=8 for 8 bits
-    
-;    LDA #$00            ; A will be the high byte of the product
-;    STA btltmp_multC    ; multC will be the low byte
-    
-    ; For each bit in multA
-;  @Loop:
-;      LSR btltmp_multA      ; shift out the low bit
-;      BCC :+
-;        CLC                 ; if it was set, add multB to our product
-;        ADC btltmp_multB
-;    : ROR A                 ; then rotate down our product
-;      ROR btltmp_multC
-;      DEX
-;      BNE @Loop
-    
-;    TAX                     ; put high bits of product in X
-;    LDA btltmp_multC        ; put low bits in A
-;    RTS   
-
-;; JIGS - This is in Bank F now, but also... it just uses the MMC5 registers!!    
- ;; Wish I knew how to simplify division though... 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8011,39 +7861,6 @@ DoDivision:
     RTS
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  RandAX [$AE5D :: 0x32E6D]
-;;
-;;  Generates a random number between [A,X] inclusive.
-;;  Generated number is stored in A on return
-;;
-;;  This is quite literally an exact copy (seriously, copy/paste) from a routine
-;;  in bank 0B.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;RandAX:
-;    STA $68AF       ; 68AF is the 'lo' value
-;    INX
-;    STX $68B0       ; 68B0 is hi+1.  But this STX is totally unnecessary because this value is never used
-    
-;    TXA
-;    SEC
-;    SBC $68AF       ; subtract to get the range.
-;    STA $68B6       ; 68B6 = range
-    
-;    JSR BattleRNG_L
-;    LDX $68B6
-;    JSR MultiplyXA  ; random()*range
-    
-;    TXA             ; drop the low 8 bits, put high 8 bits in A  (effectively:  divide by 256)
-;    CLC
-;    ADC $68AF       ; + lo
-    
-;    RTS
-
-;; JIGS - this is moved to Bank F - that is, the Fixed bank.
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8306,6 +8123,7 @@ Battle_DoEnemyTurn:
     LDA #$00
     STA btlmag_magicsource      ; Enemies can't use potions or items -- so their magic source is always 'magic'
     JSR DrawAttackerBox         ; draw the attacker box
+    LDA #02
     JSR DisplayAttackIndicator  ; flash the enemy
     
     LDY #en_ailments
@@ -8729,20 +8547,22 @@ Battle_PrepareMagic:
     ;   In the original game, this code will only be reached for players (because enemies will never use
     ;   bad items/spells)
       @Ineffective:
-        LDA btl_attacker                ; as per Disch's suggestion, skip walking forward if the attacker is enemy
-        BPL :+                          ; (high bit not set)
+        LDA btl_attacker                
         AND #$03                        ; mask out character index from the attacker ID
         LDX #$01                        ; X=1 to indicate to NOT draw magic sprite.
         JSR WalkForwardAndCastMagic     ; do the walk/magic animation
         DEC HiddenMagic                 ; JIGS - set to 0 again, since its not going to happen anywhere else...
-        
-      : LDA btlmag_magicsource
+        LDA btlmag_magicsource
         CMP #$02
-          BNE :+
+          BNE @Spell
           LDA #BTLMSG_NOTHINGHAPPENS    ; source=02 (item)
-          BNE :++
-        : LDA #BTLMSG_INEFFECTIVENOW    ; source=00 or 01 (magic or Item)
-      : JSR DrawMessageBoxDelay_ThenClearAll  ; Show the battle message, then clear all boxes
+          BNE @DoMessage
+          
+       @Spell: 
+        LDA #BTLMSG_INEFFECTIVENOW    ; source=00 or 01 (magic or Item)
+        
+       @DoMessage: 
+        JSR DrawMessageBoxDelay_ThenClearAll  ; Show the battle message, then clear all boxes
         PLA                             ; Double-RTS to abort player's turn
         PLA
         RTS
@@ -9781,6 +9601,7 @@ Battle_CastMagicOnEnemy:
         RTS
   : JSR DrawDefenderBox                 ; print defender box
     JSR BtlMag_LoadEnemyDefenderStats   ; load enemy stats into defender mem
+    JSR DoExplosionEffect
     JSR BtlMag_PerformSpellEffect       ; do the spell (modifying defender's stats)
     JMP BtlMag_SaveEnemyDefenderStats   ; update changed enemy stats.
  
@@ -9973,8 +9794,6 @@ BtlMag_LoadPlayerDefenderStats:
     LDA (CharStatsPointer), Y
     STA btlmag_defender_attackailproc
     
-
-    
     INY
     LDA (CharStatsPointer), Y
     STA btlmag_defender_critrate
@@ -9986,9 +9805,6 @@ BtlMag_LoadPlayerDefenderStats:
     INY ; #ch_weaponcategory - ch_stats
     LDA (CharStatsPointer), Y
     STA btlmag_defender_weaponcategory
-    
-    ;; And now re-hide after flashing.   
-
     RTS
     
  
@@ -10078,8 +9894,8 @@ BtlMag_LoadEnemyDefenderStats:
     INY
     LDA (EnemyRAMPointer), Y
     STA btlmag_defender_hp+1
-    
-    JMP DoExplosionEffect
+    RTS 
+    ;JMP DoExplosionEffect
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10468,19 +10284,19 @@ BtlMag_ZeroHitChance:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BtlMag_Effect_Damage:
-    INC btlmag_spellconnected           ; damage spells always connect
+    INC btlmag_spellconnected               ; damage spells always connect
     JSR BtlMag_LoadBaseHitChance            ; load base hit chance (since damage always hits, this becomes more of a "critical" chance)
     JSR PutEffectivityInDamageMathBuf       ; Load spell effectivity into 'damage' math buffer
     
     LDA btlmag_element
-    AND btlmag_defender_elementresist          ; see if the defender resists this element
+    AND btlmag_defender_elementresist       ; see if the defender resists this element
     BEQ :+                                  ; if they do...
       JSR BtlMag_ZeroHitChance              ; ... zero the hit/crit chance
       LSR math_basedamage+1                 ; and halve the damage
       ROR math_basedamage
       
   : LDA btlmag_element
-    AND btlmag_defender_elementweakness        ; see if they are weak to the element
+    AND btlmag_defender_elementweakness     ; see if they are weak to the element
     BEQ :+                                  ; if yes...
       LDA #MATHBUF_HITCHANCE
       LDX #40
@@ -10531,27 +10347,49 @@ BtlMag_ApplyDamage:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PutEffectivityInDamageMathBuf:
-;    LDY #ch_intelligence - ch_stats
-;    LDA (CharStatsPointer), Y
+    LDX #0
+    LDA btl_attacker
+    BPL @Enemy                      ; high bit set if its a player
 
-;    LSR A ; divide by 2
-;    LSR A ; divide by 4
-;    LSR A ; divide by 8
-;    STA MMC5_tmp
-;    LSR A ; divide by 16
-;    CLC
-;    ADC MMC5_tmp
+    LDA btlmag_magicsource
+    BNE @Enemy                      ; 0 if magic... if not 0, then its an item's spell
+
+    LDY #ch_intelligence - ch_stats
+    LDA (CharStatsPointer), Y
     
-    ;Int/16 + Int/8 ... so an Intelligence stat of 80 would give +15 damage
+    LDY ConfusedMagic
+    BEQ @NotConfused
     
-;    ADC btlmag_effectivity
-
-;; JIGS - someone else will have to figure that one out...
-
+       LSR A
+       LSR A                        ; divide by 4
+       STA tmp
+       SEC
+       LDA btlmag_effectivity      
+       SBC tmp                      ; subtract intelligence/4 from spell effectivity
+       BCC @CapAt5                  ; Carry set if subtraction result remains 0 or over
+       BEQ @CapAt5
+       BCS @Save
+       
+   @CapAt5:                         ; choosing 5, since the base damage for FIRE 1 is #10
+    LDA #5
+    BNE @Save
+    
+   @NotConfused:
+    LSR A                           ; divide by 2
+    LSR A                           ; divide by 4
+    LSR A                           ; divide by 8
+    CLC
+    ADC btlmag_effectivity          ; add the spell's initial damage
+    BCC @Save                       ; if carry was set by the addition
+        INX                         ; just increment X to 1
+        BNE @Save
+          
+   @Enemy:
     LDA btlmag_effectivity          ; move effectivity into the math buffer!
+    
+   @Save: 
     STA math_basedamage
-    LDA #0
-    STA math_basedamage+1
+    STX math_basedamage+1
     RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10737,34 +10575,54 @@ BtlMag_Effect_Regen:
 BtlMag_Effect_Life2:    
     JSR BtlMag_Effect_CureAilment   ; cure death
     BCS BtlMag_SetHPToMax           ; and max out HP
-    RTS ; target was not dead and it failed
+    RTS                             ; target was not dead and it failed
     
 BtlMag_Effect_Life:    
     JSR BtlMag_Effect_CureAilment   ; cure death
     BCS :+
-       RTS ; target was not dead and it failed
+       RTS                          ; target was not dead and it failed
   : LDA #$10                        ; and set cure effectivity to same as Cure 1
     STA btlmag_effectivity
 
 BtlMag_Effect_RecoverHP:
     INC btlmag_spellconnected       ; HP recovery always connects (doesn't it miss if dead?)
+    JSR PutEffectivityInDamageMathBuf
+    ;; add intelligence to effectivity
     
     LDA btlmag_defender_ailments    ; Check defender ailment
     AND #AIL_DEAD
     BNE BtlMag_Effect_Slow_RTS      ; If they're dead, do nothing
     
-    LDA btlmag_effectivity          ; This block just does:  X = rand[ effectivity, effectivity*2 ], capping at 255
-    TAX
-    LDA #0
-    JSR RandAX                      ;   random between [0,effectivity]
+;    LDX btlmag_effectivity          ; This block just does:  X = rand[ effectivity, effectivity*2 ], capping at 255
+;    LDA #0
+;    JSR RandAX                      ; random between [0,effectivity]
+;    CLC
+;    ADC btlmag_effectivity          ; add effectivtiy 
+;    BCC :+
+;       LDA #$FF                     ;   (cap at 255)
+;  : TAX
+;    LDA #MATHBUF_MAGDEFENDERHP      ; Add X to defender's HP
+;    JSR MathBuf_Add
+
+    LDX math_basedamage             ; basedamage is now amount of HP to heal
+    LDA math_basedamage+1
+    BEQ :+
+    LDX #$FF                        ; effectivity is over $FF, so random between $0-$FF
+  : LDA #0
+    JSR RandAX
     CLC
-    ADC btlmag_effectivity          ;   random between [effectivity, effectivity*2]
-    BCC :+
-      LDA #$FF                      ;   (cap at 255)
-  : TAX
-  
-    LDA #MATHBUF_MAGDEFENDERHP      ; Add X to defender's HP
-    JSR MathBuf_Add
+    ADC math_basedamage
+    BCC @DoHealing                  ; no carry, so just do healing
+    
+    ;LDA #0                          ; add carry to any high bits already set by PutEffectivityInDamageMathBuf
+    ;ADC math_basedamage+1
+    ;STA math_basedamage+1 
+    INC math_basedamage+1           ; which can also be done just by doing this...
+   
+   @DoHealing:
+    LDX #MATHBUF_DEFENDERHP
+    LDY #MATHBUF_BASEDAMAGE         
+    JSR MathBuf_Add16
     
     LDX #MATHBUF_MAGDEFENDERMAXHP
     LDY #MATHBUF_MAGDEFENDERHP
@@ -11405,7 +11263,8 @@ DoExplosionEffect:
     BPL :+
        LDA #0
        JSR PlayBattleSFX
-       JSR DisplayAttackIndicator
+       ;JSR DisplayAttackIndicator
+       LDA #02
        JMP DisplayAttackIndicator
     
   : LDA #$02
@@ -12039,7 +11898,8 @@ FiendChaosAttributes:
 .byte $D8, $FF, $D9, $FF, $DA, $FF, $DB, $FF 
 .byte $E0, $FF, $E1, $FF, $E2, $FF, $E3, $FF, $00 
 
-DisplayAttackIndicator:
+DisplayAttackIndicator:  ; in: A = amount of times to flash the enemy
+  STA tmp+6              
   LDA btl_attacker
   STA indicator_index
   
@@ -12091,8 +11951,8 @@ DisplayAttackIndicator:
   LDA indicator_index   
   JSR MultiplyXA
   STA tmp+7
-  LDA #02                ; frame loop = do this many frames
-  STA tmp+6
+ ; LDA #02                ; frame loop = do this many frames
+ ; STA tmp+6
    
  @Begin:
   JSR WaitForVBlank_L

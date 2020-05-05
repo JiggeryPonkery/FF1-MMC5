@@ -10,14 +10,17 @@ Battle:
 * Alarmclock : Works, but should flash ALL sprites?
 * The rest work fine!
 
+* Praying doesn't crouch the character
+
+* Focus doesn't display the poof sprite
+
+* If a hidden character is poisoned, the first character's palette is set to #1
+
+
 * Spells need to be tested to cast properly.
-* Pray needs to be tested.
 * Cover needs to be tested.
 * Parry needs to be tested.
-* Focus seems to be tested.
 * Enemies strike first will still have all your characters (with poison) poison-damaged before their turn. Is this a bug?
-* POISON WON'T DO THE THING!
-* Check: Will a character who is hidden and poisoned flash their sprite when damaged?
 * Set "Mag.Def" to "M.Evade" in level up text. (does it even show?)
 
 Stats:
