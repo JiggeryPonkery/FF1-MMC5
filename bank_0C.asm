@@ -3129,16 +3129,24 @@ UnhideCharacter:
 UnhideCharacter_Confirmed:    
     DEC btl_charhidden, X   ; set to 0
     INC Hidden              ; set to 1
+    TXA
+    PHA    
     JSR UpdateSprites_BattleFrame
+    PLA
+    TAX
   : RTS    
     
 HideCharacter:              ; assumes X is already set
     PHA        
     LDA Hidden              ; if general Hidden variable is 1, someone needs to rehide...
     BEQ :+
-        INC btl_charhidden, X         ; set to 1
-        DEC Hidden                    ; set to 0
-        JSR UpdateSprites_BattleFrame ; necessary, because the 4th character won't re-hide before the turn starts until sprites are updated...
+    INC btl_charhidden, X         ; set to 1
+    DEC Hidden                    ; set to 0
+    TXA
+    PHA
+    JSR UpdateSprites_BattleFrame ; necessary, because the 4th character won't re-hide before the turn starts until sprites are updated...
+    PLA
+    TAX
   : PLA
     RTS    
     
@@ -4992,7 +5000,11 @@ DrawPoisonAsAttack:
 ApplyPoisonToAllEnemies:
     LDA #08
     STA btl_defender
-  : JSR ApplyPoisonToEnemy
+  : LDX btl_defender
+    JSR DoesEnemyXExist
+    BEQ @Next 
+    JSR ApplyPoisonToEnemy
+   @Next: 
     DEC btl_defender
     BPL :-
     RTS  

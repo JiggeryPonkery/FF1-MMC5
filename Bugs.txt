@@ -14,8 +14,6 @@ Battle:
 
 * Focus doesn't display the poof sprite
 
-* If a hidden character is poisoned, the first character's palette is set to #1
-
 
 * Spells need to be tested to cast properly.
 * Cover needs to be tested.
