@@ -1515,7 +1515,7 @@ SpiritCalculations:
     ; if doing ANY of these, increase spirit instead!
 
    @SubtractSpirit:
-    LDY #ch_spirit - ch_stats
+    LDY #ch_morale - ch_stats
     LDA (CharStatsPointer), Y
     BEQ @Exit
         SEC
@@ -1543,7 +1543,7 @@ SpiritCalculations:
     STA tmp
     
    @Increment:
-    LDY #ch_spirit - ch_stats
+    LDY #ch_morale - ch_stats
     LDA (CharStatsPointer), Y
     CMP #$FF
     BEQ @Exit

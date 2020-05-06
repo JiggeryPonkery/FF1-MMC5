@@ -1104,7 +1104,7 @@ PrintCharStat:
     LDABRA <ch_speed, @Stat2Digit
 
 @Spirit:
-    LDA #ch_spirit
+    LDA #ch_morale
     JMP @SetupLikeASubStat
     
 @Critrate:
