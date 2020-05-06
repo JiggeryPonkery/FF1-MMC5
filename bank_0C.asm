@@ -9088,6 +9088,8 @@ UseItem_PhoenixDown:
     JMP UseItem_CommonCode
   
 UseItem_Smokebomb:            
+    JSR FlashAllCharacterSprites
+
     LDA #0 
    @Loop: 
     STA tmp
