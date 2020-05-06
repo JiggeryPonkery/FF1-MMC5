@@ -1617,26 +1617,27 @@ UpdateSprites_BattleFrame:
       STA btl8x8spr_a
       LDA #$F0          ; use tile $F0
       STA btl8x8spr_t
-      JSR Draw16x8SpriteRow ; draw 16x16 sprite
-      JSR Draw16x8SpriteRow
+      ;JSR Draw16x8SpriteRow ; draw 16x16 sprite
+      ;JSR Draw16x8SpriteRow
+      JSR Draw16x8SpriteRow_2Rows
     
   @DrawChars:
-    LDA #$08            ; draw char 0 at oam 4
+    LDA #$28            ; draw char 0 at oam 4
     STA btl8x8spr_i
     LDX #$00
     JSR DrawCharacter
     
-    LDA #$10            ; draw char 1 at oam 10
+    LDA #$2E            ; draw char 1 at oam 10
     STA btl8x8spr_i
     LDX #$01
     JSR DrawCharacter
     
-    LDA #$18            ; draw char 2 at oam 16
+    LDA #$34            ; draw char 2 at oam 16
     STA btl8x8spr_i
     LDX #$02
     JSR DrawCharacter
     
-    LDA #$20            ; draw char 3 at oam 22
+    LDA #$3A            ; draw char 3 at oam 22
     STA btl8x8spr_i
     LDX #$03
     JSR DrawCharacter
@@ -1696,8 +1697,9 @@ UpdateSprites_BattleFrame:
       ADC btlattackspr_pose     ; add pose to adjust for magic animation
       STA btl8x8spr_t
       
-      JSR Draw16x8SpriteRow     ; then just draw the 16x16 sprite
-      JSR Draw16x8SpriteRow
+      ;JSR Draw16x8SpriteRow     ; then just draw the 16x16 sprite
+      ;JSR Draw16x8SpriteRow
+       JSR Draw16x8SpriteRow_2Rows
   
   @Done:
     LDA btl_drawflagsA          ; high bit set, load new sprites
@@ -1879,6 +1881,7 @@ DrawCharacter:
     ADC lut_CharacterPoseTSA, X     ; add our pose TSA to it
     STA btl8x8spr_t                 ; that is the tile to draw
     INX                             ; inc TSA index so next pose row we'll use different tiles
+    JMP Draw16x8SpriteRow
     ; Flow continues into Draw16x8SpriteRow, which will draw the tiles
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1894,6 +1897,9 @@ DrawCharacter:
 ;;  16x16 sprite.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Draw16x8SpriteRow_2Rows:
+    JSR Draw16x8SpriteRow
 
 Draw16x8SpriteRow:
     LDA btl8x8spr_x+1           ; restore backup X position
@@ -2941,7 +2947,7 @@ SetNaturalPose:
       LDA #$00                  ; zero their hit points 
       STA ch_curhp, Y
       STA ch_curhp+1, Y
-      STA ch_spirit, Y          ;; and their spirit!
+      STA ch_morale, Y          ;; and their spirit!
       STA btl_charguard, X      ;; JIGS - and zero everything else...
       STA btl_charregen, X
       STA btl_charcover, X
@@ -4361,7 +4367,12 @@ ClearAltMessageBuffer:
 ;;    Offset for each character's sprite data in OAM
 lut_CharacterOAMOffset:
 ;  .BYTE $10, $28, $40, $58
-.BYTE $20, $40, $60, $80
+
+;; this is basically sprite index * 4
+.byte $28 << 2 ;$A0
+.byte $2E << 2 ;$B8
+.byte $34 << 2 ;$D0
+.byte $3A << 2 ;$E8
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4471,6 +4482,22 @@ FlashCharacterSprite:
     DEC btl_spriteflash
     BNE @MainLoop                 ; Keep looping until main counter expires
     RTS
+    
+
+FlashAllCharacterSprites:
+    LDA #$05
+    STA btl_spriteflash           ; Main Loop counter
+   @MainLoop: 
+    JSR BattleClearOAM            ; just clear and re-write sprites every other frame
+    JSR BattleFrame
+    JSR BattleFrame    
+    JSR UpdateSprites_TwoFrames
+    DEC btl_spriteflash
+    BNE @MainLoop
+    RTS
+
+
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5439,7 +5466,8 @@ ScanEnemy:
 
     JSR BtlMag_LoadEnemyDefenderStats   
     LDA #06                           ; flash enemy 6 times
-    JSR DisplayAttackIndicator         
+    STA tmp+6
+    JSR DisplayAttackIndicator_Scan
     
     JSR LongCall
     .word ScanEnemyString
@@ -5520,7 +5548,7 @@ PraySkill:
   : LDY #ch_level - ch_stats
     LDA (CharStatsPointer), Y
     STA tmp+5                        ; save prayer's level
-    LDY #ch_spirit - ch_stats
+    LDY #ch_morale - ch_stats
     LDA (CharStatsPointer), Y
     STA tmp+6                        ; save prayer's spirit
     LDA BattleCharID
@@ -5678,7 +5706,7 @@ PraySkill:
     ;; Must roll higher than that to succeed. Spirit is the minimum you can roll.
     ;; So a spirit of 155 will always succeed!
     
-    LDY #ch_spirit - ch_stats
+    LDY #ch_morale - ch_stats
     LDA tmp+6
     SEC
     SBC #PRAY_COST ; #10
@@ -5697,7 +5725,7 @@ PraySkill:
    @Fail:
     JSR @ResetScan
     JSR DrawSkillBox
-    LDY #ch_spirit - ch_stats
+    LDY #ch_morale - ch_stats
     LDA (CharStatsPointer), Y
     CLC
     ADC #PRAY_FAILVALUE ; #10
@@ -7392,7 +7420,8 @@ BattleFadeIn:
       JSR Do3Frames_UpdatePalette   ; draw palette (and turn on PPU)
       DEC btl_another_loopctr
       BNE @Loop                 ; loop until down-counter exhausted
-      
+
+ResetPalette_Update:      
     JSR ResetUsePalette         ; Reset to fully-faded in palette
     JMP DoFrame_UpdatePalette   ; Then draw it and exit
     
@@ -8208,8 +8237,9 @@ Battle_DoEnemyTurn:
     LDX #0
     STX ActiveRunic                     ; don't want Runic intercepting this
     STX btlmag_element                  ; clear fire element
-    LDA #$20
-    JSR UpdateVariablePalette           ; and make sure its white dust cloud
+    ;LDA #$20
+    ;JSR UpdateVariablePalette           ; and make sure its white dust cloud
+    JSR ResetPalette_Update
     LDY #en_strength
     LDA (EnemyRAMPointer), Y
     LSR A
@@ -8874,6 +8904,11 @@ Player_DoItem:
     ORA #$80
     STA btl_attacker            ; make sure high bit is set, and record them as an attacker
     STX btl_defender            ; X contains the defender, record them as well
+    TXA
+    AND #$03
+    STA tmp+9                   ; btl_defender_index basically
+    JSR BtlMag_LoadPlayerDefenderStats
+    ;; load them here, even if there really is no defender
     
    ; LDA #$00
    ; STA btlmag_playerhitsfx     ; player->player magic plays the 'heal' sound effect (ID 0)
@@ -8923,6 +8958,10 @@ UseItem_JumpTable:
     .word UseItem_AlarmClock    ; 13 ; D 
 
 UseItem_AlarmClock: 
+    LDA #3
+    JSR PlayBattleSFX      ; play bell SFX
+    JSR FlashAllCharacterSprites
+
     LDA #0
    @Loop: 
     TAX
@@ -8934,8 +8973,6 @@ UseItem_AlarmClock:
     ADC #$40
     BNE @Loop
 
-    LDA #3
-    JSR PlayBattleSFX      ; play bell SFX
     LDA #BTLMSG_ALARMCLOCK ; print "The bell rings loudly.."
     LDX #ALARMCLOCK
     JMP UseItem_End_RemoveItem
@@ -8951,7 +8988,6 @@ UseItem_XHeal:
 
   : PHA
     STX btlmag_effectivity
-    JSR BtlMag_LoadPlayerDefenderStats
     JSR Battle_PlMag_IsPlayerValid
     BNE UseItem_Heal_Ineffective
 
@@ -8966,7 +9002,6 @@ UseItem_Heal_Ineffective:
     JMP UseItem_Ineffective
 
 UseItem_Elixir:
-   JSR BtlMag_LoadPlayerDefenderStats
    JSR Battle_PlMag_IsPlayerValid
    BNE UseItem_Ineffective
    
@@ -9002,7 +9037,6 @@ UseItem_Elixir:
     JMP UseItem_CommonCode
     
 UseItem_Pure:
-    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_POISON
     JSR UseItem_CureAilment
     
@@ -9011,7 +9045,6 @@ UseItem_Pure:
     JMP UseItem_CommonCode
 
 UseItem_Soft:
-    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_STOP
     STA btlmag_effectivity
     
@@ -9025,7 +9058,9 @@ UseItem_Soft:
         LDA #25                 ; otherwise, give them 25 HP
         STA btlmag_defender_hp
     
-  : LDX #SOFT
+  : JSR SoftenStoneCharacter
+  
+    LDX #SOFT
     LDA #BTLMSG_STONECURED
     JMP UseItem_CommonCode
     
@@ -9043,7 +9078,6 @@ UseItem_CureAilment:
     RTS        
   
 UseItem_PhoenixDown:
-    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_DEAD
     JSR UseItem_CureAilment
     
@@ -9079,7 +9113,6 @@ UseItem_Smokebomb:
     LDX #SMOKEBOMB
     LDA #BTLMSG_HIDING    
     JMP UseItem_End_RemoveItem
-
    
 UseItem_Ether:
     LDA btl_attacker
@@ -9125,7 +9158,6 @@ UseItem_Ether:
     JMP UseItem_End_RemoveItem
     
 UseItem_Eyedrops:
-    JSR BtlMag_LoadPlayerDefenderStats
     LDA #AIL_DARK
     JSR UseItem_CureAilment
  
@@ -9137,14 +9169,15 @@ UseItem_CommonCode:
     DEC items, X
     LDA #0 ; btlmag_playerhitsfx
     JSR PlayBattleSFX  
-    LDA btl_defender
-    AND #$03
-    PHA
+   ; LDA btl_defender
+   ; AND #$03
+    LDA tmp+9
     JSR UnhideCharacter
-    PLA
+    LDA tmp+9
     JSR FlashCharacterSprite
     JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
-    PLA
+    JSR RestoreColor                   ; fix the color if they were stoned
+    PLA  
     
 UseItem_End:    
     DEC HiddenMagic
@@ -9153,10 +9186,20 @@ UseItem_End:
 UseItem_End_RemoveItem:
     DEC items, X
     JMP UseItem_End
-    
 
-
+SoftenStoneCharacter:
+    JSR ResetPalette_Update     ; and make sure the variable palette is white/grey
+    LDX tmp+9
+    LDA #03
+    STA btl_charattrib, X
+    JMP BtlMag_SavePlayerDefenderStats ; save the cured ailment and update sprite    
     
+RestoreColor:    
+    LDX tmp+9
+    LDY btlmag_defender_class
+    LDA lut_InBattleCharPaletteAssign, Y
+    STA btl_charattrib, X
+    JMP UpdateSprites_BattleFrame
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9739,8 +9782,14 @@ BtlMag_LoadPlayerDefenderStats:
  
     LDA #$0
     STA btlmag_defender_category    ; This only matters for HARM spells, which check the Undead bit. 
+    
+    LDY #ch_class - ch_stats        ;
+    LDA (CharStatsPointer), Y    
+    AND #$F0
+    JSR ShiftSpriteHightoLow
+    STA btlmag_defender_class
 
-    LDY #ch_ailments - ch_stats     ;
+    INY ; LDY #ch_ailments - ch_stats     
     LDA (CharStatsPointer), Y    
     STA btlmag_defender_ailments
     
@@ -9817,6 +9866,10 @@ BtlMag_LoadPlayerDefenderStats:
     INY ; #ch_weaponcategory - ch_stats
     LDA (CharStatsPointer), Y
     STA btlmag_defender_weaponcategory
+    
+    LDY #ch_morale - ch_stats
+    LDA (CharStatsPointer), Y
+    STA btlmag_defender_morale
     RTS
     
  
@@ -10012,7 +10065,7 @@ BtlMag_SavePlayerDefenderStats:
 
     LDA btlmag_defender_numhitsmult
     STA btl_charhitmult, X
-    
+
     LDA btlmag_defender_ailments
     LDY #ch_ailments - ch_stats
     STA (CharStatsPointer), Y       ; ailments
@@ -10082,6 +10135,10 @@ BtlMag_SavePlayerDefenderStats:
 
     INY ; #ch_weaponcategory - ch_stats
     LDA btlmag_defender_weaponcategory
+    STA (CharStatsPointer), Y
+    
+    LDY #ch_morale - ch_stats
+    LDA btlmag_defender_morale    
     STA (CharStatsPointer), Y
     
     LDA btl_defender
@@ -11687,7 +11744,7 @@ DrawExplosions:
     LDA #$FF                ; $FF value to clear
     LDX #$00                ; loop up counter
     
-    : STA oam+$D0, X        ; clear oam
+    : STA oam+$70, X  ;oam+$D0, X   ; clear oam
       INX
       DEY
       BNE :-
@@ -11720,7 +11777,7 @@ DrawExplosion_Frame:
     ASL A
     ASL A                       ; get slot * $10 (4 sprites per graphic * 4 bytes per sprite)
     CLC
-    ADC #$D0                    ; $D0 is the first oam slot for explosion graphics
+    ADC #$70; D0                ; $D0 is the first oam slot for explosion graphics
     STA btltmp
     LDA #>oam
     STA btltmp+1                ; btltmp now points to dest area in oam to draw the sprite
@@ -11910,13 +11967,14 @@ FiendChaosAttributes:
 .byte $D8, $FF, $D9, $FF, $DA, $FF, $DB, $FF 
 .byte $E0, $FF, $E1, $FF, $E2, $FF, $E3, $FF, $00 
 
-DisplayAttackIndicator:  ; in: A = amount of times to flash the enemy
+DisplayAttackIndicator:  ; in: A = amount of times to flash the enemy (each flash is 3 frames lit, 3 normal)
   STA tmp+6              
   LDA btl_attacker
   STA indicator_index
-  
+
   LDA ConfusedMagic
   BEQ :+ 
+DisplayAttackIndicator_Scan:
     LDA btl_defender
     STA indicator_index
   
@@ -12002,9 +12060,9 @@ DisplayAttackIndicator:  ; in: A = amount of times to flash the enemy
   
  @MiniFrame:
   JSR BattleUpdatePPU         ; set scroll
-  JSR BattleUpdateAudio       ; update audio
+  JSR BattleUpdateAudio       ; update audio (frame 1)
   JSR BattleFrame
-  JMP BattleFrame             ; wait for vblank/then do audio (2 frames)
+  JMP BattleFrame             ; wait for vblank/then do audio (2 more frames)
   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12267,6 +12325,73 @@ data_BattleSoundEffects:
   
   .BYTE $A0, $00, $50, $08, $10,     $00, $00, $01 
   .BYTE $8F, $00, $50, $08, $80,     $00, $00, $01 
+  
+  
+MagicTargetLUT:
+.word lut_Target9SmallCursorPos
+.byte $09
+.word lut_Target4LargeCursorPos
+.byte $04
+.word lut_TargetMixCursorPos
+.byte $08
+.word lut_PlayerTargetCursorPos
+.byte $04
+  
+TargetAllCursors:
+    LDA DrawCharTmp      ; if targeting players, skip the calculation
+    BEQ @TargetEnemies
+    LDA #9
+    BNE @FetchAddress 
+
+   @TargetEnemies:
+    LDA btl_battletype
+    LDX #3
+    JSR MultiplyXA
+    
+   @FetchAddress: 
+    TAX
+    LDA MagicTargetLUT, X   ; LUT address low
+    STA tmp
+    LDA MagicTargetLUT+1, X ; LUT address high
+    STA tmp+1
+    LDA MagicTargetLUT+2, X ; amount of cursors to draw
+    TAX                     ; put in X for a loop counter
+    ASL A
+    TAY                     ; and double it for reading from the LUT
+
+    LDA #0
+    STA btl8x8spr_i
+   @Loop:           ; this loop starts from the bottom of each CursorPos lut, and works backwards
+    LDA #$F0
+    STA btl8x8spr_t ; tile ID
+    LDA (tmp), Y    ; get Y position
+    STA btl8x8spr_y ; 
+    DEY
+    LDA (tmp), Y    ; get X position
+    STA btl8x8spr_x ; 
+    LDA #03
+    STA btl8x8spr_a ; attributes (palette 3)
+    JSR Draw16x8SpriteRow_2Rows ; draw 2 rows, 4 tiles
+    DEX             ; decrement the amount of cursors to draw
+    BNE @Loop
+    
+    JSR BattleFrame ; do a frame, update the cursors on screen...
+    
+    ;; then clear them!
+    LDX #0
+    LDY #$70              ;  Y = loop counter
+    LDA #$F0
+  : STA oam, X            ; clear basically all shadow OAM except character sprites
+     INX      
+     DEY      
+     BPL :-
+    RTS
+    
+
+
+  
+  
+  
 
 
 .byte "END OF BANK C"
