@@ -5,6 +5,7 @@
 
 .export LoadBattleTextChr
 .import CHRLoad
+.import BattleRNG_L
 
 .segment "BANK_08"
 
@@ -13,7 +14,7 @@
 BANK_THIS = $08
 
 LoadBattleTextChr:
-;; also loads all magic data and enemy AI!
+;; load the Magic table into RAM
 
     LDX #0
   : LDA MagicData, X
@@ -26,13 +27,15 @@ LoadBattleTextChr:
     STA lut_MagicData+$300, x
     INX
     BNE :-
-    
+
+;; load player HP strings into RAM     
     LDX #$20
   : LDA PlayerHPString_ROM, X
     STA PlayerHPString_RAM, X
     DEX
     BPL :-
 
+;; load the battle text and sprites
     LDA $2002         
     LDA #>$0800
     STA $2006
@@ -54,7 +57,62 @@ LoadBattleTextChr:
     LDA #<BattleTextChr_Sprites
     STA tmp
     LDX #13 
-    JMP CHRLoad
+    JSR CHRLoad
+    
+;; randomize the battle backdrop
+
+    LDY #$0  
+    STY tmp
+    STY tmp+1
+    
+   @Random: 
+    JSR BattleRNG_L
+    AND #$03
+    BEQ @Random        ; if its 0, reroll
+    CMP #3
+    BEQ @Print3        ; if its 3, do 3
+    CMP #1
+    BEQ @Print1        ; if its 1, do 1
+    BNE @Random        ; else, its 2; reroll
+
+   @Print1:            
+    LDA #0             ; clear the "drawn 3" counter
+    STA tmp+1           
+    INC tmp            ; inc the "drawn 1" counter
+    LDA tmp
+    CMP #4             ; when it reaches 4, switch to drawing 3 instead
+    BEQ @Print3        ; after clearing the "drawn 1" counter
+    ;; this will ensure that no pillar or tree or whatever is drawn more than 3 times in a row.
+    
+    LDA #1
+    STA lut_BackdropLayout, Y
+    INY
+    LDA #2
+    STA lut_BackdropLayout, Y
+    BNE @Next
+
+   @Print3:
+    LDA #0
+    STA tmp    
+    INC tmp+1
+    LDA tmp+1
+    CMP #4
+    BEQ @Print1
+    
+    LDA #3
+    STA lut_BackdropLayout, Y
+    INY
+    LDA #4
+    STA lut_BackdropLayout, Y
+  
+   @Next:
+    INY 
+    CPY #$20
+    BNE @Random
+    RTS
+
+
+   
     
     
 

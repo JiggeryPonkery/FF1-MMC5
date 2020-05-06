@@ -150,7 +150,7 @@ ch_weaponcategory = ch_stats + $2B ; effected by equipment, needs to refresh aft
 ch_numhits        = ch_stats + $2C ; effected by equipment, needs to refresh after battle
 ch_critrate       = ch_stats + $2D ; effected by equipment, needs to refresh after battle
 ch_damagebackup   = ch_stats + $2E ; effected by equipment
-ch_spirit         = ch_stats + $2F 
+ch_morale         = ch_stats + $2F 
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 
@@ -640,7 +640,7 @@ LevelUp_StatIndex   = $6004
 LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
 
 TileShiftBuffer     = $6000
- 
+
 TempSpellList        = $6000 ; to 6017 ; 24 bytes
 TempSpellListIndex   = $6018
 SpellLevelIndex      = $6019
@@ -651,13 +651,13 @@ CharacterEquipBackup = $601C
 
 orbbox_scrollwork    = $6100 ; for menu, $40 bytes   
 statusbox_scrollwork = $6140 ; for menu, $40 bytes   
-bigstr_buf        = $6300 ; 128 bytes
-SaveScreenCharBuf = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
+bigstr_buf           = $6300 ; 128 bytes
+SaveScreenCharBuf    = $6300 ; for printing the names of characters in all 3 save slots ; seems safe to overwrite bigstr_buf while printing
 
-puzzle           = $6400  ; used in minigame
-str_buf          = $6400  ; buffer must not cross page
-item_box         = $6400  ; used in shops
-
+puzzle               = $6400  ; used in minigame
+str_buf              = $6400  ; buffer must not cross page
+item_box             = $6400  ; used in shops
+lut_BackdropLayout   = $6400  ; holds randomized values for the battle backdrop before its drawn
 
 ;;;;;; ALL THE BATTLE STUFF!! ;;;;;;;
 
@@ -707,7 +707,8 @@ btl_defender_class           = btl_defender + $0D ; high bit is "hidden" state
 btl_defender_hpmax           = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)
 btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
 
-;; these are all things that can be changed by magic! Except max HP
+;; these are all things that can be changed by magic! Except max HP and class
+btlmag_defender_class           = btl_attacker + $0A
 btlmag_defender_intelligence    = btl_attacker + $0B
 btlmag_defender_speed           = btl_attacker + $0C
 btlmag_defender_damage          = btl_attacker + $0D

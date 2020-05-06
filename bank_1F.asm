@@ -12035,7 +12035,7 @@ DrawBattleBackdropRow:
   @Section:
     LDX #0
    @Loop:
-      LDA @lut_BackdropLayout, X   ; get the tile to draw in this column
+      LDA lut_BackdropLayout, X   ; get the tile to draw in this column
       CLC
       ADC btltmp+10                ; add to that our additive (to draw the right row)
       STA $2007                    ; draw the tile
@@ -12044,15 +12044,14 @@ DrawBattleBackdropRow:
       BNE @Loop
     RTS
 
-  ;; the layout of the battle backdrop -- the way the columns are arranged
-
-@lut_BackdropLayout:
-  .byte 3,4,3,4,1,2,3,4,1,2,3,4,1,2,3,4,3,4,1,2,1,2,3,4,1,2,3,4,1,2,1,2
+;; the layout of the battle backdrop -- the way the columns are arranged
+;; JIGS this is randomized in Bank 08 now!
+;@lut_BackdropLayout:
+;  .byte 3,4,3,4,1,2,3,4,1,2,3,4,1,2,3,4,3,4,1,2,1,2,3,4,1,2,3,4,1,2,1,2
   
   ;; JIGS ^ is a neat layout I guess!
   ;.BYTE 1,2,3,4,3,4,1,2,1,2,3,4,3,4
 
-;; JIGS - I kinda want to randomize this... move it to Bank B for that though.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
