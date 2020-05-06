@@ -2071,44 +2071,16 @@ PrepAndGetBattleMainCommand:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SelectPlayerTarget:
+    ;JMP TargetAllCursors -- here for testing purposes
+
     LDY #$10                    ; Set the cursor positions
     : LDA lut_PlayerTargetCursorPos-1, Y
       STA btlcurs_positions-1, Y
       DEY
       BNE :-
-      
-    ; We have to push some of the cursor positions to the left
-    ; Dead characters need to be pushed left 8 pixels
-    ; And the current character needs to be move left 16 pixels (because they've stepped forward)
-    LDA #$08                    ; first, move dead characters left 8
-    STA btl_various_tmp+1       ; $68B4 is temp to hold how much to push left
-    
-    
-    LDA btl_drawflagsA
-    AND #$01                    ; if char 0 is dead
-    BEQ :+
-      LDA #$00
-      JSR @PushLeft             ; push char 0 left
-      
-  : LDA btl_drawflagsA          ; do same for char 1
-    AND #$02
-    BEQ :+
-      LDA #$01
-      JSR @PushLeft
-      
-  : LDA btl_drawflagsA          ; and char 2
-    AND #$04
-    BEQ :+
-      LDA #$02
-      JSR @PushLeft
 
-  : LDA btl_drawflagsA          ; and char 3
-    AND #$08
-    BEQ :+
-      LDA #$03
-      JSR @PushLeft
-    
-  : JSR @PushCurChar            ; push the current character
+    JSR PushCharacterCursor
+    JSR @PushCurChar            ; push the current character
     JMP MenuSelection_2x4       ; then do the menu logic!
     
   @PushCurChar:
@@ -2116,7 +2088,7 @@ SelectPlayerTarget:
     STA btl_various_tmp+1
     LDA btlcmd_curchar
     
-  @PushLeft:
+PushCharCursorLeft:
     STA btl_various_tmp         ; increment the character index.  WHY?!?! This doesn't make any sense and
     INC btl_various_tmp         ;   is a waste of code and time, and just complicates the below labels!
     LDA btl_various_tmp         ;   This is so stupid!!!
@@ -2128,8 +2100,45 @@ SelectPlayerTarget:
     SBC btl_various_tmp+1         ; Subtract the 'push' amount
     STA btlcurs_positions-2, Y    ; Store to this X position
     STA btlcurs_positions-2+8, Y  ;   and the mirrored X position
-    
     RTS
+    
+PushCharacterCursor:      
+    ; We have to push some of the cursor positions to the left
+    ; Dead characters need to be pushed left 8 pixels
+    ; And the current character needs to be move left 16 pixels (because they've stepped forward)
+    LDA #$08                    ; first, move dead characters left 8
+    STA btl_various_tmp+1       ; $68B4 is temp to hold how much to push left
+    
+    LDA btl_drawflagsA          ; dead guys
+    ORA btl_drawflagsC          ; sleepy guys
+    STA btl_drawflags_tmp1
+    
+    ;LDA btl_drawflagsA
+    AND #$01                    ; if char 0 is dead
+    BEQ :+
+      LDA #$00
+      JSR PushCharCursorLeft    ; push char 0 left
+      
+  : LDA btl_drawflags_tmp1      ; do same for char 1
+    AND #$02
+    BEQ :+
+      LDA #$01
+      JSR PushCharCursorLeft
+      
+  : LDA btl_drawflags_tmp1      ; and char 2
+    AND #$04
+    BEQ :+
+      LDA #$02
+      JSR PushCharCursorLeft
+
+  : LDA btl_drawflags_tmp1      ; and char 3
+    AND #$08
+    BEQ :+
+      LDA #$03
+      JSR PushCharCursorLeft
+
+  : RTS 
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12356,38 +12365,67 @@ TargetAllCursors:
     STA tmp
     LDA MagicTargetLUT+1, X ; LUT address high
     STA tmp+1
+    
+    LDY #$11                ; Set the cursor positions (max 18 bytes, -1 based)
+    : LDA (tmp), Y
+      STA btlcurs_positions, Y
+      DEY
+      BPL :-    
+    
     LDA MagicTargetLUT+2, X ; amount of cursors to draw
     TAX                     ; put in X for a loop counter
     ASL A
-    TAY                     ; and double it for reading from the LUT
+    TAY                     ; and double it for reading from btlcurs_positions
 
     LDA #0
-    STA btl8x8spr_i
-   @Loop:           ; this loop starts from the bottom of each CursorPos lut, and works backwards
-    LDA #$F0
-    STA btl8x8spr_t ; tile ID
-    LDA (tmp), Y    ; get Y position
-    STA btl8x8spr_y ; 
+    STA btl8x8spr_i         ; zero the OAM index
+   
+   ;; this loop starts from the bottom of each CursorPos lut, and works backwards
+   @Loop:                   
+    LDA DrawCharTmp
+    BNE @PlayerTargets
+   
+   @CheckForEnemy: 
+    JSR DoesEnemyXExist
+    BNE @DoCursor
+    
+   @NoTarget: 
     DEY
-    LDA (tmp), Y    ; get X position
-    STA btl8x8spr_x ; 
+    DEY
+    JMP @Next    
+    
+   @PlayerTargets:
+    JSR PushCharacterCursor
+   
+   @DoCursor:
+    LDA #$F0
+    STA btl8x8spr_t             ; tile ID
+    LDA btlcurs_positions-1, Y  ; get Y position
+    STA btl8x8spr_y  
+    DEY
+    LDA btlcurs_positions-1, Y  ; get X position
+    STA btl8x8spr_x+1           ; backup X position  
+    DEY
     LDA #03
-    STA btl8x8spr_a ; attributes (palette 3)
+    STA btl8x8spr_a             ; attributes (palette 3)
     JSR Draw16x8SpriteRow_2Rows ; draw 2 rows, 4 tiles
-    DEX             ; decrement the amount of cursors to draw
+    
+   @Next: 
+    DEX                         ; decrement the amount of cursors to draw
     BNE @Loop
     
-    JSR BattleFrame ; do a frame, update the cursors on screen...
+    JSR BattleFrame             ; do a frame, update the cursors on screen...
     
     ;; then clear them!
     LDX #0
-    LDY #$70              ;  Y = loop counter
+    LDY #$70                    ;  Y = loop counter
     LDA #$F0
-  : STA oam, X            ; clear basically all shadow OAM except character sprites
+  : STA oam, X                  ; clear basically all shadow OAM except character sprites
      INX      
      DEY      
      BPL :-
-    RTS
+    JSR BattleFrame
+    JMP TargetAllCursors
     
 
 

@@ -467,8 +467,8 @@ btl_drawflagsA          = $0318 ; bits 0-3 = set to indicate character should be
 ;                               ; bit    5 = set to draw weapon attack graphic
 ;                               ; bit    6 = set to draw magic graphic & flash BG.
 ;                               ; bit    7 = set to load 4-6 character tiles during UpdateSprites_BattleFrame 
-btl_drawflagsB          = $0319 ; bits 0-4 = set to indicate character should be drawn as stone
-btl_drawflagsC          = $031A ; bits 0-4 = set to indicate character should be drawn as dead (asleep); other 4 bits - set pray star sprite
+btl_drawflagsB          = $0319 ; bits 0-3 = set to indicate character should be drawn as stone
+btl_drawflagsC          = $031A ; bits 0-3 = set to indicate character should be drawn as dead (asleep); other 4 bits - set pray star sprite
 battle_attackerisplayer = $031B ; 1 if player is attacking, 0 if enemy is attacking
 battle_defenderisplayer = $031C ; 1 if player is defending, 0 if enemy is defending 
 LongCall_A              = $031D ; The LongCall routine restores them after it swaps banks

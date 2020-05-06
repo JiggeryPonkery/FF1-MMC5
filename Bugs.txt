@@ -6,6 +6,8 @@ Shop:
 
 
 Battle:
+* SelectPlayerTarget has some obfuscating code that I will need to hijack for Multi-targeting.
+
 * Using an item sometimes flashes a garbage sprite somewhere near characters 3 and 4.
 
 * Praying doesn't crouch the character
