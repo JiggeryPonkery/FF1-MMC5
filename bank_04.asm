@@ -501,16 +501,8 @@ LoadBattleSprite:
    LDA BattleCharPositions_LUT, Y
    
 CHRLoadToAX:
-    ;; cut it as close as possible
-    PHA
-    TXA
-    PHA
-    LDA InBattle      ; only wait once battle actually begins
-    BEQ :+            ; since the screen is off until then
-    JSR WaitForVBlank_L
-  : PLA
-    TAX
-    PLA
+    LDY InBattle
+    BNE Jump_StackLoader
 
     LDY $2002         ; reset PPU Addr toggle
     STA $2006         ; write high byte of dest address
@@ -525,10 +517,8 @@ CHRLoad_Loop:
     BNE CHRLoad_Loop  ; if we've loaded all requested tiles, exit.  Otherwise continue loading
     RTS
 
-
-
-    
-
+Jump_StackLoader:
+    JMP StackLoader
     
 LoadSprite_Bank04:
     LDA MMC5_tmp
@@ -644,7 +634,8 @@ LoadMagicSprite:
     JSR CallMusicPlay_L     ; Call music playback to keep it playing
     ;; does not update battle sfx, so make sure this is called before SFX begin
     
-    JSR WaitForVBlank_L
+    LDA #BANK_DOBATTLE      ; reset the swap-back bank
+    STA cur_bank           
     
     LDA #$40
     STA tmp+2
@@ -682,6 +673,44 @@ FillBlackTile:
     STA $2007             ; write $20 zeros to clear 2 tiles
     DEX
     BNE @Loop
+    RTS
+
+StackLoader:
+    PHA       ; backup A
+    TXA       ; backup X
+    PHA
+
+    LDY #0
+   @StackLoad_Loop:
+    LDA (tmp), Y      ; read a byte from source pointer
+    STA $0100, Y      ; save to the top of the stack
+    INY
+    CPY tmp+2         ; and stop when all the bytes are loaded
+    BNE @StackLoad_Loop
+    
+    JSR WaitForVBlank_L
+    
+    PLA       ; restore X    
+    TAX
+    PLA       ; restore A 
+    LDY $2002
+    STA $2006         ; write high byte of dest address
+    STX $2006         ; write low byte
+    
+    TSX       ; move stack pointer to X
+    STX tmp+3 ; backup stack pointer    
+    LDX #$FF  ; start at the top of the stack
+    TXS       ; transfer to the stack pointer
+
+    LDX tmp+2 ; get amount of bytes to write    
+   @PullStackLoop:
+    PLA
+    STA $2007
+    DEX
+    BNE @PullStackLoop
+    
+    LDX tmp+3
+    TXS       ; restore stack pointer
     RTS
     
 .byte "END OF BANK 04"    
