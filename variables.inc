@@ -320,6 +320,8 @@ shop_x_price            = $74
 shop_drawmarks          = $75
 
 ;; Battle Things - Shared
+
+btlmag_movement         = $57
 ; submenu_targ - shared  ; $58
 btlformation            = $59 ; don't write over, is used to check for Chaos fight
 ow_tile                 = $5A ; only used for getting battle backdrop from overworld tile

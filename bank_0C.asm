@@ -784,19 +784,20 @@ BattleSubMenu_Guard:
   ;; JIGS - this is new!  
 BattleSubMenu_Hide:
     JSR UndrawOneBox
-    LDA btlcmd_curchar
+    LDA Hidden
+    BEQ :+
+       LDA #BTLMSG_ALREADYHIDING
+       BNE @DoMessage
+  : LDA btlcmd_curchar
     JSR PrepCharStatPointers      ; load player's ailments
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
     AND #AIL_DARK | AIL_STUN      ; see if character is blind or stunned
     BEQ @DoHide
        LDA #BTLMSG_CANTHIDE
-       JSR DrawMessageBox
-   @FrameLoop: 
-    JSR DoFrame_WithInput        
-    BEQ @FrameLoop               ; Wait for the player to provide any input
-    JSR UndrawOneBox
-    JMP CancelBattleAction_RedrawCommand
+      @DoMessage: 
+       JSR DrawMessageBoxDelay_ThenClearIt
+       JMP CancelBattleAction_RedrawCommand
 
    @DoHide:
     LDA btlcmd_curchar              
@@ -1677,9 +1678,12 @@ UpdateSprites_BattleFrame:
     LDA btl_drawflagsA
     AND #$40
     BEQ @Done
+      LDA btlmag_magicsource    ; if its an item doing the magic sprite, skip flashing
+      BNE :+      
+         
       JSR DoMagicFlash          ; flash the background color
       
-      LDA #$04                  ; put magic sprite at oam slot 0
+    : LDA #$04                  ; put magic sprite at oam slot 0
       STA btl8x8spr_i
       
       LDA btlattackspr_x        ; set X,Y coords
@@ -1730,22 +1734,23 @@ UpdateSprites_BattleFrame:
 ;; For attack sprites, btlattackspr_gfx must be set using vanilla values (for now)
 
 LoadSprite:                       ; this is for weapons/magic
-    STA MMC5_tmp                  ; when updating the on screen sprites isn't critical
+    PHA                           ; when updating the on screen sprites isn't critical
     JSR BattleUpdateAudio         ; update audio early
-    JMP DoLoadSprite
+    PLA
+    BNE DoLoadSprite
 
 UpdateCharacterSprite: ; In: X = 00, 01, 02, 03
     STX char_index
 UpdateCharacterSprite_Preset: ; char_index was set already
-    LDA #1
-    STA MMC5_tmp
     JSR BattleUpdateAudio         ; update audio early
     LDA btl_drawflagsA            ; then set the high bit on this
     ORA #$80
     STA btl_drawflagsA
     JSR UpdateSprites_BattleFrame ; load the right data into sprite buffers
+    LDA #1
 
 DoLoadSprite:
+    STA MMC5_tmp
     JSR LongCall                  ; then load the new sprites into CHR
     .word LoadSprite_Bank04
     .byte $04
@@ -2071,7 +2076,7 @@ PrepAndGetBattleMainCommand:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SelectPlayerTarget:
-    ;JMP TargetAllCursors -- here for testing purposes
+    ;JMP TargetAllCursors ; -- here for testing purposes
 
     LDY #$10                    ; Set the cursor positions
     : LDA lut_PlayerTargetCursorPos-1, Y
@@ -3592,11 +3597,10 @@ Magic_AFrame:
     LDA #CHARPOSE_NORM ; #CHARPOSE_CHEER
     STA btl_chardraw_pose, X     ; player is cheering rather than swinging
     
-    LDA btlattackspr_gfx  ; check what kind of graphic it is
-    CMP #$E8              ; if its the little flare from the hands, don't move the sprite
+    LDA btlmag_movement   ; check what kind of graphic it is
     BEQ @NoSpriteMovement
-    CMP #$E0              ; if its the "dust" sprite, float it up
-    BEQ @MagicSpriteUp
+    LSR A                 ; see if its #2
+    BCC @MagicSpriteUp    ; if it is, move up! else, it WAS 1, so...
     
    @MagicSpriteLeft:    
     LDA btlattackspr_x    ; load the X spot
@@ -3623,8 +3627,7 @@ Magic_AFrame:
    @NoSpriteMovement: 
     LDA btl_drawflagsA    ; turn on the magic drawflag bit, and turn off the weapon
     ORA #$40              ; drawflag bit.
-    ;AND #~$20             ; this will cause the BG color to flash.
-    STA btl_drawflagsA
+    STA btl_drawflagsA    ; this will cause the BG color to flash.
     RTS
     
     
@@ -4852,10 +4855,7 @@ ApplyEndOfRoundEffects:
     
     ; else, divide Focus boost by 3
    @FocusLoss: 
-    TAX                  ; X is low byte
-    LDY #0               ; Y is high byte, clear
-    LDA #3
-    JSR YXDivideA        ; divide by 3?
+    LSR A    
     LDX EntityRegenID
     
    @SaveFocus: 
@@ -5497,7 +5497,7 @@ ScanEnemy:
     JSR CharWalkAnimationRight
     LDX btl_animatingchar
     JMP HideCharacter
-    
+
 FocusSkill:
     LDA BattleCharID
     PHA
@@ -5508,22 +5508,40 @@ FocusSkill:
     LDA (CharStatsPointer), Y
     LSR A
     ADC #0                         ; focus boost is level divided by 2, rounded up!
+    STA tmp
+    
+    LDY #ch_morale - ch_stats
+    LDA (CharStatsPointer), Y
+    LSR A
+    LSR A                           
+    STA tmp+1                      ; save morale divided by 4
+    LDA (CharStatsPointer), Y
+    SEC
+    SBC tmp+1                      ; subtract used up morale
+    BCS :+
+       LDA #0                      ; cap at $0 if subtraction used up the carry 
+      
+ :  STA (CharStatsPointer), Y      
+ 
+    LDA tmp                        ; load up level divided by 2
+    CLC                            
+    ADC tmp+1                      ; plus morale divided by 4. Max focus can be #88, or $58, this way
     LDX BattleCharID
-    ORA #$80                       ; set high bit--so at the end of the turn, the boost
+    ADC btl_charfocus, X           ; add in previous focus amount
+    CMP #$7F
+    BCC :+
+        LDA #$7F                   ; cap at $7F, or 128 
+  : ORA #$80                       ; set high bit--so at the end of the turn, the boost
     STA btl_charfocus, X           ; is not divided, giving at least 1 turn with full potency
 
-    LDX #$E0
-    STA btlattackspr_gfx
-    LDA #04
-    JSR LoadSprite
+    LDA #$E2                        ; sprite id
+    LDY #$2D                        ; color 
+    LDX #1                          ; load white color for magic
+    JSR LoadItemSprite              ; loads the little puff of concentration
     
-    LDA #$2F
-    JSR UpdateVariablePalette
-    ;LDA #0
-    ;STA PlayMagicSound             ; this isn't a spell, don't do SFX!
-    STA btl_unformattedstringbuf+4 ; and terminate the upcoming message
-    TAX                            ; X = 0, needed for WalkForwardAndCAstMagic
-    PLA
+    LDX #0                          ; X = 0 for WalkForwardAndCastMagic to display sprite
+    STX btl_unformattedstringbuf+4  ; and terminate the upcoming message
+    PLA                             
     JSR WalkForwardAndCastMagic
     
     LDA #$0F
@@ -5533,6 +5551,8 @@ FocusSkill:
     STA btl_unformattedstringbuf+1
     LDA #BTLMSG_UP
     STA btl_unformattedstringbuf+3
+
+
     ;; Int. up
     
     LDA #BOX_MESSAGE
@@ -7336,8 +7356,14 @@ UpdateVariablePalette:
     STA btl_usepalette + $1F        ; third shade
     TXA
     BEQ DoFrame_UpdatePalette       ; if weapon, jump ahead to update the PPU
+    BMI @DarkMagic
       LDA #$30                      ; if magic, replace third shade with white
       STA btl_usepalette + $1F
+      BNE DoFrame_UpdatePalette
+      
+   @DarkMagic:  
+    LDA #$0F                 
+    STA btl_usepalette + $1F        ; Spooky magic!
     ; JMP DoFrame_UpdatePalette     ; then update PPU  (flow into)
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -8652,7 +8678,11 @@ Battle_PrepareMagic:
     
     LDY #MAGDATA_GRAPHIC
     LDA (MagicPointer), Y
-    ;STA btlmag_gfx
+    AND #$03
+    STA btlmag_movement
+    
+    LDA (MagicPointer), Y
+    AND #$F8
     STA btlattackspr_gfx
     
     ;; JIGS - set the graphic and palette here instead of doing confusing things with character buffers...    
@@ -8894,8 +8924,22 @@ Runic_MP_LUT: ; 0-based level for MP to be given to, so  7 = level 8
 
 
 
-
-    
+;; in: X = 0 (dark color), 1 (white), $80 (black) for the third palette colour
+;;     A = sprite id
+;;     Y = palette
+LoadItemSprite:
+    PHA
+    AND #$03              ; get the low 2 bits
+    STA btlmag_movement   ; save as the amount of movement to do
+    PLA
+    AND #$F8              ; restore and get the high bits
+    STA btlattackspr_gfx  
+    TYA                   ; now put X into A for the palette update
+    JSR UpdateVariablePalette
+    LDX #1
+    STX btlmag_magicsource
+    LDA #04
+    JMP LoadSprite
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8905,20 +8949,36 @@ Runic_MP_LUT: ; 0-based level for MP to be given to, so  7 = level 8
 
 Player_DoItem:
     STA btl_attackid            ; record the attack ID
-    LDA #$01                    ; source = Item
-    STA btlmag_magicsource      ; record the source
-    
+   
     TYA                         ; Y = attacker, put attacker in A
     AND #$03
     ORA #$80
     STA btl_attacker            ; make sure high bit is set, and record them as an attacker
     STX btl_defender            ; X contains the defender, record them as well
-    TXA
-    AND #$03
-    STA tmp+9                   ; btl_defender_index basically
     JSR BtlMag_LoadPlayerDefenderStats
     ;; load them here, even if there really is no defender
+
+    LDA btl_attackid
+    CMP #SMOKEBOMB
+    BEQ @LoadSmokeBomb
+    CMP #ALARMCLOCK
+    BEQ @LoadAlarmClock
     
+   @LoadDrinkSprite:
+    LDA #$58
+    BNE @LoadItemSprite
+    
+   @LoadSmokeBomb:
+    LDA #$78
+    BNE @LoadItemSprite
+
+   @LoadAlarmClock:
+    LDA #$68
+    
+   @LoadItemSprite:
+    LDY #$20
+    LDX #0
+    JSR LoadItemSprite           ; load item sprite, also sets btlmag_magicsource    
    ; LDA #$00
    ; STA btlmag_playerhitsfx     ; player->player magic plays the 'heal' sound effect (ID 0)
     
@@ -8929,6 +8989,7 @@ Player_DoItem:
     
     LDA btl_attacker
     AND #$7F      
+    LDX #0                      ; 0 = display sprite
     JSR WalkForwardAndCastMagic 
     
     LDX btl_attackid
@@ -9057,17 +9118,8 @@ UseItem_Soft:
     LDA #AIL_STOP
     STA btlmag_effectivity
     
-    JSR BtlMag_Effect_CureAilment
+    JSR BtlMag_Effect_CureStone
     BCC UseItem_Ineffective
-    
-    LDA btlmag_defender_hp+1    ; check high byte of HP
-    BNE :+                      ; if its over 0, they have enough HP
-        LDA btlmag_defender_hp  ; if its 0, check low byte
-        BNE :+                  ; if low byte is above 0, do nothing
-        LDA #25                 ; otherwise, give them 25 HP
-        STA btlmag_defender_hp
-    
-  : JSR SoftenStoneCharacter
   
     LDX #SOFT
     LDA #BTLMSG_STONECURED
@@ -9198,13 +9250,6 @@ UseItem_End_RemoveItem:
     DEC items, X
     JMP UseItem_End
 
-SoftenStoneCharacter:
-    JSR ResetPalette_Update     ; and make sure the variable palette is white/grey
-    LDX tmp+9
-    LDA #03
-    STA btl_charattrib, X
-    JMP BtlMag_SavePlayerDefenderStats ; save the cured ailment and update sprite    
-    
 RestoreColor:    
     LDX tmp+9
     LDY btlmag_defender_class
@@ -9782,6 +9827,7 @@ BtlMag_LoadPlayerDefenderStats:
     LDA btl_defender
     AND #$03
     TAX
+    STA tmp+9                       ; backup index for items and stone curing
     JSR PrepCharStatPointers        ; prep entityptr's
     
     LDA btl_charregen, X            ; load up any current regen stuff just in case...
@@ -10227,7 +10273,7 @@ BtlMag_PerformSpellEffect:
         .WORD BtlMag_Effect_RemoveResist    ; 11   
         .WORD BtlMag_Effect_InflictAilment2 ; 12   
         .WORD BtlMag_Effect_Life2           ; 13   
-        .WORD BtlMag_Effect_CureAilment     ; 14   ; for Soft
+        .WORD BtlMag_Effect_CureStone       ; 14   ; for Soft
         .WORD BtlMag_Effect_Regen           ; 15
         ;.WORD BtlMag_Effect_Drain           ; 16
         ;.WORD BtlMag_Effect_Counter         ; 17
@@ -10455,10 +10501,19 @@ PutEffectivityInDamageMathBuf:
     BNE @Save
     
    @NotConfused:
+    LDA btl_attacker
+    AND #03
+    TAX
+    LDA btl_charfocus, X
+    CLC
+    ADC tmp                         ; add focus to intelligence
+   
     LSR A                           ; divide by 2
     LSR A                           ; divide by 4
+    STA tmp
     LSR A                           ; divide by 8
     CLC
+    ADC tmp                         ; then add in "divided by 4" amount
     ADC btlmag_effectivity          ; add the spell's initial damage
     BCC @Save                       ; if carry was set by the addition
         INX                         ; just increment X to 1
@@ -10730,6 +10785,24 @@ BtlMag_SetHPToMax:
 ;;  yet strangely SOFT is not usable in battle (why not?)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BtlMag_Effect_CureStone:
+    JSR BtlMag_Effect_CureAilment
+    BCC BtlMag_Effect_CureAil_RTS 
+
+    LDA btlmag_defender_hp+1    ; check high byte of HP
+    BNE :+                      ; if its over 0, they have enough HP
+        LDA btlmag_defender_hp  ; if its 0, check low byte
+        BNE :+                  ; if low byte is above 0, do nothing
+        LDA #25                 ; otherwise, give them 25 HP
+        STA btlmag_defender_hp
+  : JSR ResetPalette_Update     ; and make sure the variable palette is white/grey
+    LDX tmp+9
+    LDA #03
+    STA btl_charattrib, X
+    JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment and update sprite
+    SEC
+    RTS
 
 BtlMag_Effect_CureAilment:
     LDA btlmag_defender_ailments    ; Get the defender's ailments
@@ -11145,7 +11218,7 @@ CheckPlayerState:
       
   : ; LDA #$01
     ; STA btlmag_fakeout_defplayer
-    RTS
+    JMP RestoreColor ; in case Soft was used
 
 
   ;; JIGS - well, figured out why this stupid thing exists... 
@@ -12374,6 +12447,7 @@ TargetAllCursors:
     
     LDA MagicTargetLUT+2, X ; amount of cursors to draw
     TAX                     ; put in X for a loop counter
+    DEX                     ; -1 for the X loop counter
     ASL A
     TAY                     ; and double it for reading from btlcurs_positions
 
@@ -12412,7 +12486,7 @@ TargetAllCursors:
     
    @Next: 
     DEX                         ; decrement the amount of cursors to draw
-    BNE @Loop
+    BPL @Loop
     
     JSR BattleFrame             ; do a frame, update the cursors on screen...
     

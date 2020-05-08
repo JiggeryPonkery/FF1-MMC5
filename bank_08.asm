@@ -135,77 +135,77 @@ MagicData:
 ;      |   |   ╒ Element
 ;      |   |   |   ╒ Target
 ;      |   |   |   |   ╒ Effect
-;      |   |   |   |   |   ╒ Graphic
+;      |   |   |   |   |   ╒ Graphic (low bits: 1 = move left, 2 = move up, 0 = don't move sprite)
 ;      |   |   |   |   |   |   ╒ Palette
 ;      |   |   |   |   |   |   |   ╒ Message
 ;      v   v   v   v   v   v   v   v  
-.byte $00,$10,$00,$10,$07,$C0,$29,$01 ; 00 CURE           ; HP up!
-.byte $18,$14,$00,$01,$02,$C8,$21,$00 ; 01 HARM           
-.byte $00,$08,$00,$10,$09,$B0,$29,$02 ; 02 SHIELD         ; Armor up
-.byte $00,$50,$00,$04,$10,$B0,$22,$03 ; 03 BLINK          ; Easy to dodge
-.byte $18,$0A,$10,$02,$01,$D0,$26,$00 ; 04 FIRE           
+.byte $00,$10,$00,$10,$07,$C1,$29,$01 ; 00 CURE           ; HP up!
+.byte $18,$14,$00,$01,$02,$C9,$21,$00 ; 01 HARM           
+.byte $00,$08,$00,$10,$09,$B1,$29,$02 ; 02 SHIELD         ; Armor up
+.byte $00,$50,$00,$04,$10,$B1,$22,$03 ; 03 BLINK          ; Easy to dodge
+.byte $18,$0A,$10,$02,$01,$D1,$26,$00 ; 04 FIRE           
 .byte $18,$20,$01,$01,$03,$E8,$2B,$00 ; 05 SLEEP          
-.byte $40,$14,$00,$02,$0E,$B8,$28,$05 ; 06 LOCK           ; Easy to hit
-.byte $18,$0A,$40,$02,$01,$C8,$28,$00 ; 07 BOLT           
-.byte $00,$08,$00,$10,$08,$E0,$27,$00 ; 08 LAMP           
+.byte $40,$14,$00,$02,$0E,$B9,$28,$05 ; 06 LOCK           ; Easy to hit
+.byte $18,$0A,$40,$02,$01,$C9,$28,$00 ; 07 BOLT           
+.byte $00,$08,$00,$10,$08,$E2,$27,$00 ; 08 LAMP           
 .byte $40,$40,$01,$01,$03,$E8,$2C,$00 ; 09 MUTE           
-.byte $00,$40,$00,$08,$0A,$B0,$28,$08 ; 0A BOLT (Shield)  ; Defend lightning
-.byte $00,$28,$00,$10,$10,$B0,$23,$03 ; 0B INVISBL        ; Easy to dodge
-.byte $18,$14,$20,$02,$01,$D0,$21,$00 ; 0C ICE            
+.byte $00,$40,$00,$08,$0A,$B1,$28,$08 ; 0A BOLT (Shield)  ; Defend lightning
+.byte $00,$28,$00,$10,$10,$B1,$23,$03 ; 0B INVISBL        ; Easy to dodge
+.byte $18,$14,$20,$02,$01,$D1,$21,$00 ; 0C ICE            
 .byte $18,$08,$01,$01,$03,$E8,$23,$00 ; 0D DARK           
-.byte $00,$0E,$00,$10,$0B,$B8,$2B,$0A ; 0E TEMPER         ; Weapons stronger
+.byte $00,$0E,$00,$10,$0B,$B9,$2B,$0A ; 0E TEMPER         ; Weapons stronger
 .byte $40,$00,$01,$01,$04,$E8,$2A,$0B ; 0F SLOW           ; Lost intelligence
-.byte $00,$21,$00,$10,$07,$C0,$2B,$01 ; 10 CURE 2         ; HP up!
-.byte $18,$28,$00,$01,$02,$C8,$23,$00 ; 11 HARM 2         
-.byte $00,$10,$00,$08,$0A,$B0,$26,$0C ; 12 FIRE (shield)  ; Defend fire
-.byte $03,$20,$00,$08,$15,$C0,$28,BTLMSG_REGENERATING ; 13 REGEN    ;; JIGS - Heal spells temporarily replaced
+.byte $00,$21,$00,$10,$07,$C1,$2B,$01 ; 10 CURE 2         ; HP up!
+.byte $18,$28,$00,$01,$02,$C9,$23,$00 ; 11 HARM 2         
+.byte $00,$10,$00,$08,$0A,$B1,$26,$0C ; 12 FIRE (shield)  ; Defend fire
+.byte $03,$20,$00,$08,$15,$C1,$28,BTLMSG_REGENERATING ; 13 REGEN    ;; JIGS - Heal spells temporarily replaced
 ;.byte $00,$0C,$00,$08,$07,$C0,$28,$00 ; 13 HEAL     ;; backup of original spe
-.byte $18,$1E,$10,$01,$01,$D0,$27,$00 ; 14 FIRE 2 
+.byte $18,$1E,$10,$01,$01,$D1,$27,$00 ; 14 FIRE 2 
 .byte $40,$10,$01,$02,$03,$E8,$27,$0D ; 15 HOLD            ; Attack halted
-.byte $18,$1E,$40,$01,$01,$C8,$27,$00 ; 16 BOLT 2          
-.byte $40,$14,$00,$01,$0E,$B8,$27,$05 ; 17 LOCK 2          ; Easy to hit
-.byte $00,$04,$00,$10,$08,$E0,$2A,$00 ; 18 PURE            
+.byte $18,$1E,$40,$01,$01,$C9,$27,$00 ; 16 BOLT 2          
+.byte $40,$14,$00,$01,$0E,$B9,$27,$05 ; 17 LOCK 2          ; Easy to hit
+.byte $00,$04,$00,$10,$08,$E2,$2A,$00 ; 18 PURE            
 .byte $18,$28,$01,$01,$05,$E8,$25,$0F ; 19 FEAR            ; Became terrified
-.byte $00,$20,$00,$08,$0A,$B0,$21,$10 ; 1A ICE (shield)    ; Defend cold
-.byte $00,$40,$00,$10,$08,$E0,$2C,$00 ; 1B VOICE           
+.byte $00,$20,$00,$08,$0A,$B1,$21,$10 ; 1A ICE (shield)    ; Defend cold
+.byte $00,$40,$00,$10,$08,$E2,$2C,$00 ; 1B VOICE           
 .byte $40,$20,$00,$02,$03,$E8,$21,$00 ; 1C SLEEP 2         
-.byte $00,$00,$00,$10,$0C,$B8,$2A,$12 ; 1D FAST            ; Quick shot
+.byte $00,$00,$00,$10,$0C,$B9,$2A,$12 ; 1D FAST            ; Quick shot
 .byte $40,$80,$01,$01,$03,$E8,$26,$00 ; 1E CONFUSE         
-.byte $18,$28,$20,$01,$01,$D0,$22,$00 ; 1F ICE 2           
-.byte $00,$42,$00,$10,$07,$C0,$2C,$01 ; 20 CURE 3          ; HP up!
-.byte $00,$01,$00,$10,$06,$E0,$21,$4F ; 21 LIFE     ; JIGS- will now cure death ; Revived from the brink!
-.byte $18,$3C,$00,$01,$02,$C8,$25,$00 ; 22 HARM 3 
-.byte $04,$40,$00,$08,$15,$C0,$27,BTLMSG_REGENERATING ; 23 REGEN 2
+.byte $18,$28,$20,$01,$01,$D1,$22,$00 ; 1F ICE 2           
+.byte $00,$42,$00,$10,$07,$C1,$2C,$01 ; 20 CURE 3          ; HP up!
+.byte $00,$01,$00,$10,$06,$E2,$21,$4F ; 21 LIFE     ; JIGS- will now cure death ; Revived from the brink!
+.byte $18,$3C,$00,$01,$02,$C9,$25,$00 ; 22 HARM 3 
+.byte $04,$40,$00,$08,$15,$C1,$27,BTLMSG_REGENERATING ; 23 REGEN 2
 ;.byte $00,$18,$00,$08,$07,$C0,$27,$00 ; 23 HEAL 2
-.byte $18,$32,$10,$01,$01,$D0,$25,$00 ; 24 FIRE 3    
+.byte $18,$32,$10,$01,$01,$D1,$25,$00 ; 24 FIRE 3    
 .byte $28,$01,$02,$01,$03,$E8,$22,$4D ; 25 BANE             ; Poison smoke
 .byte $FF,$00,$00,$08,$00,$00,$00,$4A ; 26 WARP             ; Ineffective now
 .byte $40,$00,$00,$02,$04,$E8,$29,$0B ; 27 SLOW 2           ; Lost intelligence
-.byte $00,$02,$00,$10,$14,$E0,$20,$00 ; 28 SOFT / FLOW      ; JIGS - will now cure stone
+.byte $00,$02,$00,$10,$14,$E2,$20,$00 ; 28 SOFT             ; JIGS - will now cure stone
 .byte $FF,$00,$00,$08,$00,$00,$00,$4A ; 29 EXIT             ; Ineffective now
-.byte $00,$0C,$00,$08,$09,$B0,$2A,$02 ; 2A SHIELD2          ; Armor up
-.byte $00,$28,$00,$08,$10,$B0,$24,$03 ; 2B INVIS 2          ; Easy to dodge
-.byte $18,$3C,$40,$01,$01,$C8,$22,$00 ; 2C BOLT 3           
-.byte $18,$01,$08,$02,$03,$D8,$20,$15 ; 2D RUB              ; Erased
-.byte $28,$01,$80,$01,$03,$B8,$26,$16 ; 2E QUAKE            ; Fell into crack
+.byte $00,$0C,$00,$08,$09,$B1,$2A,$02 ; 2A SHIELD2          ; Armor up
+.byte $00,$28,$00,$08,$10,$B1,$24,$03 ; 2B INVIS 2          ; Easy to dodge
+.byte $18,$3C,$40,$01,$01,$C9,$22,$00 ; 2C BOLT 3           
+.byte $18,$01,$08,$02,$03,$D9,$20,$15 ; 2D RUB              ; Erased
+.byte $28,$01,$80,$01,$03,$B9,$26,$16 ; 2E QUAKE            ; Fell into crack
 .byte $00,$10,$01,$02,$12,$E8,$28,$00 ; 2F STUN   
-.byte $00,$00,$00,$10,$0F,$C0,$21,$18 ; 30 CURE 4           ; HP max! 
-.byte $30,$50,$00,$01,$02,$C8,$2C,$00 ; 31 HARM 4           
-.byte $00,$89,$00,$08,$0A,$B0,$25,$19 ; 32 RUB (shield)     ; Defend magic ;; JIGS should be "defend death?"
-.byte $05,$60,$00,$08,$15,$C0,$25,$00 ; 33 REGEN 3
+.byte $00,$00,$00,$10,$0F,$C1,$21,$18 ; 30 CURE 4           ; HP max! 
+.byte $30,$50,$00,$01,$02,$C9,$2C,$00 ; 31 HARM 4           
+.byte $00,$89,$00,$08,$0A,$B1,$25,$19 ; 32 RUB (shield)     ; Defend magic ;; JIGS should be "defend death?"
+.byte $05,$60,$00,$08,$15,$C1,$25,$00 ; 33 REGEN 3
 ;.byte $30,$30,$00,$08,$07,$C0,$25,$00 ; 33 HEAL 3
-.byte $18,$46,$20,$01,$01,$D0,$2B,$00 ; 34 ICE 3  
-.byte $40,$02,$02,$02,$03,$C8,$20,$00 ; 35 BREAK  
-.byte $0F,$10,$00,$04,$0D,$B0,$20,$00 ; 36 SABER             ; Weapon became enchanted (JIGS - added $0F to Hit Rate)
+.byte $18,$46,$20,$01,$01,$D1,$2B,$00 ; 34 ICE 3  
+.byte $40,$02,$02,$02,$03,$C9,$20,$00 ; 35 BREAK  
+.byte $0F,$10,$00,$04,$0D,$B9,$20,$00 ; 36 SABER             ; Weapon became enchanted (JIGS - added $0F to Hit Rate)
 .byte $00,$08,$01,$02,$12,$E8,$24,$00 ; 37 BLIND             
-.byte $00,$01,$00,$10,$13,$D8,$21,$00 ; 38 LIFE 2 (Cures death now!) ; Revived from the brink!
-.byte $6B,$50,$00,$01,$01,$C8,$24,$00 ; 39 HOLY              
-.byte $00,$FF,$00,$10,$0A,$B0,$20,$00 ; 3A WALL              ; Defend all
-.byte $6B,$00,$00,$02,$11,$B8,$20,$00 ; 3B DISPEL            ; Defenseless
-.byte $6B,$64,$00,$01,$01,$D0,$28,$00 ; 3C FLARE             
+.byte $00,$01,$00,$10,$13,$D9,$21,$00 ; 38 LIFE 2 (Cures death now!) ; Revived from the brink!
+.byte $6B,$50,$00,$01,$01,$C9,$24,$00 ; 39 HOLY              
+.byte $00,$FF,$00,$10,$0A,$B1,$20,$00 ; 3A WALL              ; Defend all
+.byte $6B,$00,$00,$02,$11,$B9,$20,$00 ; 3B DISPEL            ; Defenseless
+.byte $6B,$64,$00,$01,$01,$D1,$28,$00 ; 3C FLARE             
 .byte $30,$10,$04,$01,$03,$E8,$20,$00 ; 3D STOP              ; Time stopped
-.byte $20,$01,$04,$01,$03,$D8,$2B,$00 ; 3E BANISH            ; Exile to 4th dimension
-.byte $00,$01,$08,$02,$12,$D8,$28,$00 ; 3F DOOM              ; Erased
+.byte $20,$01,$04,$01,$03,$D9,$2B,$00 ; 3E BANISH            ; Exile to 4th dimension
+.byte $00,$01,$08,$02,$12,$D9,$28,$00 ; 3F DOOM              ; Erased
 ; $200 bytes ^ 
 
 ;      ╒ Hit Rate
@@ -217,11 +217,11 @@ MagicData:
 ;      |   |   |   |   |   |   ╒ Palette
 ;      |   |   |   |   |   |   |   ╒ Message
 ;      v   v   v   v   v   v   v   v  
-.byte $00,$0C,$00,$08,$07,$C0,$28,$01 ; 00 HEAL                       ; 40
-.byte $00,$18,$00,$08,$07,$C0,$27,$01 ; 01 HEAL 2                     ; 41
-.byte $30,$30,$00,$08,$07,$C0,$25,$01 ; 02 HEAL 3                     ; 42
-.byte $00,$08,$00,$10,$FC,$C0,$20,$00 ; 03 Pray - Cure Ailment        ; 43
-.byte $00,$05,$00,$04,$18,$B0,$2C,BTLMSG_DEFENDALL ; 04 Reflect       ; 44
+.byte $00,$0C,$00,$08,$07,$C1,$28,$01 ; 00 HEAL                       ; 40
+.byte $00,$18,$00,$08,$07,$C1,$27,$01 ; 01 HEAL 2                     ; 41
+.byte $30,$30,$00,$08,$07,$C1,$25,$01 ; 02 HEAL 3                     ; 42
+.byte $00,$08,$00,$10,$FC,$C1,$20,$00 ; 03 Pray - Cure Ailment        ; 43
+.byte $00,$05,$00,$04,$18,$B1,$2C,BTLMSG_DEFENDALL ; 04 Reflect       ; 44
 .byte $00,$00,$00,$00,$00,$00,$00,BTLMSG_DEFENDALL ; 05 Reflect 2     ; 45
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 06 ????                       ; 46
 .byte $00,$00,$00,$00,$00,$00,$00,$00 ; 07 ????                       ; 47
