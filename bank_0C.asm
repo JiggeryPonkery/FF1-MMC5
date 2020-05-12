@@ -52,6 +52,7 @@
 .import DrawImageRect
 .import GetEquipmentSpell
 .import SpiritCalculations
+.import Battle_SetPartyWeaponSpritePal
 
 BANK_THIS = $0C
 
@@ -117,6 +118,9 @@ FinishBattlePrepAndFadeIn:
     JSR BackupCharacterBattleStats
     JSR ClearBattleMessageBuffer_L
     JSR ClearCharBuffers
+    JSR LongCall
+    .word Battle_SetPartyWeaponSpritePal
+    .byte BANK_EQUIPSTATS
     JSR EnterBattlePrepareSprites
     ;; this clears shadow OAM, sets the buffers for location, then laods the sprites up.
     JSR DrawCharacterStatus    
@@ -711,16 +715,13 @@ BattleSubMenu_Skill:
   
    @Runic:
     LDX btlcmd_curchar
-    LDY #ch_righthand - ch_stats
-    LDA (CharStatsPointer), Y
+    LDA btl_charweaponsprite, X
     BNE :+
         LDA #BTLMSG_NOWEAPON
         JSR DrawMessageBoxDelay_ThenClearIt
         JMP CancelBattleAction_RedrawCommand
     
-  : LDY #ch_weaponsprite - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btl_charrunic, X            ; weapon sprite is saved here
+  : STA btl_charrunic, X            ; weapon sprite is saved here
     BNE @SetSkill
     
    @Parry:
@@ -1990,15 +1991,8 @@ DrawCharacter_NextTile:
 DrawWeaponGraphicRow:
     LDA btl8x8spr_x+1               ; reset X coord to backup
     STA btl8x8spr_x
-    
-    LDA btlattackspr_t              ; get weapon graphic tile
-    CLC
-    ADC lut_WeaponSwingTSA, X       ; add TSA value
-    STA btl8x8spr_t                 ; record it
-    LDA lut_WeaponSwingTSA+4, X     ; get attribute & record it
-    STA btl8x8spr_a
-    JSR FistColors
-    JSR BattleDraw8x8Sprite         ; draw this tile
+
+    JSR DrawWeaponGraphicRow_DoubledCode
     
     INC btl8x8spr_i                 ; inc the oam position
     INX                             ; inc the TSA index
@@ -2007,14 +2001,7 @@ DrawWeaponGraphicRow:
     ADC #$08
     STA btl8x8spr_x
     
-    LDA btlattackspr_t              ; do all the same shit to draw another tile
-    CLC
-    ADC lut_WeaponSwingTSA, X
-    STA btl8x8spr_t
-    LDA lut_WeaponSwingTSA+4, X
-    STA btl8x8spr_a
-    JSR FistColors
-    JSR BattleDraw8x8Sprite
+    JSR DrawWeaponGraphicRow_DoubledCode
     
     LDA btl8x8spr_y                 ; add 8 to Y position
     CLC
@@ -2023,27 +2010,17 @@ DrawWeaponGraphicRow:
     INX                             ; inc TSA index
     INC btl8x8spr_i                 ; and oam position
     RTS
+    
+DrawWeaponGraphicRow_DoubledCode:
+    LDA btlattackspr_t              ; get weapon graphic tile
+    CLC
+    ADC lut_WeaponSwingTSA, X       ; add TSA value
+    STA btl8x8spr_t                 ; record it
+    LDA lut_WeaponSwingTSA+4, X     ; get attribute & record it
+    STA btl8x8spr_a
+    JMP BattleDraw8x8Sprite         ; draw this tile
+    
 
-FistColors:                         ; this makes the fist sprite match the character, but leaves the dust cloud white
-    LDA btlattackspr_gfx ; btlattackspr_t
-    CMP #$AC
-    BNE @Return
-        LDY #ch_class - ch_stats
-        LDA (CharStatsPointer), Y   ; Check the sprite
-        AND #$F0
-        LSR A
-        LSR A
-        LSR A
-        LSR A                       ; move to low bits
-        TAY
-        LDA lut_InBattleCharPaletteAssign, Y ; get sprite colours
-        STA tmp
-        LDA btl8x8spr_a             ; remove low bits from the attributes
-        AND #$40
-        ORA tmp                     ; then add in the sprite's colours
-        STA btl8x8spr_a            
-   @Return:
-    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8803,9 +8780,9 @@ DoRunic_OK:
     PHA                          ; back up index 
     ORA #$80
     STA btl_defender
-
-    JSR PrepCharStatPointers
-    
+    LDA btl_charweaponpal, X
+    LDX #0
+    JSR UpdateVariablePalette   ; set the variable palette to their weapon
     LDA #02
     JSR LoadSprite              ; load up the weapon sprite
     
@@ -8815,11 +8792,6 @@ DoRunic_OK:
     LDY #>SkillText_RMage
     LDA #BOX_DAMAGE
     JSR DrawCombatBox           ; draws "Runic" in the damage/hits box
-    
-    LDY #ch_weaponpal - ch_stats
-    LDA (CharStatsPointer), Y   
-    LDX #0
-    JSR UpdateVariablePalette   ; set the variable palette to their weapon
     
     LDA btl_battletype
     CMP #$03
@@ -8836,7 +8808,7 @@ DoRunic_OK:
     JSR WalkForwardAndStrike    ; doesn't really walk forward or strike, but handles the animation anyway
   
     LDA ActiveRunic             ; if its still only 01, it worked!
-    BPL :+
+    BPL @RunicSuccess
    
   @RunicFailed:
     LDA #$0F
@@ -8862,7 +8834,11 @@ DoRunic_OK:
     CLC
     RTS
    
- : LDA btl_attackid    ; this was already checked to make sure its not an enemy special attack
+  @RunicSuccess: 
+   LDA btl_defender
+   JSR PrepCharStatPointers
+  
+   LDA btl_attackid    ; this was already checked to make sure its not an enemy special attack
    ;; oops, already 0 based
    ;SEC
    ;SBC #MG_START       ; subtract magic start ($30 at this time) to make it the spell ID
@@ -9823,6 +9799,53 @@ Battle_CastMagicOnAllPlayers:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+PlayerMagDefenderStats_LUT: ; 42 bytes!
+.byte btlmag_defender_ailments - btlmag_defender,        ch_ailments - ch_stats        ; *
+.byte btlmag_defender_hp - btlmag_defender,              ch_curhp - ch_stats           ; *
+.byte btlmag_defender_hp+1 - btlmag_defender,            ch_curhp+1 - ch_stats         ; *
+.byte btlmag_defender_intelligence - btlmag_defender,    ch_intelligence - ch_stats    ; *
+.byte btlmag_defender_speed - btlmag_defender,           ch_speed - ch_stats           ; *
+.byte btlmag_defender_damage - btlmag_defender,          ch_damage - ch_stats          ; *
+.byte btlmag_defender_hitrate - btlmag_defender,         ch_hitrate - ch_stats         ; *
+.byte btlmag_defender_defense - btlmag_defender,         ch_defense - ch_stats         ; *
+.byte btlmag_defender_evasion - btlmag_defender,         ch_evasion - ch_stats         ; *
+.byte btlmag_defender_magicdefense - btlmag_defender,    ch_magicdefense - ch_stats    ; *
+.byte btlmag_defender_statusresist - btlmag_defender,    ch_statusresist - ch_stats    ; *
+.byte btlmag_defender_elementresist - btlmag_defender,   ch_elementresist - ch_stats   ; *
+.byte btlmag_defender_elementweakness - btlmag_defender, ch_elementweak - ch_stats     ; *
+.byte btlmag_defender_attackailment - btlmag_defender,   ch_attackailment - ch_stats   ; *
+.byte btlmag_defender_attackailproc - btlmag_defender,   ch_attackailproc - ch_stats   ; *
+.byte btlmag_defender_critrate - btlmag_defender,        ch_critrate - ch_stats        ; *
+.byte btlmag_defender_weaponelement - btlmag_defender,   ch_weaponelement - ch_stats   ; *
+.byte btlmag_defender_weaponcategory - btlmag_defender,  ch_weaponcategory - ch_stats  ; *
+.byte btlmag_defender_morale - btlmag_defender,          ch_morale - ch_stats          ; *
+.byte btlmag_defender_hpmax - btlmag_defender,           ch_maxhp - ch_stats           ; Loaded but not saved
+.byte btlmag_defender_hpmax+1 - btlmag_defender,         ch_maxhp+1 - ch_stats         ; Loaded but not saved
+
+EnemyMagDefenderStats_LUT: ; 36 bytes!
+.byte btlmag_defender_ailments - btlmag_defender,         en_ailments     ; *
+.byte btlmag_defender_hp - btlmag_defender,               en_hp           ; *
+.byte btlmag_defender_hp+1 - btlmag_defender,             en_hp+1         ; *
+.byte btlmag_defender_numhitsmult - btlmag_defender,      en_numhitsmult  ; *
+.byte btlmag_defender_speed - btlmag_defender,            en_speed        ; *
+.byte btlmag_defender_damage - btlmag_defender,           en_strength     ; *
+.byte btlmag_defender_hitrate - btlmag_defender,          en_hitrate      ; *
+.byte btlmag_defender_defense - btlmag_defender,          en_defense      ; *
+.byte btlmag_defender_evasion - btlmag_defender,          en_evade        ; *
+.byte btlmag_defender_magicdefense - btlmag_defender,     en_magdef       ; *
+.byte btlmag_defender_statusresist - btlmag_defender,     en_statusresist ; *
+.byte btlmag_defender_elementresist - btlmag_defender,    en_elemresist   ; *
+.byte btlmag_defender_elementweakness - btlmag_defender,  en_elemweakness ; *
+.byte btlmag_defender_attackailment - btlmag_defender,    en_attackail    ; *
+.byte btlmag_defender_critrate - btlmag_defender,         en_critrate     ; *
+.byte btlmag_defender_morale - btlmag_defender,           en_morale       ; *
+.byte btlmag_defender_hpmax - btlmag_defender,            en_hpmax        ; Loaded but not saved
+.byte btlmag_defender_hpmax+1 - btlmag_defender,          en_hpmax+1      ; Loaded but not saved
+
+
+
+
+
 BtlMag_LoadPlayerDefenderStats:
     LDA btl_defender
     AND #$03
@@ -9845,97 +9868,64 @@ BtlMag_LoadPlayerDefenderStats:
     AND #$F0
     JSR ShiftSpriteHightoLow
     STA btlmag_defender_class
-
-    INY ; LDY #ch_ailments - ch_stats     
-    LDA (CharStatsPointer), Y    
-    STA btlmag_defender_ailments
     
-    LDY #ch_curhp - ch_stats        ;
+    LDX #42
+   @Loop: 
+    LDY PlayerMagDefenderStats_LUT, X
     LDA (CharStatsPointer), Y
-    STA btlmag_defender_hp
-    INY
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_hp+1
-    
-    INY ; #ch_maxhp - ch_stats        ; max HP from OB
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_hpmax
-    INY
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_hpmax+1
-    
-    LDY #ch_intelligence - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_intelligence
-    
-    LDY #ch_speed - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_speed
-    
-    INY ; #ch_damage - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_damage
-    
-    INY ; #ch_hitrate - ch_stats
-	LDA (CharStatsPointer), Y
-	STA btlmag_defender_hitrate    
-    
-    INY ; #ch_defense - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_defense
-    
-    INY ; #ch_evasion - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_evasion
-    
-    INY ; #ch_magicdefense - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_magicdefense
-
-    INY ; #ch_statusresist - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_statusresist
-    
-    INY ; #ch_elementresist - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_elementresist
-
-    INY ; #ch_elementweak - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_elementweakness
-    
-    INY ; #ch_attackailment - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_attackailment
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_attackailproc
-    
-    INY
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_critrate
-    
-    LDY #ch_weaponelement - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_weaponelement
-    
-    INY ; #ch_weaponcategory - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_weaponcategory
-    
-    LDY #ch_morale - ch_stats
-    LDA (CharStatsPointer), Y
-    STA btlmag_defender_morale
+    DEX
+    LDY PlayerMagDefenderStats_LUT, X
+    STA btlmag_defender, Y
+    DEX
+    BPL @Loop
     RTS
-    
- 
-  ;; JIGS - loading and saving stats could be shortened by making a .word table of the ch_xxx - ch_stats stuff
-  ;; and another of the btlmag_defender_xxx stuff, and going through a loop...
-  ;; make a note to test this, see if I can use it for ALL attacker/defender stuff (physical too why not)
-  ;; see the way the game loads enemy ROM stats for ideas.
-  
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  BtlMag_SavePlayerDefenderStats  [$B790 :: 0x337A0]
+;;
+;;    Saved stats that the spell effect may have changed back to IB player stats
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+BtlMag_SavePlayerDefenderStats:
+    LDA btl_defender
+    AND #$03
+    PHA
+    TAX
+    JSR HideCharacter
+    JSR PrepCharStatPointers
+
+    LDA btlmag_defender_battlestate
+    AND #STATE_REFLECT
+    STA btl_charreflect, X
+    
+    LDA btlmag_defender_battlestate
+    AND #STATE_REGENALL | STATE_REGENERATING
+    STA btl_charregen, X
+
+    LDA btlmag_defender_numhitsmult
+    STA btl_charhitmult, X
+
+    LDX #38
+   @Loop: 
+    DEX                                 ; needs to read the left byte in the table first
+    LDY PlayerMagDefenderStats_LUT, X
+    LDA btlmag_defender, Y
+    INX                                 ; then the right-side byte
+    LDY PlayerMagDefenderStats_LUT, X
+    STA (CharStatsPointer), Y
+    DEX                                 ; then decrement them both again
+    DEX
+    BPL @Loop
+    RTS
+
+    PLA
+    JSR SetNaturalPose
+    JSR UpdateCharacterSprite
+    
+    JMP DrawCharacterStatus_Fast           ; update icons to reflect any status changes, without updating all sprites
+    ; while this is done at the end of every turn, spells that cast over the party can show their effect immediately
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9952,72 +9942,16 @@ BtlMag_LoadEnemyDefenderStats:
     LDA btl_defender
     JSR GetEnemyRAMPtr     
     
-    LDY #en_hpmax               
-    LDA (EnemyRAMPointer), Y    ; Max HP 
-    STA btlmag_defender_hpmax
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA btlmag_defender_hpmax+1
-    
-    INY 
-    LDA (EnemyRAMPointer), Y    ; Morale
-    STA btlmag_defender_morale
-    
-    INY ; ai
-    INY                         
-    LDA (EnemyRAMPointer), Y    ; Evade 
-    STA btlmag_defender_evasion
-    
-    INY
-    LDA (EnemyRAMPointer), Y    ; Defense
-    STA btlmag_defender_defense ; 
-    
-    INY ; numhits
-    INY
-    LDA (EnemyRAMPointer), Y    ; hit rate
-    STA btlmag_defender_hitrate ; 
-    
-    INY                         ; Damage
-    LDA (EnemyRAMPointer), Y    ; 
-    STA btlmag_defender_damage
-    
-    LDY #en_category            
-    LDA (EnemyRAMPointer), Y    ; Category
-    STA btlmag_defender_category
-    
-    INY                          
-    LDA (EnemyRAMPointer), Y    ; Magic Defense
-    STA btlmag_defender_magicdefense
-    
-    INY                        
-    LDA (EnemyRAMPointer), Y    ; Elemental weakness
-    STA btlmag_defender_elementweakness
-    
-    INY                        
-    LDA (EnemyRAMPointer), Y    ; Elemental Resistance
-    STA btlmag_defender_elementresist
-    
-    INY                        
-    INY
-    LDA (EnemyRAMPointer), Y    ; Speed
-    STA btlmag_defender_speed
-    
-    LDY #en_numhitsmult         
-    LDA (EnemyRAMPointer), Y    ; Hit multiplier
-    STA btlmag_defender_numhitsmult
-    
-    INY                         
-    LDA (EnemyRAMPointer), Y    ; Ailments
-    STA btlmag_defender_ailments
-    
-    INY 
-    LDA (EnemyRAMPointer), Y    ; Current HP
-    STA btlmag_defender_hp
-    INY
-    LDA (EnemyRAMPointer), Y
-    STA btlmag_defender_hp+1
+    LDX #36
+   @Loop: 
+    LDY EnemyMagDefenderStats_LUT, X
+    LDA (CharStatsPointer), Y
+    DEX
+    LDY EnemyMagDefenderStats_LUT, X
+    STA btlmag_defender, Y
+    DEX
+    BPL @Loop  
     RTS 
-    ;JMP DoExplosionEffect
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10037,175 +9971,18 @@ BtlMag_SaveEnemyDefenderStats:
     LDA btl_defender                ; get defender slot index
     JSR GetEnemyRAMPtr              ; use it to get a pointer to their stats in RAM
     
-    LDY #en_morale
-    LDA btlmag_defender_morale
-    STA (EnemyRAMPointer), Y    ; Morale
-        
-    INY ; ai
-    INY                         
-    LDA btlmag_defender_evasion
-    STA (EnemyRAMPointer), Y    ; Evade 
-    
-    INY
-    LDA btlmag_defender_defense ; 
-    STA (EnemyRAMPointer), Y    ; Defense
-    
-    INY ; numhits
-    INY
-    LDA btlmag_defender_hitrate ; 
-    STA (EnemyRAMPointer), Y    ; hit rate
-    
-    INY                         ; Damage
-    LDA btlmag_defender_damage
-    STA (EnemyRAMPointer), Y    ; 
-    
-    LDY #en_category            
-    LDA btlmag_defender_category
-    STA (EnemyRAMPointer), Y    ; Category
-    
-    INY                          
-    LDA btlmag_defender_magicdefense
-    STA (EnemyRAMPointer), Y    ; Magic Defense
-    
-    INY                        
-    LDA btlmag_defender_elementweakness
-    STA (EnemyRAMPointer), Y    ; Elemental weakness
-    
-    INY                        
-    LDA btlmag_defender_elementresist
-    STA (EnemyRAMPointer), Y    ; Elemental Resistance
-    
-    INY                        
-    INY
-    LDA btlmag_defender_speed
-    STA (EnemyRAMPointer), Y    ; Speed
-    
-    LDY #en_numhitsmult         
-    LDA btlmag_defender_numhitsmult
-    STA (EnemyRAMPointer), Y    ; Hit multiplier
-    
-    INY                         
-    LDA btlmag_defender_ailments
-    STA (EnemyRAMPointer), Y    ; Ailments
-    
-    INY 
-    LDA btlmag_defender_hp
-    STA (EnemyRAMPointer), Y    ; Current HP
-    INY
-    LDA btlmag_defender_hp+1
-    STA (EnemyRAMPointer), Y
-    
+    LDX #32
+   @Loop: 
+    DEX                                 ; needs to read the left byte in the table first
+    LDY EnemyMagDefenderStats_LUT, X
+    LDA btlmag_defender, Y
+    INX                                 ; then the right-side byte
+    LDY EnemyMagDefenderStats_LUT, X
+    STA (CharStatsPointer), Y
+    DEX                                 ; then decrement them both again
+    DEX
+    BPL @Loop
     RTS
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  BtlMag_SavePlayerDefenderStats  [$B790 :: 0x337A0]
-;;
-;;    Saved stats that the spell effect may have changed back to IB player stats
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-BtlMag_SavePlayerDefenderStats:
-    LDA btl_defender
-    AND #$03
-    TAX
-    JSR HideCharacter
-    JSR PrepCharStatPointers
-
-    LDA btlmag_defender_battlestate
-    AND #STATE_REFLECT
-    STA btl_charreflect, X
-    
-    LDA btlmag_defender_battlestate
-    AND #STATE_REGENALL | STATE_REGENERATING
-    STA btl_charregen, X
-
-    LDA btlmag_defender_numhitsmult
-    STA btl_charhitmult, X
-
-    LDA btlmag_defender_ailments
-    LDY #ch_ailments - ch_stats
-    STA (CharStatsPointer), Y       ; ailments
-    
-    LDA btlmag_defender_hp          ; HP
-    LDY #ch_curhp - ch_stats
-    STA (CharStatsPointer), Y
-    LDA btlmag_defender_hp+1
-    INY
-    STA (CharStatsPointer), Y
-    
-    LDA btlmag_defender_intelligence
-    LDY #ch_intelligence - ch_stats
-    STA (CharStatsPointer), Y
-    
-    LDA btlmag_defender_speed
-    LDY #ch_speed - ch_stats
-    STA (CharStatsPointer), Y
-        
-    INY ; #ch_damage - ch_stats
-    LDA btlmag_defender_damage
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_hitrate - ch_stats
-	LDA btlmag_defender_hitrate    
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_defense - ch_stats
-    LDA btlmag_defender_defense
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_evasion - ch_stats
-    LDA btlmag_defender_evasion
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_magicdefense - ch_stats
-    LDA btlmag_defender_magicdefense
-    STA (CharStatsPointer), Y
-
-    INY ; #ch_statusresist - ch_stats
-    LDA btlmag_defender_statusresist
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_elementresist - ch_stats
-    LDA btlmag_defender_elementresist
-    STA (CharStatsPointer), Y
-
-    INY ; #ch_elementweak - ch_stats
-    LDA btlmag_defender_elementweakness
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_attackailment - ch_stats
-    LDA btlmag_defender_attackailment
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_attackailproc - ch_stats
-    LDA btlmag_defender_attackailproc
-    STA (CharStatsPointer), Y
-    
-    INY ; #ch_critrate - ch_stats
-    LDA btlmag_defender_critrate
-    STA (CharStatsPointer), Y
-    
-    LDY #ch_weaponelement - ch_stats
-    LDA btlmag_defender_weaponelement
-    STA (CharStatsPointer), Y
-
-    INY ; #ch_weaponcategory - ch_stats
-    LDA btlmag_defender_weaponcategory
-    STA (CharStatsPointer), Y
-    
-    LDY #ch_morale - ch_stats
-    LDA btlmag_defender_morale    
-    STA (CharStatsPointer), Y
-    
-    LDA btl_defender
-    AND #$03
-    JSR SetNaturalPose
-    JSR UpdateCharacterSprite
-    
-    JMP DrawCharacterStatus_Fast           ; update icons to reflect any status changes, without updating all sprites
-    ; while this is done at the end of every turn, spells that cast over the party can show their effect immediately
-    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10300,16 +10077,55 @@ BtlMag_PrepHitAndDamage:
     LDX btlmag_defender_magicdefense
     JSR MathBuf_Sub             ; math_hitchance -= defender's magdef
     
-    LDA #0
-    LDX math_basedamage
-    JSR RandAX
-    TAX                         ; X = rand[ 0, spelldamage ]
-    
-    LDA #MATHBUF_BASEDAMAGE
-    JSR MathBuf_Add             ; math_basedamage = rand[ spelldamage, spelldamage*2 ]
+   ; LDA #0
+   ; LDX math_basedamage
+   ; JSR RandAX
+   ; TAX                         ; X = rand[ 0, spelldamage ]
+   ; 
+   ; LDA #MATHBUF_BASEDAMAGE
+   ; JSR MathBuf_Add             ; math_basedamage = rand[ spelldamage, spelldamage*2 ]
+   
+    ;; basically the same thing, but with a 16 bit number!
+    JSR BtlMag_BaseDamageRandom16
     
     JSR Random_0_200
     JMP WriteAToMagRandHit      ; math_magrandhit = rand[ 0, 200 ]
+
+
+
+
+BtlMag_BaseDamageRandom16:
+    LDA math_basedamage             ; low byte of healing
+    STA tmp                         ; save in tmp 
+    LDA math_basedamage+1           ; high byte of healing
+    LSR A                           ; shift far right bit out
+    ROR tmp                         ; and into low byte of healing (dropping out far right bit)
+    PHP                             ; push carry to the stack
+    LDX tmp                         ; load shifted high/low into X
+    LDA #0                          ; and clear A and tmp+1
+    STA tmp+1                       ; 
+    JSR RandAX                      ; get a random number between high/low and 0
+    ASL A                           ; shift the high bit out
+    ROL tmp+1                       ; and into the empty tmp+1
+    PLP                             ; pull the precious carry, if set
+    ADC math_basedamage             ; add it in with the low byte of healing
+    STA math_basedamage             ; and save it
+    LDA tmp+1                       ; then load up the high byte of the random number
+    ADC math_basedamage+1           ; add in any carry from the low byte addition
+    STA math_basedamage+1           ; and save THAT!
+    RTS
+    
+    ;; Example:
+    ; %0000,0001 %0101,1011   ; $01, $5B (347)
+    ; %0000,0000>%1010,1101>1 ; $00, $AD +1 
+    ;  push that lone 1 for | later
+    ;  then random between  | $0 and $AD... lets say $54 
+    ;            %0101,0100 | ; $54      (84) 
+    ; %0000,0000<%1010,1000 v ; $00, $A8 (168)
+    ;   |       $A8 + $5B + 1 = $01, $04 (260) (high byte is carry)
+    ;   \-----> $00 + $01 + 1 = $02, $04 (516)
+    ; that turns 357 healing into 516! An additional 159! (that's weird, shouldn't it be 168?) 
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10739,22 +10555,10 @@ BtlMag_Effect_RecoverHP:
 ;    LDA #MATHBUF_MAGDEFENDERHP      ; Add X to defender's HP
 ;    JSR MathBuf_Add
 
-    LDX math_basedamage             ; basedamage is now amount of HP to heal
-    LDA math_basedamage+1
-    BEQ :+
-    LDX #$FF                        ; effectivity is over $FF, so random between $0-$FF
-  : LDA #0
-    JSR RandAX
-    CLC
-    ADC math_basedamage
-    BCC @DoHealing                  ; no carry, so just do healing
-    
-    ;LDA #0                          ; add carry to any high bits already set by PutEffectivityInDamageMathBuf
-    ;ADC math_basedamage+1
-    ;STA math_basedamage+1 
-    INC math_basedamage+1           ; which can also be done just by doing this...
-   
-   @DoHealing:
+    ;; basically the same thing, but with a 16 bit number!
+    JSR BtlMag_BaseDamageRandom16
+
+    LDA #MATHBUF_DEFENDERHP
     LDX #MATHBUF_DEFENDERHP
     LDY #MATHBUF_BASEDAMAGE         
     JSR MathBuf_Add16

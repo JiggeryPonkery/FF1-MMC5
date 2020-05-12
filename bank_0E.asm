@@ -633,7 +633,7 @@ M_Char4Name:
 .byte $13,$00,$00 ; Character 4's name
 
 M_EquipNameClass:  
-.byte $10,$00,$09,$08,$10,$01,$00 ; name and class
+.byte $10,$00,$09,$08,$10,$01,$00 ; name, 8 spaces, then class
 
 M_EquipmentSlots:
 .byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$FF,$D4,$01   ; RIGHT_HAND__[________]_*
@@ -646,12 +646,12 @@ M_EquipmentSlots:
 .byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$FF,$D8,$00       ; BATTLE_ITEM_[________]_*
 
 M_EquipStats:
-.byte $8D,$A4,$B0,$A4,$66,$09,$03,        $10,$3C,$FF,$FF      ; Damage___##__
-.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$3E,$01          ; Defense__##
-.byte $8A,$A6,$A6,$55,$5E,$4B,            $10,$3D,$FF,$FF      ; Accuracy_##__
-.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$3F,$01          ; Evasion__##
-.byte $8C,$5C,$57,$51,$AF,$FF,            $10,$44,$FF,$FF      ; Critical_##__
-.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00          ; M.Evade__## 
+.byte $8D,$A4,$B0,$A4,$66,$09,$03,        $10,$16,$FF,$FF      ; Damage___##__
+.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$18,$01          ; Defense__##
+.byte $8A,$A6,$A6,$55,$5E,$4B,            $10,$17,$FF,$FF      ; Accuracy_##__
+.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$19,$01          ; Evasion__##
+.byte $8C,$5C,$57,$51,$AF,$FF,            $10,$1B,$FF,$FF      ; Critical_##__
+.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$1A,$00          ; M.Evade__## 
 
 M_MP_List_Level:  
 .byte $95,$81,$01
@@ -664,31 +664,30 @@ M_MP_List_Level:
 .byte $95,$88,$00
 
 M_MP_List_MP:
-.byte $10,$2C,$7A,$10,$34,$01 ; lists current MP / max MP veritcally
-.byte $10,$2D,$7A,$10,$35,$01
-.byte $10,$2E,$7A,$10,$36,$01
-.byte $10,$2F,$7A,$10,$37,$01
-.byte $10,$30,$7A,$10,$38,$01
-.byte $10,$31,$7A,$10,$39,$01
-.byte $10,$32,$7A,$10,$3A,$01
-.byte $10,$33,$7A,$10,$3B,$00
+.byte $10,$20,$7A,$10,$30,$01 ; lists current MP / max MP veritcally
+.byte $10,$21,$7A,$10,$31,$01
+.byte $10,$22,$7A,$10,$32,$01
+.byte $10,$23,$7A,$10,$33,$01
+.byte $10,$24,$7A,$10,$34,$01
+.byte $10,$25,$7A,$10,$35,$01
+.byte $10,$26,$7A,$10,$36,$01
+.byte $10,$27,$7A,$10,$37,$00
 
 M_Elixir_List_MP: ; lists current MP / current MP / etc, horizontally
-.byte $96,$99,$FF,$FF,$10,$2C,$7A,$10,$2D,$7A,$10,$2E,$7A,$10,$2F,$7A,$10,$30,$7A,$10,$32,$7A,$10,$33,$00
+.byte $96,$99,$FF,$FF,$10,$20,$7A,$10,$21,$7A,$10,$22,$7A,$10,$23,$7A,$10,$24,$7A,$10,$25,$7A,$10,$26,$7A,$10,$27,$00
 
 M_HP_List: 
 .byte $10,$00,$FF,$10,$02,$FF,$10,$05,$7A,$10,$06,$00 ; lists name, ailment, and current HP horizontally
 
 M_MagicList: 
-
-.byte $95,$81,$FF,$FF,$10,$14,$FF,$FF,$10,$15,$FF,$FF,$10,$16,$01
-.byte $95,$82,$FF,$FF,$10,$17,$FF,$FF,$10,$18,$FF,$FF,$10,$19,$01
-.byte $95,$83,$FF,$FF,$10,$1A,$FF,$FF,$10,$1B,$FF,$FF,$10,$1C,$01
-.byte $95,$84,$FF,$FF,$10,$1D,$FF,$FF,$10,$1E,$FF,$FF,$10,$1F,$01
-.byte $95,$85,$FF,$FF,$10,$20,$FF,$FF,$10,$21,$FF,$FF,$10,$22,$01
-.byte $95,$86,$FF,$FF,$10,$23,$FF,$FF,$10,$24,$FF,$FF,$10,$25,$01
-.byte $95,$87,$FF,$FF,$10,$26,$FF,$FF,$10,$27,$FF,$FF,$10,$28,$01
-.byte $95,$88,$FF,$FF,$10,$29,$FF,$FF,$10,$2A,$FF,$FF,$10,$2B,$00
+.byte $95,$81,$FF,$FF,$10,$40,$FF,$FF,$10,$41,$FF,$FF,$10,$42,$01
+.byte $95,$82,$FF,$FF,$10,$43,$FF,$FF,$10,$44,$FF,$FF,$10,$45,$01
+.byte $95,$83,$FF,$FF,$10,$46,$FF,$FF,$10,$47,$FF,$FF,$10,$48,$01
+.byte $95,$84,$FF,$FF,$10,$49,$FF,$FF,$10,$4A,$FF,$FF,$10,$4B,$01
+.byte $95,$85,$FF,$FF,$10,$4C,$FF,$FF,$10,$4D,$FF,$FF,$10,$4E,$01
+.byte $95,$86,$FF,$FF,$10,$4F,$FF,$FF,$10,$50,$FF,$FF,$10,$51,$01
+.byte $95,$87,$FF,$FF,$10,$52,$FF,$FF,$10,$53,$FF,$FF,$10,$54,$01
+.byte $95,$88,$FF,$FF,$10,$55,$FF,$FF,$10,$56,$FF,$FF,$10,$57,$00
 
 ;     |L  #    __ cc  MP   /  max MP   __  __ spel1 1  __ spell 2  __ spell 3 
 ;.byte $7E,$81,$FF,$10,$2C,$7A,$10,$34,$FF,$FF,$10,$14,$FF,$10,$15,$FF,$10,$16,$01
@@ -705,15 +704,15 @@ M_CharLevelStats:
 .byte $10,$01,$01                                     ; Class
 .byte $95,$A8,$32,$AF,$09,$05,$10,$03,$01             ; Level ##
 .byte $8E,$BB,$B3,$C0,$FF,$FF,$10,$04,$01             ; Exp.  ## 
-.byte $97,$A8,$BB,$B7,$09,$03,$10,$42,$00             ; Next  ##
+.byte $97,$A8,$BB,$B7,$09,$03,$10,$1E,$00             ; Next  ##
 
 M_CharMainStats: 
-.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$09,$04,  $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Strength__##____Damage___###
-.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$09,$04,  $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Agility___##____Accuracy_###
-.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$09,$09,$04,  $8C,$5C,$57,$51,$AF,$FF,$10,$44,$01             ; Intellect_##____Critical_###
-.byte $9F,$5B,$5F,$5B,$4B,$FF,$10,$0A,$09,$04,      $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Vitality__##____Defense__###
-.byte $9C,$B3,$A8,$40,$09,$05,$10,$0B,$09,$04,      $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Speed_____##____Evasion__###
-.byte $96,$35,$A4,$45,$09,$03,$10,$45,$09,$04,      $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00 ; Morale___###____M.Evade__###
+.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$11,$09,$04,  $8D,$A4,$B0,$A4,$66,$09,$03,        $10,$16,$01 ; Strength__##____Damage___###
+.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$12,$09,$04,  $8A,$A6,$A6,$55,$5E,$4B,            $10,$17,$01 ; Agility___##____Accuracy_###
+.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$13,$09,$04,  $8C,$5C,$57,$51,$AF,$FF,            $10,$1B,$01 ; Intellect_##____Critical_###
+.byte $9F,$5B,$5F,$5B,$4B,$FF,    $10,$14,$09,$04,  $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$18,$01 ; Vitality__##____Defense__###
+.byte $9C,$B3,$A8,$40,$09,$05,    $10,$15,$09,$04,  $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$19,$01 ; Speed_____##____Evasion__###
+.byte $96,$35,$A4,$45,$09,$03,    $10,$1C,$09,$04,  $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$1A,$00 ; Morale___###____M.Evade__###
 
 ;.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$01         ; Strength__ 
 ;.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$01         ; Agility___  
@@ -950,6 +949,7 @@ M_MagicMenuMPTitle:
 .byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
 
 M_EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
+;; don't draw it with the normal ComplexString setup... it must be loaded into RAM and edited there first!
 .byte $8D,$A4,$B0,$A4,$66,$08                 ; Damage___###__ ; later on, stats are added in the # slots
 .byte $8D,$A8,$A9,$3A,$3E,$05,$01             ; Defense__###
 .byte $8A,$A6,$A6,$55,$5E,$BC,$06             ; Accuracy_###__
@@ -987,91 +987,77 @@ M_EquipInventoryClear:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrintCharStat:
-    CMP #$03      ; is ID == $03?
-    BNE :+
-      JMP @Level  ; if yes, print Level
-:   CMP #$04
-    BEQ @Exp      ; if $04, print Exp
+    CMP #$03       ; is ID == $03?
+    BEQ @Level     ; if yes, print Level
+    CMP #$04
+    BEQ @Exp       ; if $04, print Exp
     CMP #$05
-    BEQ @CurHP    ; if $05, print CurHP
+    BEQ @CurHP     ; if $05, print CurHP
     CMP #$06
-    BEQ @MaxHP    ; etc
-    CMP #$07
-    BEQ @Str
-    CMP #$08
-    BEQ @Agil
-    CMP #$09
-    BEQ @Int
-    CMP #$0A
-    BEQ @Vit
-    CMP #$0B
-    BEQ @Luck
-
-    CMP #$3C
-    BCS @CodeAbove3B   ; see if ID is >= #$3C
+    BEQ @MaxHP     ; if $06, print MaxHP
+    CMP #$16
+    BCC @MainStat  ; if under $16, do main stats
+    CMP #$1E
+    BCC @SubStats  ; if under $1E, do sub stats  
+    CMP #$20
+    BCC @ExpToNext ; if under $20, do Exp to next level
+    CMP #$28
+    BCC @CurMP     ; if under $28, do current MP 
+    ; else, its max MP
     
-    CMP #$34 ; JIGS - check if its equal to or above $34, for Max MP
-    BCS @MaxMP 
-    
-    CMP #$2C ; JIGS - check if its equal to or above $2C, for current MP
-    BCS @CurMP 
-
-    ;;  2C-33 = Cur MP
-    ;;  34-3B = Max MP
-    
-    ;CMP #$2C
-    BCC @ExpToNext   ; see if ID is < #$2C (should never happen)
-   
-   @CurMP: ;; JIGS - adding this
-    SEC
-    SBC #$0C         ; subtract #$C  ($20-2F -- index + $20)
+   @MaxMP:
+    ;; A = 30-37
     CLC
     ADC char_index   ; add character index
     TAX
-    LDA ch_mp-$20, X ; get MP  (need to subtract $20 because index is +$20)
-    AND #$F0         ;; JIGS - gets current MP
+    LDA ch_stats, X  ; get MP
+    AND #$0F         ;; JIGS - clear out current MP for max MP only
+    STA tmp          ;  and print it as 1 Digit
+    JMP PrintNumber_1Digit   
+  
+   @CurMP: 
+    ;; A = 20-27
+    ; Carry is clear from the branch
+    ADC #$10         ; mp is +$10 from $20 in ch_stats
+    ADC char_index   ; add character index
+    TAX
+    LDA ch_stats, X  ; get MP 
+    AND #$F0         ;; JIGS - cut off max MP to get only current MP
     LSR A            ; and move it to low bits
     LSR A 
     LSR A 
     LSR A 
-    ;ORA #$80        ;  Or with $80 to get this digit's tile
     STA tmp          ;  and print it as 1 Digit
     JMP PrintNumber_1Digit
    
-   ;; code reaches here if the ID is between $2C-3B  (prints MP... cur or max)
-   @MaxMP:
-    SEC
-    SBC #$14         ; JIGS - originally subtract #$C  ($20-2F -- index + $20)
+   ;;  Stat Code = $03 -- character level
+   @Level:
+    LDX char_index   ; Get Character index
+    LDA ch_level, X  ; Get character's level
     CLC
-    ADC char_index   ; add character index
-    TAX
-    LDA ch_mp-$20, X ; get MP  (need to subtract $20 because index is +$20)
-    AND #$0F         ;; JIGS - gets max MP
-    STA tmp          ;  and print it as 1 Digit
-    JMP PrintNumber_1Digit
+    ADC #$01         ; Add 1 to it ($00 is "Level 1")
+    BNE :+           ; jump ahead to print it as 2 digits
     
-@CodeAbove3B:
-    CMP #$42
-    BCS :+                ; see if ID is >= $42
-
-  ;;; code reaches here if ID is between $3C-41  (prints substats, like Damage, Hit%, etc)
-    SEC
-    SBC #$3C            ; subtract #$3C  ($00-05)
-   @LikeASubStat: 
-    CLC
+   @MainStat:
+    ;; A = stat    
+    ; Carry is clear from the branch
+    ADC char_index
+    TAX
+    LDA ch_stats, X
+  : STA tmp
+    JMP PrintNumber_2Digit
+    
+   @SubStats:
+    ;; A = substat
+    ; Carry is clear from the branch
     ADC char_index      ; add character index
     TAX
-    LDA ch_substats, X  ; get the substat
+    LDA ch_stats, X     ; get the substat
     STA tmp             ; write it as low byte
     LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
     STA tmp+1           ;  and print as 3 digits
     JMP PrintNumber_3Digit
     
- : CMP #$44   
-   BEQ @Critrate
-   CMP #$45
-   BEQ @Spirit
-
     ;;; all other codes default to Exp to Next level
 @ExpToNext:
     JSR LongCall
@@ -1088,31 +1074,6 @@ PrintCharStat:
 @MaxHP:
     LDABRA <ch_maxhp, @Stat3Digit
 
-@Str:
-    LDABRA <ch_strength, @Stat2Digit
-
-@Agil:
-    LDABRA <ch_agility, @Stat2Digit
-
-@Int:
-    LDABRA <ch_intelligence, @Stat2Digit
-
-@Vit:
-    LDABRA <ch_vitality, @Stat2Digit
-
-@Luck:
-    LDABRA <ch_speed, @Stat2Digit
-
-@Spirit:
-    LDA #ch_morale
-    JMP @SetupLikeASubStat
-    
-@Critrate:
-    LDA #ch_critrate
-   @SetupLikeASubStat:
-    CLC
-    SBC #ch_substats - 1
-    JMP @LikeASubStat
 
 @Stat1Digit:       ; same as below routines -- but 1 byte, 1 digit
     CLC            ;  I do not believe this 1Digit code is ever called
@@ -1151,16 +1112,6 @@ PrintCharStat:
     LDA ch_stats+2, X
     STA tmp+2           ; and print it as 6-digits
     JMP PrintNumber_6Digit
-
-;;  Stat Code = $03 -- character level
-@Level:
-    LDX char_index   ; Get Character index
-    LDA ch_level, X  ; Get character's level
-    CLC
-    ADC #$01         ; Add 1 to it ($00 is "Level 1")
-    STA tmp          ; and print it as 2-digit
-    JMP PrintNumber_2Digit
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2110,8 +2061,8 @@ EnterNormalShop:
     BNE MainShopLoop
 
 EnterCaravan:    
-    LDA #$03
-    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
+    LDA #SHOPBOX_COMMAND
+    JSR DrawMainItemBox      ; draw shop box ID=3 (the command box)
     LDA #$0B
     JSR DrawShopString       ; draw shop string ID=$0B ("Buy"/"Exit")
     LDA #2
@@ -2137,8 +2088,8 @@ MainShopLoop:
     BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
     JSR Shop_CharacterStopDancing 
     
-  : LDA #$03
-    JSR DrawShopBox          ; draw box 3 (command box)
+  : LDA #SHOPBOX_COMMAND
+    JSR DrawMainItemBox      ; draw box 3 (command box)
     LDA #$0C
     JSR DrawShopString       ; string 0C ("Buy Sell Exit")
     LDA #$03
@@ -2161,16 +2112,16 @@ ShopBuy:
  ;   LDX shop_type
  ;   LDA lut_ShopWhatWant, X
  ;   JSR DrawShopDialogueBox     ; "what would you like" dialogue (different depending on shop type)
-    LDA #$03
-    JSR EraseShopBox         ; erase shop box #3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR EraseMainItemBox         ; erase shop box #3 (command box)
     JSR ResetShopListAttributes
     JSR ResetScroll
     
 ShopBuy_Loop:    
     LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
     BNE :+
-    LDA #$02
-    JSR DrawShopBox             ; draw shop box #2 (inv list box)    
+    LDA #SHOPBOX_INV
+    JSR DrawMainItemBox             ; draw shop box #2 (inv list box)    
     INC shop_listdrawn
 
   : JSR ShopCursor_Slot1
@@ -2317,16 +2268,16 @@ ShopSell:
   : ;LDX shop_type
     ;LDA lut_ShopWhatSell, X
     ;JSR DrawShopDialogueBox     ; "what do you have to sell?"
-    LDA #$03
-    JSR EraseShopBox         ; erase shop box #3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR EraseMainItemBox         ; erase shop box #3 (command box)
     JSR ResetShopListAttributes
     JSR ResetScroll
 
 ShopSell_Loop:    
     LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
     BNE :+
-    LDA #$02
-    JSR DrawShopBox             ; draw shop box #2 (inv list box)    
+    LDA #SHOPBOX_INV
+    JSR DrawMainItemBox             ; draw shop box #2 (inv list box)    
     INC shop_listdrawn
 
   : JSR ShopCursor_Slot1
@@ -2413,8 +2364,8 @@ NothingToSell:
     LDA #$12
     JSR DrawShopDialogueBox
     JSR MenuWaitForBtn
-  : LDA #$02
-    JSR EraseShopBox            ; erase shop box 2 (inventory)
+  : LDA #SHOPBOX_INV
+    JSR EraseMainItemBox        ; erase shop box 2 (inventory)
 	LDA #$0
     STA shop_selling
     STA shop_listdrawn
@@ -3051,8 +3002,8 @@ EnterInn:
     LDA #$21
     JSR DrawShopDialogueBox     ; "Remember to save" dialogue
 
-    LDA #$03
-    JSR EraseShopBox            ; erase shop box 3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR EraseMainItemBox        ; erase shop box 3 (command box)
 
     JSR ShopFrameNoCursor 
     JSR FadeOutBatSprPalettes   ; and fade the party out
@@ -3083,8 +3034,8 @@ EnterInn:
     JMP @True_Exit
     
   @Exit:
-    LDA #$03
-    JSR EraseShopBox            ; erase shop box 3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR EraseMainItemBox        ; erase shop box 3 (command box)
 
     LDA #$21
     JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue 
@@ -3153,8 +3104,8 @@ EnterClinic:
     LDA #$25
     JSR DrawShopDialogueBox    ; "Warrior!  Return to life!"  dialogue
 
-    LDA #$03
-    JSR EraseShopBox           ; erase shop box 3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR EraseMainItemBox       ; erase shop box 3 (command box)
 
   @ReviveLoop:
     JSR ShopFrameNoCursor      ; do a frame
@@ -3256,14 +3207,14 @@ InnClinic_CanAfford:
 
 
 Clinic_SelectTarget:
-    LDA #$03
-    JSR DrawShopBox            ; draw shop box #3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR DrawMainItemBox            ; draw shop box #3 (command box)
 
-   LDA #<(str_buf+$10)        ; set our text pointer to point to the generated string
-   STA text_ptr
-   LDA #>(str_buf+$10)
-   STA text_ptr+1
-   JSR DrawShopComplexString  ; and draw it
+    LDA #<(str_buf+$10)        ; set our text pointer to point to the generated string
+    STA text_ptr
+    LDA #>(str_buf+$10)
+    STA text_ptr+1
+    JSR DrawShopComplexString  ; and draw it
    
     LDA #0
     STA cursor 
@@ -3730,8 +3681,8 @@ DrawShop:
     LDA #0
     STA menustall                ; disable menu stalling (PPU is off)
 
-    LDA #$01
-    JSR DrawShopBox              ; draw shop box ID=1  (the title box)
+    LDA #SHOPBOX_TITLE
+    JSR DrawMainItemBox              ; draw shop box ID=1  (the title box)
 
     LDA shop_type                ; get the shop type
     DEC dest_y ; JIGS 
@@ -3808,8 +3759,8 @@ LoadShopInventory:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawShopGoldBox:
-    LDA #$04
-    JSR DrawShopBox            ; Draw shop box #4  (the gold box)
+    LDA #SHOPBOX_GOLD
+    JSR DrawMainItemBox            ; Draw shop box #4  (the gold box)
     JSR PrintGold              ; print current gold to format buffer
     DEC dest_y                 ; JIGS - I think this makes it look nicer
     JSR DrawShopComplexString  ; draw formatted string
@@ -3956,8 +3907,8 @@ EquipMenu_BuildSellBox:
 
 ShopSelectItem:
     JSR UpdateShopList 
-    LDA #$03
-    JSR EraseShopBox         ; erase shop box #3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR EraseMainItemBox     ; erase shop box #3 (command box)
     LDA #1
     STA shop_listactive
     STA shop_cursorchange  
@@ -4249,8 +4200,8 @@ ConvertInventoryToItemBox:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ShopLoop_YesNo:
-    LDA #$03
-    JSR DrawShopBox          ; draw shop box ID=3 (the command box)
+    LDA #SHOPBOX_COMMAND
+    JSR DrawMainItemBox          ; draw shop box ID=3 (the command box)
     LDA #$0D
     JSR DrawShopString       ; draw shop string ID=$0F ("Yes"/"No")
 
@@ -4274,7 +4225,7 @@ ShopLoop_YesNo:
 
 ;ShopLoop_BuySellExit:
 ;    LDA #$03
-;    JSR DrawShopBox          ; draw box 3 (command box)
+;    JSR DrawMainItemBox          ; draw box 3 (command box)
 ;    LDA #$0A
 ;    JSR DrawShopString       ; string 0A ("Buy Sell Exit")
 
@@ -4298,8 +4249,8 @@ ShopLoop_YesNo:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ShopLoop_CharNames:
-    LDA #$03
-    JSR DrawShopBox            ; draw shop box 3 (command box)
+    LDA #SHOPBOX_COMMAND
+    JSR DrawMainItemBox            ; draw shop box 3 (command box)
 
     LDA #<@NamesString         ; set our pointer to the string containing char names
     STA text_ptr
@@ -4572,23 +4523,6 @@ DisplayDescription:
 
 
 
-;ClearShopkeeperTextBox:
-;    JSR ShopFrame        ; now that cursor position has been recorded... do a frame
-
-;    LDA joy_b
-;    ORA joy_a
-;    BEQ ClearShopkeeperTextBox ; just wait for A or B to be pressed
-    
-;    LDA #0
-;    STA joy_b
-;    STA joy_a
-
-;    LDA #$00
-;    JSR EraseShopBox        ; erase shop box #3 (command box)
-
-
-
-
 
 
    
@@ -4598,19 +4532,6 @@ DisplayDescription:
 ;;  Shop cursor position luts  [$A977 :: 0x3A987]
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;lut_ShopCurs_Cmd:    ; cursor positions for the command box
-;  .BYTE $28,$A0
-;  .BYTE $28,$B0
-;  .BYTE $28,$C0
-;  .BYTE $28,$D0
-
-;lut_ShopCurs_List:   ; cursor positions for the inventory list box
-;  .BYTE $A8,$20
-;  .BYTE $A8,$40
-;  .BYTE $A8,$60
-;  .BYTE $A8,$80
-;  .BYTE $A8,$A0
 
 ;; JIGS - reorganized:
 
@@ -4628,94 +4549,7 @@ lut_ShopCurs_List:   ; cursor positions for the inventory list box
   .BYTE $A0,$A0
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Shop Select Buy Magic   [$A989 :: 0x3A999]
-;;
-;;     Builds the string to fill the inventory box from the shop's
-;;  inventory (ie:  spells you can buy).  These items are taken from the item_box
-;;  Once the string is drawn, cursor_max is set appropriatly (the number of items
-;;  available for sale), and this routine calls the common shop loop.
-;;
-;;  OUT:   cursor = selected item
-;;              C = set if B pressed, clear if A pressed
-;;
-;;     str_buf+$10 is used to hold the string because item_box and str_buf share
-;;  space.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;ShopSelectBuyMagic:
-;    LDA #0
-;    STA cursor
-;    STA cursor_max     ; zero cursor max... this will count the number of spells for sale.
-;    LDY #0             ; Y will be our string index
-
-;  @Loop:
-;    LDX cursor_max
-;    LDA item_box, X    ; get next item in shop inventory
-;    BEQ @Done          ; if it's zero (the null terminator), break out of the loop
-   
-;    STA str_buf+$42, Y ; store item ID at $11
-;    STA str_buf+$48, Y ; and $17
-;    LDA #$02
-;    STA str_buf+$41, Y ; store $02 ("draw item name" control byte) at $10
-;    LDA #$03
-;    STA str_buf+$47, Y ; store $03 ("draw item price" control byte) at $16
-;    LDA #$01
-;    STA str_buf+$43, Y ; store $01 (double line break) at $12 and $18
-;    STA str_buf+$49, Y
-;    LDA #$95
-;    STA str_buf+$44, Y ; JIGS - normal L now
-;    LDA #$FF           ; and a space
-;    STA str_buf+$46, Y
-
-;    LDA str_buf+$42, Y ; get the item ID
-;    SEC
-;    SBC #ITEM_MAGICSTART  ; subtract 
-;    LSR A
-;    LSR A
-;    LSR A              ; then divide by 8.  This gives us the spell's level
-;    SEC
-;    ADC #$80           ; SEC then add $80 (so really... add $81).  This converts the 0-based
-                       ;  level, into the 1-based tile to draw.  IE:  level=0 prints the "1" tile.
-;    STA str_buf+$45, Y ; put that tile at $14
-
-                 ; string is now:  "02 XX 01 C6 VV 03 XX 01" where XX is the item ID, and VV is the spell level
-                 ;  which... after processing all control codes... will draw to:
-                 ;
-                 ; Name
-                 ; LV_Price
-
-;    TYA
-;    CLC                ; that bit of string is 8 bytes... so add 8 to our
-    ;ADC #$08           ;  string index:  Y
-    ;; JIGS - it is 9!
-;    ADC #$09
-;    TAY
-
-;    INC cursor_max     ; increment cursor max to count this entry
-;    LDA cursor_max
-;    CMP #5             ; check to see if we have 5 spells yet (can't sell more than 5)
-;    BCC @Loop          ; keep looping if we have less than 5
-
-;  @Done:
-;    LDA #$00
-;    STA str_buf+$41, Y ; put a null terminator at the end of the string
-
-;    LDA #$02
-;    JSR DrawShopBox    ; draw shop box 2 (inventory list box)
-
-;    LDA #<(str_buf+$41)         ; set the text pointer to our string
-;    STA text_ptr
-;    LDA #>(str_buf+$41)
-;    STA text_ptr+1
-;    JSR DrawShopComplexString   ; and draw it
-
-;    LDA #$03
-;    JSR EraseShopBox           ; then erase shop box 3 (command box)
-
-;    JMP CommonShopLoop_List     ; and have the user select an option from the shop inventory list
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4739,30 +4573,6 @@ DrawShopCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawShopPartySprites:
-;    LDA #$98
-;    STA spr_x
-;    LDA #$38
-;    STA spr_y
-;    LDA #1<<6
-;    JSR DrawOBSprite    ; draw char 1 at $98,$38
-
-;    LDA #$50
-;    STA spr_y
-;    LDA #2<<6
-;    JSR DrawOBSprite    ; draw char 2 at $98,$50
-
-;    LDA #$68
-;    STA spr_y
-;    LDA #3<<6
-;    JSR DrawOBSprite    ; draw char 3 at $98,$68
-
-;    LDA #$50
-;    STA spr_y
-;    LDA #$88
-;    STA spr_x
-;    LDA #0<<6
-;    JMP DrawOBSprite    ; draw char 0 at $88,$50, then exit
-
 ;; JIGS - really cram 'em in there! Let Light Warrior #2 see the wares! 
 
     LDA #$80
@@ -4777,8 +4587,6 @@ DrawShopPartySprites:
     LDA #1<<6
     JSR DrawOBSprite    
     
-    ;LDA #$90
-    ;STA spr_x
     LDA #$5A ; 3C
     STA spr_y
     LDA #2<<6
@@ -4805,78 +4613,9 @@ DrawShopString:
     LDA lut_ShopStrings, X  ; load the pointer from the shop string LUT
     STA text_ptr
     LDA lut_ShopStrings+1, X
-    STA text_ptr+1     ;  ... then draw it....
-                       ; no JMP or RTS -- code seamlessly flows into DrawShopComplexString
+    STA text_ptr+1          ;  ... then draw it....
+    JMP DrawMenuComplexString
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Shop Complex String  [$AA32 :: 0x3AA42]
-;;
-;;    This just calls DrawComplexString, but sets the required bank information
-;;  first.
-;;
-;;    Somewhat wastefully, there's a routine virtually identical to this one
-;;  that is used for menus!  See DrawMenuComplexString.  The only difference is that this
-;;  routine uses X instead of A -- but since DrawComplexString overwrites both A and X...
-;;  that is utterly meaningless.
-;;
-;;    Anyway, yeah.  Big waste.  No reason this routine needs to exist.  All references to it
-;;  could just call DrawMenuComplexString.  C'est la vie... one of this game's many quirks.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;DrawShopComplexString:
-;    LDX #BANK_THIS
-;    STX cur_bank
-;    STX ret_bank
-;    JMP DrawComplexString
-
-;; JIGS - moving this label to save space
-
-JMP DrawMenuComplexString
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Shop Box  [$AA3B :: 0x3AA4B]
-;;
-;;    Draws a shop box
-;;
-;;  IN:   A = shop box ID number
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawShopBox:
-    JSR LoadShopBoxDims      ; load the dims
-    JMP DrawBox              ; draw it, then exit
-
-EraseShopBox:
-    JSR LoadShopBoxDims      
-    JMP EraseBox
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Shop Box Dims  [$AA41 :: 0x3AA51]
-;;
-;;    Loads the positions and dimensions for the given shop box ID number (in A)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadShopBoxDims:
-    TAX                    ; put box ID in X
-
-    LDA lut_ShopBox_X, X        ; use it to copy data from LUTs
-    STA box_x
-    LDA lut_ShopBox_Y, X
-    STA box_y
-    LDA lut_ShopBox_Wd, X
-    STA box_wd
-    LDA lut_ShopBox_Ht, X
-    STA box_ht
-
-    LDA #BANK_THIS         ; set the cur bank.  cur bank is needed to be set
-    STA cur_bank           ; for when boxes are drawn/erased when stalled
-
-    RTS
 
 
 
@@ -4891,8 +4630,8 @@ LoadShopBoxDims:
 
 DrawShopDialogueBox:
     PHA                  ; back up desired dialogue string by pushing it
-    LDA #$00
-    JSR DrawShopBox      ; draw shop box ID 0 (the dialogue box)
+    LDA #SHOPBOX_SHOPKEEP
+    JSR DrawMainItemBox  ; draw shop box ID 0 (the dialogue box)
     PLA                  ; pull our dialogue string
     JMP DrawShopString   ; draw it, then exit
 
@@ -5190,37 +4929,6 @@ lut_BIT:
   .BYTE %00000100
   .BYTE %00000010
   .BYTE %00000001
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Shop Box LUTs  [$AC40 :: 0x3AC50]
-;;
-;;    These are the LUTs for the 5 boxes that appear in the shops.
-;;  Since it's not easy to multiply an index by 5 and use that to index a single
-;;  LUT, each element (X coord, Y coord, Width, Height) are each in their own
-;;  seperate LUT (personally I think this is the better way to do it for all
-;;  LUTs... no multiplication needed... but meh)
-;;
-;;  As for the box IDs:
-;;
-;;    0 = the shopkeeper's dialogue box
-;;    1 = the title box (WEAPON / INN / whathaveyou)
-;;    2 = the shop inventory box
-;;    3 = the command box (buy/sell/exit/etc)
-;;    4 = the gold box (how much money you have left)
-;;
-
-
-;lut_ShopBox_X:    .BYTE $01,$0C,$16,$06,$12
-;lut_ShopBox_Y:    .BYTE $04,$02,$02,$12,$18
-;lut_ShopBox_Wd:   .BYTE $09,$08,$09,$09,$0A
-;lut_ShopBox_Ht:   .BYTE $0C,$04,$16,$0A,$04
-
-;JIGS - MUCH NICER
-
-lut_ShopBox_X:    .BYTE $01,$01,$15,$02,$15
-lut_ShopBox_Y:    .BYTE $12,$02,$02,$06,$18
-lut_ShopBox_Wd:   .BYTE $13,$13,$0A,$09,$0A
-lut_ShopBox_Ht:   .BYTE $09,$03,$16,$0B,$03
 
 
 
@@ -5789,13 +5497,13 @@ DrawMagicMenu:
     JSR DrawMagicMenuMainBox       ; draw the big box containing all the spells
     ;; item_pageswap is set to 0 if no spells are found
     
-    LDA #06
+    LDA #MBOX_TITLE
     JSR DrawMainItemBox             
     DEC dest_y
     LDA #7
     JSR DrawCharMenuString         ; draw the character's name
    
-    LDA #07
+    LDA #MBOX_SUBMENU
     JSR DrawMainItemBox            ; sub menu box
 
 DrawMagicSubMenuString:
@@ -6502,18 +6210,18 @@ DrawLearnSpellMenu:
     
     JSR ClearNT
     
-	LDA #14
+	LDA #MBOX_MAGIC_L
     JSR DrawMainItemBox          ; draw these first so the name and submenu boxes overlap
-    LDA #15
+    LDA #MBOX_MAGIC_R
     JSR DrawMainItemBox          ; Draw the two learning menu boxes
 	
-    LDA #06
+    LDA #MBOX_TITLE
     JSR DrawMainItemBox             
     DEC dest_y
     LDA #7
     JSR DrawCharMenuString         ; draw the character's name
     
-    LDA #07
+    LDA #MBOX_SUBMENU
     JSR DrawMainItemBox            ; sub menu box
     DEC dest_y
     LDA #11
@@ -6775,7 +6483,7 @@ TryLearnSpell:
     
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
-    LDA #09               ; draw main/item box ID $08  (the description box)
+    LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
     JSR DrawMainItemBox
     INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
     LDA #77
@@ -6820,10 +6528,10 @@ EnterItemMenu:
     STA descboxopen     ; indicate that the descbox is closed
     JSR ClearNT         ; wipe the NT clean
                         ;  then start drawing the item menu
-	LDA #08         
+	LDA #MBOX_INV         
     JSR DrawMainItemBox    ; draw first, so that the next boxes overlap it 
 
-    LDA #06                ; draw mainitem box ID 7 (the "ITEM" title box)
+    LDA #MBOX_TITLE        ; draw mainitem box ID 7 (the "ITEM" title box)
     JSR DrawMainItemBox
     DEC dest_y
     
@@ -6836,7 +6544,7 @@ EnterItemMenu:
   : LDA #3                 ; draw QUEST in box
     JSR DrawMenuString     ;  and draw it and return   
   
-  : LDA #07                ; draw submenu box
+  : LDA #MBOX_SUBMENU      ; draw submenu box
     JSR DrawMainItemBox
     DEC dest_y
     LDA #66
@@ -7928,12 +7636,12 @@ DrawElixirTargetCursor:
     LDX cursor           ; put the cursor in X
     LDA @lut, X          ; use it to index our LUT
     STA spr_y            ; that lut is the X coord for cursor
-    LDA #$30
+    LDA #$2C
     STA spr_x            ; Y coord is always $68
     JMP DrawCursor       ; draw it, and exit
 
   @lut:
-    .BYTE $28,$48,$68,$88    
+    .BYTE $26,$46,$66,$86    
     
     
 DrawMPTargetCursor:
@@ -7985,7 +7693,7 @@ CheckForMP:
     
 DrawItemTargetMenu:
     JSR ScreenOff_ClearNT
-    LDA #10
+    LDA #MBOX_HP
     JSR DrawMainItemBox
     LDA #3
     STA submenu_targ
@@ -8010,7 +7718,7 @@ DrawItemTargetMenu_OneChar:
     
 DrawItemTargetMenu_Elixir:
     JSR ScreenOff_ClearNT
-    LDA #12
+    LDA #MBOX_HPMP
     JSR DrawMainItemBox
     LDA #3
     STA submenu_targ
@@ -8034,6 +7742,7 @@ DrawItemTargetMenu_Elixir_OneChar:
     JSR DrawCharMenuString          ; draw Name, ailment, HP for each character
     INC dest_y
     INC dest_y
+    DEC dest_x
     JSR CheckForMP
     BEQ :+
     LDA #16
@@ -8042,7 +7751,7 @@ DrawItemTargetMenu_Elixir_OneChar:
     
 DrawMPTargetMenu:
     JSR ScreenOff_ClearNT
-    LDA #11
+    LDA #MBOX_MP
     JSR DrawMainItemBox             ; draw main box for all character's MP
     INC dest_x                      
     INC dest_y                      
@@ -8143,23 +7852,11 @@ EnterStatusMenu:
     LDA #19
     JSR DrawCharMenuString
 
-    LDA #05 ; 03             ; lower left box - Correction, only box
+    LDA #MBOX_STATUS
     JSR DrawMainItemBox
     LDA #20
     INC dest_x
     JSR DrawCharMenuString
-    
-   ; LDA #04                 ; lower right box
-   ; JSR DrawMainItemBox
-   ; INC dest_x
-    
-  ;  LDA #18
-  ;  STA dest_x
-  ;  LDA #15
-  ;  STA dest_y    
-  ;  
-  ;  LDA #21
-  ;  JSR DrawCharMenuString
     
     JSR ClearOAM            ; clear OAM
 
@@ -9302,7 +8999,7 @@ DrawMainMenu:
    JSR DrawMenuString   ; draw options string
 
 DrawMainMenu_CharacterBox:
-    LDA #1                         ; then draw the boxes for each character
+    LDA #MBOX_CHARACTERS           ; then draw the boxes for each character
     JSR DrawMainItemBox            ;  stats...starting with the first character
 	;; at this point, should be at scanline 250 or so... 
 	JSR CallMusicPlay
@@ -9341,22 +9038,6 @@ DrawMainMenu_CharacterBox:
     JMP DrawMenuString
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Main Menu Gold Box   [$B86E :: 0x3B87E]
-;;
-;;    Self explanitory.  Draws the box on the main menu that shows your current GP
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
- ;DrawMainMenuGoldBox:
- ;  LDA #16             ; draw main/item box number 5 (the GP box)
- ;  JSR DrawMainItemBox
- ;  LDA #0              ; draw menu string ID=$01  (current GP, followed by " G")
- ;  DEC dest_y
- ;  ;; JIGS ^ the gold box is thinner now
- ;  LDA #0
- ;  JMP DrawMenuString
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9370,7 +9051,7 @@ DrawMainMenu_CharacterBox:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawOrbBox:
-    LDA #0             ; Draw main menu box ID 0  (the orb box)
+    LDA #MBOX_OPTION          ; Draw main menu box ID 0  (the orb box)
     JSR DrawMainItemBox
    
     LDX #$20
@@ -9482,6 +9163,15 @@ DrawOrbBox:
 DrawMainItemBox:
     JSR LoadMainItemBoxDims
     JMP DrawBox
+    
+EraseDescBox:
+    LDA #1
+    STA menustall            ; set menustall -- we will need to stall here, since the PPU is on
+    LDA #MBOX_ITEMDESC
+    
+EraseMainItemBox:
+    JSR LoadMainItemBoxDims
+    JMP EraseBox   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9524,45 +9214,31 @@ LoadMainItemBoxDims:
 lut_MainItemBoxes:
  
     ;        X   Y   wid height
-  ;  .BYTE   $01,$01,$0A,$0A ; 00 ; Main menu orb box
-    .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb box
+    .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb/option box
     .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
-    .BYTE   $08,$02,$10,$0D ; 02 ; Status Menu - Name, Class, Level, Exp., Exp to Next (UNUSED)
-    .BYTE   $00,$0F,$10,$0D ; 03 ; Status Menu - main stats (UNUSED)
-    .BYTE   $10,$0F,$10,$0D ; 04 ; Status Menu - sub stats (UNUSED)
-	;.BYTE   $10,$02,$10,$0D ; 05 ; Status Menu - extra box in case... (UNUSED)
-    .BYTE   $00,$0D,$20,$0F ; 05 ; Status Menu - New and only box.
-    .BYTE   $00,$01,$09,$03 ; 06 ; Item title box (character name for magic screen)
-	.BYTE   $09,$01,$17,$03 ; 07 ; Magic/Item title submenu
-    .BYTE   $00,$03,$20,$13 ; 08 ; Inventory box
-	.BYTE   $00,$16,$20,$07 ; 09 ; Item description box
-    .BYTE   $05,$06,$16,$0E ; 10 ; Item Target Menu (HP)
-    .BYTE   $03,$01,$1A,$15 ; 11 ; Item Target Menu (MP)
-    .BYTE   $05,$03,$16,$13 ; 12 ; Item Target Menu (HP/MP)
-	.BYTE   $01,$01,$1E,$1C ; 13 ; Equip Menu
-    .BYTE   $00,$03,$10,$13 ; 14 ; Magic Learning menu left side
-    .BYTE   $10,$03,$10,$13 ; 15 ; Magic Learning menu right side
-  	.BYTE   $00,$16,$20,$07 ; 16 ; Equip Stats Box
-   ; .BYTE   $01,$0A,$0A,$03 ; 16 ; Main menu gold box
-   ; .BYTE   $01,$0C,$0A,$10 ; 17 ; Main menu option box
+    .BYTE   $00,$0D,$20,$0F ; 02 ; Status Menu 
+    .BYTE   $00,$01,$09,$03 ; 03 ; Item title box (character name for magic screen)
+	.BYTE   $09,$01,$17,$03 ; 04 ; Magic/Item title submenu
+    .BYTE   $00,$03,$20,$13 ; 05 ; Inventory box
+	.BYTE   $00,$16,$20,$07 ; 06 ; Item description box
+    .BYTE   $05,$06,$16,$0E ; 07 ; Item Target Menu (HP)
+    .BYTE   $03,$01,$1A,$15 ; 08 ; Item Target Menu (MP)
+    .BYTE   $04,$03,$18,$13 ; 09 ; Item Target Menu (HP/MP)
+	.BYTE   $01,$01,$1E,$1C ; 0A ; Equip Menu
+    .BYTE   $00,$16,$20,$07 ; 0B ; Equip Stats Box
+    .BYTE   $00,$03,$10,$13 ; 0C ; Magic Learning menu left side
+    .BYTE   $10,$03,$10,$13 ; 0D ; Magic Learning menu right side
+    
+    ;; Shop boxes
+    .BYTE   $01,$12,$13,$09 ; 0E ; Shopkeeper dialogue
+    .BYTE   $01,$02,$13,$03 ; 0F ; Title box
+    .BYTE   $15,$02,$0A,$16 ; 10 ; Inventory list
+    .BYTE   $02,$06,$09,$0B ; 11 ; Command box
+    .BYTE   $15,$18,$0A,$03 ; 12 ; Gold box
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawMainMenuOptionBox  [$B911 :: 0x3B921]
-;;
-;;    Draws the option box for the main menu (the one that contains further menu options,
-;;  like "Status", "Item", "Weapon", etc
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
 
-;DrawMainMenuOptionBox:
-;    LDA #17
-;    JSR DrawMainItemBox    ; Draw Main/Item Box ID=$06  (the option box)
-;    LDA #4
-;    STA dest_x             ; JIGS - due to widening the option box, text needs to be pushed right 2 extra 
-;    LDA #01                ; Draw Menu String ID=$02 (the option text)
-;    JMP DrawMenuString
 
 
 
@@ -9604,7 +9280,7 @@ DrawItemDescBox:
     PHA                   ; push menu string ID to back it up
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
-    LDA #09               ; draw main/item box ID $08  (the description box)
+    LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
     JSR DrawMainItemBox
     PLA                   ; restore menu string ID
     INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
@@ -9653,20 +9329,7 @@ DrawMenuComplexString:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Erase Description Box [$B94D :: 0x3B95D]
-;;
-;;    Erases the item description box from the item menu.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-EraseDescBox:
-    LDA #1
-    STA menustall            ; set menustall -- we will need to stall here, since the PPU is on
-    LDA #09
-    JSR LoadMainItemBoxDims  ; load box dimensions for box ID 8 (the item description box)
-    JMP EraseBox             ;  erase the box, then exit
 
 
 
@@ -9891,7 +9554,7 @@ DrawMainMenuCharBoxBody:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawMagicMenuMainBox:
-    LDA #08
+    LDA #MBOX_INV
     JSR DrawMainItemBox          ; Draw the box itself from the list of MainItem boxes
     
     LDY #$C0                     ; set char menu string length to $C0
@@ -10150,27 +9813,27 @@ EquipStatsDescBoxNumbers:
     
    @FetchStats:    
     LDX #$08       
-    LDY #$3C         ; damage
+    LDY #$16         ; damage
     JSR @TheThing
   
     LDX #$14
-    LDY #$3E         ; defense
+    LDY #$18         ; defense
     JSR @TheThing
     
     LDX #$1F
-    LDY #$3D         ; accuracy
+    LDY #$17         ; accuracy
     JSR @TheThing
    
     LDX #$2B
-    LDY #$3F         ; evasion
+    LDY #$19         ; evasion
     JSR @TheThing
     
     LDX #$35
-    LDY #$44         ; critical
+    LDY #$1B         ; critical
     JSR @TheThing
     
     LDX #$43
-    LDY #$41         ; magic defense    
+    LDY #$1A         ; magic defense    
    
    @TheThing:
     LDA equip_impossible
@@ -10481,7 +10144,7 @@ lut_EquipInventoryPageTitle:
 .byte $04, $05, $06, $4E 
     
 DrawEquipInventory:
-    LDA #16                ; Equip Stats Box
+    LDA #MBOX_EQUIPSTATS        ; Equip Stats Box
     JSR DrawMainItemBox
     LDA equipoffset
     CMP #6
@@ -10490,17 +10153,17 @@ DrawEquipInventory:
     
   : JSR EquipStatsDescBoxString ; base string, no stats
 
-    LDA #08                ; Inventory List
+    LDA #MBOX_INV               ; Inventory List
     JSR DrawMainItemBox
     
-    LDA #06                ; Name
+    LDA #MBOX_TITLE             ; Name
     JSR DrawMainItemBox
     DEC dest_y
 
     LDA #07
     JSR DrawCharMenuString
    
-    LDA #07
+    LDA #MBOX_SUBMENU
     JSR DrawMainItemBox    ; sub menu box
     DEC dest_y
     INC dest_x
@@ -10990,7 +10653,7 @@ MoveEquipInventoryCursor:
 DrawEquipMenu:
    JSR ClearNT             ; clear the NT
    
-   LDA #13            
+   LDA #MBOX_EQUIP         
    JSR DrawMainItemBox
 
    LDA CharacterEquipBackup

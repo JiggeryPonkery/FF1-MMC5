@@ -279,11 +279,28 @@ BOX_ITEM            = $0E
 BOX_GEAR            = $0F
 BOX_SCAN            = $10
 
+;;;;;;;;;;;;;;;;;
+;; menu box IDs
+MBOX_OPTION         = $00
+MBOX_CHARACTERS     = $01
+MBOX_STATUS         = $02
+MBOX_TITLE          = $03
+MBOX_SUBMENU        = $04
+MBOX_INV            = $05
+MBOX_ITEMDESC       = $06
+MBOX_HP             = $07
+MBOX_MP             = $08
+MBOX_HPMP           = $09
+MBOX_EQUIP          = $0A
+MBOX_EQUIPSTATS     = $0B
+MBOX_MAGIC_L        = $0C
+MBOX_MAGIC_R        = $0D
 
-
-
-
-
+SHOPBOX_SHOPKEEP    = $0E
+SHOPBOX_TITLE       = $0F
+SHOPBOX_INV         = $10
+SHOPBOX_COMMAND     = $11
+SHOPBOX_GOLD        = $12
 
 
 ;;;;;;;;;;;;;;;;;;

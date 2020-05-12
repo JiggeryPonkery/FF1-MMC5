@@ -129,11 +129,10 @@ ch_hitrate        = ch_stats + $17
 ch_defense        = ch_stats + $18
 ch_evasion        = ch_stats + $19
 ch_magicdefense   = ch_stats + $1A
-ch_statusresist   = ch_stats + $1B ;
-ch_elementresist  = ch_stats + $1C ; effected by equipment, needs to refresh after battle
-ch_elementweak    = ch_stats + $1D ; effected by equipment, needs to refresh after battle
-ch_attackailment  = ch_stats + $1E ; effected by equipment
-ch_attackailproc  = ch_stats + $1F ; effected by equipment
+ch_critrate       = ch_stats + $1B ; effected by equipment, needs to refresh after battle
+ch_morale         = ch_stats + $1C
+ch_damagebackup   = ch_stats + $1D ; effected by equipment
+ch_basehp         = ch_stats + $1E ; 1F
 
 ch_righthand      = ch_stats + $20
 ch_lefthand       = ch_stats + $21
@@ -143,14 +142,15 @@ ch_hands          = ch_stats + $24
 ch_accessory      = ch_stats + $25
 ch_bag1           = ch_stats + $26  
 ch_bag2           = ch_stats + $27  
-ch_weaponsprite   = ch_stats + $28 ; effected by equipment
-ch_weaponpal      = ch_stats + $29 ; effected by equipment
-ch_weaponelement  = ch_stats + $2A ; effected by equipment, needs to refresh after battle
-ch_weaponcategory = ch_stats + $2B ; effected by equipment, needs to refresh after battle
-ch_numhits        = ch_stats + $2C ; effected by equipment, needs to refresh after battle
-ch_critrate       = ch_stats + $2D ; effected by equipment, needs to refresh after battle
-ch_damagebackup   = ch_stats + $2E ; effected by equipment
-ch_morale         = ch_stats + $2F 
+ch_weaponelement  = ch_stats + $28 ; effected by equipment, needs to refresh after battle
+ch_weaponcategory = ch_stats + $29 ; effected by equipment, needs to refresh after battle
+ch_numhits        = ch_stats + $2A ; effected by equipment, needs to refresh after battle
+ch_attackailment  = ch_stats + $2B ; effected by equipment
+ch_attackailproc  = ch_stats + $2C ; effected by equipment
+ch_statusresist   = ch_stats + $2D 
+ch_elementresist  = ch_stats + $2E ; effected by equipment, needs to refresh after battle
+ch_elementweak    = ch_stats + $2F ; effected by equipment, needs to refresh after battle
+
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 
@@ -710,6 +710,7 @@ btl_defender_hpmax           = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)
 btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
 
 ;; these are all things that can be changed by magic! Except max HP and class
+btlmag_defender                 = btl_attacker 
 btlmag_defender_class           = btl_attacker + $0A
 btlmag_defender_intelligence    = btl_attacker + $0B
 btlmag_defender_speed           = btl_attacker + $0C
@@ -786,7 +787,6 @@ btl_mathbuf = $6050 ;   ; $16 bytes, 2 byte pairs, used as buffers for mathemati
 
 btl_turnorder       = $6070 ; $D entries (9 enemies + 4 characters)
 indicator_index     = $607D ; tmp byte for flashing enemies if they're defender or attacker
-GuardDefense        = $607F ; amount to add to a players btl_defender_defense stat
 battle_item         = $607F ; handles item box scrolling and item use
 btl_turnorderBackup = $6080 ; 13 bytes
 btl_turnorderSpeed  = $6090 ; 13 bytes
@@ -824,7 +824,7 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes ($F3)
     en_special      = $0A ;                                     11
     en_attackail    = $0B ; can be changed with magic           12
     en_category     = $0C ;                                     13 
-    en_magdef       = $0D ;                                     14 
+    en_magdef       = $0D ; can be changed with magic           14 
     en_elemweakness = $0E ; can be changed with magic           15
     en_elemresist   = $0F ; can be changed with magic           16
     en_elemattack   = $10 ;                                     17
@@ -915,6 +915,8 @@ btl_charrunic           = $6844 ; Red Runic skill
 btl_charrush            = $6848 ; Fighter Rush skill
 btl_charstone           = $684C ; Stone status
 
+btl_charweaponpal       = $68E0 ; weapon palette
+btl_charweaponsprite    = $68E4 ; weapon sprite
 
 btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
     btl_chardraw_x      = btl_chardrawinfo+0

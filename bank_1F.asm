@@ -7836,32 +7836,31 @@ AddGPToParty:
 ;;
 ;;  00    = name (fixed width)
 ;;  01    = class
-;;  02    = out of battle stat icon
+;;  02    = out of battle stat icon (ailments)
 ;;  03    = Level
 ;;  04    = Exp
 ;;  05    = Cur HP
 ;;  06    = Max HP
-;;  07    = Strength
-;;  08    = Agility
-;;  09    = Int
-;;  0A    = Vit
-;;  0B    = Luck
-;;  0C-0F = Weapons (BUGGED)
-;;  10-13 = Armor (BUGGED)
-;;  14-2B = Magic
-;;  2C-33 = Cur MP
-;;  34-3B = Max MP
-;;  3C    = Damage
-;;  3D    = Hit %
-;;  3E    = Absorb
-;;  3F    = Evade %
-;;  40    = Elemental Resistence (but prints it as a number!)
-;;  41    = Mag Def
-;;  42    = Exp to Next Level
-;;  43    = name (variable width)
-;;  44    = Critical hit rate
-;;  45    = spirit
-;;  46-FF = unused (default to same as $42)
+;;  07-0F ;; nothing
+;;  10    ;; 10 cannot be used! See DrawCharMenuString_Len in Bank E
+;;  11    = Strength
+;;  12    = Agility
+;;  13    = Intelligence
+;;  14    = Vitality
+;;  15    = Speed
+;;  16    = Damage
+;;  17    = Hit Rate (Accuracy)
+;;  18    = Defense
+;;  19    = Evasion
+;;  1A    = Magic Defense
+;;  1B    = Crit Rate
+;;  1C    = Morale
+;;  1D    = Damage without weapon
+;;  1E-1F = Exp to next level
+;;  20-27 = Cur MP
+;;  30-37 = Max MP
+;;  40-57 = Magic Spells
+;;  everything above 58 defaults to: name (variable width)
 ;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -8119,16 +8118,12 @@ ComplexString_CharacterStatCode:
     BEQ ComplexString_CharCode_Class
     CMP #$02
     BEQ ComplexString_CharCode_AilmentIcon
-    ;; if its still below $14, then its a normal stat
-    CMP #$14
+    ;; if its still below $14, then its a stat or substat
+    CMP #$40
     BCC ComplexString_CharCode_NumericalStat
-    CMP #$2C
+    CMP #$58
     BCC ComplexString_CharCode_MagicName
     ;; if its still below $2B, draw the name of the spell they know!
-    
-    CMP #$43
-    BNE ComplexString_CharCode_NumericalStat 
-    ;; if its is NOT $43, do the normal stats
     ;; otherwise, do the variable width name:
     
 ComplexString_CharCode_Name_VariableWidth:
@@ -8185,6 +8180,7 @@ ComplexString_CharCode_AilmentIcon:
     BNE @DrawIcon
    @Healthy: 
     LDA #$E8  ; healthy!
+    
    @DrawIcon:
     JMP ComplexString_DrawAndResume
 

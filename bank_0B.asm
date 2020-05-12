@@ -3103,51 +3103,25 @@ ChaosDeath_FadeNoise:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BackDropLut:
-.byte 1,2,1,2,5,6,5,6,5,6,5,6
-
-Add20toTmp:
-    LDA tmp
-    CLC
-    ADC #$20
-    STA tmp
-    RTS
-
 ChaosDeath:
     JSR WaitForVBlank_L
     LDA $2002
     
-    LDY #0
-    LDA #$3C              
-    STA tmp    
-   @DrawBackdropThing:
-    LDA tmp
-    LDX #$20
-    JSR SetPPUAddr_XA       ; set the address to $203C/5C/7C
-    LDX #04                 ; draw 4 tiles from the above LUT
-   @DrawBackdropLoop:       ; thus making the pillars fill inthe battle turn box
-    LDA BackDropLut, Y
-    STA $2007
-    INY
-    DEX
-    BNE @DrawBackdropLoop
-    JSR Add20toTmp
-    CMP #$9C
-    BNE @DrawBackdropThing
-
-    LDA #$DD                ; now draw a column of blank spaces from $20DD down, 12 rows
+    LDA #$DE                ; now draw a column of blank spaces from $20DD down, 12 rows
     STA tmp                 
     LDX #$20                
     LDY #11                 ; Y is rows
    @ClearIconLoop:
-    LDA tmp
     JSR SetPPUAddr_XA       
     LDA #0                  
     STA $2007               
     STA $2007               
     DEY                     
     BEQ :+                  
-    JSR Add20toTmp          
+        LDA tmp
+        CLC
+        ADC #$20
+        STA tmp
     BCC @ClearIconLoop      
       INX                   
       BNE @ClearIconLoop    
