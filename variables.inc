@@ -821,7 +821,7 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes ($F3)
     en_hitrate      = $07 ; can be changed with magic           8
     en_strength     = $08 ; can be changed with magic           9 
     en_critrate     = $09 ; can be changed with magic           10
-    en_special      = $0A ;                                     11
+    en_special      = $0A ; (unused?)                           11
     en_attackail    = $0B ; can be changed with magic           12
     en_category     = $0C ;                                     13 
     en_magdef       = $0D ; can be changed with magic           14 
@@ -833,16 +833,16 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes ($F3)
     en_item         = $13 ; can be changed by stealing          20
     en_BLANK        = $14 ;                                     21
     
-    ;; this block matches enemy ROM layout
+    ;; ^ this block matches enemy ROM layout ^ 
     
-    en_aimagpos     = $15 ; NOT USED ANYMORE                    22
-    en_extraAI      = $16 ; holds info like counter, guard, etc 23
-    en_numhitsmult  = $17 ; can be changed with magic   24
-    en_ailments     = $18 ; can be changed with magic   25
-    en_hp           = $19 ; $1A ; 2 bytes               26 27
-    en_enemyid      = $1B ;                             28
+    en_numhitsmult  = $15 ; can be changed with magic (default=1) 24
+    en_unused       = $16 ;                                       22
+    en_extraAI      = $17 ; holds info like counter, guard, etc   23
+    en_ailments     = $18 ; can be changed with magic             25
+    en_hp           = $19 ; $1A ; 2 bytes                         26 27
+    en_enemyid      = $1B ;                                       28
     
-btl_enemyrewards    = $6200 ; up to $6224 (9*4)
+btl_enemyrewards    = $6200 ; up to $6224 (9*4=36)
     en_exp          = $00 ; 2 bytes                     1 2
     en_gp           = $02 ; 2 bytes                     2 3 
 
