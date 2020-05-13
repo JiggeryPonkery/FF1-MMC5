@@ -1777,34 +1777,34 @@ ClearNT_Color:   ;; JIGS - now this loads either 0 or FF depending what you want
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-DrawCharacterName:
-    TAX                    ; put char index in X
-   
-    LDA ch_name, X          ; copy the character name to the format_buf
-    STA format_buf-7
-    LDA ch_name+1, X
-    STA format_buf-6
-    LDA ch_name+2, X
-    STA format_buf-5
-    LDA ch_name+3, X
-    STA format_buf-4
-    LDA ch_name+4, X
-    STA format_buf-3
-    LDA ch_name+5, X
-    STA format_buf-2
-    LDA ch_name+6, X
-    STA format_buf-1
-    
-    LDA #<(format_buf-7)   ; set text_ptr to point to it
-    STA text_ptr
-    LDA #>(format_buf-7)
-    STA text_ptr+1
-
-    LDA #BANK_THIS         ; set banks required for DrawComplexString
-    STA cur_bank
-    STA ret_bank
-
-    JMP DrawComplexString  ; Draw it!  Then return
+;DrawCharacterName:
+;    TAX                    ; put char index in X
+;   
+;    LDA ch_name, X          ; copy the character name to the format_buf
+;    STA format_buf-7
+;    LDA ch_name+1, X
+;    STA format_buf-6
+;    LDA ch_name+2, X
+;    STA format_buf-5
+;    LDA ch_name+3, X
+;    STA format_buf-4
+;    LDA ch_name+4, X
+;    STA format_buf-3
+;    LDA ch_name+5, X
+;    STA format_buf-2
+;    LDA ch_name+6, X
+;    STA format_buf-1
+;    
+;    LDA #<(format_buf-7)   ; set text_ptr to point to it
+;    STA text_ptr
+;    LDA #>(format_buf-7)
+;    STA text_ptr+1
+;
+;    LDA #BANK_THIS         ; set banks required for DrawComplexString
+;    STA cur_bank
+;    STA ret_bank
+;
+;    JMP DrawComplexString  ; Draw it!  Then return
 
 
 
@@ -2242,7 +2242,8 @@ FinishPurchase:
     JSR ShopPayPrice            ; subtract the price from your gold amount
     LDA #$16
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
-    JMP ShopBuy_Loop            ; and continue loop
+   ; JMP ShopBuy_Loop            ; and continue loop
+    JMP MainShopLoop
     
     
 ;;;;;;;;;;;;;;;;;;;;;
@@ -3300,15 +3301,12 @@ Shop_CharacterStopDancing:
     STA item_box_offset
     LDA cursor
     PHA
+    LDX #$91
     LDA shop_type
-    BNE @Armor
+    BEQ :+                ; if its the weapon shop, then skip ahead to save it
     
-    LDA #$91
-    JMP :+
-    
-   @Armor:
-    LDA #$92
-  : STA cursor
+    LDX #$92
+  : STX cursor
     JSR Shop_CharacterCanEquip
     PLA
     STA cursor
@@ -3324,18 +3322,15 @@ Shop_CharacterCanEquip:
     CLC
     ADC item_box_offset
     TAX
-    
-    LDA shop_type
-    STA equipoffset
-    BNE @Armor
-    
+
     LDA item_box, X
     STA tmp+8
-    BNE :+
+    
+    LDY shop_type
+    STY equipoffset
+    BEQ :+
 
    @Armor:
-    LDA item_box, X
-    STA tmp+8
     SEC
     SBC #ARMORSTART
   : STA tmp+9
@@ -3351,6 +3346,7 @@ Shop_CharacterCanEquip:
     JSR IsEquipLegal
     BCS @CannotEquip
     
+   @SetHighBit: 
     LDX CharacterIndexBackup ; this sets the high bit, which tells the sprite drawing routine to do the "Cheer" pose
     LDA ch_ailments, X
     ORA #$80
