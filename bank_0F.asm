@@ -5870,12 +5870,11 @@ lut_ZMenuText:
 .word Song20                 ; 23
 .word Song21                 ; 24
 .word Song22                 ; 25
-.word Song22                 ; 26
-.word Song23                 ; 27
-.word Song24                 ; 28
-.word Song25                 ; 29
-.word Song26                 ; 2A
-.word Song27                 ; 2B
+.word Song23                 ; 26
+.word Song24                 ; 27
+.word Song25                 ; 28
+.word Song26                 ; 29
+.word Song27                 ; 2A
 
 
 BLANK:
