@@ -563,11 +563,11 @@ data_EnemyStats:
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMWEAK
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMRESIST
 ;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMATTACK
-;     2   1   2   1   2   1   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  ENROMSTAT_SPEED
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   ENROMSTAT_LEVEL
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   ENROMSTAT_ITEM
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |  |   |   |    ENROMSTAT_BLANK
-;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__|__ |__ |__  |__  ID Name
+;     2   1   2   1   2   1   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_SPEED
+;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_LEVEL
+;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ITEM
+;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_BLANK
+;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__  ID Name
 .byte $06,$00,$06,$00,$08,$00,$6A,$00,$06,$04,$11,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$01,$01,$00 ;00 IMP
 .byte $12,$00,$12,$00,$10,$00,$78,$00,$09,$06,$11,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00,$08,$02,$01,$00 ;01 GrIMP
 .byte $18,$00,$06,$00,$14,$00,$69,$00,$24,$00,$11,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00,$07,$01,$00,$00 ;02 WOLF
@@ -671,7 +671,7 @@ data_EnemyStats:
 .byte $A1,$0D,$A0,$0F,$A4,$01,$9A,$00,$30,$10,$11,$58,$07,$01,$02,$04,$40,$8F,$00,$00,$40,$26,$1A,$00,$00 ;64 GrNAGA
 .byte $10,$08,$C4,$09,$2C,$01,$C8,$00,$48,$14,$14,$3C,$1E,$01,$00,$00,$02,$82,$20,$90,$00,$20,$12,$00,$00 ;65 CHIMERA
 .byte $E8,$11,$88,$13,$5E,$01,$C8,$00,$3C,$12,$14,$46,$28,$01,$00,$00,$02,$8F,$20,$90,$00,$34,$1A,$00,$00 ;66 JIMERA
-.byte $14,$01,$2C,$01,$54,$00,$7E,$00,$42,$10,$12,$15,$1E,$01,$00,$80,$21,$62,$00,$33,$00,$10,$0A,$01,$00 ;67 WIZARD
+.byte $14,$01,$2C,$01,$54,$00,$7E,$00,$42,$10,$12,$15,$1E,$01,$01,$80,$21,$62,$00,$33,$00,$10,$0A,$01,$00 ;67 WIZARD
 .byte $36,$03,$E7,$03,$70,$00,$82,$00,$30,$0C,$13,$1C,$01,$01,$00,$01,$00,$BB,$00,$00,$00,$1C,$14,$01,$00 ;68 SORCERER
 .byte $82,$00,$FA,$00,$6A,$00,$FF,$90,$0C,$0A,$21,$1B,$0F,$01,$00,$00,$00,$40,$00,$00,$00,$08,$06,$01,$00 ;69 GARLAND
 .byte $E4,$0F,$88,$13,$60,$01,$C8,$04,$60,$10,$11,$44,$48,$01,$00,$00,$02,$C8,$20,$80,$04,$26,$26,$01,$00 ;6A Gas D
@@ -681,7 +681,7 @@ data_EnemyStats:
 .byte $3D,$1A,$B8,$0B,$30,$01,$C8,$00,$18,$64,$11,$4C,$5D,$01,$00,$00,$01,$8F,$00,$BB,$80,$16,$1F,$01,$00 ;6E IronGOL
 .byte $EF,$04,$08,$07,$04,$01,$C8,$00,$24,$26,$12,$41,$2C,$01,$00,$00,$00,$87,$00,$00,$00,$30,$11,$01,$00 ;6F BADMAN
 .byte $8C,$0A,$B8,$0B,$BE,$00,$C8,$00,$2A,$20,$11,$30,$37,$01,$00,$00,$41,$AD,$00,$0B,$00,$38,$18,$01,$00 ;70 EVILMAN
-.byte $CA,$08,$D0,$07,$A8,$00,$FF,$80,$4E,$28,$21,$2A,$1A,$01,$00,$80,$00,$AA,$00,$00,$00,$24,$12,$01,$00 ;71 ASTOS
+.byte $CA,$08,$D0,$07,$A8,$00,$FF,$80,$4E,$28,$21,$2A,$1A,$01,$01,$80,$00,$AA,$00,$00,$00,$24,$12,$01,$00 ;71 ASTOS
 .byte $47,$04,$47,$04,$69,$00,$C8,$00,$4E,$28,$11,$1B,$1A,$01,$00,$00,$40,$AA,$00,$00,$00,$26,$10,$01,$00 ;72 MAGE
 .byte $5C,$0D,$5C,$0D,$C8,$00,$9E,$00,$5A,$26,$11,$2D,$28,$01,$00,$00,$40,$BA,$00,$00,$00,$28,$14,$01,$00 ;73 FIGHTER
 .byte $3F,$00,$0F,$00,$40,$00,$6A,$00,$16,$02,$12,$10,$0A,$01,$00,$00,$00,$28,$00,$00,$00,$20,$03,$00,$00 ;74 MADPONY
@@ -691,10 +691,10 @@ data_EnemyStats:
 .byte $D0,$07,$01,$00,$F4,$01,$FF,$B7,$30,$32,$11,$40,$32,$01,$01,$10,$49,$8C,$00,$2B,$88,$28,$24,$81,$00 ;78 LICH (reprise)
 .byte $AB,$09,$B8,$0B,$58,$02,$FF,$BF,$30,$32,$36,$3F,$28,$01,$00,$00,$41,$B7,$01,$72,$12,$20,$20,$81,$00 ;79 KARY
 .byte $D0,$07,$01,$00,$BC,$02,$FF,$BF,$3C,$3C,$36,$3F,$3C,$01,$00,$00,$41,$B7,$00,$72,$12,$28,$28,$81,$00 ;7A KARY (reprise)
-.byte $95,$10,$88,$13,$20,$03,$FF,$BF,$54,$3C,$48,$5A,$32,$01,$00,$08,$20,$A0,$40,$90,$24,$30,$24,$81,$00 ;7B KRAKEN
-.byte $D0,$07,$01,$00,$84,$03,$FF,$BF,$62,$46,$48,$72,$46,$01,$00,$08,$20,$C8,$00,$90,$24,$38,$2C,$81,$00 ;7C KRAKEN (reprise)
-.byte $78,$15,$70,$17,$E8,$03,$FF,$FB,$48,$50,$24,$50,$31,$01,$00,$80,$02,$C8,$02,$F0,$41,$40,$28,$81,$00 ;7D TIAMAT
-.byte $D0,$07,$01,$00,$4C,$04,$FF,$FF,$5A,$5A,$24,$55,$4B,$01,$00,$80,$42,$C8,$00,$F0,$41,$48,$30,$81,$00 ;7E TIAMAT (reprise)
+.byte $95,$10,$88,$13,$20,$03,$FF,$BF,$54,$3C,$48,$5A,$32,$01,$02,$08,$20,$A0,$40,$90,$24,$30,$24,$81,$00 ;7B KRAKEN
+.byte $D0,$07,$01,$00,$84,$03,$FF,$BF,$62,$46,$48,$72,$46,$01,$02,$08,$20,$C8,$00,$90,$24,$38,$2C,$81,$00 ;7C KRAKEN (reprise)
+.byte $78,$15,$70,$17,$E8,$03,$FF,$FB,$48,$50,$24,$50,$31,$01,$01,$80,$02,$C8,$02,$F0,$41,$40,$28,$81,$00 ;7D TIAMAT
+.byte $D0,$07,$01,$00,$4C,$04,$FF,$FF,$5A,$5A,$24,$55,$4B,$01,$01,$80,$42,$C8,$00,$F0,$41,$48,$30,$81,$00 ;7E TIAMAT (reprise)
 .byte $00,$00,$00,$00,$D0,$07,$FF,$FF,$64,$64,$12,$C8,$64,$01,$01,$10,$00,$C8,$00,$FF,$0F,$3F,$35,$81,$00 ;7F CHAOS
 
 DoesEnemyXExist:
@@ -716,7 +716,7 @@ GetEnemyRAMPtr:
 LoadEnemyStats:
     LDA #0
     LDY #0
-    @ClearLoop:
+   @ClearLoop:
     STA btl_enemystats, Y
     STA btl_enemystats+$24, Y
     DEY
@@ -727,7 +727,7 @@ LoadEnemyStats:
     LDA #$00
     STA btl_loadenstats_index               ; loop up-counter / enemy index
 
-    LDA #0
+    ;LDA #0
     STA tmp
     STA tmp+1
    @EnemyLoop:
@@ -770,43 +770,33 @@ LoadEnemyStats:
     STX tmp
     LDX tmp+1
 
+    ; Y = 4 here, is pointing at HP max
    @Loop:
     LDA (EnemyROMPointer), Y
     STA btl_enemystats, X
     INX
     INY
-    CPY #25               ; copy the next 21 bytes of ROM data into RAM.
+    CPY #25                  ; copy the next 21 bytes of ROM data into RAM.
     BNE @Loop
+
+    LDA #1
+    STA btl_enemystats, X    ; <- en_numhitsmult, default to hit multiplier of 1
+
+    ;; skip 3 stats that were set to 0 by the clearing of the RAM 
+    ;; en_unused, en_extraAI, and en_ailments
 
     TXA
     CLC
-    ADC #7                ; add 8 to the "btl_enemystats, X" position, 'cos adding 7 more stats with Y instead
-    STA tmp+1             ;
+    ADC #7                   ; add 7 to the "btl_enemystats, X" position
+    STA tmp+1                ;
 
-    TYA                   ; now using Y to save, so subtract 4 since Y is 4 past the RAM pointer
-    SEC
-    SBC #4
-    TAY
-
-    LDA #0
-    STA (EnemyRAMPointer), Y ; <- en_aimagpos
-    INY
-    STA (EnemyRAMPointer), Y ; <- en_aiatkpos
-    INY
-    LDA #$01
-    STA (EnemyRAMPointer), Y ; en_numhitsmult, default to hit multiplier of 1
-
-    INY
-    LDA #0
-    STA (EnemyRAMPointer), Y ; <- en_ailments
-
-    LDY #04
+    LDY #ENROMSTAT_HPMAX
     LDA (EnemyROMPointer), Y ; load max HP low byte
     PHA                      ; push low byte
     INY
     LDA (EnemyROMPointer), Y ; load max HP high byte
 
-    LDY #en_hp+1
+    LDY #en_hp+1             ; Y = $19, or 26
     STA (EnemyRAMPointer), Y ; save as current HP high byte
     PLA                      ; pull low byte
     DEY
@@ -817,95 +807,106 @@ LoadEnemyStats:
     LDY #en_enemyid
     STA (EnemyRAMPointer), Y
 
-    LDY #en_level               ; get enemy level
+    ;; level is already set, but this will randomize things a bit!
+    
+    LDY #ENROMSTAT_LEVEL        ; get enemy level
     LDA (EnemyROMPointer), Y
     STA tmp+2                   ; save in tmp+2
 
-    LDA #0
-    LDX #255
-    JSR RandAX                  ; random number between 0-255
-    CMP #255
-    BCC :+
-        DEC tmp+2               ; if its exactly 255, decrease the level
-  : CMP #180
-    BCC :+                      ; if its over 200, decrease the level
-        DEC tmp+2
-        JMP @SaveLevel
+    JSR BattleRNG_L
+    AND #$0F                    ; get a random number between 0-15
+    TAX                         ; and fetch an alteration number from this little LUT
+    LDA EnemyLevelRandomizer_LUT, X 
+    BEQ @SaveLevel             ; then increase or decrease the level 
+    BMI @DecreaseLevel
+    
+    ;; 0   = do nothing
+    ;; 1-3 = increase level by this amount
+    ;; 4   = decrease level twice
+    ;; 255 = decrease level
+    
+    CMP #4
+    BEQ @DecreaseLevel_2
+    
+    CLC
+    ADC tmp+2
+    BNE @SaveLevel
+    
+   @DecreaseLevel_2: 
+    DEC tmp+2
+    
+   @DecreaseLevel: 
+    DEC tmp+2   
 
-  : CMP #0
-    BNE :+
-        INC tmp+2               ; if its exactly 0, increase the level
-
-  : CMP #85                     ; if its under 85, increase the level
-    BCS @NextEnemy
-
-    INC tmp+2
-  @SaveLevel:
+   @SaveLevel:
     LDA tmp+2
-    STA (EnemyROMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
+    STA (EnemyRAMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
 
-  @NextEnemy:
+   @NextEnemy:
     INC btl_loadenstats_index           ; inc up-counter to look at next enemy
     DEC btl_loadenstats_count           ; dec down-counter
     BEQ :+
       JMP @EnemyLoop    ; loop until all 9 enemies processed
 
- : LDX #0
-  @FillPlayerHitMultiplyer:
-   TXA
-   JSR PrepCharStatPointers
-   LDY #ch_class - ch_stats
-   LDA (CharStatsPointer), Y
-   AND #$0F
-   AND #CLS_BB | CLS_MA              ; see if the player character is BB or Master
-   BEQ :+
+  : LDX #0
+   @FillPlayerHitMultiplyer:
+    TXA
+    JSR PrepCharStatPointers
+    LDY #ch_class - ch_stats
+    LDA (CharStatsPointer), Y
+    AND #CLS_BB | CLS_MA              ; see if the player character is BB or Master
+    BEQ :+
        LDY #ch_righthand - ch_stats
        LDA (CharStatsPointer), Y     ; then see if they have a weapon equipped
        BNE :+
         LDA #02                      ; if no weapon, they have 2 fists, so a hit multiplyer of 2
         BNE :++
- : LDA #01                           ; everyone else gets 1
- : STA btl_charhitmult, X
-   INX
-   CPX #4
-   BNE @FillPlayerHitMultiplyer
+  : LDA #01                           ; everyone else gets 1
+  : STA btl_charhitmult, X
+    INX
+    CPX #4
+    BNE @FillPlayerHitMultiplyer
 
    ;; JIGS - and now on to filling the enemy's AI RAM!!
 
-   LDA #0
-   STA tmp+2                ; enemy ID counter
-   STA tmp+3                ; AI index for writing to RAM
-  @EnemyAI_Loop:
-   JSR GetEnemyRAMPtr
-   LDY #en_enemyid
-   LDA (EnemyRAMPointer), Y
-   AND #$7F                 ; cap at $7F, in case not enough enemies were loaded and old data wasn't overwritten with the right values here
-   LDX #$10
-   JSR MultiplyXA
-   CLC
-   ADC #<EnemyAIData
-   STA EnemyROMPointer
-   TXA
-   ADC #>EnemyAIData
-   STA EnemyROMPointer+1    ; ROM pointer now points to their AI data
+    LDA #0
+    STA tmp+2                ; enemy ID counter
+    STA tmp+3                ; AI index for writing to RAM
+   @EnemyAI_Loop:
+    JSR GetEnemyRAMPtr
+    LDY #en_enemyid
+    LDA (EnemyRAMPointer), Y
+    AND #$7F                 ; cap at $7F, in case not enough enemies were loaded and old data wasn't overwritten with the right values here
+    LDX #$10
+    JSR MultiplyXA
+    CLC
+    ADC #<EnemyAIData
+    STA EnemyROMPointer
+    TXA
+    ADC #>EnemyAIData
+    STA EnemyROMPointer+1    ; ROM pointer now points to their AI data
+ 
+    LDY #0
+    LDX tmp+3
+   @FillAI:
+    LDA (EnemyROMPointer), Y
+    STA lut_EnemyAi, X
+    INX
+    INY
+    CPY #$10
+    BNE @FillAI
 
-   LDY #0
-   LDX tmp+3
-  @FillAI:
-   LDA (EnemyROMPointer), Y
-   STA lut_EnemyAi, X
-   INX
-   INY
-   CPY #$10
-   BNE @FillAI
+    STX tmp+3                ; save RAM write position
+    INC tmp+2                ; inc tmp+2 for next enemy
+    LDA tmp+2
+    CMP #$09
+    BNE @EnemyAI_Loop
+    RTS
 
-   STX tmp+3                ; save RAM write position
-   INC tmp+2                ; inc tmp+2 for next enemy
-   LDA tmp+2
-   CMP #$09
-   BNE @EnemyAI_Loop
-   RTS
 
+EnemyLevelRandomizer_LUT:
+;     0, 1, 2, 3, 4,   5, 6, 7, 8, 9, A, B, C, D, E,   F
+.byte 0, 1, 2, 0, 255, 0, 1, 4, 2, 0, 1, 4, 0, 0, 255, 3
 
 ;;
 ;; For the enemy's ITEM byte above:
@@ -1850,6 +1851,12 @@ PlayerAttackPlayer_PhysicalZ:
     LSR A
     LSR A
     STA btl_attacker_limbs
+    
+    LDA btl_retaliate
+    BEQ LoadPlayerDefenderStats_ForEnemyAttack
+        LDA #1
+        STA btl_attacker_limbs
+    ;; if this attack is a counter attack, only do the one attack
 
 LoadPlayerDefenderStats_ForEnemyAttack:
     LDA btl_randomplayer
