@@ -783,17 +783,56 @@ RUINEDCASTLE_SQ1:
    .byte $F5,$02 ; duty 25%
    
    RC_SQ1_PAUSE:
-   .byte $C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0
+   .byte $C0
+   RC_SQ1_PAUSE_LONG:
+   .byte $C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0,$C0
    ;; do nothing for 12 4/4 bars, or 16 3/4 bars
+
+   ;; JIGS SONG v  -- only delete this block to remove my custom content
+   RC_SQ1_ALTMELODY: ; (2 bars each line... mostly)
+   .byte $F8,$0D
+   .byte $D9,$50,$C6,$97,$27,$57,$97 
+   .byte $DA,$40,$C6,$26,$16,$D9,$96
+   .byte $60,$C6,$77,$27,$47,$67 
+   .byte $21,$13,$D8,$76,$A6,$76
+   .byte $D9,$20,$C6,$D8,$96,$D9,$06,$D8,$96    
+   .byte $D9,$30,$36,$46,$64 
+   .byte $71,$74,$94,$B4
+   .byte $A4,$94,$74,$DA,$13,$D9,$93
+   .byte $DA,$22,$E3,$2A,$4A,$5A,$7A,$9A,$BA,$DB,$0A,$2A,$F8,$0C,$ED,$21
+   .byte $F8,$0D
+   .byte $E3,$F1
+   .WORD RC_SQ1_MELODY_TRILL_2 ; 1, 2
+   .byte $E2,$F1
+   .WORD RC_SQ1_MELODY_TRILL_2 ; 3, 4 
+   .byte $E1,$F1
+   .WORD RC_SQ1_MELODY_TRILL   ; 5 
+   .byte $ED,$F1
+   .WORD RC_SQ1_MELODY_TRILL   ; 6 
+   .byte $D9,$B2,$E3,$BA,$DA,$0A,$2A,$4A,$5A,$7A,$9A,$BA,$ED,$B0,$C4 
+   .byte $D9,$E3,$AA,$DA,$0A,$2A,$4A,$5A,$7A,$9A,$AA,$ED
+   .byte $F7,$03,$A4,$F7,$02,$94,$F7,$01,$84,$F7,$00,$73,$23
+   .byte $64,$24,$14,$23,$D9,$93
+   .byte $DA,$04,$D9,$B4,$94,$73,$23
+   .byte $A4,$94,$74,$93,$43 
+   .byte $74,$94,$54,$60,$D0
+   .WORD RC_SQ1_PAUSE_LONG
    
-   RC_SQ1_MELODY:
-   .byte $DA,$61,$75,$65,$45,$25,$43,$D9,$90,$C6
-   .byte $DA,$21,$45,$25,$15,$D9,$B5,$DA,$13,$D9,$60,$C6
-   .byte $B2,$C8,$DA,$15,$23,$43,$63,$73,$93,$75,$65,$43
-   .byte $D9,$B1,$DA,$15,$25,$61,$41,$D1
-   .WORD RC_SQ1_MELODY
-   .byte $D0
-   .WORD RC_SQ1_PAUSE
+   RC_SQ1_MELODY_TRILL_2:
+   .byte $DA,$28,$18,$D9,$98,$DA,$18 
+   RC_SQ1_MELODY_TRILL:
+   .byte $DA,$28,$18,$D9,$98,$DA,$18,$F2
+   ;; JIGS SONG ^ 
+   
+ ;; original Castle theme from the GBA version
+ ;  RC_SQ1_MELODY:
+ ;  .byte $DA,$61,$75,$65,$45,$25,$43,$D9,$90,$C6
+ ;  .byte $DA,$21,$45,$25,$15,$D9,$B5,$DA,$13,$D9,$60,$C6
+ ;  .byte $B2,$C8,$DA,$15,$23,$43,$63,$73,$93,$75,$65,$43
+ ;  .byte $D9,$B1,$DA,$15,$25,$61,$41,$D1
+ ;  .WORD RC_SQ1_MELODY
+ ;  .byte $D0
+ ;  .WORD RC_SQ1_PAUSE
 
 RUINEDCASTLE_SQ2:
    .byte $FE
@@ -3739,7 +3778,7 @@ lut_NoteLengths:
   .BYTE $6C,$48,$36,$24,$1B,$12,$0E,$09,$07,$04,$03,$06,$0E,$60,$40,$30 ; FD (99 bpm)
   ;.BYTE $60,$40,$30,$20,$18,$10,$0C,$08,$06,$04,$02,$02,$0B,$0A,$06,$05 ; FE
   .BYTE $80,$60,$40,$30,$20,$18,$10,$0C,$08,$06,$04,$02,$03,$05,$01,$C0 ; (112.5 bpm)
-  ; JIGS ^ note lengths used for my Marsh Cave replacement
+  ; JIGS ^ note lengths used for my Marsh Cave replacement, and Ruined Castle
   
 ;; JIGS -- NOTE : I changed an original byte of code in the FD string, under the B column, from a $03 to a $06
 ;; This is so I can use triplets that equal the same length as an eighth note ($12)
@@ -3813,6 +3852,7 @@ lut_NoteLengths:
 ;;  the addition of the existing 'fraction' will never cause an overflow.
 
 lut_EnvSpeeds:
+  ;       0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  A,  B,  C,  D,  E,  F
   .BYTE $80,$60,$40,$30,$20,$18,$10,$0C,$08,$06,$04,$03,$02,$01,$00,$00
 
 
