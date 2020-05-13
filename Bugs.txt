@@ -1,11 +1,12 @@
 Map:
 * Treasure chests will swap back to closed when the dialogue box is drawn. (Needs to be confirmed, footage is from old version.)
 
-Shop:
-* Thank you, Anything else? dialogue is overwritten by immediately jumping back to the Buy/Sell option. Since buying things is just so easy now, I suggest returning to the Buy/Sell/Exit option after every purchase or sale? 
-
 
 Battle:
+* Fixed: Enemy level was being saved to ROM pointers, not RAM.
+
+* Enemies have an unused ailment chance byte... 
+
 * SelectPlayerTarget has some obfuscating code that I will need to hijack for Multi-targeting.
 
 * Regen/Poison - make sure its loading the right division bytes and ORA-ing the other right one.
@@ -18,8 +19,6 @@ Battle:
 * Enemies strike first will still have all your characters (with poison) poison-damaged before their turn. Is this a bug?
 * Set "Mag.Def" to "M.Evade" in level up text. (does it even show?)
 
-Stats:
-Unequipping and re-equipping gear does not cap stats, and maybe should?
 
 Menu:
 * Exiting the soundtest menu will scramble NPC sprites for a frame?
@@ -33,8 +32,6 @@ MiniMap:
 Ideas:
 * Put Healed amount into a string then print it in HP Up messaging. 
 
-* Battle: Random chance for enemies who have more than 1 physical attack against another target per round, to do or not do the second, third, fourth, etc, attack.
-
 * Variable Magic: Spells that can either target 1 enemy, all enemies (reduced potency), 1 player, or all players (reduced potency). Will this require drawing shimmering glovehands when highlighting multiple targets?
 
-* Shop: Characters pose when able to learn a spell.
+* Shop: Characters pose when able to learn a spell. -- This is a little too difficult at the moment, and would require extensive changes and keeping track of which bytes of tmp are used... 

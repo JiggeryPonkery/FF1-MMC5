@@ -311,8 +311,7 @@ Battle_AfterFadeIn:
     
     ; surprised code
   @Surprised:
-    LDA #02
-    STA btl_strikingfirst               ; JIGS - if party surprised, this is 2
+    DEC btl_strikingfirst               ; JIGS - if party surprised, this is $FF
     LDA #BTLMSG_SURPRISED
     JSR DrawMessageBoxDelay_ThenClearAll
     ;JMP BattleLogicLoop_DoCombat        ; skip over first round of player input, and just do combat
@@ -4665,41 +4664,41 @@ DoBattleRound:
     STA btl_defender_ailments   ; zero defender ailments (important for turn output)
     
     LDA btl_turnorder, Y        ; get whoever's turn it is
-    BMI @TakeTurn               ; if it's a player, take their turn
-      CMP #$7F                  ; if its a blank enemy, skip it
-      BEQ @NextTurn
-      TAY                       ; otherwise it's an enemy... so:
-      LDA btl_enemyIDs, Y       ; get this slot's enemy ID
-      CMP #$FF
-      BEQ @NextTurn             ; if the slot is empty, skip their turn
-      LDA btl_strikingfirst     ; if the party is striking first
-      CMP #01
-      BEQ @NextTurn             ;   skip their turn
-      TYA                       ; otherwise, put the SLOT ID in A, and take their turn
-      JMP :+
-      
-  @TakeTurn:
-    STA tmp
-    LDA btl_strikingfirst     ; if enemies are striking first
-    CMP #02
+    BMI @PlayerTurn             ; if it's a player, take their turn
+    
+   @EnemyTurn: 
+    CMP #$7F                  ; if its a blank enemy, skip it
     BEQ @NextTurn
-    LDA tmp
+    TAY                       ; otherwise it's an enemy... so:
+    LDA btl_enemyIDs, Y       ; get this slot's enemy ID
+    CMP #$FF
+    BEQ @NextTurn             ; if the slot is empty, skip their turn
+    LDA btl_strikingfirst     ; if the party is striking first
+    CMP #01
+    BEQ @NextTurn             ;   skip their turn
+    TYA                       ; otherwise, put the SLOT ID in A, and take their turn
+    JMP @DoTurn
+
+  @PlayerTurn:
+    LDX btl_strikingfirst     ; if enemies are striking first
+    BMI @NextTurn
   
-  : JSR Battle_DoTurn                       ; do their turn
+   @DoTurn:
+    JSR Battle_DoTurn                       ; do their turn
     JSR DrawCharacterStatus                 ; update character on-screen stats
     JSR UpdatePlayerHP
     JSR BattleTurnEnd_CheckForBattleEnd     ; wrap up / see if battle is over (will double-RTS if battle is over)
     LDA btl_retaliate
     BEQ @NextTurn
         JSR Retaliate
-        JMP :-
+        BEQ @DoTurn ; DEC btl_retaliate should set the Z flag
     
   @NextTurn:
     INC btl_curturn
     LDA btl_curturn
     CMP #9+4                        ; 9 enemy slots + 4 player slots
     BNE @PerformBattleTurnLoop      ; keep looping until all entities have had a turn
-        
+
     ;; once all entities have had their turn, the round is over.
     LDA #$00
     STA btl_strikingfirst       ; clear striking first flag so enemies can now act.
@@ -4951,6 +4950,11 @@ ApplyRegenToPlayer:
     JSR DrawMessageBoxDelay_ThenClearIt
 
 ApplyPoisonToPlayer:
+    LDA btl_strikingfirst
+    BMI @Exit
+    ;; JIGS - remove this if you want to be poisoned on the first round
+    ;; personally, I feel its better to be poisoned after doing an action
+
     LDA btlmag_defender_ailments
     AND #AIL_POISON
     BEQ @Exit                       ; if poison = no, then z = 1
@@ -5200,8 +5204,47 @@ WalkForwardAndCastMagic:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_DoTurn:
+    JSR ClearAltMessageBuffer   ; Clear alt message buffer
+    ;; JIGS - do this here instead of when it gets to items/magic 
+    ;; maybe it'll be used for skill stuff too! It clears btl_boxcount to 0
+    ;; A is restored after it exits
     BMI Battle_DoPlayerTurn     ; if high bit set, this is a player, do a player turn
     JMP Battle_DoEnemyTurn      ; otherwise, do an enemy turn
+
+
+IsCommandPlayerValid:     
+    LDA BattleCharID
+    JSR PrepCharStatPointers        ; load player's ailments
+
+    LDY #ch_ailments - ch_stats
+    LDA (CharStatsPointer), Y
+    STA ailment_backup
+    
+    AND #AIL_DEAD | AIL_STOP
+    BEQ :+
+   @Nope:
+      CLC                           ; cancel action and return
+      RTS
+    
+  : LDA ailment_backup
+    AND #AIL_SLEEP                  ; are they asleep?
+    BEQ :+
+      JSR Battle_PlayerTryWakeup
+      BCC @Nope
+      
+  : LDA ailment_backup
+    AND #AIL_STUN                   ; are they stunned?
+    BEQ :+
+      JSR Battle_PlayerTryUnstun    ; if yes, try to unstun
+      BCC @Nope
+
+  : LDA ailment_backup
+    AND #AIL_CONF                   ; are they confused?
+    BEQ :+
+      JSR Player_Confused           ; if yes, do something random! (will try to un-confuse too)
+     ; continues here if confuse was cured
+  : SEC ; set C to allow doing an action (if action exists in command buffer)
+    RTS 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5223,10 +5266,6 @@ Battle_DoTurn:
 
 
 Battle_DoPlayerTurn:
-    JSR ClearAltMessageBuffer   ; Clear alt message buffer
-    ;; JIGS - do this here instead of when it gets to items/magic 
-    ;; maybe it'll be used for skill stuff too! It clears btl_boxcount to 0
-    
     AND #$03                    ; mask off the high bit to get the player ID
     STA BattleCharID            ;  and record it for future use
     
@@ -5335,43 +5374,6 @@ Battle_DoPlayerTurn:
    @Steal:
     LDX btl_charcmdbuf+2, Y         ; X = enemy target
     LDA BattleCharID                ; A = attacker
-    JMP StealFromEnemy
-
-IsCommandPlayerValid:     
-    LDA BattleCharID
-    JSR PrepCharStatPointers        ; load player's ailments
-
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    STA ailment_backup
-    
-    AND #AIL_DEAD | AIL_STOP
-    BEQ :+
-   @Nope:
-      CLC                           ; cancel action and return
-      RTS
-    
-  : LDA ailment_backup
-    AND #AIL_SLEEP                  ; are they asleep?
-    BEQ :+
-      JSR Battle_PlayerTryWakeup
-      BCC @Nope
-      
-  : LDA ailment_backup
-    AND #AIL_STUN                   ; are they stunned?
-    BEQ :+
-      JSR Battle_PlayerTryUnstun    ; if yes, try to unstun
-      BCC @Nope
-
-  : LDA ailment_backup
-    AND #AIL_CONF                   ; are they confused?
-    BEQ :+
-      JSR Player_Confused           ; if yes, do something random! (will try to un-confuse too)
-     ; continues here if confuse was cured
-  : SEC ; set C to allow doing an action (if action exists in command buffer)
-    RTS 
-   
-StealFromEnemy:
     STX btl_defender_index       ; set defender index
     STX btl_defender
     STA btl_animatingchar
@@ -6255,15 +6257,23 @@ Retaliate:
     LDA btl_defender            ;; partly because I don't want to code for that, and partly because if you're
     BMI @DontRetaliate          ;; getting beat up by your own guys you have enough trouble without losing your buff attack
     
+    PHA
+    LDA btl_attacker            ;; swap attacker and defender
+    STA btl_defender            ;; so the enemy will counter whoever attacked
+    PLA
     STA btl_attacker
     LDX btl_defender_index
     JSR DoesEnemyXExist
     BEQ @DontRetaliate          ;; Don't counter if enemy was killed in the last turn
     
+    LDA #0
+    STA btl_parrydamage+1
+    STA btl_parrydamage         ; zero the parry damage; an extra attack is enough 
+    
     JSR DrawAttackerBox         ; draw the attacker box
     LDA #02
     JSR DisplayAttackIndicator  ; flash the enemy
-    JMP ChooseAndAttackPlayer
+    JMP EnemyAttackPlayer_Physical
    
    @DontRetaliate:               
     DEC btl_retaliate                
@@ -6330,9 +6340,13 @@ SavePlayerDefender:
   : LDA btl_attacker
     BMI @FinalEnd
   
+   @EnemyLimbs: 
     DEC btl_attacker_limbs                      ; dec the number of unique physical attacks to perform
-    ;LDA btl_attacker_limbs                  
     BEQ @FinalEnd                               ; at 0, stop!   
+    
+    JSR BattleRNG_L
+    AND #01
+    BEQ @EnemyLimbs                             ; 50/50 chance the enemy will skip one attack
     
     JSR GetRandomPlayerTarget
     JSR LongCall
