@@ -2791,13 +2791,16 @@ MapPoisonDamage_Z:
     LDA #1
     LDX #5
     JSR RandAX     ; get between 1-5 damage to deal out
-    STA tmp
+    STA tmp+1
 
     LDY #0         ; X will be our loop counter and char index
   @DmgLoop:
     LDA ch_ailments, Y    ; get this character's ailments
     AND #AIL_POISON       ; see if they're poisoned
     BEQ @DmgSkip          ; if not... skip this character
+    
+    LDA tmp+1
+    STA tmp
 
     LDA ch_curhp+1, Y     ; check high byte of HP
     BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this character damage
