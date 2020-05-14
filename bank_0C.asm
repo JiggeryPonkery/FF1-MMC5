@@ -6734,27 +6734,18 @@ DoPhysicalAttack_NoAttackerBox:
     LDX #MATHBUF_TOTALDAMAGE
     LDY #MATHBUF_DMGCALC
     JSR MathBuf_Add16               ; total damage += dmgcalc
-    
+
+    LDA battle_thishitconnected
+    BEQ @NextHitIteration           ; no hits connected = no ailment 
     LDA btl_attacker_attackailment
     BEQ @NextHitIteration           ; we're done if no ailment to apply
-    LDA battle_thishitconnected
-    BEQ @NextHitIteration
     
-    LDA battle_attackerisplayer    ; 1 if player, 0 if enemy
-    BEQ @DoEnemyAilmentChance
-       LDA btl_attacker_attackailment
-       AND btl_defender_statusresist
-       BNE @NextHitIteration            ; enemy has resistance to the status
-        LDA btl_attacker_ailmentchance  ; use ailment chance from weapon
-        STA math_ailmentchance          
-        BNE @GetAilmentRandChance  ; skip all the enemy>player stuff with elements and magic defense checks
+   @DoAilmentChance:
+    AND btl_defender_statusresist
+    BNE @NextHitIteration           ; defender has resistance to the status
  
-   @DoEnemyAilmentChance:
-    LDA #100
-    STA math_ailmentchance          ; base chance of connecting ailment = 100
-    LDA btl_defender_statusresist
-    AND btl_attacker_attackailment
-    BNE @NextHitIteration           ; player's equipment is immune to the status, so skip it
+    LDA btl_attacker_ailmentchance  ; transfer the chance to the math buffer
+    STA math_ailmentchance
 
     LDA #MATHBUF_AILMENTCHANCE
     LDX btl_defender_magicdefense   ; subtract defender's magdef from ailment chance
@@ -6769,13 +6760,13 @@ DoPhysicalAttack_NoAttackerBox:
     LDA #$00
     LDX #200
     JSR RandAX
-    STA battle_ailmentrandchance    ; random value between [0,200]
+    STA tmp ; battle_ailmentrandchance    ; random value between [0,200]
     
     CMP #200
     BEQ @NextHitIteration           ; if == 200, skip ahead (no ailment)
     
     LDA math_ailmentchance
-    CMP battle_ailmentrandchance
+    CMP tmp ; battle_ailmentrandchance
     BCC @NextHitIteration           ; if ailment chance >= rand value, apply the ailment!
       LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
       EOR #$FF                      ;  the defender does not already have.
