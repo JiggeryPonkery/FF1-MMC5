@@ -2802,9 +2802,17 @@ MapPoisonDamage_Z:
     LDA ch_curhp+1, Y     ; check high byte of HP
     BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this character damage
 
+    LDA ch_curhp, Y
+    CMP #1                ; skip if their HP is only 1  
+    BEQ @DmgSkip
+
+  @FindNewDamage:
     LDA tmp               ; otherwise, check low byte of HP
     CMP ch_curhp, Y       ; see if they have as much HP as there is damage 
-    BCS @DmgSkip          ; C set if they will die from it, so skip 
+    BCC @DmgSubtract      ; C set if they will die from it, so skip 
+    
+    DEC tmp
+    JMP @FindNewDamage
 
   @DmgSubtract:
     LDA ch_curhp, Y       ; subtract 1 from HP
