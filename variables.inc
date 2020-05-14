@@ -211,10 +211,8 @@ tileprop_last           = $34 ; 1 byte
 wateraccess             = $35 ; for moving into water
 sm_player_x             = $36 ; player X/Y position on standard map.  Only used for NPC collision detection
 sm_player_y             = $37
-talkobj                 = $38 ; shared -- object you're talking to on SM
-dlg_itemid              = $39 ; shared
-DialogueTable_1or2      = $3A ; important for dialogue
-treasure_offset         = $3B ; stores the chest's item name printing code (weapons and armor use a different code)
+domappoison             = $38
+;; 39, 3A, 3B -- free to use
 battlerate              = $3C ; X/256 chance of a random encounter occuring (SM only apparently)
 inroom                  = $3D ; bit 7 is the actual inroom flag.  $x2=entering room, $x1=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
 doorppuaddr             = $3E ; 2 bytes, PPU address of door drawing work
@@ -279,6 +277,12 @@ backup_cursor           = $56 ; shops, menus
 backup_cursor_targ      = $57 ; for item menus, to not reset the cursor when exiting a sub-menu
 shop_cursor_ptr         = $56 ; + 7 ; used in shops only
 submenu_targ            = $58 ; also used in battle for the ether menu
+
+;; Dialogue Things - shared
+talkobj                 = $51 ; shared -- object you're talking to on SM
+dlg_itemid              = $52 ; shared
+DialogueTable_1or2      = $53 ; important for dialogue
+treasure_offset         = $54 ; stores the chest's item name printing code (weapons and armor use a different code)
 
 ;; Menu Things - Shared 
 equipoffset             = $59 ; menus

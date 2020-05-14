@@ -22,6 +22,7 @@
 .export GetEquipmentSpell
 .export SpiritCalculations
 .export Battle_SetPartyWeaponSpritePal
+.export MapPoisonDamage_Z
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
@@ -2782,6 +2783,58 @@ AssignMapTileDamage_Z:
     BNE @Loop             ; loop until it wraps (4 iterations)
     LDA cur_bank
     RTS                   ; then exit
+
+
+
+
+MapPoisonDamage_Z:
+    LDA #1
+    LDX #5
+    JSR RandAX     ; get between 1-5 damage to deal out
+    STA tmp
+
+    LDY #0         ; X will be our loop counter and char index
+  @DmgLoop:
+    LDA ch_ailments, Y    ; get this character's ailments
+    AND #AIL_POISON       ; see if they're poisoned
+    BEQ @DmgSkip          ; if not... skip this character
+
+    LDA ch_curhp+1, Y     ; check high byte of HP
+    BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this character damage
+
+    LDA tmp               ; otherwise, check low byte of HP
+    CMP ch_curhp, Y       ; see if they have as much HP as there is damage 
+    BCS @DmgSkip          ; C set if they will die from it, so skip 
+
+  @DmgSubtract:
+    LDA ch_curhp, Y       ; subtract 1 from HP
+    SEC
+    SBC tmp
+    STA ch_curhp, Y
+    LDA ch_curhp+1, Y
+    SBC #0
+    STA ch_curhp+1, Y
+
+  @DmgSkip:
+    TYA                   ; add $40 char index
+    CLC
+    ADC #$40
+    TAY
+    BNE @DmgLoop          ; and loop until it wraps (4 iterations)
+    
+   @Random:               ; then figure out how many steps until the next poison
+    LDA #4
+    LDX #8
+    JSR RandAX
+    STA domappoison
+    LDA #$1E
+    STA btl_soft2001      ; and remove red emphasis (reset soft2001 to normal use)
+    LDA cur_bank
+    RTS  
+
+
+
+
 
 
 

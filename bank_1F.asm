@@ -175,6 +175,7 @@
 .import lut_MenuTextCHR
 .import LoadStoneSprites
 .import lut_CommonStringPtrTbl
+.import MapPoisonDamage_Z
 
 .segment "BANK_FIXED"
 
@@ -881,17 +882,17 @@ OverworldMovement:
     LDA move_speed        ; check movement speed
     BEQ SetOWScroll_PPUOn ; if zero (we're not moving), just set the scroll and exit
 
-   ; JSR OW_MovePlayer     ; otherwise... process party movement
-   
-   LDA ow_slow           ; if non-zero...
-   BEQ :+
-   
-   LDA framecounter      ; check framecounter
-   AND #$1               ; skip moving every other frame
-   BEQ @SlowMove
-   
- : JSR SM_MovePlayer
-   ;; JIGS - SM_MovePlayer handles all the same things by changing mapflags when it needs to do overworld stuff
+    ; JSR OW_MovePlayer     ; otherwise... process party movement
+    
+    LDA ow_slow           ; if non-zero...
+    BEQ :+
+    
+    LDA framecounter      ; check framecounter
+    AND #$1               ; skip moving every other frame
+    BEQ @SlowMove
+    
+  : JSR SM_MovePlayer
+    ;; JIGS - SM_MovePlayer handles all the same things by changing mapflags when it needs to do overworld stuff
 
     LDA vehicle           ; check the current vehicle
     CMP #$01              ; are they on foot?
@@ -2175,17 +2176,18 @@ MapTileDamage:
     LDA framecounter      ; get the frame counter
     AND #$01              ; isolate low bit and use as a quick monochrome toggle
     ORA #%00111110        ; OR with typical PPU flags (JIGS - plus red emphasis! ow!)
-    STA $2001             ; and write to PPU reg.  This results in a rapid toggle between
-                          ;  normal/monochrome mode (toggles every frame).  This produces the flashy effect
+    STA $2001             
+    ; and write to PPU reg.  This results in a rapid toggle between
+    ;  normal/monochrome mode (toggles every frame).  This produces the flashy effect
 
     LDA #$0F              ; set noise to slowest decay rate (starts full volume, decays slowly)
     STA $400C
     LDA #$0D
     STA $400E             ; set noise freq to $0D (low)
     LDA #$00
-    STA $400F             ; set length counter to $0A (silence sound after 5 frames)
-                          ; this gets the noise channel playing the "kssssh" sound effect
-
+    STA $400F             
+    ; set length counter to $0A (silence sound after 5 frames)
+    ; this gets the noise channel playing the "kssssh" sound effect
     LDA move_speed            ; check move_speed (will be zero when the move is complete)
     BEQ AssignMapTileDamage   ; if the move is complete, assign damage (a branch instead of a jump?  -_-)
     RTS                       ; otherwise, just exit
@@ -2206,29 +2208,31 @@ MapTileDamage:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-MapPoisonDamage:       ; first thing is to check if ANY characters are poisoned.
-    LDA ch_ailments    ; if nobody is poisoned, do nothing.
-    ;CMP #$03                     ; get char 0's ailments... see if they=3 (poison)
-    CMP #04 ; JIGS 
-    BEQ @DoIt                    ; if yes... "DoIt"
-
-    LDA ch_ailments + (1<<6)     ; and do the same with chars 1,2 and 3
-    ;CMP #$03
-    CMP #04 ; JIGS 
-    BEQ @DoIt
-    LDA ch_ailments + (2<<6)
-    ;CMP #$03
-    CMP #04 ; JIGS 
-    BEQ @DoIt
-    LDA ch_ailments + (3<<6)
-    ;CMP #$03
-    CMP #04 ; JIGS 
-    BEQ @DoIt
-
+MapPoisonDamage:              ; first thing is to check if ANY characters are poisoned.
+    LDA ch_ailments           ; so combine their ailments 
+    ORA ch_ailments + (1<<6)   
+    ORA ch_ailments + (2<<6)
+    ORA ch_ailments + (3<<6)
+    AND #AIL_POISON           ; AND out anything that's not poison
+    BNE @DoIt
+   @Exit: 
     RTS                          ; if nobody poisoned, just exit
 
-  @DoIt:
-                            ; play the "you're poisoned" sound effect
+   @DoIt:
+    LDA domappoison
+    BMI @SFX
+    ;mappoison must be set high bit in order to do SFX and red tint    
+    ;but if move_speed is not 0, don't do anything.
+    ;once move_speed is 0, decrement domappoison for this step
+    
+    LDA move_speed
+    BNE @Exit
+  
+    DEC domappoison
+    RTS
+
+   @SFX:
+    ; play the "you're poisoned" sound effect
     ;LDA #%00111010          ; 12.5% duty (harsh), volume=$A
     ;STA $4004
     ;LDA #%10000001          ; sweep downward in pitch
@@ -2240,61 +2244,79 @@ MapPoisonDamage:       ; first thing is to check if ANY characters are poisoned.
     ;LDA #$06                ; indicate sq2 is busy with sound effects for 6 frames
     ;STA sq2_sfx
     
-    ;; JIGS - this edit uses the noise channel instead of the square 2 channel.
-    ;; Not sure if it will conflict with damage tiles.
-    LDA #%10010100   
+    ;; turn on red emphasis
+    LDA #%00111110    
+    STA $2001             
+    
+    ;; and play a scrapey sort of damage noise
+    LDA #$1B
     STA $400C
-    LDA #%00000010
-    STA $400E       
-    LDA #$05
-    STA $400F       
-
+    LDA #$08
+    STA $400E 
+    LSR A ; #4
+    STA $400F             
+    ;; check move speed again...!
     LDA move_speed          ; see if party is moving (or really, "has moved")
-    BEQ @DoDamage           ; if not... do damage
-    RTS                     ; otherwise... don't do damage... just exit.
-            ;   This might take some explaining.  This seems contradictory to what I say in the routine
-            ; description ("It is called only when the player is moving").  Due to the order in which
-            ; this routine is called... move_speed will be zero at this point if the player just completed
-            ; a move across a tile (ie:  they moved a full 16 pixels).  move_speed will be nonzero if they
-            ; moved less than that.
-            ;   Without doing this check, poisoned characters would be damaged every FRAME rather than every step
-            ; (which would end up being -16 HP per step, since the player moves 1 pixel per frame).  With this check,
-            ; damage is only dealt once the move is completed (so only once per step)
+    BNE @Exit               ; if not... do damage
+    ; otherwise... don't do damage... just exit.
+    
+    LDA #BANK_Z
+    JSR SwapPRG_L
+    JSR MapPoisonDamage_Z
+    JMP SwapPRG_L
+    
+    ;   This might take some explaining.  This seems contradictory to what I say in the routine
+    ; description ("It is called only when the player is moving").  Due to the order in which
+    ; this routine is called... move_speed will be zero at this point if the player just completed
+    ; a move across a tile (ie:  they moved a full 16 pixels).  move_speed will be nonzero if they
+    ; moved less than that.
+    ;   Without doing this check, poisoned characters would be damaged every FRAME rather than every step
+    ; (which would end up being -16 HP per step, since the player moves 1 pixel per frame).  With this check,
+    ; damage is only dealt once the move is completed (so only once per step)
 
-  @DoDamage:
-    LDX #0         ; X will be our loop counter and char index
-
-  @DmgLoop:
-    LDA ch_ailments, X    ; get this character's ailments
-    ;CMP #$03              ; see if it = 3 (poison)
-    CMP #04               ; JIGS - poison is 4 in battle, it should be 4 out of battle too
-    BNE @DmgSkip          ; if not... skip this character
-
-    LDA ch_curhp+1, X     ; check high byte of HP
-    BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this character damage
-
-    LDA ch_curhp, X       ; otherwise, check low byte of HP
-    CMP #2                ; see if >= 2 (don't take away their last HP)
-    BCC @DmgSkip          ; if < 2, skip this character
-                          ; otherwise... deal him damage
-
-  @DmgSubtract:
-    LDA ch_curhp, X       ; subtract 1 from HP
-    SEC
-    SBC #1
-    STA ch_curhp, X
-    LDA ch_curhp+1, X
-    SBC #0
-    STA ch_curhp+1, X
-
-  @DmgSkip:
-    TXA                   ; add $40 char index
-    CLC
-    ADC #$40
-    TAX
-
-    BNE @DmgLoop          ; and loop until it wraps (4 iterations)
-    RTS                   ; then exit
+ ; @DoDamage:
+ ;   LDA #1
+ ;   LDX #5
+ ;   JSR RandAX     ; get between 1-5 damage to deal out
+ ;   STA tmp
+ ;
+ ;   LDY #0         ; X will be our loop counter and char index
+ ; @DmgLoop:
+ ;   LDA ch_ailments, Y    ; get this character's ailments
+ ;   AND #AIL_POISON       ; see if they're poisoned
+ ;   BEQ @DmgSkip          ; if not... skip this character
+ ;
+ ;   LDA ch_curhp+1, Y     ; check high byte of HP
+ ;   BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this character damage
+ ;
+ ;   LDA tmp               ; otherwise, check low byte of HP
+ ;   CMP ch_curhp, Y       ; see if they have as much HP as there is damage 
+ ;   BCS @DmgSkip          ; C set if they will die from it, so skip 
+ ;
+ ; @DmgSubtract:
+ ;   LDA ch_curhp, Y       ; subtract 1 from HP
+ ;   SEC
+ ;   SBC tmp
+ ;   STA ch_curhp, Y
+ ;   LDA ch_curhp+1, Y
+ ;   SBC #0
+ ;   STA ch_curhp+1, Y
+ ;
+ ; @DmgSkip:
+ ;   TYA                   ; add $40 char index
+ ;   CLC
+ ;   ADC #$40
+ ;   TAY
+ ;   BNE @DmgLoop          ; and loop until it wraps (4 iterations)
+ ;   
+ ;  @Random:               ; then figure out how many steps until the next poison
+ ;   LDA #4
+ ;   LDX #8
+ ;   JSR RandAX
+ ;   STA domappoison
+ ;   LDA #$1E
+ ;   STA btl_soft2001      ; and remove red emphasis (reset soft2001 to normal use)
+ ;   RTS  
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13766,14 +13788,6 @@ BattleRNG:
 ;  @Scramble_lut:
 ;    .INCBIN "bin/0F_FCF1_rngtable.bin"
 
-    
-;; Unused space
-;;    .BYTE 0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0
-  
-;; JIGS - and another silly jump table... Labels moved to the right spots.  
-    
-;;WaitForVBlank_L: JMP WaitForVBlank
-;;SwapPRG_L:       JMP SwapPRG
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
