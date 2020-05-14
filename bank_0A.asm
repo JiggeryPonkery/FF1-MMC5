@@ -1868,7 +1868,7 @@ BTL_MESSAGE68:
 BTL_MESSAGE69:
 .byte $9C,$B7,$B8,$B1,$00 ; Stun
 BTL_MESSAGE70:
-;.byte $8A,$EA,$C8,$C9,$00 ; A {EA}{C8}{C9} (sl eep) ; JIGS - the squished text doesn't exist anymore...
+.byte $97,$2E,$2C,$51,$B3,$A8,$C4,$00 ; No escape!
 BTL_MESSAGE71:
 .byte $96,$B8,$B7,$A8,$00 ; Mute
 BTL_MESSAGE72:

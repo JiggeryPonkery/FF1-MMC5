@@ -143,14 +143,6 @@ FinishBattlePrepAndFadeIn:
     ; at the end of VBlank
    
     JSR BattleFadeIn
-    
-  ;  LDA #$1E
-  ;  STA btl_soft2001                ; enable BG and sprites
-    
-    LDA #BOX_PLAYER
-    JSR DrawCombatBox
-    DEC BattleBoxBufferCount ; but don't count it!
-    
     JMP Battle_AfterFadeIn
     
     
@@ -251,15 +243,26 @@ ClearCharBuffers:
       DEY
       BNE :-
     RTS
+
+DrawPlayerBox:
+    LDA #BOX_PLAYER
+    JSR DrawCombatBox
+    DEC BattleBoxBufferCount ; but don't count it!
+    RTS
    
 Battle_AfterFadeIn:
     LDA #$00                    ; zero a bunch of misc vars to prep them
     STA btl_strikingfirst
     STA battle_autoswitch
+    STA btl_mathbuf+1   ; clear high byte of mathbuf0
     
     LDA btlform_norun
     AND #$01                ; see if "no run" bit is set.  If it is, there is no strike first/surprised check
-    BNE BattleLogicLoop
+    BEQ :+
+    
+    LDA #BTLMSG_NOESCAPE
+    JSR DrawMessageBoxDelay_ThenClearAll
+    JMP BattleLogicLoop
     
     ; This block of code does some math to see if the party will be surprised or
     ;   get a first strike in the battle.  The end result of this math is:
@@ -271,10 +274,7 @@ Battle_AfterFadeIn:
     ; if V >= 90, party strikes first
     ; otherwise, normal fight
     
-    LDA #$00
-    STA btl_mathbuf+1   ; clear high byte of mathbuf0
-    
-    LDA ch_agility
+  : LDA ch_agility
     CLC
     ADC ch_speed
     LSR A
@@ -307,13 +307,15 @@ Battle_AfterFadeIn:
       LDA #BTLMSG_STRIKEFIRST
       JSR DrawMessageBoxDelay_ThenClearAll   ; draw strike first message
       INC btl_strikingfirst             ; set flag
+      JSR DrawPlayerBox
       JMP BattleLogicLoop               ; and jump ahead to logic loop
     
     ; surprised code
   @Surprised:
-    DEC btl_strikingfirst               ; JIGS - if party surprised, this is $FF
     LDA #BTLMSG_SURPRISED
     JSR DrawMessageBoxDelay_ThenClearAll
+    DEC btl_strikingfirst               ; JIGS - if party surprised, this is $FF
+    JSR DrawPlayerBox
     ;JMP BattleLogicLoop_DoCombat        ; skip over first round of player input, and just do combat
     ;; JIGS - flows into it
     
@@ -354,8 +356,7 @@ BattleLogicLoop_ReEntry:
     LDA AutoTargetOptionBackup      ;; JIGS - restore AutoTargetOption if auto battle (start button)
     STA AutoTargetOption            ;;  was used last round
     JSR ClearCommandBuffer
-    JSR ResetUsePalette                 ; make sure the cursor is grey
-    JSR DoFrame_UpdatePalette
+    JSR ResetPalette_Update         ; make sure the cursor is grey
     
     ;;   Get input commands for each of the 4 characters.  This is done kind of confusingly,
     ;; since the player can undo/backtrack by pressing B.  This code does not necessarily
@@ -6505,16 +6506,16 @@ DoPhysicalAttack_NoAttackerBox:
         JSR HitChance_Subtract40    ; if the enemy is blind, hitchance is #48 now
 
   : LDA btl_attacker_category       ; see if attacker category matches defender category
-    AND btl_defender_category
-    STA math_category
+    AND btl_defender_category       ; any bits that match will be saved, indicating that the attacker is 
+    STA math_category               ; effective against the defender
     
-    LDA btl_attacker_element        ; see if attacker element matches defender elemental weakness
-    AND btl_defender_elementweakness
+    LDA btl_attacker_element         ; see if attacker element matches defender elemental weakness
+    AND btl_defender_elementweakness 
     STA math_element
     
     LDA math_category
     ORA math_element                    ; merge categoy/element matches
-    BEQ :+                              ; if any weaknesses found...
+    BEQ @CheckForSleep                  ; if any weaknesses found...
      ; LDA #MATHBUF_HITCHANCE           ; +40 bonus to hit chance
      ; LDX #40
      ; JSR MathBuf_Add
@@ -6532,23 +6533,26 @@ DoPhysicalAttack_NoAttackerBox:
       CLC
       ADC #4
       STA math_basedamage
-      BCC :+
+      BCC @CheckForSleep
         LDA #$FF
         STA math_basedamage             ; maximum base damage of 255
-        
-  : LDA btl_defender_ailments
+    
+   @CheckForSleep:
+    LDA btl_defender_ailments
     AND #AIL_SLEEP
-    BEQ :+      
+    BEQ @CheckForDark
         LDA #0
         STA btl_defender_evasion        ;; JIGS - sleep is scary!
-        BEQ :++                         ;; skip the DARK check if defender is asleep
-        
-  : LDA btl_defender_ailments           ; if defender has DARK, bonus of 40 to attacker's hit chance
+        BEQ @CheckForStunSleep          ;; skip the DARK check if defender is asleep
+   
+   @CheckForDark:     
+    LDA btl_defender_ailments           ; if defender has DARK, bonus of 40 to attacker's hit chance
     AND #AIL_DARK
-    BEQ :+
+    BEQ @CheckForStunSleep
         JSR HitChance_Add40
-        
-  : LDA btl_defender_ailments
+   
+   @CheckForStunSleep:   
+    LDA btl_defender_ailments
     AND #AIL_STUN | AIL_SLEEP
     BEQ :+                              ; if defender alseep or stunned....
       LDA math_basedamage               ; apply 25% bonus to base damage
@@ -6622,6 +6626,13 @@ DoPhysicalAttack_NoAttackerBox:
     LDA battle_defenderisplayer
     BNE :+
     
+    LDA btl_attacker_graphic
+    CMP #$AC                    ; is it the fist sprite?
+    BNE @DoEnemyExplosion
+    
+    JSR ResetPalette_Update     ; if fists, then make the dust cloud white/grey
+    
+   @DoEnemyExplosion: 
     LDA btl_defender_ailments
     AND #AIL_DEAD | AIL_STOP
     BNE :+                      ; if the enemy target is not already dead or stone...
@@ -6769,7 +6780,7 @@ DoPhysicalAttack_NoAttackerBox:
       LDA btl_defender_ailments     ; Do some bit trickery to get only the ailments that
       EOR #$FF                      ;  the defender does not already have.
       AND btl_attacker_attackailment
-      BEQ @NextHitIteration              ; if its 0, the player already has the ailments the enemy can give them
+      BEQ @NextHitIteration         ; if its 0, the player already has the ailments the enemy can give them
       ;; Note that in the case an enemy has more than 1 ailment to give,
       ;; They will apply both ailments again if the defender only has one of them?
       

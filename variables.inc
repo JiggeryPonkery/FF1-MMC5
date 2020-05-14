@@ -821,7 +821,7 @@ btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes ($F3)
     en_hitrate      = $07 ; can be changed with magic           8
     en_strength     = $08 ; can be changed with magic           9 
     en_critrate     = $09 ; can be changed with magic           10
-    en_special      = $0A ; (unused?)                           11
+    en_ailproc      = $0A ;                                     11
     en_attackail    = $0B ; can be changed with magic           12
     en_category     = $0C ;                                     13 
     en_magdef       = $0D ; can be changed with magic           14 
