@@ -5594,7 +5594,7 @@ DrawDialogueBox:
 
     LDA sm_scroll_x     ; get the X scroll of the map
     CLC                 ; then add $10+2 to it.  $10 to put the text on the "offscreen" NT
-    ADC #$10+2          ;   and 2 to put it two map tiles (32 pixels) into that screen.
+    ADC #$10+1  ;2        ;   and 2 to put it two map tiles (32 pixels) into that screen.
     AND #$1F            ; mask with $1F to wrap around both NTs properly
     ASL A               ; then double it, to convert from 16x16 tiles to 8x8 tiles
     STA box_x           ; this is our target X coord for the text
@@ -5627,12 +5627,13 @@ DrawDialogueBox:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepDialogueBoxAttr:
-    LDX #$0E               ; Loop from $E to 1
+    LDX #$0F ; 0E               ; Loop from $E to 1
     LDA #$FF               ; and set attributes to use palette set 3
   @Loop:
       STA draw_buf_attr, X
       DEX
-      BNE @Loop            ; loop until X=0 (do not change draw_buf_attr+0!)
+      BPL @Loop
+      ;BNE @Loop            ; loop until X=0 (do not change draw_buf_attr+0!)
     RTS                    ; then exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5651,70 +5652,105 @@ PrepDialogueBoxAttr:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PrepDialogueBoxRow:
-    DEC dlgbox_row     ; decrement the row (drawing bottom up)
-    BEQ @TopRow
-   ; BEQ @Exit          ; if this is the very top row, draw nothing -- since the map is visible
-                       ;  for the top 16 pixels of the screen
+   LDA #$1F
+   STA box_wd
+   LDY #0             ; prep width and set Y to 0 for JigsBoxDoRow
+   
+   LDA #<draw_buf     ; set draw_buf as the destination to draw to
+   STA tmp+1
+   LDA #>draw_buf
+   STA tmp+2
 
-    LDA dlgbox_row
-    CMP #5             ; Otherwise, see if this is the bottom row
-    BEQ @BottomRow     ;   if it is, prepare it specially
-
-   ; CMP #1
-   ; BEQ @TopRow        ; same with the top row of the dialogue box (2nd row of 16x16 tiles)
-
-                 ; otherwise, just draw a normal "inner" row
-
-  @InnerRows:
-    LDA #$FA           ; use tile $FA for the leftmost tile in the row (left box graphic)
-    STA tmp+1
-    LDA #$FF           ; tile $FF for all other tiles in the row (inner box graphic / empty space)
-    STA tmp
-    JSR DlgBoxPrep_UL  ;  prep UL tiles
-
-    LDA #$FB           ; $FB as rightmost tile in row (right box graphic)
-    STA tmp+1
-    JSR DlgBoxPrep_UR  ;  prep UR tiles
-
-    LDA #$FA
-    STA tmp+1
-    JSR DlgBoxPrep_DL  ; then prep the fixed DL/DR tiles
-    
-    LDA #$FB
-    STA tmp+1
-    JMP DlgBoxPrep_DR  ;   and exit
-
-  @TopRow:
-    LDA #$F7           ; use tile $F7 for the leftmost tile in the row (UL box graphic)
-    STA tmp+1
-    LDA #$F8           ; use tile $F8 for every other tile in the row (top box graphic)
-    STA tmp
-    JSR DlgBoxPrep_DL  ;  prep the UL tiles
-
-    LDA #$F9           ; use tile $F9 for the rightmost tile in the row (UR box graphic)
-    STA tmp+1
-    JMP DlgBoxPrep_DR  ;  prep the UR tiles
+   LDX #2             ; do one inner row first--even if its the top row!  
+   JSR JigsBoxDoRow   ; since the very top is not shown (fix your TV if it is!)
+   ;; this might be considered bad practice? But emulators have overscan, or should... so its fine
+  
+   DEC dlgbox_row     ; this part is the same as the original at least
+   BEQ @TopRow
+   
+   LDX dlgbox_row
+   CPX #5
+   BEQ @BottomRow
+   
+  @InnerRow:
+   LDX #2
+   JMP JigsBoxDoRow
 
   @BottomRow:
-    LDA #$FF
-    STA tmp
-    LDA #$FA
-    STA tmp+1
-    JSR DlgBoxPrep_UL  
-    
-    LDA #$FB
-    STA tmp+1
-    JSR DlgBoxPrep_UR  
+   LDX #5
+   JMP JigsBoxDoRow
+  
+  @TopRow:
+   LDX #$FF
+   JMP JigsBoxDoRow
 
-    LDA #$FC           ; use tile $FC for the leftmost tile in the row (DL box graphic)
-    STA tmp+1
-    LDA #$FD           ; use tile $FD for every other tile in the row (bottom box graphic)
-    STA tmp
-    JSR DlgBoxPrep_DL  ;  prep the UL tiles
-   
-    LDA #$FE           ; use tile $FE for the rightmost tile in the row (DR box graphic)
-    STA tmp+1
-    JMP DlgBoxPrep_DR  ;  prep the UR tiles and exit
+;; JIGS - neat, the row drawing of my battle box drawing routine works just fine here!
+
+
+;    DEC dlgbox_row     ; decrement the row (drawing bottom up)
+;    BEQ @TopRow
+;   ; BEQ @Exit          ; if this is the very top row, draw nothing -- since the map is visible
+;                       ;  for the top 16 pixels of the screen
+;
+;    LDA dlgbox_row
+;    CMP #5             ; Otherwise, see if this is the bottom row
+;    BEQ @BottomRow     ;   if it is, prepare it specially
+;
+;   ; CMP #1
+;   ; BEQ @TopRow        ; same with the top row of the dialogue box (2nd row of 16x16 tiles)
+;
+;                 ; otherwise, just draw a normal "inner" row
+;
+;  @InnerRows:
+;    LDA #$FA           ; use tile $FA for the leftmost tile in the row (left box graphic)
+;    STA tmp+1
+;    LDA #$FF           ; tile $FF for all other tiles in the row (inner box graphic / empty space)
+;    STA tmp
+;    JSR DlgBoxPrep_UL  ;  prep UL tiles
+;
+;    LDA #$FB           ; $FB as rightmost tile in row (right box graphic)
+;    STA tmp+1
+;    JSR DlgBoxPrep_UR  ;  prep UR tiles
+;
+;    LDA #$FA
+;    STA tmp+1
+;    JSR DlgBoxPrep_DL  ; then prep the fixed DL/DR tiles
+;    
+;    LDA #$FB
+;    STA tmp+1
+;    JMP DlgBoxPrep_DR  ;   and exit
+;
+;  @TopRow:
+;    LDA #$F7           ; use tile $F7 for the leftmost tile in the row (UL box graphic)
+;    STA tmp+1
+;    LDA #$F8           ; use tile $F8 for every other tile in the row (top box graphic)
+;    STA tmp
+;    JSR DlgBoxPrep_DL  ;  prep the UL tiles
+;
+;    LDA #$F9           ; use tile $F9 for the rightmost tile in the row (UR box graphic)
+;    STA tmp+1
+;    JMP DlgBoxPrep_DR  ;  prep the UR tiles
+;
+;  @BottomRow:
+;    LDA #$FF
+;    STA tmp
+;    LDA #$FA
+;    STA tmp+1
+;    JSR DlgBoxPrep_UL  
+;    
+;    LDA #$FB
+;    STA tmp+1
+;    JSR DlgBoxPrep_UR  
+;
+;    LDA #$FC           ; use tile $FC for the leftmost tile in the row (DL box graphic)
+;    STA tmp+1
+;    LDA #$FD           ; use tile $FD for every other tile in the row (bottom box graphic)
+;    STA tmp
+;    JSR DlgBoxPrep_DL  ;  prep the UL tiles
+;   
+;    LDA #$FE           ; use tile $FE for the rightmost tile in the row (DR box graphic)
+;    STA tmp+1
+;    JMP DlgBoxPrep_DR  ;  prep the UR tiles and exit
 
  ; @Exit:
  ;   RTS
@@ -5739,71 +5775,71 @@ PrepDialogueBoxRow:
  ;;   tmp   = tile for all other tiles
  ;;
 
-DlgBoxPrep_UL:
-    LDA tmp+1             ; get the desired leftmost tile
-    STA draw_buf_ul+1     ; record it
-
-    LDX #$02
-    LDA tmp               ; then get the main tile
-   @Loop:
-      STA draw_buf_ul, X  ; and record it for +2 to +$E
-      INX
-      CPX #$0F
-      BCC @Loop           ; stop when X gets to $F (don't want to change $F)
-    RTS                   ; and exit
-
- ;;
- ;;  UR  [$D5AC ::0x3D5BC]
- ;;   tmp   = tile for all other tiles
- ;;   tmp+1 = tile for rightmost tile
- ;;
-
-DlgBoxPrep_UR:
-    LDA tmp               ; get main tile
-    LDX #$01
-   @Loop:
-      STA draw_buf_ur, X  ; and write it to +1 to +$D
-      INX
-      CPX #$0E
-      BCC @Loop
-
-    LDA tmp+1             ; then copy the right-most tile to +$E
-    STA draw_buf_ur+$E
-    RTS
-
- ;;
- ;;  DL  [$D5BE :: 0x3D5CE]
- ;;
-
-DlgBoxPrep_DL:
-    LDA tmp+1             ; load hardcoded tile $FA (box left border graphic)
-    STA draw_buf_dl+1     ; to leftmost tile
-
-    LDX #$02
-    LDA tmp               ; then hardcoded tile $FF (blank space / box inner graphic)
-   @Loop:
-      STA draw_buf_dl, X  ;   to the rest of the row
-      INX
-      CPX #$0F
-      BCC @Loop
-    RTS
-
- ;;
- ;;  DR  [$D5D0 :: 0x3D5E0]
- ;;
-
-DlgBoxPrep_DR:
-    LDA tmp               ; load hardcoded tile $FF (blank space / box inner graphic)
-    LDX #$01
-   @Loop:
-      STA draw_buf_dr, X  ;   to all tiles in row except the rightmost
-      INX
-      CPX #$0E
-      BCC @Loop
-
-    LDA tmp+1             ; load hardcoded tile $FB (box right border graphic)
-    STA draw_buf_dr+$E    ; to rightmost tile
-    RTS
+;DlgBoxPrep_UL:
+;    LDA tmp+1             ; get the desired leftmost tile
+;    STA draw_buf_ul+1     ; record it
+;
+;    LDX #$01; 02
+;    LDA tmp               ; then get the main tile
+;   @Loop:
+;      STA draw_buf_ul, X  ; and record it for +2 to +$E
+;      INX
+;      CPX #$10; 0F
+;      BCC @Loop           ; stop when X gets to $F (don't want to change $F)
+;    RTS                   ; and exit
+;
+; ;;
+; ;;  UR  [$D5AC ::0x3D5BC]
+; ;;   tmp   = tile for all other tiles
+; ;;   tmp+1 = tile for rightmost tile
+; ;;
+;
+;DlgBoxPrep_UR:
+;    LDA tmp               ; get main tile
+;    LDX #$00 ; 1
+;   @Loop:
+;      STA draw_buf_ur, X  ; and write it to +1 to +$D
+;      INX
+;      CPX #$0F ; E
+;      BCC @Loop
+;
+;    LDA tmp+1             ; then copy the right-most tile to +$E
+;    STA draw_buf_ur+$E
+;    RTS
+;
+; ;;
+; ;;  DL  [$D5BE :: 0x3D5CE]
+; ;;
+;
+;DlgBoxPrep_DL:
+;    LDA tmp+1             ; load hardcoded tile $FA (box left border graphic)
+;    STA draw_buf_dl+1     ; to leftmost tile
+;
+;    LDX #$01; 2
+;    LDA tmp               ; then hardcoded tile $FF (blank space / box inner graphic)
+;   @Loop:
+;      STA draw_buf_dl, X  ;   to the rest of the row
+;      INX
+;      CPX #$10; 0F
+;      BCC @Loop
+;    RTS
+;
+; ;;
+; ;;  DR  [$D5D0 :: 0x3D5E0]
+; ;;
+;
+;DlgBoxPrep_DR:
+;    LDA tmp               ; load hardcoded tile $FF (blank space / box inner graphic)
+;    LDX #$00; 1
+;   @Loop:
+;      STA draw_buf_dr, X  ;   to all tiles in row except the rightmost
+;      INX
+;      CPX #$0F; E
+;      BCC @Loop
+;
+;    LDA tmp+1             ; load hardcoded tile $FB (box right border graphic)
+;    STA draw_buf_dr+$E    ; to rightmost tile
+;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5954,7 +5990,7 @@ ShowDialogueBox:
       LDA tmp+11        ; subtract 3 from the dialogue visibility scanline (move it 3 lines up
       SEC               ;    retracting box visibility)
       ;SBC #3
-      SBC #9            ; JIGS - faster closing of the dialogue box
+      SBC #8            ; JIGS - faster closing of the dialogue box
       STA tmp+11        ; box closes 3 pixels/frame.
 
       CMP #$12          ; and keep looping until line is below $12
@@ -14105,8 +14141,7 @@ Dialogue_CoverSprites_VBl:
   @Loop:
     LDA oam_y, X       ; get the sprite's Y coord
     CMP tmp+11         ; compare it to our cutoff scanline (result in C)
-    LDA oam_a, X       ; then get the attribute byte for this sprite
-
+    LDA oam_a, X       ; then get the attribute byte for this sprite    
     BCS @FGPrio        ; if spriteY >= cutoffY, sprite has foreground priority, otherwise, BG priority
 
    @BGPrio:
@@ -14804,13 +14839,6 @@ JigsDrawBoxAddress_LUT: ; read from -4
 ;; Spaced them out so its easier to read to make sure things are working. 
 ;; See JigsBox_Start for instructions on making a more snug version
 
-BoxTiles:
-    .byte $F7,$F8,$F9
-    .byte $FA,$FF,$FB
-    .byte $FC,$FD,$FE
-
-
-
 
 UndrawBattleBlock:
     LDX BattleBoxBufferCount
@@ -14998,7 +15026,7 @@ ClearJigsBoxBuffer:
     TXA
     
     ;; ^^ 
-    
+
     ASL A                   ; * 4
     TAX
     LDA JigsDrawBox_LUT-8, X
@@ -15011,13 +15039,13 @@ ClearJigsBoxBuffer:
     LDY #0
     
     LDX #$FF                ; so the first INX will set it to 0
-    JSR @DoRow              ; top row
+    JSR JigsBoxDoRow        ; top row
   : LDX #2                  ; X is the index to the box tiles, so use the middle row by default
-    JSR @DoRow              ; middle rows
+    JSR JigsBoxDoRow        ; middle rows
     DEC box_ht              ; decrement the height counter (no need to back it up)
     BNE :-                  ; when the height counter = 0 there's one row left, so don't set X back
     
-   @DoRow:
+JigsBoxDoRow:
     INX                      
     LDA box_wd
     STA tmp+5               ; set width counter
@@ -15039,6 +15067,10 @@ ClearJigsBoxBuffer:
     RTS
 
  
+BoxTiles:
+    .byte $F7,$F8,$F9
+    .byte $FA,$FF,$FB
+    .byte $FC,$FD,$FE
 
 
 ;; this draws a mini box, but the #0F ID skips incrementing drawn-box stuff
