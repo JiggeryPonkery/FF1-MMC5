@@ -3091,6 +3091,7 @@ EnterTitleScreen:
     STA soft2000           ;   table while BG uses left
 
     JSR ClearButtons       ; resets all buttons and A = 0
+    STA weasels            ; 
     STA $2001              ; turn off the PPU
     STA cursor
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
@@ -4726,6 +4727,13 @@ SoundTestClearNT:
 SoundTestZ:
     LDA #BANK_THIS           ; record current bank and CallMusicPlay
     STA cur_bank
+    
+    LDA #0
+    STA cursor
+    STA soundtest
+    STA weasels
+    STA joy
+    STA joy_prevdir
 
     JSR SoundTestClearNT     ; clear the nametable, set the attributes, load weasel sprite
     STX menustall            ; X = 0
@@ -4805,15 +4813,18 @@ SoundTestMenuLoop:
     JMP SoundTestMenuLoop         ; rinse, repeat
 
    @B_Pressed:
+    JSR ClearOAM              ; clear OAM
     JSR ClearButtons
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
     STA $2001
-    STA $4015           ; and silence the APU.  Music sill start next time MusicPlay is called.
-    STA $5015           ; and silence the MMC5 APU.
+    STA $4015              ; and silence the APU.  Music sill start next time MusicPlay is called.
+    STA $5015              ; and silence the MMC5 APU.
     STA soundtesthelper
     STA dlgmusic_backup
     STA soundtest
-    RTS               ; and exit the main menu (by RTSing out of its loop)
+    LDA BANK_MUSIC       
+    STA cur_bank
+    RTS                     ; and exit the main menu (by RTSing out of its loop)
 
    @A_Pressed:
     LDA soundtesthelper
@@ -5397,7 +5408,7 @@ SaveSecondSlot:
     STA sram3_checksum ;  and write it to the checksum byte.  Checksum calculations will now result in FF
     RTS
 
-    LoadFirstSlot:
+LoadFirstSlot:
     LDA sram_assert_55              ; check sram assertion values to make sure
     CMP #$55                        ;  sram is not corrupt.  If they are not what are expected...
     BNE UhOhNewGame                    ;  then do a new game.
@@ -5424,7 +5435,7 @@ SaveSecondSlot:
     STA MenuHush
     JMP GameLoaded
 
-    LoadSecondSlot:
+LoadSecondSlot:
     LDA sram2_assert_55              ; check sram assertion values to make sure
     CMP #$55                        ;  sram is not corrupt.  If they are not what are expected...
     BNE UhOhNewGame                    ;  then do a new game.

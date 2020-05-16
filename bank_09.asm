@@ -13,10 +13,11 @@
 
 .import DrawComplexString_L, DrawBox_L, UpdateJoy_L, DrawPalette_L
 .import WaitForVBlank_L, lut_RNG
-.import CallMinimapDecompress, CallMusicPlay_L
-.import lut_MinimapSprCHR, lut_MinimapBGPal, CHRLoad
+.import CallMusicPlay_L
+.import CHRLoad
 .import LongCall
 .import DrawComplexString
+.import MinimapDecompress
 
 BANK_THIS = $09
 
@@ -3294,7 +3295,10 @@ Minimap_DrawRows:
 
 
 Minimap_PrepRow:
-    JSR CallMinimapDecompress    ; decompress 2 rows of map data
+    JSR LongCall
+    .word MinimapDecompress    ; decompress 2 rows of map data
+    .byte BANK_OWMAP
+    
     LDY #0                       ; Y will be the x coord (column) counter
 
   @MainLoop:
@@ -3512,23 +3516,22 @@ Minimap_FillNTPal:
 ;  .BYTE 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
 ;  .BYTE 0,0,0,0, 0
 
-;; JIGS The following moved to Bank F to make space for ... item prices!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Minimap Sprite CHR  [$BF00 :: 0x27F10]
 ;;    CHR for sprites on the minimap
 
-;lut_MinimapSprCHR:
-;  .INCBIN "bin/minimap_sprite.chr"
+lut_MinimapSprCHR:
+  .INCBIN "chr/minimap_sprite.chr"
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  BG palette for minimap  [$BF20 :: 0x27F30]
 
-;lut_MinimapBGPal:
-;  .BYTE $02,$1B,$38,$2B, $02,$04,$37,$0F, $02,$28,$18,$0F, $02,$24,$1A,$30
+lut_MinimapBGPal:
+  .BYTE $02,$1B,$38,$2B, $02,$04,$37,$0F, $02,$28,$18,$0F, $02,$24,$1A,$30
 
 
 

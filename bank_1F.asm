@@ -12,7 +12,7 @@
 ;.export Battle_WritePPUData_L
 .export CHRLoad
 .export CHRLoadToA
-.export CallMinimapDecompress
+;.export CallMinimapDecompress
 .export CallMusicPlay
 .export CallMusicPlay_L
 .export CancelNewGame
@@ -67,8 +67,8 @@
 .export UpdateJoy_L
 .export WaitForVBlank_L
 .export lutClassBatSprPalette
-.export lut_MinimapBGPal
-.export lut_MinimapSprCHR
+;.export lut_MinimapBGPal
+;.export lut_MinimapSprCHR
 .export lut_NTRowStartHi
 .export lut_NTRowStartLo
 .export lut_RNG
@@ -434,7 +434,7 @@ DoOWTransitions:
     BEQ @SkipBridgeScene  ;   if not triggered... skip it
     BMI @SkipBridgeScene  ;   if we've already done it in the past, skip it
 
-      JSR StopNoise_StopSprites      ; cycle palettes with code=00 (overworld, cycle out)
+      ;JSR StopNoise_StopSprites      ; cycle palettes with code=00 (overworld, cycle out)
 
       JSR LoadBridgeSceneGFX ; load CHR and NT for the bridge scene
       LDA #BANK_BRIDGESCENE
@@ -447,7 +447,7 @@ DoOWTransitions:
     BEQ @SkipShop         ; if not... skip it
 
       ;JSR GetOWTile       ; Get overworld tile (why do this here?  doesn't make sense)
-      JSR StopNoise_StopSprites   ; cycle out the palette
+      ;JSR StopNoise_StopSprites   ; cycle out the palette
 
       LDA #BANK_MENUS
       JSR SwapPRG_L       ; swap to bank containing shops
@@ -715,7 +715,7 @@ ProcessOWInput:
     CMP #$C0
     BNE @Exit          ; if not... exit
 
-    LDA #0                  ; otherwise... they activated the minigame!
+    ;LDA #0                  ; otherwise... they activated the minigame!
     JSR StopNoise_StopSprites
     JSR LoadBridgeSceneGFX  ; load the NT and most of the CHR for the minigame
     LDA #BANK_MINIGAME
@@ -2480,7 +2480,7 @@ StandardMapLoop:
     LDA #0                  ;   this seems totally useless to do here
     STA inroom              ; clear the inroom flags so that we're out of rooms when we enter the shop
     ;LDA #2                 ;   this is to counter the effect of shop enterances also being doors that enter rooms
-    JSR StopNoise_StopSprites  ; do the palette cycle effect (code 2 -- standard map, cycle out)
+    ;JSR StopNoise_StopSprites  ; do the palette cycle effect (code 2 -- standard map, cycle out)
 
     LDA #BANK_MENUS         ; swap to menu bank
     JSR SwapPRG_L
@@ -2709,25 +2709,16 @@ ProcessSMInput:
  ;;
  ;; Select button pressed
  ;;
-
-      ;JSR GetSMTilePropNow     ; do all the same stuff as when start is pressed.
-      LDA #0                   ;   though I don't know why you'd need to get the now tile properties...
-      STA joy_select
-      ;LDA #$02
-      ;JSR CyclePalettes
-      JSR StopNoise_StopSprites
       ;; JIGS - here we have the sound test menu!
   
       LDA joy
-      AND #$40            
-      BEQ @ResumeAsNormal 
+      AND #$40          ; see if B is held down
+      BEQ @Pause        ; if not, just pause!
     
-        LDA #BANK_Z
-        JSR SwapPRG_L      
         JSR SoundTestMenu  
         JMP ReenterStandardMap
       
-    @ResumeAsNormal:
+    @Pause:
       ;LDA #BANK_MENUS
       ;JSR SwapPRG_L
       ;JSR EnterLineupMenu      ; but since they pressed select -- enter lineup menu, not main menu
@@ -4229,19 +4220,7 @@ EnterStandardMap:
     JMP ScreenWipe_Open             ; do the screen wipe effect and exit once map is visible
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Reenter Standard Map  [$CF3A :: 0x3CF4A]
-;;
-;;    Called to reenter (but not reload) a standard map.  Like when you exit
-;;  a shop or menu... the map and objects haven't changed, but the map
-;;  needs to be redrawn and such.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ReenterStandardMap:
-    JSR PrepStandardMap   ; do map preparation stuff (redraw, etc)
-    JMP StopNoise_StopSprites ;  and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4260,6 +4239,22 @@ LoadStandardMapAndObjects:
     JSR LoadStandardMap   ; decompress the map
     JSR LoadMapObjects    ; load up the objects for this map (townspeople/bats/etc)
     RTS                   ; exit
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Reenter Standard Map  [$CF3A :: 0x3CF4A]
+;;
+;;    Called to reenter (but not reload) a standard map.  Like when you exit
+;;  a shop or menu... the map and objects haven't changed, but the map
+;;  needs to be redrawn and such.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ReenterStandardMap:
+ ;   JSR PrepStandardMap   ; do map preparation stuff (redraw, etc)
+;    JMP StopNoise_StopSprites ;  and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4346,7 +4341,7 @@ PrepStandardMap:
     LDA tileset_data+$180, X ; Do the same with the upper right tile
     ORA #TP_TREASURE_OPEN
     STA tileset_data+$180, X
-    JMP @IncY2               ; Then jump back to inc Y by 2 to check the next tile property 
+    BNE @IncY2               ; Then jump back to inc Y by 2 to check the next tile property 
     
    @ContinueLoad: 
     JSR LoadMapPalettes     ; load palettes
@@ -4377,7 +4372,7 @@ PrepStandardMap:
         STA music_track               ; play it
         STA dlgmusic_backup           ; and record it so it can be restarted later by the dialogue box
             
-    @NoChange:
+   @NoChange:
     LDA #0                  ; JIGS - so set it to 0 I guess?
     STA MenuHush            ; Honestly don't remember what these toggles are doing, but it worked, so...
     
@@ -6826,7 +6821,7 @@ StopNoise_StopSprites:
 	LDA #$30					;; JIGS: Turning off noise, because there's a click when
     STA $400C					;; entering menus on the ship
    	JSR WaitVBlank_NoSprites    ; wait for VBlank, and kill all sprites
-    JMP CallMusicPlay_NoSwap  ; and update music  (all the typical frame work)
+    JMP CallMusicPlay_NoSwap    ; and update music  (all the typical frame work)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14326,29 +14321,29 @@ FadeInBatSprPalettes:           ; Exactly the same as FadeOutBatSprPalettes... e
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-CallMinimapDecompress:
-    LDA #BANK_OWMAP
-    JSR SwapPRG_L
-    JSR MinimapDecompress
-    LDA #BANK_MINIMAP
-    JMP SwapPRG_L
+;CallMinimapDecompress:
+;    LDA #BANK_OWMAP
+;    JSR SwapPRG_L
+;    JSR MinimapDecompress
+;    LDA #BANK_MINIMAP
+;    JMP SwapPRG_L
 
 ;; So now we made lots of room, let's move some routines here to be used more often by other banks!
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Sprite CHR  [$BF00 :: 0x27F10]
-;;    CHR for sprites on the minimap
-
-lut_MinimapSprCHR:
-  .INCBIN "chr/minimap_sprite.chr"
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  BG palette for minimap  [$BF20 :: 0x27F30]
-
-lut_MinimapBGPal:
-  .BYTE $02,$1B,$38,$2B, $02,$04,$37,$0F, $02,$28,$18,$0F, $02,$24,$1A,$30  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;;  Minimap Sprite CHR  [$BF00 :: 0x27F10]
+;;;    CHR for sprites on the minimap
+;
+;lut_MinimapSprCHR:
+;  .INCBIN "chr/minimap_sprite.chr"
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;;  BG palette for minimap  [$BF20 :: 0x27F30]
+;
+;lut_MinimapBGPal:
+;  .BYTE $02,$1B,$38,$2B, $02,$04,$37,$0F, $02,$28,$18,$0F, $02,$24,$1A,$30  
 
 
   
@@ -14550,21 +14545,16 @@ ClearMenuOtherNametables:
     
 ;; JIGS - loads the sound test menu and swaps banks and stuff!
 
-SoundTestMenu:         ; 
+SoundTestMenu:         
     LDA #0
-    STA soundtest
-    STA weasels
     STA $2001           ; turn off the PPU (we need to do some drawing)     
     STA $4015           ; and silence the APU.  Music sill start next time MusicPlay is called.
     STA $5015           ; and silence the MMC5 APU.
-    STA cursor          ; flush cursor, joypad, and prev joy directions
-    STA joy
-    STA joy_prevdir
-    STA menustall
     JSR LoadMenuCHRPal_TextOnly ; load menu related CHR and palettes
     LDA #BANK_Z
     JSR SwapPRG
-    JMP SoundTestZ
+    JSR SoundTestZ
+    JMP SwapPRG         ; A = BANK_MUSIC
 
 
 

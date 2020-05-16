@@ -1,12 +1,9 @@
 Map:
-* Treasure chests will swap back to closed when the dialogue box is drawn. (Needs to be confirmed, footage is from old version.)
+* Treasure chests will swap back to closed when the dialogue box is drawn. (Needs to be confirmed, footage is from old version.) (Temporarily fixed by making the dialogue box wider.)
+* NPCs beside the dialogue box show through the black color of backgrounds. (Temporatily fixed by making the dialogue box wider.)
 
 
 Battle:
-* Fixed: Enemy level was being saved to ROM pointers, not RAM.
-
-* Enemies have an unused ailment chance byte... 
-
 * SelectPlayerTarget has some obfuscating code that I will need to hijack for Multi-targeting.
 
 * Regen/Poison - make sure its loading the right division bytes and ORA-ing the other right one.
@@ -21,7 +18,6 @@ Battle:
 
 
 Menu:
-* Exiting the soundtest menu will scramble NPC sprites for a frame?
 * Adjust loading of backgrounds so that music is not stalled for several frames between screens.
 
 MiniMap:
