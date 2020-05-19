@@ -1,40 +1,32 @@
-0 = Object info
-1 = Overworld map
-2 = map sprites and chr
-3 = tile sets
-4, 5, 6 = standard maps
-7, 8 = enemy graphics
-9 = Battle chr/Shop chr/ mini map code
-A = Item names, prices, battle strings
-B = Battle prep/End 
-C = Battle
-D = Music 
-E = Shops/Menus
-F = Intro, save/load, sound test, Enemy/weapon/armor stats, extras
-10 = Dialogue
-11 = Puzzle and Bridge scenes
-____________________
-
-New order:
-____________________
-
-0-3   - Enemy graphics (double)
-4-5   - Shop/Text graphics, Battle sprites
-6-7   - Tileset graphics
-8     - free space
-9     - Minigame, Bridge scene animations, maybe mini map code
-A-10  - remain the same as current banks
-11    - Dialogue
-12    - Teleport data / new game save ram
-13-14 - Map Sprites
-15-1D - Maps (8 banks)
-1E    - World map
-1F    - Fixed bank
-
-
-
-3x28 desc box     = 84 out of 127
-
-7x24 dialogue box = 168 out of 127
-
-5x24 = 120
+00 : Enemy graphics, battle backdrops 1
+01 : Enemy graphics, battle backdrops 2
+02 : Enemy graphics, battle backdrops 3
+03 : Battle backdrops, battle icons
+04 : Character battle sprites, Weapon and magic sprites, Shop CHR, menu text, and sprite loading routines
+05 : 
+06 : Small map tilesets
+07 : Small map tilesets - copy (unneeded)
+08 : Magic data, battle text CHR, pre-battle loading routines
+09 : Bridge scenes and text, Minigame, Minimap
+0A : Battle messages, enemy names, item names, magic names, chest gold amounts, item prices, Enemy Scan code
+0B : Battle set up, Enemy formations, Enemy drawing, Post-battle rewards, Level up
+0C : In-battle code
+0D : Music driver and data
+0E : Main Menu and Shop Logic, Item Descriptions
+0F : New Game, Title Screens, Sound Test, Equipment adjusting, Battle stat Loading; Enemy and weapon data
+10 : Environmental dialogue, dialogue code
+11 : NPC dialogue
+12 : Overworld tileset, small map tile attributes and properties, Character map palettes, New Game RAM initilization
+13 : Teleport coordinates, Small map NPC coordinates, New Game Character stats, Treasure chest contents
+14 : Character and NPC map sprites
+15 : 
+16 : Standard Map Data 1
+17 : Standard Map Data 2
+18 : Standard Map Data 3
+19 : 
+1A : 
+1B : 
+1C : 
+1D : 
+1E : Overworld Map data, Minimap decompression routine
+1F : Most game code, Overworld and Small Map loop, Text drawing routines
