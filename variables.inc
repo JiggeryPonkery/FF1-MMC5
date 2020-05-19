@@ -376,6 +376,9 @@ battlereward            = $78 ; 3 bytes.  Note that while this var is 3 bytes, t
 ;                             ;  will never receive more than 65535 XP/GP in any one battle.
 lvlup_chstats           = $80 ; 2 byte pointer to character's OB stats
 
+ZoomMapPointer          = $80 ; for mini map stuff
+ZoomMapTilesetPtr       = $82
+
 CharStatsPointer        = $80 
 CharBackupStatsPointer  = $82 ; these get loaded up at the same time
 EnemyRAMPointer         = $84 ; pointer to enemy's adjustable stats

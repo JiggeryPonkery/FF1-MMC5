@@ -18,6 +18,8 @@
 .import LongCall
 .import DrawComplexString
 .import MinimapDecompress
+.import ClearOAM
+.import CHRLoadToA
 
 BANK_THIS = $09
 
@@ -504,7 +506,7 @@ TheEnd_MoveAndSet:
     LDX theend_x
     LDY theend_y
     JSR TheEnd_SetPixel
-    JMP TheEnd_EndVblank
+   ; JMP TheEnd_EndVblank
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1136,7 +1138,7 @@ EnterMiniGame:
    ;   on... and begin the main loop
    ;
 
-    JSR ClearOAM_BankD       ; clear OAM
+    JSR ClearOAM             ; clear OAM
     JSR WaitForVBlank_L      ; then once in VBlank...
     LDA #>oam
     STA $4014                ; do sprite DMA
@@ -1361,29 +1363,7 @@ MiniGame_CheckVictory:
     CLC             ; CLC to indicate puzzle not solved
     RTS
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  ClearOAM_BankD   [$AFAB, 0x36FBB]
-;;
-;;    This is simply a copy of the ClearOAM routine found in the fixed bank.
-;;  It doesn't really need to be duplicated here since it could just call the main ClearOAM routine.
-;;  My guess is there were assembler limitations that made it difficult to export routines so that they
-;;  were visible in other banks (hence all the "_L" versions of routines).  Obviously today we don't
-;;  have these limitations... so this seems kind of wasteful.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ClearOAM_BankD:
-    LDX #0
-    STX sprindex
-    LDA #$F8
-
-  @Loop:
-      STA oam, X
-      INX
-      BNE @Loop
-
-    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2368,7 +2348,7 @@ CREDITSLIDE4:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawAllPuzzlePieces:
-    JSR ClearOAM_BankD     ; clear OAM
+    JSR ClearOAM     ; clear OAM
 
     LDA #$48         ; set sprite coords to $48, $2F
     STA spr_x        ;  this is where we start drawing the puzzle pieces
@@ -2617,7 +2597,6 @@ LoadStatusBoxScrollWork:
 .byte $42,$43,$19,$19,$19,$19,$44,$45
 .byte $1E,$1F,$00,$00,$00,$00,$1A,$1B 
 .byte $1E,$1F,$00,$00,$00,$00,$1A,$1B
-;.byte $1E,$1F,$00,$00,$00,$00,$1A,$1B 
 .byte $1E,$1F,$00,$00,$00,$00,$1A,$1B
 .byte $1E,$1F,$00,$00,$00,$00,$1A,$1B 
 .byte $1E,$1F,$00,$00,$00,$00,$1A,$1B
@@ -2626,206 +2605,7 @@ LoadStatusBoxScrollWork:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap NT LUT  [$B000 :: 0x27010]
-;;
-;;    This LUT contains the full name and attribute table for the minimap
-;;  It is copied in full to the nametables when the minimap is drawn.
 
-lut_MinimapNT:
-.INCBIN "bin/minimap_nt.nam"
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap BG CHR  [$B400 :: 0x27410]
-;;
-;;    This is the CHR for the non-map BG graphics for the minimap
-;;  Due to the way it's loaded, each of these blocks must be aligned
-;;  on a $100 byte page
-
-
-  .ALIGN $100
-chr_MinimapDecor:
-  .INCBIN "chr/minimap_decor.chr"
-
-
-  .ALIGN $100
-chr_MinimapTitle:
-  .INCBIN "chr/minimap_title.chr"
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Draw Title CHR  [$BB00 :: 0x27B10]
-;;
-;;    Progressively draws the title CHR for the minimap
-;;  This drawing is done progressively while the PPU is on so that
-;;  tiles appear to gradually fill the screen.
-;;
-;;    Because it's done when PPU is on, it must be done in VBlank.  Which
-;;  means it needs to be reasonably fast... and you can't do too much at once.
-;;  The game spreads the job out over 16 frames, drawing 1 byte of each tile's
-;;  CHR each frame.  ($28 bytes drawn per frame).
-;;
-;;    CHR must have already been preloaded and prearranged so that this
-;;  routine can simply load and draw it without having to do heavy computations.
-;;  See Minimap_PrepTitleCHR for how that's accomplished.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Minimap_DrawTitleCHR:
-    LDA #<mm_titlechr
-    STA minimap_ptr
-    LDA #>mm_titlechr
-    STA minimap_ptr+1        ; load up the pointer to our pre-loaded CHR
-
-    LDX #0                   ; X will be our frame counter.  We will spread this drawing
-                             ;  out over 16 frames
-
-  @FrameLoop:
-    JSR WaitForVBlank_L      ; wait for VBlank
-    LDY #0                   ; Y will be loop counter/index
-
-    @SmallLoop:
-      LDA lut_MinimapTitleCHRDest_hi, Y  ; load up the destination PPU address for this
-      STA $2006                          ;  tile of the title graphic
-      LDA lut_MinimapTitleCHRDest_lo, Y  ; get low byte as well
-      CLC
-      ADC lut_MinimapBitplane, X         ; and add bitplane/row info to low byte
-      STA $2006                          ;  before writing it
-
-      LDA (minimap_ptr), Y   ; get the preloaded CHR data
-      STA $2007              ; and draw it
-
-      INY                    ; inc loop counter/index
-      CPY #$28
-      BCC @SmallLoop         ; and keep looping until a single bitplane row has been drawn for $28 tiles
-
-    LDA minimap_ptr          ; add $28 to our source pointer
-    CLC                      ;   so that we load the next chunk of graphic data
-    ADC #$28
-    STA minimap_ptr
-    LDA minimap_ptr+1
-    ADC #0
-    STA minimap_ptr+1
-
-    LDA soft2000             ; reset the scroll
-    STA $2000
-    LDA #$00
-    STA $2005
-    LDA #$E8
-    STA $2005
-
-    ;JSR Minimap_DrawSFX       ; play ugly drawing sound effect
-    ;; JIGS - please no
-    INX
-    CPX #16                   ; increment the frame loop counter
-    BCC @FrameLoop            ; and loop until we do 16 frames (8 rows, 2 bitplanes per row = full tile)
-
-    RTS                       ; then exit
-
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap - Prep Title CHR  [$BB4E :: 0x27B5E]
-;;
-;;    Exact same idea as Minimap_PrepDecorCHR (see that routine for details)
-;;
-;;    The loop in this routine is constructed a bit differently because it needs
-;;  to copy only $280 bytes instead of $300.  Other than that (and using a different
-;;  src/dest buffers), the routines are identical
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-Minimap_PrepTitleCHR:
-    LDA #<mm_titlechr
-    STA tmp+2
-    LDA #>mm_titlechr
-    STA tmp+3            ; set (tmp+2) to point to our dest buffer
-
-    LDX #0               ; X will be outer loop counter
-    LDY #0               ; Y must stay at zero for indexing
-  @OuterLoop:
-    LDA lut_MinimapBitplane, X
-    STA tmp                  ; set (tmp) to point to our source buffer
-    LDA #>chr_MinimapTitle   ; and offset it by current row/bitplane
-    STA tmp+1
-
-    @InnerLoop:
-      LDA (tmp), Y       ; copy a byte from source to dest
-      STA (tmp+2), Y
-
-      INC tmp+2          ; inc dest pointer
-      BNE :+
-        INC tmp+3
-
-  :   LDA tmp            ; add $10 to low byte of source pointer
-      CLC                ;  to have it look at the next tile
-      ADC #$10
-      STA tmp
-      BCS @IncHigh       ; if it had carry, inc high byte of pointer
-
-      BPL @InnerLoop     ; if result of low byte is positive ($00-$70) keep looping
-
-      LDA tmp+1
-      CMP #>(chr_MinimapTitle + $280)  ; otherwise (low byte is >= $80), check to see if high byte
-                                       ; is at the end of our source buffer
-      BCC @InnerLoop        ;  if not.. keep looping
-      BCS @ExitInnerLoop    ;  if yes... break out of inner loop (always branches)
-
-    @IncHigh:
-      INC tmp+1          ; inc high byte of source pointer
-      BNE @InnerLoop     ; and keep looping (always branches)
-
-  @ExitInnerLoop:
-    INX                  ; increment row/bitplane counter
-    CPX #$10             ; and keep looping until we do all $10 of them
-    BCC @OuterLoop
-
-    RTS                  ; then exit!
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Title CHR Dest LUT  [$BB8A :: 0x27B9A]
-;;
-;;    There are $28 tiles that make up the "Final Fantasy" title that is displayed
-;;  in the minimap.  These tiles (along with those for the dragon graphic thing)
-;;  are scattered around in the pattern table so as to not interefere with the map's CHR.
-;;
-;;    These LUTs tell where the game is supposed to put each of those $28 tiles in
-;;  the pattern tables.  Each entry is the desired tile ID of each graphic left
-;;  shift 4 (to make it a CHR address).  One table has the low byte and the other
-;;  has the high byte.
-
-lut_MinimapTitleCHRDest_lo:
-  .BYTE <$0160,<$0260,<$02F0,<$0400, <$0450,<$0480,<$0490,<$0500
-  .BYTE <$0540,<$0550,<$0560,<$0570, <$0580,<$0590,<$0600,<$0610
-  .BYTE <$0640,<$0650,<$0660,<$0670, <$0680,<$0690,<$06A0,<$07B0
-  .BYTE <$07C0,<$07F0,<$08F0,<$0900, <$0910,<$0A00,<$0A70,<$0AA0
-  .BYTE <$0B00,<$0B80,<$0B90,<$0BA0, <$0C00,<$0C20,<$0C90,<$0EF0
-
-lut_MinimapTitleCHRDest_hi:
-  .BYTE >$0160,>$0260,>$02F0,>$0400, >$0450,>$0480,>$0490,>$0500
-  .BYTE >$0540,>$0550,>$0560,>$0570, >$0580,>$0590,>$0600,>$0610
-  .BYTE >$0640,>$0650,>$0660,>$0670, >$0680,>$0690,>$06A0,>$07B0
-  .BYTE >$07C0,>$07F0,>$08F0,>$0900, >$0910,>$0A00,>$0A70,>$0AA0
-  .BYTE >$0B00,>$0B80,>$0B90,>$0BA0, >$0C00,>$0C20,>$0C90,>$0EF0
-
-
-
-;; unused
-
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$6D,$76
-
-;; JIGS  ^ 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2894,23 +2674,39 @@ EnterMinimap:
     LDA #$00
     STA $2001
     STA $4015              ; turn off PPU and APU
-    STA $5015           ; and silence the MMC5 APU. (JIGS)
+    STA $5015              ; and silence the MMC5 APU. (JIGS)
 
     ;;LDA #$41               ; switch to music track $41 (crystal theme)
     LDA #$51
     ;; JIGS - since the menu theme isn't used, why not use it here! 
     STA music_track        ;   but it's not heard until after all drawing is complete (music routine isn't called)
     STA dlgmusic_backup
+    
+    LDA mapflags
+    LSR A
+    BCS @DoSmallMap
+    
+    LDA mapflags
+    ORA #$80
+    STA mapflags           ; set the "overworld zoomed in" flag
+    
+   @DoSmallMap: 
+    JSR EnterDungeonMap    ; will double-RTS out back to the game if B is pressed, or A is pressed and not on overworld
+    
+   
+BigMiniMap:   
+    LDA #$00
+    STA $2001
+    STA $4015              ; turn off PPU and APU
+    STA $5015              ; and silence the MMC5 APU. (JIGS)
 
-    JSR Minimap_PrepDecorCHR   ; Load decoration CHR to RAM (those dragon graphic things)
-    JSR Minimap_PrepTitleCHR   ; And the "Final Fantasy" title text
     JSR Minimap_YouAreHere     ; Load the "You are here" graphic -- clear OAM, and draw the "you are here" sprite
     JSR Minimap_FillNTPal      ; Fill the nametable and palettes
 
     LDA #0
     STA mm_maprow          ; start decompression tiles from row 0 (top row)
 
-    LDA #>$0000            ; set high byte of dest PPU addr.
+    ;LDA #>$0000            ; set high byte of dest PPU addr.
     STA minimap_ptr+1
 
   @MainLoop:
@@ -2939,9 +2735,10 @@ EnterMinimap:
 
       ;  now map drawing is done
 
-    JSR Minimap_DrawDecorCHR   ; draw the dragon decorations (previously loaded)
-    JSR Minimap_DrawTitleCHR   ; and the "Final Fantasy" title graphics (also previously loaded)
-
+ ;   JSR Minimap_DrawDecorCHR   ; draw the dragon decorations (previously loaded)
+ ;   JSR Minimap_DrawTitleCHR   ; and the "Final Fantasy" title graphics (also previously loaded)
+   
+    JSR SetupMinimapScreen
 
   @ExitLoop:
     JSR MinimapFrame      ; do a frame... animating sprite palettes and whatnot
@@ -2950,204 +2747,49 @@ EnterMinimap:
     ORA joy_b
     BEQ @ExitLoop         ; and simply loop until the user presses A or B
 
-    RTS                   ; at which point... exit!
+ExitMiniMap:
+    ;; no idea how much of this NEEDS to be here, but it seems to keep exiting clean so far.
+    LDA #$0F
+    STA cur_pal
+    STA cur_pal+$10
+    JSR ClearOAM
+    JSR DoMiniMapVBlank
+    LDA #>oam
+    STA $4014                ; do sprite DMA (clear sprites from screen)  
+    JSR DrawPalette_L
+    LDA #0
+    STA $2005
+    STA $2005
+    STA $2001
+    LDA soft2000
+    AND #$10
+    STA soft2000
+    LDA mapflags
+    AND #$7F
+    STA mapflags
+    RTS
+    
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Draw Decorative CHR  [$BC55 :: 0x27C65]
-;;
-;;    EXACTLY the same as Minimap_DrawTitleCHR (see that routine for
-;;  details).  Only difference here is we're drawing the CHR for the 
-;;  dragon decoration graphic, and so we use different LUTs.  Also, this
-;;  graphic consists of $30 tiles instead of $28, so a bit more is drawn
-;;  each frame.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Minimap_DrawDecorCHR:
-    LDA #<mm_decorchr
-    STA minimap_ptr
-    LDA #>mm_decorchr
-    STA minimap_ptr+1        ; load up the pointer to our pre-loaded CHR
-
-    LDX #0                   ; X will be our frame counter.  We will spread this drawing
-                             ;  out over 16 frames
-
-  @FrameLoop:
-    JSR WaitForVBlank_L      ; wait for VBlank
-    LDY #0                   ; Y will be loop counter/index
-
-    @SmallLoop:
-      LDA lut_MinimapDecorCHRDest_hi, Y  ; load up the destination PPU address for this
-      STA $2006                          ;  tile of the title graphic
-      LDA lut_MinimapDecorCHRDest_lo, Y  ; get low byte as well
-      CLC
-      ADC lut_MinimapBitplane, X         ; and add bitplane/row info to low byte
-      STA $2006                          ;  before writing it
-
-      LDA (minimap_ptr), Y   ; get the preloaded CHR data
-      STA $2007              ; and draw it
-
-      INY                    ; inc loop counter/index
-      CPY #$30
-      BCC @SmallLoop         ; and keep looping until a single bitplane row has been drawn for $30 tiles
-
-    LDA minimap_ptr          ; add $30 to our source pointer
-    CLC                      ;   so that we load the next chunk of graphic data
-    ADC #$30
-    STA minimap_ptr
-    LDA minimap_ptr+1
-    ADC #0
-    STA minimap_ptr+1
-
-    LDA soft2000             ; reset the scroll
+SetupMinimapScreen:
+    JSR WaitForVBlank_L
+    JSR DrawPalette_L
+    LDA #>oam
+    STA $4014
+    LDA #$0A
+    STA $2001              ; turn on BG rendering (but leave sprites disabled)
+    
+SetMinimapScroll:
+    LDA soft2000           ; reset scroll to $00,$E8
     STA $2000
     LDA #$00
     STA $2005
     LDA #$E8
     STA $2005
+    RTS    
+    
 
-    ;JSR Minimap_DrawSFX       ; play ugly drawing sound effect
-    ;; JIGS - again, no
-    INX
-    CPX #16                   ; increment the frame loop counter
-    BCC @FrameLoop            ; and loop until we do 16 frames (8 rows, 2 bitplanes per row = full tile)
-
-    RTS                       ; then exit
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap - Prep Decorative CHR  [$BCA3 :: 0x27CB3]
-;;
-;;    Preps the decorative CHR (the little dragon graphic thing that goes
-;;  in the corners of the minimap) by re-arranging it to its necessary
-;;  format, then dumping to a temporary RAM buffer, so it can be quickly copied to
-;;  the pattern tables later.
-;;
-;;    Since each tile is drawn bitplane and row at a time, there is some necessary
-;;  interleaving to perform here.  To speed up the routine that actually draws
-;;  this data to the pattern tables, we want to do all the calculations here, and store the
-;;  data in the temp buffer so that bytes can just be read and output in the order they're
-;;  given.  We'll only be drawing one byte per tile at a time (rather than 16 bytes
-;;  in a row for each tile -- which is how the pattern tables work).
-;;
-;;    Too hard to explain how this works in words... so here's an example:
-;;
-;;  CHR data as it needs to appear in the PPU pattern tables:
-;;  00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F    (all 16 bytes of tile 0's graphic)
-;;  10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F    (followed by all 16 bytes of tile 1's graphic)
-;;  20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F    (followed by tile 2, etc)
-;;
-;;   But to draw this one bitplane row at a time, we need to have it stored
-;;  in our RAM buffer as the following:
-;;  00 10 20 08 18 28 01 11 21 09 19 29 03 13 23 ...   (all top row low bitplanes
-;;                                                      followed by top row high bitplanes
-;;                                                      followed by row 1 low bitplanes... etc)
-;;
-;;    That is the interleaving this routine is performing -- and why it isn't just a straight
-;;  copy.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-
-Minimap_PrepDecorCHR:
-    LDA #<mm_decorchr
-    STA tmp+2
-    LDA #>mm_decorchr
-    STA tmp+3              ; set (tmp+2) to our dest pointer (RAM to receive interleaved graphics)
-
-    LDX #0          ; X is the outer loop counter, and indicates which row/bitplane to output next
-    LDY #0          ; Y needs to always be zero for indexing
-
-  @OuterLoop:
-    LDA lut_MinimapBitplane, X
-    STA tmp                  ; Load source pointer (tmp) to point to chr_MinimapDecor
-    LDA #>chr_MinimapDecor   ;   offset by the row/bitplane we're to be decoded
-    STA tmp+1                ;   from lut_MinimapBitplane)
-
-    @InnerLoop:
-      LDA (tmp), Y       ; copy a single byte from source
-      STA (tmp+2), Y     ;  to dest
-
-      INC tmp+2          ; increment dest pointer by 1
-      BNE :+
-        INC tmp+3
-
-  :   LDA tmp            ; increment source pointer by $10 (to look at the same
-      CLC                ;  row/bitplane on the next tile)
-      ADC #$10
-      STA tmp
-      BCC @InnerLoop     ; if there was no wrap -- continue looping.  Otherwise...
-
-      INC tmp+1            ; include the carry in the high byte of src pointer
-      LDA tmp+1            ; check it to see if we copied data for $30 tiles
-      CMP #>(chr_MinimapDecor + $300)
-      BCC @InnerLoop       ; if not, keep looping  ($30 iterations)
-
-    INX                 ; once the inner loop exits, we finished a single row/bitplane
-    CPX #$10            ;  INX to start the next row/bitplane.
-    BCC @OuterLoop      ; and continue outer loop until we do all $10 bytes of each tile
-                        ; (outer loop = $10 iterations ... * $30 inner iterations =
-                        ;     total $300 bytes copied)
-
-    RTS
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap CHR bitplane LUT  [$BCD9 :: 0x27CE9]
-;;
-;;    CHR for the minimap support graphics (title and decorations) is drawn progressively.
-;;  CHR for each tile is drawn one row at a time -- or more specificlaly, one row of
-;;  one bitplane at a time.
-;;
-;;    This progressive drawing is performed in a loop with an upcounter.  That counter
-;;  is run through this LUT to know which bitplane of which row to draw during which
-;;  loop iteration
-;;
-;;    You can scramble this table up in any order to change how the title and decorations
-;;  get drawn without changing the final result.  As long as every value between 00-0F
-;;  exists in this table.
-
-lut_MinimapBitplane:
-
-;      bitplane
-;        lo  hi
-  .BYTE $00,$08   ; top row
-  .BYTE $01,$09
-  .BYTE $02,$0A
-  .BYTE $03,$0B
-  .BYTE $04,$0C
-  .BYTE $05,$0D
-  .BYTE $06,$0E
-  .BYTE $07,$0F   ; bottom row
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Decoration CHR Dest LUT  [$BCE9 :: 0x27CF9]
-;;
-;;    Exactly the same as lut_MinimapDecorCHRDest (see that LUT description for
-;;  details).  Except this is for the 'dragon' decoration that appears on the map.
-;;  It consists of $30 tiles
-
-
-
-lut_MinimapDecorCHRDest_lo:
-  .BYTE <$0010,<$0020,<$0030,<$0040, <$0050,<$0060,<$0070,<$0080
-  .BYTE <$00B0,<$00C0,<$00D0,<$00E0, <$00F0,<$0700,<$0710,<$0720
-  .BYTE <$0730,<$0740,<$0750,<$0760, <$0800,<$0810,<$0820,<$0830
-  .BYTE <$0840,<$0D00,<$0D10,<$0D20, <$0D30,<$0D40,<$0E00,<$0E10
-  .BYTE <$0E20,<$0E30,<$0E40,<$0F00, <$0F10,<$0F20,<$0F30,<$0F40
-  .BYTE <$0F50,<$0F60,<$0F70,<$0F80, <$0F90,<$0FA0,<$0FB0,<$0FC0
-
-lut_MinimapDecorCHRDest_hi:
-  .BYTE >$0010,>$0020,>$0030,>$0040, >$0050,>$0060,>$0070,>$0080
-  .BYTE >$00B0,>$00C0,>$00D0,>$00E0, >$00F0,>$0700,>$0710,>$0720
-  .BYTE >$0730,>$0740,>$0750,>$0760, >$0800,>$0810,>$0820,>$0830
-  .BYTE >$0840,>$0D00,>$0D10,>$0D20, >$0D30,>$0D40,>$0E00,>$0E10
-  .BYTE >$0E20,>$0E30,>$0E40,>$0F00, >$0F10,>$0F20,>$0F30,>$0F40
-  .BYTE >$0F50,>$0F60,>$0F70,>$0F80, >$0F90,>$0FA0,>$0FB0,>$0FC0
-
+    
+    
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3158,22 +2800,64 @@ lut_MinimapDecorCHRDest_hi:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+DoMiniMapVBlank:
+    LDA $2002     
+    BPL @Wait     
+    LDA #0        
+  @Loop:
+      SEC         
+      SBC #$01    
+      BNE @Loop   
+
+  @Wait:
+    LDA soft2000  
+    ORA #$80
+    STA $2000     
+    
+    LDA #63
+    STA $5203
+
+@LoopForever:
+    LDA $5204      ; JIGS - high bit set when scanline #63 is being drawn
+    BPL @LoopForever
+    
+   @Scanline63:   
+    LDX #$10      ; waits for H-blank so as not to draw weird dots on the screen
+  : DEX        
+    BNE :-    
+    LDA soft2000
+    EOR #$90       ; turn off sprites, but turn on the NMI bit thing
+    STA $2000
+    LDA #207       ; 208 - 56      
+    STA $5203      
+   
+  @WaitForNext:
+    LDA $5204      ; JIGS - high bit set when scanline #207 is being drawn
+    BPL @WaitForNext
+    
+   @Scanline207:   
+    LDX #$10   
+  : DEX        
+    BNE :-    
+    LDA soft2000
+    ORA #$80
+    STA $2000
+    LDA #$00       
+    STA $5203      
+    JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
+    
+
+
 MinimapFrame:
-    JSR WaitForVBlank_L    ; wait for VBlank
+    JSR DoMiniMapVBlank
     LDA #>oam              ; Sprite DMA
     STA $4014
 
     JSR DrawPalette_L      ; draw the palette
     LDA #$1E               ; turn PPU on
     STA $2001
-
-    LDA soft2000           ; reset scroll to $00,$E8
-    STA $2000
-    LDA #$00
-    STA $2005
-    LDA #$E8
-    STA $2005
-
+    
+    JSR SetMinimapScroll
     JSR CallMusicPlay_L    ; keep the music playing
 
     LDA #0
@@ -3216,7 +2900,7 @@ Minimap_DrawRows:
 
     @MainLoop:
       LDX mm_pixrow          ; put row in X -- X will be the loop up counter and source index
-      JSR WaitForVBlank_L    ; wait for VBlank
+      ;JSR WaitForVBlank_L    ; wait for VBlank
 
       @RowLoop:
         LDA minimap_ptr+1    ; set PPU address
@@ -3233,12 +2917,12 @@ Minimap_DrawRows:
 
         BCC @RowLoop         ; keep looping until X wraps ($20 interations -- $10 tiles)
 
-      LDA soft2000          ; drawing for this row is done -- reset the scroll
-      STA $2000
-      LDA #$00
-      STA $2005
-      LDA #$E8
-      STA $2005
+    ; LDA soft2000          ; drawing for this row is done -- reset the scroll
+    ; STA $2000
+    ; LDA #$00
+    ; STA $2005
+    ; LDA #$E8
+    ; STA $2005
 
       ; JSR Minimap_DrawSFX   ; play the ugly drawing sound effect
       ;; JIGS : STOP IT.
@@ -3253,33 +2937,6 @@ Minimap_DrawRows:
 
     RTS
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap - Drawing Sound effect [$BDCD :: 0x27DDD]
-;;
-;;    Plays that ugly sound effect you hear when the map is drawing.  Just
-;;  plays a steady tone, but when called every frame, the phase resets each
-;;  frame, which is why it sounds almost like it's buzzing.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;Minimap_DrawSFX:
-;    LDA #$02
-;    STA $4015            ; silence all channels except for square 2
-
-;    LDA #%00110110
-;    STA $4004            ; 12.5% duty (harshest), volume=6
-;    LDA #$7F
-;    STA $4005            ; disable sweep
-;    LDA #$60
-;    STA $4006            ; play tone at F=$060
-;    LDA #$00
-;    STA $4007
-
-;    RTS
-
-;; JIGS YAY
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3352,6 +3009,149 @@ Minimap_PrepRow:
                          ;  from 16 tiles (128 pixels).  So this routine has completed its task
     RTS
 
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Minimap Sprite CHR  [$BF00 :: 0x27F10]
+;;    CHR for sprites on the minimap
+
+;lut_MinimapSprCHR:
+;  .INCBIN "chr/minimap_sprite.chr"
+
+lut_NewMinimapCHR:
+  .INCBIN "chr/new_minimap.chr"
+  
+lut_MinimapTitleCHR:  
+  .INCBIN "chr/minimap_title.chr"
+  
+lut_ZoomMinimapTextCHR:
+  .INCBIN "chr/minimap_zoomout.chr"
+  
+  
+lut_MinimapTitle:
+.byte $84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$88,$89,$8A,$8B
+.byte $8C,$8D,$8E,$8F,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84
+.byte $84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$90,$91,$92,$93
+.byte $94,$95,$96,$97,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84
+.byte $84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$98,$99,$9A,$9B,$9C,$9D
+.byte $9E,$9F,$A0,$A1,$A2,$A3,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84
+.byte $84,$84,$84,$84,$84,$84,$84,$84,$84,$84,$A4,$A5,$A6,$A7,$A8,$A9
+.byte $AA,$AB,$AC,$AD,$AE,$AF,$84,$84,$84,$84,$84,$84,$84,$84,$84,$84
+  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  BG palette for minimap  [$BF20 :: 0x27F30]
+
+lut_MinimapBGPal:
+  ;.BYTE $02,$04,$37,$0F
+  .BYTE $02,$0F,$37,$04
+  .BYTE $02,$28,$18,$0F
+  .BYTE $02,$24,$1A,$30
+  .BYTE $02,$1B,$38,$2B
+
+lut_ZoommapBGPal:
+  .BYTE $38,$0F,$37,$04
+  .BYTE $38,$00,$21,$1A
+  .BYTE $38,$00,$21,$1A
+  .BYTE $38,$00,$21,$1A
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Minimap - Draw "You Are Here" sprite [$BF34 :: 0x27F44]
+;;
+;;     Clears OAM and draws the "you are here" marker sprite
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+Minimap_YouAreHere:
+    LDX #0
+    STX sprindex      ; clear the sprite index
+
+    LDA #$F8          ; flood OAM with $F8 (to clear it -- moves all sprites offscreen, making them invisible)
+   @Loop:
+      STA oam, X
+      INX
+      BNE @Loop       ; $100 iterations (all of OAM)
+
+    LDA #$08
+    STA soft2000      ; clear NT scroll (seems inapporpriate to do it here, but I guess it doesn't hurt)
+
+    LDA #$82
+    STA oam+1         ; "you are here" sprite uses tile $80
+
+    LDA ow_scroll_x   ; get scroll X
+    CLC
+    ADC #$07          ; add 7 to get player position
+    LSR A             ; divide that by 2 to scale to minimap (world map is 256x256 -- minimap is 128x128)
+    CLC
+    ADC #$3D          ; add $3D to offset it so it starts at the start of the map
+    STA oam+3, X      ; record as X coord
+
+    LDA ow_scroll_y   ; do the same to get Y coord
+    CLC
+    ADC #$07
+    LSR A
+    CLC
+    ADC #$44          ; but add a little less ($34 instead of $3D)
+    STA oam+0         ; record as Y coord
+
+    LDA #$00
+    STA oam+2         ; set sprite attributes (palette 0, no flipping, foreground priority)
+
+    RTS               ; and exit!
+
+Zoommap_YouAreHere:
+    LDX #0
+    STX sprindex      ; clear the sprite index
+
+    LDA #$F8          ; flood OAM with $F8 (to clear it -- moves all sprites offscreen, making them invisible)
+   @Loop:
+      STA oam, X
+      INX
+      BNE @Loop       ; $100 iterations (all of OAM)
+
+    LDA #$08
+    STA soft2000      ; clear NT scroll (seems inapporpriate to do it here, but I guess it doesn't hurt)
+    
+    LDA #$80
+    STA oam+1         ; "you are here" sprite uses tile $80
+
+    LDA #$00
+    STA oam+2         ; set sprite attributes (palette 0, no flipping, foreground priority)
+
+    LDA mapflags
+    BMI @OverworldZoom
+
+    LDA sm_scroll_x   ; get scroll X
+    CLC
+    ADC #$07          ; add 7 to get player position
+    ASL A             ; divide that by 2 to scale to minimap (world map is 256x256 -- minimap is 128x128)
+    CLC
+    ADC #$3D          ; add $3D to offset it so it starts at the start of the map
+    STA oam+3         ; record as X coord
+
+    LDA sm_scroll_y   ; do the same to get Y coord
+    CLC
+    ADC #$07
+    ASL A
+    CLC
+    ADC #$44          ; but add a little less ($34 instead of $3D)
+    STA oam+0         ; record as Y coord
+    RTS               ; and exit!
+    
+   @OverworldZoom:    ; simply put it over the center where the player will be
+    LDA #127-2
+    STA oam+3, X      ; record as X coord
+
+    LDA #127+5
+    STA oam+0         ; record as Y coord
+    RTS
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Draw Dungeon Sprite  [$BE30 :: 0x27E40]
@@ -3373,10 +3173,10 @@ DrawDungeonSprite:
     LDA mm_maprow    ; get Y coord
     LSR A            ; divide by 2 (minimap display is 128x128 -- world map is 256x256)
     CLC
-    ADC #$34         ; add $34 to offset the sprite to the start of the map on the screen
+    ADC #$44         ; add $34 to offset the sprite to the start of the map on the screen
     STA oam, X       ; write this as Y coord of sprite
 
-    LDA #$81
+    LDA #$83
     STA oam+1, X     ; use tile $81
 
     LDA #$00
@@ -3391,19 +3191,493 @@ DrawDungeonSprite:
     RTS              ; done!
 
 
+DrawZoomDungeonSprite:
+    LDA tmp+6        ; does this sprite show up where the "Press A to zoom out" text cuts off the map?
+    CMP #60          ; if so, don't draw it!
+    BCS @RTS
+
+    LDA sprindex     ; Add 4 to the sprite index (drawing a single sprite -- 4 bytes)
+    CLC              ;  do this before drawing the sprite to leave sprite 0 alone
+    ADC #$04         ;  since that is the party position sprite
+    STA sprindex
+    TAX              ; put sprite index in X for indexing
+
+   @NormalZoom:
+    LDA tmp+6        ; get Y coord - 0-64
+    ASL A            ; double it
+    CLC
+    ADC #$44         ; add $34 to offset the sprite to the start of the map on the screen
+    STA oam, X       ; write this as Y coord of sprite
+
+    LDA #$81
+    STA oam+1, X     ; use tile $81
+
+    LDA #$00
+    STA oam+2, X     ; attributes (palette 0, no flipping, foreground priority)
+
+    LDA tmp+1        ; get tile in the row, 0-64
+    ASL A            ; multiply by 2
+    CLC
+    ADC #$3B         ; add $3D to offset it to start of the map
+    STA oam+3, X     ; write as X coord
+
+   @RTS:
+    RTS              ; done!
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  Minimap - Fill NT and Palette [$BE54 :: 0x27E64]
+;;  Minimap Tileset color assignment LUT  [$BF80 :: 0x27F90]
 ;;
-;;    Fills the nametable for the minimap.
-;;  Also clears all of CHR-RAM for the BG, loads and draws the palette,
-;;  and loads CHR for the sprites.
+;;    Each entry in this table coresponds to an overworld tile.
+;;  This table specifies what color (of the 4 colors available
+;;  colors) this tile will be represented by in the minimap.
+;;
+;;    The low 2 bits specify the color... bit 2 ($4), is set if
+;;  the tile represents a town/dungeon and indicates that a sprite
+;;  should be drawn on that tile.
+;;
+
+lut_MinimapTileset: ; 0 
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3
+
+;; for small maps:
+; 0 = floor
+; 1 = wall
+; 2 = treasure / things to talk to / water
+; 3 = other / trees / pillars
+; 4, 5, 6, 7 = exit / shop
+  
+lut_TownMiniMapTileset: ; 1
+  .BYTE 0,0,0,1,1,1,1,1, 1,1,1,1,1,1,3,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,5,5
+  .BYTE 1,1,1,1,1,1,5,2, 2,2,1,1,0,5,2,2
+  .BYTE 1,2,0,0,3,0,5,5, 1,0,1,2,0,0,5,5
+  .BYTE 5,5,5,5,5,5,5,0, 5,5,5,5,5,5,5,5
+  .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,5,5,5
+  .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,5,5,5
+  .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,3,5,2
+  
+lut_CastleMiniMapTileset: ; 2
+  .BYTE 1,1,1,1,0,1,1,0, 1,0,5,0,1,3,3,3
+  .BYTE 3,3,3,3,3,3,3,3, 3,3,3,3,7,3,3,3
+  .BYTE 3,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0
+  .BYTE 1,0,1,1,1,1,5,5, 2,0,0,5,0,0,0,0
+  .BYTE 0,0,0,0,5,5,0,0, 5,5,0,0,2,2,2,2
+  .BYTE 2,2,2,2,2,2,0,0, 2,0,0,0,0,0,0,0
+  .BYTE 0,7,7,2,2,2,2,2, 2,2,2,2,2,2,2,2
+  .BYTE 2,2,2,2,2,2,2,2, 2,0,0,0,0,0,0,0  
+
+lut_EarthCaveMiniMapTileset:
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3  
+
+lut_IceCaveMiniMapTileset:
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3  
+
+lut_TowerMiniMapTileset:
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3  
+  
+lut_ShrineMiniMapTileset:
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3  
+
+lut_SkyCastleMiniMapTileset:
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3  
+
+lut_TempleMiniMapTileset:
+  .BYTE 1,5,5,1,1,1,1,1, 1,1,1,1,1,1,6,0
+  .BYTE 1,1,1,1,1,1,0,0, 0,1,1,5,5,6,2,3
+  .BYTE 1,3,1,1,1,1,1,0, 1,5,5,5,1,1,1,5
+  .BYTE 1,1,5,1,5,5,2,2, 5,5,5,1,3,3,3,1
+  .BYTE 0,0,2,2,0,2,4,1, 1,5,5,1,5,5,5,1
+  .BYTE 0,0,2,2,1,1,1,5, 5,1,5,1,1,5,1,1
+  .BYTE 1,1,1,1,5,5,5,5, 5,5,5,3,5,5,5,3
+  .BYTE 1,1,1,1,1,1,1,1, 1,2,0,3,3,3,3,3  
+
+
+lut_ZoomMapTilesetID:
+.byte $01 ; 00 - CONERIA
+.byte $01 ; 01 - PRAVOKA
+.byte $01 ; 02 - ELFLAND
+.byte $01 ; 03 - MELMOND
+.byte $01 ; 04 - CRESCENT_LAKE
+.byte $01 ; 05 - GAIA
+.byte $01 ; 06 - ONRAC
+.byte $01 ; 07 - LEIFEN
+.byte $02 ; 08 - Coneria_CASTLE_1F
+.byte $02 ; 09 - ELFLAND_CASTLE
+.byte $02 ; 0A - NORTHWEST_CASTLE
+.byte $02 ; 0B - CASTLE_OF_ORDEALS_1F
+.byte $06 ; 0C - TEMPLE_OF_FIENDS_PRESENT
+.byte $04 ; 0D - EARTH_CAVE_B1
+.byte $04 ; 0E - GURGU_VOLCANO_B1
+.byte $05 ; 0F - ICE_CAVE_B1
+.byte $05 ; 10 - CARDIA
+.byte $05 ; 11 - BAHAMUTS_ROOM_B1
+.byte $05 ; 12 - WATERFALL
+.byte $05 ; 13 - DWARF_CAVE
+.byte $05 ; 14 - MATOYAS_CAVE
+.byte $05 ; 15 - SARDAS_CAVE
+.byte $06 ; 16 - MARSH_CAVE_B1
+.byte $06 ; 17 - MIRAGE_TOWER_1F
+.byte $02 ; 18 - Coneria_CASTLE_2F
+.byte $02 ; 19 - Castle_of_Ordeals_2F
+.byte $02 ; 1A - Castle_of_Ordeals_3F
+.byte $06 ; 1B - Marsh_Cave_B2       
+.byte $06 ; 1C - Marsh_Cave_B3       
+.byte $04 ; 1D - Earth_Cave_B2       
+.byte $04 ; 1E - Earth_Cave_B3       
+.byte $04 ; 1F - Earth_Cave_B4       
+.byte $04 ; 20 - Earth_Cave_B5       
+.byte $04 ; 21 - Gurgu_Volcano_B2    
+.byte $04 ; 22 - Gurgu_Volcano_B3    
+.byte $04 ; 23 - Gurgu_Volcano_B4    
+.byte $04 ; 24 - Gurgu_Volcano_B5    
+.byte $05 ; 25 - Ice_Cave_B2         
+.byte $05 ; 26 - Ice_Cave_B3         
+.byte $05 ; 27 - Bahamuts_Room_B2    
+.byte $06 ; 28 - Mirage_Tower_2F     
+.byte $06 ; 29 - Mirage_Tower_3F     
+.byte $03 ; 2A - Sea_Shrine_B5             
+.byte $03 ; 2B - Sea_Shrine_B4             
+.byte $03 ; 2C - Sea_Shrine_B3             
+.byte $03 ; 2D - Sea_Shrine_B2             
+.byte $03 ; 2E - Sea_Shrine_B1             
+.byte $07 ; 2F - Sky_Palace_1F             
+.byte $07 ; 30 - Sky_Palace_2F             
+.byte $07 ; 31 - Sky_Palace_3F             
+.byte $07 ; 32 - Sky_Palace_4F             
+.byte $07 ; 33 - Sky_Palace_5F             
+.byte $08 ; 34 - Temple_of_Fiends_1F       
+.byte $08 ; 35 - Temple_of_Fiends_2F       
+.byte $08 ; 36 - Temple_of_Fiends_3F       
+.byte $08 ; 37 - Temple_of_Fiends_4F_Earth 
+.byte $08 ; 38 - Temple_of_Fiends_5F_Fire  
+.byte $08 ; 39 - Temple_of_Fiends_6F_Water 
+.byte $08 ; 3A - Temple_of_Fiends_7F_Wind      
+.byte $08 ; 3B - Temple_of_Fiends_8F_Chaos     
+.byte $04 ; 3C - Titans_Tunnel 
+
+lut_ZoomMapTilesets:
+.word lut_MinimapTileset
+.word lut_TownMiniMapTileset 
+.word lut_CastleMiniMapTileset
+.word lut_EarthCaveMiniMapTileset
+.word lut_IceCaveMiniMapTileset
+.word lut_TowerMiniMapTileset
+.word lut_ShrineMiniMapTileset
+.word lut_SkyCastleMiniMapTileset
+.word lut_TempleMiniMapTileset
+
+
+lut_MapTilesetFillTile:
+.byte $FF ; 00 - CONERIA
+.byte $FF ; 01 - PRAVOKA
+.byte $FF ; 02 - ELFLAND
+.byte $FF ; 03 - MELMOND
+.byte $FF ; 04 - CRESCENT_LAKE
+.byte $00 ; 05 - GAIA
+.byte $DF ; 06 - ONRAC
+.byte $FF ; 07 - LEIFEN
+.byte $FF ; 08 - Coneria_CASTLE_1F
+.byte $FF ; 09 - ELFLAND_CASTLE
+.byte $FF ; 0A - NORTHWEST_CASTLE
+.byte $FF ; 0B - CASTLE_OF_ORDEALS_1F
+.byte $FF ; 0C - TEMPLE_OF_FIENDS_PRESENT
+.byte $FF ; 0D - EARTH_CAVE_B1
+.byte $FF ; 0E - GURGU_VOLCANO_B1
+.byte $FF ; 0F - ICE_CAVE_B1
+.byte $FF ; 10 - CARDIA
+.byte $FF ; 11 - BAHAMUTS_ROOM_B1
+.byte $FF ; 12 - WATERFALL
+.byte $FF ; 13 - DWARF_CAVE
+.byte $FF ; 14 - MATOYAS_CAVE
+.byte $FF ; 15 - SARDAS_CAVE
+.byte $FF ; 16 - MARSH_CAVE_B1
+.byte $FF ; 17 - MIRAGE_TOWER_1F
+.byte $FF ; 18 - Coneria_CASTLE_2F
+.byte $FF ; 19 - Castle_of_Ordeals_2F
+.byte $FF ; 1A - Castle_of_Ordeals_3F
+.byte $FD ; 1B - Marsh_Cave_B2       
+.byte $FF ; 1C - Marsh_Cave_B3       
+.byte $FF ; 1D - Earth_Cave_B2       
+.byte $FF ; 1E - Earth_Cave_B3       
+.byte $FF ; 1F - Earth_Cave_B4       
+.byte $FF ; 20 - Earth_Cave_B5       
+.byte $FF ; 21 - Gurgu_Volcano_B2    
+.byte $FF ; 22 - Gurgu_Volcano_B3    
+.byte $FF ; 23 - Gurgu_Volcano_B4    
+.byte $FF ; 24 - Gurgu_Volcano_B5    
+.byte $FF ; 25 - Ice_Cave_B2         
+.byte $FF ; 26 - Ice_Cave_B3         
+.byte $FF ; 27 - Bahamuts_Room_B2    
+.byte $FF ; 28 - Mirage_Tower_2F     
+.byte $FF ; 29 - Mirage_Tower_3F     
+.byte $FF ; 2A - Sea_Shrine_B5             
+.byte $FF ; 2B - Sea_Shrine_B4             
+.byte $FF ; 2C - Sea_Shrine_B3             
+.byte $FF ; 2D - Sea_Shrine_B2             
+.byte $FF ; 2E - Sea_Shrine_B1             
+.byte $FF ; 2F - Sky_Palace_1F             
+.byte $FF ; 30 - Sky_Palace_2F             
+.byte $FF ; 31 - Sky_Palace_3F             
+.byte $FF ; 32 - Sky_Palace_4F             
+.byte $FF ; 33 - Sky_Palace_5F             
+.byte $FF ; 34 - Temple_of_Fiends_1F       
+.byte $FF ; 35 - Temple_of_Fiends_2F       
+.byte $FF ; 36 - Temple_of_Fiends_3F       
+.byte $FF ; 37 - Temple_of_Fiends_4F_Earth 
+.byte $FF ; 38 - Temple_of_Fiends_5F_Fire  
+.byte $FF ; 39 - Temple_of_Fiends_6F_Water 
+.byte $FF ; 3A - Temple_of_Fiends_7F_Wind      
+.byte $FF ; 3B - Temple_of_Fiends_8F_Chaos     
+.byte $FF ; 3C - Titans_Tunnel 
+
+
+EnterDungeonMap:
+    JSR Zoommap_YouAreHere     ; Load the "You are here" graphic -- clear OAM, and draw 
+    JSR Minimap_FillNTPal
+    
+    LDA #0
+    STA mm_maprow          ; start decompression tiles from row 0 (top row)
+    ;LDA #>$0000            ; set high byte of dest PPU addr.
+    STA minimap_ptr+1
+    STA tmp+6              
+    
+    LDA #<mapdata
+    STA ZoomMapPointer
+    LDA #>mapdata
+    STA ZoomMapPointer+1
+    
+    LDA mapflags
+    BPL @SmallMap
+    
+    LDA ow_scroll_y
+    SEC
+    SBC #32-7            ; -7 because ow_scroll_y is already 7 off from player's actual position
+    STA mm_maprow        ; set the starting row to Y coordinates - 32
+    
+    LDX #0
+    BEQ :+
+   
+   @SmallMap:   
+    LDX cur_map
+    LDA lut_ZoomMapTilesetID, X
+    ASL A
+    TAX
+  : LDA lut_ZoomMapTilesets, X
+    STA ZoomMapTilesetPtr
+    LDA lut_ZoomMapTilesets+1, X
+    STA ZoomMapTilesetPtr+1
+
+  @MainLoop:
+    LDA #0                 ; reset low byte of PPU addr to 0
+    STA minimap_ptr
+
+    @InnerLoop:            ; Inner loop is run 8 times -- each time loads a single row of pixels
+      LDA mapflags
+      BMI @OverworldPrepRow
+      
+      JSR ZoomMinimap_PrepRow  ; Load a single row of 128 pixels from 2 rows of map data
+      JMP :+
+      
+     @OverworldPrepRow:
+      JSR ZoomMinimap_PrepRow_Overworld
+
+    : INC mm_maprow        ; increment map row counter by 1
+      INC tmp+6
+
+      LDA minimap_ptr      ; increment dest PPU address by 2 (next NEXT row of pixels)
+      CLC
+      ADC #2
+      AND #$07             ; and mask with 7 (0-7)
+      STA minimap_ptr
+      BNE @InnerLoop       ; once it wraps from 7->0, we've filled 256 bytes of graphic data (8 rows of pixels)
+
+    JSR Minimap_DrawRows       ; draw those 8 rows of pixels
+    INC minimap_ptr+1          ; increment high byte of PPU dest
+
+    LDA minimap_ptr+1
+    CMP #>$1000
+    BNE @MainLoop              ; loop until PPU dest=$1000 (filling entire left pattern table)
+    
+    LDA mapflags
+    BPL :+
+    
+    ;; overworld zoomed in has to cut off the last row and replace it with this:
+    LDA #<lut_ZoomMinimapTextCHR
+    STA tmp
+    LDA #>lut_ZoomMinimapTextCHR
+    STA tmp+1
+    LDA #$0F
+    LDX #1
+    JSR CHRLoadToA
+    
+  : JSR SetupMinimapScreen
+
+  @ExitLoop:
+    JSR MinimapFrame      ; do a frame... animating sprite palettes and whatnot
+
+    LDA joy_b
+    BEQ :+
+       
+       @DoExit: 
+        PLA
+        PLA               ; don't bother going back to the EnterMiniMap routine
+        JMP ExitMiniMap   ; just exit back to the game
+
+  : LDA joy_a
+    BEQ @ExitLoop         ; and simply loop until the user presses A or B
+    
+    LDA mapflags
+    LSR A
+    BCS @DoExit           ; if in a small map, exit
+    
+    RTS                   ; else, return to draw the big view overworld!
+
+    
+
+
+
+;; so while the overworld minimap compresses 4 tiles into 1 pixel...
+;; this has to expand 1 tile into 4 pixels.
+
+ZoomMinimap_PrepRow_Overworld:
+    JSR LongCall
+    .word MinimapDecompress    ; decompress 2 rows of map data
+    .byte BANK_OWMAP
+
+    LDA ow_scroll_x
+    SEC
+    SBC #32-7
+    STA ZoomMapPointer
+    LDA #>mm_mapbuf
+    STA ZoomMapPointer+1
+    
+ZoomMinimap_PrepRow:
+    LDA #0
+    STA tmp+1
+
+   @MainLoop:
+    LDA #4
+    STA tmp+7
+    
+   @RotateLoop:
+    INC tmp+1
+    LDY #0
+    LDA (ZoomMapPointer), Y     ; get the tile from mapdata ($7000)
+    TAY
+    LDA (ZoomMapTilesetPtr), Y  ; get the bit plane info from this LUT
+    STA tmp
+    ASL A                       ; shift the bits over twice 
+    ASL A                       ; then ORA with the original
+    ORA tmp
+    LSR A                       ; right shift it out
+    ROL mm_bplo                 ; and into the low bit plane
+    LSR A
+    ROL mm_bphi                 ; then into the high bit plane
+    LSR A
+    ROL mm_bplo                 ; do the same with the next 2 bits
+    LSR A
+    ROL mm_bphi                  
+    LSR A
+    BCC :+
+        JSR DrawZoomDungeonSprite
+  : INC ZoomMapPointer
+    BNE :+
+       INC ZoomMapPointer+1
+  : DEC tmp+7
+    BNE @RotateLoop  
+
+    LDX minimap_ptr
+    LDA mm_bplo
+    STA mm_drawbuf, X     ; double the bit planes in the draw buffer
+    STA mm_drawbuf+1, X   ; 
+    LDA mm_bphi
+    STA mm_drawbuf+8, X   ; 
+    STA mm_drawbuf+9, X   ; 
+    
+    TXA
+    CLC
+    ADC #$10
+    STA minimap_ptr
+    
+    BCC @MainLoop
+    RTS
+    
+
+EightWrites:
+    LDY #8
+    LDA tmp+1
+
+DoWrites:
+    STA $2007
+    DEY
+    BNE DoWrites
+    RTS
 
 Minimap_FillNTPal:
     LDA #$08           ; write to soft2000 to clear NT scroll
     STA soft2000
+    ASL A
+    STA tmp            ; $10 is loop counter for the map tiles
+    
+    LDA mapflags
+    LSR A
+    BCS :+
+      LDA #$FF
+      BNE @SetFillTile ; if doing the overworld, use $FF as fill value
+   
+    ; otherwise, get the fill value from this LUT.
+    ; this is because, while most maps have the bottom right 4 tiles blank
+    ; some of them don't, and will fill the whole screen with whatever pixels it draws there
+  : LDX cur_map   
+    LDA lut_MapTilesetFillTile, X
+    
+   @SetFillTile:
+    STA tmp+1
 
    ; 
    ; draw the NT data at lut_MinimapNT
@@ -3412,25 +3686,77 @@ Minimap_FillNTPal:
     LDA $2002          ; reset PPU toggle
     LDA #>$2000        ; set PPU address to $2000  (start of nametables)
     STA $2006
-    LDA #<$2000
-    STA $2006
+    LDX #<$2000
+    STX $2006
 
-    LDA #<lut_MinimapNT
-    STA tmp
-    LDA #>lut_MinimapNT ; load up the pointer to the LUT containing the minimap NT
-    STA tmp+1           ;  data.  Store the pointer in (tmp)
+    LDY #$20
+    LDA #$84           ; 84 tile in the sprite CHR should be filled with black 
+    JSR DoWrites
+    
+    ;; do the title from this lut
+    
+    LDX #0
+   @Title:
+    LDA lut_MinimapTitle, X
+    STA $2007
+    INX
+    CPX #$80
+    BNE @Title
 
-    LDX #$04            ; X is high byte of loop counter
-    LDY #$00            ; Y is low byte of counter and index
-   @NTLoop:
-       LDA (tmp), Y     ; get byte from LUT
-       STA $2007        ; draw it
-       INY              ; inc source index
-       BNE @NTLoop      ; if it wrapped....
-      INC tmp+1         ; inc high byte of source pointer
-      DEX               ; dec high byte of loop counter
-      BNE @NTLoop       ; and keep looping until expires ($400 iterations)
+    ;; now the edge of the map page, which is just 0-40 in sequence
 
+    LDX #0
+   @MapTopLoop:
+    STX $2007
+    INX
+    CPX #$40
+    BNE @MapTopLoop
+    
+    LDY #$20
+    LDA tmp+1
+    JSR DoWrites
+    
+    LDX #0
+   @ZoomMapLoop:             ; fill middle of nametable with $0-$FF in sequence
+    JSR EightWrites          ; with both the sides being 8 filltiles in a row
+    
+   @ZoomMap_InnerLoop:
+    STX $2007
+    INX
+    TXA
+    AND #$0F
+    BNE @ZoomMap_InnerLoop
+    
+    JSR EightWrites
+    DEC tmp                  ; decrement the row counter for this part
+    BNE @ZoomMapLoop
+    
+    LDY #$20                 ; $20 more filltiles
+    LDA tmp+1
+    JSR DoWrites
+    
+    LDX #$40                 ; then 40-80 are the bottom of the map page
+   @MapBottomLoop:
+    STX $2007
+    INX
+    CPX #$80
+    BNE @MapBottomLoop    
+
+    LDY #$60
+    LDA #$84
+    JSR DoWrites
+    
+    ;; should be on the attribute table now
+    LDY #$10
+    LDA #0
+    JSR DoWrites
+    LDY #$20
+    LDA #$FF
+    JSR DoWrites
+    LDY #$10
+    LDA #0
+    JSR DoWrites
+    
    ;
    ; clear the BG pattern table
    ;
@@ -3455,32 +3781,38 @@ Minimap_FillNTPal:
    ; load CHR for sprites ("you are here" mark, and town/dungeon points)
    ;
 
-    LDA $2002          ; reset PPU toggle
-    LDA #>$1800        ; PPU address = $1800  (start of CHR for sprite tile $80)
-    STA $2006
-    LDA #<$1800
-    STA $2006
-
-    LDX #$00
-   @SpriteCHRLoop:
-      LDA lut_MinimapSprCHR, X
-      STA $2007                      ; copy the CHR to the PPU
-      INX                            ; inc loop counter
-      CPX #$20
-      BCC @SpriteCHRLoop             ; loop until $20 bytes copied (2 tiles)
+    LDA #<lut_NewMinimapCHR
+    STA tmp
+    LDA #>lut_NewMinimapCHR
+    STA tmp+1
+    LDA #$10
+    LDX #11
+    JSR CHRLoadToA
+    ;; that loads up the map edges and sprite thingies
 
    ;
    ; load BG palettes for this screen
    ;
 
     LDX #$0F
+    LDA mapflags
+    LSR A 
+    BCC @OverworldPalette
+
    @BGPalLoop:
-      LDA lut_MinimapBGPal, X   ; copy color from LUT
+      LDA lut_ZoommapBGPal, X   ; copy color from LUT
       STA cur_pal, X            ;  to palette
       DEX
       BPL @BGPalLoop            ; loop until X wraps ($10 iterations)
+      BMI :+  
+   
+   @OverworldPalette:   
+      LDA lut_MinimapBGPal, X   ; copy color from LUT
+      STA cur_pal, X            ;  to palette
+      DEX
+      BPL @OverworldPalette     ; loop until X wraps ($10 iterations)
 
-    LDA cur_pal           ; copy the background color to the mirrored copy in the sprite palette
+  : LDA cur_pal           ; copy the background color to the mirrored copy in the sprite palette
     STA cur_pal+$10       ;  this ensures the BG color will be what's desired when the palette is drawn
 
     LDA #$0F
@@ -3491,130 +3823,15 @@ Minimap_FillNTPal:
    ;  Do last minute PPU stuff before exiting
    ;
 
-    JSR WaitForVBlank_L   ; wait for VBlank
-    LDA #>oam             ; then do sprite DMA
-    STA $4014
-
-    JSR DrawPalette_L     ; draw the palette
-
     LDA soft2000
-    STA $2000             ; set NT scroll and pattern page assignments
-    LDA #$0A
-    STA $2001             ; turn on BG rendering, but leave sprites invisible for now
+    ORA #$10              ; start each VBlank with sprites as the background
+    STA soft2000
 
-    LDA #$00              ; set scroll to $00,$E8  (8 pixels up from bottom of the NT)
-    STA $2005             ;   since there's vertical mirroring, this scrolls up 8 pixels,
-    LDA #$E8              ;   which makes the screen appear to be 8 pixels lower than
-    STA $2005             ;   what you might expect.  This centers the image on the screen a bit better
-                          ; The NT could've just been drawn 1 tile down.. but that would mess with
-                          ; attribute alignment
-
+    LDA #$00              ; set scroll 
+    STA $2005             
+    LDA #$E8
+    STA $2005             
     RTS                   ; then exit!
-
-
-;;  unused space
-;  .BYTE 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
-;  .BYTE 0,0,0,0, 0
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Sprite CHR  [$BF00 :: 0x27F10]
-;;    CHR for sprites on the minimap
-
-lut_MinimapSprCHR:
-  .INCBIN "chr/minimap_sprite.chr"
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  BG palette for minimap  [$BF20 :: 0x27F30]
-
-lut_MinimapBGPal:
-  .BYTE $02,$1B,$38,$2B, $02,$04,$37,$0F, $02,$28,$18,$0F, $02,$24,$1A,$30
-
-
-
-;; unused
-;  .BYTE 0,0,0,0
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap - Draw "You Are Here" sprite [$BF34 :: 0x27F44]
-;;
-;;     Clears OAM and draws the "you are here" marker sprite
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-Minimap_YouAreHere:
-    LDX #0
-    STX sprindex      ; clear the sprite index
-
-    LDA #$F8          ; flood OAM with $F8 (to clear it -- moves all sprites offscreen, making them invisible)
-   @Loop:
-      STA oam, X
-      INX
-      BNE @Loop       ; $100 iterations (all of OAM)
-
-    LDA #$08
-    STA soft2000      ; clear NT scroll (seems inapporpriate to do it here, but I guess it doesn't hurt)
-
-    LDA #$80
-    STA oam+1         ; "you are here" sprite uses tile $80
-
-    LDA ow_scroll_x   ; get scroll X
-    CLC
-    ADC #$07          ; add 7 to get player position
-    LSR A             ; divide that by 2 to scale to minimap (world map is 256x256 -- minimap is 128x128)
-    CLC
-    ADC #$3D          ; add $3D to offset it so it starts at the start of the map
-    STA oam+3, X      ; record as X coord
-
-    LDA ow_scroll_y   ; do the same to get Y coord
-    CLC
-    ADC #$07
-    LSR A
-    CLC
-    ADC #$34          ; but add a little less ($34 instead of $3D)
-    STA oam+0         ; record as Y coord
-
-    LDA #$00
-    STA oam+2         ; set sprite attributes (palette 0, no flipping, foreground priority)
-
-    RTS               ; and exit!
-
-
-
-  ; unused
-  ;.BYTE 0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0
-  ;.BYTE 0,0,0,0, 0,0,0,0, 0
-  
- ;; JIGS ^ 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Minimap Tileset color assignment LUT  [$BF80 :: 0x27F90]
-;;
-;;    Each entry in this table coresponds to an overworld tile.
-;;  This table specifies what color (of the 4 colors available
-;;  colors) this tile will be represented by in the minimap.
-;;
-;;    The low 2 bits specify the color... bit 2 ($4), is set if
-;;  the tile represents a town/dungeon and indicates that a sprite
-;;  should be drawn on that tile.
-;;
-
-lut_MinimapTileset:
-  .BYTE 1,5,5,1,1,1,1,1,1,1,1,1,1,1,6,0
-  .BYTE 1,1,1,1,1,1,0,0,0,1,1,5,5,6,2,3
-  .BYTE 1,3,1,1,1,1,1,0,1,5,5,5,1,1,1,5
-  .BYTE 1,1,5,1,5,5,2,2,5,5,5,1,3,3,3,1
-  .BYTE 0,0,2,2,0,2,4,1,1,5,5,1,5,5,5,1
-  .BYTE 0,0,2,2,1,1,1,5,5,1,5,1,1,5,1,1
-  .BYTE 1,1,1,1,5,5,5,5,5,5,5,3,5,5,5,3
-  .BYTE 1,1,1,1,1,1,1,1,1,2,0,3,3,3,3,3
-
 
 
 

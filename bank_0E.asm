@@ -937,7 +937,7 @@ M_MagicMenuOrbs:
 .byte $E5,$01,$E5,$01,$E5,$01,$E5,$01,$E6,$01,$E6,$01,$E6,$01,$E6,$00
 
 M_MagicNameLearned:
-.byte $FF,$10,$43,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
+.byte $FF,$10,$60,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
 
 M_FixInventoryWindow:
 ;.byte $7B,$0B,$07,$7E,$6A,$6B,$0B,$15,$7E,$7C    ; connect name and submenu title boxes

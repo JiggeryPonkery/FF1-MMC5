@@ -4822,8 +4822,6 @@ SoundTestMenuLoop:
     STA soundtesthelper
     STA dlgmusic_backup
     STA soundtest
-    LDA BANK_MUSIC       
-    STA cur_bank
     RTS                     ; and exit the main menu (by RTSing out of its loop)
 
    @A_Pressed:

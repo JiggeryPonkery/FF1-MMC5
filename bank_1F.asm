@@ -4,21 +4,20 @@
 .feature force_range
 
 .export AddGPToParty
+.export BattleBackgroundColor_LUT
 .export BattleCrossPageJump_L
 .export BattleRNG_L
 .export BattleScreenShake_L
-.export WaitForVBlank_L
 .export Battle_ReadPPUData_L
-;.export Battle_WritePPUData_L
 .export CHRLoad
 .export CHRLoadToA
-;.export CallMinimapDecompress
 .export CallMusicPlay
 .export CallMusicPlay_L
 .export CancelNewGame
 .export ClearBattleMessageBuffer_L
 .export ClearMenuOtherNametables
 .export ClearOAM
+.export ClearUnformattedCombatBoxBuffer
 .export CoordToNTAddr
 .export DimBatSprPalettes
 .export DoOverworld
@@ -29,9 +28,11 @@
 .export DrawComplexString
 .export DrawComplexString_L
 .export DrawCursor
+.export DrawEquipBox_String
 .export DrawEquipMenuStrings
 .export DrawImageRect
-.export FillItemBox
+.export DrawItemBox_String
+.export DrawMagicBox_String
 .export DrawOBSprite
 .export DrawPalette
 .export DrawPalette_L
@@ -39,26 +40,37 @@
 .export EraseBox
 .export FadeInBatSprPalettes
 .export FadeOutBatSprPalettes
+.export FillItemBox
 .export FormatBattleString
 .export GameLoaded
 .export GameStart2
 .export GameStart_L
 .export HushTriangle
+.export JIGS_RefreshAttributes
 .export LoadBattleSpritePalettes
 .export LoadBorderPalette_Blue
 .export LoadBridgeSceneGFX_Menu
 .export LoadMenuCHRPal
+.export LoadMenuCHRPal_Z
 .export LoadPrice
+.export LoadPriceZ
 .export LoadShopCHRPal
 .export LongCall
 .export Magic_ConvertBitsToBytes
 .export MenuCondStall
 .export MultiplyXA
 .export PaletteFrame
+.export PlayDoorSFX
 .export PlaySFX_Error
 .export RandAX
 .export SaveScreenHelper
+.export SetBattlePPUAddr
+.export SetPPUAddr_XA
+.export ShiftLeft4
+.export ShiftLeft6
 .export ShiftSpriteHightoLow
+.export SkillText_BBelt
+.export SkillText_RMage
 .export StartNewGame
 .export SwapBtlTmpBytes_L
 .export UndrawBattleBlock
@@ -66,32 +78,18 @@
 .export UpdateJoy
 .export UpdateJoy_L
 .export WaitForVBlank_L
+.export WaitForVBlank_L
 .export lutClassBatSprPalette
-;.export lut_MinimapBGPal
-;.export lut_MinimapSprCHR
+.export lut_MapMusicTrack
 .export lut_NTRowStartHi
 .export lut_NTRowStartLo
 .export lut_RNG
-.export PlayDoorSFX
-.export ShiftLeft4
-.export ShiftLeft6
-.export BattleBackgroundColor_LUT
-.export LoadMenuCHRPal_Z
-.export LoadPriceZ
-.export SkillText_BBelt
-;.export lut_TilesetMusicTrack
-.export lut_MapMusicTrack
 .export lut_VehicleMusic
-.export JIGS_RefreshAttributes
-.export SetBattlePPUAddr
-.export ClearUnformattedCombatBoxBuffer
-.export SetPPUAddr_XA
-.export SkillText_RMage
-.export DrawItemBox_String
-.export DrawMagicBox_String
-.export DrawEquipBox_String
 
+.import AssignMapTileDamage_Z
+.import BattleIcons
 .import ClearNT
+.import DumbBottleThing
 .import EnterBridgeScene_L
 .import EnterEndingScene
 .import EnterIntroStory
@@ -100,8 +98,15 @@
 .import EnterMinimap
 .import EnterShop
 .import EnterTitleScreen
+.import GetDialogueString
 .import JigsIntro
 .import LoadBattleSpritesForBank_Z
+.import LoadBattleTextChr
+.import LoadOWMapRow_1E
+.import LoadSprite_Bank04
+.import LoadStatusBoxScrollWork
+.import LoadStoneSprites
+.import MapPoisonDamage_Z
 .import MinimapDecompress
 .import MusicPlay_L
 .import NewGamePartyGeneration
@@ -115,8 +120,12 @@
 .import SaveScreen
 .import SoundTestZ
 .import TalkToObject
+.import TalkToTile_BankE
 .import TurnMenuScreenOn_ClearOAM
 .import UhOhNewGame
+.import UnadjustEquipStats
+.import WeaponArmorPrices
+.import WriteAttributesToPPU
 .import __Nasir_CRC_High_Byte
 .import data_BattleMessages
 .import data_BridgeCHR
@@ -124,58 +133,45 @@
 .import data_EnemyNames
 .import data_EpilogueCHR
 .import data_EpilogueNT
+.import lut_BackdropPal
 .import lut_BattleFormations
 .import lut_BattlePalettes
 .import lut_BattleRates
-.import lut_ItemPrices
-.import lut_OrbCHR
-.import lut_ShopCHR
-.import UnadjustEquipStats
-.import lut_OWTileset
-.import lut_SMTilesetAttr
-.import lut_SMTilesetProp
-.import lut_MapmanPalettes
-.import lut_SMTilesetTSA
-.import lut_SMPalettes
-.import lut_EntrTele_X
-.import lut_EntrTele_Y
-.import lut_EntrTele_Map
-.import lut_ExitTele_X
-.import lut_ExitTele_Y
-.import lut_Tilesets
-.import lut_NormTele_X
-.import lut_NormTele_Y
-.import lut_NormTele_Map
-.import lut_MapObjGfx
-.import lut_InitGameFlags
-.import lut_InitUnsramFirstPage
-.import lut_ClassStartingStats
-.import lut_Treasure
-.import lut_Treasure_2
-.import lut_BackdropPal
 .import lut_BtlBackdrops
-.import lut_MapObjects
-.import lut_ItemNamePtrTbl
-.import lut_WeaponArmorNamePtrTbl
-.import WeaponArmorPrices
-.import lut_EnemyAttack
+.import lut_ClassStartingStats
+.import lut_CommonStringPtrTbl
 .import lut_DialoguePtrTbl
 .import lut_DialoguePtrTbl_2
-.import DumbBottleThing
 .import lut_Domains
-.import lut_OWPtrTbl
-.import BattleIcons
-.import GetDialogueString
-.import TalkToTile_BankE
-.import AssignMapTileDamage_Z
-.import WriteAttributesToPPU
-.import LoadBattleTextChr
-.import LoadStatusBoxScrollWork
-.import LoadSprite_Bank04
+.import lut_EnemyAttack
+.import lut_EntrTele_Map
+.import lut_EntrTele_X
+.import lut_EntrTele_Y
+.import lut_ExitTele_X
+.import lut_ExitTele_Y
+.import lut_InitGameFlags
+.import lut_InitUnsramFirstPage
+.import lut_ItemNamePtrTbl
+.import lut_ItemPrices
+.import lut_MapObjGfx
+.import lut_MapObjects
+.import lut_MapmanPalettes
 .import lut_MenuTextCHR
-.import LoadStoneSprites
-.import lut_CommonStringPtrTbl
-.import MapPoisonDamage_Z
+.import lut_NormTele_Map
+.import lut_NormTele_X
+.import lut_NormTele_Y
+.import lut_OWPtrTbl
+.import lut_OWTileset
+.import lut_OrbCHR
+.import lut_SMPalettes
+.import lut_SMTilesetAttr
+.import lut_SMTilesetProp
+.import lut_SMTilesetTSA
+.import lut_ShopCHR
+.import lut_Tilesets
+.import lut_Treasure
+.import lut_Treasure_2
+.import lut_WeaponArmorNamePtrTbl
 
 .segment "BANK_FIXED"
 
@@ -557,7 +553,17 @@ DoMainMenu:
 	INC MenuHush
     JMP EnterMainMenu   ; and enter the main menu    
     
+
+PauseSoundTest:
+    JSR SoundTestMenu         
+    LDA mapflags
+    LSR A 
+    BCC @Overworld
+   
+    JMP ReenterStandardMap
     
+   @Overworld:    
+    JMP EnterOW_NoWipe
     
 PauseGame:
     LDA #%11111110 ; set all colour emphasis, keep PPU on, no greyscale
@@ -592,6 +598,8 @@ PauseGame:
     JSR DrawMapObjectsNoUpdate 
         
   : JSR UpdateJoy  ; keep checking if select is pressed again
+    LDA joy_start
+    BNE PauseSoundTest
     LDA joy_select
     BEQ @PauseLoop
 
@@ -603,7 +611,7 @@ PauseGame:
     STA $2001
     RTS
     
-    
+
     
     
     
@@ -2715,7 +2723,10 @@ ProcessSMInput:
       AND #$40          ; see if B is held down
       BEQ @Pause        ; if not, just pause!
     
-        JSR SoundTestMenu  
+        LDA #BANK_MINIMAP
+        JSR SwapPRG_L
+        JSR EnterMinimap
+        ;JSR SoundTestMenu  
         JMP ReenterStandardMap
       
     @Pause:
@@ -4254,7 +4265,7 @@ LoadStandardMapAndObjects:
 
 ReenterStandardMap:
  ;   JSR PrepStandardMap   ; do map preparation stuff (redraw, etc)
-;    JMP StopNoise_StopSprites ;  and exit
+    JSR StopNoise_StopSprites
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4854,33 +4865,35 @@ LoadOWMapRow:
 
     LDA #BANK_OWMAP  ;  swap to bank contianing overworld map
     JSR SwapPRG_L
+    
+    JSR LoadOWMapRow_1E ;; JIGS - moved this to the Overworld Map bank.
 
-    LDA #>lut_OWPtrTbl ;  set (tmp+6) to the start of the pointers for the rows of the OW map.
-    STA tmp+7          ;   we will then index this pointer table to get the pointer for the start of the row
-    LDA #<lut_OWPtrTbl ;  Need to use a pointer because there are 256 rows, which means 512 bytes for indexing
-    STA tmp+6          ;    so normal indexing won't work -- have to use indirect mode
-
-    LDA mapdraw_y    ;  Load the row we need to load
-    TAX              ;  stuff it in X (temporary)
-    ASL A            ;  double it (2 bytes per pointer)
-    BCC :+           ;  if there was carry...
-      INC tmp+7      ;     inc the high byte of our temp pointer
-:   TAY              ;  put low byte in Y for indexing
-    LDA (tmp+6), Y   ;  load low byte of row pointer
-    STA tmp          ;  put it in tmp
-    INY              ;  inc our index
-    LDA (tmp+6), Y   ;  load high byte, and put it in tmp+!
-    STA tmp+1        ;  (tmp) is now our source pointer for the row
-
-    TXA              ;  get our row number (previously stuffed in X)
-    AND #$0F         ;  mask out the low 4 bits
-    ORA #>mapdata    ;  and ORA with high byte of mapdata destination
-    STA tmp+3        ;  use this as high byte of dest pointer (to receive decompressed map)
-    LDA #<mapdata    ;   the row will be decompressed to $7x00-$7xFF
-    STA tmp+2        ;   where 'x' is the low 4 bits of the row number
-                     ;  (tmp+2) is now our dest pointer for the row
-
-           ; no RTS or JMP -- code seamlessly runs into DecompressMap
+;    LDA #>lut_OWPtrTbl ;  set (tmp+6) to the start of the pointers for the rows of the OW map.
+;    STA tmp+7          ;   we will then index this pointer table to get the pointer for the start of the row
+;    LDA #<lut_OWPtrTbl ;  Need to use a pointer because there are 256 rows, which means 512 bytes for indexing
+;    STA tmp+6          ;    so normal indexing won't work -- have to use indirect mode
+;
+;    LDA mapdraw_y    ;  Load the row we need to load
+;    TAX              ;  stuff it in X (temporary)
+;    ASL A            ;  double it (2 bytes per pointer)
+;    BCC :+           ;  if there was carry...
+;      INC tmp+7      ;     inc the high byte of our temp pointer
+;:   TAY              ;  put low byte in Y for indexing
+;    LDA (tmp+6), Y   ;  load low byte of row pointer
+;    STA tmp          ;  put it in tmp
+;    INY              ;  inc our index
+;    LDA (tmp+6), Y   ;  load high byte, and put it in tmp+!
+;    STA tmp+1        ;  (tmp) is now our source pointer for the row
+;
+;    TXA              ;  get our row number (previously stuffed in X)
+;    AND #$0F         ;  mask out the low 4 bits
+;    ORA #>mapdata    ;  and ORA with high byte of mapdata destination
+;    STA tmp+3        ;  use this as high byte of dest pointer (to receive decompressed map)
+;    LDA #<mapdata    ;   the row will be decompressed to $7x00-$7xFF
+;    STA tmp+2        ;   where 'x' is the low 4 bits of the row number
+;                     ;  (tmp+2) is now our dest pointer for the row
+;
+;; no RTS or JMP -- code seamlessly runs into DecompressMap
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7016,6 +7029,8 @@ AltarFrame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.ALIGN $100
+
 WaitAltarScanline:   ; JSR to routine = 6 cycles
     LDY #18          ; +2 = 8
   @Loop:
@@ -8196,7 +8211,7 @@ ComplexString_CharCode_Name:
     
 ComplexString_CharCode_MagicName:
     SEC
-    SBC #$14                        ; subtract #$14 to get it zero based
+    SBC #$40                        ; subtract #$14 to get it zero based
     TAX                             ; use that as an index
     LDA TempSpellList, X 
     BEQ :+                          ; if 0, skip ahead and draw nothing (no spell)
@@ -14312,39 +14327,6 @@ FadeInBatSprPalettes:           ; Exactly the same as FadeOutBatSprPalettes... e
 
     RTS
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Call Minimap Decompress [$FFC0 :: 0x3FFD0]
-;;
-;;    Called from the minimap to call the MinimapDecompress routine
-;;  it cannot call the routine directly because it is on a different bank.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;CallMinimapDecompress:
-;    LDA #BANK_OWMAP
-;    JSR SwapPRG_L
-;    JSR MinimapDecompress
-;    LDA #BANK_MINIMAP
-;    JMP SwapPRG_L
-
-;; So now we made lots of room, let's move some routines here to be used more often by other banks!
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;  Minimap Sprite CHR  [$BF00 :: 0x27F10]
-;;;    CHR for sprites on the minimap
-;
-;lut_MinimapSprCHR:
-;  .INCBIN "chr/minimap_sprite.chr"
-;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;  BG palette for minimap  [$BF20 :: 0x27F30]
-;
-;lut_MinimapBGPal:
-;  .BYTE $02,$1B,$38,$2B, $02,$04,$37,$0F, $02,$28,$18,$0F, $02,$24,$1A,$30  
-
 
   
   
@@ -14553,8 +14535,7 @@ SoundTestMenu:
     JSR LoadMenuCHRPal_TextOnly ; load menu related CHR and palettes
     LDA #BANK_Z
     JSR SwapPRG
-    JSR SoundTestZ
-    JMP SwapPRG         ; A = BANK_MUSIC
+    JMP SoundTestZ
 
 
 
@@ -14578,7 +14559,7 @@ DashButton:
     STA move_speed
     RTS
     
-    @Walking:   
+   @Walking:   
     LDA mapflags            ; make sure we're NOT on the overworld
     LSR A                   ;  Get SM flag, and shift it into C
     BCC @RTS
@@ -14586,8 +14567,8 @@ DashButton:
     LDA #02    
     STA move_speed
  
- @RTS:
- RTS
+   @RTS:
+    RTS
  
  
  

@@ -3,6 +3,7 @@
 .feature force_range
 .export MinimapDecompress
 .export lut_OWPtrTbl
+.export LoadOWMapRow_1E
 
 .segment "BANK_1E"
 
@@ -1020,16 +1021,46 @@ lut_OWPtrTbl:
   .BYTE $97,$D4,$08,$80,$0C,$06,$97,$1E,$FF,$97,$D5,$08,$80,$06,$06,$87
   .BYTE $04,$97,$1F,$FF,$97,$D6,$87,$06,$97,$24,$FF,$97,$00,$FF,$97,$00
   .BYTE $FF,$97,$00,$FF,$97,$00,$FF,$97,$00,$FF,$97,$00,$FF,$97,$00,$FF
-  .BYTE $97,$00,$FF,$97,$00,$FF,$97,$00,$FF,$00,$FF,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-  .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE $97,$00,$FF,$97,$00,$FF,$97,$00,$FF,$00,$FF ; ,$00,$00,$00,$00,$00
+  
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  ;.BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+.byte "END OF OVERWORLD DATA"
+
+LoadOWMapRow_1E:
+    LDA #>lut_OWPtrTbl ;  set (tmp+6) to the start of the pointers for the rows of the OW map.
+    STA tmp+7          ;   we will then index this pointer table to get the pointer for the start of the row
+    LDA #<lut_OWPtrTbl ;  Need to use a pointer because there are 256 rows, which means 512 bytes for indexing
+    STA tmp+6          ;    so normal indexing won't work -- have to use indirect mode
+
+    LDA mapdraw_y    ;  Load the row we need to load
+    TAX              ;  stuff it in X (temporary)
+    ASL A            ;  double it (2 bytes per pointer)
+    BCC :+           ;  if there was carry...
+      INC tmp+7      ;     inc the high byte of our temp pointer
+:   TAY              ;  put low byte in Y for indexing
+    LDA (tmp+6), Y   ;  load low byte of row pointer
+    STA tmp          ;  put it in tmp
+    INY              ;  inc our index
+    LDA (tmp+6), Y   ;  load high byte, and put it in tmp+!
+    STA tmp+1        ;  (tmp) is now our source pointer for the row
+
+    TXA              ;  get our row number (previously stuffed in X)
+    AND #$0F         ;  mask out the low 4 bits
+    ORA #>mapdata    ;  and ORA with high byte of mapdata destination
+    STA tmp+3        ;  use this as high byte of dest pointer (to receive decompressed map)
+    LDA #<mapdata    ;   the row will be decompressed to $7x00-$7xFF
+    STA tmp+2        ;   where 'x' is the low 4 bits of the row number
+    RTS              ;  (tmp+2) is now our dest pointer for the row
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1191,4 +1222,4 @@ MinimapDecompress:
 ;  .BYTE  0,0,0,0,  0,0,0,0,  0,0,0,0,  0,0,0,0
 ;  .BYTE  0,0,0,0,  0,0,0,0,  0,0,0,0,  0,0
 
-.byte "END OF OVERWORLD DATA"
+.byte "END OF BANK 1E"

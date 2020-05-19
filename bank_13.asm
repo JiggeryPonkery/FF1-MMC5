@@ -444,17 +444,20 @@ lut_MapObjects:
 .byte $00,$00,$00
 .byte $00,$00,$00
 
+;  +1: bits 0-5: X coordinate ; across: + 2 
+;  +2: Y coordinate ; up/down: - 5
+
 ; 08 ; Conera Castle 1F
-.byte $20,$4E,$1C ; Coneria castle peoples
-.byte $20,$4A,$12
-.byte $22,$02,$0A
-.byte $23,$08,$0B
-.byte $25,$47,$1C
-.byte $26,$47,$0F ; Invisible lady
-.byte $29,$C6,$18
-.byte $2A,$91,$17
-.byte $2C,$56,$09
-.byte $2E,$4E,$0F
+.byte $20,$50,$17 ; Guard near lower pillar 
+.byte $20,$4C,$0D ; Guard near stairs
+.byte $22,$04,$05
+.byte $23,$0A,$06
+.byte $25,$49,$17
+.byte $26,$49,$0A ; Invisible lady
+.byte $29,$C8,$13
+.byte $2A,$93,$12
+.byte $2C,$58,$04
+.byte $2E,$50,$0A
 .byte $00,$00,$00
 .byte $00,$00,$00
 .byte $00,$00,$00
@@ -1645,7 +1648,7 @@ lut_EntrTele_X:
 .byte $3D ; Gaia
 .byte $01 ; Onrac
 .byte $13 ; Leifen
-.byte $0C ; Coneria Castle 1F
+.byte $0E ; C ; Coneria Castle 1F
 .byte $10 ; Elfland Castle
 .byte $16 ; Northwest Castle
 .byte $0C ; Castle of Ordeals 1F
@@ -1680,7 +1683,7 @@ lut_EntrTele_Y:
 .byte $3D ; Gaia
 .byte $0C ; Onrac
 .byte $17 ; Leifen
-.byte $23 ; Coneria Castle 1F
+.byte $1E ; 23 ; Coneria Castle 1F
 .byte $1F ; Elfland Castle
 .byte $18 ; Northwest Castle
 .byte $15 ; Castle of Ordeals 1F
