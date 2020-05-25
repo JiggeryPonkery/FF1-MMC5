@@ -576,11 +576,11 @@ data_EnemyStats:
 .byte $87,$00,$43,$00,$44,$00,$78,$04,$2A,$06,$11,$11,$0E,$01,$64,$04,$91,$2D,$00,$00,$01,$0C,$04,$00,$00 ;04 WrWolf
 .byte $92,$01,$C8,$00,$5C,$00,$C8,$00,$36,$00,$11,$17,$19,$01,$00,$00,$00,$37,$10,$20,$20,$10,$0C,$00,$00 ;05 FrWOLF
 .byte $99,$00,$32,$00,$5C,$00,$86,$00,$18,$0C,$11,$17,$12,$0A,$00,$00,$02,$37,$00,$00,$00,$05,$03,$00,$00 ;06 IGUANA
-.byte $A8,$09,$B0,$04,$28,$01,$C8,$00,$24,$12,$12,$4A,$1F,$01,$00,$00,$02,$8F,$20,$10,$10,$0C,$00,$00,$00 ;07 AGAMA
-.byte $B9,$07,$92,$02,$C4,$00,$C8,$00,$18,$14,$11,$36,$1E,$01,$00,$00,$02,$5B,$00,$00,$00,$10,$00,$00,$00 ;08 SAURIA
-.byte $6F,$03,$6F,$03,$F0,$00,$88,$00,$30,$0C,$11,$3C,$26,$01,$00,$00,$04,$78,$00,$00,$00,$0C,$00,$01,$00 ;09 GIANT
-.byte $D8,$06,$D8,$06,$50,$01,$C8,$00,$30,$10,$11,$4E,$3C,$01,$00,$00,$04,$96,$10,$20,$20,$12,$00,$01,$00 ;0A FrGIANT
-.byte $E2,$05,$E2,$05,$2C,$01,$C8,$00,$30,$14,$11,$53,$49,$01,$00,$00,$04,$87,$20,$10,$10,$14,$00,$01,$00 ;0B R`GIANT
+.byte $A8,$09,$B0,$04,$28,$01,$C8,$00,$24,$12,$12,$4A,$1F,$01,$00,$00,$02,$8F,$20,$10,$10,$0C,$02,$00,$00 ;07 AGAMA
+.byte $B9,$07,$92,$02,$C4,$00,$C8,$00,$18,$14,$11,$36,$1E,$01,$00,$00,$02,$5B,$00,$00,$00,$10,$0B,$00,$00 ;08 SAURIA
+.byte $6F,$03,$6F,$03,$F0,$00,$88,$00,$30,$0C,$11,$3C,$26,$01,$00,$00,$04,$78,$00,$00,$00,$0C,$10,$01,$00 ;09 GIANT
+.byte $D8,$06,$D8,$06,$50,$01,$C8,$00,$30,$10,$11,$4E,$3C,$01,$00,$00,$04,$96,$10,$20,$20,$12,$1B,$01,$00 ;0A FrGIANT
+.byte $E2,$05,$E2,$05,$2C,$01,$C8,$00,$30,$14,$11,$53,$49,$01,$00,$00,$04,$87,$20,$10,$10,$14,$16,$01,$00 ;0B R`GIANT
 .byte $1E,$00,$1E,$00,$1C,$00,$6E,$00,$48,$04,$11,$07,$0A,$01,$00,$00,$20,$1C,$40,$90,$00,$09,$03,$01,$00 ;0C SAHAG
 .byte $69,$00,$69,$00,$40,$00,$8E,$00,$4E,$08,$11,$10,$0F,$01,$00,$00,$20,$2E,$40,$90,$00,$10,$05,$01,$00 ;0D R`SAHAG
 .byte $72,$03,$72,$03,$CC,$00,$C8,$80,$60,$14,$11,$33,$2F,$01,$00,$00,$20,$65,$40,$90,$20,$15,$14,$01,$00 ;0E WzSAHAG
@@ -834,13 +834,20 @@ LoadEnemyStats:
     BNE @SaveLevel
     
    @DecreaseLevel_2: 
+    LDA tmp+2        ; compare level (minimum of 1)
+    CMP #1           ; to 1
+    BEQ @SaveLevel   ; if its equal, don't decrease it
     DEC tmp+2
     
    @DecreaseLevel: 
+    LDA tmp+2        ; compare level (minimum of 1)
+    CMP #1           ; to 1
+    BEQ @SaveLevel   ; if its equal, don't decrease it   
     DEC tmp+2   
 
    @SaveLevel:
-    LDA tmp+2
+    LDA tmp+2             
+    LDY #en_level
     STA (EnemyRAMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
 
    @NextEnemy:
@@ -849,28 +856,9 @@ LoadEnemyStats:
     BEQ :+
       JMP @EnemyLoop    ; loop until all 9 enemies processed
 
-  : LDX #0
-   @FillPlayerHitMultiplyer:
-    TXA
-    JSR PrepCharStatPointers
-    LDY #ch_class - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #CLS_BB | CLS_MA              ; see if the player character is BB or Master
-    BEQ :+
-       LDY #ch_righthand - ch_stats
-       LDA (CharStatsPointer), Y     ; then see if they have a weapon equipped
-       BNE :+
-        LDA #02                      ; if no weapon, they have 2 fists, so a hit multiplyer of 2
-        BNE :++
-  : LDA #01                           ; everyone else gets 1
-  : STA btl_charhitmult, X
-    INX
-    CPX #4
-    BNE @FillPlayerHitMultiplyer
-
    ;; JIGS - and now on to filling the enemy's AI RAM!!
 
-    LDA #0
+  : LDA #0
     STA tmp+2                ; enemy ID counter
     STA tmp+3                ; AI index for writing to RAM
    @EnemyAI_Loop:
@@ -1931,7 +1919,7 @@ PlayerDefenderStats:
 
 
 
-
+;; this also sets hit multiplier for the party!
 Battle_SetPartyWeaponSpritePal:
     LDX #8
    @Clear: 
@@ -1956,18 +1944,20 @@ Battle_SetPartyWeaponSpritePal:
     STA btl_charweaponsprite, X
     INY
     LDA (tmp), Y
+   @SetWeaponPal:
     STA btl_charweaponpal, X
+    LDA #01                    ; hit multiplier starts at 1
     
    @Next:
-    DEX
-    BNE @Loop
+    STA btl_charhitmult, X   
+    DEC char_index
+    BPL @Loop
     RTS
    
    @Empty:   
     LDX char_index
     LDA #$20                   ; set the palette to white/grey
-    STA btl_charweaponpal, X
-    BNE @Next
+    BNE @SetWeaponPal          ; jump to save palette
     
    @CheckForFist:
     LDA ch_class, X
@@ -1988,7 +1978,8 @@ Battle_SetPartyWeaponSpritePal:
     TAY
     LDA lut_InBattleCharPaletteAssign, Y
     STA btl_charweaponsprite, X
-    JMP @Next
+    LDA #02                   ; hit multiplier is 2 for unarmed BB/Master
+    BNE @Next
 
 lut_InBattleCharPaletteAssign:
   .BYTE $21 ; Fighter

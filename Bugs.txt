@@ -6,6 +6,8 @@ Map:
 Battle:
 * SelectPlayerTarget has some obfuscating code that I will need to hijack for Multi-targeting.
 
+* Enemies are always poisoned? But take no damage? Player box won't draw!
+
 * Regen/Poison - make sure its loading the right division bytes and ORA-ing the other right one.
 
 * Praying doesn't crouch the character
