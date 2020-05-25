@@ -564,7 +564,7 @@ PauseSoundTest:
     
    @Overworld:    
     JMP EnterOW_NoWipe
-    
+
 PauseGame:
     LDA #%11111110 ; set all colour emphasis, keep PPU on, no greyscale
     STA $2001 

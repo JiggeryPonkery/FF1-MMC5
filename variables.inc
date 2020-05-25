@@ -378,6 +378,7 @@ lvlup_chstats           = $80 ; 2 byte pointer to character's OB stats
 
 ZoomMapPointer          = $80 ; for mini map stuff
 ZoomMapTilesetPtr       = $82
+MiniMap_DrawBuf         = $84 
 
 CharStatsPointer        = $80 
 CharBackupStatsPointer  = $82 ; these get loaded up at the same time
@@ -590,9 +591,11 @@ cur_pal         = $03C0       ; 32 bytes
 inroom_pal      = cur_pal+$20 ; 16 bytes
 tmp_pal         = $03F0       ; 16 bytes
 
+;; JIGS - if I'm not mistaken, $400-7FF can be used in battle and will re-fill with tileset_data afterwards
+
 tileset_data    = $0400  ; $400 bytes -- must be on page bound
 
-mm_drawbuf      = $0500  ;$100 bytes, shared, should be on page bound, but don't think it's absolutely required
+mm_spritebuf    = $0500  ; $100 bytes, keep on page bound
 mm_mapbuf       = $0600  ; same
 mm_mapbuf2      = $0700  ; same
 
@@ -613,6 +616,8 @@ draw_buf_attr   = draw_buf + $40
 draw_buf_at_hi  = draw_buf + $50
 draw_buf_at_lo  = draw_buf + $60
 draw_buf_at_msk = draw_buf + $70
+
+mm_drawbuf      = $6000  ; $1000 bytes
 
 MapMusicBackup  = $6000    
 MapMusicBackup1 = $6050    
