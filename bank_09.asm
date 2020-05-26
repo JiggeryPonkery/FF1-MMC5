@@ -2951,12 +2951,12 @@ lut_MinimapTileset:
 ; 3, 7 = brown - mountains, entrances
 
 lut_OverworldZoomTileset: ; 0 
-  .BYTE 0,7,7,0,0,0,0,1, 0,0,0,2,2,2,4,2
+  .BYTE 0,7,7,0,0,0,0,1, 0,2,2,2,2,2,4,2
   .BYTE 3,3,3,0,0,0,1,1, 1,2,2,7,7,2,2,2
   .BYTE 3,3,3,0,0,0,0,1, 0,7,7,4,2,2,2,4
   .BYTE 3,3,4,3,4,4,2,2, 7,7,4,0,2,2,2,0
   .BYTE 1,1,2,2,1,2,4,2, 2,7,7,2,7,7,7,2
-  .BYTE 1,1,2,2,0,0,0,4, 4,0,7,2,2,7,2,2
+  .BYTE 1,1,2,2,0,0,0,7, 7,0,7,2,2,7,2,2
   .BYTE 0,0,0,0,7,7,4,4, 4,4,4,2,4,7,4,2
   .BYTE 0,0,0,0,3,3,0,2, 2,2,2,2,2,2,2,2
 
@@ -3575,9 +3575,7 @@ OverworldMap_Prep:
     STA minimap_ptr
 
 OverworldMapPrep_VBlank: 
-    JSR CallMusicPlay_L 
-    
-    LDA #72                   ; and set scanline #71 as the one to break on
+    LDA #71                   ; and set scanline #71 as the one to break on
     STA $5203
 
 MiniMap_2Rows:
@@ -3592,14 +3590,14 @@ MiniMap_2Rows:
     LDA $5204      ; high bit set when scanline #71 is being drawn
     BPL @Wait
     
-   @Scanline72:   
+   @Scanline71:   
     LDX #$10       ; waits for H-blank so as not to draw weird dots on the screen
   : DEX        
     BNE :-    
     LDA soft2000
     AND #~$10      ; turn off sprites-as-background-tiles
     STA $2000
-    LDA #200       ; set next break at scanline #199 
+    LDA #199       ; set next break at scanline #199 
     STA $5203      
 
   @MainLoop:        ; tmp+7 is a counter to keep track of the number of bits
@@ -3659,7 +3657,7 @@ MiniMap_2Rows:
     LDA $5204      ; high bit set when scanline #199 is being drawn
     BPL @WaitForNext
     
-  @Scanline200:   
+  @Scanline199:   
     LDX #$10   
   : DEX        
     BNE :-    
@@ -3674,6 +3672,8 @@ MiniMap_2Rows:
     AND #$07                   ; and mask with 7 (0-7)
     STA minimap_ptr
     BEQ :+
+       JSR WaitForVBlank_L
+       JSR CallMusicPlay_L 
        JMP OverworldMapPrep_VBlank
     ;BNE MiniMap_2Rows          ; once it wraps from 7->0, we've filled 256 bytes of graphic data (8 rows of pixels)                         
 
@@ -3682,6 +3682,8 @@ MiniMap_2Rows:
     LDA minimap_ptr+1
     CMP #>$1000                ; see if the high byte is #$10
     BEQ :+
+       JSR WaitForVBlank_L
+       JSR CallMusicPlay_L     
        JMP OverworldMap_Prep      ; if not, do another $100 bytes
   : RTS
 
