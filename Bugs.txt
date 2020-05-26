@@ -6,8 +6,6 @@ Map:
 Battle:
 * SelectPlayerTarget has some obfuscating code that I will need to hijack for Multi-targeting.
 
-* Enemies are always poisoned? But take no damage? Player box won't draw!
-
 * Regen/Poison - make sure its loading the right division bytes and ORA-ing the other right one.
 
 * Praying doesn't crouch the character
@@ -21,9 +19,6 @@ Battle:
 
 Menu:
 * Adjust loading of backgrounds so that music is not stalled for several frames between screens.
-
-MiniMap:
-* Check: Adding a new teleport location may not add a glowy pixel to the map.
 
 
 

@@ -2916,7 +2916,7 @@ MusicPlay:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Battle_FlipAllChars:        
-    LDA #$20 ; 10           ; put a pointer to first character's OAM data in $8A
+    LDA #$A0 ; 10           ; put a pointer to first character's OAM data in $8A
     STA BattleBoxString     ;  start at $10 because the first 4 sprites are for the battle
     LDA #>oam               ;  cursor/weapon/magic sprite.
     STA BattleBoxString+1

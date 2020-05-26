@@ -249,6 +249,10 @@ DrawPlayerBox:
     JSR DrawCombatBox
     DEC BattleBoxBufferCount ; but don't count it!
     RTS
+
+DrawPlayerBox_StartBattleLogicLoop:
+    JSR DrawPlayerBox
+    JMP BattleLogicLoop
    
 Battle_AfterFadeIn:
     LDA #$00                    ; zero a bunch of misc vars to prep them
@@ -262,7 +266,7 @@ Battle_AfterFadeIn:
     
     LDA #BTLMSG_NOESCAPE
     JSR DrawMessageBoxDelay_ThenClearAll
-    JMP BattleLogicLoop
+    JMP DrawPlayerBox_StartBattleLogicLoop
     
     ; This block of code does some math to see if the party will be surprised or
     ;   get a first strike in the battle.  The end result of this math is:
@@ -301,7 +305,7 @@ Battle_AfterFadeIn:
    
     BCC @Surprised          ; if < 11, SURPRISED!
     CMP #90
-    BCC BattleLogicLoop     ; if < 90, normal fight
+    BCC DrawPlayerBox_StartBattleLogicLoop   ; if < 90, normal fight
     
       ; otherwise (>= 90), STRIKE FIRST
       LDA #BTLMSG_STRIKEFIRST
@@ -9887,10 +9891,10 @@ BtlMag_LoadPlayerDefenderStats:
     
     LDX #42
    @Loop: 
-    LDY PlayerMagDefenderStats_LUT, X
+    LDY PlayerMagDefenderStats_LUT-1, X
     LDA (CharStatsPointer), Y
     DEX
-    LDY PlayerMagDefenderStats_LUT, X
+    LDY PlayerMagDefenderStats_LUT-1, X
     STA btlmag_defender, Y
     DEX
     BPL @Loop
@@ -9926,10 +9930,10 @@ BtlMag_SavePlayerDefenderStats:
     LDX #38
    @Loop: 
     DEX                                 ; needs to read the left byte in the table first
-    LDY PlayerMagDefenderStats_LUT, X
+    LDY PlayerMagDefenderStats_LUT-1, X
     LDA btlmag_defender, Y
     INX                                 ; then the right-side byte
-    LDY PlayerMagDefenderStats_LUT, X
+    LDY PlayerMagDefenderStats_LUT-1, X
     STA (CharStatsPointer), Y
     DEX                                 ; then decrement them both again
     DEX
@@ -9960,10 +9964,10 @@ BtlMag_LoadEnemyDefenderStats:
     
     LDX #36
    @Loop: 
-    LDY EnemyMagDefenderStats_LUT, X
-    LDA (CharStatsPointer), Y
+    LDY EnemyMagDefenderStats_LUT-1, X
+    LDA (EnemyRAMPointer), Y
     DEX
-    LDY EnemyMagDefenderStats_LUT, X
+    LDY EnemyMagDefenderStats_LUT-1, X
     STA btlmag_defender, Y
     DEX
     BPL @Loop  
@@ -9990,11 +9994,11 @@ BtlMag_SaveEnemyDefenderStats:
     LDX #32
    @Loop: 
     DEX                                 ; needs to read the left byte in the table first
-    LDY EnemyMagDefenderStats_LUT, X
+    LDY EnemyMagDefenderStats_LUT-1, X
     LDA btlmag_defender, Y
     INX                                 ; then the right-side byte
-    LDY EnemyMagDefenderStats_LUT, X
-    STA (CharStatsPointer), Y
+    LDY EnemyMagDefenderStats_LUT-1, X
+    STA (EnemyRAMPointer), Y
     DEX                                 ; then decrement them both again
     DEX
     BPL @Loop
