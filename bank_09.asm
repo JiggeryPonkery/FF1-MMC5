@@ -3652,6 +3652,7 @@ MiniMap_2Rows:
     
     INC mm_maprow              ; increment map row counter by 2
     INC mm_maprow
+    JSR CallMusicPlay_L 
 
   @WaitForNext:
     LDA $5204      ; high bit set when scanline #199 is being drawn
@@ -3673,7 +3674,6 @@ MiniMap_2Rows:
     STA minimap_ptr
     BEQ :+
        JSR WaitForVBlank_L
-       JSR CallMusicPlay_L 
        JMP OverworldMapPrep_VBlank
     ;BNE MiniMap_2Rows          ; once it wraps from 7->0, we've filled 256 bytes of graphic data (8 rows of pixels)                         
 
@@ -3683,7 +3683,6 @@ MiniMap_2Rows:
     CMP #>$1000                ; see if the high byte is #$10
     BEQ :+
        JSR WaitForVBlank_L
-       JSR CallMusicPlay_L     
        JMP OverworldMap_Prep      ; if not, do another $100 bytes
   : RTS
 
