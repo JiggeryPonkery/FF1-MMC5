@@ -1913,7 +1913,7 @@ lut_NormTele_X:
 .byte $08 ; Castle of Ordeals 11
 .byte $0E ; Castle of Ordeals 12
 .byte $17 ; Castle of Ordeals 13
-.byte $0C ; Coneria Castle
+.byte $0E ; Coneria Castle bottom floor
 .byte $0C ; Rescue Princess
 
 ; map->map teleport Y coords
@@ -1980,7 +1980,7 @@ lut_NormTele_Y:
 .byte $04 ; Castle of Ordeals 11
 .byte $14 ; Castle of Ordeals 12
 .byte $16 ; Castle of Ordeals 13
-.byte $12 ; Coneria Castle
+.byte $0D ; Coneria Castle bottom floor
 .byte $07 ; Rescue Princess
 
 ; map->map teleport map #
