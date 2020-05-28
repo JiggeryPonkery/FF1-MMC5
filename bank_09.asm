@@ -3164,20 +3164,6 @@ EnterMinimap:
     
    @DoSmallMap: 
     JSR EnterDungeonMap    ; Set up and draw the zoomed in map!
-    
-    LDA mapflags           ; if its on the overworld, prepare the next screen!
-    BPL @SemiExitLoop
-
-    LDA #0
-    STA mm_maprow          ; start decompression tiles from row 0 (top row)
-    STA minimap_ptr+1
-    STA sprindex
-
-    JSR SetMiniMapPointers ; re-set the pointers
-    JSR DoMiniMapVBlank    ; wait for VBlank    
-    JSR OverworldMap_Prep  ; Loads up fully zoomed out Overworld graphics into RAM while doing normal frame work!
-    
-    JSR DrawPressAToZoom
 
    @SemiExitLoop: 
     JSR MiniMapFrame      ; do a frame... animating sprite palettes and whatnot
@@ -3208,7 +3194,7 @@ EnterMinimap:
 
     LDA #$0A
     STA $2001              ; turn on BG rendering (but leave sprites disabled)
-    JSR MiniMap_Draw       ; draw everything with the screen on!
+    JSR MiniMap_DrawOW     ; draw everything with the screen on!
 
    @ExitLoop:
     JSR MiniMapFrame      ; do a frame... animating sprite palettes and whatnot
@@ -3279,8 +3265,15 @@ EnterDungeonMap:
 
     JSR ZoomMap_Prep              ; Fill $6000 with the BG CHR to draw
     JSR SetupMinimapScreen        ; turn on the screen and do some prep to clear sprite DMA
-    JMP MiniMap_Draw              ; transfer $6000 to BG CHR one row of pixels at a time; animated!
 
+    ;; prepare these for decompressing the overworld map to mapdata
+    LDA #0
+    STA mm_maprow                 ; start decompression tiles from row 0 (top row)
+    STA sprindex    
+    STA minimap_ptr
+    
+    JMP MiniMap_Draw              ; transfer $6000 to BG CHR one row of pixels at a time; animated!
+    ;; if on the overworld, also decompresses the zoomed out map while drawing!
 
 SetupMinimapScreen:
     JSR DoMiniMapVBlank    ; wait for the normal VBlank routine
@@ -3295,7 +3288,7 @@ SetMinimapScroll:
     STA $2000
     LDA #$00
     STA $2005
-    LDA #$E8
+    LDA #$E0 ;8
     STA $2005
     RTS    
     
@@ -3340,7 +3333,7 @@ DoMiniMapVBlank:
     ORA #$80
     STA $2000     
     
-    LDA #71        ; and set scanline #71 as the one to break on
+    LDA #79        ; and set scanline #71 as the one to break on
     STA $5203
 
    @WaitForScanline71:
@@ -3354,7 +3347,7 @@ DoMiniMapVBlank:
     LDA soft2000
     EOR #$90       ; turn off sprites-as-background-tiles, but turn on the NMI bit thing if its off
     STA $2000
-    LDA #199       ; set next break at scanline #199 
+    LDA #207       ; set next break at scanline #199 
     STA $5203      
     
     JSR CallMusicPlay_L 
@@ -3453,23 +3446,33 @@ MiniMapFrame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+MiniMap_DrawOW:
+    LDA #<mapdata
+    STA MiniMap_DrawBuf
+    LDA #>mapdata
+    STA MiniMap_DrawBuf+1    ; Draw the overworld from "mapdata"
+    JMP :+
 
 MiniMap_Draw:
+    LDA #<mapdata
+    STA MiniMap_OWDrawBuf
+    LDA #>mapdata
+    STA MiniMap_OWDrawBuf+1  ; sat "mapdata" to the OWDrawBuf
+
     LDA #<mm_drawbuf
     STA MiniMap_DrawBuf
     LDA #>mm_drawbuf
     STA MiniMap_DrawBuf+1    ; reset this pointer to the start of its data
     
-    LDA #0
+  : LDA #0
     STA minimap_ptr+1        ; reset the high byte of this pointer too
     
-PressAToZoom_Entry:
    @0100_Loop:               ; this loop happens every $0100 bytes
     LDA #0
     STA mm_pixrow            ; start drawing pixel row 0, increment by 1 row each loop
 
     @MainLoop:
-        JSR DoMiniMapVBlank ; wait for Vblank before drawing anything
+        JSR DoMiniMapDrawVBlank ; wait for Vblank before drawing anything
        
         LDX mm_pixrow        ; put row in X -- X will be the loop up counter and source index
       @RowLoop:
@@ -3492,7 +3495,7 @@ PressAToZoom_Entry:
     STA $2000
     LDA #$00
     STA $2005
-    LDA #$E8
+    LDA #$E0; 8
     STA $2005
 
     ; JSR Minimap_DrawSFX   ; play the ugly drawing sound effect
@@ -3513,36 +3516,69 @@ PressAToZoom_Entry:
     CMP #$10              ; see if its $10
     BNE :+                ; if not, jump ahead
        RTS                ; if it is, everything's drawn! so exit
-    
+   
   : LDA mapflags          ; get the map flag and see if its on the overworld and zoomed in 
     BPL @0100_Loop        ; if not, keep looping
-    
-    RTS 
-    
+
     ;; But aha! Its row $0F on the zoomed in overworld: This needs to draw the text "_Press A to Zoom in_"
     ;; so overwrite the mm_drawbuf pointer with new data:
-  ;  LDA #<lut_ZoomMinimapTextCHR
-  ;  STA MiniMap_DrawBuf
-  ;  LDA #>lut_ZoomMinimapTextCHR
-  ;  STA MiniMap_DrawBuf+1    
-  ;  JMP @0100_Loop
-
-
-DrawPressAToZoom:
     LDA #<lut_ZoomMinimapTextCHR
-    STA MiniMap_DrawBuf    
+    STA MiniMap_DrawBuf
     LDA #>lut_ZoomMinimapTextCHR
     STA MiniMap_DrawBuf+1    
-    
-    LDA #$0F                     ; set the high byte of the pointer to the last row
-    STA minimap_ptr+1
-    LDA #$1E
-    STA $2001                    ; and enable sprites
-    JSR DoMiniMapVBlank
-    LDA #>oam                    ; Do the sprite thing
-    STA $4014    
-    JMP PressAToZoom_Entry
+    JMP @0100_Loop
 
+
+
+DoMiniMapDrawVBlank: 
+    LDA mapflags
+    BPL @SetWait
+    LDA minimap_ptr+1
+    CMP #>$1000
+    BEQ @SetWait
+    
+    JSR LongCall
+    .word MinimapDecompress    ; decompress 2 rows of map data
+    .byte BANK_OWMAP
+    
+   @SetWait: 
+    LDA #79        ; and set scanline #71 as the one to break on
+    STA $5203
+
+   @WaitForScanline71:
+    LDA $5204      ; high bit set when scanline #71 is being drawn
+    BPL @WaitForScanline71
+    
+   @Scanline71:   
+    LDX #$10       ; waits for H-blank so as not to draw weird dots on the screen
+  : DEX        
+    BNE :-    
+    LDA soft2000
+    EOR #$90       ; turn off sprites-as-background-tiles, but turn on the NMI bit thing if its off
+    STA $2000
+    LDA #207       ; set next break at scanline #199 
+    STA $5203      
+    
+    JSR CallMusicPlay_L 
+    LDA mapflags
+    BPL @WaitForScanline199
+    JSR OverworldMap_Prep
+   
+  @WaitForScanline199:
+    LDA $5204      ; high bit set when scanline #199 is being drawn
+    BPL @WaitForScanline199
+    
+   @Scanline199:   
+    LDX #$10   
+  : DEX        
+    BNE :-    
+    LDA soft2000         ; still has bit $10 set, so will set sprite CHR as background tiles again
+    ORA #$80             ; turn on the NMI bit again just in case...
+    STA $2000
+    LDA #$00             ; and clear the scanline break register
+    STA $5203      
+   @LoopForever: 
+    JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3554,9 +3590,6 @@ DrawPressAToZoom:
 ;;  in this routine.
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
 
 ;; MinimapDecompress takes about 56 scanlines to decompress 2 rows.
 ;; It takes 5 scanlines to do 1 @MainLoop
@@ -3571,34 +3604,14 @@ DrawPressAToZoom:
 
 
 OverworldMap_Prep:
-    LDA #0                     ; reset low byte of PPU addr to 0
-    STA minimap_ptr
-
-OverworldMapPrep_VBlank: 
-    LDA #71                   ; and set scanline #71 as the one to break on
-    STA $5203
-
-MiniMap_2Rows:
-    JSR LongCall
-    .word MinimapDecompress    ; decompress 2 rows of map data
-    .byte BANK_OWMAP
-    
-    LDY #0                     ; Y will be the x coord (column) counter
-    STY tmp                    ;; JIGS - tmp is used as a backup for Y     
-
-   @Wait:
-    LDA $5204      ; high bit set when scanline #71 is being drawn
-    BPL @Wait
-    
-   @Scanline71:   
-    LDX #$10       ; waits for H-blank so as not to draw weird dots on the screen
-  : DEX        
-    BNE :-    
-    LDA soft2000
-    AND #~$10      ; turn off sprites-as-background-tiles
-    STA $2000
-    LDA #199       ; set next break at scanline #199 
-    STA $5203      
+    LDA minimap_ptr+1
+    CMP #>$1000                ; see if the high byte is #$10
+    BNE :+
+    RTS
+  : LDA #0                     ; reset low byte of PPU addr to 0
+    STA tmp
+   ; LDY #0                     ; Y will be the x coord (column) counter
+   ; STY tmp                    ;; JIGS - tmp is used as a backup for Y     
 
   @MainLoop:        ; tmp+7 is a counter to keep track of the number of bits
     LDY tmp         ;  that have yet to be shifted into the output CHR bytes
@@ -3636,13 +3649,13 @@ MiniMap_2Rows:
     LDY minimap_ptr            ; use low byte of dest pointer as index for draw buffer
 
     LDA mm_bplo                ; copy both bitplanes to the appropriate areas of the buffer
-    STA (MiniMap_DrawBuf), Y
+    STA (MiniMap_OWDrawBuf), Y
     TYA
     CLC
     ADC #$08                   ; increment destination by 8
     TAY
     LDA mm_bphi
-    STA (MiniMap_DrawBuf), Y
+    STA (MiniMap_OWDrawBuf), Y
     TYA
     CLC
     ADC #$08                   ; and then another 8
@@ -3652,39 +3665,21 @@ MiniMap_2Rows:
     
     INC mm_maprow              ; increment map row counter by 2
     INC mm_maprow
-    JSR CallMusicPlay_L 
-
-  @WaitForNext:
-    LDA $5204      ; high bit set when scanline #199 is being drawn
-    BPL @WaitForNext
-    
-  @Scanline199:   
-    LDX #$10   
-  : DEX        
-    BNE :-    
-    LDA soft2000         ; still has bit $10 set, so will set sprite CHR as background tiles again
-    STA $2000
-    LDA #$00             ; and clear the scanline break register
-    STA $5203      
 
     LDA minimap_ptr            ; increment dest PPU address by 1 (next row of pixels)
     CLC
     ADC #1
     AND #$07                   ; and mask with 7 (0-7)
     STA minimap_ptr
-    BEQ :+
-       JSR WaitForVBlank_L
-       JMP OverworldMapPrep_VBlank
-    ;BNE MiniMap_2Rows          ; once it wraps from 7->0, we've filled 256 bytes of graphic data (8 rows of pixels)                         
-
-  : INC MiniMap_DrawBuf+1      ; increment high byte of source
-    INC minimap_ptr+1          ; increment high byte of PPU dest
-    LDA minimap_ptr+1
-    CMP #>$1000                ; see if the high byte is #$10
-    BEQ :+
-       JSR WaitForVBlank_L
-       JMP OverworldMap_Prep      ; if not, do another $100 bytes
+    BNE :+
+    INC MiniMap_OWDrawBuf+1
+    LDA #0
+    STA minimap_ptr
   : RTS
+
+
+
+
 
 
 
@@ -3842,7 +3837,7 @@ Overworld_YouAreHere:
     ADC #$07
     LSR A
     CLC
-    ADC #$44          ; and add more since the map is lower than the in the original game
+    ADC #$4C          ; and add more since the map is lower than the in the original game
     STA oam+0         ; record as Y coord
     RTS               ; and exit!
 
@@ -3878,7 +3873,7 @@ ZoomMap_YouAreHere:
     ADC #$07
     ASL A
     CLC
-    ADC #$44          ; but add a little less ($34 instead of $3D)
+    ADC #$4C          ; but add a little less ($34 instead of $3D)
     STA oam+0         ; record as Y coord
     RTS               ; and exit!
     
@@ -3886,7 +3881,7 @@ ZoomMap_YouAreHere:
     LDA #127-2
     STA oam+3, X      ; record as X coord
 
-    LDA #127+5
+    LDA #127+13
     STA oam+0         ; record as Y coord
     RTS
 
@@ -3914,7 +3909,7 @@ DrawOverworldSprite:
     LDA mm_maprow         ; get Y coord
     LSR A                 ; divide by 2 (minimap display is 128x128 -- world map is 256x256)
     CLC
-    ADC #$44              ; add $34 to offset the sprite to the start of the map on the screen
+    ADC #$4C              ; add $34 to offset the sprite to the start of the map on the screen
     STA mm_spritebuf, X   ; write this as Y coord of sprite
 
     LDA #$83
@@ -3947,7 +3942,7 @@ DrawZoomSprite:
     LDA tmp+6        ; get Y coord - 0-64
     ASL A            ; double it
     CLC
-    ADC #$44         ; add $34 to offset the sprite to the start of the map on the screen
+    ADC #$4C         ; add $34 to offset the sprite to the start of the map on the screen
     STA oam, X       ; write this as Y coord of sprite
 
     LDA #$81
@@ -4197,7 +4192,7 @@ MiniMap_FillNTPal:
 
     LDA #$00              ; set scroll 
     STA $2005             
-    LDA #$E8
+    LDA #$E0; 8
     STA $2005             
     RTS                   ; then exit!
 

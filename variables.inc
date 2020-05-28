@@ -379,6 +379,7 @@ lvlup_chstats           = $80 ; 2 byte pointer to character's OB stats
 ZoomMapPointer          = $80 ; for mini map stuff
 ZoomMapTilesetPtr       = $82
 MiniMap_DrawBuf         = $84 
+MiniMap_OWDrawBuf       = $86 
 
 CharStatsPointer        = $80 
 CharBackupStatsPointer  = $82 ; these get loaded up at the same time
