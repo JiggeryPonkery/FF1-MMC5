@@ -3163,6 +3163,13 @@ EnterMinimap:
     STA mapflags           ; set the "overworld zoomed in" flag
     
    @DoSmallMap: 
+    LDX #0
+   @BackupMapObj: 
+    LDA mapobj, X
+    STA mapobj_backup, X
+    DEX
+    BNE @BackupMapObj
+   
     JSR EnterDungeonMap    ; Set up and draw the zoomed in map!
 
    @SemiExitLoop: 
@@ -3227,7 +3234,17 @@ EnterMinimap:
     LDA mapflags
     AND #$7F
     STA mapflags             ; clear the high bit from mapfalgs
-    RTS
+    LSR A
+    BCC :+
+    
+    LDX #0
+   @FixMapObj: 
+    LDA mapobj_backup, X
+    STA mapobj, X
+    DEX
+    BNE @FixMapObj
+    
+  : RTS
     
     
     

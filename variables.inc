@@ -594,6 +594,7 @@ tmp_pal         = $03F0       ; 16 bytes
 
 ;; JIGS - if I'm not mistaken, $400-7FF can be used in battle and will re-fill with tileset_data afterwards
 
+mapobj_backup   = $0400  ; $100 bytes -- used for minimap
 tileset_data    = $0400  ; $400 bytes -- must be on page bound
 
 mm_spritebuf    = $0500  ; $100 bytes, keep on page bound
