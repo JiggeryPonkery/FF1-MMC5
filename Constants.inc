@@ -197,6 +197,7 @@ BANK_BTLPALETTES  = $0B
 BANK_DOBATTLE     = $0C
 
 BANK_MUSIC        = $0D
+BANK_MAPMUSIC     = $0D
 
 BANK_MENUS        = $0E
 
@@ -224,6 +225,8 @@ BANK_TREASURE     = $13
 BANK_TELEPORTINFO = $13
 
 BANK_MAPCHR       = $14
+
+BANK_MAPS         = $17 ; + 18, 19, 1A, 1B, 1C
 
 BANK_OWMAP        = $1E
 
@@ -1109,12 +1112,6 @@ MAP_3A  = $3A ; Temple_of_Fiends_7F_Wind
 MAP_3B  = $3B ; Temple_of_Fiends_8F_Chaos   
 MAP_3C  = $3C ; Titans_Tunnel               
 
-MAP_BANKCHANGE_2 = MAP_18 ; first map in SM_Bank_2
-MAP_BANKCHANGE_3 = MAP_2A ; first map in SM_Bank_3
-  
-SM_BANK_1 = $16
-SM_BANK_2 = $17
-SM_BANK_3 = $18
   
   
 ;; labels that couldn't be inserted in data

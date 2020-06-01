@@ -20,6 +20,8 @@
 .import MinimapDecompress
 .import ClearOAM
 .import CHRLoadToA
+.import BackupMapMusic
+.import RestoreMapMusic
 
 BANK_THIS = $09
 
@@ -3150,9 +3152,13 @@ EnterMinimap:
     STA $4015              ; turn off PPU and APU
     STA $5015              ; and silence the MMC5 APU. (JIGS)
 
+    JSR LongCall
+    .WORD BackupMapMusic
+    .BYTE BANK_MUSIC
+
     LDA #$41               ; switch to music track $41 (crystal theme)
     STA music_track        ; 
-    STA dlgmusic_backup
+    ;STA dlgmusic_backup
     
     LDA mapflags
     LSR A
@@ -3244,7 +3250,12 @@ EnterMinimap:
     DEX
     BNE @FixMapObj
     
-  : RTS
+  : JSR LongCall
+    .WORD RestoreMapMusic
+    .byte BANK_MUSIC
+    ;; why isn't this working? music_track is 0 ... 
+    
+    RTS
     
     
     

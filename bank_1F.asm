@@ -80,7 +80,6 @@
 .export WaitForVBlank_L
 .export WaitForVBlank_L
 .export lutClassBatSprPalette
-.export lut_MapMusicTrack
 .export lut_NTRowStartHi
 .export lut_NTRowStartLo
 .export lut_RNG
@@ -156,6 +155,7 @@
 .import lut_MapObjGfx
 .import lut_MapObjects
 .import lut_MapmanPalettes
+.import lut_MapMusicTrack
 .import lut_MenuTextCHR
 .import lut_NormTele_Map
 .import lut_NormTele_X
@@ -172,6 +172,7 @@
 .import lut_Treasure
 .import lut_Treasure_2
 .import lut_WeaponArmorNamePtrTbl
+
 
 .segment "BANK_FIXED"
 
@@ -4373,8 +4374,8 @@ PrepStandardMap:
 
     LDA MenuHush            ; JIGS - if its 1, then the map music is already playing! 
     BNE @NoChange
-        ;LDX cur_tileset               ; get the tileset
-        ;LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
+        LDA #BANK_MAPMUSIC
+        JSR SwapPRG_L
         LDX cur_map
         LDA lut_MapMusicTrack, X      ;; JIGS - why tie songs to tilesets when each map can be specific?
         CMP dlgmusic_backup           ; is it already set as the backup song?
@@ -4773,55 +4774,28 @@ ScrollUpOneRow:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadStandardMap:
-    LDA cur_map
-    CMP #MAP_BANKCHANGE_3 ; see Constants.inc to change the values for what maps are on which bank!
-    BCC :+
-        SBC #MAP_BANKCHANGE_3 ; subtract the # of maps before this point
-        STA tmp               ; since every bank has its own pointer table that starts at 0
-        LDA #SM_BANK_3        ; get the bank # for maps in this range 
-        JMP @Finish           ; 
-  : CMP #MAP_BANKCHANGE_2
-    BCC :+  
-        SBC #MAP_BANKCHANGE_2
-        STA tmp
-        LDA #SM_BANK_2
-        JMP @Finish
-  : STA tmp
-    LDA #SM_BANK_1
-  
-   @Finish:
-    STA tmp+5             ; save the bank # for later--though this might never be used if maps don't cross over banks
-    JSR SwapPRG_L         ; swap to the bank with the map
-    LDA tmp               ; restore cur_map, minus any previous bank's map ranges
-    ASL A                 ; double it, put in X for pointer
-    TAX                   ; 
-    LDA lut_SMPtrTbl, X   ; get low byte of pointer (lut_SMPtrTbl points to the very start of each bank!)
+    LDA #BANK_MAPS
+    JSR SwapPRG_L         ; swap to bank containing start of standard maps
+    LDA cur_map           ; get current map ID
+    ASL A                 ; double it, and throw it in X (to get index for pointer table)
+    TAX
+    LDA lut_SMPtrTbl, X   ; get low byte of pointer
     STA tmp               ; put in tmp (low byte of our source pointer)
     LDA lut_SMPtrTbl+1, X ; get high byte of pointer
-    STA tmp+1
-
- ;   LDA #BANK_STANDARDMAPS
- ;   JSR SwapPRG_L     ; swap to bank containing start of standard maps
- ;   LDA cur_map        ; get current map ID
- ;   ASL A             ; double it, and throw it in X (to get index for pointer table)
- ;   TAX
- ;   LDA lut_SMPtrTbl, X   ; get low byte of pointer
- ;   STA tmp               ; put in tmp (low byte of our source pointer)
- ;   LDA lut_SMPtrTbl+1, X ; get high byte of pointer
- ;   STA tmp+1  
- ;   TAY                   ; copy to Y (temporary hold)
- ;   AND #$3F          ; convert pointer to useable CPU address (bank will be loaded into $8000-FFFF)
- ;   ORA #$80          ;   AND with #$3F and ORA with #$80 will determine where in the bank the map will start
- ;   STA tmp+1         ; put converted high byte to our pointer.  (tmp) is now the pointer to the start of the map
-                      ;   provided the proper bank is swapped in
- ;   TYA               ; restore original high byte of pointer
- ;   ROL A
- ;   ROL A                  ; right shift it by 6 (high 2 bytes become low 2 bytes).
- ;   ROL A                  ;    These ROLs are a shorter way to do it than LSRs.  Effectively dividing the pointer by $4000
- ;   AND #$03               ; mask out low 2 bits (gets bank number for start of this map)
- ;   ORA #BANK_STANDARDMAPS ; Add standard map bank (use ORA to avoid unwanted carry from above ROLs)
- ;   STA tmp+5              ; put bank number in temp ram for future reference
- ;   JSR SwapPRG_L          ; swap to desired bank
+    STA tmp+1  
+    TAY                   ; copy to Y (temporary hold)
+    AND #$3F          ; convert pointer to useable CPU address (bank will be loaded into $8000-FFFF)
+    ORA #$80          ;   AND with #$3F and ORA with #$80 will determine where in the bank the map will start
+    STA tmp+1         ; put converted high byte to our pointer.  (tmp) is now the pointer to the start of the map
+                     ;   provided the proper bank is swapped in
+    TYA               ; restore original high byte of pointer
+    ROL A
+    ROL A                  ; right shift it by 6 (high 2 bytes become low 2 bytes).
+    ROL A                  ;    These ROLs are a shorter way to do it than LSRs.  Effectively dividing the pointer by $4000
+    AND #$03               ; mask out low 2 bits (gets bank number for start of this map)
+    ORA #BANK_MAPS         ; Add standard map bank (use ORA to avoid unwanted carry from above ROLs)
+    STA tmp+5              ; put bank number in temp ram for future reference
+    JSR SwapPRG_L          ; swap to desired bank
  
     LDA #<mapdata
     STA tmp+2
@@ -14424,79 +14398,9 @@ LongCall:
     
     
     
-; lut_TilesetMusicTrack:
-;.byte $47 ; Town maps
-;.byte $48 ; Castle 
-;.byte $49 ; Volcano
-;.byte $4A ; Matoya
-;.byte $4B ; Marsh Cave
-;.byte $4C ; Sea Shrine
-;.byte $4D ; Sky Castle
-;.byte $4E ; Temple of Fiends
 
 
-lut_MapMusicTrack:
-.byte $47 ; 00 - CONERIA
-.byte $47 ; 01 - PRAVOKA
-.byte $47 ; 02 - ELFLAND
-.byte $47 ; 03 - MELMOND
-.byte $47 ; 04 - CRESCENT_LAKE
-.byte $47 ; 05 - GAIA
-.byte $47 ; 06 - ONRAC
-.byte $47 ; 07 - LEIFEN
-.byte $48 ; 08 - Coneria_CASTLE_1F
-.byte $48 ; 09 - ELFLAND_CASTLE
-.byte $5B ; 0A - NORTHWEST_CASTLE
-.byte $5B ; 0B - CASTLE_OF_ORDEALS_1F
-.byte $4E ; 0C - TEMPLE_OF_FIENDS_PRESENT
-.byte $49 ; 0D - EARTH_CAVE_B1
-.byte $49 ; 0E - GURGU_VOLCANO_B1
-.byte $4B ; 0F - ICE_CAVE_B1
-.byte $4A ; 10 - CARDIA
-.byte $5B ; 4A ; 11 - BAHAMUTS_ROOM_B1
-.byte $4B ; 12 - WATERFALL
-.byte $4A ; 13 - DWARF_CAVE
-.byte $4A ; 14 - MATOYAS_CAVE
-.byte $4A ; 15 - SARDAS_CAVE
-.byte $4B ; 16 - MARSH_CAVE_B1
-.byte $4B ; 17 - MIRAGE_TOWER_1F
-.byte $48 ; 18 - Coneria_CASTLE_2F
-.byte $5B ; 19 - Castle_of_Ordeals_2F
-.byte $5B ; 1A - Castle_of_Ordeals_3F
-.byte $4B ; 1B - Marsh_Cave_B2       
-.byte $4B ; 1C - Marsh_Cave_B3       
-.byte $49 ; 1D - Earth_Cave_B2       
-.byte $49 ; 1E - Earth_Cave_B3       
-.byte $49 ; 1F - Earth_Cave_B4       
-.byte $49 ; 20 - Earth_Cave_B5       
-.byte $49 ; 21 - Gurgu_Volcano_B2    
-.byte $49 ; 22 - Gurgu_Volcano_B3    
-.byte $49 ; 23 - Gurgu_Volcano_B4    
-.byte $49 ; 24 - Gurgu_Volcano_B5    
-.byte $4B ; 25 - Ice_Cave_B2         
-.byte $4B ; 26 - Ice_Cave_B3         
-.byte $4A ; 27 - Bahamuts_Room_B2    
-.byte $4B ; 28 - Mirage_Tower_2F     
-.byte $4B ; 29 - Mirage_Tower_3F     
-.byte $4C ; 2A - Sea_Shrine_B5             
-.byte $4C ; 2B - Sea_Shrine_B4             
-.byte $4C ; 2C - Sea_Shrine_B3             
-.byte $4C ; 2D - Sea_Shrine_B2             
-.byte $4C ; 2E - Sea_Shrine_B1             
-.byte $4D ; 2F - Sky_Palace_1F             
-.byte $4D ; 30 - Sky_Palace_2F             
-.byte $4D ; 31 - Sky_Palace_3F             
-.byte $4D ; 32 - Sky_Palace_4F             
-.byte $4D ; 33 - Sky_Palace_5F             
-.byte $4E ; 34 - Temple_of_Fiends_1F       
-.byte $4E ; 35 - Temple_of_Fiends_2F       
-.byte $4E ; 36 - Temple_of_Fiends_3F       
-.byte $4E ; 37 - Temple_of_Fiends_4F_Earth 
-.byte $4E ; 38 - Temple_of_Fiends_5F_Fire  
-.byte $4E ; 39 - Temple_of_Fiends_6F_Water 
-.byte $4E ; 3A - Temple_of_Fiends_7F_Wind      
-.byte $4E ; 3B - Temple_of_Fiends_8F_Chaos     
-.byte $4B ; 3C - Titans_Tunnel                 
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

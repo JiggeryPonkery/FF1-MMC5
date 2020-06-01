@@ -2,8 +2,8 @@
 .export MusicPlay_L
 .export BackupMapMusic
 .export RestoreMapMusic
+.export lut_MapMusicTrack
 
-.import lut_MapMusicTrack
 .import lut_VehicleMusic
 .import MultiplyXA
 .import WaitForVBlank_L
@@ -4044,7 +4044,68 @@ RestoreMapMusic:
    RTS
  
  
- 
+lut_MapMusicTrack:
+.byte $47 ; 00 - CONERIA
+.byte $47 ; 01 - PRAVOKA
+.byte $47 ; 02 - ELFLAND
+.byte $47 ; 03 - MELMOND
+.byte $47 ; 04 - CRESCENT_LAKE
+.byte $47 ; 05 - GAIA
+.byte $47 ; 06 - ONRAC
+.byte $47 ; 07 - LEIFEN
+.byte $48 ; 08 - Coneria_CASTLE_1F
+.byte $48 ; 09 - ELFLAND_CASTLE
+.byte $5B ; 0A - NORTHWEST_CASTLE
+.byte $5B ; 0B - CASTLE_OF_ORDEALS_1F
+.byte $4E ; 0C - TEMPLE_OF_FIENDS_PRESENT
+.byte $49 ; 0D - EARTH_CAVE_B1
+.byte $49 ; 0E - GURGU_VOLCANO_B1
+.byte $4B ; 0F - ICE_CAVE_B1
+.byte $4A ; 10 - CARDIA
+.byte $5B ; 4A ; 11 - BAHAMUTS_ROOM_B1
+.byte $4B ; 12 - WATERFALL
+.byte $4A ; 13 - DWARF_CAVE
+.byte $4A ; 14 - MATOYAS_CAVE
+.byte $4A ; 15 - SARDAS_CAVE
+.byte $4B ; 16 - MARSH_CAVE_B1
+.byte $4B ; 17 - MIRAGE_TOWER_1F
+.byte $48 ; 18 - Coneria_CASTLE_2F
+.byte $5B ; 19 - Castle_of_Ordeals_2F
+.byte $5B ; 1A - Castle_of_Ordeals_3F
+.byte $4B ; 1B - Marsh_Cave_B2       
+.byte $4B ; 1C - Marsh_Cave_B3       
+.byte $49 ; 1D - Earth_Cave_B2       
+.byte $49 ; 1E - Earth_Cave_B3       
+.byte $49 ; 1F - Earth_Cave_B4       
+.byte $49 ; 20 - Earth_Cave_B5       
+.byte $49 ; 21 - Gurgu_Volcano_B2    
+.byte $49 ; 22 - Gurgu_Volcano_B3    
+.byte $49 ; 23 - Gurgu_Volcano_B4    
+.byte $49 ; 24 - Gurgu_Volcano_B5    
+.byte $4B ; 25 - Ice_Cave_B2         
+.byte $4B ; 26 - Ice_Cave_B3         
+.byte $5B ; 4A ; 27 - Bahamuts_Room_B2    
+.byte $4B ; 28 - Mirage_Tower_2F     
+.byte $4B ; 29 - Mirage_Tower_3F     
+.byte $4C ; 2A - Sea_Shrine_B5             
+.byte $4C ; 2B - Sea_Shrine_B4             
+.byte $4C ; 2C - Sea_Shrine_B3             
+.byte $4C ; 2D - Sea_Shrine_B2             
+.byte $4C ; 2E - Sea_Shrine_B1             
+.byte $4D ; 2F - Sky_Palace_1F             
+.byte $4D ; 30 - Sky_Palace_2F             
+.byte $4D ; 31 - Sky_Palace_3F             
+.byte $4D ; 32 - Sky_Palace_4F             
+.byte $4D ; 33 - Sky_Palace_5F             
+.byte $4E ; 34 - Temple_of_Fiends_1F       
+.byte $4E ; 35 - Temple_of_Fiends_2F       
+.byte $4E ; 36 - Temple_of_Fiends_3F       
+.byte $4E ; 37 - Temple_of_Fiends_4F_Earth 
+.byte $4E ; 38 - Temple_of_Fiends_5F_Fire  
+.byte $4E ; 39 - Temple_of_Fiends_6F_Water 
+.byte $4E ; 3A - Temple_of_Fiends_7F_Wind      
+.byte $4E ; 3B - Temple_of_Fiends_8F_Chaos     
+.byte $4B ; 3C - Titans_Tunnel                  
  
  
  
