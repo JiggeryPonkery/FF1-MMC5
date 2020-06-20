@@ -23,8 +23,6 @@ CHAN_TRI          = CHAN_START + (2 * CHAN_BYTES)
 CHAN_SQ3          = CHAN_START + (3 * CHAN_BYTES)
 CHAN_SQ4          = CHAN_START + (4 * CHAN_BYTES)
 CHAN_STOP         = $0 ; CHAN_START + (5 * CHAN_BYTES)
-EXTRA_CHAN_START  = $0300
-
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -1112,6 +1110,73 @@ MAP_3A  = $3A ; Temple_of_Fiends_7F_Wind
 MAP_3B  = $3B ; Temple_of_Fiends_8F_Chaos   
 MAP_3C  = $3C ; Titans_Tunnel               
 
+  
+  
+  
+;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; MUSIC SCORE COMMANDS
+;;
+;;
+
+LOOP_FOREVER = $D0
+LOOP_1       = $D1
+LOOP_2       = $D2
+LOOP_3       = $D3
+LOOP_4       = $D4
+LOOP_5       = $D5
+LOOP_6       = $D6
+LOOP_7       = $D7
+OCTAVE_1     = $D8
+OCTAVE_2     = $D9
+OCTAVE_3     = $DA
+OCTAVE_4     = $DB
+OCTAVE_5     = $DC
+OCTAVE_UP    = $DD
+OCTAVE_DOWN  = $DE
+LOOP_SWITCH  = $DF
+INSTRUMENT_0 = $E0
+INSTRUMENT_1 = $E1
+INSTRUMENT_2 = $E2
+INSTRUMENT_3 = $E3
+INSTRUMENT_4 = $E4
+INSTRUMENT_5 = $E5
+INSTRUMENT_6 = $E6
+INSTRUMENT_7 = $E7
+INSTRUMENT_8 = $E8
+INSTRUMENT_9 = $E9
+INSTRUMENT_A = $EA
+INSTRUMENT_B = $EB
+INSTRUMENT_C = $EC
+INSTRUMENT_D = $ED
+INSTRUMENT_E = $EE
+INSTRUMENT_F = $EF
+SCORE_GOTO   = $F0
+SCORE_RETURN = $F1
+VOLUME_MINUS = $F2
+VOLUME_QRTR  = $F3
+VOLUME_HALF  = $F4
+DUTY_12      = $F5
+DUTY_25      = $F6
+DUTY_50      = $F7
+SPEED_SET    = $F8
+TEMPO_1      = $F9
+TEMPO_2      = $FA
+TEMPO_3      = $FB
+TEMPO_4      = $FC
+TEMPO_5      = $FD
+TEMPO_6      = $FE
+END_SONG     = $FF
+
+
+
+
+
+  
+  
+  
+  
+  
   
   
 ;; labels that couldn't be inserted in data

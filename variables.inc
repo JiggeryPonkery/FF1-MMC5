@@ -435,23 +435,21 @@ mu_scoreptr             = $AE ; + F
 ; for sound channels (between Bx-Fx)
 ;  see Constants.inc
 ch_scoreptr             = $0
-ch_envptr               = $2  ; ptr to start of env data
-ch_envpos               = $4  ; pos in env data (00-1F)
-ch_lenctr               = $5  ; counter for score data (note length)
-ch_frqtblptr            = $6  ; pointer to freq table (changes per octave)
-ch_lentblptr            = $8  ; pointer to length table (changes per tempo)
-ch_envrate              = $A  ; rate/speed of env table traversal
-ch_envrem               = $B  ; remaining "fraction" of env data (3 bits of fraction)
-ch_vol                  = $C  ; output volume
-ch_loopctr              = $D  ; remaining loop counter
-ch_freq                 = $E  ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
-;                             ; these are added in for the music system!
-ch_loop_marker          = $0250 ; somehow this will end up at $0300, $0310, $0320 $0330, and $0340
-ch_return               = $0251 ; $0301 + 2
-ch_duty                 = $0253 ; $0303 
-ch_octave               = $0254 ; $0304
-ch_quiet                = $0255 ; $0305
-ch_customquiet          = $0256 ; $0306
+ch_instrument           = $2  ; low 4 bits are volume envelope ; shared
+ch_tempo                = $2  ; high 4 bits are tempo ; shared
+ch_envpos               = $3  ; pos in env data (00-1F)
+ch_lenctr               = $4  ; counter for score data (note length)
+ch_envrate              = $5  ; rate/speed of env table traversal
+ch_envrem               = $6  ; remaining "fraction" of env data (3 bits of fraction)
+ch_trem_depth           = $7  ; unused still 
+ch_trem_speed           = $8  ; unused still
+ch_octave               = $9  ; bits 0-2 are octave, bits 4-5 are octave switches ; shared
+ch_quiet                = $9  ; bits 6-7 are half and quarter volume switches ; shared
+ch_loopctr              = $A  ; bits 4-6 are remaining loop counter, bit 7 is loop switch ; shared
+ch_vol_minus            = $A  ; bits 0-3 are subtracted from ch_vol ; shared
+ch_vol                  = $B  ; output volume + duty
+ch_freq                 = $C  ; +D ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
+ch_return               = $E  ; +F ; holds return address for SCORE_GOTO
 
 text_ptr_backup         = $010D ; + E, F
 stack                   = $0100 
@@ -462,29 +460,30 @@ oam_a                   = oam+2
 oam_x                   = oam+3
 
 ;; Flags                
-startintrocheck         = $0307 ;
-altareffect             = $0308 ; flag to indicate altar effect is to occur (screen shaking, monochrome diagonal window thing)
-dlgflg_reentermap       = $0309 ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
-entering_shop           = $030A ; nonzero = about to enter shop
-dlgsfx                  = $030B ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
-Hidden                  = $030C ; for hiding in battle 
-HiddenMagic             = $030D ; for hiding in battle 
-ConfusedMagic           = $030E ; confused magic stuff for battle
-battle_autoswitch       = $030F ; $FF if auto-battle, $01 if auto-run, $00 normal
+startintrocheck         = $0300 ;
+altareffect             = $0301 ; flag to indicate altar effect is to occur (screen shaking, monochrome diagonal window thing)
+dlgflg_reentermap       = $0302 ; flag to indicate the map needs re-entering due to dialogue (Bahamut/class change)
+entering_shop           = $0303 ; nonzero = about to enter shop
+dlgsfx                  = $0304 ; flag to indicate to play a sound effect after opening dialogue box.  0=no sfx, 1=fanfare, else=treasure
+Hidden                  = $0305 ; for hiding in battle 
+HiddenMagic             = $0306 ; for hiding in battle 
+ConfusedMagic           = $0307 ; confused magic stuff for battle
+battle_autoswitch       = $0308 ; $FF if auto-battle, $01 if auto-run, $00 normal
 
-gettingcommand          = $0317 ; flag for allowing start to trigger auto-fight or auto-run
-btl_drawflagsA          = $0318 ; bits 0-3 = set to indicate character should be drawn as dead
+gettingcommand          = $0309 ; flag for allowing start to trigger auto-fight or auto-run
+btl_drawflagsA          = $030A ; bits 0-3 = set to indicate character should be drawn as dead
 ;                               ; bit    4 = set to draw battle cursor
 ;                               ; bit    5 = set to draw weapon attack graphic
 ;                               ; bit    6 = set to draw magic graphic & flash BG.
 ;                               ; bit    7 = set to load 4-6 character tiles during UpdateSprites_BattleFrame 
-btl_drawflagsB          = $0319 ; bits 0-3 = set to indicate character should be drawn as stone
-btl_drawflagsC          = $031A ; bits 0-3 = set to indicate character should be drawn as dead (asleep); other 4 bits - set pray star sprite
-battle_attackerisplayer = $031B ; 1 if player is attacking, 0 if enemy is attacking
-battle_defenderisplayer = $031C ; 1 if player is defending, 0 if enemy is defending 
-LongCall_A              = $031D ; The LongCall routine restores them after it swaps banks
-LongCall_Y              = $031E
-LongCall_X              = $031F
+btl_drawflagsB          = $030B ; bits 0-3 = set to indicate character should be drawn as stone
+btl_drawflagsC          = $030C ; bits 0-3 = set to indicate character should be drawn as dead (asleep); other 4 bits - set pray star sprite
+battle_attackerisplayer = $030D ; 1 if player is attacking, 0 if enemy is attacking
+battle_defenderisplayer = $030E ; 1 if player is defending, 0 if enemy is defending 
+
+LongCall_A              = $0310 ; The LongCall routine restores them after it swaps banks
+LongCall_Y              = $0311
+LongCall_X              = $0312
 
 btltmp_targetlist       = $0327 ; temporary buffer (9 entries) containing possible targets
 
