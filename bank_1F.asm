@@ -4782,13 +4782,12 @@ LoadStandardMap:
     LDA lut_SMPtrTbl, X   ; get low byte of pointer
     STA tmp               ; put in tmp (low byte of our source pointer)
     LDA lut_SMPtrTbl+1, X ; get high byte of pointer
-    STA tmp+1  
     TAY                   ; copy to Y (temporary hold)
-    AND #$3F          ; convert pointer to useable CPU address (bank will be loaded into $8000-FFFF)
-    ORA #$80          ;   AND with #$3F and ORA with #$80 will determine where in the bank the map will start
-    STA tmp+1         ; put converted high byte to our pointer.  (tmp) is now the pointer to the start of the map
-                     ;   provided the proper bank is swapped in
-    TYA               ; restore original high byte of pointer
+    AND #$3F              ; convert pointer to useable CPU address (bank will be loaded into $8000-FFFF)
+    ORA #$80              ;   AND with #$3F and ORA with #$80 will determine where in the bank the map will start
+    STA tmp+1             ; put converted high byte to our pointer.  (tmp) is now the pointer to the start of the map
+    ;                     ;   provided the proper bank is swapped in
+    TYA                   ; restore original high byte of pointer
     ROL A
     ROL A                  ; right shift it by 6 (high 2 bytes become low 2 bytes).
     ROL A                  ;    These ROLs are a shorter way to do it than LSRs.  Effectively dividing the pointer by $4000
@@ -9760,7 +9759,7 @@ CanMapObjMove:             ; first thing to check is the map
     ASL A                  ; double the tile number (2 bytes of properties per tile)
     TAY                    ; throw in Y for indexing
     LDA tileset_data, Y    ; fetch the first byte of properties for this tile
-    AND #TP_TELE_MASK | TP_NOMOVE | TP_HIDESPRITE | TP_SPEC_DOOR ; see if this tile is a teleport tile, or a tile you can't move on
+    AND #TP_TELE_MASK | TP_NOMOVE | TP_HIDESPRITE | TP_SPEC_DOOR | TP_SPEC_CLOSEROOM ; see if this tile is a teleport tile, or a tile you can't move on
     BEQ :+                 ; if either teleport or nomove, NPCs can't walk here, so 
    @AlsoBridge: 
       SEC                  ;  SEC to indicate failure (can't move)
