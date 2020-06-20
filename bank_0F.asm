@@ -6021,7 +6021,7 @@ Song7:
 Song8:
 .byte $8C,$A4,$B6,$B7,$AF,$A8,$09,$11,$00                                                 ; Castle
 Song9:
-.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$7A,$FF,$90,$B8,$B5,$AA,$B8,$09,$05,$00 ; Earth Cave / Gurgu
+.byte $8E,$A4,$B5,$B7,$AB,$FF,$8C,$A4,$B9,$A8,$FF,$F2,$FF,$90,$B8,$B5,$AA,$B8,$09,$05,$00 ; Earth Cave / Gurgu
 Song10:
 .byte $96,$A4,$B7,$B2,$BC,$A4,$09,$11,$00                                                 ; Matoya
 Song11:
@@ -6037,7 +6037,7 @@ Song15:
 Song16:
 .byte $8B,$A4,$B7,$B7,$AF,$A8,$09,$11,$00                                                 ; Battle
 Song17:
-.byte $96,$A8,$B1,$B8,$FF,$7A,$FF,$92,$B1,$B1,$FF,$7A,$FF,$96,$A4,$B3,$09,$07,$00         ; Menu / Inn / Map
+.byte $96,$A8,$B1,$B8,$FF,$F2,$FF,$92,$B1,$B1,$FF,$F2,$FF,$96,$A4,$B3,$09,$07,$00         ; Menu / Inn / Map
 Song18:
 .byte $9C,$AF,$A4,$AC,$B1,$09,$12,$00                                                     ; Slain
 Song19:
