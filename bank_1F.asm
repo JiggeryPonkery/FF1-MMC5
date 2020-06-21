@@ -45,7 +45,6 @@
 .export GameLoaded
 .export GameStart2
 .export GameStart_L
-.export HushTriangle
 .export JIGS_RefreshAttributes
 .export LoadBattleSpritePalettes
 .export LoadBorderPalette_Blue
@@ -354,11 +353,6 @@ OverworldLoop_2:
     JSR OverworldMovement      ; do any pending movement animations and whatnot
                                ;   also does any required map drawing and updates
                                ;   the scroll appropriately
-
-
-
-    JSR UnhushTriangle     
-    ;; JIGS - unhush the triangle
     LDA music_track        ; if no music track is playing...
     BPL :+
       LDA dlgmusic_backup  ; start the overworld music! 
@@ -2441,10 +2435,7 @@ StandardMapLoop:
       BNE :+
       INC framecounter+1  ;   inc high byte if low byte wrapped
     
-  : JSR UnhushTriangle
-    ;; JIGS - make sure the triangle isn't quieted
-    
-    LDA music_track        ; if no music track is playing...
+  : LDA music_track        ; if no music track is playing...
     BPL :+
       LDA dlgmusic_backup  ;; JIGS - start map music again!
       STA music_track
@@ -14478,28 +14469,9 @@ DashButton:
  
  
 
-;; JIGS - these two things raise and lower the volume of the triangle (and noise channel)    
 
-HushTriangle:
-    LDA TriangleHush
-    CMP #$7F
-    BEQ @return
-    INC TriangleHush
-    STA $4011
-    @return:
-    RTS
-    
-UnhushTriangle:
-    LDA CHAN_TRI+ch_quiet ; is the triangle's quiet trigger on? 
-    BNE HushTriangle      ; if so, don't unshush it--make sure it IS shushed!
 
-    LDA TriangleHush
-;    CMP #0
-    BEQ @return
-    DEC TriangleHush
-    STA $4011
-    @return: 
-    RTS  
+
 
 ;; JIGS - AND FINALLY the option stuff for the encounter rate.   
     

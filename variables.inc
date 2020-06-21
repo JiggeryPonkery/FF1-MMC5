@@ -415,7 +415,6 @@ RAMSwap                 = $A0 ; 0 for normal RAM, 1 for extra
 ;; Music stuff          
 ;                       = $A0
 ChaosNoise              = $A1 ; only used at the end of the game
-TriangleHushTrigger     = $A1
 SaveGameMusic           = $A2 
 soundtesthelper         = $A3 ; Something to do with the sound test screen
 soundtest               = $A4 ; Something to do with the sound test screen

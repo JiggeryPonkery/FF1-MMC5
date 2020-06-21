@@ -54,14 +54,17 @@ BANK_THIS = $0D
 ;;  SCORE RETURN    - Returns to previous jump point
 ;;  VOLUME MINUS    - Next byte is amount to subtract from volume
 ;;  VOLUME QRTR     - Toggle for using 1/4th the volume
-;;  VOLUME HALF     - Toggle for using 1/2 volume
+;;  VOLUME HALF     - Toggle for using 1/2 volume - WORKS ON TRIANGLE TOO!!*
 ;;  DUTY 12         - Sets duty to 12.5%
 ;;  DUTY 25         - Sets duty to 25%
 ;;  DUTY 50         - Sets duty to 50%
 ;;  ENVELOPE 0-F    - Sets Envelope speed
 ;;  TEMPO 1-6       - Sets note length
 ;;  END SONG        - Ends song and stops all playback
-;;
+;; 
+;; * Uses DPCM volume register. 
+;; Entering the menu also hushes the triangle, along with forcing a half volume trigger on all square channels.
+
 
 
  .ALIGN $100
@@ -2754,6 +2757,11 @@ Music_NewSong:
       DEX
       BPL @ClearChannels    
       ;; JIGS - clear out all previous song data      
+      
+      LDA TriangleHush
+      AND #$7F
+      STA TriangleHush
+      ;; JIGS - and turn off the force-hush bit
 
       LDA #$30            ; *then* set channel volumes to zero -- this will properly
       STA $4000           ;  silence the squares and noise... and will eventually silence
@@ -2815,9 +2823,9 @@ Music_NewSong:
 
  ;; LUT used to convert from primer index to chan index
   @lut_PrimerToChan:
-  .BYTE CHAN_SQ1,  CHAN_SQ1
-  .BYTE CHAN_SQ2,  CHAN_SQ2
-  .BYTE CHAN_TRI,  CHAN_TRI
+  .BYTE CHAN_SQ1, CHAN_SQ1
+  .BYTE CHAN_SQ2, CHAN_SQ2
+  .BYTE CHAN_TRI, CHAN_TRI
   .BYTE CHAN_SQ3, CHAN_SQ3  ;
   .BYTE CHAN_SQ4, CHAN_SQ4  ; JIGS
 
@@ -2970,13 +2978,30 @@ MusicPlay:
    
     ORA #%10000000
     STA CHAN_TRI + ch_freq+1  ; then set high bit to indicate freq doesn't need updating
-    JMP @Tri_Done
+    JMP @CheckHush
 
    @Tri_HighBitSet:           ; if high bit was set
     CMP #$FF                  ;  see if high byte = $FF
-    BNE @Tri_Done             ; if not, do nothing
+    BNE @CheckHush            ; if not, do nothing
     LDA #%10000000            ;  otherwise, silence the tri by setting the linear counter reload
     STA $4008                 ;  to zero.  This will silence the tri on the next linear counter clock.
+    
+   @CheckHush: 
+    LDA MenuHush
+    BNE @HushTri              ; hush triangle if in menu
+    LDA TriangleHush
+    BPL @CheckUnhush          ; skip hush triangle if high bit not set (song is not forcing half volume)
+    
+   @HushTri: 
+    JSR HushTriangle       
+   
+   @CheckUnhush:   
+    LDA MenuHush              
+    BNE @Tri_Done              ; skip unhushing if in menu
+    LDA TriangleHush
+    BMI @Tri_Done              ; skip unhushing if high bit set
+    
+    JSR UnhushTriangle
 
    @Tri_Done:
 
@@ -3432,7 +3457,21 @@ Music_Rest:
 
 
 Music_HalfVolume:
-    LDA ch_quiet, X
+    CPX #CHAN_START + CHAN_BYTES * 2 ; is it the Triangle channel?
+    BNE :+                         ; if not, jump ahead to do square stuff 
+        LDA TriangleHush           ; if yes, check TriangleHush
+        BMI @Off                   ; if the high bit is set, the Hushing is active; so branch to turn it off
+        ORA #$80                   ; here, turn it on by setting the high bit
+        BMI @TriDone               ; then jump ahead to save it
+        
+       @Off:
+        AND #$7F                   ; to turn it off, flip off the high bit
+       
+       @TriDone: 
+        STA TriangleHush           ; save and exit!
+        JMP Music_DoScore_IncBy1        
+
+  : LDA ch_quiet, X
     AND #$80              ; bit set means its already quiet
     BNE @UnShush          ; if bit set, then turn it off
       LDA ch_quiet, X     ; but if its off: reload to restore other bits
@@ -4066,6 +4105,37 @@ RestoreMapMusic:
     LDA #0
     STA $5113         ; swap RAM
     RTS
+
+;; JIGS - these two things raise and lower the volume of the triangle
+
+HushTriangle:
+    LDA TriangleHush
+    AND #$7F
+    CMP #$7F
+    BEQ @return        ; its already at max!
+    INC TriangleHush
+    LDA TriangleHush
+    STA $4011
+   @return:
+    RTS
+    
+UnhushTriangle:
+    AND #$7F
+    BEQ @return
+    DEC TriangleHush
+    LDA TriangleHush
+    STA $4011
+   @return: 
+    RTS  
+
+
+
+
+
+
+
+
+
 
 
 lut_MapMusicTrack:

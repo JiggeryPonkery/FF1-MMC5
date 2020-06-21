@@ -40,7 +40,6 @@
 .import FadeInBatSprPalettes
 .import FadeOutBatSprPalettes
 .import GameStart_L
-.import HushTriangle
 .import LoadBattleSpritePalettes
 .import LoadBridgeSceneGFX_Menu
 .import LoadMenuCHRPal
@@ -8275,9 +8274,6 @@ MainMenuFrame:
     LDA #0
     STA $2005
     STA $2005
-
-    JSR HushTriangle
-    ;; JIGS ^ every frame, gosh    
     
     LDA music_track        ; if no music track is playing...
     BPL :+

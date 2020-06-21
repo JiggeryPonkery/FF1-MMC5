@@ -26,7 +26,7 @@
 
 .import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
-.import RandAX, HushTriangle, WaitForVBlank_L, GameStart_L, GameStart2, LoadPtyGenBGCHRAndPalettes, IntroTitlePrepare, LoadBridgeSceneGFX_Menu
+.import RandAX, WaitForVBlank_L, GameStart_L, GameStart2, LoadPtyGenBGCHRAndPalettes, IntroTitlePrepare, LoadBridgeSceneGFX_Menu
 .import DrawComplexString, ClearOAM, DrawPalette, CallMusicPlay, UpdateJoy, DrawSimple2x3Sprite, Draw2x2Sprite, CHRLoad, CHRLoadToA
 .import DrawCursor, WaitForVBlank_L, DrawBox, LoadMenuCHRPal, MenuCondStall, CoordToNTAddr, LoadBorderPalette_Blue
 .import UndrawBattleBlock, ShiftSpriteHightoLow, PlaySFX_Error
@@ -4616,11 +4616,7 @@ lut_OptionsCursor_Y:
    .BYTE  $40,$50,$60,$70,$80,$90,$A0
 
 OptionsMenuFrame:
-    LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
-    BEQ :+
-    JSR HushTriangle
-
- :  JSR WaitForVBlank_L    ; wait for VBlank
+    JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
 
@@ -5536,11 +5532,7 @@ WaitForButton:
 
 
 SaveScreenFrame:
-    LDA MenuHush ; InMainMenu ; if in main menu, lower triangle volume
-    BEQ :+                    ; otherwise, in Inn or Loading screen
-    JSR HushTriangle
-
-  : JSR WaitForVBlank_L    ; wait for VBlank
+    JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
 
@@ -5862,8 +5854,6 @@ PlaySFX_MenuMove:
     RTS
 
 MenuFrame:
-    JSR HushTriangle
-    ;; JIGS ^ every frame, gosh
     JSR WaitForVBlank_L    ; wait for VBlank
     LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
     STA $4014
