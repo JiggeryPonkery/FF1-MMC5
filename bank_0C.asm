@@ -310,6 +310,7 @@ Battle_AfterFadeIn:
       ; otherwise (>= 90), STRIKE FIRST
       LDA #BTLMSG_STRIKEFIRST
       JSR DrawMessageBoxDelay_ThenClearAll   ; draw strike first message
+      JSR SetEnemiesAsleep              ; teeheehee! 
       INC btl_strikingfirst             ; set flag
       JSR DrawPlayerBox
       JMP BattleLogicLoop               ; and jump ahead to logic loop
@@ -4866,6 +4867,35 @@ ClearGuardBuffers:
     STA btl_charrush, X
     RTS
  
+
+SetEnemiesAsleep:
+    LDA #08
+    STA btl_defender
+  : LDX btl_defender
+    JSR DoesEnemyXExist
+    BEQ @Next 
+    JSR ApplySleepToEnemy
+   @Next: 
+    DEC btl_defender
+    BPL :-
+    RTS  
+
+ApplySleepToEnemy:
+    JSR BtlMag_LoadEnemyDefenderStats
+    LDA btlmag_defender_statusresist
+    AND #AIL_SLEEP
+    BEQ @Next
+    
+    JSR BattleRNG_L
+    AND #$01
+    BEQ @Next
+
+    LDA btlmag_defender_ailments
+    ORA #AIL_SLEEP
+    STA btlmag_defender_ailments
+    JSR BtlMag_SaveEnemyDefenderStats
+   @Next:
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
