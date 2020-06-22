@@ -48,6 +48,7 @@ BANK_THIS = $0D
 ;;  LOOP 1-7 times  - Loop this many times.
 ;;  OCTAVE 1-5      - Set octave
 ;;  OCTAVE UP/DOWN  - Set octave offset -- used for the new Marsh Cave song so that an MMC5 square matches the triangle bass. Use again to turn it off.
+;;                    Can now also be used to reach the highest octave!
 ;;  LOOP SWITCH     - Ignores the loop address the first time around, then branches to the new address when read again
 ;;  INSTRUMENT 0-F  - Set instrument
 ;;  SCORE GOTO      - Jumps to address
@@ -3062,63 +3063,62 @@ MusicPlay:
     CLC
     ADC ch_envrem, X       ; add to it the remaining "fraction"
     STA ch_envrem, X       ; and write that back as updated fraction
-
     CMP #8                 ; check to see if fraction >= 8 (take another step)
     BCC @UpdateNext        ; if not, no further work to be done for envelope.  Skip ahead
 
-      STA tmp              ; otherwise (fraction >= 8), store fraction in tmp for later
-      AND #7               ; isolate just the low bits (fraciton bits)
-      STA ch_envrem, X     ;  and write those back as the channel's remaining fraction
+    STA tmp              ; otherwise (fraction >= 8), store fraction in tmp for later
+    AND #7               ; isolate just the low bits (fraciton bits)
+    STA ch_envrem, X     ;  and write those back as the channel's remaining fraction
 
-      LDA tmp              ; then get all the full value back from tmp
-      LSR A                ; right shift by 3 (removing fraction)
-      LSR A
-      LSR A
-      CLC
-      ADC ch_envpos, X     ; and add that to the envelope position
+    LDA tmp              ; then get all the full value back from tmp
+    LSR A                ; right shift by 3 (removing fraction)
+    LSR A
+    LSR A
+    CLC
+    ADC ch_envpos, X     ; and add that to the envelope position
 
-    @UpdateVol:
-      CMP #$20             ; check to see if the envelope position is >= $20
-      BCC :+               ;  if it is...
-        LDA #$1F           ;  ... cap it at $1F ($1F is maximum)
+   @UpdateVol:
+    CMP #$20             ; check to see if the envelope position is >= $20
+    BCC :+               ;  if it is...
+      LDA #$1F           ;  ... cap it at $1F ($1F is maximum)
 
-    : STA ch_envpos, X     ; write back as current env pos
-      TAY                  ; then put in Y for indexing
+  : STA ch_envpos, X     ; write back as current env pos
+    TAY                  ; then put in Y for indexing
       
-      LDA #0
-      STA tmp+1            ; zero temp RAM (Y is assumed to be zero)
-      LDA ch_instrument, X
-      AND #$0F
-      ASL A                 ;  this is done so it can catch the carry
-      ASL A
-      ASL A                 ; multiply the desired env pattern (low 4 bits) by 32
-      ASL A                 ;  (32 bytes per env pattern)
-      ASL A
-      ROL tmp+1             ; rotate high bit of carry into temp ram
+    LDA #0
+    STA tmp+1            ; zero temp RAM (Y is assumed to be zero)
+    LDA ch_instrument, X
+    AND #$0F
+    ASL A                 ;  this is done so it can catch the carry
+    ASL A
+    ASL A                 ; multiply the desired env pattern (low 4 bits) by 32
+    ASL A                 ;  (32 bytes per env pattern)
+    ASL A
+    ROL tmp+1             ; rotate high bit of carry into temp ram
     
-      ADC #<lut_EnvPatterns  ; set the channel's envptr to the pointer to the
-      STA tmp                ; Env Pattern LUT + patternID*32
-      LDA #>lut_EnvPatterns
-      ADC tmp+1
-      STA tmp+1
-      
-     ; LDA ch_envptr, X     ; copy the channel's env pointer to tmp
-     ; STA tmp
-     ; LDA ch_envptr+1, X
-     ; STA tmp+1
+    ADC #<lut_EnvPatterns  ; set the channel's envptr to the pointer to the
+    STA tmp                ; Env Pattern LUT + patternID*32
+    LDA #>lut_EnvPatterns
+    ADC tmp+1
+    STA tmp+1
 
-      LDA (tmp), Y         ; then read the env byte to output
-      STA tmp
+   ; LDA ch_envptr, X     ; copy the channel's env pointer to tmp
+   ; STA tmp
+   ; LDA ch_envptr+1, X
+   ; STA tmp+1
 
-      JSR AdjustVolume
-      ;; JIGS ^ inserting this!
+    LDA (tmp), Y         ; then read the env byte to output
+    STA tmp
 
-      LDA ch_vol, X        ;    
-      AND #$F0             ; clear out everything but the high bits (duty and whatever else)
-      ORA tmp              ; add them into the note's volume byte
-      STA ch_vol, X        ; and record that as channel's output volume
+    JSR AdjustVolume
+    ;; JIGS ^ inserting this!
 
-  @UpdateNext:        ; processing for this channel is done
+    LDA ch_vol, X        ;    
+    AND #$F0             ; clear out everything but the high bits (duty)
+    ORA tmp              ; add them into the note's volume byte
+    STA ch_vol, X        ; and record that as channel's output volume
+
+  @UpdateNext:             ; processing for this channel is done
     LDA mu_chan            ; so increment mu_chan to look at the next channel
     CLC
     ADC #CHAN_BYTES
@@ -3127,7 +3127,6 @@ MusicPlay:
    ;; JIGS - this basically ends when mu_chan is #$F0 and #CHAN_BYTES is added to it (#$10) resulting in 0, with carry set
     ; CMP #CHAN_STOP         ; and keep looping until all channels processed
     BCC @UpdateLoop
-
     RTS                    ; then we're done!  exit!
 
 
@@ -3290,8 +3289,6 @@ Music_Control_Codes:
     ;; eles, it's $FF : End the song
      : LDA #$80           ; If yes, write $80 to the music track to mark that the song is over
        STA music_track    ;  All channels will be silenced next frame
-       LDA #0
-       STA soundtesthelper ;; JIGS - reset this when there's no music
        RTS                ; RTS because no further score processing is needed if song is over
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3621,8 +3618,9 @@ Music_SetOctave:
     JMP @Resume
 
   @OctaveUp:
-    CPY #04                 ; if Y = 4 (Octave DC) then don't increase it further.
-    BEQ @Resume
+   ; CPY #04                 ; if Y = 4 (Octave DC) then don't increase it further.
+   ; BEQ @Resume
+   ;; there is now a highest octave only reachable if Y = 4!
     INY
     
   @Resume:
@@ -3754,14 +3752,13 @@ Music_ApplyTone:
 ;      LDA #0
 ;      STA ch_freq+1, X  ; clear high byte of freq to mark freq needs updating
 ;      RTS             ; exit
-
+;  @NotNoise:          ; other channels (squares, tri)
 ;;      JIGS - unused
 
-  @NotNoise:    ; other channels (squares, tri)
     LSR A            ; right shift code by 3 and isolate what previously was the high bits
     LSR A            ;  this is the same as right-shifting by 4 to get the high bits (note to play),
     LSR A            ;  then doubling that to get the index (2 bytes of F-data per note)
-    AND #($F0 >> 3)
+    AND #($F0 >> 3)  ; #$1E? 
    ; TAY              ; put note*2 in Y for indexing
 
    ; LDA ch_frqtblptr, X    ; copy freq table pointer to tmp
@@ -3789,8 +3786,14 @@ Music_ApplyTone:
     INY
     LDA (tmp), Y
     STA ch_freq+1, X
+    
+    ;; for vibrato: 
+    DEY                  ; undo the INY
+    TYA                
+    LSR A                ; and halve it for a table only half the size
+    STA ch_vibrato, X
+    RTS
 
-    RTS              ; and exit
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3852,8 +3855,8 @@ lut_OctaveOffset:
   .BYTE 1*12*2
   .BYTE 2*12*2
   .BYTE 3*12*2
-  .BYTE 4*12*2     ; last two entries are useless (note freq table isn't large enough)
- ; .BYTE 5*12*2     ; JIGS - note that only THIS line is useless
+  .BYTE 4*12*2     
+  .BYTE 5*12*2     
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3865,12 +3868,57 @@ lut_OctaveOffset:
 
 lut_NoteFreqs:
   ;       C     C#    D     D#    E     F     F#    G     G#    A     A#    B
-  .WORD $06AD,$064D,$05F2,$059D,$054C,$0500,$04B8,$0474,$0434,$03F8,$03BF,$0389 ; D8 - BASS
-  .WORD $0357,$0327,$02FA,$02CF,$02A7,$0281,$025D,$023B,$021B,$01FC,$01E0,$01C5 ; D9 - low
-  .WORD $01AB,$0193,$017D,$0167,$0153,$0140,$012E,$011D,$010D,$00FE,$00F0,$00E2 ; DA - mid
-  .WORD $00D6,$00CA,$00BE,$00B4,$00AA,$00A0,$0097,$008F,$0087,$007F,$0078,$0071 ; DB - high
-  .WORD $006B,$0065,$005F,$005A,$0055,$0050,$004C,$0047,$0043,$0040,$003C,$0039 ; DC - highest
+  .WORD $06AC,$064C,$05F2,$059E,$054C,$0501,$04B8,$0474,$0434,$03F8,$03BE,$0388 ; D8 - BASS
+  .WORD $0356,$0326,$02F9,$02CF,$02A6,$0280,$025C,$023A,$021A,$01FC,$01DF,$01C4 ; D9 - low
+  .WORD $01AB,$0193,$017C,$0167,$0153,$0140,$012E,$011D,$010D,$00FE,$00EF,$00E2 ; DA - mid
+  .WORD $00D5,$00C9,$00BE,$00B3,$00A9,$00A0,$0097,$008E,$0086,$007E,$0077,$0071 ; DB - high
+  .WORD $006A,$0064,$005F,$0059,$0054,$0050,$004B,$0047,$0043,$003F,$003B,$0038 ; DC - highest
+  .WORD $0035,$0032,$002F,$002C,$002A,$0028,$0026,$0024,$0022,$0020,$001E,$001C ; only available with octave switch
+  
   ;; JIGS ^ ADDED BASS OCTAVE
+  ;; Also changed values to match:
+  ;; http://wiki.nesdev.com/w/index.php/Pulse_Channel_frequency_chart
+  ;; FF1's vanilla values were close, but 1 bit sharp in some spots.
+
+
+ ;; JIGS - Added vibrato range tables.
+ ;; JIGS - ch_vibrato's high bit indicates if its moving up or down
+ ;; This is about as much as I can do. 
+
+lut_Vibrato_Tri:
+   ;     C   C#  D   D#  E   F   F#  G   G#  A   A#  B
+  .byte $60,$5A,$54,$52,$4B,$49,$44,$40,$3C,$3A,$36,$32
+  .byte $30,$2D,$2A,$29,$26,$24,$22,$20,$1E,$1D,$1B,$19
+  .byte $18,$17,$15,$14,$13,$12,$11,$10,$0F,$0F,$0D,$0D
+  .byte $0C,$0B,$0B,$0A,$09,$09,$09,$08,$08,$07,$06,$07
+  .byte $06,$05,$06,$05,$04,$05,$04,$04,$04,$04,$03,$03
+  .byte $03,$03,$03,$02,$02,$02,$02,$02,$02,$02,$02,$01
+
+  ;; these values are the distance from the low note to the next high note.
+  
+lut_Vibrato:
+   ;     C   C#  D   D#  E   F   F#  G   G#  A   A#  B    v - pitch octave for standard notation
+  .byte $53,$4C,$0D,$52,$4B,$01,$44,$40,$34,$07,$36,$32 ; 2 ; 0 < - this driver's pitch ID 
+  .byte $30,$26,$06,$29,$26,$24,$22,$20,$1A,$03,$1B,$19 ; 3 ; 1 
+  .byte $18,$17,$15,$14,$13,$12,$11,$10,$0D,$01,$0D,$0D ; 4 ; 2
+  .byte $0C,$0B,$0B,$0A,$09,$09,$09,$08,$08,$07,$06,$07 ; 5 ; 3 
+  .byte $06,$05,$06,$05,$04,$05,$04,$04,$04,$04,$03,$03 ; 6 ; 4
+  .byte $03,$03,$03,$02,$02,$02,$02,$02,$02,$02,$02,$01 ; 7 ; 4+ up switch
+;
+; Avoid using heavy vibrato on these notes:
+; D-2
+; F-2
+; A-2
+; A-3
+; A-4
+;
+; Notes with more limited vibrato range than Triangle table:
+; C-2 
+; C#-2
+; G#-2
+; C#-3
+; G#-3
+; G#-4 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
