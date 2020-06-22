@@ -1197,6 +1197,7 @@ lut_BatObjCHR      = $B000   ; BANK_BTLCHR -- page ; $A800 for first half of the
 ;;
 ;;
 
+MAX_SONG                 = $1A ; total number of music tracks the soundtest screen can play ; 0 based
 FAST_HITCAP              = $03 ; How many times the Fast spell can boost the hit multiplyer
 
 

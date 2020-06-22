@@ -414,11 +414,8 @@ RAMSwap                 = $A0 ; 0 for normal RAM, 1 for extra
 
 ;; Music stuff          
 ;                       = $A0
-ChaosNoise              = $A1 ; only used at the end of the game
 SaveGameMusic           = $A2 
-soundtesthelper         = $A3 ; Something to do with the sound test screen
-soundtest               = $A4 ; Something to do with the sound test screen
-SFX_ErrorTime           = $A5 ; might have to do with using the noise channel for error SFX
+soundtest_track         = $A4 ; Something to do with the sound test screen
 TriangleHush            = $A6 ; Slowly raises and lowers a DMC thing to quiet the triangle channel
 MenuHush                = $A7 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
 noise_sfx               = $A8 ; loop counter, for opening chests (play noise this long)
@@ -428,6 +425,19 @@ music_track             = $AB
 mu_chanprimer           = $AC
 mu_chan                 = $AD
 mu_scoreptr             = $AE ; + F
+ChaosNoise              = $AF ; only used at the end of the game, while no music is playing
+
+
+
+;; JIGS - thoughts on compressing some flags...
+;InBattle      = 1 bit
+;SaveGameMusic = 1 bit
+;MenuHush      = 1 bit
+;altareffect, dlflfg_reentermap, dlgsfx, entering shop = all 1 bit
+;ow_slow uses high bit, can be merged with mapflags
+
+
+
 
 ;; $B0, $C0, $D0, $E0, and $F0 are the 5 tracks
 
@@ -440,8 +450,9 @@ ch_envpos               = $3  ; pos in env data (00-1F)
 ch_lenctr               = $4  ; counter for score data (note length)
 ch_envrate              = $5  ; rate/speed of env table traversal
 ch_envrem               = $6  ; remaining "fraction" of env data (3 bits of fraction)
-ch_trem_depth           = $7  ; unused still 
-ch_trem_speed           = $8  ; unused still
+ch_vibrato_depth        = $7  ; low bits
+ch_vibrato_speed        = $7  ; high bits
+ch_vibrato              = $8  ; 
 ch_octave               = $9  ; bits 0-2 are octave, bits 4-5 are octave switches ; shared
 ch_quiet                = $9  ; bits 6-7 are half and quarter volume switches ; shared
 ch_loopctr              = $A  ; bits 4-6 are remaining loop counter, bit 7 is loop switch ; shared

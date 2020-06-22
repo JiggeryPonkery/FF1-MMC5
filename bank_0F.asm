@@ -4717,7 +4717,7 @@ SoundTestZ:
     
     LDA #0
     STA cursor
-    STA soundtest
+    STA soundtest_track
     STA weasels
     STA joy
     STA joy_prevdir
@@ -4775,7 +4775,7 @@ SoundTest_NewSong:
     STA dest_x
     LDA #$0C
     STA dest_y
-    LDA soundtest         ; 0-24, or however many songs there are
+    LDA soundtest_track   ; 0-24, or however many songs there are
     CLC
     ADC #$10              ; all song names are after $10 in the lut_ZMenuText table
     JSR DrawZ_MenuString
@@ -4800,40 +4800,39 @@ SoundTestMenuLoop:
     JMP SoundTestMenuLoop         ; rinse, repeat
 
    @B_Pressed:
-    JSR ClearOAM              ; clear OAM
+    JSR ClearOAM             ; clear OAM
     JSR ClearButtons
-    STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
+    STA joy_prevdir          ; as well as resetting the cursor and previous joy direction
     STA $2001
-    STA $4015              ; and silence the APU.  Music sill start next time MusicPlay is called.
-    STA $5015              ; and silence the MMC5 APU.
-    STA soundtesthelper
+    STA $4015                ; and silence the APU.  Music sill start next time MusicPlay is called.
+    STA $5015                ; and silence the MMC5 APU.
     STA dlgmusic_backup
-    STA soundtest
-    RTS                     ; and exit the main menu (by RTSing out of its loop)
+    STA soundtest_track
+    RTS                      ; and exit the main menu (by RTSing out of its loop)
 
    @A_Pressed:
-    LDA soundtesthelper
-    BEQ @MusicOn
+    LDA soundtest_track    
+    BPL @TurnMusicOn         ; if the high bit is set, current track is playing
+      AND #$7F               ; so shut it off
+      STA soundtest_track
       LDA #0
-      STA soundtesthelper
-      STA $4015             ; silence APU
-      STA $5015             ; and silence the MMC5 APU. (JIGS)
+      STA $4015              ; silence APU
+      STA $5015              ; and silence the MMC5 APU. (JIGS)
+      JMP SoundTestMenuLoop  ; then return to main menu loop
 
-      ;LDA #$80           ; If yes, write $80 to the music track to mark that the song is over
-      ;STA music_track    ;  All channels will be silenced next frame
-      JMP SoundTestMenuLoop          ; then return to main menu loop
-
-   @MusicOn:
+   @TurnMusicOn:
+    PHA
+    ORA #$80
+    STA soundtest_track      ; set high bit to indicate music is now playing
     LDA #0
-    STA $4015             ; silence APU
-    STA $5015             ; and silence the MMC5 APU. (JIGS)
+    STA $4015                ; silence APU
+    STA $5015                ; and silence the MMC5 APU. (JIGS)
     JSR WaitForVBlank_L
-    INC soundtesthelper
-    LDA soundtest
+    PLA
     CLC
     ADC #$41
     STA music_track
-    JMP SoundTestMenuLoop          ; then return to main menu loop
+    JMP SoundTestMenuLoop     ; then return to main menu loop
 
    @Start_Pressed:
     JSR DrawZheepText
@@ -4854,7 +4853,7 @@ SoundTestFrame:
     STA $2005
     STA $2005
 
-    LDA #BANK_THIS           ; record current bank and CallMusicPlay
+    LDA #BANK_THIS         ; record current bank and CallMusicPlay
     STA cur_bank
     JSR CallMusicPlay
 
@@ -4881,33 +4880,37 @@ SoundTestSelect:
     CMP #$04          ; see if the user pressed down or up
     BNE @Up
 
-  @Down:              ; moving down...
-    LDA #0
-    STA soundtesthelper
-    DEC soundtest
-    LDA soundtest
-    CMP #$FF
-    BNE :+
-      LDA #26
-      STA soundtest
-  : CLC
+   @Down:             ; moving down...
+    LDA soundtest_track
+    AND #$7F         
+    BNE @DecreaseTrack
+      LDA #MAX_SONG
+      BNE @SetTrack
+   
+   @DecreaseTrack:
+    SEC
+    SBC #1
+  
+   @SetTrack:  
+    STA soundtest_track
+    CLC
     RTS
 
-  @Up:                ; up is the same deal...
-    LDA #0
-    STA soundtesthelper
-    INC soundtest
-    LDA soundtest
-    CMP #27
-    BNE :+
-      LDA #0
-      STA soundtest
-  : CLC
-    RTS
+   @Up:               ; up is the same deal...
+    LDA soundtest_track
+    AND #$7F    
+    CMP #MAX_SONG
+    BNE @IncreaseTrack
+       LDA #$FF
 
- @Exit:
-  SEC
-  RTS
+   @IncreaseTrack:    
+    CLC
+    ADC #1
+    JMP @SetTrack         ; JMP, because it can be 0 
+
+   @Exit:
+    SEC
+    RTS
 
 DrawSoundTestCursor:
     LDA #$16

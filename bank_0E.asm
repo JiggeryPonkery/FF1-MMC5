@@ -4799,21 +4799,20 @@ DrawShopSellItemConfirm:
 
 ;; JIGS - whew... totally re-did this...
 SaveGame:
- LDA #1
- STA weasels ; weasels will help save the game
- JSR LongCall
- .word SaveScreen
- .byte BANK_TITLE
- 
-  LDA music_track             ; check the music track
-  CMP #$81                    ; if $81 (no music currently playing)...
-  BEQ :+
-  LDA SaveGameMusic           ; will be 0 if saving didn't happen
-  CMP #$56                    ; if save music still playing
-  BNE :++
-: LDA dlgmusic_backup         ; pre-emptively end the save music
-  STA music_track
-: RTS
+    LDA #1
+    STA weasels ; weasels will help save the game
+    JSR LongCall
+    .word SaveScreen
+    .byte BANK_TITLE
+   
+    LDA music_track             ; check the music track
+    BMI :+                      ; high bit set if music is not playing
+    LDA SaveGameMusic           
+    AND #$01                    ; will be 0 if saving didn't happen
+    BEQ :++
+  : LDA dlgmusic_backup         ; pre-emptively end the save music
+    STA music_track
+  : RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
