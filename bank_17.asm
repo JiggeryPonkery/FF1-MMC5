@@ -6,11 +6,14 @@
 
 BANK_THIS = $17
 
+.export lut_SMPtrTbl
+
 ;; Info from Anomie's disassembly!
 
 ; Map offsets from this address. Of the 16-bit value, bits 0-13 are the pointer
 ; within the bank and bits 14-15 select the bank.
 
+lut_SMPtrTbl:
 .WORD Coneria
 .WORD Pravoka
 .WORD Elfland

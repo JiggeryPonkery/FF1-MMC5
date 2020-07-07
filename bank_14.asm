@@ -6,22 +6,29 @@
 
 BANK_THIS = $14
 
+.export lut_MapObjCHR
+.export lut_SmallMapObjCHR
+.export lut_OWMapObjCHR
 
-.incbin "chr/tilesets/overworld_tileset.chr"
-
+lut_MapObjCHR:
 .incbin "chr/class/fighter_mapsprite.chr"
 .incbin "chr/class/thief_mapsprite.chr"
 .incbin "chr/class/blackbelt_mapsprite.chr"
 .incbin "chr/class/redmage_mapsprite.chr"
 .incbin "chr/class/whitemage_mapsprite.chr"
 .incbin "chr/class/blackmage_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
 .incbin "chr/class/knight_mapsprite.chr"
 .incbin "chr/class/ninja_mapsprite.chr"
 .incbin "chr/class/master_mapsprite.chr"
 .incbin "chr/class/redwizard_mapsprite.chr"
 .incbin "chr/class/whitewizard_mapsprite.chr"
 .incbin "chr/class/blackwizard_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
 
+lut_OWMapObjCHR:
 .incbin "chr/npc_sprites/shadow_bridge_canal_tiles.chr"
 .incbin "chr/npc_sprites/ship_sprite.chr"
 .incbin "chr/npc_sprites/airship_sprite.chr"
@@ -29,15 +36,16 @@ BANK_THIS = $14
 
 ;; ?? -- unused garbage filler...?
 
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
-.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
-.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
-.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
-.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
-.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+;.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
+;.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
+;.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
+;.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
+;.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
+;.byte $02,$25,$38,$3A,$02,$16,$14,$19,$02,$2C,$30,$27,$02,$26,$31,$17
 
+lut_SmallMapObjCHR:
 .incbin "chr/npc_sprites/princess_sprite.chr"   ; 00
 .incbin "chr/npc_sprites/woman_sprite.chr"      ; 01
 .incbin "chr/npc_sprites/oldlady_sprite.chr"    ; 02
@@ -70,4 +78,4 @@ BANK_THIS = $14
 .incbin "chr/npc_sprites/vampire_sprite.chr"    ; 1D
 
 
-; .byte "END OF BANK 14"
+ .byte "END OF BANK 14"

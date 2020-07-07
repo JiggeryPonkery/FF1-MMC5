@@ -19,6 +19,7 @@
 ;;.export lut_BackdropPal
 ;;.export lut_BtlBackdrops
 .export lut_MapObjects
+.export Overworld_Tileset
 
 .segment "BANK_13"
 
@@ -1628,12 +1629,16 @@ lut_ClassStartingStats:
 .byte $03,  $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; RedMage
 .byte $04,  $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00,   $00 ; WMage
 .byte $05,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; BMage
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 1
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 2
 .byte $06,  $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00,   $00 ; Knight
 .byte $07,  $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00,   $00 ; Ninja
 .byte $08,  $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00,   $00 ; Master
 .byte $09,  $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; RedWiz
 .byte $0A,  $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00,   $00 ; WWiz 
 .byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Bwiz
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 3
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 4
 ;                                                                     \ 02 small knife or 03 wooden staff
 ;                                                                            \ 01 cloth armour
 
@@ -2585,5 +2590,8 @@ lut_Treasure_2:
 .byte $00, $00        ; FD ;
 .byte $00, $00        ; FE ;
 .byte $00, $00        ; FF ;
+
+Overworld_Tileset:
+.incbin "chr/tilesets/overworld_tileset.chr"
 
 .byte "END OF BANK 13"

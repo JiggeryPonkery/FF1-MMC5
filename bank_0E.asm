@@ -20,7 +20,6 @@
 
 .import AddGPToParty
 .import CallMusicPlay
-.import ClearMenuOtherNametables
 .import ClearOAM
 .import CoordToNTAddr
 .import DimBatSprPalettes
@@ -70,6 +69,8 @@
 .import ItemDescriptions
 .import WeaponArmorShopStats
 .import WeaponArmorSpecialDesc
+.import DrawMenuString_FixedBank
+.import DrawMenuString_CharCodes_FixedBank
 
 .segment "BANK_0E"
 
@@ -85,9 +86,9 @@ lut_ShopStrings:
 .word ShopArmor            ;01 
 .word ShopWhiteMagic       ;02   
 .word ShopBlackMagic       ;03   
-.word ShopTemple           ;04   
-.word ShopInn              ;05   
-.word ShopItem             ;06   
+.word ShopItem             ;04   
+.word ShopTemple           ;05   
+.word ShopInn              ;06   
 .word ShopOasis            ;07   
 .word ShopGold             ;08   
 .word ShopXGoldOK          ;09
@@ -229,20 +230,18 @@ ShopWeaponDescription:
 .byte $FF,$FF,$8A,$A6,$A6,$55,$5E,$BC,$E4,$09,$06,$01     ; __Accuracy:______|
 .byte $FF,$FF,$8C,$5C,$57,$51,$AF,$E4,$00                 ; __Critical:      |
 
-
-
-
-
-
 ShopEquipNow:
-.byte $FF,$8D,$B2,$FF,$BC,$B2,$B8,$FF,$BA,$A4,$B1,$B7,$FF,$B7,$B2,$01
-.byte $FF,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$AC,$B7,$FF,$B1,$B2,$BA,$C5,$00 ; Do you want to equip it now?
+.byte $FF,$8D,$2E,$56,$64,$5D,$B1,$21,$28,$05,$FF,$FF,$A8,$B4,$B8,$AC
+.byte $B3,$2D,$21,$B1,$46,$C5,$00; Do you want to equip it now?
+
 ShopWhoWillTake:
 .byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00 ; Who is it for?
+
 ShopCannotEquip:
-.byte $FF,$FF,$91,$B2,$AF,$A7,$FF,$B2,$B1,$FF,$B1,$B2,$BA,$C3,$C0,$01
-.byte $FF,$A2,$B2,$B8,$BE,$B5,$A8,$FF,$B1,$B2,$B7,$FF,$A4,$A5,$AF,$A8,$01
-.byte $FF,$FF,$B7,$B2,$FF,$A8,$B4,$B8,$AC,$B3,$FF,$B7,$AB,$A4,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
+.byte $FF,$FF,$91,$B2,$AF,$27,$3C,$FF,$B1,$46,$69,$05
+.byte $FF,$A2,$26,$BE,$23,$FF,$B1,$B2,$21,$A4,$A5,$45,$05
+.byte $FF,$1B,$2E,$A8,$B4,$B8,$AC,$B3,$1B,$41,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
+
 ShopItemStowed:
 .byte $FF,$91,$A4,$B9,$1F,$47,$B7,$4D,$B8,$A5,$45,$C5,$01
 .byte $92,$BE,$4E,$FF,$AD,$B8,$37,$4F,$B8,$21,$5B,$01
@@ -252,10 +251,12 @@ ShopInnWelcome:
 .byte $FF,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01
 .byte $B7,$B5,$A4,$32,$45,$63,$C4,$FF,$95,$A8,$21,$B8,$B6,$01
 .byte $B7,$A4,$AE,$1A,$51,$23,$36,$54,$56,$B8,$C0,$00 ; Welcome, weary travelers! Let us take care of you.
+
 ShopDontForget:
 .byte $FF,$8D,$3C,$BE,$21,$A9,$35,$66,$21,$28,$01
 .byte $FF,$42,$A4,$AE,$1A,$A4,$65,$B2,$47,$4C,$01
 .byte $FF,$50,$26,$44,$B7,$B5,$A4,$32,$AF,$B6,$C4,$00 ; Don't forget to make a log of your travels!
+
 ShopInnSaved: 
 .byte $8D,$3C,$BE,$21,$56,$64,$A9,$A8,$A8,$58,$B6,$B2,$01
 .byte $42,$B8,$A6,$AB,$31,$A8,$B7,$53,$44,$B1,$46,$C5,$01
@@ -265,10 +266,12 @@ ShopClinicWelcome:
 .byte $95,$B2,$B2,$AE,$1B,$2E,$1C,$1A,$68,$AA,$AB,$B7,$01
 .byte $22,$27,$B3,$2B,$48,$31,$1A,$BA,$5B,$AB,$01
 .byte $FF,$56,$B8,$BF,$FF,$5D,$B5,$5C,$35,$B6,$C0,$00 ; Look to the light and peace be with you, warriors.
+
 ShopWhoToRevive:
 .byte $8F,$35,$20,$1B,$5B,$1D,$FF,$92,$38,$22,$01
 .byte $AA,$B5,$22,$21,$56,$55,$43,$5C,$3A,$A7,$01
 .byte $FF,$42,$4B,$A5,$45,$B6,$B6,$1F,$AA,$B6,$C0,$00 ; For a tithe I can grant your friend my blessings.
+
 ShopReturnToLife:
 .byte $8B,$4B,$1C,$1A,$AA,$B5,$5E,$1A,$4C,$01
 .byte $68,$AA,$AB,$B7,$69,$FF,$A0,$2F,$5C,$35,$C4,$01
@@ -292,6 +295,9 @@ ShopHowMany_Sell:
 ;;
 ;;  LUT containing shop data  [$8300 :: 0x38310]
 
+;; JIGS - once all these shops are used, it probably saves bytes to make each shop's inventory X bytes long
+;; and skip this pointer table in favor of just converting the shop ID to a pointer.
+
 lut_ShopData:
 .word UnusedShop        ; 00 
 .word ConeriaWeapon     ; 01 
@@ -304,72 +310,82 @@ lut_ShopData:
 .word UnusedShop        ; 08 
 .word UnusedShop        ; 09 
 .word UnusedShop        ; 0A 
-.word ConeriaArmor      ; 0B 
-.word ProvokaArmor      ; 0C 
-.word ElflandArmor      ; 0D 
-.word MelmondArmor      ; 0E 
-.word LakeArmor         ; 0F 
-.word GaiaArmor         ; 10
-.word UnusedShop        ; 11
-.word UnusedShop        ; 12
-.word UnusedShop        ; 13
-.word UnusedShop        ; 14
-.word ConeriaWMagic     ; 15
-.word ProvokaWMagic     ; 16
-.word ElflandWMagic     ; 17
-.word MelmondWMagic     ; 18
-.word LakeWMagic        ; 19
-.word ElflandWMagic2    ; 1A
-.word GaiaWMagic        ; 1B
-.word GaiaWMagic2       ; 1C
-.word OnracWMagic       ; 1D
-.word LeifenWMagic      ; 1E
-.word ConeriaBMagic     ; 1F
-.word ProvokaBMagic     ; 20
-.word ElflandBMagic     ; 21
-.word MelmondBMagic     ; 22
-.word LakeBMagic        ; 23
-.word ElflandBMagic2    ; 24
-.word GaiaBMagic        ; 25
-.word GaiaBMagic2       ; 26
-.word OnracBMagic       ; 27
-.word LeifenBMagic      ; 28
-.word ConeriaTemple     ; 29
-.word ElflandTemple     ; 2A
-.word LakeTemple        ; 2B
-.word GaiaTemple        ; 2C
-.word OnracTemple       ; 2D
-.word ProvokaTemple     ; 2E
-.word UnusedShop        ; 2F
-.word UnusedShop        ; 30
-.word UnusedShop        ; 31
-.word UnusedShop        ; 32
-.word ConeriaInn        ; 33
-.word ProvokaInn        ; 34
-.word ElflandInn        ; 35
-.word MelmondInn        ; 36
-.word LakeInn           ; 37
-.word GaiaInn           ; 38
-.word OnracInn          ; 39
-.word UnusedShop        ; 3A
-.word UnusedShop        ; 3B
-.word UnusedShop        ; 3C
-.word ConeriaItem       ; 3D
-.word ProvokaItem       ; 3E
-.word ElflandItem       ; 3F
-.word LakeItem          ; 40
-.word GaiaItem          ; 41
-.word OnracItem         ; 42
-.word UnusedShop        ; 43
-.word UnusedShop        ; 44
-.word UnusedShop        ; 45
-.word CaravanShop       ; 46
+.word UnusedShop        ; 0B 
+.word UnusedShop        ; 0C 
+.word UnusedShop        ; 0D 
+.word UnusedShop        ; 0E
+.word UnusedShop        ; 0F  
+
+.word ConeriaArmor      ; 10 
+.word ProvokaArmor      ; 11 
+.word ElflandArmor      ; 12 
+.word MelmondArmor      ; 13 
+.word LakeArmor         ; 14 
+.word GaiaArmor         ; 15
+.word UnusedShop        ; 16
+.word UnusedShop        ; 17
+.word UnusedShop        ; 18
+.word UnusedShop        ; 19
+.word UnusedShop        ; 1A 
+.word UnusedShop        ; 1B 
+.word UnusedShop        ; 1C 
+.word UnusedShop        ; 1D 
+.word UnusedShop        ; 1E
+.word UnusedShop        ; 1F 
+
+.word ConeriaWMagic     ; 20
+.word ProvokaWMagic     ; 21
+.word ElflandWMagic     ; 22
+.word MelmondWMagic     ; 23
+.word LakeWMagic        ; 24
+.word ElflandWMagic2    ; 25
+.word GaiaWMagic        ; 26
+.word GaiaWMagic2       ; 27
+.word OnracWMagic       ; 28
+.word LeifenWMagic      ; 29
+.word UnusedShop        ; 2A 
+.word UnusedShop        ; 2B 
+.word UnusedShop        ; 2C 
+.word UnusedShop        ; 2D 
+.word UnusedShop        ; 2E
+.word UnusedShop        ; 2F 
+
+.word ConeriaBMagic     ; 30
+.word ProvokaBMagic     ; 31
+.word ElflandBMagic     ; 32
+.word MelmondBMagic     ; 33
+.word LakeBMagic        ; 34
+.word ElflandBMagic2    ; 35
+.word GaiaBMagic        ; 36
+.word GaiaBMagic2       ; 37
+.word OnracBMagic       ; 38
+.word LeifenBMagic      ; 39
+.word UnusedShop        ; 3A 
+.word UnusedShop        ; 3B 
+.word UnusedShop        ; 3C 
+.word UnusedShop        ; 3D 
+.word UnusedShop        ; 3E
+.word UnusedShop        ; 3F 
+
+.word ConeriaItem       ; 40
+.word ProvokaItem       ; 41
+.word ElflandItem       ; 42
+.word LakeItem          ; 43
+.word GaiaItem          ; 44
+.word OnracItem         ; 45
+.word UnusedShop        ; 46
+.word UnusedShop        ; 47
+.word UnusedShop        ; 48
+.word UnusedShop        ; 49 
+.word UnusedShop        ; 4A 
+.word UnusedShop        ; 4B 
+.word UnusedShop        ; 4C 
+.word UnusedShop        ; 4D
+.word UnusedShop        ; 4E 
+.word CaravanShop       ; 4F
 
 ;; The following data was organized by 	Dienyddiwr Da - http://www.romhacking.net/documents/81/ ! 
 
-;the bytes of Inns and Clinics are Read as Gold, Two Bytes long. the first byte being the second 2 digits
-;and the second byte being the first two (e.g. 28-00 would be 0x0028 = 0x28 = 40 decimal)
-;
 ;; JIGS - for weapons and armor shops, add +1 because the constants are in 0-based format
 ;
 ;Second Price Digits or First Item for Sale
@@ -387,12 +403,9 @@ ConeriaWMagic:
 .byte MG_CURE, MG_HARM, MG_FOG, MG_RUSE, $00  ;(Coneria) CURE, HARM, FOG, RUSE
 ConeriaBMagic:
 .byte MG_FIRE, MG_SLEP, MG_LOCK, MG_LIT, $00  ;(Coneria) FIRE, SLEP, LOCK, LIT
-ConeriaTemple:
-;.byte $28,$00,$00                             ;(Coneria) 40g Clinic
-ConeriaInn:                               
-;.byte $1E,$00,$00                             ;(Coneria) 30g Inn
 ConeriaItem:                               
 .byte HEAL, PURE, TENT, $00                   ;(Coneria) Heal, Pure, Tent
+
 ProvokaWeapon:                              
 .byte WEP5+1, WEP6+1, WEP7+1, WEP8+1, $00     ;(Provoka) Iron Hammer, Short Sword, Hand Axe, Scimtar
 ProvokaArmor:                              
@@ -401,12 +414,9 @@ ProvokaWMagic:
 .byte MG_LAMP, MG_MUTE, MG_ALIT, MG_INVS, $00 ;(Provoka) LAMP, MUTE, ALIT, INVS
 ProvokaBMagic:                              
 .byte MG_ICE, MG_DARK, MG_TMPR, MG_SLOW, $00  ;(Provoka) ICE, DARK, TMPR, SLOW
-ProvokaTemple:                              
-;.byte $50,$00                                 ;(Provoka) 80g Clinic
-ProvokaInn:                                   
-;.byte $32,$00                                 ;(Provoka) 50g Inn
 ProvokaItem:                                  
 .byte HEAL, PURE, EYEDROPS, TENT, CABIN       ;(Provoka) Heal, Pure, Tent, Cabin
+
 ElflandWeapon:                                
 .byte WEP9+1, WEP10+1, WEP11+1, WEP12+1, WEP17+1;(Elfland) Iron Nunchuku, Large Knife, Iron Staff, Sabre, Silver Sword 
 ElflandArmor:                                
@@ -419,10 +429,7 @@ ElflandWMagic2:
 .byte MG_PURE, MG_FEAR, MG_AICE, MG_AMUT, $00 ;(Elfland) PURE, FEAR, AICE, AMUT
 ElflandBMagic2:                               
 .byte MG_SLP2, MG_FAST, MG_CONF, MG_ICE2, $00 ;(Elfland) SLP2, FAST, CONF, ICE2
-ElflandTemple:                                
-;.byte $C8,$00                                 ;(Elfland) 200g Clinic
-ElflandInn:                                   
-;.byte $64,$00                                 ;(Elfland) 100g Inn
+
 ElflandItem:                                  
 .byte HEAL, PURE, TENT, CABIN, SOFT            ;(Elfland) Heal, Pure, Tent, Cabin, Soft
 MelmondWeapon:                                
@@ -433,8 +440,7 @@ MelmondWMagic:
 .byte MG_CUR3, MG_LIFE, MG_HRM3, MG_RGN2, $00 ;(Melmond) CUR3, LIFE, HRM3, HEL2
 MelmondBMagic:                                
 .byte MG_FIR3, MG_BANE, MG_WARP, MG_SLO2, $00 ;(Melmond) FIR3, BANE, WARP, SLO2
-MelmondInn:                                   
-;.byte $64,$00                                 ;(Melmond) 100g Inn
+
 LakeWeapon:                                   
 .byte WEP16+1, WEP17+1, WEP18+1, WEP19+1, $00 ;(Cresent Lake) Silver Knife, Silver Sword, Silver Hammer, Silver Axe
 LakeArmor:                                   
@@ -443,10 +449,7 @@ LakeWMagic:
 .byte MG_SOFT, MG_EXIT, MG_FOG2, MG_INV2, $00 ;(Cresent Lake) SOFT, EXIT, FOG2, INV2
 LakeBMagic:                                   
 .byte MG_LIT3, MG_RUB, MG_QAKE, MG_STUN, $00  ;(Cresent Lake) LIT3, RUB, QAKE, STUN
-LakeTemple:                                   
-;.byte $90,$01,$00                             ;(Cresent Lake) 400g Clinic
-LakeInn:                                      
-;.byte $C8,$00                                 ;(Cresent Lake) 200g Inn
+
 LakeItem:                                     
 .byte HEAL, PURE, TENT, CABIN, ALARMCLOCK     ;(Cresent Lake) Heal, Pure, Tent, Cabin
 GaiaWeapon:                                   
@@ -461,28 +464,24 @@ GaiaWMagic2:
 .byte MG_FADE, MG_WALL, MG_XFER, $00          ;(Gaia) FADE, WALL, XFER
 GaiaBMagic2:                                  
 .byte MG_STOP, MG_ZAP, MG_XXXX, $00           ;(Gaia) STOP, ZAP!, XXXX
-GaiaTemple:                                   
-;.byte $EE,$02,$00                             ;(Gaia) 750g Clinic
-GaiaInn:                                      
-;.byte $F4,$01,$00                             ;(Gaia) 500g Inn
 GaiaItem:                                     
 .byte CABIN, HOUSE, HEAL, PURE, PHOENIXDOWN   ;(Gaia) Cabin, House, Heal, Pure
+
 OnracWMagic:                                  
 .byte MG_ARUB, MG_RGN3, $00                   ;(Onrac) ARUB, HEL3
 OnracBMagic:                                  
 .byte MG_SABR, MG_BLND, $00                   ;(Onrac) SABR, BLND
-OnracTemple:                                  
-;.byte $EE,$02,$00                             ;(Onrac) 750g Clinic
-OnracInn:                                     
-;.byte $2C,$01,$00                             ;(Onrac) 300g Inn
 OnracItem:                                    
 .byte TENT, CABIN, HOUSE, PURE, SOFT          ;(Onrac) Tent, Cabin, House, Pure, Soft
+
 CaravanShop:                                  
 .byte X_HEAL, ETHER, ELIXIR, SMOKEBOMB, BOTTLE;(Caravan) Bottle
+
 LeifenWMagic:                                 
 .byte MG_LIF2, $00                            ;(Leifen) LIF2
 LeifenBMagic:                                 
 .byte MG_NUKE ,$00                            ;(Leifen) NUKE
+
 UnusedShop:                                   
 .byte $FF,$00                                 
 
@@ -490,488 +489,8 @@ UnusedShop:
 ;; Pravoka       - 80
 ;; Elfland       - 200
 ;; Crescent Lake - 400 
-;; Onrac / Gaiat - 750 g
+;; Onrac / Gaia  - 750 g
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for menu text  [$8500 :: 0x38510]
-;;
-;;    This is a table of complex strings used in menus.
-
-;; A few things were edited to fit the new menu layouts.
-
-lut_MenuText:                 
-.word M_Gold                  ; 0  ; 0 
-.word M_Options               ; 1  ; 1 
-.word M_ItemTitle             ; 2  ; 2 
-.word M_QuestItemsTitle       ; 3  ; 3 
-.word M_EquipPage1            ; 4  ; 4 
-.word M_EquipPage2            ; 5  ; 5 
-.word M_EquipPage3            ; 6  ; 6 
-.word M_Char1Name             ; 7  ; 7 
-.word M_Char2Name             ; 8  ; 8 
-.word M_Char3Name             ; 9  ; 9 
-.word M_Char4Name             ; A  ; 10
-.word M_EquipNameClass        ; B  ; 11
-.word M_EquipmentSlots        ; C  ; 12
-.word M_EquipStats            ; D  ; 13
-.word M_MP_List_Level         ; E  ; 14
-.word M_MP_List_MP            ; F  ; 15
-.word M_Elixir_List_MP        ; 10 ; 16
-.word M_HP_List               ; 11 ; 17
-.word M_MagicList             ; 12 ; 18
-.word M_CharLevelStats        ; 13 ; 19
-.word M_CharMainStats         ; 14 ; 20
-.word M_CharSubStats          ; 15 ; 21
-.word M_ItemNothing           ; 16 ; 22
-.word M_KeyItem1_Desc         ; 17 ; 23 ; Lute
-.word M_KeyItem2_Desc         ; 18 ; 24 ; Crown
-.word M_KeyItem3_Desc         ; 19 ; 25 ; Crystal
-.word M_KeyItem4_Desc         ; 1A ; 26 ; Herb
-.word M_KeyItem5_Desc         ; 1B ; 27 ; Mystic Key
-.word M_KeyItem6_Desc         ; 1C ; 28 ; TNT
-.word M_KeyItem7_Desc         ; 1D ; 29 ; Adamant
-.word M_KeyItem8_Desc         ; 1E ; 30 ; Slab
-.word M_KeyItem9_Desc         ; 1F ; 31 ; Ruby
-.word M_KeyItem10_Desc        ; 20 ; 32 ; Rod
-.word M_KeyItem11_Desc        ; 21 ; 33 ; Floater
-.word M_KeyItem12_Desc        ; 22 ; 34 ; Chime
-.word M_KeyItem13_Desc        ; 23 ; 35 ; Tail
-.word M_KeyItem14_Desc        ; 24 ; 36 ; Cube
-.word M_KeyItem15_Desc        ; 25 ; 37 ; Bottle
-.word M_KeyItem16_Desc        ; 26 ; 38 ; Oxyale
-.word M_KeyItem17_Desc        ; 27 ; 39 ; Canoe
-.word M_KeyItem1_Use          ; 28 ; 40 ; Lute use
-.word M_KeyItem10_Use         ; 29 ; 41 ; Rod use
-.word M_KeyItem11_Use         ; 2A ; 42 ; Floater use
-.word M_KeyItem15_Use         ; 2B ; 43 ; Bottle use
-.word M_ItemHeal              ; 2C ; 44 ; CURE magic
-.word M_ItemEther             ; 2D ; 45
-.word M_ItemElixir            ; 2E ; 46 
-.word M_ItemPure              ; 2F ; 47 ; PURE magic
-.word M_ItemSoft              ; 30 ; 48 ; SOFT magic
-.word M_ItemPhoenixDown       ; 31 ; 49 ; LIFE magic
-.word M_ItemAlarmClock        ; 32 ; 50
-.word M_ItemEyedrop           ; 33 ; 51
-.word M_ItemSmokebomb         ; 34 ; 52
-.word M_ItemUseTentCabin      ; 35 ; 53 ; HEAL magic
-.word M_ItemUseTentCabin_Save ; 36 ; 54
-.word M_ItemUseHouse_Save     ; 37 ; 55
-.word M_ItemUseHouse          ; 38 ; 56
-.word M_ItemCannotSleep       ; 39 ; 57
-.word M_NowSaving             ; 3A ; 58
-.word M_ItemCannotUse         ; 3B ; 59
-.word M_HealMagic             ; 3C ; 60 ; unused
-.word M_WarpMagic             ; 3D ; 61
-.word M_ExitMagic             ; 3E ; 62
-.word M_NoMana                ; 3F ; 63
-.word M_CannotUseMagic        ; 40 ; 64
-.word M_OrbGoldBoxLink        ; 41 ; 65
-.word M_ItemSubmenu           ; 42 ; 66
-.word M_MagicSubmenu          ; 43 ; 67
-.word M_MagicCantLearn        ; 44 ; 68
-.word M_MagicAlreadyKnow      ; 45 ; 69
-.word M_MagicLevelFull        ; 46 ; 70
-.word M_MagicForget           ; 47 ; 71
-.word M_MagicMenuSpellLevel12 ; 48 ; 72
-.word M_MagicMenuSpellLevel34 ; 49 ; 73
-.word M_MagicMenuSpellLevel56 ; 4A ; 74
-.word M_MagicMenuSpellLevel78 ; 4B ; 75
-.word M_MagicMenuOrbs         ; 4C ; 76
-.word M_MagicNameLearned      ; 4D ; 77
-.word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
-.word M_FixInventoryWindow    ; 4F ; 79 ; 
-.word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
-.word M_EquipStats_Blank      ; 51 ; 81 ; 
-.word M_EquipInventoryWeapon  ; 52 ; 82 ; 
-.word M_EquipInventoryArmor   ; 53 ; 83 ; 
-.word M_EquipInventorySelect  ; 54 ; 84 ; 
-.word M_KeyItem18_Desc        ; 55 ; 85 ; 
-.word M_LampMagic             ; 56 ; 86 ; LAMP magic
-.word M_EquipInventoryClear   ; 57 ; 87 ; 
-
-M_Gold: 
-.byte $04,$FF,$90,$00 ; _G - for gold on menu
-
-M_Options:
-.byte $92,$9D,$8E,$96,$9C,$01 ; ITEMS 
-.byte $96,$8A,$90,$92,$8C,$01 ; MAGIC
-.byte $8E,$9A,$9E,$92,$99,$01 ; EQUIP
-.byte $CA,$CB,$CC,$CD,$CE,$01 ; STATUS
-.byte $CF,$D0,$D1,$D2,$97,$01 ; OPTION
-.byte $9C,$8A,$9F,$8E,$E8,$00 ; SAVE (Heart)
-
-M_ItemTitle: 
-.BYTE $FF,$92,$9D,$8E,$96,$9C,$00 ; ITEMS
-
-M_QuestItemsTitle: 
-.BYTE $FF,$9A,$9E,$8E,$9C,$9D,$00 ; QUEST
-
-M_EquipPage1:  
-.byte $FF,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$81,$FF,$C7,$00
-
-M_EquipPage2:   
-.byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$82,$FF,$C7,$00
-
-M_EquipPage3:
-.byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$83,$FF,$C7,$00
-
-M_EquipPage4:
-.byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$84,$00
-
-M_Char1Name:   
-.byte $10,$00,$00 ; Character 1's name
-
-M_Char2Name:   
-.byte $11,$00,$00 ; Character 2's name
-
-M_Char3Name:  
-.byte $12,$00,$00 ; Character 3's name
-
-M_Char4Name:   
-.byte $13,$00,$00 ; Character 4's name
-
-M_EquipNameClass:  
-.byte $10,$00,$09,$08,$10,$01,$00 ; name, 8 spaces, then class
-
-M_EquipmentSlots:
-.byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$FF,$D4,$01   ; RIGHT_HAND__[________]_*
-.byte $95,$A8,$A9,$21,$FF,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$FF,$DB,$01   ; LEFT__HAND__[________]_*
-.byte $91,$2B,$A7,$09,$08,$C8,$09,$08,$C9,$FF,$DC,$01                       ; HEAD________[________]_*
-.byte $8B,$B2,$A7,$BC,$09,$08,$C8,$09,$08,$C9,$FF,$DA,$01                   ; BODY________[________]_*
-.byte $91,$22,$A7,$B6,$09,$07,$C8,$09,$08,$C9,$FF,$DD,$01                   ; HANDS_______[________]_*
-.byte $8A,$A6,$48,$B6,$B6,$35,$BC,$09,$03,$C8,$09,$08,$C9,$FF,$DE,$01       ; ACCESSORY___[________]_*
-.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$FF,$D8,$01       ; BATTLE_ITEM_[________]_*
-.byte $8B,$39,$B7,$45,$FF,$92,$53,$B0,$FF,$C8,$09,$08,$C9,$FF,$D8,$00       ; BATTLE_ITEM_[________]_*
-
-M_EquipStats:
-.byte $8D,$A4,$B0,$A4,$66,$09,$03,        $10,$16,$FF,$FF      ; Damage___##__
-.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$18,$01          ; Defense__##
-.byte $8A,$A6,$A6,$55,$5E,$4B,            $10,$17,$FF,$FF      ; Accuracy_##__
-.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$19,$01          ; Evasion__##
-.byte $8C,$5C,$57,$51,$AF,$FF,            $10,$1B,$FF,$FF      ; Critical_##__
-.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$1A,$00          ; M.Evade__## 
-
-M_MP_List_Level:  
-.byte $95,$81,$01
-.byte $95,$82,$01
-.byte $95,$83,$01
-.byte $95,$84,$01
-.byte $95,$85,$01
-.byte $95,$86,$01
-.byte $95,$87,$01
-.byte $95,$88,$00
-
-M_MP_List_MP:
-.byte $10,$20,$7A,$10,$30,$01 ; lists current MP / max MP veritcally
-.byte $10,$21,$7A,$10,$31,$01
-.byte $10,$22,$7A,$10,$32,$01
-.byte $10,$23,$7A,$10,$33,$01
-.byte $10,$24,$7A,$10,$34,$01
-.byte $10,$25,$7A,$10,$35,$01
-.byte $10,$26,$7A,$10,$36,$01
-.byte $10,$27,$7A,$10,$37,$00
-
-M_Elixir_List_MP: ; lists current MP / current MP / etc, horizontally
-.byte $96,$99,$FF,$FF,$10,$20,$7A,$10,$21,$7A,$10,$22,$7A,$10,$23,$7A,$10,$24,$7A,$10,$25,$7A,$10,$26,$7A,$10,$27,$00
-
-M_HP_List: 
-.byte $10,$00,$FF,$10,$02,$FF,$10,$05,$7A,$10,$06,$00 ; lists name, ailment, and current HP horizontally
-
-M_MagicList: 
-.byte $95,$81,$FF,$FF,$10,$40,$FF,$FF,$10,$41,$FF,$FF,$10,$42,$01
-.byte $95,$82,$FF,$FF,$10,$43,$FF,$FF,$10,$44,$FF,$FF,$10,$45,$01
-.byte $95,$83,$FF,$FF,$10,$46,$FF,$FF,$10,$47,$FF,$FF,$10,$48,$01
-.byte $95,$84,$FF,$FF,$10,$49,$FF,$FF,$10,$4A,$FF,$FF,$10,$4B,$01
-.byte $95,$85,$FF,$FF,$10,$4C,$FF,$FF,$10,$4D,$FF,$FF,$10,$4E,$01
-.byte $95,$86,$FF,$FF,$10,$4F,$FF,$FF,$10,$50,$FF,$FF,$10,$51,$01
-.byte $95,$87,$FF,$FF,$10,$52,$FF,$FF,$10,$53,$FF,$FF,$10,$54,$01
-.byte $95,$88,$FF,$FF,$10,$55,$FF,$FF,$10,$56,$FF,$FF,$10,$57,$00
-
-;     |L  #    __ cc  MP   /  max MP   __  __ spel1 1  __ spell 2  __ spell 3 
-;.byte $7E,$81,$FF,$10,$2C,$7A,$10,$34,$FF,$FF,$10,$14,$FF,$10,$15,$FF,$10,$16,$01
-;.byte $7E,$82,$FF,$10,$2D,$7A,$10,$35,$FF,$FF,$10,$17,$FF,$10,$18,$FF,$10,$19,$01
-;.byte $7E,$83,$FF,$10,$2E,$7A,$10,$36,$FF,$FF,$10,$1A,$FF,$10,$1B,$FF,$10,$1C,$01
-;.byte $7E,$84,$FF,$10,$2F,$7A,$10,$37,$FF,$FF,$10,$1D,$FF,$10,$1E,$FF,$10,$1F,$01
-;.byte $7E,$85,$FF,$10,$30,$7A,$10,$38,$FF,$FF,$10,$20,$FF,$10,$21,$FF,$10,$22,$01
-;.byte $7E,$86,$FF,$10,$31,$7A,$10,$39,$FF,$FF,$10,$23,$FF,$10,$24,$FF,$10,$25,$01
-;.byte $7E,$87,$FF,$10,$32,$7A,$10,$3A,$FF,$FF,$10,$26,$FF,$10,$27,$FF,$10,$28,$01
-;.byte $7E,$88,$FF,$10,$33,$7A,$10,$3B,$FF,$FF,$10,$29,$FF,$10,$2A,$FF,$10,$2B,$00
-
-M_CharLevelStats: 
-.byte $10,$00,$01                                     ; NAME
-.byte $10,$01,$01                                     ; Class
-.byte $95,$A8,$32,$AF,$09,$05,$10,$03,$01             ; Level ##
-.byte $8E,$BB,$B3,$C0,$FF,$FF,$10,$04,$01             ; Exp.  ## 
-.byte $97,$A8,$BB,$B7,$09,$03,$10,$1E,$00             ; Next  ##
-
-M_CharMainStats: 
-.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$11,$09,$04,  $8D,$A4,$B0,$A4,$66,$09,$03,        $10,$16,$01 ; Strength__##____Damage___###
-.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$12,$09,$04,  $8A,$A6,$A6,$55,$5E,$4B,            $10,$17,$01 ; Agility___##____Accuracy_###
-.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$13,$09,$04,  $8C,$5C,$57,$51,$AF,$FF,            $10,$1B,$01 ; Intellect_##____Critical_###
-.byte $9F,$5B,$5F,$5B,$4B,$FF,    $10,$14,$09,$04,  $8D,$A8,$A9,$3A,$3E,$FF,$FF,        $10,$18,$01 ; Vitality__##____Defense__###
-.byte $9C,$B3,$A8,$40,$09,$05,    $10,$15,$09,$04,  $8E,$B9,$3F,$AC,$3C,$FF,$FF,        $10,$19,$01 ; Speed_____##____Evasion__###
-.byte $96,$35,$A4,$45,$09,$03,    $10,$1C,$09,$04,  $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$1A,$00 ; Morale___###____M.Evade__###
-
-;.byte $9C,$B7,$23,$2A,$1C,$FF,$FF,$10,$07,$01         ; Strength__ 
-;.byte $8A,$AA,$61,$5B,$4B,$FF,$FF,$10,$08,$01         ; Agility___  
-;.byte $92,$B1,$53,$4E,$A8,$A6,$21,$10,$09,$01         ; Intellect_
-;.byte $9F,$5B,$5F,$5B,$4B,$FF,$10,$0A,$01             ; Vitality__
-;.byte $9C,$B3,$A8,$40,$09,$05,$10,$0B,$01             ; Speed_____    
-;.byte $9C,$B3,$AC,$5C,$21,$FF,$FF,$00                 ; Spirit___
-;
-M_CharSubStats: 
-;.byte $8D,$A4,$B0,$A4,$66,$09,$03,$10,$3C,$01         ; Damage___###
-;.byte $8A,$A6,$A6,$55,$5E,$4B,$10,$3D,$01             ; Accuracy_###
-;.byte $8C,$5C,$57,$51,$AF,$FF,$10,$44,$01             ; Critical_###
-;.byte $8D,$A8,$A9,$3A,$3E,$FF,$FF,$10,$3E,$01         ; Defense__###
-;.byte $8E,$B9,$3F,$AC,$3C,$FF,$FF,$10,$3F,$01         ; Evasion__###
-;.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$FF,$FF,$10,$41,$00 ; M.Evade__###
-
-M_ItemNothing:
-.byte $A2,$B2,$64,$41,$B9,$1A,$B1,$B2,$1C,$1F,$AA,$C0,$00 ; You have nothing.
-
-M_KeyItem1_Desc: 
-.byte $8B,$A8,$A4,$B8,$57,$A9,$B8,$AF,$42,$B8,$B6,$AC,$A6,$43,$AC,$4E,$B6,$05
-.byte $B7,$AB,$1A,$A4,$AC,$B5,$C0,$00 ; Beautiful music fills[enter]the air.
-
-M_KeyItem2_Desc: 
-.byte $9D,$AB,$1A,$B6,$28,$45,$29,$8C,$9B,$98,$A0,$97,$C0,$00 ; The stolen CROWN.
-
-M_KeyItem3_Desc:
-.byte $8A,$FF,$A5,$A4,$4E,$42,$A4,$A7,$1A,$4C,$FF,$8C,$9B,$A2,$9C,$9D,$8A,$95,$C0,$00 ; A ball made of CRYSTAL.
-
-M_KeyItem4_Desc: 
-.byte $A2,$B8,$A6,$AE,$C4,$FF,$9D,$3D,$1E,$34,$A7,$AC,$A6,$1F,$A8,$05
-.byte $AC,$B6,$1B,$B2,$2E,$A5,$5B,$B7,$25,$C4,$00 ; Yuck! This medicine[enter]is too bitter!
-
-M_KeyItem5_Desc:
-.byte $9D,$AB,$1A,$B0,$BC,$37,$AC,$A6,$FF,$94,$8E,$A2,$C0,$00 ; The mystic KEY.
-
-M_KeyItem6_Desc: 
-.byte $8B,$A8,$38,$A4,$23,$A9,$B8,$AF,$C4,$00 ; Be careful!
-
-M_KeyItem7_Desc:  
-.byte $9D,$AB,$1A,$45,$AA,$3A,$A7,$2F,$4B,$34,$B7,$5F,$C0,$00 ; The legendary metal.
-
-M_KeyItem8_Desc:  
-.byte $9E,$B1,$AE,$B1,$46,$B1,$24,$BC,$B0,$A5,$B2,$AF,$1E,$A6,$B2,$B9,$25,$05
-.byte $B7,$AB,$1A,$9C,$95,$8A,$8B,$C0,$00 ; Unknown symbols cover[enter]the SLAB.
-
-M_KeyItem9_Desc:  
-.byte $8A,$FF,$AF,$2F,$AA,$1A,$23,$A7,$24,$28,$5A,$C0,$00 ; A large red stone.
-
-M_KeyItem10_Desc:  
-.byte $9D,$AB,$1A,$9B,$98,$8D,$1B,$2E,$23,$B0,$B2,$B9,$1A,$1C,$A8,$05
-.byte $B3,$AF,$39,$1A,$A9,$B5,$49,$1B,$AB,$1A,$2B,$B5,$1C,$C0,$00 ; The ROD to remove the[enter]plate from the earth.
-
-M_KeyItem11_Desc: 
-.byte $8A,$FF,$B0,$BC,$37,$25,$AC,$26,$1E,$4D,$A6,$AE,$C0,$00 ; A mysterious rock.
-
-M_KeyItem12_Desc: 
-.byte $9C,$B7,$A4,$B0,$B3,$A8,$27,$3C,$1B,$AB,$1A,$A5,$B2,$B7,$28,$B0,$69,$05
-.byte $96,$8A,$8D,$8E,$FF,$92,$97,$FF,$95,$8E,$8F,$8E,$92,$97,$00 ; Stamped on the bottom..[enter]MADE IN LEFEIN. 
-
-M_KeyItem13_Desc: 
-.byte $98,$98,$91,$91,$C4,$C4,$FF,$92,$21,$37,$1F,$AE,$B6,$C4,$05
-.byte $9D,$AB,$B5,$46,$2D,$21,$B2,$B9,$25,$69,$05
-.byte $97,$B2,$C4,$FF,$8D,$3C,$BE,$21,$A7,$B2,$1B,$AB,$39,$C4,$C4,$00 ; OOHH!! It stinks![enter]Throw it over..[enter]No! Don't do that!!
-
-M_KeyItem14_Desc:
-.byte $8C,$B2,$AF,$35,$1E,$AA,$A4,$1C,$25,$20,$3B,$05
-.byte $B6,$BA,$AC,$B5,$58,$1F,$1B,$AB,$1A,$8C,$9E,$8B,$8E,$C0,$00 ; Colors gather and[enter]swirl in the CUBE.
-
-M_KeyItem15_Desc: 
-;.byte $92,$B7,$2D,$1E,$A8,$B0,$B3,$B7,$BC,$C0,$00 ; It is empty.
-
-M_KeyItem16_Desc:
-.byte $9D,$AB,$1A,$98,$A1,$A2,$8A,$95,$8E,$43,$55,$B1,$30,$1D,$B6,$05
-.byte $A9,$B5,$2C,$AB,$20,$AC,$B5,$C0,$00 ; The OXYALE furnishes[enter]fresh air. 
-
-M_KeyItem17_Desc: 
-.byte $A2,$B2,$B8,$38,$22,$FF,$A6,$4D,$B6,$B6,$1B,$AB,$1A,$5C,$B9,$25,$C0,$00 ; You can cross the river.
-
-M_KeyItem18_Desc:
-.byte $C6,$9D,$1D,$23,$BE,$1E,$B1,$2E,$B3,$AC,$A6,$B7,$55,$2C,$C5,$C4,$BE,$05
-.byte $C6,$9E,$3E,$50,$26,$44,$AC,$B0,$A4,$AA,$1F,$39,$AC,$3C,$C4,$BE,$05
-.byte $C6,$8A,$BA,$BF,$1B,$41,$B7,$BE,$1E,$A5,$35,$1F,$AA,$C4,$BE,$00
-
-M_KeyItem1_Use:
-.byte $9D,$AB,$1A,$B7,$B8,$B1,$1A,$B3,$AF,$A4,$BC,$B6,$BF,$05
-.byte $B5,$A8,$B9,$2B,$AF,$1F,$AA,$20,$24,$B7,$A4,$AC,$B5,$5D,$BC,$C0,$00 ; The tune plays,[enter]revealing a stairway.
-
-M_KeyItem10_Use: 
-.byte $9D,$AB,$1A,$B3,$AF,$39,$1A,$B6,$AB,$39,$B7,$25,$B6,$BF,$05
-.byte $B5,$A8,$B9,$2B,$AF,$1F,$AA,$20,$24,$B7,$A4,$AC,$B5,$5D,$BC,$C4,$00 ; The plate shatters,[enter]revealing a stairway!
-
-M_KeyItem11_Use: 
-.byte $9D,$AB,$1A,$8A,$92,$9B,$9C,$91,$92,$99,$31,$A8,$AA,$1F,$B6,$1B,$B2,$05
-.byte $B5,$AC,$B6,$1A,$A9,$B5,$49,$1B,$AB,$1A,$A7,$2C,$25,$B7,$C0,$00 ; The AIRSHIP begins to[enter]rise from the desert.
-
-M_KeyItem15_Use: 
-.byte $99,$B2,$B3,$C4,$FF,$8A,$43,$A4,$AC,$B5,$BC,$20,$B3,$B3,$2B,$63,$BF,$05
-.byte $B7,$AB,$A8,$29,$AC,$1E,$AA,$3C,$A8,$C0,$00 ; Pop! A fairy appears,[enter]then is gone.
-
-M_ItemHeal:  
-M_CureMagic:
-.byte $9E,$3E,$1B,$2E,$23,$A6,$B2,$32,$44,$91,$99,$C0,$00 ; Use to recover HP.[END]
-
-M_ItemEther:
-.byte $9E,$3E,$1B,$2E,$23,$A6,$B2,$32,$44,$96,$99,$05
-.byte $A9,$35,$36,$5A,$24,$B3,$A8,$4E,$65,$A8,$32,$AF,$C0,$00 ; Use to recover MP[ENTER]for one spell level.[END]
-
-M_ItemElixir:
-.byte $9E,$3E,$1B,$2E,$23,$A6,$B2,$32,$44,$5F,$58,$91,$99,$20,$3B,$FF,$96,$99,$C0,$00 ; Use to recover all HP and MP.[END]
-
-M_ItemPure:  
-M_PureMagic:
-.byte $9E,$3E,$1B,$2E,$A6,$55,$1A,$B3,$B2,$30,$3C,$C0,$00 ; Use to cure poison.[END]
-
-M_ItemSoft:  
-M_SoftMagic:
-.byte $9E,$3E,$1B,$2E,$23,$37,$35,$1A,$1C,$A8,$05
-.byte $A5,$B2,$A7,$4B,$A9,$4D,$B0,$4F,$A8,$B7,$5C,$A9,$AC,$51,$57,$3C,$C0,$00 ; Use to restore the[ENTER]body from petrification.[END]
-
-M_ItemPhoenixDown:
-M_LifeMagic:
-.byte $9E,$3E,$1B,$2E,$23,$B9,$AC,$32,$1B,$1D,$24,$B3,$AC,$5C,$B7,$C0,$00 ; Use to revive the spirit.[END]
-
-M_ItemAlarmClock:
-.byte $9E,$3E,$1B,$2E,$4D,$B8,$3E,$1B,$1D,$4F,$2F,$B7,$BC,$05
-.byte $A9,$4D,$B0,$24,$45,$A8,$B3,$2D,$29,$A5,$39,$B7,$45,$C0,$00 ; Use to rouse the party[ENTER]from sleep in battle.[END]
-
-M_ItemEyedrop:
-.byte $9E,$3E,$1B,$2E,$23,$AA,$A4,$1F,$FF,$B6,$AC,$AA,$AB,$B7,$C0,$00 ; Use to regain sight.[END]
-
-M_ItemSmokebomb:
-.byte $9E,$3E,$1B,$2E,$3D,$A7,$1A,$A8,$32,$B5,$56,$5A,$2D,$29,$A5,$39,$B7,$45,$05
-.byte $B2,$44,$A8,$AF,$B8,$A7,$1A,$3A,$A8,$B0,$AC,$2C,$2D,$29,$A7,$B8,$2A,$A8,$3C,$B6,$C0,$05 ; Use to hide everyone in battle,[ENTER]Or elude enemies in dungeons.[END]
-.byte $9E,$3E,$FF,$AC,$B7,$C5,$FF,$99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$FF,$99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; Use it? Push A..YES Push B..NO
-
-M_ItemUseTentCabin:
-.byte $9B,$A8,$A6,$B2,$32,$44,$91,$99,$43,$35,$20,$4E,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
-.byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00; Recover HP for all?[ENTER]Push A..YES[ENTER]Push B..NO[END]
-
-M_ItemUseTentCabin_Save:
-.byte $91,$99,$FF,$23,$A6,$B2,$32,$23,$A7,$C0,$FF,$9C,$A4,$32,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
-.byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; HP recovered. SAVE?[enter]Push A..YES[enter]Push B..NO
-
-M_ItemUseHouse_Save:
-.byte $91,$99,$20,$3B,$FF,$96,$99,$FF,$23,$A6,$B2,$32,$23,$A7,$C0,$FF,$9C,$A4,$32,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
-.byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; HP and MP recovered. Save?[ENTER]Push A..YES[ENTER]Push B..NO[END]
-
-M_ItemUseHouse:  
-.byte $9B,$A8,$A6,$B2,$32,$44,$91,$99,$20,$3B,$FF,$96,$99,$43,$35,$20,$4E,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
-.byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; Recover HP and MP for all?[ENTER]Push A..YES[ENTER]Push B..NO[END]
-
-M_ItemCannotSleep:  
-.byte $A2,$B2,$B8,$38,$22,$B1,$B2,$21,$B6,$45,$A8,$B3,$FF,$1D,$23,$C4,$00 ; You cannot sleep here!
-
-M_NowSaving:   
-.byte $97,$B2,$BA,$24,$A4,$B9,$1F,$AA,$69,$C4,$00 ; Now saving...! 
-
-M_ItemCannotUse: 
-.byte $A2,$B2,$B8,$38,$22,$B1,$B2,$21,$B8,$B6,$1A,$AC,$21,$1D,$23,$C4,$00 ; You cannot use it here!
-
-M_HealMagic:   ; unused
-
-M_WarpMagic:  
-.byte $8A,$FF,$B0,$A4,$AA,$AC,$A6,$1B,$2E,$23,$B7,$55,$29,$3C,$A8,$05
-.byte $A9,$AF,$B2,$35,$C0,$FF,$97,$46,$33,$2F,$B3,$31,$5E,$AE,$C4,$00 ; A magic to return one[enter]floor. Now warp back!
-
-M_ExitMagic:  
-.byte $95,$B2,$37,$C5,$FF,$97,$2E,$5D,$4B,$26,$B7,$C5,$05
-.byte $92,$B6,$2D,$21,$AB,$B2,$B3,$A8,$AF,$2C,$B6,$C5,$FF,$9E,$B6,$1A,$1C,$30,$05
-.byte $B6,$B3,$A8,$4E,$1B,$2E,$A8,$BB,$5B,$C4,$00 ; Lost? No way out?[return]Is it hopeless? Use this[return]spell to exit!
-
-M_NoMana:  
-.byte $8A,$AF,$AF,$36,$A9,$1B,$41,$21,$45,$32,$AF,$BE,$B6,$05
-.byte $B6,$B3,$A8,$4E,$1E,$2F,$1A,$A8,$BB,$41,$B8,$37,$40,$C0,$00 ; All of that level's[enter]spells are exhausted.
-
-M_CannotUseMagic:  
-.byte $9C,$B2,$B5,$B5,$BC,$BF,$50,$26,$38,$22,$B1,$B2,$21,$B8,$3E,$05
-.byte $B7,$AB,$A4,$21,$B6,$B3,$A8,$4E,$FF,$1D,$23,$C0,$00 ; Sorry, you cannot use[enter]that spell here.
-
-M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape and timer box...
-.byte $6C,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$6D,$01
-.byte $7B,$7E,$7E,$7E,$7E,$7E,$7E,$7E,$7E,$7C,$01,$01,$01,$01,$01,$01,$01
-.byte $6C,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$6D,$00
-
-M_ItemSubmenu:
-.byte $FF,$FF,$9E,$3E,$09,$03,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
-
-M_MagicSubmenu: 
-.byte $FF,$FF,$8C,$3F,$21,$FF,$95,$2B,$B5,$29,$FF,$8F,$35,$66,$B7,$00 ; Cast __ Learn __ Forget
-
-M_MagicCantLearn:      
-.byte $A2,$26,$38,$22,$B1,$B2,$21,$45,$2F,$29,$1C,$39,$24,$B3,$A8,$4E,$C0,$00 ; You cannot learn that spell.[END]
-
-M_MagicAlreadyKnow:     
-.byte $A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$1B,$41,$21,$B6,$B3,$A8,$4E,$C0,$00 ; You already know that spell.[END]
-
-M_MagicLevelFull:       
-.byte $A2,$26,$38,$22,$B1,$B2,$21,$45,$2F,$29,$22,$4B,$B0,$35,$A8,$05
-.byte $B6,$B3,$A8,$4E,$1E,$A9,$35,$1B,$3D,$1E,$B6,$B3,$A8,$4E,$65,$A8,$32,$AF,$C4,$00 ; You cannot learn any more[ENTER]spells for this spell level![END]
-
-M_MagicForget:
-.byte $8F,$35,$66,$21,$1C,$30,$24,$B3,$A8,$4E,$C5,$00
-
-M_MagicMenuSpellLevel12:
-.byte $FF,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$81,$C2,$82,$FF,$C7,$00
-
-M_MagicMenuSpellLevel34:
-.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$83,$C2,$84,$FF,$C7,$00
-
-M_MagicMenuSpellLevel56:
-.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$85,$C2,$86,$FF,$C7,$00
-
-M_MagicMenuSpellLevel78:
-.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$87,$C2,$88,$00
-
-M_MagicMenuOrbs:
-.byte $E5,$01,$E5,$01,$E5,$01,$E5,$01,$E6,$01,$E6,$01,$E6,$01,$E6,$00
-
-M_MagicNameLearned:
-.byte $FF,$10,$60,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
-
-M_FixInventoryWindow:
-;.byte $7B,$0B,$07,$7E,$6A,$6B,$0B,$15,$7E,$7C    ; connect name and submenu title boxes
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$05        ; line break to the bottom...
-;.byte $7B,$0B,$1E,$7E,$7C,$00                    ; and connect the stat window
-
-M_MagicMenuMPTitle:
-;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
-.byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
-
-M_EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
-;; don't draw it with the normal ComplexString setup... it must be loaded into RAM and edited there first!
-.byte $8D,$A4,$B0,$A4,$66,$08                 ; Damage___###__ ; later on, stats are added in the # slots
-.byte $8D,$A8,$A9,$3A,$3E,$05,$01             ; Defense__###
-.byte $8A,$A6,$A6,$55,$5E,$BC,$06             ; Accuracy_###__
-.byte $8E,$B9,$3F,$AC,$3C,$05,$01             ; Evasion__###
-.byte $8C,$5C,$57,$51,$AF,$06                 ; Critical_###__
-.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$05,$00     ; M.Evade__###
-
-M_EquipInventoryWeapon:
-.byte $C1,$FF,$A0,$2B,$B3,$3C,$B6,$FF,$C7,$00 ; Weapons
-
-M_EquipInventoryArmor: 
-.byte $C1,$FF,$FF,$8A,$B5,$B0,$35,$FF,$FF,$C7,$00 ; Armor
-
-M_EquipInventorySelect:
-.byte $9E,$3E,$FF,$9C,$B7,$2F,$B7,$7A,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$01
-;.byte $09,$03,$9E,$3E,$FF,$9C,$A8,$45,$A6,$21,$28,$24,$BA,$5B,$A6,$AB,$09,$05,$01
-.byte $A5,$A8,$B7,$60,$3A,$33,$2B,$B3,$3C,$1E,$22,$27,$2F,$B0,$35,$C0,$00 ; Use Start/Select to switch between weapons and armor.
-
-M_LampMagic:
-.byte $8A,$24,$B3,$A8,$4E,$1B,$2E,$23,$37,$35,$1A,$B6,$AC,$AA,$AB,$B7,$C4,$00
-
-M_EquipInventoryClear:
-.byte $09,$1A,$00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1872,12 +1391,22 @@ EnterShop:
     BNE @ClearShopVars
 
     JSR LoadShopCHRPal     ; load up the CHR and palettes (and the shop type)
-    JSR DrawShop           ; draw the shop
+    LDA shop_id            ; check if its the caravan
+    CMP #$7F               
+    BNE :+
+      LDA #$4F
+      STA shop_id          ; turn caravan shop ID to one whose inventory can be read    
+  : JSR DrawShop           ; draw the shop (and load inventory)
+  
+    LDA shop_type          ; use the shop type to get the entry point for this shop
+    CMP #7
+    BNE :+
+      LDA #4
+      STA shop_type        ; set it to shop type 4 if its the caravan
 
-    LDA shop_type              ; use the shop type to get the entry point for this shop
-    CMP #4
-    BEQ @EnterClinic
-    CMP #5
+  : CMP #5
+    BEQ @EnterClinic    
+    CMP #6
     BEQ @EnterInn
     
    @EnterShop:
@@ -1900,44 +1429,18 @@ EnterShop:
     
     
 lut_ShopWelcome: ; uses shop_type to pick what lut_ShopStrings text to display
-.byte $0F ; weapons
-.byte $0F ; armor
-.byte $10 ; white magic
-.byte $10 ; black magic
-.byte $23 ; clinic (not used; clinics do their own logic)
-.byte $20 ; inn    (not used; inns do their own logic)
-.byte $0F ; item shop
-.byte $0F ; caravan
+.byte $0F ; 0 weapons
+.byte $0F ; 1 armor
+.byte $10 ; 2 white magic
+.byte $10 ; 3 black magic
+.byte $0F ; 4 item shop, caravan
 
-;lut_ShopWhatWant: 
-;.byte $18 ; weapons
-;.byte $18 ; armor
-;.byte $19 ; white magic
-;.byte $19 ; black magic
-;.byte $00 ; clinic (not used; clinics do their own logic)
-;.byte $00 ; inn    (not used; inns do their own logic)
-;.byte $18 ; item shop
-;.byte $18 ; caravan
-;
-;lut_ShopWhatSell: 
-;.byte $1A ; weapons
-;.byte $1A ; armor
-;.byte $1B ; white magic
-;.byte $1B ; black magic
-;.byte $00 ; clinic (not used; clinics do their own logic)
-;.byte $00 ; inn    (not used; inns do their own logic)
-;.byte $1A ; item shop
-;.byte $00 ; caravan (not used; caravan won't buy your things)
-
-lut_ShopMaxAmount:
-.byte $10 ; weapons
-.byte $10 ; armor
-.byte $04 ; white magic
-.byte $04 ; black magic
-.byte $00 ; clinic (not used; clinics do their own logic)
-.byte $00 ; inn    (not used; inns do their own logic)
-.byte $63 ; item shop
-.byte $63 ; caravan    
+lut_ShopMaxAmount: ; maximum amount of this shop's item you can hold in your inventory
+.byte 16 ; 0 weapons           
+.byte 16 ; 1 armor             
+.byte 4  ; 2 white magic       
+.byte 4  ; 3 black magic       
+.byte 99 ; 4 item shop, caravan
     
 
     
@@ -2055,8 +1558,8 @@ EnterNormalShop:
     LDX shop_type
     LDA lut_ShopWelcome, X
     JSR DrawShopDialogueBox     ; draw the "welcome" dialogue
-    LDA shop_type
-    CMP #7
+    LDA shop_id
+    CMP #$4F
     BNE MainShopLoop
 
 EnterCaravan:    
@@ -2078,8 +1581,8 @@ RestartShopLoop:
     JSR ResetShopList_Color
     LDA #$17  
     JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
-    LDA shop_type
-    CMP #7
+    LDA shop_id
+    CMP #$4F
     BEQ EnterCaravan
     
 MainShopLoop:
@@ -2105,7 +1608,16 @@ MainShopLoop:
     JMP ShopSell
     
 ExitShop:
-    RTS
+    ;JMP ReturnToMap
+
+ReturnToMap:                ; this should fix the weird flicker when leaving a shop...
+    JSR WaitForVBlank_L
+    LDA #0
+    STA $2001               ; turn off APU and PPU
+    STA $4015
+    STA $5015               ; MMC5 - JIGS
+    JMP WaitForVBlank_L
+   
 
 ShopBuy:
  ;   LDX shop_type
@@ -2842,9 +2354,9 @@ ShopPayPrice:
     LDX #0
     LDA ch_class, X    ; check if thief is party leader.
     AND #$0F           ; cut off high bits (sprite)
-    CMP #$01           ; IF thief, goto ShopSteal
+    CMP #CLASS_TH      ; IF thief, goto ShopSteal
     BEQ @ShopSteal
-    CMP #$07
+    CMP #CLASS_NJ
     BNE @PayUp         ; otherwise, pay up
     
    @ShopSteal:
@@ -3023,36 +2535,35 @@ EnterInn:
     JSR FadeInBatSprPalettes    ; then fade the party back in
 
   @Exit_HealthRestored:
-    LDA music_track             ; check to see if the music has silenced (will happen
-    CMP #$81                    ;  after the save jingle ends)
-    BNE :+
-      LDA #$51 ; 4F             ; restart track $4F (shop music) ;; JIGS - menu music now!
-      STA music_track
-    
-  : LDA #$22
+    LDA #$22
     JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue
-    JMP @True_Exit
+    JMP Clinic_Inn_Exit
     
   @Exit:
     LDA #SHOPBOX_COMMAND
     JSR EraseMainItemBox        ; erase shop box 3 (command box)
 
     LDA #$21
-    JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue 
+    JSR DrawShopDialogueBox     ; "Don't forget to save" dialogue 
     
-  @True_Exit:  
+Clinic_Inn_Exit:
     LDA #0
     STA joy_a
     STA joy_b                   ; clear A and B catchers
-
-  @LoopTwo:
+    
+   @Loop: 
     JSR ShopFrameNoCursor       ; do a frame
-    LDA joy_a                   ; check to see if A or B have been pressed
+    LDA music_track             ; check to see if the music has silenced (will happen
+    CMP #$81                    ;  after the save jingle ends)
+    BNE :+
+      LDA #$51 ; 4F             ; restart track $4F (shop music) ;; JIGS - menu music now!
+      STA music_track
+  : LDA joy_a                   ; check to see if A or B have been pressed
     ORA joy_b
-    BEQ @LoopTwo                ; and keep looping until one of them has
+    BEQ @Loop                   ; and keep looping until one of them has
 
-ClinicInn_Exit:
-    RTS                         ; then exit
+Clinic_Inn_QuickExit:    
+    JMP ReturnToMap             ; then exit
 
 
 EnterClinic:
@@ -3069,7 +2580,7 @@ EnterClinic:
     JSR Clinic_SelectTarget    ; Get a user selection
     LDA cursor                 ; grab their selection
     STA shop_curitem           ; and put it in cur_item to hold it for later
-    BCS ClinicInn_Exit         ; If they pressed B, exit.
+    BCS Clinic_Inn_QuickExit   ; If they pressed B, exit.
 
     JSR DrawInnClinicConfirm   ; Draw the cost confirmation dialogue
     JSR ShopLoop_YesNo         ; give them the yes/no option
@@ -3117,17 +2628,7 @@ EnterClinic:
   @NobodysDead:
     LDA #$23
     JSR DrawShopDialogueBox    ; if nobody is dead... "You don't need my help" dialogue
-
-    LDA #0
-    STA joy_a
-    STA joy_b                  ; clear A and B catchers
-
-  @ExitLoop:
-    JSR ShopFrameNoCursor      ; do a frame
-    LDA joy_a
-    ORA joy_b
-    BEQ @ExitLoop              ; and loop (keep doing frames) until either A or B pressed
-    RTS                        ; then exit
+    JMP Clinic_Inn_Exit
 
     
     
@@ -3628,9 +3129,9 @@ LoadEquippedMark:
 
 DrawShop:
     LDA shop_type              ;; JIGS - skip loading "inventory" if its an inn or clinic
-    CMP #4
-    BEQ :+
     CMP #5
+    BEQ :+
+    CMP #6
     BEQ :+              
     
     JSR LoadShopInventory      ; load up this shop's inventory into the item box
@@ -3967,8 +3468,7 @@ UpdateShopList_Loop:
     
     LDA item_box, X      ; use it to get the next shop item
     BNE @ItemExists
-    
-    JMP Fillblank_item
+    BEQ Fillblank_item
     
    @ItemExists:
     STA str_buf+$42, Y   ; put item ID
@@ -3978,7 +3478,7 @@ UpdateShopList_Loop:
     CMP #2
     BCS :+
        LDA #$07
-       JMP :++
+       BNE :++
     
   : LDA #$02
   : STA str_buf+$41, Y   ; Item Name control code
@@ -4647,7 +4147,7 @@ DrawInnClinicConfirm:
     STA tmp+1
 
     LDA shop_type
-    CMP #4
+    CMP #5
     BEQ @CalculateClinicPrice
     
    @CalculateInnPrice:    ;; JIGS - Each character's level x 5 added up
@@ -4937,7 +4437,14 @@ lut_BIT:
 ;;  just a multiplication by 14
 
 lut_ShopkeepAdditive:
-  .BYTE (0*14),(1*14),(2*14),(3*14),(4*14),(5*14),(6*14),(7*14)
+  .BYTE (0*14) ; weapons
+  .BYTE (1*14) ; armor
+  .BYTE (2*14) ; white magic
+  .BYTE (3*14) ; black magic
+  .BYTE (4*14) ; items
+  .BYTE (5*14) ; clinic
+  .BYTE (6*14) ; inn
+  .BYTE (7*14) ; caravan
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5020,17 +4527,19 @@ lut_ShopkeepImage:
 
    ; pointer table -- one entry for each class
 lut_MagicPermisPtr:
-  .WORD @FT, @TH, @BB, @RM, @WM, @BM
-  .WORD @KN, @NJ, @MA, @RW, @WW, @BW
+  .WORD @FT, @TH, @BB, @RM, @WM, @BM, @C1, @C2
+  .WORD @KN, @NJ, @MA, @RW, @WW, @BW, @C3, @C4
 
    ; each class's permission table.  8 bytes (64 spells) per table
 
- @FT: ;.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
- @TH: ;.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;; JIGS - now they share
+ @FT: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ @TH: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  @BB: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
  @RM: .BYTE $50,$00,$50,$50,$76,$FF,$FF,$FF
  @WM: .BYTE $0F,$0F,$0F,$0F,$0F,$4F,$CF,$FF
  @BM: .BYTE $F0,$F0,$F0,$F0,$F2,$F0,$F6,$FF
+ @C1: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ @C2: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
  @KN: .BYTE $4F,$0F,$5F,$FF,$FF,$FF,$FF,$FF
  @NJ: .BYTE $F0,$F0,$F0,$F0,$FF,$FF,$FF,$FF
@@ -5038,6 +4547,8 @@ lut_MagicPermisPtr:
  @RW: .BYTE $40,$00,$50,$40,$30,$87,$D7,$FF
  @WW: .BYTE $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
  @BW: .BYTE $F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0
+ @C3: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+ @C4: .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5138,31 +4649,31 @@ PlaySFX_MenuMove:
     
 ;; JIGS - optional heal SFX instead of the jingle
     
- PlayHealSFX:
- LDA MuteSFXOption
- BNE SFX_Done
+PlayHealSFX:
+    LDA MuteSFXOption
+    BNE SFX_Done
  
- PlayHealSFX_Map:
- LDA #%01000111 ; 
- STA $4004
-
- LDA #%11101010 ; 
- STA $4005
-
- LDA #%11110000 ; 
- STA $4006        
- LSR A
- LDA #%11000000
- STA $4007
-
- LDA #$20
- STA sq2_sfx      ; indicate square 2 is playing a sound effect for $20 frames
+PlayHealSFX_Map:
+    LDA #%01000111 ; 
+    STA $4004
+    
+    LDA #%11101010 ; 
+    STA $4005
+    
+    LDA #%11110000 ; 
+    STA $4006        
+    LSR A
+    LDA #%11000000
+    STA $4007
+    
+    LDA #$20
+    STA sq2_sfx      ; indicate square 2 is playing a sound effect for $20 frames
+    
+    SFX_Done:
+    RTS              ;  and exit!  
  
- SFX_Done:
- RTS              ;  and exit!  
  
- 
- PlaySFX_CharSwap:
+PlaySFX_CharSwap:
     LDA MuteSFXOption
     BNE @Done
     
@@ -5182,6 +4693,28 @@ PlaySFX_MenuMove:
     
     @Done:
     RTS              ;  and exit!
+
+
+
+
+ClearMenuOtherNametables:
+;; JIGS - just a little thing for the menu, when you shut off SFX, it'll shake the screen for errors instead.
+;; This stops it from showing a pixel's worth of garbage on the side.
+    LDX #>$2400
+    LDA #<$2400
+    STX $2006   ; write X as high byte
+    STA $2006   ; A as low byte
+
+    LDY #4                    ; loops to clear $0400 bytes of NT data (right nametables)
+  @ClearNT_OuterLoop:
+      LDX #0
+    @ClearNT_InnerLoop:         ; inner loop clears $100 bytes
+        STA $2007
+        DEX
+        BNE @ClearNT_InnerLoop
+      DEY                       ; outer loop runs inner loop 8 times
+      BNE @ClearNT_OuterLoop    ;  clearing $800 bytes total
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5261,6 +4794,8 @@ ResumeMainMenu:
     STA menustall                   ; and disable menu stalling
 
     JSR DrawMainMenu                ; draw the main menu
+    LDA #BANK_THIS
+    STA cur_bank
 	JSR MusicPlay_LoadingCHR
     JSR TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen on
 
@@ -8632,18 +8167,31 @@ MoveMagicMenuCursor:
     LDA TempSpellList, X
 UpdateMP_Exit:    
     RTS              ; then exit.
+
+
+
+
+
+MagicMenuMPTitle:
+.byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
+
     
 UpdateMP:    
     LDA item_pageswap
     CMP #2
     BEQ UpdateMP_Exit         ; don't display MP if forgetting spells  
     
-    LDA #80
-    ASL A                   ; double A (pointers are 2 bytes)
-    TAX                     ; put in X to index menu string pointer table
-    LDA lut_MenuText, X
-    STA text_ptr
-    LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+   ; LDA #80
+   ; ASL A                   ; double A (pointers are 2 bytes)
+   ; TAX                     ; put in X to index menu string pointer table
+   ; LDA lut_MenuText, X
+   ; STA text_ptr
+   ; LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+   ; STA text_ptr+1
+   
+    LDA #<MagicMenuMPTitle
+    STA text_ptr 
+    LDA #>MagicMenuMPTitle
     STA text_ptr+1
     
     LDY #0
@@ -8990,6 +8538,10 @@ DrawMainMenu:
    JSR DrawMenuString   ; draw options string
 
 DrawMainMenu_CharacterBox:
+    LDA #BANK_THIS
+    STA cur_bank 
+    STA ret_bank                   ; set for MusicPlay and ComplexString
+
     LDA #MBOX_CHARACTERS           ; then draw the boxes for each character
     JSR DrawMainItemBox            ;  stats...starting with the first character
 	;; at this point, should be at scanline 250 or so... 
@@ -9294,10 +8846,12 @@ DrawItemDescBox:
 DrawMenuString:
     ASL A                   ; double A (pointers are 2 bytes)
     TAX                     ; put in X to index menu string pointer table
-    LDA lut_MenuText, X
-    STA text_ptr
-    LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
-    STA text_ptr+1
+    JMP DrawMenuString_FixedBank
+    
+   ; LDA lut_MenuText, X
+   ; STA text_ptr
+   ; LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+   ; STA text_ptr+1
          ;;  code seamlessly flows into DrawMenuComplexString
 
 
@@ -9348,30 +8902,33 @@ DrawCharMenuString:
     LDY #$7F                ; set length to default 7F
 
 DrawCharMenuString_Len:
+    STY LongCall_Y
     ASL A                   ; double menu string ID
     TAX                     ; put in X
-    LDA lut_MenuText, X     ; and load up the pointer into (tmp)
-    STA tmp
-    LDA lut_MenuText+1, X
-    STA tmp+1
-
-    LDA #<bigstr_buf        ; set the text pointer to our bigstring buffer
-    STA text_ptr
-    LDA #>bigstr_buf
-    STA text_ptr+1
-
-  @Loop:                    ; now step through each byte of the string....
-    LDA (tmp), Y            ; get the byte
-    CMP #$10                ; compare it to $10 (charater stat control code)
-    BNE :+                  ;   if it equals...
-      ORA submenu_targ      ;   OR with desired character ID to draw desired character's stats
-:   STA bigstr_buf, Y       ; copy the byte to the big string buffer
-    DEY                     ; then decrement Y
-    CPY #$FF                ; check to see if it wrapped
-    BNE @Loop               ; and keep looping until it has
-
-                                ; once the loop is complete and our big string buffer has been filled
-    JMP DrawMenuComplexString   ; draw the complex string and exit.
+    JMP DrawMenuString_CharCodes_FixedBank
+    
+;    LDA lut_MenuText, X     ; and load up the pointer into (tmp)
+;    STA tmp
+;    LDA lut_MenuText+1, X
+;    STA tmp+1
+;
+;    LDA #<bigstr_buf        ; set the text pointer to our bigstring buffer
+;    STA text_ptr
+;    LDA #>bigstr_buf
+;    STA text_ptr+1
+;
+;  @Loop:                    ; now step through each byte of the string....
+;    LDA (tmp), Y            ; get the byte
+;    CMP #$10                ; compare it to $10 (charater stat control code)
+;    BNE :+                  ;   if it equals...
+;      ORA submenu_targ      ;   OR with desired character ID to draw desired character's stats
+;:   STA bigstr_buf, Y       ; copy the byte to the big string buffer
+;    DEY                     ; then decrement Y
+;    CPY #$FF                ; check to see if it wrapped
+;    BNE @Loop               ; and keep looping until it has
+;
+;                                ; once the loop is complete and our big string buffer has been filled
+;    JMP DrawMenuComplexString   ; draw the complex string and exit.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9868,6 +9425,17 @@ EquipStatsDescBoxNumbers:
     RTS
     
 
+EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
+;; don't draw it with the normal ComplexString setup... it must be loaded into RAM and edited there first!
+.byte $8D,$A4,$B0,$A4,$66,$08                 ; Damage___###__ ; later on, stats are added in the # slots
+.byte $8D,$A8,$A9,$3A,$3E,$05,$01             ; Defense__###
+.byte $8A,$A6,$A6,$55,$5E,$BC,$06             ; Accuracy_###__
+.byte $8E,$B9,$3F,$AC,$3C,$05,$01             ; Evasion__###
+.byte $8C,$5C,$57,$51,$AF,$06                 ; Critical_###__
+.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$05,$00     ; M.Evade__###
+
+
+
 EquipStatsDescBoxString:
     LDA #23
     STA dest_y
@@ -9940,12 +9508,17 @@ EquipStatsDescBoxString:
     ;; but at this point I already re-did the "slower" version to work so...
 
    @Stats: 
-    LDA #81 
-    ASL A                   ; double A (pointers are 2 bytes)
-    TAX                     ; put in X to index menu string pointer table
-    LDA lut_MenuText, X
+    ;LDA #81 
+    ;ASL A                   ; double A (pointers are 2 bytes)
+    ;TAX                     ; put in X to index menu string pointer table
+    ;LDA lut_MenuText, X
+    ;STA text_ptr
+    ;LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    ;STA text_ptr+1
+    
+    LDA #<EquipStats_Blank    
     STA text_ptr
-    LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    LDA #>EquipStats_Blank    
     STA text_ptr+1
  
     LDY #0                  ; copy it to str_buf for some reason, instead of just printing it normally
@@ -10319,13 +9892,30 @@ IsEquipLegal:
     LDX CharacterIndexBackup
     LDA ch_class, X   ; get the character's class
     AND #$0F             ;; JIGS - cut off high bits (sprite)
-    ASL A             ; double it (2 bytes for equip permissions)
+  ;  ASL A             ; double it (2 bytes for equip permissions)
     TAX               ; and put in X to index the equip bit
+    
+    ;; JIGS - instead of doubling it for another table...
+    
+    LDA #0            ; clear the temp RAM
+    STA tmp+4
+    STA tmp+5          
+    SEC               ; set C
+  : ROR tmp+4         ; shift the carry into the low byte (setting it to $80)
+    ROR tmp+5         ; then again with the high byte 
+    DEX               ; decrement X (class ID) -- so a Fighter's ID of 0 will now be FF
+    BPL :-            ; when it wraps to FF, its done.
+    ;; The White Wizard's class ID is #$0C (12), doing that many shifts...
+    ;; would make the temp ram look like so:
+    ;; tmp+4      tmp+5
+    ;; %00000000, %00001000
+    ;;  01234567   89ABCDEF 
+    ;; which is the same value that doing this v would have gotten
 
-    LDA lut_ClassEquipBit, X        ; get the class permissions bit position word
-    STA tmp+4                       ;  and put in tmp+4,5
-    LDA lut_ClassEquipBit+1, X
-    STA tmp+5
+  ;  LDA lut_ClassEquipBit, X        ; get the class permissions bit position word
+  ;  STA tmp+4                       ;  and put in tmp+4,5
+  ;  LDA lut_ClassEquipBit+1, X
+  ;  STA tmp+5
 
     LDX equipoffset
     LDA lut_EquipOffset, X
@@ -10682,10 +10272,25 @@ DrawEquipMenu:
 ;;  formula is "equip_bit = ($800 >> class_id)".  So Fighter=$800, Thief=$400, etc
 ;;
 
+;; JIGS - see "IsEquipLegal" for why this isn't used!
 
-lut_ClassEquipBit: ;  FT   TH   BB   RM   WM   BM      KN   NJ   MA   RW   WW   BW
-   .WORD            $800,$400,$200,$100,$080,$040,   $020,$010,$008,$004,$002,$001
-
+;lut_ClassEquipBit: ;  FT   TH   BB   RM   WM   BM      KN   NJ   MA   RW   WW   BW
+;.WORD %10000000, %00000000 ; Fighter
+;.WORD %01000000, %00000000 ; Thief
+;.WORD %00100000, %00000000 ; BBelt
+;.WORD %00010000, %00000000 ; RMage
+;.WORD %00001000, %00000000 ; WMage
+;.WORD %00000100, %00000000 ; BMage
+;.WORD %00000010, %00000000 ; 
+;.WORD %00000001, %00000000 ; 
+;.WORD %00000000, %10000000 ; Knight
+;.WORD %00000000, %01000000 ; Ninja
+;.WORD %00000000, %00100000 ; Master
+;.WORD %00000000, %00010000 ; RedWiz
+;.WORD %00000000, %00001000 ; W.Wiz
+;.WORD %00000000, %00000100 ; B.Wiz
+;.WORD %00000000, %00000010 ; 
+;.WORD %00000000, %00000001 ; 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10696,14 +10301,149 @@ lut_ClassEquipBit: ;  FT   TH   BB   RM   WM   BM      KN   NJ   MA   RW   WW   
 ;;  Note again that bit set = weapon CANNOT be equipped by that class.
 
 lut_WeaponPermissions:
-  .WORD   $0DE7,$028A,$0400,$02CB,$074D,   $06CB,$07CF,$02CB,$0DE7,$028A
-  .WORD   $05C7,$02CB,$06CB,$07CF,$02CB,   $028A,$06CB,$074D,$07CF,$06CB
-  .WORD   $06CB,$02CB,$06CB,$06CB,$02CB,   $06CB,$02CB,$0504,$07CF,$0F6D
-  .WORD   $0FAE,$0FCB,$0FFE,$0FCB,$0FCA,   $0FCD,$0FCB,$0FEF,$0FDF,$0000
-  .WORD   $0208,$06CB,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
-  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
-  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF
+.byte %11011111, %10011111 ; 0  ; Wooden Nunchuck
+.byte %00101011, %00101011 ; 1  ; Small Knife
+.byte %01000011, %00000011 ; 2  ; Wooden Staff
+.byte %00101111, %00101111 ; 3  ; Rapier
+.byte %01110111, %00110111 ; 4  ; Iron Hammer
+.byte %01101111, %00101111 ; 5  ; Short Sword
+.byte %01111111, %00111111 ; 6  ; Hand Axe
+.byte %00101111, %00101111 ; 7  ; Scimitar
+.byte %11011111, %10011111 ; 8  ; Iron Nunchucks
+.byte %00101011, %00101011 ; 9  ; Large Knife
+.byte %01011111, %00011111 ; A  ; Iron Staff
+.byte %00101111, %00101111 ; B  ; Sabre
+.byte %01101111, %00101111 ; C  ; Long Sword
+.byte %01111111, %00111111 ; D  ; Great Axe
+.byte %00101111, %00101111 ; E  ; Falchion
+.byte %00101011, %00101011 ; F  ; Silver Knife
+.byte %01101111, %00101111 ; 10 ; Silver Sword
+.byte %01110111, %00110111 ; 11 ; Silver Hammer
+.byte %01111111, %00111111 ; 12 ; Silver Axe
+.byte %01101111, %00101111 ; 13 ; Flame Sword
+.byte %01101111, %00101111 ; 14 ; Ice Sword
+.byte %01001111, %00101111 ; 15 ; Dragon Sword
+.byte %01101111, %00101111 ; 16 ; Giant Sword
+.byte %01101111, %00101111 ; 17 ; Sun Sword
+.byte %01001111, %00101111 ; 18 ; Coral Sword
+.byte %01101111, %00101111 ; 19 ; Were Sword
+.byte %01001111, %00101111 ; 1A ; Rune Sword
+.byte %01010011, %00010011 ; 1B ; Power Staff
+.byte %01111111, %00111111 ; 1C ; Light Axe
+.byte %11110111, %10110111 ; 1D ; Heal Staff
+.byte %11111011, %10111011 ; 1E ; Mage Staff
+.byte %11111111, %00101111 ; 1F ; Defense Sword
+.byte %11111111, %11111011 ; 20 ; Wizard Staff
+.byte %11111111, %00101111 ; 21 ; Vorpal Sword
+.byte %11111111, %00101011 ; 22 ; CatClaw
+.byte %11111111, %00110111 ; 23 ; Thor Hammer
+.byte %11111111, %00101111 ; 24 ; Bane Sword
+.byte %11111111, %10111111 ; 25 ; Katana
+.byte %11111111, %01111111 ; 26 ; Excalibur
+.byte %00000000, %00000000 ; 27 ; Masamune
+.byte %00101011, %00100011 ; 28 ; Chicken Knife
+.byte %00101111, %00101111 ; 29 ; Brave Blade
+.byte %11111111, %11111111 ; 2A
+.byte %11111111, %11111111 ; 2B
+.byte %11111111, %11111111 ; 2C
+.byte %11111111, %11111111 ; 2D
+.byte %11111111, %11111111 ; 2E
+.byte %11111111, %11111111 ; 2F
+.byte %11111111, %11111111 ; 30
+.byte %11111111, %11111111 ; 31
+.byte %11111111, %11111111 ; 32
+.byte %11111111, %11111111 ; 33
+.byte %11111111, %11111111 ; 34
+.byte %11111111, %11111111 ; 35
+.byte %11111111, %11111111 ; 36
+.byte %11111111, %11111111 ; 37
+.byte %11111111, %11111111 ; 38
+.byte %11111111, %11111111 ; 39
+.byte %11111111, %11111111 ; 3A
+.byte %11111111, %11111111 ; 3B
+.byte %11111111, %11111111 ; 3C
+.byte %11111111, %11111111 ; 3D
+.byte %11111111, %11111111 ; 3E
+.byte %11111111, %11111111 ; 3F
+.byte %11111111, %11111111 ; Shop CheerPose
 
+
+lut_ArmorPermissions:
+.byte %00000011, %00000011 ; 40  ; Cloth T
+.byte %00001111, %00001111 ; 41  ; Wooden Armor
+.byte %01101111, %00101111 ; 42  ; Chain Armor
+.byte %01111111, %00111111 ; 43  ; Iron Armor
+.byte %01111111, %01111111 ; 44  ; Steel Armor
+.byte %01101111, %00101111 ; 45  ; Silver Armor
+.byte %01111111, %00111111 ; 46  ; Flame Armor
+.byte %01111111, %00111111 ; 47  ; Ice Armor
+.byte %11111111, %01111111 ; 48  ; Opal Armor
+.byte %11111111, %01111111 ; 49  ; Dragon Armor
+.byte %00000011, %00000011 ; 4A  ; Copper Q
+.byte %00000011, %00000011 ; 4B  ; Silver Q
+.byte %00000011, %00000011 ; 4C  ; Gold Q
+.byte %00000011, %00000011 ; 4D  ; Opal Q
+.byte %11111111, %11110111 ; 4E  ; White T
+.byte %11111111, %11111011 ; 4F  ; Black T
+.byte %01111111, %00111111 ; 50  ; Wooden Shield
+.byte %01111111, %00111111 ; 51  ; Iron Shield
+.byte %01111111, %00111111 ; 52  ; Silver Shield
+.byte %01111111, %00111111 ; 53  ; Flame Shield
+.byte %01111111, %00111111 ; 54  ; Ice Shield
+.byte %11111111, %01111111 ; 55  ; Opal Shield
+.byte %11111111, %01111111 ; 56  ; Aegis Shield
+.byte %00101111, %00101111 ; 57  ; Buckler
+.byte %00100011, %00100011 ; 58  ; Protect Cape
+.byte %00000011, %00000011 ; 59  ; Cap
+.byte %01111111, %00111111 ; 5A  ; Wooden Helm
+.byte %01111111, %00111111 ; 5B  ; Iron Helm
+.byte %01111111, %00111111 ; 5C  ; Silver Helm
+.byte %11111111, %01111111 ; 5D  ; Opal Helm
+.byte %11111111, %00111111 ; 5E  ; Heal Helm
+.byte %00000000, %00000000 ; 5F  ; Ribbon
+.byte %00000011, %00000011 ; 60  ; Gloves
+.byte %01111111, %00111111 ; 61  ; Copper Gauntlet
+.byte %01111111, %00111111 ; 62  ; Iron Gauntlet
+.byte %01111111, %00101111 ; 63  ; Silver Gauntlet
+.byte %11111111, %00101111 ; 64  ; Zeus Gauntlet
+.byte %01111111, %00101111 ; 65  ; Power Gauntlet
+.byte %11111111, %01111111 ; 66  ; Opal Gauntlet
+.byte %00000011, %00000011 ; 67  ; Protect Ring
+.byte %11111111, %11111111 ; 68
+.byte %11111111, %11111111 ; 69
+.byte %11111111, %11111111 ; 6A
+.byte %11111111, %11111111 ; 6B
+.byte %11111111, %11111111 ; 6C
+.byte %11111111, %11111111 ; 6D
+.byte %11111111, %11111111 ; 6E
+.byte %11111111, %11111111 ; 6F
+.byte %11111111, %11111111 ; 70
+.byte %11111111, %11111111 ; 71
+.byte %11111111, %11111111 ; 72
+.byte %11111111, %11111111 ; 73
+.byte %11111111, %11111111 ; 74
+.byte %11111111, %11111111 ; 75
+.byte %11111111, %11111111 ; 76
+.byte %11111111, %11111111 ; 77
+.byte %11111111, %11111111 ; 78
+.byte %11111111, %11111111 ; 79
+.byte %11111111, %11111111 ; 7A
+.byte %11111111, %11111111 ; 7B
+.byte %11111111, %11111111 ; 7C
+.byte %11111111, %11111111 ; 7D
+.byte %11111111, %11111111 ; 7E
+.byte %11111111, %11111111 ; 7F
+.byte %11111111, %11111111 ; Shop CheerPose
+
+
+; .WORD   $0DE7,$028A,$0400,$02CB,$074D,   $06CB,$07CF,$02CB,$0DE7,$028A
+; .WORD   $05C7,$02CB,$06CB,$07CF,$02CB,   $028A,$06CB,$074D,$07CF,$06CB
+; .WORD   $06CB,$02CB,$06CB,$06CB,$02CB,   $06CB,$02CB,$0504,$07CF,$0F6D
+; .WORD   $0FAE,$0FCB,$0FFE,$0FCB,$0FCA,   $0FCD,$0FCB,$0FEF,$0FDF,$0000
+; .WORD   $0208,$06CB,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
+; .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
+; .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF
+;
   ; JIGS - last one is for clearing cheer pose in shops 
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10712,15 +10452,15 @@ lut_WeaponPermissions:
 ;;
 ;;    Same deal as above, only for the armor instead of the weapons.
 
-lut_ArmorPermissions:
-  .WORD   $0000,$00C3,$06CB,$07CF,$07DF,   $06CB,$07CF,$07CF,$0FDF,$0FDF
-  .WORD   $0000,$0000,$0000,$0000,$0FFD,   $0FFE,$07CF,$07CF,$07CF,$07CF
-  .WORD   $07CF,$0FDF,$0FDF,$02CB,$0208,   $0000,$07CF,$07CF,$07CF,$0FDF
-  .WORD   $0FCF,$0000,$0000,$07CF,$07CF,   $07CB,$0FCB,$07CB,$0FDF,$0000
-  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
-  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
-  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF
-
+;lut_ArmorPermissions:
+;  .WORD   $0000,$00C3,$06CB,$07CF,$07DF,   $06CB,$07CF,$07CF,$0FDF,$0FDF
+;  .WORD   $0000,$0000,$0000,$0000,$0FFD,   $0FFE,$07CF,$07CF,$07CF,$07CF
+;  .WORD   $07CF,$0FDF,$0FDF,$02CB,$0208,   $0000,$07CF,$07CF,$07CF,$0FDF
+;  .WORD   $0FCF,$0000,$0000,$07CF,$07CF,   $07CB,$0FCB,$07CB,$0FDF,$0000
+;  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
+;  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF
+;  .WORD   $FFFF,$FFFF,$FFFF,$FFFF,$FFFF,   $FFFF
+;
 
 lut_EquipOffset:
 .byte $00,$01,$01,$01,$01,$01,$00,$00

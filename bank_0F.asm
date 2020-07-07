@@ -44,6 +44,7 @@
 .import LoadCursorOnly
 .import LoadShopCHRForBank_Z
 .import ShiftLeft6
+.import SetPPUAddr_XA
 
 
 
@@ -1284,25 +1285,25 @@ CritCheck:
 
     LDA btl_attacker_class
     AND #$0F             ;; JIGS - cut off high bits (hidden state)
-    CMP #$01                        ; IF thief, goto CritCrit
-    BEQ @CritCrit
-    CMP #$07                        ; IF ninja, goto CritCrit
-    BEQ @CritCrit
-    CMP #$02                        ; IF bbelt, goto CritStun
-    BEQ @CritStun
-    CMP #$08                        ; IF master, goto CritStun
-    BEQ @CritStun
-    CMP #$03                        ; IF redmage, goto CritSlow
-    BEQ @CritSlow
-    CMP #$09                        ; IF redwiz, goto CritSlow
-    BEQ @CritSlow
-    CMP #$05                        ; IF blackmage, goto CritConfuse
-    BEQ @CritConfuse
-    CMP #$0B                        ; IF blackwiz, goto CritConfuse
-    BEQ @CritConfuse
-    CMP #$04                        ; IF whitemage, goto CritStrength
-    BEQ @CritStrength
-    CMP #$0A                        ; IF whitewiz, goto CritStrength
+    CMP #CLASS_TH                   ; IF thief, goto CritCrit
+    BEQ @CritCrit              
+    CMP #CLASS_NJ                   ; IF ninja, goto CritCrit
+    BEQ @CritCrit              
+    CMP #CLASS_BB                   ; IF bbelt, goto CritStun
+    BEQ @CritStun              
+    CMP #CLASS_MA                   ; IF master, goto CritStun
+    BEQ @CritStun              
+    CMP #CLASS_RM                   ; IF redmage, goto CritSlow
+    BEQ @CritSlow              
+    CMP #CLASS_RW                   ; IF redwiz, goto CritSlow
+    BEQ @CritSlow              
+    CMP #CLASS_BM                   ; IF blackmage, goto CritConfuse
+    BEQ @CritConfuse           
+    CMP #CLASS_BW                   ; IF blackwiz, goto CritConfuse
+    BEQ @CritConfuse           
+    CMP #CLASS_WM                   ; IF whitemage, goto CritStrength
+    BEQ @CritStrength          
+    CMP #CLASS_WW                   ; IF whitewiz, goto CritStrength
     BEQ @CritStrength
    @CritReturn:
     RTS
@@ -1394,9 +1395,9 @@ HiddenCheck:
   :	STA btl_attacker_critrate
 
     LDA btl_attacker_class
-    CMP #$01                     ; if thief
+    CMP #CLASS_TH             ; if thief
     BEQ @HiddenBoost
-    CMP #$07                     ; if ninja
+    CMP #CLASS_NJ             ; if ninja
     BEQ @HiddenBoost
     RTS
 
@@ -1961,10 +1962,13 @@ Battle_SetPartyWeaponSpritePal:
     
    @CheckForFist:
     LDA ch_class, X
-    AND #CLS_BB | CLS_MA
-    BEQ @Empty
+    AND #$0F
+    CMP #CLASS_BB
+    BEQ :+
+    CMP #CLASS_MA
+    BNE @Empty
     
-    TXA
+  : TXA
     TAY
     LDX char_index
     LDA #$AC
@@ -1989,13 +1993,16 @@ lut_InBattleCharPaletteAssign:
   .BYTE $21 ; WMage
   .BYTE $20 ; BMage
   .BYTE $21 ; 
-  .BYTE $22 ; 
-  .BYTE $20 ; 
+  .BYTE $21 ; 
+  
+  .BYTE $21 ; Knight
+  .BYTE $22 ; Ninja
+  .BYTE $20 ; Master
+  .BYTE $21 ; RedWiz
+  .BYTE $21 ; W.Wiz
+  .BYTE $20 ; B.Wiz
   .BYTE $21 ; 
   .BYTE $21 ; 
-  .BYTE $20 ; 
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2141,10 +2148,10 @@ UnadjustBBEquipStats:
     LDA ch_class, X     ; get the char's class
     AND #$0F            ;; JIGS - cut off high bits (sprite)
 
-    CMP #CLS_BB         ; check if he's a black belt or master
-    BEQ @BlackBelt      ;  if he isn't, just exit
-    CMP #CLS_MA         ; if he is...
-    BNE @Armor
+    CMP #CLASS_BB         ; check if he's a black belt or master
+    BEQ @BlackBelt      ; if blackbelt, do the thing
+    CMP #CLASS_MA         
+    BNE @Armor          ; if not, do armor normally
 
   @BlackBelt:
     LDA #0              ; zero his damage stat
@@ -2388,9 +2395,9 @@ ReadjustBBEquipStats:
     LDA ch_class, X    ; get this char's class
     AND #$0F             ;; JIGS - cut off high bits (sprite)
 
-    CMP #CLS_BB        ; see if he's a black belt or master... if yes, jump ahead
+    CMP #CLASS_BB        ; see if he's a black belt or master... if yes, jump ahead
     BEQ @BlackBelt     ; otherwise, exit
-    CMP #CLS_MA
+    CMP #CLASS_MA
     BNE @Exit
 
   @BlackBelt:
@@ -3099,7 +3106,7 @@ EnterTitleScreen:
 
     JSR LongCall
     .word LoadCursorOnly
-    .byte BANK_MENUCHR
+    .byte BANK_BTLCHR
 
     JSR DrawTitleWords
     JSR TurnMenuScreenOn_ClearOAM
@@ -3198,7 +3205,7 @@ lut_TitleCursor_Y:
 ;; This is for the Options menu on the title mostly.
 ;; Because it doesn't need to reset the Bridge Scene graphics, and tile $00 is a piece of hillside for some reason.
 ClearNT_FillBackground:
-    LDA #$7E
+    LDA #$6B
     STA MMC5_tmp
     BNE ClearNT_Color
 
@@ -3302,11 +3309,10 @@ NewGamePartyGeneration:
 
     JSR LoadMenuCHRPal_Z
     ;; This loads up the menu text, as well as each class's sprites -- even the job changes!
-    
+
     LDA #$17
-    STA $2006
-    LDA #$EE
-    STA $2006
+    LDX #$EE
+    JSR SetPPUAddr_XA
     LDA #$7F
     STA $2007
     ;; this will draw a _ on a blank tile, for the blinker
@@ -3421,9 +3427,32 @@ PtyGen_DrawScreen:
     STA joy_prevdir       ; as well as resetting the cursor and previous joy direction
     STA $2001             ; turn off PPU
 
-    JSR ClearNT ;_FillBackground      ; Fill the background with colour instead of boxes
+    JSR ClearNT 
     JSR PtyGen_DrawBoxes
     JSR PtyGen_DrawText
+    
+    LDA #05 
+    STA dest_x 
+    LDA #26
+    STA dest_y
+    
+    LDA #$0E
+    JSR DrawZ_MenuString
+    
+    LDA #<$23F0
+    LDX #>$23F0
+    JSR SetPPUAddr_XA
+
+    LDA #$0F
+    LDX #$08
+  : STA $2007
+    DEX
+    BPL :-
+    ;; set the nametable attributes  
+    ;LDA #$0F
+    STA cur_pal+2
+    ;; make palette 0 have black instead of blue    
+    
     JMP TurnMenuScreenOn_ClearOAM
 
 
@@ -3479,7 +3508,7 @@ DoPartyGen_OnCharacter:
     CLC
     LDA ptygen_class, X       ; Add 1 to the class ID of the current character.
     ADC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes
+    CMP #CLASS_START_MAX      ; JIGS - change this to 12 for all classes
     BCC :+
       LDA #0                  ; wrap 5->0
   : STA ptygen_class, X
@@ -3495,9 +3524,9 @@ DoPartyGen_OnCharacter:
     LDA ptygen_class, X       ; Subtract 1 from the class ID of the current character.
     SEC
     SBC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes
+    CMP #CLASS_START_MAX      ; JIGS - change this to 12 for all classes
     BCC :-
-    LDA #5                    ; JIGS - and then change this to 11
+    LDA #CLASS_START_MAX-1    ; JIGS - and then change this to 11
     BNE :-
 
    @CharSpriteThing:
@@ -3505,7 +3534,7 @@ DoPartyGen_OnCharacter:
     LDA ptygen_sprite, X
     CLC
     ADC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes
+    CMP #CLASS_START_MAX      ; JIGS - change this to 12 for all classes
     BCC :+
        LDA #0
   : STA ptygen_sprite, X
@@ -3516,9 +3545,9 @@ DoPartyGen_OnCharacter:
     LDA ptygen_sprite, X      ; Subtract 1 from the sprite ID of the current character.
     SEC
     SBC #1
-    CMP #6                    ; JIGS - change this to 12 for all classes
+    CMP #CLASS_START_MAX      ; JIGS - change this to 12 for all classes
     BCC :-
-    LDA #5                    ; JIGS - and then change this to 11
+    LDA #CLASS_START_MAX-1    ; JIGS - and then change this to 11
     BNE :-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3914,9 +3943,9 @@ PtyGen_DrawOneText:
     STA dest_y
 
     LDA ptygen_class, X     ; get the selected class
-    CMP #01                 ; this silly thing just centers the THIEF text...
+    CMP #CLASS_TH           ; this silly thing just centers the THIEF text...
     BEQ :+
-    CMP #07                 ; and the NINJA if its ever set to print here
+    CMP #CLASS_NJ           ; and the NINJA if its ever set to print here
     BNE :++
 
   : INC dest_x
@@ -4234,26 +4263,27 @@ lut_PtyGenBuf:
 ;  .BYTE $01,$00,$FF,$FF,$FF,$FF,$15,$0C,$13,$06,$B0,$40,$12,$04,$A0,$40
 ;  .BYTE $02,$00,$FF,$FF,$FF,$FF,$07,$18,$05,$12,$40,$A0,$04,$10,$30,$A0
 ;  .BYTE $03,$00,$FF,$FF,$FF,$FF,$15,$18,$13,$12,$B0,$A0,$12,$10,$A0,$A0
-  ;      1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19
-  .BYTE $00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$0C,$05,$06,$48,$40,$04,$04,$33,$44,$00
-  .BYTE $01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$0C,$12,$06,$B0,$40,$11,$04,$9C,$44,$01
-  .BYTE $02,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$18,$05,$12,$48,$A0,$04,$10,$33,$A4,$02
-  .BYTE $03,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$18,$12,$12,$B0,$A0,$11,$10,$9C,$A4,$03
 
-  ;; JIGS ^ adding more bytes for names, and one for sprite instead of class.... ^
-; ptygen_class   = 1
-; ptygen_name    = 2, 3, 4, 5, 6, 7, 8
-; ptygen_name_x  = 9
-; ptygen_name_y  = 10
-; ptygen_class_x = 11
-; ptygen_class_y = 12
-; ptygen_spr_x   = 13
-; ptygen_spr_y   = 14
-; ptygen_box_x   = 15
-; ptygen_box_y   = 16
-; ptygen_curs_x  = 17
-; ptygen_curs_y  = 18
-; ptygen_sprite  = 19
+  ;      1   2                           3   4   5   6   7   8   9   10  11  12  13
+  .BYTE $00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$0A,$05,$04,$48,$30,$04,$02,$33,$34,$00
+  .BYTE $01,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$0A,$12,$04,$B0,$30,$11,$02,$9C,$34,$01
+  .BYTE $02,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$16,$05,$10,$48,$90,$04,$0E,$33,$94,$02
+  .BYTE $03,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$16,$12,$10,$B0,$90,$11,$0E,$9C,$94,$03
+
+  ;; JIGS ^ adding 3 more bytes for names, and one for sprite instead of class... ^
+; 1 - ptygen_class   
+; 2 - ptygen_name    
+; 3 - ptygen_name_x  
+; 4 - ptygen_name_y  
+; 5 - ptygen_class_x 
+; 6 - ptygen_class_y 
+; 7 - ptygen_spr_x   
+; 8 - ptygen_spr_y   
+; 9 - ptygen_box_x   
+; 10 - ptygen_box_y  
+; 11 - ptygen_curs_x 
+; 12 - ptygen_curs_y 
+; 13 - ptygen_sprite 
 
 
 
@@ -5910,7 +5940,7 @@ lut_ZMenuText:
 .word Deleted                ; B ; 11
 .word SoundTestInstructions  ; C ; 12
 .word Zheep                  ; D ; 13
-.word BLANK                  ; E ;
+.word PartyGenInstructions   ; E ;
 .word BLANK                  ; F ;
 .word Song1                  ; 10
 .word Song2                  ; 11
@@ -5993,6 +6023,10 @@ AreYouSure:
 
 Deleted:
 .byte $FF,$FF,$8D,$8E,$95,$8E,$9D,$8E,$8D,$C4,$FF,$FF,$FF,$00
+
+PartyGenInstructions:
+;.byte $C1,$C7,$FF,$8C,$AF,$3F,$B6,$09,$04,$7A,$7E,$FF,$8C,$41,$B5,$5E,$53,$B5,$00
+.byte $C1,$C7,$FF,$8C,$AF,$3F,$B6,$09,$02,$7A,$7E,$FF,$8C,$41,$B5,$5E,$53,$B5,$00
 
 
 ;                      13  12  11  10  0F  0E  0D  0C  0B  0A

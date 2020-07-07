@@ -854,17 +854,21 @@ lut_MapmanPalettes:
 .byte $16,$16,$36,$36 ; RedMage
 .byte $30,$30,$36,$36 ; WhiteMage
 .byte $27,$12,$36,$36 ; BlackMage
+.byte $16,$16,$36,$36 ; Unused Class 1
+.byte $16,$16,$36,$36 ; Unused Class 2
 .byte $16,$16,$36,$36 ; Knight
 .byte $08,$08,$38,$38 ; Ninja
 .byte $18,$21,$28,$28 ; Master
 .byte $16,$16,$36,$36 ; RedWiz
 .byte $16,$30,$36,$36 ; WhiteWiz
 .byte $27,$13,$36,$36 ; BlackWiz
+.byte $16,$16,$36,$36 ; Unused Class 3
+.byte $16,$16,$36,$36 ; Unused Class 4
 
 ;; unused, but needed for padding
 
 ;.byte $00,$00,$00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 .byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ;.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -1105,68 +1109,68 @@ lut_SMTilesetProp:
 .byte $06,$00 ; 3C Sand - Door Closer
 .byte $06,$00 ; 3D Sandy Grass - Door Closer
 .byte $04,$06 ; 3E Door - Gaia Weapon
-.byte $04,$07 ; 3F Door - unused shop
-.byte $04,$08 ; 40 Door - unused shop
-.byte $04,$09 ; 41 Door - unused shop
-.byte $04,$0A ; 42 Door - unused shop
-.byte $04,$0B ; 43 Door - Coneria Armor
-.byte $04,$0C ; 44 Door - Pravoka Armor
-.byte $04,$0D ; 45 Door - Elfland Armor
-.byte $04,$0E ; 46 Door - Melmond Armor
+.byte $04,$07 ; 3F Door - unused weapon shop
+.byte $04,$08 ; 40 Door - unused weapon shop
+.byte $04,$09 ; 41 Door - unused weapon shop
+.byte $04,$0A ; 42 Door - unused weapon shop
+.byte $04,$10 ; 43 Door - Coneria Armor
+.byte $04,$11 ; 44 Door - Pravoka Armor
+.byte $04,$12 ; 45 Door - Elfland Armor
+.byte $04,$13 ; 46 Door - Melmond Armor
 .byte $01,$00 ; 47 Grass (teleport?)
 .byte $02,$20 ; 48 Submarine (teleport to underwater shrine)
-.byte $04,$0F ; 49 Door - LakeArmor     
-.byte $04,$10 ; 4A Door - GaiaArmor     
-.byte $04,$11 ; 4B Door - UnusedShop    
-.byte $04,$12 ; 4C Door - UnusedShop    
-.byte $04,$13 ; 4D Door - UnusedShop    
-.byte $04,$14 ; 4E Door - UnusedShop    
-.byte $04,$15 ; 4F Door - ConeriaWMagic
-.byte $04,$16 ; 50 Door - ProvokaWMagic 
-.byte $04,$17 ; 51 Door - ElflandWMagic 
-.byte $04,$18 ; 52 Door - MelmondWMagic 
-.byte $04,$19 ; 53 Door - LakeWMagic    
-.byte $04,$1A ; 54 Door - ElflandWMagic2
-.byte $04,$1B ; 55 Door - GaiaWMagic    
-.byte $04,$1C ; 56 Door - GaiaWMagic2   
-.byte $04,$1D ; 57 Door - OnracWMagic   
-.byte $04,$1E ; 58 Door - LeifenWMagic  
-.byte $04,$1F ; 59 Door - ConeriaBMagic
-.byte $04,$20 ; 5A Door - ProvokaBMagic 
-.byte $04,$21 ; 5B Door - ElflandBMagic 
-.byte $04,$22 ; 5C Door - MelmondBMagic 
-.byte $04,$23 ; 5D Door - LakeBMagic    
-.byte $04,$24 ; 5E Door - ElflandBMagic2
-.byte $04,$25 ; 5F Door - GaiaBMagic    
-.byte $04,$26 ; 60 Door - GaiaBMagic2   
-.byte $04,$27 ; 61 Door - OnracBMagic   
-.byte $04,$28 ; 62 Door - LeifenBMagic  
-.byte $04,$29 ; 63 Door - ConeriaTemple
-.byte $04,$2A ; 64 Door - ElflandTemple 
-.byte $04,$2B ; 65 Door - LakeTemple    
-.byte $04,$2C ; 66 Door - GaiaTemple    
-.byte $04,$2D ; 67 Door - OnracTemple   
-.byte $04,$2E ; 68 Door - ProvokaTemple 
-.byte $04,$2F ; 69 Door - UnusedShop    
-.byte $04,$30 ; 6A Door - UnusedShop    
-.byte $04,$31 ; 6B Door - UnusedShop    
-.byte $04,$32 ; 6C Door - UnusedShop    
-.byte $04,$33 ; 6D Door - ConeriaInn   
-.byte $04,$34 ; 6E Door - ProvokaInn    
-.byte $04,$35 ; 6F Door - ElflandInn    
-.byte $04,$36 ; 70 Door - MelmondInn    
-.byte $04,$37 ; 71 Door - LakeInn       
-.byte $04,$38 ; 72 Door - GaiaInn       
-.byte $04,$39 ; 73 Door - OnracInn      
-.byte $04,$3A ; 74 Door - UnusedShop    
-.byte $04,$3B ; 75 Door - UnusedShop    
-.byte $04,$3C ; 76 Door - UnusedShop    
-.byte $04,$3D ; 77 Door - ConeriaItem  
-.byte $04,$3E ; 78 Door - ProvokaItem   
-.byte $04,$3F ; 79 Door - ElflandItem   
-.byte $04,$40 ; 7A Door - LakeItem      
-.byte $04,$41 ; 7B Door - GaiaItem      
-.byte $04,$42 ; 7C Door - OnracItem     
+.byte $04,$14 ; 49 Door - LakeArmor     
+.byte $04,$15 ; 4A Door - GaiaArmor     
+.byte $04,$16 ; 4B Door - Unused armor Shop    
+.byte $04,$17 ; 4C Door - Unused armor Shop    
+.byte $04,$18 ; 4D Door - Unused armor Shop     
+.byte $04,$19 ; 4E Door - Unused armor Shop    
+.byte $04,$20 ; 4F Door - ConeriaWMagic
+.byte $04,$21 ; 50 Door - ProvokaWMagic 
+.byte $04,$22 ; 51 Door - ElflandWMagic 
+.byte $04,$23 ; 52 Door - MelmondWMagic 
+.byte $04,$24 ; 53 Door - LakeWMagic    
+.byte $04,$25 ; 54 Door - ElflandWMagic2
+.byte $04,$26 ; 55 Door - GaiaWMagic    
+.byte $04,$27 ; 56 Door - GaiaWMagic2   
+.byte $04,$28 ; 57 Door - OnracWMagic   
+.byte $04,$29 ; 58 Door - LeifenWMagic  
+.byte $04,$30 ; 59 Door - ConeriaBMagic
+.byte $04,$31 ; 5A Door - ProvokaBMagic 
+.byte $04,$32 ; 5B Door - ElflandBMagic 
+.byte $04,$33 ; 5C Door - MelmondBMagic 
+.byte $04,$34 ; 5D Door - LakeBMagic    
+.byte $04,$35 ; 5E Door - ElflandBMagic2
+.byte $04,$36 ; 5F Door - GaiaBMagic    
+.byte $04,$37 ; 60 Door - GaiaBMagic2   
+.byte $04,$38 ; 61 Door - OnracBMagic   
+.byte $04,$39 ; 62 Door - LeifenBMagic  
+.byte $04,$50 ; 63 Door - ConeriaTemple
+.byte $04,$50 ; 64 Door - ElflandTemple 
+.byte $04,$50 ; 65 Door - LakeTemple    
+.byte $04,$50 ; 66 Door - GaiaTemple    
+.byte $04,$50 ; 67 Door - OnracTemple   
+.byte $04,$50 ; 68 Door - ProvokaTemple 
+.byte $04,$50 ; 69 Door - UnusedShop    
+.byte $04,$50 ; 6A Door - UnusedShop    
+.byte $04,$50 ; 6B Door - UnusedShop    
+.byte $04,$50 ; 6C Door - UnusedShop    
+.byte $04,$60 ; 6D Door - ConeriaInn   
+.byte $04,$60 ; 6E Door - ProvokaInn    
+.byte $04,$60 ; 6F Door - ElflandInn    
+.byte $04,$60 ; 70 Door - MelmondInn    
+.byte $04,$60 ; 71 Door - LakeInn       
+.byte $04,$60 ; 72 Door - GaiaInn       
+.byte $04,$60 ; 73 Door - OnracInn      
+.byte $04,$60 ; 74 Door - UnusedShop    
+.byte $04,$60 ; 75 Door - UnusedShop    
+.byte $04,$60 ; 76 Door - UnusedShop    
+.byte $04,$40 ; 77 Door - ConeriaItem  
+.byte $04,$41 ; 78 Door - ProvokaItem   
+.byte $04,$42 ; 79 Door - ElflandItem   
+.byte $04,$43 ; 7A Door - LakeItem      
+.byte $04,$44 ; 7B Door - GaiaItem      
+.byte $04,$45 ; 7C Door - OnracItem     
 .byte $9A,$01 ; 7D Tree - Treasure Table 2
 .byte $80,$00 ; 7E Dark Water
 .byte $C0,$DB ; 7F Grave (special) 

@@ -166,10 +166,9 @@ MAGDATA_MESSAGE      = $07
 BANK_BATTLECHR    = $00
 
 BANK_BATTLEBG     = $03
+BANK_MENUCHR      = $03
 
-BANK_MENUCHR      = $04
 BANK_BTLCHR       = $04
-BANK_BACKDROPPAL  = $04
 
 BANK_TILESETCHR   = $06
 
@@ -184,6 +183,7 @@ BANK_BTLMESSAGES  = $0A
 BANK_ITEMS        = $0A 
 BANK_ITEMPRICES   = $0A 
 BANK_ENEMYNAMES   = $0A
+BANK_MENUSTRINGS  = $0A
 
 BANK_BATTLE       = $0B
 BANK_BTLDATA      = $0B
@@ -191,6 +191,7 @@ BANK_DOMAINS      = $0B
 BANK_BRIDGEGFX    = $0B
 BANK_EPILOGUEGFX  = $0B
 BANK_BTLPALETTES  = $0B
+BANK_BACKDROPPAL  = $0B
 
 BANK_DOBATTLE     = $0C
 
@@ -221,6 +222,7 @@ BANK_STARTINGSTATS= $13
 BANK_OBJINFO      = $13
 BANK_TREASURE     = $13
 BANK_TELEPORTINFO = $13
+BANK_OWMAPBGCHR   = $13
 
 BANK_MAPCHR       = $14
 
@@ -651,19 +653,24 @@ LOADCHARPOSE_LEGS     = $12
 ;;;;;;;;;;;;;;;;;;
 ;;  classes
 
-CLS_FT  = $00
-CLS_TH  = $01
-CLS_BB  = $02
-CLS_RM  = $03
-CLS_WM  = $04
-CLS_BM  = $05
-CLS_KN  = $06
-CLS_NJ  = $07
-CLS_MA  = $08
-CLS_RW  = $09
-CLS_WW  = $0A
-CLS_BW  = $0B
-
+CLASS_FT  = $00
+CLASS_TH  = $01
+CLASS_BB  = $02
+CLASS_RM  = $03
+CLASS_WM  = $04
+CLASS_BM  = $05
+CLASS_1   = $06
+CLASS_2   = $07
+CLASS_KN  = $08
+CLASS_NJ  = $09
+CLASS_MA  = $0A
+CLASS_RW  = $0B
+CLASS_WW  = $0C
+CLASS_BW  = $0D
+CLASS_3   = $0E
+CLASS_4   = $0F
+CLASS_START_MAX = $06 ; amount of starting classes to pick from
+CLASS_PROMOTION = $08 ; classes lower than this are starting classes
 
 ;;;;;;;;;;;;;;;;;
 ;; Item offsets
@@ -1175,22 +1182,6 @@ END_SONG     = $FF
   
   
   
-  
-  
-  
-  
-;; labels that couldn't be inserted in data
-
-
-lut_MapObjCHR      = $A200   ; BANK_MAPCHR
-;lut_OWPtrTbl       = $8000   ; BANK_OWMAP
-lut_SMPtrTbl       = $8000   ; BANK_STANDARDMAPS
-;lut_Domains        = $8000   ; BANK_DOMAINS -- MUST be on page boundary
-lut_BatSprCHR      = $9000   ; BANK_BTLCHR -- page
-lut_BatObjCHR      = $B000   ; BANK_BTLCHR -- page ; $A800 for first half of the weapon/magic sprites
-;lut_DialoguePtrTbl = $8000   ; BANK_DIALOGUE
-
-
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; USER SET THINGS

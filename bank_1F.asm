@@ -15,7 +15,6 @@
 .export CallMusicPlay_L
 .export CancelNewGame
 .export ClearBattleMessageBuffer_L
-.export ClearMenuOtherNametables
 .export ClearOAM
 .export ClearUnformattedCombatBoxBuffer
 .export CoordToNTAddr
@@ -83,6 +82,8 @@
 .export lut_NTRowStartLo
 .export lut_RNG
 .export lut_VehicleMusic
+.export DrawMenuString_FixedBank
+.export DrawMenuString_CharCodes_FixedBank
 
 .import AssignMapTileDamage_Z
 .import BattleIcons
@@ -171,10 +172,18 @@
 .import lut_Treasure
 .import lut_Treasure_2
 .import lut_WeaponArmorNamePtrTbl
+.import lut_MapObjCHR
+.import lut_OWMapObjCHR
+.import lut_SmallMapObjCHR
+.import Overworld_Tileset
+.import lut_SMPtrTbl
+.import lut_BatSprCHR
+.import lut_BatObjCHR
+.import DrawMenuString_A
+.import DrawMenuString_CharCodes_A
 
 
 .segment "BANK_FIXED"
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1407,7 +1416,7 @@ OWCanMove:
     ;LDA #$01             ; otherwise, we need to indicate the player is entering the caravan
     ;STA entering_shop    ; set entering_shop to nonzero
     INC entering_shop
-    LDA #70
+    LDA #$7F
     STA shop_id          ; shop ID=70 ($46) = caravan's shop ID
 
     @Success_2:
@@ -6612,23 +6621,21 @@ ProcessJoyButtons:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+SetPaletteAddress:
+    LDA $2002       ; Reset PPU toggle
+    LDX #$3F        ; set PPU Address to $3F00 (start of palettes)
+    LDA #$00
+    JMP SetPPUAddr_XA
+
 DrawPalette_L:
 DrawPalette:
-    LDA $2002       ; Reset PPU toggle
-    LDA #$3F        ; set PPU Address to $3F00 (start of palettes)
-    STA $2006
-    LDA #$00
-    STA $2006
-    LDX #$00        ; set X to zero (our source index)
-    JMP _DrawPalette_Norm   ; and copy the normal palette
+    JSR SetPaletteAddress
+    TAX
+    BEQ _DrawPalette_Norm   ; and copy the normal palette
 
 DrawMapPalette:
-    LDA $2002       ; Reset PPU Toggle
-    LDA #$3F        ; set PPU Address to $3F00 (start of palettes)
-    STA $2006
-    LDA #$00
-    STA $2006
-    LDX #$00        ; clear X (our source index)
+    JSR SetPaletteAddress 
+    TAX    
     LDA inroom      ; check in-room flag
     BEQ _DrawPalette_Norm   ; if we're not in a room, copy normal palette...otherwise...
 
@@ -6646,13 +6653,16 @@ _DrawPalette_Norm:
     CPX #$20           ; loop until $20 colors have been drawn (full palette)
     BCC _DrawPalette_Norm
 
-    LDA $2002          ; once done, do the weird thing NES games do
-    LDA #$3F           ;  reset PPU address to start of palettes ($3F00)
-    STA $2006          ;  and then to $0000.  Most I can figure is that they do this
-    LDA #$00           ;  to avoid a weird color from being displayed when the PPU is off
+  ;  LDA $2002          ; once done, do the weird thing NES games do
+  ;  LDA #$3F           ;  reset PPU address to start of palettes ($3F00)
+  ;  STA $2006          ;  and then to $0000.  Most I can figure is that they do this
+  ;  LDA #$00           ;  to avoid a weird color from being displayed when the PPU is off
+  ;  STA $2006
+  ;  STA $2006
+  ;  STA $2006
+    JSR SetPaletteAddress
     STA $2006
-    STA $2006
-    STA $2006
+    STA $2006  
     RTS
 
 
@@ -7813,6 +7823,19 @@ AddGPToParty:
 
   @Exit:
     RTS
+
+
+
+
+DrawMenuString_FixedBank:
+    LDA #BANK_MENUSTRINGS
+    JSR SwapPRG_L
+    JMP DrawMenuString_A
+
+DrawMenuString_CharCodes_FixedBank:
+    LDA #BANK_MENUSTRINGS
+    JSR SwapPRG_L
+    JMP DrawMenuString_CharCodes_A
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10336,17 +10359,12 @@ LoadShopCHRPal:
     JMP LoadBatSprCHRPalettes
 
 LoadSMCHR:                     ; standard map -- does not any palettes
-    LDA #BANK_MAPCHR
-    JSR SwapPRG_L
     JSR LoadPlayerMapmanCHR
     JSR LoadTilesetAndMenuCHR
     JMP LoadMapObjCHR
 
 LoadOWCHR:                     ; overworld map -- does not load any palettes
     JSR LoadCHR_MusicPlay
-	LDA #BANK_MAPCHR
-	STA cur_bank
-    JSR SwapPRG_L
     JSR LoadOWBGCHR
 	JSR LoadCHR_MusicPlay
     JSR LoadPlayerMapmanCHR
@@ -10380,13 +10398,15 @@ LoadMenuCHRPal_Z:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadPlayerMapmanCHR:
+    LDA #BANK_MAPCHR
+    JSR SwapPRG_L
     LDA #0          ; #0 -> tmp
     STA tmp
     LDA ch_class    ; Get lead party member's class
     AND #$F0        ;; JIGS - cut off low bits to get sprite
     JSR ShiftSpriteHightoLow
     
-    ORA #$90        ; ORA with #$90, and put in tmp+1
+    ORA #>lut_MapObjCHR ; ORA with #$90, and put in tmp+1
     STA tmp+1       ; (tmp) is now $9x00 (where x=lead party member's class).
                     ;    This points to mapman graphics for that class
     LDX #1          ; X=1  (load 1 row of tiles)
@@ -10407,9 +10427,9 @@ LoadPlayerMapmanCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadOWObjectCHR:
-    LDA #$9C         ; source address is $9C00 (note:  low byte not explicitly cleared)
+    LDA #>lut_OWMapObjCHR         ; source address is $9C00 (note:  low byte not explicitly cleared)
     STA tmp+1
-    LDX #$06         ; 6 rows to load
+    LDX #$04         ; 6 rows to load
     LDA #$11         ; dest address is $1100
     BNE CHRLoadToA
 
@@ -10423,21 +10443,20 @@ LoadOWObjectCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadOWBGCHR:
-;;    LDA #$80
-;;    STA tmp+1        ; source address is $8000
-;;    LDA #0
-;;    STA tmp
-;;    LDX #$10         ; 16 rows to load (full pattern table)
-	LDA #$80
+    LDA #BANK_OWMAPBGCHR
+	STA cur_bank
+    JSR SwapPRG_L
+	LDA #>Overworld_Tileset
 	STA tmp+1
-	LDA #0
+	LDA #<Overworld_Tileset
 	STA tmp
+    LDA #0
 	LDX #$08
-	JSR CHRLoadToA		;; JIGS - load half, update music, load the next half
+	JSR CHRLoadToA		     ;; JIGS - load half, update music, load the next half
 	JSR LoadCHR_MusicPlay
-	LDA #$88
+	LDA #>Overworld_Tileset+8
 	STA tmp+1
-	LDA #0
+	LDA #<Overworld_Tileset
 	STA tmp
 	LDX #$08
 	TXA	
@@ -10606,9 +10625,9 @@ LoadMapObjCHR:
     TAX                  ; put it in X
     LDA lut_MapObjGfx, X ; index to get graphic ID based on object ID
     CLC
-    ADC #>lut_MapObjCHR  ; add to high byte of pointer
+    ADC #>lut_SmallMapObjCHR  ; add to high byte of pointer
     STA tmp+1
-    LDA #<lut_MapObjCHR
+    LDA #<lut_SmallMapObjCHR
     STA tmp              ; CHR source pointer (tmp) now = lut_MapObjCHR + (graphic_id * $100)
 
     LDA #BANK_MAPCHR
@@ -10937,35 +10956,7 @@ ShiftSpriteHightoLow_Battle:
    RTS
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Shop Type and Palette [$EB42 :: 0x3EB52]
-;;
-;;    Loads the type of shop from the given shop ID number (weapon/armor/magic/what have you)
-;;  And loads the palette appropriate for the keeper of that shop type.  It also loads the
-;;  blue border palette used by most menus.
-;;
-;;  It doesn't, however, load the purple and green box palettes used by the title
-;;   and money boxes in the shop.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-LoadShopTypeAndPalette:
-    LDA #BANK_BACKDROPPAL
-    JSR SwapPRG_L        ; Swap to bank
-
-    LDX shop_id          ; Get Shop ID, use it to index and get shop type
-    LDA lut_ShopTypes, X
-    AND #$07             ; Mask out low 3 bits (precautionary -- not really necessary unless you have an invalid shop ID)
-    STA shop_type        ; save shop type
-    ASL A
-    ASL A
-    ORA #$40             ; *4 and add $40 to get offset to required backdrop palette
-    JMP LoadBackdropPalette     ; get the backdrop palette loaded
-	
-	;; JIGS - do this after loading shop/menu chr
-   ;JMP LoadBorderPalette_Blue  ; and the border palette loaded
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11014,6 +11005,36 @@ lut_ShopPalettes:
  
   .BYTE  $0F,$00,$04,$30,  $0F,$00,$11,$30
  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Load Shop Type and Palette [$EB42 :: 0x3EB52]
+;;
+;;    Loads the type of shop from the given shop ID number (weapon/armor/magic/what have you)
+;;  And loads the palette appropriate for the keeper of that shop type.  It also loads the
+;;  blue border palette used by most menus.
+;;
+;;  It doesn't, however, load the purple and green box palettes used by the title
+;;   and money boxes in the shop.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+LoadShopTypeAndPalette:
+    LDA #BANK_BACKDROPPAL
+    JSR SwapPRG_L        ; Swap to bank
+
+    LDA shop_id          ; Get Shop ID
+    LSR A                ; shift high bits (shop type) into low bits
+    LSR A
+    LSR A
+    LSR A
+    STA shop_type        ; save shop type
+    ASL A
+    ASL A
+    ORA #$40             ; *4 and add $40 to get offset to required backdrop palette
+    BNE LoadBackdropPalette     ; get the backdrop palette loaded
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11108,15 +11129,16 @@ LoadBattleSpritePalettes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-lut_ShopTypes:
-   .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00      ; 10 weapon shops (but first is unused)
-   .BYTE $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01  ; 11 armor shops (to correct the off-by-1 error)
-   .BYTE $02,$02,$02,$02,$02,$02,$02,$02,$02,$02      ; 10 white magic
-   .BYTE $03,$03,$03,$03,$03,$03,$03,$03,$03,$03      ; 10 black magic
-   .BYTE $04,$04,$04,$04,$04,$04,$04,$04,$04,$04      ; 10 clinics
-   .BYTE $05,$05,$05,$05,$05,$05,$05,$05,$05,$05      ; 10 inns
-   .BYTE $06,$06,$06,$06,$06,$06,$06,$06,$06,$07      ; 9 item shops + 1 caravan
- 
+;lut_ShopTypes:
+;   .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00      ; 10 weapon shops (but first is unused)
+;   .BYTE $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01  ; 11 armor shops (to correct the off-by-1 error)
+;   .BYTE $02,$02,$02,$02,$02,$02,$02,$02,$02,$02      ; 10 white magic
+;   .BYTE $03,$03,$03,$03,$03,$03,$03,$03,$03,$03      ; 10 black magic
+;   .BYTE $04,$04,$04,$04,$04,$04,$04,$04,$04,$04      ; 10 clinics
+;   .BYTE $05,$05,$05,$05,$05,$05,$05,$05,$05,$05      ; 10 inns
+;   .BYTE $06,$06,$06,$06,$06,$06,$06,$06,$06,$07      ; 9 item shops + 1 caravan
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11306,8 +11328,8 @@ DrawCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 lutClassBatSprPalette:
-  .BYTE $01,$02,$00,$01,$01,$00    ; unpromoted classes
-  .BYTE $01,$02,$00,$01,$01,$00    ; promoted classes
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; unpromoted classes
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; promoted classes
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12893,6 +12915,7 @@ SkillText_RMage:     .BYTE $9B,$B8,$B1,$AC,$A6,$00    ; Runic
 SkillText_WMage:     .BYTE $99,$B5,$A4,$BC,$FF,$00    ; Pray
 SkillText_BMage:     .BYTE $8F,$B2,$A6,$B8,$B6,$00    ; Focus
 SkillText_Blank:     .BYTE $FF,$FF,$FF,$FF,$FF,$00    ; _____  
+SkillText_Blank2:    .BYTE $FF,$FF,$FF,$FF,$FF,$00    ; _____  
   
 PlayerBoxString:
 .BYTE $04,$FF,$13,$00,$05,$7A,$13,$00,$06,$01 ; Name_CurrentHP/MaxHP
@@ -13347,8 +13370,11 @@ DrawBattleString_ControlCode:
     LDA #5
     STA btldraw_subsrc           ; use the subsource pointer as a counter this time
     LDA battle_class             ; get class ID
-    LDX #6
-    JSR MultiplyXA               ; multiply by 6
+    ASL A
+    ASL A
+    ASL A                        ; multiply by 8
+    ;LDX #6
+    ;JSR MultiplyXA               ; multiply by 6
     TAX
   : LDA SkillText_LUT, X         ; use as index for the text string to print
     JSR DrawBattleString_DrawChar
@@ -14397,24 +14423,7 @@ LongCall:
 
 ;; JIGS - and now the stuff I made myself!
 
-ClearMenuOtherNametables:
-;; JIGS - just a little thing for the menu, when you shut off SFX, it'll shake the screen for errors instead.
-;; This stops it from showing a pixel's worth of garbage on the side.
-    LDX #>$2400
-    LDA #<$2400
-    STX $2006   ; write X as high byte
-    STA $2006   ; A as low byte
 
-    LDY #4                    ; loops to clear $0400 bytes of NT data (right nametables)
-  @ClearNT_OuterLoop:
-      LDX #0
-    @ClearNT_InnerLoop:         ; inner loop clears $100 bytes
-        STA $2007
-        DEX
-        BNE @ClearNT_InnerLoop
-      DEY                       ; outer loop runs inner loop 8 times
-      BNE @ClearNT_OuterLoop    ;  clearing $800 bytes total
-    RTS
     
 
     
@@ -14502,7 +14511,7 @@ EncounterRateOption:
 
 SaveScreenHelper: 
   ;  JSR LoadMenuCHRPal
-    LDA #BANK_MENUCHR
+    LDA #BANK_BTLCHR
     JSR SwapPRG
     JSR LoadBattleSpritesForBank_Z
 	JSR LoadBattleSpritePalettes

@@ -1890,26 +1890,26 @@ lut_MapObjTalkData:
 DoClassChange:
     LDA ch_class        ; simply bump up every party member's class ID number
     CLC                 ; to up them to the promoted version of their class
-    ADC #6
-    ADC #$60            ; JIGS - and sprite
+    ADC #8
+    ADC #$80            ; JIGS - and sprite
     STA ch_class
 
     LDA ch_class+(1<<6)
     CLC
-    ADC #6
-    ADC #$60
+    ADC #8
+    ADC #$80
     STA ch_class+(1<<6)
 
     LDA ch_class+(2<<6)
     CLC
-    ADC #6
-    ADC #$60
+    ADC #8
+    ADC #$80
     STA ch_class+(2<<6)
 
     LDA ch_class+(3<<6)
     CLC
-    ADC #6
-    ADC #$60
+    ADC #8
+    ADC #$80
     STA ch_class+(3<<6)
  
     INC dlgflg_reentermap  ; set flag to indicate map needs reentering 

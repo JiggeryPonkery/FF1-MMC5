@@ -3,15 +3,12 @@
 .feature force_range
 
 
-.export lut_ShopCHR
-.export lut_MenuTextCHR
-.export LoadShopCHRForBank_Z
 .export LoadBattleSpritesForBank_Z
 .export LoadSprite_Bank04
-.export lut_BackdropPal
-.export lut_BtlBackdrops
 .export LoadStoneSprites
 .export LoadCursorOnly
+.export lut_BatSprCHR
+.export lut_BatObjCHR
 
 .import WaitForVBlank_L
 .import LongCall
@@ -24,13 +21,9 @@
 
 BANK_THIS = $04
 
-lut_ShopCHR:
-.INCBIN "chr/shop.chr" 
-
-lut_MenuTextCHR:
-.INCBIN "chr/menu_text.chr" 
-
 ;; JIGS: Battle sprites split into class
+
+lut_BatSprCHR:
 
 FighterSprites: 
 .INCBIN "chr/class/Fighter.chr"
@@ -44,6 +37,10 @@ WhiteMageSprites:
 .INCBIN "chr/class/WhiteMage.Chr"
 BlackMageSprites: 
 .INCBIN "chr/class/BlackMage.chr"
+UnusedSprites:
+.INCBIN "chr/class/Unused.chr"
+UnusedSprites2:
+.INCBIN "chr/class/Unused.chr"
 KnightSprites: 
 .INCBIN "chr/class/Knight.Chr"
 NinjaSprites: 
@@ -56,10 +53,14 @@ WhiteWizSprites:
 .INCBIN "chr/class/WhiteWiz.Chr"
 BlackWizSprites: 
 .INCBIN "chr/class/BlackWiz.Chr"
-
+UnusedSprites3:
+.INCBIN "chr/class/Unused.chr"
+UnusedSprites4:
+.INCBIN "chr/class/Unused.chr"
  
 
 ;; Weapon and Magic Casting Sprites
+lut_BatObjCHR:
 MagicWeaponSprites:  
 .INCBIN "chr/weapon_magic_sprites.chr"
 
@@ -67,197 +68,6 @@ MagicWeaponSprites:
 ;; Turns out it was character, weapon, and magic sprites, so I sorted them out! 
 ;; Now they're easy to edit with YY-CHR or by copying edited data from a FFHackster-compatible rom.
 
-; Battle backdrop palettes
-
-lut_BackdropPal:
-.byte $0F,$31,$29,$30 ; 00 ; grasslands
-.byte $0F,$0C,$17,$07 ; 01 ; cave
-.byte $0F,$1C,$2B,$1B ; 02 ; cave_2
-.byte $0F,$30,$3C,$22 ; 03 ; ocean
-.byte $0F,$18,$0A,$1C ; 04 ; forest
-.byte $0F,$3C,$1C,$0C ; 05 ; temple
-.byte $0F,$37,$31,$28 ; 06 ; desert
-.byte $0F,$27,$17,$1C ; 07 ; brambles
-.byte $0F,$1A,$17,$07 ; 08 ; cave_3
-.byte $0F,$30,$10,$00 ; 09 ; castle
-.byte $0F,$22,$1A,$10 ; 0A ; river
-.byte $0F,$37,$10,$00 ; 0B ; sky_castle
-.byte $0F,$21,$12,$03 ; 0C ; sea_shrine
-.byte $0F,$31,$22,$13 ; 0D ; cave_4
-.byte $0F,$26,$16,$06 ; 0E ; cave_5
-.byte $0F,$2B,$1C,$0C ; 0F ; waterfall
-
-.byte $0F,$30,$00,$31 ; Weapon shop
-.byte $0F,$10,$27,$17 ; Armor shop
-.byte $0F,$3C,$1C,$0C ; White magic shop
-.byte $0F,$3B,$1B,$0B ; Black magic shop
-.byte $0F,$37,$16,$10 ; Clinic
-.byte $0F,$36,$16,$07 ; Inn
-.byte $0F,$37,$17,$07 ; Item
-.byte $0F,$30,$28,$16 ; Caravan
-
-
-; Battle backdrop assignment
-
-lut_BtlBackdrops:
-.byte $00 ; grasslands
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $08 ; cave_3
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $03 ; ocean
-.byte $03 ; ocean
-.byte $03 ; ocean
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $0B ; sky_castle
-.byte $06 ; desert
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $00 ; grasslands
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $0D ; cave_4
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $02 ; cave_2
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $0A ; river
-.byte $0A ; river
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $0A ; river
-.byte $06 ; desert
-.byte $0F ; waterfall?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $0A ; river
-.byte $0A ; river
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $00 ; grasslands
-.byte $05 ; temple
-.byte $05 ; temple
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $0C ; sea_shrine
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $07 ; brambles
-.byte $0E ; cave_5
-.byte $0E ; cave_5
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $00 ; grasslands
-.byte $01 ; cave
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $07 ; brambles
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-
-
-
-
-
-
-LoadShopCHRForBank_Z: ;; JIGS - Its either put this here or copy all of lut_ShopCHR to Bank Z as well.
-    LDA #$08
-    STA soft2000           ; 
-    LDA $2002              ; reset toggle
-    LDA #0
-    STA $2001              ; turn off the PPU
-    STA $2006              ; set write address to $0000
-    STA $2006
-
-    JSR LoadShopCHR
-
-    LDA $2002          ; Set address to $1000 
-    LDA #>$1000
-    STA $2006
-    LDA #<$1000
-    STA $2006
-    
-LoadShopCHR:
-    LDA #>lut_ShopCHR
-    STA tmp+1        
-    LDA #<lut_ShopCHR
-    STA tmp
-    LDX #16    
-    JMP CHRLoad    
     
 LoadBattleSpritesForBank_Z: 
     LDA $2002  
@@ -274,7 +84,7 @@ LoadBattleSpritesForBank_Z:
     JSR CHRLoadToAX
     INC tmp+3
     LDA tmp+3
-    CMP #12
+    CMP #$10
     BNE @Loop
     JMP LoadBlackTile_BG
    
@@ -303,17 +113,25 @@ LoadBattleSpritesLUT_1:
    .byte $11,$E0
    .word BlackMageSprites
    .byte $12,$40
-   .word KnightSprites
+   .word UnusedSprites
    .byte $12,$A0
-   .word NinjaSprites
+   .word UnusedSprites
    .byte $13,$00
-   .word MasterSprites
+   .word KnightSprites
    .byte $13,$60
-   .word RedWizSprites
+   .word NinjaSprites
    .byte $13,$C0
-   .word WhiteWizSprites
+   .word MasterSprites
    .byte $14,$20
+   .word RedWizSprites
+   .byte $14,$80
+   .word WhiteWizSprites
+   .byte $14,$E0
    .word BlackWizSprites    
+   .byte $15,$40
+   .word UnusedSprites
+   .byte $15,$A0
+   .word UnusedSprites
 
 
 ShiftTile:

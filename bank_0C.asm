@@ -478,11 +478,13 @@ GetCharacterBattleCommand:
     ROR A
     STA CharacterIndexBackup        ; convert current command character 
     TAX
-    LDA ch_class, X                 ;; JIGS - to use 12 clases, just AND and STA this
+    LDA ch_class, X                 
     AND #$0F                        ; get class, throw away sprite bits
-    CMP #CLS_KN                     ; if its over black mage, subtract 6
+    
+    ;; JIGS - to use all 16 clases, just "STA battle_class" here
+    CMP #CLASS_PROMOTION            ; if its higher than the starting classes, subtract
     BCC :+                          
-      SBC #6
+      SBC #CLASS_PROMOTION
   : STA battle_class
     
     LDA btlcmd_curchar    
@@ -693,13 +695,13 @@ BattleSubMenu_Skill:
     
     LDA battle_class
     BEQ @Cover                      ; if fighter/knight, do Cover
-    CMP #1
+    CMP #CLASS_TH
     BEQ @Steal                      ; thief/ninja, do Steal
-    CMP #2
+    CMP #CLASS_BB
     BEQ @Parry                      ; bb/master, parry
-    CMP #3
-    BEQ @Runic ;@Scan                       ; red mage/wiz, scan
-    CMP #4
+    CMP #CLASS_RM
+    BEQ @Runic ;@Scan               ; red mage/wiz, scan
+    CMP #CLASS_WM
     BEQ @Pray                       ; white mage/wiz, pray
     BNE @SetSkill                   ; black mage/wiz, just set the skill
   
@@ -3925,11 +3927,16 @@ lut_InBattleCharPaletteAssign:
   .BYTE $21 ; WMage
   .BYTE $20 ; BMage
   .BYTE $21 ; 
-  .BYTE $22 ; 
-  .BYTE $20 ; 
+  .BYTE $21 ; 
+  
+  .BYTE $21 ; Knight
+  .BYTE $22 ; Ninja
+  .BYTE $20 ; Master
+  .BYTE $21 ; RedWiz
+  .BYTE $21 ; W.Wiz
+  .BYTE $20 ; B.Wiz
   .BYTE $21 ; 
   .BYTE $21 ; 
-  .BYTE $20 ; 
   
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4162,6 +4169,10 @@ DrawAttackBox:
    .byte BTLMSG_RUNIC
    .byte BTLMSG_PRAYING
    .byte BTLMSG_FOCUSING
+   .byte BTLMSG_NOTHING
+   .byte BTLMSG_NOTHING
+   ;.byte BTLMSG_NOTHING
+   ;.byte BTLMSG_NOTHING
    ;.byte BTLMSG_NOTHING
    ;.byte BTLMSG_NOTHING
    ;.byte BTLMSG_NOTHING
@@ -5381,13 +5392,13 @@ Battle_DoPlayerTurn:
    @Skill:
     LDA btl_charcmdbuf+3, Y
     STA battle_class
-    CMP #1
+    CMP #CLASS_TH
     BEQ @Steal                      
-    ;CMP #3
+    ;CMP #CLASS_RM
     ;BEQ @Scan
-    CMP #4
+    CMP #CLASS_WM
     BEQ @Pray
-    CMP #5
+    CMP #CLASS_BM
     BEQ @Focus
    
    @Cover:
@@ -6535,8 +6546,11 @@ DoPhysicalAttack_NoAttackerBox:
       
       LDA btl_defender_class        ; thieves and ninjas get an extra 40 for hiding
       AND #$0F                      ; cut off hiding bit
-      AND #CLS_TH | CLS_NJ
-      BEQ :+
+      CMP #CLASS_TH
+      BEQ @Boost
+      CMP #CLASS_NJ
+      BNE :+
+     @Boost:
         JSR HitChance_Subtract40    ; if the enemy is blind, hitchance is #48 now
 
   : LDA btl_attacker_category       ; see if attacker category matches defender category
