@@ -411,10 +411,10 @@ dlgbox_row              = $9D ; counts down from 7 when drawing dialogue box; no
 npcdir_seed             = $9E ; RNG seed for determining direction for NPCs to walk
 InBattle                = $9F
 RAMSwap                 = $A0 ; 0 for normal RAM, 1 for extra
+PaletteFade             = $A1 ; for fading palettes during screen transitions
 
 ;; Music stuff          
-;                       = $A0
-SaveGameMusic           = $A2 
+SaveGameMusic           = $A3 
 soundtest_track         = $A4 ; Something to do with the sound test screen
 TriangleHush            = $A6 ; Slowly raises and lowers a DMC thing to quiet the triangle channel
 MenuHush                = $A7 ; Toggles in the main menu, keeps map music playing, and is used to help hush the triangle
@@ -596,10 +596,9 @@ btl_enemycount          = $038F ; count of the number of enemies being generated
 MMC5_tmp                = $0390 ; 16 bytes, tmp ram not used by the original game
 ;; ^ battle turn order uses up $0D of this ^ 
 
-btl_usepalette  = $03A0 ; $20 bytes - the palette that is actually displayed (after fade effects)
-cur_pal         = $03C0       ; 32 bytes
+cur_pal         = $03B0       ; 32 bytes
 inroom_pal      = cur_pal+$20 ; 16 bytes
-tmp_pal         = $03F0       ; 16 bytes
+tmp_pal         = cur_pal+$20 ; 32 bytes
 
 ;; JIGS - if I'm not mistaken, $400-7FF can be used in battle and will re-fill with tileset_data afterwards
 

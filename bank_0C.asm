@@ -53,6 +53,14 @@
 .import GetEquipmentSpell
 .import SpiritCalculations
 .import Battle_SetPartyWeaponSpritePal
+.import DimAll
+.import FadeOutAllPalettes
+.import FadeInBG
+.import FadeInSprites
+.import BackUpPalettes
+.import ClearPalette
+.import DrawPalette_L
+
 
 BANK_THIS = $0C
 
@@ -74,11 +82,12 @@ ExitBattle:
     LDA btl_result                  ; if its 2, they won the battle, so walk forward
     CMP #$02
     BNE :+
-    JSR ResetUsePalette
+    JSR ResetBattlePalette
     JSR PartyWalkAnimation          ; JIGS - makes them all walk to the left
     JMP :++                         ; does its own fadeout, so skip this one
     
-  : JSR BattleFadeOut               ; else, just fade out
+  : ;JSR BattleFadeOut               ; else, just fade out
+    JSR FadeOutAllPalettes
     
   : JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
     LDA btl_result                  ; check battle result
@@ -141,8 +150,13 @@ FinishBattlePrepAndFadeIn:
     STA BattleTurn         ; since the screen has to be off mid-frame to update palettes
     ; This also has to be on in order to reset the grey for stone characters
     ; at the end of VBlank
-   
-    JSR BattleFadeIn
+    
+    JSR ResetBattlePalette
+    JSR BackUpPalettes   
+    JSR ClearPalette    
+    JSR DoFrame_UpdatePalette    
+    JSR FadeInBG
+    JSR FadeInSprites
     JMP Battle_AfterFadeIn
     
     
@@ -214,7 +228,8 @@ CheckForEndOfBattle:
 
 BattleFadeOutAndRestartGame:
 	DEC InBattle
-    JSR BattleFadeOut
+    ;JSR BattleFadeOut
+    JSR FadeOutAllPalettes
     JMP GameStart_L     ; then jump to GameStart, which returns the user to the title screen.
     
    
@@ -3269,7 +3284,8 @@ PartyWalkAnimation:
       CMP #$4                       ; when there's 4 boopers left, start fading out
       BCS @Loop
       
-      JSR FadeOutOneShade           ; fade out one shade
+      JSR DimAll
+      ;JSR FadeOutOneShade           ; fade out one shade
       JSR DoFrame_UpdatePalette
       
       LDA btl_walkloopctr
@@ -3949,7 +3965,7 @@ lut_InBattleCharPaletteAssign:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DoMagicFlash:
-    LDA btl_usepalette + $1D        ; get the color of the magic spell from the usepalette
+    LDA cur_pal + $1D        ; get the color of the magic spell from the usepalette
     CMP #$20                        ; if it's white, replace it with gray so it isn't
     BNE :+                          ;   so overwhelming
       LDA #$10
@@ -3969,7 +3985,7 @@ DoMagicFlash:
     LDA #$0F
     
   @FramePaletteChange:
-    STA btl_usepalette + $10
+    STA cur_pal + $10
     JMP DoFrame_UpdatePalette
     
   @FrameNoPaletteChange:
@@ -7386,25 +7402,25 @@ DrawCharacterStatus_Fast:
 
 UpdateVariablePalette:
     PHA
-    JSR ResetUsePalette
+    JSR ResetBattlePalette
     PLA
-    STA btl_usepalette + $1D        ; set first shade
+    STA cur_pal + $1D        ; set first shade
     SEC
     SBC #$10
-    STA btl_usepalette + $1E        ; second shade
+    STA cur_pal + $1E        ; second shade
     SEC
     SBC #$10
-    STA btl_usepalette + $1F        ; third shade
+    STA cur_pal + $1F        ; third shade
     TXA
     BEQ DoFrame_UpdatePalette       ; if weapon, jump ahead to update the PPU
     BMI @DarkMagic
       LDA #$30                      ; if magic, replace third shade with white
-      STA btl_usepalette + $1F
+      STA cur_pal + $1F
       BNE DoFrame_UpdatePalette
       
    @DarkMagic:  
     LDA #$0F                 
-    STA btl_usepalette + $1F        ; Spooky magic!
+    STA cur_pal + $1F        ; Spooky magic!
     ; JMP DoFrame_UpdatePalette     ; then update PPU  (flow into)
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7425,44 +7441,24 @@ DoFrame_UpdatePalette:
     
     LDA #>oam               ; and do Sprite DMA
     STA $4014             
-    
-    LDA #$3F            ; set PPU addr to point to palettes
-    STA $2006
-    LDA #$00
-    STA $2006
-    
-    LDY #$00                ; draw the usepalette to the PPU
-  @Loop:
-      LDA btl_usepalette, Y
-      STA $2007
-      INY
-      CPY #$20
-      BNE @Loop
-      
-    LDA #$3F                ; reset PPU address
-    STA $2006
-    LDA #$00
-    STA $2006
-    STA $2006
-    STA $2006
-    
+    JSR DrawPalette_L    
     JSR BattleUpdatePPU     ; reset scroll & apply soft2001
     JMP BattleUpdateAudio   ; update audio and exit
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  ResetUsePalette  [$AB80 :: 0x32B90]
+;;  ResetBattlePalette  [$AB80 :: 0x32B90]
 ;;
-;;  Resets btl_usepalettes by copying btl_palettes on top of it
+;;  Resets cur_pals by copying btl_palettes on top of it
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ResetUsePalette:
+ResetBattlePalette:
     LDY #$20                    ; copy $20 bytes over
   @Loop:
       LDA btl_palettes-1, Y     ; -1 because Y is 1-based and stops at 0
-      STA btl_usepalette-1, Y
+      STA cur_pal-1, Y
       DEY
       BNE @Loop
     RTS
@@ -7476,29 +7472,30 @@ ResetUsePalette:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BattleFadeIn:
-    LDA #$04
-    STA btl_another_loopctr     ; loop downcounter.  Looping 4 times -- once for each shade
-    
-    ; This fades in by using the fadeout routine.  Basically it will reset the palette each iteration
-    ;   fading it out less and less each time, giving the appearance that it is fading it.
-    ; So first frame it will fade out 4 shades, then draw
-    ; next frame will reset, then fade out 3 shades, then draw
-    ; next will reset, fade 2 shades, etc
-  @Loop:
-      JSR ResetUsePalette       ; reset palette
-      
-      LDX btl_another_loopctr
-      : JSR FadeOutOneShade     ; fade out X shades, where X is our loop down-counter
-        DEX
-        BNE :-
-        
-      JSR Do3Frames_UpdatePalette   ; draw palette (and turn on PPU)
-      DEC btl_another_loopctr
-      BNE @Loop                 ; loop until down-counter exhausted
+;BattleFadeIn:
+;    LDA #$04
+;    STA btl_another_loopctr     ; loop downcounter.  Looping 4 times -- once for each shade
+;    
+;    ; This fades in by using the fadeout routine.  Basically it will reset the palette each iteration
+;    ;   fading it out less and less each time, giving the appearance that it is fading it.
+;    ; So first frame it will fade out 4 shades, then draw
+;    ; next frame will reset, then fade out 3 shades, then draw
+;    ; next will reset, fade 2 shades, etc
+;  @Loop:
+;      JSR ResetBattlePalette       ; reset palette
+;      
+;      LDX btl_another_loopctr
+;      : JSR FadeOutOneShade     ; fade out X shades, where X is our loop down-counter
+;        DEX
+;        BNE :-
+;        
+;      JSR Do3Frames_UpdatePalette   ; draw palette (and turn on PPU)
+;      DEC btl_another_loopctr
+;      BNE @Loop                 ; loop until down-counter exhausted
+;
 
 ResetPalette_Update:      
-    JSR ResetUsePalette         ; Reset to fully-faded in palette
+    JSR ResetBattlePalette         ; Reset to fully-faded in palette
     JMP DoFrame_UpdatePalette   ; Then draw it and exit
     
     
@@ -7510,49 +7507,49 @@ ResetPalette_Update:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-BattleFadeOut:
-    JSR ResetUsePalette ; reset usepalette
-    LDA #$04
-    STA btl_another_loopctr           ; Loop down counter (loop 4 shades, enough to make solid black)
-  @Loop:
-      JSR FadeOutOneShade           ; fade out one shade
-      JSR Do3Frames_UpdatePalette   ; draw it
-      DEC btl_another_loopctr
-      BNE @Loop                     ; repeat 4 times
-
-    RTS
+;BattleFadeOut:
+;    JSR ResetBattlePalette ; reset usepalette
+;    LDA #$04
+;    STA btl_another_loopctr           ; Loop down counter (loop 4 shades, enough to make solid black)
+;  @Loop:
+;      JSR FadeOutOneShade           ; fade out one shade
+;      JSR Do3Frames_UpdatePalette   ; draw it
+;      DEC btl_another_loopctr
+;      BNE @Loop                     ; repeat 4 times
+;
+;    RTS
 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  FadeOutOneShade  [$ABD8 :: 0x32BE8]
 ;;
-;;  Iterates btl_usepalette and fades every color out by 1 shade
+;;  Iterates cur_pal and fades every color out by 1 shade
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-FadeOutOneShade:
-    LDY #$00                ; index and loop up-counter
-  @Loop:
-      LDA btl_usepalette, Y ; get the color
-      AND #$30              ; mask out brighness bits
-      BNE :+                ; if brightness is 0
-        LDA #$0F            ;  use 0F black
-        BNE @SetColor
-    : SEC                   ; otherwise, subtract $10 to take it down a shade
-      SBC #$10
-      STA btl_various_tmp   ; save new brightness to temp ram
-      LDA btl_palettes, Y   ; get the original color
-      AND #$CF              ; remove brightness
-      ORA btl_various_tmp   ; apply new brightness
-      
-    @SetColor:
-      STA btl_usepalette, Y ; write new color to usepalette
-      INY
-      CPY #$20              ; loop until all $20 colors faded
-      BNE @Loop
-      
-    RTS
+;FadeOutOneShade:
+;    LDY #$00                ; index and loop up-counter
+;  @Loop:
+;      LDA cur_pal, Y ; get the color
+;      AND #$30              ; mask out brighness bits
+;      BNE :+                ; if brightness is 0
+;        LDA #$0F            ;  use 0F black
+;        BNE @SetColor
+;    : SEC                   ; otherwise, subtract $10 to take it down a shade
+;      SBC #$10
+;      STA btl_various_tmp   ; save new brightness to temp ram
+;      LDA btl_palettes, Y   ; get the original color
+;      AND #$CF              ; remove brightness
+;      ORA btl_various_tmp   ; apply new brightness
+;      
+;    @SetColor:
+;      STA cur_pal, Y ; write new color to usepalette
+;      INY
+;      CPY #$20              ; loop until all $20 colors faded
+;      BNE @Loop
+;      
+;    RTS
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7564,11 +7561,11 @@ FadeOutOneShade:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Do3Frames_UpdatePalette:
-    JSR DoFrame_UpdatePalette
-    JSR BattleFrame
-    JSR BattleFrame ; JIGS - added another one
-    JMP BattleFrame
+;Do3Frames_UpdatePalette:
+;    JSR DoFrame_UpdatePalette
+;    JSR BattleFrame
+;    JSR BattleFrame ; JIGS - added another one
+;    JMP BattleFrame
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

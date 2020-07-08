@@ -36,8 +36,10 @@
 .import DrawSimple2x3Sprite
 .import EraseBox
 .import ExitMenu
-.import FadeInBatSprPalettes
-.import FadeOutBatSprPalettes
+.import FadeInSprites
+.import FadeOutSprites
+.import BackUpPalettes
+.import ClearSpritePalette
 .import GameStart_L
 .import LoadBattleSpritePalettes
 .import LoadBridgeSceneGFX_Menu
@@ -2518,21 +2520,20 @@ EnterInn:
     JSR EraseMainItemBox        ; erase shop box 3 (command box)
 
     JSR ShopFrameNoCursor 
-    JSR FadeOutBatSprPalettes   ; and fade the party out
+    JSR BackUpPalettes
+    JSR FadeOutSprites          ; and fade the party out
     JSR MenuWaitForBtn_SFX  
     
     JSR SaveGame                ; JIGS - now save... and!
     LDA #0
     STA $2001                   ; turn off PPU
     JSR LoadShopCHRPal          ; 
-   @PaletteLoop:    
-    JSR DimBatSprPalettes       ; dim the palettes to black so we can fade back in again; save screen reset it
-    BCS @PaletteLoop            ; 
+    JSR ClearSpritePalette      ; dim the palettes to black so we can fade back in again; save screen reset it
     JSR DrawShop                ; re-draw the shop!
     
   @LoopOne:
     JSR ShopFrameNoCursor       ; do a shop frame (with no visible cursor)
-    JSR FadeInBatSprPalettes    ; then fade the party back in
+    JSR FadeInSprites           ; then fade the party back in
 
   @Exit_HealthRestored:
     LDA #$22

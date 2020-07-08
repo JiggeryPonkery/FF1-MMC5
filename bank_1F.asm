@@ -18,7 +18,6 @@
 .export ClearOAM
 .export ClearUnformattedCombatBoxBuffer
 .export CoordToNTAddr
-.export DimBatSprPalettes
 .export DoOverworld
 .export Draw2x2Sprite
 .export DrawBox
@@ -37,8 +36,16 @@
 .export DrawPalette_L
 .export DrawSimple2x3Sprite
 .export EraseBox
-.export FadeInBatSprPalettes
-.export FadeOutBatSprPalettes
+.export FadeInSprites
+.export FadeOutSprites
+.export DimAll
+.export FadeOutAllPalettes
+.export FadeInAllPalettes
+.export FadeOutBG
+.export FadeInBG
+.export ClearPalette
+.export BackUpPalettes
+.export ClearSpritePalette
 .export FillItemBox
 .export FormatBattleString
 .export GameLoaded
@@ -6660,6 +6667,7 @@ _DrawPalette_Norm:
   ;  STA $2006
   ;  STA $2006
   ;  STA $2006
+SetPaletteAddress_ScreenThing:  
     JSR SetPaletteAddress
     STA $2006
     STA $2006  
@@ -6794,8 +6802,6 @@ BattleTransition:
     LDA #$00         ; at which point
     STA $2001        ; turn off the PPU
     STA $4015        ;  and APU
-    ;STA $5015        ;  and MMC5 APU (JIGS)
-    ;; but also just did that...
 
     JMP WaitVBlank_NoSprites   ; then wait for another VBlank before exiting
 
@@ -7004,6 +7010,8 @@ AltarFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .ALIGN $100
+
+.byte "JIGSCHECK"
 
 WaitAltarScanline:   ; JSR to routine = 6 cycles
     LDY #18          ; +2 = 8
@@ -10058,6 +10066,45 @@ DrawMapObject:
     LDX tmp+15            ; restore X to the previously backed-up object index
     RTS                   ; and exit
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Dialogue_CoverSprites_VBl  [$FF02 :: 0x3FF12]
+;;
+;;     Edits OAM to hide sprites that are behind the dialogue box
+;;  then waits for a VBlank
+;;
+;;  IN:  tmp+11 = Y coord cutoff point (sprites above this scanline will be hidden)
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Dialogue_CoverSprites_VBl:
+    LDX #4*4           ; start looking at sprites after the first 4 sprites (first 4 are the player, who is never covered)
+  @Loop:
+    LDA oam_y, X       ; get the sprite's Y coord
+    CMP tmp+11         ; compare it to our cutoff scanline (result in C)
+    LDA oam_a, X       ; then get the attribute byte for this sprite    
+    BCS @FGPrio        ; if spriteY >= cutoffY, sprite has foreground priority, otherwise, BG priority
+
+   @BGPrio:
+      ORA #$20         ; for BG prio, set the priority attribute bit in the attribute byte
+      BNE @SetPrio     ; and jump ahead (always branches)
+   @FGPrio:
+      AND #~$20        ; for FG prio, clear priority bit
+
+  @SetPrio:
+    STA oam_a, X       ; record priority bit
+    INX
+    INX
+    INX
+    INX                ; then increment X by 4 to look at the next sprite
+
+    BNE @Loop          ; keep looping until all sprites examined
+
+    JMP WaitForVBlank_L   ; then wait for VBlank, and exit
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  LUTs for 2x2 sprites that make up map objects (townspeople, etc)  [$E7AB :: 0x3E7BB]
@@ -10715,31 +10762,32 @@ LoadMenuCHR:
 
 LoadBattleBGCHRAndPalettes:
     ;; Load this up first, so it doesn't overwrite the stone sprites
-	LDA #$08
+	LDA #BANK_BATTLEMAGIC
     JSR SwapPRG_L
     JSR LoadBattleTextChr		   ; also loads magic data and enemy AI into RAM
 
-    LDA #BANK_BACKDROPPAL              ; Swap to BANK_OWINFO
+    LDA #BANK_BTLCHR
     JSR SwapPRG_L
-
-	JSR LoadBattleBackdropPalette
-
 	LDA #08
     STA MMC5_tmp
     JSR LoadSprite_Bank04           ; this loads the player>enemy attack cloud sprites
     JSR LoadStoneSprites            ; this loads the player stone graphics to background tiles
 
+	JSR LoadBattleBackdropPalette  ; this also swaps banks
+
     ;; JIGS - slight changes
     
-    LDX ow_tile                   ; Get last OW tile we stepped on
-    LDA lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
+    ;LDX ow_tile                   ; Get last OW tile we stepped on
+    ;LDA lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
     
     ;; every backdrop is 1 tile of black, 1 row of graphics, and another 1 tile of black
     ;; for a total of $120 bytes
     ;; but they're arranged in #BANK_BATTLEBG in $10 tile rows
     ;; So an ID of 09 would be at $8900
    
-    AND #$0F                      ; mask with $0F (there are only 16 battle BGs)
+    ;AND #$0F                      ; mask with $0F (there are only 16 battle BGs)
+    
+    LDA tmp+1                     ; reload value saved by LoadBattleBackdropPalette
     ORA #$80                      ; add $80 to get high byte
     STA tmp+1                     ; save high byte
 
@@ -11051,6 +11099,7 @@ LoadBattleBackdropPalette:
      LDX ow_tile              ; Get last OW tile stepped on
      LDA lut_BtlBackdrops, X  ; use it to index and get battle backdrop ID
      AND #$0F                 ; multiply ID by 4
+     STA tmp+1                ; save this value for just after the RTS below
      ASL A
      ASL A                    ; and load up the palette
 	 ;; flow into loading
@@ -13959,8 +14008,8 @@ OnReset:
 
     TXS            ; transfer it to the Stack Pointer (resetting the SP)
 
-    JSR ClearBGPalette ;  clear the BG palette
-    
+    JSR ClearPalette   ; set all palettes to black
+    JSR DrawPalette_L
     JSR DisableAPU     ;; JIGS - moved this here
 
     ;LDA #$06           ; swap to bank 6 again (even though we just did) .. but why?  We never use
@@ -14099,67 +14148,23 @@ OnNMI:
 ;;
 ;;;;
 
-ClearBGPalette:
-    LDA #$00
-    STA $2001   ; Disable BG/Sprites (shut PPU off)
-    LDA $2002   ; reset 2005/2006 write toggle
-    LDA #$3F
-    STA $2006
-    LDA #$00
-    STA $2006   ; set PPU address to $3F00 (start of BG palette)
+ClearSpritePalette:
+    LDA #$0F
+    BNE :+
 
-    LDX #$10
+ClearPalette:
+    LDA #$FF
+  : STA PaletteFade
+    
+    LDX #$1F
     LDA #$0F
 
   @Loop:
-    STA $2007   ; write 0F black to the palette
+    STA cur_pal, X ; write 0F black to the palette
     DEX
+    CPX PaletteFade
     BNE @Loop   ; repeat $10 times (entire BG palette)
-
-    LDA #$3F
-    STA $2006
-    LDA #$00
-    STA $2006   ; set ppu addr to $3F00 (again), then to $0000
-    STA $2006   ; lots of commercial games do this.  Best I can figure is because they don't want to leave
-    STA $2006   ; the PPU addr pointing to palettes because this can cause different colors to be drawn when the PPU
-    RTS         ;  is off.  But why they change to $3F00 first is beyond me....
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Dialogue_CoverSprites_VBl  [$FF02 :: 0x3FF12]
-;;
-;;     Edits OAM to hide sprites that are behind the dialogue box
-;;  then waits for a VBlank
-;;
-;;  IN:  tmp+11 = Y coord cutoff point (sprites above this scanline will be hidden)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-Dialogue_CoverSprites_VBl:
-    LDX #4*4           ; start looking at sprites after the first 4 sprites (first 4 are the player, who is never covered)
-  @Loop:
-    LDA oam_y, X       ; get the sprite's Y coord
-    CMP tmp+11         ; compare it to our cutoff scanline (result in C)
-    LDA oam_a, X       ; then get the attribute byte for this sprite    
-    BCS @FGPrio        ; if spriteY >= cutoffY, sprite has foreground priority, otherwise, BG priority
-
-   @BGPrio:
-      ORA #$20         ; for BG prio, set the priority attribute bit in the attribute byte
-      BNE @SetPrio     ; and jump ahead (always branches)
-   @FGPrio:
-      AND #~$20        ; for FG prio, clear priority bit
-
-  @SetPrio:
-    STA oam_a, X       ; record priority bit
-    INX
-    INX
-    INX
-    INX                ; then increment X by 4 to look at the next sprite
-
-    BNE @Loop          ; keep looping until all sprites examined
-
-    JMP WaitForVBlank_L   ; then wait for VBlank, and exit
+    RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14174,12 +14179,25 @@ Dialogue_CoverSprites_VBl:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DimBatSprPalettes:
-    LDY #0             ; Y will count how many colors are not yet black
-    LDX #$0B            ; X will be our loop down counter and palette index
+DimBG: 
+    LDX #$10           ; start with BG palettes
+    LDA #0
+    BEQ DimPalette
 
+DimAll:
+    LDX #$1F           ; X will be our loop down counter and palette index
+    LDA #$0
+    BEQ DimPalette     ; stop when the palette fade routine hits 0
+
+DimSprites:
+    LDX #$1F           ; X will be our loop down counter and palette index
+    LDA #$10           ; stop when it hits $10 (only does the sprites)
+    
+DimPalette:
+    STA PaletteFade
+    LDY #0             ; Y will count how many colors are not yet black
   @Loop:
-    LDA cur_pal+$10, X ; get color in current palette
+    LDA cur_pal, X     ; get color in current palette
     CMP #$0F           ; check if it's black ($0F)
     BEQ @Skip          ; if it is... skip it
 
@@ -14187,11 +14205,12 @@ DimBatSprPalettes:
     SBC #$10           ; otherwise, subtract $10 (dim it)
     BPL :+             ; if that caused it to dro below zero...
       LDA #$0F         ; ...replace it with black ($0F)
-:   STA $03D0, X       ; write the new color back to the palette
+:   STA cur_pal, X     ; write the new color back to the palette
     INY                ; and increment Y to mark this color as not fully dimmed yet
 
   @Skip:
     DEX                ; decrement the loop counter
+    CPX PaletteFade    ; see if it reaches the limit set previously
     BNE @Loop          ; and keep looping until it reaches 0 (only 7 iterations because color 0 is transparent)
     CPY #$01           ; set C if Y is nonzero (to indicate some colors are not yet black)
     RTS                ; then exit
@@ -14208,11 +14227,26 @@ DimBatSprPalettes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BrightenBatSprPalettes:
+
+BrightenBG:
+    LDX #$0F           ; start with BG palettes
+    LDA #$FF
+    BNE BrightenPalettes
+
+BrightenAll:
+    LDX #$1F           ; X will be our loop down counter and palette index
+    LDA #$FF
+    BNE BrightenPalettes     ; stop when the palette fade routine hits 0
+
+BrightenSprites:
+    LDX #$1F
+    LDA #$0F
+
+BrightenPalettes:
+    STA PaletteFade
     LDY #0              ; Y will count how many colors are not fully brightened
-    LDX #$0B            ; X will be loop down counter and palette index (7 iterations)
   @Loop:
-    LDA cur_pal+$10, X  ; get the current color in the palette
+    LDA cur_pal, X      ; get the current color in the palette
     CMP tmp_pal, X      ; compare it to our backed up palette
     BEQ @Skip           ; if it matches.. color is already restored.  Skip it
 
@@ -14228,11 +14262,12 @@ BrightenBatSprPalettes:
     ADC #$10            ; add one shade to the color's brightness
 
  @SetClr:
-    STA cur_pal+$10, X  ; write this color back to the palette
+    STA cur_pal, X      ; write this color back to the palette
     INY                 ; and increment Y to count this color as not fully brightened yet
 
  @Skip:
     DEX                 ; decrement X and loop until it expires
+    CPX PaletteFade
     BNE @Loop
 
     CPY #$01            ; then set C if Y is nonzero (to indicate not all colors are fully bright)
@@ -14247,13 +14282,13 @@ BrightenBatSprPalettes:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BackUpBatSprPalettes:
-    LDX #$0B            ; X is our loop counter.  Going to back up B colors (color 0 is transparent)
+BackUpPalettes:
+    LDX #$1F            ; X is our loop counter.  Going to back up B colors (color 0 is transparent)
   @Loop:
-    LDA cur_pal+$10, X  ; copy the color...
+    LDA cur_pal, X      ; copy the color...
     STA tmp_pal, X
     DEX                 ; decrement X
-    BNE @Loop           ; loop until X expires
+    BPL @Loop           ; loop until X expires
     RTS                 ; then exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14273,6 +14308,14 @@ PaletteFrame:
     STA $2005
     JMP CallMusicPlay_L      ; update music engine, then exit
 
+PaletteFrame_Loop:
+    JSR PaletteFrame            ; do a frame (updating palettes)
+    INC framecounter            ; increment the frame counter
+    LDA framecounter
+    AND #$07                    ; check low 3 bits of frame counter
+    BNE PaletteFrame_Loop       ; and loop until they're all clear (effectively waits 8 frames)
+    RTS
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Fade Out Battle Sprite Palettes [$FF90 :: 0x3FFA0]
@@ -14281,40 +14324,40 @@ PaletteFrame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-FadeOutBatSprPalettes:
-    JSR BackUpBatSprPalettes    ; back up the unedited battle sprite palettes
+FadeOutAllPalettes:
+    JSR PaletteFrame_Loop
+    JSR DimAll                  ; every 8 frames... dim the palettes a bit
+    BCS FadeOutAllPalettes      ; and jump back to the loop if there are any that aren't blackened yet
+    RTS                         ; exit once palette is all black    
 
-  @Loop:
-    JSR PaletteFrame            ; do a frame (updating palettes)
-    INC framecounter            ; increment the frame counter
-    LDA framecounter
-    AND #$07                    ; check low 3 bits of frame counter
-    BNE @Loop                   ; and loop until they're all clear (effectively waits 8 frames)
+FadeOutBG:
+    JSR PaletteFrame_Loop
+    JSR DimBG
+    BCS FadeOutBG
+    RTS
 
-    JSR DimBatSprPalettes       ; every 8 frames... dim the palettes a bit
-    BCS @Loop                   ; and jump back to the loop if there are any that aren't blackened yet
-
+FadeOutSprites:
+    JSR PaletteFrame_Loop
+    JSR DimSprites              ; every 8 frames... dim the palettes a bit
+    BCS FadeOutSprites          ; and jump back to the loop if there are any that aren't blackened yet
     RTS                         ; exit once palette is all black
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Fade In Battle Sprite Palettes [$FFA8 :: 0x3FFB8]
-;;
-;;    Opposite of above routine.  Fades in the battle sprites until
-;;  they're back to their original colors.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+FadeInAllPalettes:              ; Exactly the same as FadeOutBatSprPalettes... except...
+    JSR PaletteFrame_Loop
+    JSR BrightenAll             ; brighten them instead of dimming them.
+    BCS FadeInAllPalettes
+    RTS
 
-FadeInBatSprPalettes:           ; Exactly the same as FadeOutBatSprPalettes... except...
-    JSR PaletteFrame            ; no need to back up the palettes first
-    INC framecounter
-    LDA framecounter
-    AND #$07
-    BNE FadeInBatSprPalettes
+FadeInBG:
+    JSR PaletteFrame_Loop
+    JSR BrightenBG
+    BCS FadeInBG
+    RTS
 
-    JSR BrightenBatSprPalettes  ; brighten them instead of dimming them.
-    BCS FadeInBatSprPalettes
-
+FadeInSprites:                  ; Exactly the same as FadeOutBatSprPalettes... except...
+    JSR PaletteFrame_Loop
+    JSR BrightenSprites         ; brighten them instead of dimming them.
+    BCS FadeInSprites
     RTS
 
 
