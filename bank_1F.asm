@@ -437,9 +437,13 @@ OverworldLoop_2:
 
 
 DoOWTransitions:
-    LDA bridgescene       ; see if the bridge scene has been triggered
-    BEQ @SkipBridgeScene  ;   if not triggered... skip it
-    BMI @SkipBridgeScene  ;   if we've already done it in the past, skip it
+    LDA ow_flags
+    AND #BRIDGE_SCENE_OVER | BRIDGE_SCENE_NOTYET
+    BNE @SkipBridgeScene
+
+    ;LDA bridgescene       ; see if the bridge scene has been triggered
+    ;BEQ @SkipBridgeScene  ;   if not triggered... skip it
+    ;BMI @SkipBridgeScene  ;   if we've already done it in the past, skip it
 
       ;JSR StopNoise_StopSprites      ; cycle palettes with code=00 (overworld, cycle out)
 
@@ -637,7 +641,8 @@ PauseGame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 FlyAirship:
-    LDA airship_vis      ; see if airship is visible
+    LDA ow_flags         ; see if airship is visible
+    AND #AIRSHIP_VISIBLE
     BEQ @Exit            ; if not... exit
 
     LDA ow_scroll_x      ; get map X scroll
@@ -772,10 +777,19 @@ ProcessOWInput:
     JSR IsOnBridge     ; see if they're stepping on the bridge/canal
     BCS @Foot_NoBridge ; if they aren't on the bridge, skip ahead
 
-     LDA bridgescene   ; if they are on a bridge... see if the bridge scene has already happened
-     BNE @StartMove    ;   if it has, just start moving
-     INC bridgescene   ; otherwise, INC the bridgescene counter to make it happen
-     BNE @StartMove    ; then start moving (always branches)
+     LDA ow_flags
+     AND #BRIDGE_SCENE_OVER
+     BNE @StartMove
+     
+    @TriggerBridgeScene:
+     LDA ow_flags
+     AND #~BRIDGE_SCENE_NOTYET
+     STA ow_flags
+     
+     ;LDA bridgescene   ; if they are on a bridge... see if the bridge scene has already happened
+     ;BNE @StartMove    ;   if it has, just start moving
+     ;INC bridgescene   ; otherwise, INC the bridgescene counter to make it happen
+     ;BNE @StartMove    ; then start moving (always branches)
 
     @Foot_NoBridge:    ; if they weren't on the bridge
       JSR BoardCanoe   ; see if they can board the canoe to get to the next tile
@@ -1727,7 +1741,8 @@ BoardCanoe:
 ;;
 
 BoardShip:
-    LDA ship_vis        ; is ship visible / available?
+    LDA ow_flags        ; is ship visible / available?
+    AND #SHIP_VISIBLE
     BEQ Board_Fail      ; if not, fail
 
     LDA ship_x          ; is ship docked at current X/Y
@@ -1805,7 +1820,8 @@ DockShip:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 IsOnBridge:
-    LDA bridge_vis
+    LDA ow_flags
+    AND #BRIDGE_VISIBLE
     BEQ IsOnCanal      ; if bridge isn't visible... fail -- skip to canal
 
     LDA tmp+2
@@ -1832,7 +1848,8 @@ OnABridgeSuccess:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 IsOnCanal:
-    LDA canal_vis      ; do all the same checks as with IsOnBridge, but with the canal
+    LDA ow_flags      ; do all the same checks as with IsOnBridge, but with the canal
+    AND #CANAL_VISIBLE
     BEQ @Fail          ;  visibility
 
     LDA tmp+2
@@ -3224,7 +3241,7 @@ TalkToSMTile:
     LDX tileprop+1            ; put the chest ID in X
     LDA game_flags, X         ; get the game flag associated with that chest
     AND #GMFLG_TCOPEN         ;   to see if the chest has already been opened
-    JMP :+                    
+    BNE :+                    
 
   @TreasureChest2:            ; if the tile is a treasure chest
     LDX tileprop+1            ; put the chest ID in X
@@ -7653,7 +7670,7 @@ OpenTreasureChest:
     BCS @TooFull
         INC inv_weapon, X    ; says inv_weapon, but armor IDs are +$40 so it works
         INC dlg_itemid
-        JMP @OpenChest
+        BNE @OpenChest
     
    @Gold:
     LDA dlg_itemid
@@ -7676,7 +7693,7 @@ OpenTreasureChest:
     CMP #99                  ; see if they have >= 99
     BCS @TooFull
       INC items, X           ; give them one of this item -- but only if they have < 99
-      JMP @OpenChest
+      BNE @OpenChest
     
    @TooFull:                  ; If too full...
     LDA #DLGID_CANTCARRY     ; select "You can't carry any more" text
@@ -7690,7 +7707,7 @@ OpenTreasureChest:
     ;CMP #4                   ; no reason to have more than 4
     ;BCS @TooFull            ;; JIGS - why not, you can sell 'em now
        INC inv_magic, X      ;; and something else is wrong if you're pulling over 99 from chests
-       JMP @OpenChest
+       BNE @OpenChest
     
    @KeyItem:
     TAX
@@ -7706,7 +7723,7 @@ OpenTreasureChest:
     LDX tileprop+1           ; re-get the chest index
     LDA game_flags, X        ; set the game flag for this chest to mark it as opened
     ORA #GMFLG_TCOPEN        ; 
-    JMP :+
+    BNE :+
     
    @FlagChest_2: 
     LDX tileprop+1           ; re-get the chest index
@@ -7715,15 +7732,15 @@ OpenTreasureChest:
     
   : STA game_flags, X        ; 
    
-   JSR IsThisAChest
-   BNE @NotChest             ; so skip ahead to alternate message
+    JSR IsThisAChest
+    BNE @NotChest             ; so skip ahead to alternate message
 
-   LDA #0                    ; since SetChestAddr hijacks the door-drawing code
-   STA tileprop+1            ; tileprop+1 needs to be 0
-   LDA facing                ; and joy needs to be the direction the character is facing
-   STA joy                   ; instead of the direction they're going to be moving
+    LDA #0                    ; since SetChestAddr hijacks the door-drawing code
+    STA tileprop+1            ; tileprop+1 needs to be 0
+    LDA facing                ; and joy needs to be the direction the character is facing
+    STA joy                   ; instead of the direction they're going to be moving
    
-   JSR SetChestAddr
+    JSR SetChestAddr
     
    @DrawOpenChest:
     LDA #%00000011             ; first clunk
@@ -7766,12 +7783,14 @@ OpenTreasureChest:
     RTS
 
 IsThisAChest:
-   LDA tmp+10                ; get backed-up Y
-   LSR A                     ; halve it
-   TAY                       ; put it back in Y
-   LDA tsa_ul, Y             ; use it to index the upper left chest tile
-   CMP #$2A                  ; if its not $2A, its not using the chest graphic
-   RTS
+    LDA tmp+10                ; get backed-up Y
+    LSR A                     ; halve it
+    TAY                       ; put it back in Y
+    LDA tsa_ul, Y             ; use it to index the upper left chest tile
+    CMP #$2A                  ; if its not $2A, its not using the chest graphic
+    RTS
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8790,9 +8809,12 @@ DrawOWSprites:
    ;  JSR HideSpriteBottomHalf
 
   @NotInForest:
-    LDA airship_vis      ; check airship visibility
+    LDA ow_flags         ; check airship visibility
+    AND #AIRSHIP_VISIBLE
     BEQ @HideAirship     ; if not visible, skip ahead and don't draw the airship
 
+    LDA airship_vis
+    AND #$1F
     CMP #$1F             ; if visibility = $1F -- airship is fully visible
     BCS @ShowAirship     ; so skip ahead and draw it
                          ;  otherwise the airship is "flashing" because you just
@@ -9133,7 +9155,8 @@ lut_VehicleSprY:
  ;;
 
 DrawOWObj_Ship:
-    LDA ship_vis            ; get ship visibility flag
+    LDA ow_flags            ; get ship visibility flag
+    AND #SHIP_VISIBLE
     BEQ DrawOWObj_Exit      ; if zero, ship isn't available yet -- so don't draw it
 
     LDX ship_x              ; get x coord in X
@@ -9151,7 +9174,8 @@ DrawOWObj_Ship:
  ;;
 
 DrawOWObj_Airship:
-    LDA airship_vis         ; get airship visibility flag
+    LDA ow_flags            ; get airship visibility flag
+    AND #AIRSHIP_VISIBLE
     BEQ DrawOWObj_Exit      ; if zero, airship isn't available yet -- so don't draw it
 
     LDX airship_x           ; get x coord in X
@@ -9176,7 +9200,8 @@ DrawOWObj_Exit:
  ;;
 
 DrawOWObj_BridgeCanal:
-    LDA bridge_vis          ; check if bridge is visible
+    LDA ow_flags            ; check if bridge is visible
+    AND #BRIDGE_VISIBLE
     BEQ @Canal              ; if not.. skip it and proceed to canal
 
     LDX bridge_x            ; get and convert X,Y coords
@@ -9188,7 +9213,8 @@ DrawOWObj_BridgeCanal:
     JSR @Draw               ;  then proceed to canal
 
   @Canal:
-    LDA canal_vis           ; if not visible
+    LDA ow_flags
+    AND #CANAL_VISIBLE      ; if not visible
     BEQ DrawOWObj_Exit      ;    exit
 
     LDX canal_x
@@ -11614,7 +11640,7 @@ FillItemBox:
     BNE :+
     
     LDY #1           ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
-    JMP @ItemFillLoop
+    BNE @ItemFillLoop
     
   : LDY #16          ; if item_pageswap is 1, set Y to look at key items  
 

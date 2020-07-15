@@ -11,29 +11,29 @@ sram3           = $6C00  ; $400 bytes
 sram_checksum   = sram + $FD
 sram_assert_55  = sram + $FE
 sram_assert_AA  = sram + $FF
-sram2_checksum   = sram2 + $FD
-sram2_assert_55  = sram2 + $FE
-sram2_assert_AA  = sram2 + $FF
-sram3_checksum   = sram3 + $FD
-sram3_assert_55  = sram3 + $FE
-sram3_assert_AA  = sram3 + $FF
+sram2_checksum  = sram2 + $FD
+sram2_assert_55 = sram2 + $FE
+sram2_assert_AA = sram2 + $FF
+sram3_checksum  = sram3 + $FD
+sram3_assert_55 = sram3 + $FE
+sram3_assert_AA = sram3 + $FF
 
-ship_vis        = unsram + $00
+ow_flags        = unsram + $00 ; see Overworld Flags in Constants
 ship_x          = unsram + $01
 ship_y          = unsram + $02
-airship_vis     = unsram + $03
-airship_x       = unsram + $04
-airship_y       = unsram + $05
-bridge_vis      = unsram + $06
-bridge_x        = unsram + $07
-bridge_y        = unsram + $08
-canal_vis       = unsram + $09
-canal_x         = unsram + $0A
-canal_y         = unsram + $0B
-bridgescene     = unsram + $0C ; 00 = hasnt happened yet. 01 = happens when move is complete, 80=  already has happened
-unsram_ow_scroll_x = unsram + $0D
-unsram_ow_scroll_y = unsram + $0E
-unsram_vehicle     = unsram + $0F
+airship_x       = unsram + $03
+airship_y       = unsram + $04
+bridge_x        = unsram + $05
+bridge_y        = unsram + $06
+canal_x         = unsram + $07
+canal_y         = unsram + $08
+ow2_vehicle_x   = unsram + $09
+ow2_vehicle_y   = unsram + $0A
+unsram_ow2_scroll_x = unsram + $0B
+unsram_ow2_scroll_y = unsram + $0C
+unsram_ow_scroll_x  = unsram + $0D
+unsram_ow_scroll_y  = unsram + $0E
+unsram_vehicle      = unsram + $0F
 
 ExpGainOption    = unsram + $10
 MoneyGainOption  = unsram + $11
@@ -78,6 +78,7 @@ item_mystickey  = keyitems + $04
 item_tnt        = keyitems + $05
 item_adamant    = keyitems + $06
 item_slab       = keyitems + $07
+
 item_ruby       = keyitems + $08
 item_rod        = keyitems + $09
 item_floater    = keyitems + $0A
@@ -86,6 +87,7 @@ item_tail       = keyitems + $0C
 item_cube       = keyitems + $0D
 item_bottle     = keyitems + $0E
 item_oxyale     = keyitems + $0F
+
 item_canoe      = keyitems + $10
 item_lewds      = keyitems + $11
 item_nothing2   = keyitems + $12
@@ -94,6 +96,7 @@ item_nothing4   = keyitems + $14
 item_nothing5   = keyitems + $15
 item_nothing6   = keyitems + $16
 item_nothing7   = keyitems + $17
+
 item_nothing8   = keyitems + $18
 item_nothing9   = keyitems + $19
 item_bottle_alt = keyitems + $1A
@@ -200,7 +203,8 @@ mapdraw_job             = $2B ; 0 = no job, 1 = draw attribs, 2 = draw tiles
 cur_map                 = $2C
 cur_tileset             = $2D
 cur_mapobj              = $2E ; counter for updating which map object
-battlestep_sign         = $2F ; controls whether or not battlestep goes up or down
+battlestep_sign         = $2F ; controls whether or not battlestep goes up or down ; uses high 3 bits
+airship_vis             = $2F ; uses low 5 bits
 
 ;; Standard Map Things  
 tileprop                = $30 ; 2 bytes

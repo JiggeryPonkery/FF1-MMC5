@@ -966,14 +966,17 @@ Talk_KingConeria:
       LDA tmp+1             ;  ... print [1]
       RTS
 
-:   LDA bridge_vis          ; otherwise (princess rescued), see if bridge is visible
+:   LDA ow_flags            ; otherwise (princess rescued), see if bridge is visible
+    AND #BRIDGE_VISIBLE
     BEQ :+                  ; if it is...
       LDA tmp+3             ;  ... print [3]
       RTS
                             ; otherwise (princess rescued, bridge not visible)
-:   LDA tmp+2               ; print [2]
-    INC bridge_vis          ; make bridge visible
+:   LDA ow_flags
+    ORA #BRIDGE_VISIBLE
+    STA ow_flags
     INC dlgsfx              ; play fanfare
+    LDA tmp+2               ; print [2]
     RTS
 
  ;; Garland (regular, not the ToFR version)  [$92B1 :: 0x392C1]
@@ -1022,10 +1025,13 @@ Talk_Bikke:
       RTS
 
   @AlreadyFought:        ; if we've already fought bikke...
-    LDA ship_vis         ; see if the party has the ship
+    LDA ow_flags         ; see if the party has the ship
+    AND #SHIP_VISIBLE
     BNE @HaveShip        ; if they do, skip ahead
 
-      INC ship_vis            ; otherwise, give the player the ship
+      LDA ow_flags
+      ORA #SHIP_VISIBLE
+      STA ow_flags            ; otherwise, give the player the ship
       LDY #OBJID_PIRATETERR_1
       JSR ShowMapObject       ; and show a bunch of scaredy-cat townspeople that the pirates
       LDY #OBJID_PIRATETERR_2 ;  were terrorizing
@@ -1124,8 +1130,9 @@ Talk_Nerrick:
 
   @HaveTNT:
     DEC item_tnt           ; otherwise, remove the TNT from the party
-    LDA #0                 ; kill the Canal
-    STA canal_vis
+    LDA ow_flags
+    AND #~CANAL_VISIBLE    ; remove the canal_visible bit
+    STA ow_flags
     LDY #OBJID_NERRICK     ; hide Nerrick (this object)
     JSR HideThisMapObject
 
@@ -1462,7 +1469,8 @@ Talk_Invis:
   ;;  [2] otherwise
 
 Talk_ifbridge:
-    LDA bridge_vis       ; see if bridge is visible (has been built)
+    LDA ow_flags
+    AND #BRIDGE_VISIBLE  ; see if bridge is visible (has been built)
     BEQ :+               ; if it has...
       LDA tmp+1          ; print [1]
       RTS
@@ -1494,7 +1502,8 @@ Talk_GoBridge:
     LDY #OBJID_PRINCESS_2   ; check to see if princess has been rescued
     JSR IsObjectVisible
     BCC :+                  ; if she has...
-      LDA bridge_vis        ; see if bridge has been built
+      LDA ow_flags
+      AND #BRIDGE_VISIBLE   ; see if bridge has been built
       BNE :+                ; if not... (princess saved, but bridge not built yet...)
         LDA tmp+1           ;  ... print [1]
         RTS
@@ -1554,7 +1563,8 @@ Talk_ifcanoe:
  ;;  [2] if Canal is still blocked
 
 Talk_ifcanal:
-    LDA canal_vis       ; see if the canal has been blown yet
+    LDA ow_flags
+    AND #CANAL_VISIBLE  ; see if the canal has been blown yet
     BNE @CanalBlocked   ; if it has been opened up already
       LDA tmp+1         ;   print [1]
       RTS
@@ -1596,7 +1606,8 @@ Talk_ifearthvamp:
  ;;  [2] if you do
 
 Talk_ifairship:
-    LDA airship_vis      ; see if the party has the airship
+    LDA ow_flags
+    AND #AIRSHIP_VISIBLE ; see if the party has the airship
     BNE @HaveAirship     ; if they don't....
       LDA tmp+1          ; print [1]
       RTS

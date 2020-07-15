@@ -2834,22 +2834,23 @@ lut_SMPalettes:
 ;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
 
 lut_InitUnsramFirstPage:
-.byte $00 ; 00 ship visible
+.byte %01010000 ; 00 overworld flags
 .byte $D2 ; 01 ship X 
 .byte $99 ; 02 ship Y
-.byte $00 ; 03 airship visible
-.byte $DD ; 04 airship X
-.byte $ED ; 05 airship Y
-.byte $00 ; 06 bridge visible
-.byte $98 ; 07 bridge X
-.byte $98 ; 08 bridge Y
-.byte $01 ; 09 canal visible
-.byte $66 ; 0A canal X
-.byte $A4 ; 0B canal Y
-.byte $00 ; 0C bridgescene ; 00 = hasnt happened yet. 01 = happens when move is complete, 80 =  already has happened
+.byte $DD ; 03 airship X
+.byte $ED ; 04 airship Y
+.byte $98 ; 05 bridge X
+.byte $98 ; 06 bridge Y
+.byte $66 ; 07 canal X
+.byte $A4 ; 08 canal Y
+.byte $00 ; 09 ow2_vehicle X
+.byte $00 ; 0A ow2_vehicle Y
+.byte $00 ; 0B overworld 2 scroll x
+.byte $00 ; 0C overworld 2 scroll y
 .byte $92 ; 0D overworld scroll x
 .byte $9E ; 0E overworld scroll y
 .byte $01 ; 0F overworld vehicle
+
 .byte $01 ; 10 exp gain option (normal)
 .byte $01 ; 11 money gain option (normal)
 .byte $01 ; 12 encounter rate option (normal)
@@ -2857,12 +2858,12 @@ lut_InitUnsramFirstPage:
 .byte $00 ; 14 auto target option (on)
 .byte $04 ; 15 battle text speed (5)
 .byte $00 ; 16 battle text background color (0: blue)
-.byte $00 ; 17 unused
+.byte $00 ; 17 smokebomb steps
 .byte $00 ; 18 unused
 .byte $00 ; 19 unused
 .byte $00 ; 1A unused 
-.byte $00 ; 1B unused
-.byte $00 ; 1C unused
+.byte $00 ; 1B battles won
+.byte $00 ; 1C battles fled
 .byte $90 ; 1D gold low
 .byte $01 ; 1E gold middle
 .byte $00 ; 1F gold high

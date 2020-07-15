@@ -1568,8 +1568,10 @@ EnterBridgeScene:
       JMP @CreditsLoop      ; and continue looping
 
   @CreditsExit:
-    LDA #$80              ; mark the bridge scene as completed.. so it won't be activated again
-    STA bridgescene       ;   if the user walks over the bridge again
+    LDA ow_flags
+    AND #~BRIDGE_SCENE_NOTYET
+    ORA #BRIDGE_SCENE_OVER  ; mark the bridge scene as completed.. so it won't be activated again
+    STA ow_flags            ;   if the user walks over the bridge again
 
   ; this last loop simply stalls a bit ($20 frames) before exiting so the exit
   ;  isn't so abrupt
