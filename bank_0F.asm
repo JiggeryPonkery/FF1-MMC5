@@ -4663,23 +4663,21 @@ BattleBackgroundColor:
     BEQ @NextColor
 
    @PreviousColor:
-    LDA BattleBGColor
-    SEC
-    SBC #$01
+    DEC BattleBGColor
     JMP @Return 
 
    @NextColor:
-    LDA BattleBGColor
-    CLC
-    ADC #$01
+    INC BattleBGColor
 
    @Return:
+    LDA BattleBGColor
     AND #$0F
-    STA BattleBGColor
+    TAX
+    STX BattleBGColor
     LDA BattleBackgroundColor_LUT, X
     STA cur_pal+14
-   ; LDA #0
-   ; STA $2002
+    ;LDA #0
+    ;STA $2002
     JMP TurnOnScreen
 
 
