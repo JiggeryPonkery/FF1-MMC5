@@ -3111,11 +3111,14 @@ SumBattleRewardEXP:
       DEX
       BNE @Loop
       
-      LDA ExpGainOption
-      BEQ HalveReward ; If ExpGain is 0 (Low), halve the reward
-          CMP #2
-          BEQ DoubleReward ; If ExpGain is 2 (High), 1.5x the reward
-          ;; Otherwise, ExpGain is 1, normal, so do nothing.
+      LDA Options
+      AND #EXP_GAIN_HIGH | EXP_GAIN_LOW
+      BEQ @RTS         ; if both are 0, exit
+      AND #EXP_GAIN_HIGH ; if not, one of them is active; check if its high
+      BEQ HalveReward  ; its not high, so it must be low; halve the reward
+      BNE DoubleReward ; it IS high; 1.5x the reward
+
+   @RTS:       
     RTS
 
 
@@ -3151,14 +3154,17 @@ SumBattleRewardGP:
       
       DEX
       BNE @Loop
-      
-      LDA MoneyGainOption
-      BEQ HalveReward ; If ExpGain is 0 (Low), halve the reward
-          CMP #2
-          BEQ DoubleReward ; If ExpGain is 2 (High), 1.5x the reward
-          ;; Otherwise, ExpGain is 1, normal, so do nothing.
-      
+
+      LDA Options
+      AND #MONEY_GAIN_HIGH | MONEY_GAIN_LOW
+      BEQ @RTS         ; if both are 0, exit
+      AND #MONEY_GAIN_HIGH ; if not, one of them is active; check if its high
+      BEQ HalveReward  ; its not high, so it must be low; halve the reward
+      BNE DoubleReward ; it IS high; 1.5x the reward
+
+   @RTS:       
     RTS
+
     
     
 HalveReward:

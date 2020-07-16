@@ -2851,22 +2851,24 @@ lut_InitUnsramFirstPage:
 .byte $9E ; 0E overworld scroll y
 .byte $01 ; 0F overworld vehicle
 
-.byte $01 ; 10 exp gain option (normal)
-.byte $01 ; 11 money gain option (normal)
-.byte $01 ; 12 encounter rate option (normal)
-.byte $00 ; 13 mute SFX option (on)
-.byte $00 ; 14 auto target option (on)
-.byte $04 ; 15 battle text speed (5)
-.byte $00 ; 16 battle text background color (0: blue)
-.byte $00 ; 17 smokebomb steps
-.byte $00 ; 18 unused
-.byte $00 ; 19 unused
-.byte $00 ; 1A unused 
-.byte $00 ; 1B battles won
-.byte $00 ; 1C battles fled
-.byte $90 ; 1D gold low
-.byte $01 ; 1E gold middle
-.byte $00 ; 1F gold high
+
+.byte %00000001 ; 10 options - only auto target on
+.byte $04 ; 11 battle text speed (5)
+.byte $00 ; 12 battle text background color (0: blue)
+.byte $00 ; 13 smokebomb steps
+.byte $00 ; 14 battles won
+.byte $00 ; 15 battles fled
+.byte $90 ; 16 gold low
+.byte $01 ; 17 gold middle
+.byte $00 ; 18 gold high
+.byte $00 ; 19 play time 
+.byte $00 ; 1A
+.byte $00 ; 1B
+.byte $00 ; 1C
+.byte $00 ; 1D checksum stuff
+.byte $00 ; 1E
+.byte $00 ; 1F
+
 
 ; Items
 .byte $00 ; 20 unused

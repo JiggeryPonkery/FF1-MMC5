@@ -205,8 +205,11 @@ CheckForEndOfBattle:
     BNE :+
       RTS                       ; if battle result is zero, do nothing -- keep battling!
       
-  : LDX AutoTargetOptionBackup      ;; JIGS - restore option for future battles
-    STX AutoTargetOption            ;; in case it was overwritten in the last round 
+  : PHA
+    LDA Options
+    AND #AUTO_TARGET            ;; JIGS - restore option for future battles
+    STA AutoTarget              ;; in case it was overwritten in the last round 
+    PLA
   
     CMP #$02                    ; if battle result == 2, the party is victorious
     BNE :+
@@ -373,8 +376,9 @@ BattleLogicLoop:
     JSR UndrawOneBox
     
 BattleLogicLoop_ReEntry:    
-    LDA AutoTargetOptionBackup      ;; JIGS - restore AutoTargetOption if auto battle (start button)
-    STA AutoTargetOption            ;;  was used last round
+    LDA Options
+    AND #AUTO_TARGET               ;; JIGS - restore AutoTarget        if auto battle (start button)
+    STA AutoTarget                 ;;  was used last round
     JSR ClearCommandBuffer
     JSR ResetPalette_Update         ; make sure the cursor is grey
     
@@ -838,8 +842,8 @@ BattleSubMenu_Hide:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 SetAutoBattle:
-    LDA #0
-    STA AutoTargetOption         ; turn on AutoTarget
+    LDA #1
+    STA AutoTarget              ; turn on AutoTarget
     INC battle_autoswitch
     JSR SetAutoFirstChar   
     
@@ -6234,14 +6238,14 @@ PlayerAttackPlayer_Physical:   ;; this LongCall part makes sure the player being
 ;; JIGS - hopefully DoPhysicalAttack is updated enough to handle this!
 
 ConfusedPlayerAttackEnemy_Physical:
-    LDA AutoTargetOption
+    LDA AutoTarget       
     PHA                   ; push the current state of the option
-    LDA #0
-    STA AutoTargetOption  ; set auto target for this attack
+    LDA #1
+    STA AutoTarget         ; set auto target for this attack
     LDA BattleCharID
     JSR PlayerAttackEnemy_Physical
     PLA
-    STA AutoTargetOption  ; and restore it
+    STA AutoTarget         ; and restore it
     RTS
 
 PlayerAttackEnemy_Physical:
@@ -9530,8 +9534,8 @@ Battle_PlMag_TargetOneEnemy:
      JMP Battle_CastMagicOnEnemy   
     
    @CheckAutoTarget:
-    LDA AutoTargetOption ; 0 = on, 1 = off
-    BEQ @RandomEnemy     ; if on, choose a new random enemy 
+    LDA AutoTarget        ; 1 = on, 0 = off
+    BNE @RandomEnemy     ; if on, choose a new random enemy 
         JMP DrawIneffective  ; if off, just show "Ineffective" message, and exit
     
    @RandomEnemy: 

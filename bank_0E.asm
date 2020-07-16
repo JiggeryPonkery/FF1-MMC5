@@ -4593,7 +4593,8 @@ PlaySFX_MenuSel:
 
 ;; JIGS - uses the noise channel instead now. Pff! 
 
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE @Done
 
     LDA #%00010100
@@ -4632,7 +4633,8 @@ PlaySFX_MenuMove:
 ;    STA sq2_sfx      ; indicate square 2 is playing a sound effect for $10 frames
 ;    RTS              ;  and exit!
 
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE @Done
 
     LDA #%00000010
@@ -4651,7 +4653,8 @@ PlaySFX_MenuMove:
 ;; JIGS - optional heal SFX instead of the jingle
     
 PlayHealSFX:
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE SFX_Done
  
 PlayHealSFX_Map:
@@ -4675,7 +4678,8 @@ PlayHealSFX_Map:
  
  
 PlaySFX_CharSwap:
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE @Done
     
     LDA #%10111010   ; 50% duty, length disabed, decay disabed, volume=$A

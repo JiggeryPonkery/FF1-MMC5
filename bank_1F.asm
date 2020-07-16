@@ -7148,7 +7148,8 @@ PlaySFX_Error:
 ;; JIGS - original game code ^ up there
 ;; This new code uses noise channel instead.
 
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE @Muted
     
     LDA #%00000010
@@ -14554,15 +14555,16 @@ DashButton:
 ;; JIGS - AND FINALLY the option stuff for the encounter rate.   
     
 EncounterRateOption:
-    LDA EncRateOption
-    BEQ @LowEncounterRate ; If EncRate is 0 (Low)
-        CMP #2
-        BEQ @HighEncounterRate ; If EncRate is 2 (High), 
-          ;; Otherwise, ExpGain is 1, normal, so do nothing.
-        RTS
+    LDA Options
+    AND #ENC_RATE_HIGH | ENC_RATE_LOW
+    BEQ @RTS
+    AND #ENC_RATE_HIGH
+    BEQ @LowEncounterRate
+    BNE @HighEncounterRate
 
    @LowEncounterRate:
-    LSR tmp       ; 5 if on land, 1 if on ship
+    LSR tmp              ; 5 if on land, 1 if on ship
+   @RTS: 
     RTS
   
    @HighEncounterRate:
@@ -14570,8 +14572,8 @@ EncounterRateOption:
     LDX vehicle          ; check the current vehicle
     CPX #$04             ; see if it's the ship
     BNE :+               ; if it is....
-    LDA #10            ;   ... 10 / 256 chance instead  (more infrequent battles at sea)
-
+    LDA #10              ; ... 10 / 256 chance instead  (more infrequent battles at sea)
+ 
   : STA tmp              ; store chance of battle in tmp
     RTS     
   
@@ -14590,15 +14592,10 @@ SaveScreenHelper:
     
     
 BattleBackgroundColor_LUT:
-.byte $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$2D,$0F,$25
-    
-    
-
-
-
-
-
-    
+.byte $01,$02,$03,$04
+.byte $05,$06,$07,$08
+.byte $09,$0A,$0B,$0C
+.byte $2D,$0F,$14,$11    
     
     
 Magic_ConvertBitsToBytes:

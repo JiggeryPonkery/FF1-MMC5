@@ -1651,8 +1651,8 @@ PlayerAttackEnemy_PhysicalZ:
     BEQ :+
        JSR EnemyExistLoop
 
-  : LDA AutoTargetOption
-    BNE @SkipAutoTarget
+  : LDA AutoTarget
+    BEQ @SkipAutoTarget
 
     JSR CheckTargetLoop             ; JIGS - doublecheck the enemy you're attacking exists!
 
@@ -4291,69 +4291,96 @@ lut_PtyGenBuf:
 
 
 
-
-
 DrawOptions:
-  LDA #24
-  STA dest_x
-  LDA #8
-  STA dest_y
-  LDX ExpGainOption
-  LDA lut_LowNormalHigh, X
-  JSR DrawZ_MenuString
+    LDA #24
+    STA dest_x
+    LDA #8
+    STA dest_y
+    LDX ExpGainOption
+    LDA lut_LowNormalHigh, X
+    JSR DrawZ_MenuString
+    
+    LDA #10
+    STA dest_y
+    LDX MoneyGainOption
+    LDA lut_LowNormalHigh, X
+    JSR DrawZ_MenuString
 
-  LDA #10
-  STA dest_y
-  LDX MoneyGainOption
-  LDA lut_LowNormalHigh, X
-  JSR DrawZ_MenuString
+    LDA #12
+    STA dest_y
+    LDX EncRateOption    
+    LDA lut_LowNormalHigh, X
+    JSR DrawZ_MenuString
 
-  LDA #12
-  STA dest_y
-  LDX EncRateOption
-  LDA lut_LowNormalHigh, X
-  JSR DrawZ_MenuString
+    JSR LongCall
+    .word BattleBGColorDigits
+    .byte BANK_MENUS
+    
+    LDA $2002          ; PPU toggle... needed or not?
+    LDA #>$221A        ; Color is drawn here
+    STA $2006
+    LDA #<$221A
+    STA $2006
+    LDA format_buf-2
+    STA $2007
+    LDA format_buf-1
+    STA $2007
+    
+    LDA #>$21DB        ; Respond rate is drawn here
+    STA $2006
+    LDA #<$21DB
+    STA $2006
+    LDA BattleTextSpeed ; get the current respond rate (which is zero based)
+    CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
+    ADC #$80+1          ;  for the desired digit to print, and +1 to convert it from zero
+    STA $2007           ;  based to 1 based (so it's printed as 1-8 instead of 0-7)
+    LDA #$00            ; reset scroll to 0 (very important!)
+    STA $2005
+    STA $2005
+    
+    LDA #24
+    STA dest_x
+    LDA #18
+    STA dest_y
+    LDX AutoTargetOption
+    LDA lut_OnOff, X
+    JSR DrawZ_MenuString
+    
+    LDA #20
+    STA dest_y
+    LDX MuteSFXOption
+    LDA lut_OnOff, X
+    JMP DrawZ_MenuString
 
-  JSR LongCall
-  .word BattleBGColorDigits
-  .byte BANK_MENUS
 
-  LDA $2002          ; PPU toggle... needed or not?
-  LDA #>$221A        ; Color is drawn here
-  STA $2006
-  LDA #<$221A
-  STA $2006
-  LDA format_buf-2
-  STA $2007
-  LDA format_buf-1
-  STA $2007
-
-  LDA #>$21DB        ; Respond rate is drawn here
-  STA $2006
-  LDA #<$21DB
-  STA $2006
-  LDA BattleTextSpeed ; get the current respond rate (which is zero based)
-  CLC                 ;  add $80+1 to it.  $80 to convert it to the coresponding tile
-  ADC #$80+1          ;  for the desired digit to print, and +1 to convert it from zero
-  STA $2007           ;  based to 1 based (so it's printed as 1-8 instead of 0-7)
-  LDA #$00            ; reset scroll to 0 (very important!)
-  STA $2005
-  STA $2005
-
-  LDA #24
-  STA dest_x
-  LDA #18
-  STA dest_y
-  LDX AutoTargetOption
-  LDA lut_OnOff, X
-  JSR DrawZ_MenuString
-
-  LDA #20
-  STA dest_y
-  LDX MuteSFXOption
-  LDA lut_OnOff, X
-  JMP DrawZ_MenuString
-
+SaveOptions:
+    LDA AutoTargetOption
+    STA Options
+    LDA MuteSFXOption
+    ASL A
+    JSR @QuickSave
+    LDA ExpGainOption
+    ASL A
+    ASL A
+    JSR @QuickSave
+    LDA MoneyGainOption
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    JSR @QuickSave
+    LDA EncRateOption
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    
+   @QuickSave:    
+    ORA Options
+    STA Options
+    RTS 
 
 OptionsMenu:
     JSR ClearButtons          ; A = 0
@@ -4380,7 +4407,36 @@ OptionsMenu:
     STA cursor_max
     LDA #0
     JSR DrawZ_MenuString       ; draws the static list of changable things
-
+    
+    LDA Options
+    AND #AUTO_TARGET
+    STA AutoTargetOption
+    LDA Options
+    AND #SFX_MUTED
+    LSR A
+    STA MuteSFXOption
+    LDA Options
+    AND #EXP_GAIN_LOW | EXP_GAIN_HIGH
+    LSR A
+    LSR A
+    STA ExpGainOption
+    LDA Options
+    AND #MONEY_GAIN_LOW | MONEY_GAIN_HIGH
+    LSR A
+    LSR A
+    LSR A
+    LSR A    
+    STA MoneyGainOption
+    LDA Options
+    AND #ENC_RATE_LOW | ENC_RATE_HIGH
+    LSR A
+    LSR A    
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    STA EncRateOption
+    
     JSR TurnMenuScreenOn_ClearOAM
 
 ReenterOptionsMenu:
@@ -4389,19 +4445,19 @@ ReenterOptionsMenu:
     JSR DrawOptions            ; and draw the option variables (off, on, high, low, etc)
 
 OptionsLoop:
-  JSR ClearOAM
-  JSR DrawOptionsCursor        ; draw the cursor
-  JSR OptionsMenuFrame         ; Do a frame
-
-  LDA joy_a                    ; check to see if A has been pressed
-  BNE @A_Pressed
-  LDA joy_b                    ; then see if B has been pressed
-  BNE @B_Pressed
-  JSR @OptionDirections
-  JMP OptionsLoop
+    JSR ClearOAM
+    JSR DrawOptionsCursor        ; draw the cursor
+    JSR OptionsMenuFrame         ; Do a frame
+    
+    LDA joy_a                    ; check to see if A has been pressed
+    BNE @A_Pressed
+    LDA joy_b                    ; then see if B has been pressed
+    BNE @B_Pressed
+    JSR @OptionDirections
+    JMP OptionsLoop
 
   @B_Pressed:
-   RTS
+    JMP SaveOptions
 
   @A_Pressed:
     LDA #0                  ; enter ChangeOption with A = 0, as if right was pressed
@@ -4491,13 +4547,13 @@ ChangeOption:
     RTS
 
    @JMP_BattleBackground:
-   JMP BattleBackgroundColor
+    JMP BattleBackgroundColor
 
    @JMP_MoneyGain:
-   JMP @MoneyGain
+    JMP @MoneyGain
 
    @JMP_EncounterRate:
-   JMP @EncounterRate
+    JMP @EncounterRate
 
    @BattleTextSpeed:
     PLA                     ; pull direction and branch
@@ -4526,8 +4582,8 @@ ChangeOption:
     JMP @AutoTarget
 
    @ExpGain:
-   PLA
-   BEQ @IncreaseExpGain
+    PLA
+    BEQ @IncreaseExpGain
 
        DEC ExpGainOption
        LDA ExpGainOption
@@ -4547,7 +4603,7 @@ ChangeOption:
   : INC ExpGainOption
     RTS
 
-    @MoneyGain:
+   @MoneyGain:
     PLA
     BEQ @IncreaseMoneyGain
 
@@ -4607,30 +4663,23 @@ BattleBackgroundColor:
     BEQ @NextColor
 
    @PreviousColor:
-    DEC BattleBGColor
     LDA BattleBGColor
-    CMP #$FF
-    BNE @Return
-    LDA #14
-    STA BattleBGColor
-    JMP @Return
+    SEC
+    SBC #$01
+    JMP @Return 
 
    @NextColor:
     LDA BattleBGColor
-    CMP #14
-    BNE :+
-       LDA #0
-       STA BattleBGColor
-       JMP @Return
-
-  : INC BattleBGColor
+    CLC
+    ADC #$01
 
    @Return:
-    LDA #0
-    STA $2002
-    LDX BattleBGColor
+    AND #$0F
+    STA BattleBGColor
     LDA BattleBackgroundColor_LUT, X
     STA cur_pal+14
+   ; LDA #0
+   ; STA $2002
     JMP TurnOnScreen
 
 
@@ -5861,7 +5910,8 @@ MenuWaitForBtn_SFX:
 
 
 PlaySFX_MenuSel:
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE @Done
     LDA #%00010100
     STA $400C
@@ -5875,7 +5925,8 @@ PlaySFX_MenuSel:
 
 
 PlaySFX_MenuMove:
-    LDA MuteSFXOption
+    LDA Options
+    AND #SFX_MUTED
     BNE @Done
     LDA #%00000010
     STA $400C
@@ -5927,11 +5978,11 @@ lut_OnOff:
 
 lut_ZMenuText:
 .word M_OptionsMenu          ; 0
-.word OptLow                 ; 1
-.word OptNormal              ; 2
-.word OptHigh                ; 3
-.word OptionOn               ; 4
-.word OptionOff              ; 5
+.word OptionNormal           ; 1
+.word OptionLow              ; 2
+.word OptionHigh             ; 3
+.word OptionOff              ; 4
+.word OptionOn               ; 5
 .word M_SaveSlots            ; 6
 .word M_SaveTitle            ; 7
 .word M_LoadTitle            ; 8
@@ -5979,13 +6030,13 @@ OptionOn:
 OptionOff:
 .byte $98,$8F,$8F,$00
 
-OptLow:
+OptionLow:
 .byte $95,$98,$A0,$FF,$FF,$FF,$00
 
-OptNormal:
+OptionNormal:
 .byte $97,$98,$9B,$52,$95,$00
 
-OptHigh:
+OptionHigh:
 .byte $91,$92,$90,$91,$FF,$FF,$00
 
 M_OptionsMenu:

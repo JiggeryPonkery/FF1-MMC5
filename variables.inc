@@ -8,15 +8,15 @@ unsram          = $5C00  ; $400 bytes
 sram            = $6400  ; $400 bytes ; but these are all on the swapped ram side
 sram2           = $6800  ; $400 bytes
 sram3           = $6C00  ; $400 bytes
-sram_checksum   = sram + $FD
-sram_assert_55  = sram + $FE
-sram_assert_AA  = sram + $FF
-sram2_checksum  = sram2 + $FD
-sram2_assert_55 = sram2 + $FE
-sram2_assert_AA = sram2 + $FF
-sram3_checksum  = sram3 + $FD
-sram3_assert_55 = sram3 + $FE
-sram3_assert_AA = sram3 + $FF
+sram_checksum   = sram + $1D
+sram_assert_55  = sram + $1E
+sram_assert_AA  = sram + $1F
+sram2_checksum  = sram2 + $1D
+sram2_assert_55 = sram2 + $1E
+sram2_assert_AA = sram2 + $1F
+sram3_checksum  = sram3 + $1D
+sram3_assert_55 = sram3 + $1E
+sram3_assert_AA = sram3 + $1F
 
 ow_flags        = unsram + $00 ; see Overworld Flags in Constants
 ship_x          = unsram + $01
@@ -35,20 +35,17 @@ unsram_ow_scroll_x  = unsram + $0D
 unsram_ow_scroll_y  = unsram + $0E
 unsram_vehicle      = unsram + $0F
 
-ExpGainOption    = unsram + $10
-MoneyGainOption  = unsram + $11
-EncRateOption    = unsram + $12
-MuteSFXOption    = unsram + $13
-AutoTargetOption = unsram + $14
-BattleTextSpeed  = unsram + $15
-BattleBGColor    = unsram + $16
-smokebomb_steps  = unsram + $17
-; unused         = unsram + $18
-; unused         = unsram + $19
-; unused         = unsram + $1A
-battleswon       = unsram + $1B
-battlesrun       = unsram + $1C
-gold             = unsram + $1D ; 1E ; 1F - 3 bytes
+Options          = unsram + $10 ; see Option Flags in Constants
+BattleTextSpeed  = unsram + $11
+BattleBGColor    = unsram + $12
+smokebomb_steps  = unsram + $13
+battleswon       = unsram + $14
+battlesrun       = unsram + $15
+gold             = unsram + $16 ; 17 ; 18 - 3 bytes
+playtimer        = unsram + $19 ; 1A ; 1B ; 1C - 4 bytes - game clock!
+; checksum       = unsram + $1D
+; assert 55      = unsram + $1E
+; assert AA      = unsram + $1F
 
 items           = unsram + $20
 item_pageswap   = items + $00
@@ -108,10 +105,7 @@ item_orb_start  = keyitems + $1C
   orb_earth     = item_orb_start + 3 ; $1F
 item_stop       = item_orb_start + 4 ; $20
 
-playtimer        = unsram + $F0 ; 4 bytes - game clock!
-;                = unsram + $F1
-;                = unsram + $F2
-;                = unsram + $F3
+
 
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00 ; high bits = sprite, low bits = class
@@ -168,6 +162,12 @@ game_flags        = unsram + $0300  ; must be on page bound
 
 ;; Temporary RAM 
 tmp                     = $00 ; 16 bytes
+
+ExpGainOption           = $0B
+MoneyGainOption         = $0C
+EncRateOption           = $0D
+MuteSFXOption           = $0E
+AutoTargetOption        = $0F 
 
 ;; Controls & Movement  
 joy                     = $10
@@ -498,6 +498,7 @@ battle_defenderisplayer = $030E ; 1 if player is defending, 0 if enemy is defend
 LongCall_A              = $0310 ; The LongCall routine restores them after it swaps banks
 LongCall_Y              = $0311
 LongCall_X              = $0312
+AutoTarget              = $0313
 
 btltmp_targetlist       = $0327 ; temporary buffer (9 entries) containing possible targets
 
