@@ -5,6 +5,11 @@
 
 BANK_THIS = $05
  
-.byte "END OF BANK 05"        
+.export Overworld_Tileset
+.export Second_Overworld_Tileset
     
-    
+Overworld_Tileset:
+.incbin "chr/tilesets/overworld_tileset.chr"
+
+Second_Overworld_Tileset:
+.incbin "chr/tilesets/overworld_tileset.chr"

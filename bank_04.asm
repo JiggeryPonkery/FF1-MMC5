@@ -4,11 +4,12 @@
 
 
 .export LoadBattleSpritesForBank_Z
-.export LoadSprite_Bank04
 .export LoadStoneSprites
-.export LoadCursorOnly
+.export LoadBattleSprite
 .export lut_BatSprCHR
-.export lut_BatObjCHR
+.export LoadBattleSpritePalettes
+.export LoadAllBattleSprites
+.export LoadAllBattleSprites_Menu
 
 .import WaitForVBlank_L
 .import LongCall
@@ -37,7 +38,7 @@ WhiteMageSprites:
 .INCBIN "chr/class/WhiteMage.Chr"
 BlackMageSprites: 
 .INCBIN "chr/class/BlackMage.chr"
-UnusedSprites:
+UnusedSprites1:
 .INCBIN "chr/class/Unused.chr"
 UnusedSprites2:
 .INCBIN "chr/class/Unused.chr"
@@ -57,12 +58,40 @@ UnusedSprites3:
 .INCBIN "chr/class/Unused.chr"
 UnusedSprites4:
 .INCBIN "chr/class/Unused.chr"
- 
 
-;; Weapon and Magic Casting Sprites
-lut_BatObjCHR:
-MagicWeaponSprites:  
-.INCBIN "chr/weapon_magic_sprites.chr"
+ExtraSprites1:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites2:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites3:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites4:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites5:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites6:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites7:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites8:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites9:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites10:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites11:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites12:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites13:
+.INCBIN "chr/class/Unused.chr"
+ExtraSprites14:
+.INCBIN "chr/class/Unused.chr"
+
+CursorCHR:
+.INCBIN "chr/cursor.chr"
+
+
 
 ;; JIGS - Disch's original disassembly had a long string of data here.
 ;; Turns out it was character, weapon, and magic sprites, so I sorted them out! 
@@ -70,6 +99,8 @@ MagicWeaponSprites:
 
     
 LoadBattleSpritesForBank_Z: 
+    JSR LoadBattleSpritePalettes
+
     LDA $2002  
     LDA #0    
     STA tmp+3					; counter for 12 classes 
@@ -84,9 +115,32 @@ LoadBattleSpritesForBank_Z:
     JSR CHRLoadToAX
     INC tmp+3
     LDA tmp+3
-    CMP #$10
+    CMP #$1E
     BNE @Loop
-    JMP LoadBlackTile_BG
+    
+LoadCursor:
+    LDA #<CursorCHR
+    STA tmp
+    LDA #>CursorCHR
+    STA tmp+1
+    LDA #$40
+    STA tmp+2   
+    LDA #$1F
+    LDX #$00
+    JMP CHRLoadToAX       
+    
+LoadBlackTile_BG: ;; this one is necessary for the save screen and new game screens!
+    LDA #0
+    STA $2006
+    STA $2006
+
+FillBlackTile:    
+    LDX #$10
+   @Loop:
+    STA $2007             ; write $20 zeros to clear 2 tiles
+    DEX
+    BNE @Loop
+    RTS
    
 LoadBattleSpritesLocation:
     LDA tmp+3
@@ -113,9 +167,9 @@ LoadBattleSpritesLUT_1:
    .byte $11,$E0
    .word BlackMageSprites
    .byte $12,$40
-   .word UnusedSprites
+   .word UnusedSprites1
    .byte $12,$A0
-   .word UnusedSprites
+   .word UnusedSprites2
    .byte $13,$00
    .word KnightSprites
    .byte $13,$60
@@ -129,9 +183,38 @@ LoadBattleSpritesLUT_1:
    .byte $14,$E0
    .word BlackWizSprites    
    .byte $15,$40
-   .word UnusedSprites
+   .word UnusedSprites3
    .byte $15,$A0
-   .word UnusedSprites
+   .word UnusedSprites4
+   
+   .byte $16,$00
+   .word ExtraSprites1
+   .byte $16,$60
+   .word ExtraSprites2
+   .byte $16,$C0
+   .word ExtraSprites3
+   .byte $17,$20
+   .word ExtraSprites4
+   .byte $17,$80
+   .word ExtraSprites5
+   .byte $17,$E0
+   .word ExtraSprites6
+   .byte $18,$40
+   .word ExtraSprites7
+   .byte $18,$A0
+   .word ExtraSprites8
+   .byte $19,$00
+   .word ExtraSprites9
+   .byte $19,$60
+   .word ExtraSprites10
+   .byte $19,$C0
+   .word ExtraSprites11
+   .byte $1A,$20
+   .word ExtraSprites12
+   .byte $1A,$80
+   .word ExtraSprites13
+   .byte $1A,$E0
+   .word ExtraSprites14
 
 
 ShiftTile:
@@ -286,41 +369,68 @@ LoadStoneSprites:
     STA char_index
     BNE @CharLoop                  ; when char_index loops back to $00, all 4 are done 
     RTS
+    
+LoadAllBattleSprites_Menu:
+    JSR LoadAllBattleSprites
+    
+LoadBattleSpritePalettes:
+    LDX #$0F  ; start at $0F
+  @Loop:
+      LDA @BattleSpritePalettes, X
+      STA cur_pal+$10, X   ; copy color to sprite palette
+      DEX
+      BPL @Loop            ; loop until X wraps ($10 colors copied)
+      RTS
+
+@BattleSpritePalettes:
+  .byte $0F,$18,$21,$28  ; BlackMage, BlackBelt
+  .byte $0F,$16,$30,$36  ; Fighter, RedMage, WhiteMage
+  .byte $0F,$08,$17,$28  ; Thief
+  .byte $0F,$00,$10,$30  ; Cursor
+
+    
+LoadAllBattleSprites:    
+    LDA #3
+    STA char_index
+  : JSR LoadBattleSprite
+    DEC char_index
+    BPL :-
+    RTS    
 
 LoadBattleSprite:   
-   LDA char_index
-   CLC      
-   ROR A    
-   ROR A    
-   ROR A    
-   TAX
-   LDA ch_class, X 
-   AND #$F0                        ; get sprite from class
-   LSR A 
-   LSR A                           ; shift down twice -- since what we want is the low bits shifted up twice!
-   TAY                             ; so $F0 = $0F, then * 4   
-   LDA LoadBattleSpritesLUT_1+3,Y  ; only bother with the high byte, the low byte is always $0
-   STA tmp+1                       
-   LDY char_index
-   LDX btl_charactivepose, Y       ; btl_charpose buffer holds the pose to use: stand, attack, crouch, cheer, dead
-   LDA BattleCharPose_LUT, X       ; which is used to get these bytes!
-   STA tmp                         ; so now get the low byte
-   LDA BattleCharPose_LUT+1, X     ; and if there's an high byte to add... add it
-   CLC      
-   ADC tmp+1
-   STA tmp+1
-   LDA BattleCharPose_LUT+2, X     ; third byte is how many tiles to draw 
-   STA tmp+2
-   LDA char_index                  ; finally, get the destination address to draw the tiles to
-   ASL A
-   TAY 
-   LDA BattleCharPositions_LUT+1, Y
-   TAX
-   LDA BattleCharPositions_LUT, Y
+    LDA char_index
+    CLC      
+    ROR A    
+    ROR A    
+    ROR A    
+    TAX
+    LDA ch_class, X 
+    AND #$F0                        ; get sprite from class
+    LSR A 
+    LSR A                           ; shift down twice -- since what we want is the low bits shifted up twice!
+    TAY                             ; so $F0 = $0F, then * 4   
+    LDA LoadBattleSpritesLUT_1+3,Y  ; only bother with the high byte, the low byte is always $0
+    STA tmp+1                       
+    LDY char_index
+    LDX btl_charactivepose, Y       ; btl_charpose buffer holds the pose to use: stand, attack, crouch, cheer, dead
+    LDA BattleCharPose_LUT, X       ; which is used to get these bytes!
+    STA tmp                         ; so now get the low byte
+    LDA BattleCharPose_LUT+1, X     ; and if there's an high byte to add... add it
+    CLC      
+    ADC tmp+1
+    STA tmp+1
+    LDA BattleCharPose_LUT+2, X     ; third byte is how many tiles to draw 
+    STA tmp+2
+    LDA char_index                  ; finally, get the destination address to draw the tiles to
+    ASL A
+    TAY 
+    LDA BattleCharPositions_LUT+1, Y
+    TAX
+    LDA BattleCharPositions_LUT, Y
    
 CHRLoadToAX:
     LDY InBattle
-    BNE Jump_StackLoader
+    BNE StackLoader
 
     LDY $2002         ; reset PPU Addr toggle
     STA $2006         ; write high byte of dest address
@@ -333,164 +443,6 @@ CHRLoad_Loop:
     INY               ; inc our source index
     DEX
     BNE CHRLoad_Loop  ; if we've loaded all requested tiles, exit.  Otherwise continue loading
-    RTS
-
-Jump_StackLoader:
-    JMP StackLoader
-    
-LoadSprite_Bank04:
-    LDA MMC5_tmp
-    LSR A    				; 01 
-    BCS LoadBattleSprite
-    LSR A                   ; 02 
-    BCS LoadWeaponSprite
-    LSR A                   ; 04 
-    BCS LoadMagicSprite     
-    BCC LoadAttackCloud     ; 08
-
-BattleCharStonePositions_LUT:
-   .byte $0D,$00    ; character 0 
-   .byte $0D,$70    ; character 1 
-   .byte $0E,$00    ; character 2 
-   .byte $0E,$70    ; character 3 
-   
-BattleCharPositions_LUT:
-   .byte $11,$00    ; character 0 
-   .byte $11,$80    ; character 1 
-   .byte $12,$00    ; character 2 
-   .byte $12,$80    ; character 3    
-
-BattleCharPose_LUT:
-   ; first two bytes is offset for where to load sprites from
-   ; third byte is how many tiles to draw (amount in high bits)
-   .byte $00,$00,$60 ; $00 ; Stand/Walk ; 6 tiles 
-   .byte $00,$00,$40 ; $03 ; Attack_1   ; 4 tiles, same as stand, but quicker
-   .byte $80,$00,$60 ; $06 ; Attack_2   ; 6 tiles
-   .byte $E0,$00,$60 ; $09 ; Cheer      ; 6 tiles
-   .byte $40,$01,$60 ; $0C ; Crouch     ; 6 tiles
-   .byte $A0,$01,$60 ; $0F ; Dead       ; 6 tiles
-   .byte $00,$00,$80 ; $12 ; Stand/Walk ; 8 tiles, loads the walking legs before battle
-   ;; Don't want to load 8 tiles per frame, so this last one is for before battle begins
-
-LoadAttackCloud:
-    LDA #<MagicWeaponSprites+$40
-    STA tmp
-    LDA #>MagicWeaponSprites+$0F
-    STA tmp+1
-    ; a800 < start of MagicWeaponSprites
-    ; b740 < where we want to laod from
-
-    LDA #$C0
-    STA tmp+2
-    LDA #$10
-    LDX #$40
-    JSR CHRLoadToAX
-	JMP LoadBlackTiles_Sprite
-   
-LoadWeaponSprite:
-    JSR LoadMagicWeaponSprite    
-    LDA #$10
-    LDX #$00
-    JMP CHRLoadToAX
-    
-LoadCursorOnly:
-    LDA #$F0
-    STA btlattackspr_gfx
-    JSR LoadMagicWeaponSprite    
-    LDA #$1F
-    LDX #$00
-    JMP CHRLoadToAX   
-
-LoadMagicWeaponSprite:    
-    LDA #0
-    STA tmp+1
-    LDA btlattackspr_gfx
-    CLC
-    ROL A
-    ROL tmp+1
-    ROL A
-    ROL tmp+1
-    ROL A
-    ROL tmp+1
-    ROL A
-    ROL tmp+1                 ; this should convert something like $A8 into $0A80
-    CLC
-    ADC #<MagicWeaponSprites
-    STA tmp
-    LDA #>MagicWeaponSprites
-    ADC tmp+1
-    STA tmp+1
-    LDA #$40
-    STA tmp+2    
-    RTS
-    
-    
-LoadMagicSprite:
-    JSR LoadMagicWeaponSprite    
-    LDA tmp+1
-    PHA
-    LDA tmp
-    PHA
-    
-    LDA #$13                
-    LDX #$00
-    JSR CHRLoadToAX    
-    ;; do the first 4 tiles
-    
-    ;; BattleUpdatePPU - Copy:
-    LDA btl_soft2001
-    STA $2001               ; copy over soft2001
-    LDA #$00
-    STA $2005               ; reset scroll
-    STA $2005
-    
-    LDA $2002
-    LDA #>oam
-    STA $4014               ; Do OAM DMA
-    LDA #BANK_THIS
-    STA cur_bank            ; set the swap-back bank (necessary because music playback is in another bank)
-    JSR CallMusicPlay_L     ; Call music playback to keep it playing
-    ;; does not update battle sfx, so make sure this is called before SFX begin
-    
-    LDA #BANK_DOBATTLE      ; reset the swap-back bank
-    STA cur_bank           
-    
-    LDA #$40
-    STA tmp+2
-    PLA 
-    STA tmp
-    CLC
-    ADC #$40
-    STA tmp
-    PLA 
-    ADC #$00
-    STA tmp+1
-    LDA #$13
-    LDX #$40
-    JMP CHRLoadToAX
-
-;; JIGS - this is really just so I don't see garbage in the PPU viewer while testing battle graphics...
-;; since now it displays sprites instead of background tiles
-
-LoadBlackTiles_Sprite:
-    LDX #>$1000
-    LDA #<$1000
-    STX $2006             ; write X as high byte
-    STA $2006             ; A as low byte
-	JMP FillBlackTile
-
-LoadBlackTile_BG: ;; this one is necessary for the save screen and new game screens!
-    LDA #0
-    STA $2006
-    STA $2006
-
-FillBlackTile:    
-;   LDA #0
-    LDX #$10
-   @Loop:
-    STA $2007             ; write $20 zeros to clear 2 tiles
-    DEX
-    BNE @Loop
     RTS
 
 StackLoader:
@@ -530,6 +482,33 @@ StackLoader:
     LDX tmp+3
     TXS       ; restore stack pointer
     RTS
+
+
+BattleCharStonePositions_LUT:
+   .byte $0D,$00    ; character 0 
+   .byte $0D,$70    ; character 1 
+   .byte $0E,$00    ; character 2 
+   .byte $0E,$70    ; character 3 
+   
+BattleCharPositions_LUT:
+   .byte $11,$00    ; character 0 
+   .byte $11,$80    ; character 1 
+   .byte $12,$00    ; character 2 
+   .byte $12,$80    ; character 3    
+
+BattleCharPose_LUT:
+   ; first two bytes is offset for where to load sprites from
+   ; third byte is how many tiles to draw (amount in high bits)
+   .byte $00,$00,$60 ; $00 ; Stand/Walk ; 6 tiles 
+   .byte $00,$00,$40 ; $03 ; Attack_1   ; 4 tiles, same as stand, but quicker
+   .byte $80,$00,$60 ; $06 ; Attack_2   ; 6 tiles
+   .byte $E0,$00,$60 ; $09 ; Cheer      ; 6 tiles
+   .byte $40,$01,$60 ; $0C ; Crouch     ; 6 tiles
+   .byte $A0,$01,$60 ; $0F ; Dead       ; 6 tiles
+   .byte $00,$00,$80 ; $12 ; Stand/Walk ; 8 tiles, loads the walking legs before battle
+   ;; Don't want to load 8 tiles per frame, so this last one is for before battle begins
+
+
     
 .byte "END OF BANK 04"    
     

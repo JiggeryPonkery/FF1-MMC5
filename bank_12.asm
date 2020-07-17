@@ -9,7 +9,17 @@
 .export lut_MapmanPalettes
 .export lut_SMTilesetTSA
 .export lut_SMPalettes
-.export lut_InitUnsramFirstPage
+.export lut_EntrTele_X
+.export lut_EntrTele_Y
+.export lut_EntrTele_Map
+.export lut_ExitTele_X
+.export lut_ExitTele_Y
+.export lut_Tilesets
+.export lut_NormTele_X
+.export lut_NormTele_Y
+.export lut_NormTele_Map
+.export lut_MapObjGfx
+.export lut_MapObjects
 
 .segment "BANK_12"
 
@@ -2794,133 +2804,1858 @@ lut_SMPalettes:
 .byte $7F,$7F,$7F,$7F,$7F,$7F,$60,$60,$60,$60,$60,$60,$60,$60,$FF,$FF
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Initial sprite visibilities, event flags, treasure chest opened flags
+; Map sprite picture assignment
 
-;; JIGS - this seems wasteful... as it is for the original game, it could be done with:
-;LDA #1
-;LDY #0
-; @Loop:
-; STA game_flags, Y
-; DEY
-; BNE @Loop
- 
-;TYA
-;STA game_flags+$12
-;STA game_flags+$13
-;STA game_flags+$19
-;STA game_flags+$1A
-;STA game_flags+$3F 
-;STA game_flags+$40
-;STA game_flags+$41
-;; So that's what it does now. If ever you need to switch back, here's the old data:
+lut_MapObjGfx:
+.byte $00 ; 00 ; Princess
+.byte $0F ; 01 ; King
+.byte $12 ; 02 ; Garland
+.byte $00 ; 03 ; Princess
+.byte $13 ; 04 ; Pirate
+.byte $18 ; 05 ; Elf Woman (Doctor)
+.byte $1A ; 06 ; Elf Prince
+.byte $0F ; 07 ; King (Astos)
+.byte $0C ; 08 ; Dwarf
+.byte $0C ; 09 ; Dwarf
+.byte $05 ; 0A ; Witch
+.byte $08 ; 0B ; Scholar
+.byte $1D ; 0C ; Vampire
+.byte $0B ; 0D ; Sage
+.byte $17 ; 0E ; Bahamut
+.byte $14 ; 0F ; Fairy
+.byte $01 ; 10 ; Woman
+.byte $15 ; 11 ; Robot
+.byte $00 ; 12 ; Princess
+.byte $14 ; 13 ; Fairy
+.byte $1C ; 14 ; Titan
+.byte $0B ; 15 ; Sage 
+.byte $1B ; 16 ; Slab
+.byte $1B ; 17 ; Slab
+.byte $12 ; 18 ; Garland
+.byte $12 ; 19 ; Garland
+.byte $12 ; 1A ; Garland
+.byte $04 ; 1B ; Orb
+.byte $04 ; 1C ; Orb
+.byte $04 ; 1D ; Orb
+.byte $04 ; 1E ; Orb
+.byte $00 ; 1F ; Princess
+.byte $07 ; 20 ; Soldier
+.byte $07 ; 21 ; Soldier
+.byte $01 ; 22 ; Woman
+.byte $08 ; 23 ; Scholar
+.byte $0B ; 24 ; Sage
+.byte $07 ; 25 ; Soldier
+.byte $01 ; 26 ; Woman  (invisible)
+.byte $07 ; 27 ; Soldier
+.byte $08 ; 28 ; Scholar
+.byte $00 ; 29 ; Princess
+.byte $00 ; 2A ; Princess
+.byte $07 ; 2B ; Soldier
+.byte $0B ; 2C ; Sage
+.byte $07 ; 2D ; Soldier
+.byte $0B ; 2E ; Sage
+.byte $07 ; 2F ; Soldier
+.byte $07 ; 30 ; Soldier
+.byte $07 ; 31 ; Soldier
+.byte $07 ; 32 ; Soldier
+.byte $09 ; 33 ; Punk
+.byte $0B ; 34 ; Sage
+.byte $03 ; 35 ; Dancer
+.byte $01 ; 36 ; Woman
+.byte $02 ; 37 ; Old Lady
+.byte $01 ; 38 ; Woman
+.byte $0A ; 39 ; Man
+.byte $11 ; 3A ; Bat (Sky Warrior)
+.byte $11 ; 3B ; Bat (Sky Warrior)
+.byte $11 ; 3C ; Bat (Sky Warrior)
+.byte $11 ; 3D ; Bat (Sky Warrior)
+.byte $11 ; 3E ; Bat (Sky Warrior)
+.byte $0A ; 3F ; Man
+.byte $0B ; 40 ; Sage
+.byte $01 ; 41 ; Woman
+.byte $09 ; 42 ; Punk
+.byte $0A ; 43 ; Man
+.byte $19 ; 44 ; Elf Man
+.byte $19 ; 45 ; Elf Man
+.byte $19 ; 46 ; Elf Man
+.byte $19 ; 47 ; Elf Man
+.byte $18 ; 48 ; Elf Woman
+.byte $19 ; 49 ; Elf Man
+.byte $19 ; 4A ; Elf Man
+.byte $19 ; 4B ; Elf Man
+.byte $19 ; 4C ; Elf Man
+.byte $19 ; 4D ; Elf Man
+.byte $19 ; 4E ; Elf Man
+.byte $19 ; 4F ; Elf Man
+.byte $19 ; 50 ; Elf Man
+.byte $19 ; 51 ; Elf Man
+.byte $19 ; 52 ; Elf Man
+.byte $18 ; 53 ; Elf Woman
+.byte $18 ; 54 ; Elf Woman
+.byte $19 ; 55 ; Elf Man
+.byte $19 ; 56 ; Elf Man
+.byte $11 ; 57 ; Bat (all the normal bats)
+.byte $0C ; 58 ; Dwarf
+.byte $0C ; 59 ; Dwarf
+.byte $0C ; 5A ; Dwarf
+.byte $0C ; 5B ; Dwarf
+.byte $0C ; 5C ; Dwarf
+.byte $0C ; 5D ; Dwarf
+.byte $0C ; 5E ; Dwarf
+.byte $0C ; 5F ; Dwarf
+.byte $0C ; 60 ; Dwarf
+.byte $0C ; 61 ; Dwarf
+.byte $0C ; 62 ; Dwarf
+.byte $0C ; 63 ; Dwarf
+.byte $10 ; 64 ; Broom
+.byte $10 ; 65 ; Broom
+.byte $10 ; 66 ; Broom
+.byte $10 ; 67 ; Broom
+.byte $0A ; 68 ; Man
+.byte $0A ; 69 ; Man
+.byte $0A ; 6A ; Man
+.byte $0B ; 6B ; Sage
+.byte $0A ; 6C ; Man
+.byte $0A ; 6D ; Man
+.byte $0B ; 6E ; Sage
+.byte $0A ; 6F ; Man
+.byte $0A ; 70 ; Man
+.byte $0A ; 71 ; Man
+.byte $01 ; 72 ; Woman
+.byte $01 ; 73 ; Woman
+.byte $0C ; 74 ; Dwarf
+.byte $07 ; 75 ; Soldier
+.byte $13 ; 76 ; Pirate
+.byte $0B ; 77 ; Sage
+.byte $0B ; 78 ; Sage
+.byte $0B ; 79 ; Sage
+.byte $0B ; 7A ; Sage
+.byte $0B ; 7B ; Sage
+.byte $0B ; 7C ; Sage
+.byte $0B ; 7D ; Sage
+.byte $0B ; 7E ; Sage
+.byte $0B ; 7F ; Sage
+.byte $0B ; 80 ; Sage
+.byte $0A ; 81 ; Man
+.byte $0B ; 82 ; Sage
+.byte $01 ; 83 ; Woman
+.byte $0B ; 84 ; Sage
+.byte $16 ; 85 ; Dragon
+.byte $16 ; 86 ; Dragon
+.byte $16 ; 87 ; Dragon
+.byte $16 ; 88 ; Dragon
+.byte $16 ; 89 ; Dragon
+.byte $16 ; 8A ; Dragon
+.byte $16 ; 8B ; Dragon
+.byte $16 ; 8C ; Dragon
+.byte $16 ; 8D ; Dragon
+.byte $16 ; 8E ; Dragon
+.byte $16 ; 8F ; Dragon
+.byte $16 ; 90 ; Dragon
+.byte $16 ; 91 ; Dragon
+.byte $16 ; 92 ; Dragon
+.byte $01 ; 93 ; Woman
+.byte $08 ; 94 ; Scholar
+.byte $07 ; 95 ; Soldier
+.byte $05 ; 96 ; Witch
+.byte $03 ; 97 ; Dancer
+.byte $09 ; 98 ; Punk
+.byte $0B ; 99 ; Sage
+.byte $0B ; 9A ; Sage
+.byte $16 ; 9B ; Dragon
+.byte $13 ; 9C ; Pirate
+.byte $09 ; 9D ; Punk
+.byte $01 ; 9E ; Woman
+.byte $0A ; 9F ; Man
+.byte $0A ; A0 ; Man
+.byte $0A ; A1 ; Man
+.byte $15 ; A2 ; Robot
+.byte $0D ; A3 ; Mermaid
+.byte $0D ; A4 ; Mermaid
+.byte $0D ; A5 ; Mermaid
+.byte $0D ; A6 ; Mermaid
+.byte $0D ; A7 ; Mermaid
+.byte $0D ; A8 ; Mermaid
+.byte $0D ; A9 ; Mermaid
+.byte $0D ; AA ; Mermaid
+.byte $0D ; AB ; Mermaid
+.byte $0D ; AC ; Mermaid
+.byte $0D ; AD ; Mermaid
+.byte $0A ; AE ; Man
+.byte $08 ; AF ; Scholar
+.byte $08 ; B0 ; Scholar
+.byte $01 ; B1 ; Woman
+.byte $03 ; B2 ; Dancer
+.byte $08 ; B3 ; Scholar
+.byte $0A ; B4 ; Man
+.byte $0A ; B5 ; Man
+.byte $13 ; B6 ; Pirate
+.byte $0A ; B7 ; Man
+.byte $10 ; B8 ; Broom
+.byte $05 ; B9 ; Witch
+.byte $02 ; BA ; Old Lady
+.byte $0E ; BB ; Leifen
+.byte $0E ; BC ; Leifen
+.byte $0E ; BD ; Leifen
+.byte $0E ; BE ; Leifen
+.byte $0E ; BF ; Leifen
+.byte $0E ; C0 ; Leifen
+.byte $0E ; C1 ; Leifen
+.byte $0E ; C2 ; Leifen
+.byte $0E ; C3 ; Leifen
+.byte $0E ; C4 ; Leifen
+.byte $0E ; C5 ; Leifen
+.byte $0E ; C6 ; Leifen
+.byte $0E ; C7 ; Leifen
+.byte $0E ; C8 ; Leifen
+.byte $0E ; C9 ; Leifen
+.byte $04 ; CA ; Orb
+.byte $15 ; CB ; Robot
+.byte $15 ; CC ; Robot
+.byte $15 ; CD ; Robot
+.byte $15 ; CE ; Robot
+.byte $15 ; CF ; Robot
+.byte $00 ; D0 ; no NPC exists
+.byte $00 ; D1 ;
+.byte $00 ; D2 ;
+.byte $00 ; D3 ;
+.byte $00 ; D4 ;
+.byte $00 ; D5 ;
+.byte $00 ; D6 ;
+.byte $00 ; D7 ;
+.byte $00 ; D8 ;
+.byte $00 ; D9 ;
+.byte $00 ; DA ;
+.byte $00 ; DB ;
+.byte $00 ; DC ;
+.byte $00 ; DD ;
+.byte $00 ; DE ;
+.byte $00 ; DF ;
+.byte $00 ; E0 ;
+.byte $00 ; E1 ;
+.byte $00 ; E2 ;
+.byte $00 ; E3 ;
+.byte $00 ; E4 ;
+.byte $00 ; E5 ;
+.byte $00 ; E6 ;
+.byte $00 ; E7 ;
+.byte $00 ; E8 ;
+.byte $00 ; E9 ;
+.byte $00 ; EA ;
+.byte $00 ; EB ;
+.byte $00 ; EC ;
+.byte $00 ; ED ;
+.byte $00 ; EE ;
+.byte $00 ; EF ;
+.byte $00 ; F0 ;
+.byte $00 ; F1 ;
+.byte $00 ; F2 ;
+.byte $00 ; F3 ;
+.byte $00 ; F4 ;
+.byte $00 ; F5 ;
+.byte $00 ; F6 ;
+.byte $00 ; F7 ;
+.byte $00 ; F8 ;
+.byte $00 ; F9 ;
+.byte $00 ; FA ;
+.byte $00 ; FB ;
+.byte $00 ; FC ;
+.byte $00 ; FD ;
+.byte $00 ; FE ;
+.byte $00 ; FF ;
 
-;lut_InitGameFlags:
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$00,$00,$01,$01,$01,$01,$01,$00,$00,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00
-;.byte $00,$00,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-
-lut_InitUnsramFirstPage:
-.byte %01010000 ; 00 overworld flags
-.byte $D2 ; 01 ship X 
-.byte $99 ; 02 ship Y
-.byte $DD ; 03 airship X
-.byte $ED ; 04 airship Y
-.byte $98 ; 05 bridge X
-.byte $98 ; 06 bridge Y
-.byte $66 ; 07 canal X
-.byte $A4 ; 08 canal Y
-.byte $00 ; 09 ow2_vehicle X
-.byte $00 ; 0A ow2_vehicle Y
-.byte $00 ; 0B overworld 2 scroll x
-.byte $00 ; 0C overworld 2 scroll y
-.byte $92 ; 0D overworld scroll x
-.byte $9E ; 0E overworld scroll y
-.byte $01 ; 0F overworld vehicle
 
 
-.byte %00000001 ; 10 options - only auto target on
-.byte $04 ; 11 battle text speed (5)
-.byte $00 ; 12 battle text background color (0: blue)
-.byte $00 ; 13 smokebomb steps
-.byte $00 ; 14 battles won
-.byte $00 ; 15 battles fled
-.byte $90 ; 16 gold low
-.byte $01 ; 17 gold middle
-.byte $00 ; 18 gold high
-.byte $00 ; 19 play time 
-.byte $00 ; 1A
-.byte $00 ; 1B
-.byte $00 ; 1C
-.byte $00 ; 1D checksum stuff
-.byte $00 ; 1E
-.byte $00 ; 1F
 
 
-; Items
-.byte $00 ; 20 unused
-.byte $02 ; 21 heal -- JIGS - added two heals
-.byte $00 ; 22 X-heal
-.byte $00 ; 23 ether
-.byte $00 ; 24 elixier
-.byte $01 ; 25 pure -- JIGS - added one pure 
-.byte $00 ; 26 soft
-.byte $00 ; 27 phoenix down
-.byte $00 ; 28 tent
-.byte $00 ; 29 cabin
-.byte $00 ; 2A house
-.byte $00 ; 2B eyedrops
-.byte $00 ; 2C smokebomb
-.byte $00 ; 2D wakeup bell
-.byte $00 ; 2E nothing
-.byte $00 ; 2F nothing
+; Map sprites
+; 3 bytes
+;  +0: graphic (00 = no sprite)
+;  +1: bits 0-5: X coordinate
+;      bit  6:   don't move
+;      bit  7:   "in room" flag
+;  +2: Y coordinate
 
-; Key Items
-.byte $00 ; 30 lute 
-.byte $00 ; 31 crown
-.byte $00 ; 32 crystal
-.byte $00 ; 33 herb
-.byte $00 ; 34 mystic key
-.byte $00 ; 35 tnt
-.byte $00 ; 36 adamant
-.byte $00 ; 37 slab
-.byte $00 ; 38 ruby
-.byte $00 ; 39 rod
-.byte $00 ; 3A floater
-.byte $00 ; 3B chime
-.byte $00 ; 3C tail
-.byte $00 ; 3D cube
-.byte $00 ; 3E bottle
-.byte $00 ; 3F oxyale
-.byte $00 ; 40 canoe
-.byte $00 ; 41 
-.byte $00 ; 42 
-.byte $00 ; 43 
-.byte $00 ; 44 
-.byte $00 ; 45
-.byte $00 ; 46
-.byte $00 ; 47
-.byte $00 ; 48
-.byte $00 ; 49
-.byte $00 ; 4A
-.byte $00 ; 4B
-.byte $00 ; 4C fire orb
-.byte $00 ; 4D water orb
-.byte $00 ; 4E air orb 
-.byte $00 ; 4F earth orb
+;.align $100 - Enable in case sprites in maps wig out
+
+lut_MapObjects:
+
+; 00 ; Coneria 
+.byte $31,$10,$01 ; Townsfolk
+.byte $32,$07,$0D
+.byte $34,$44,$01
+.byte $35,$0F,$0C
+.byte $36,$12,$14
+.byte $37,$05,$06
+.byte $38,$1B,$05
+.byte $39,$1E,$0B
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 01 ; Pravoka 
+.byte $04,$45,$07 ; Bikke
+.byte $3F,$0D,$10 ; Townsfolk
+.byte $3F,$0C,$03
+.byte $3F,$18,$15
+.byte $40,$1D,$08
+.byte $41,$08,$0E
+.byte $42,$13,$0B
+.byte $43,$14,$19
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 02 ; Elfland
+.byte $4D,$25,$17 ; Elves
+.byte $4E,$26,$01
+.byte $4F,$1C,$0B
+.byte $50,$58,$0F
+.byte $51,$09,$0F
+.byte $52,$0A,$06
+.byte $53,$44,$05
+.byte $54,$4F,$1B
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 03 ; Melmond
+.byte $0B,$1A,$01 ; Unne
+.byte $68,$08,$03 ; Farmers'n such
+.byte $69,$16,$03
+.byte $6A,$15,$11
+.byte $6B,$4C,$01
+.byte $6C,$0E,$0D
+.byte $6D,$0F,$16
+.byte $6E,$5D,$12
+.byte $6F,$18,$07
+.byte $70,$18,$17
+.byte $71,$1D,$09
+.byte $72,$14,$1A
+.byte $73,$16,$0C
+.byte $74,$19,$0D
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 04 ; Crescent Lake  
+.byte $15,$6A,$0A ; Dr. Canoe
+.byte $77,$66,$0B ; Sages
+.byte $78,$64,$0A
+.byte $79,$63,$08
+.byte $7A,$63,$06
+.byte $7B,$64,$04
+.byte $7C,$66,$03
+.byte $7D,$68,$03
+.byte $7E,$6A,$04
+.byte $7F,$6B,$06
+.byte $80,$6B,$08
+.byte $81,$45,$01 ; Sleeping guy
+.byte $82,$68,$0B
+.byte $83,$10,$07 ; one of these is a lady and not a sage, maybe this one?
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 05 ; Gaia
+.byte $13,$71,$13 ; Fairy
+.byte $AE,$38,$3C ; Gaia townsfolk
+.byte $AF,$29,$3B
+.byte $B0,$3A,$29
+.byte $B1,$0A,$34
+.byte $B2,$26,$36
+.byte $B3,$0C,$1F
+.byte $B4,$1B,$2B
+.byte $B5,$3A,$31
+.byte $B6,$10,$10
+.byte $B7,$17,$3B
+.byte $B8,$29,$33
+.byte $B9,$69,$31
+.byte $BA,$17,$36
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 06 ; Onrac
+.byte $10,$6D,$1E ; Submarine Engineer
+.byte $93,$12,$18 
+.byte $94,$09,$17
+.byte $95,$15,$07
+.byte $96,$5E,$15
+.byte $97,$11,$0C
+.byte $98,$14,$0C
+.byte $99,$53,$03
+.byte $9A,$6E,$17
+.byte $9B,$11,$27
+.byte $9C,$1A,$0E
+.byte $9D,$1F,$0B
+.byte $9E,$04,$17
+.byte $9F,$29,$1B
+.byte $A0,$1C,$04
+.byte $00,$00,$00
+
+; 07 ; Leifen
+.byte $BB,$58,$15 ; Chime-giver
+.byte $BC,$04,$08 ; Leifen peoples
+.byte $BD,$53,$13
+.byte $BE,$21,$08
+.byte $BF,$50,$0A
+.byte $C0,$1A,$0E
+.byte $C1,$21,$0D
+.byte $C2,$23,$16
+.byte $C3,$09,$0F
+.byte $C4,$56,$0A
+.byte $C5,$06,$0A
+.byte $C6,$1C,$12
+.byte $C8,$0E,$14
+.byte $C9,$07,$0D
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+;  +1: bits 0-5: X coordinate ; across: + 2 
+;  +2: Y coordinate ; up/down: - 5
+
+; 08 ; Conera Castle 1F
+.byte $20,$50,$17 ; Guard near lower pillar 
+.byte $20,$4C,$0D ; Guard near stairs
+.byte $22,$04,$05
+.byte $23,$0A,$06
+.byte $25,$49,$17
+.byte $26,$49,$0A ; Invisible lady
+.byte $29,$C8,$13
+.byte $2A,$93,$12
+.byte $2C,$58,$04
+.byte $2E,$50,$0A
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 09 ; Elfland Castle 
+.byte $05,$C9,$05 ; Elf Doctor
+.byte $06,$C8,$06 ; Elf Prince
+.byte $45,$41,$01 ; Elves
+.byte $46,$17,$0E
+.byte $47,$02,$18
+.byte $48,$13,$04
+.byte $49,$4F,$14
+.byte $4A,$51,$14
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 0A ; Northwest Castle 
+.byte $07,$D0,$06 ; Astos
+.byte $57,$16,$08 ; bats
+.byte $57,$1C,$03
+.byte $57,$04,$03
+.byte $57,$13,$10
+.byte $57,$0B,$0A
+.byte $57,$04,$14
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 0B ; Castle of Ordeals 1F
+.byte $84,$4C,$0D ; Creepy vanishing sage
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 0C ; Temple of Fiends (Present)
+.byte $02,$D4,$15 ; Garland
+.byte $03,$D4,$12 ; Princess
+.byte $3A,$91,$13 ; Sky Warrior bats
+.byte $3B,$92,$12
+.byte $3C,$92,$13
+.byte $3D,$97,$13
+.byte $3E,$96,$13
+.byte $CA,$D4,$11 ; Black orb
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 0D ; Earth Cave B1
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 0E ; Gurgu Volcano B1
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 0F ; Ice Cave B1
+;.byte $13,$6F,$1E ; surprise fairy!
+.byte $00,$00,$00 ; fixed ^ 
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 10 ; Cardia
+.byte $85,$1C,$09 ; Dragons
+.byte $86,$29,$06
+.byte $87,$29,$16
+.byte $88,$A6,$34
+.byte $8A,$18,$1F
+.byte $8B,$91,$25
+.byte $8C,$25,$1E
+.byte $8D,$0D,$06
+.byte $8E,$95,$25
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 11 ; Bahamut's Room B1
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 12 ; Waterfall
+.byte $11,$94,$35 ; must be robot
+.byte $57,$08,$04 ; these are bats -- this one has been moved down 1 tile so as not to be in the wall
+.byte $57,$0F,$17
+.byte $57,$0A,$29
+.byte $57,$17,$19
+.byte $57,$19,$09
+.byte $57,$28,$09
+.byte $57,$21,$18
+.byte $57,$32,$23
+.byte $57,$2B,$29
+.byte $57,$3A,$2C
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 13 ; Dwarf Cave
+.byte $08,$50,$2D ; TNT dwarf
+.byte $09,$C7,$02 ; Blacksmith
+.byte $58,$4E,$15 ; dwarves
+.byte $59,$03,$0A
+.byte $5A,$16,$11
+.byte $5B,$0E,$07
+.byte $5C,$D5,$04
+.byte $5D,$02,$04
+.byte $5E,$0A,$0F
+.byte $5F,$0A,$13
+.byte $60,$D3,$0E
+.byte $61,$0D,$02
+.byte $63,$12,$0A
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 14 ; Matoya's Cave
+.byte $0A,$C8,$01 ; Matoya
+.byte $64,$03,$0D ; Brooms
+.byte $65,$8B,$0A
+.byte $66,$83,$07
+.byte $67,$CD,$03
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 15 ; Sarda's Cave
+.byte $0D,$C2,$02 ;; Its Sarda!
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 16 ; Marsh Cave B1
+.byte $57,$04,$03 ; bats
+.byte $57,$1E,$24 
+.byte $57,$10,$15
+.byte $57,$34,$16
+.byte $57,$18,$1C
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 17 ; Mirage Tower 1F
+.byte $CE,$D4,$05 ; Robot
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 18 ; Coneria Castle 2F
+.byte $01,$CC,$04 ; King
+.byte $12,$CB,$05 ; Princess
+.byte $2B,$42,$1D ; Guards
+.byte $30,$4D,$09
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 19 ; Castle of Ordeals 2F
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 1A ; Castle of Ordeals 3F
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 1B ; Marsh Cave B2
+.byte $57,$0E,$11 ; bats
+.byte $57,$1B,$0B
+.byte $57,$06,$10
+.byte $57,$0F,$2D
+.byte $57,$11,$33
+.byte $57,$16,$30
+.byte $57,$1D,$35
+.byte $57,$22,$32
+.byte $57,$26,$2B
+.byte $57,$31,$1E
+.byte $57,$36,$28
+.byte $57,$2F,$28
+.byte $57,$2E,$33
+.byte $57,$3A,$38
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 1C ; Marsh Cave B3
+.byte $57,$06,$0A ; all the bats
+.byte $57,$1E,$08
+.byte $57,$11,$10
+.byte $57,$2C,$10
+.byte $57,$2A,$1D
+.byte $57,$33,$04
+.byte $57,$2F,$22
+.byte $57,$1F,$18
+.byte $57,$1D,$20
+.byte $57,$10,$1F
+.byte $57,$02,$1E
+.byte $57,$06,$2A
+.byte $57,$05,$31
+.byte $57,$14,$2D
+.byte $57,$1E,$36
+.byte $57,$1F,$2F
+
+; 1D ; Earth Cave B2
+.byte $57,$0A,$0B ; bats
+.byte $57,$12,$0F
+.byte $57,$0A,$15
+.byte $57,$15,$16
+.byte $57,$0F,$1F
+.byte $57,$19,$24
+.byte $57,$1B,$31
+.byte $57,$21,$28
+.byte $57,$1D,$19
+.byte $57,$27,$16
+.byte $57,$1F,$12
+.byte $57,$A8,$10
+.byte $57,$26,$29
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 1E ; Earth Cave B3
+.byte $0C,$DA,$26 ; Vampire
+.byte $16,$5A,$1B ; Earth Plate
+.byte $57,$8B,$09 ; bats
+.byte $57,$8A,$0A
+.byte $57,$89,$09
+.byte $57,$0F,$10
+.byte $57,$18,$0F
+.byte $57,$11,$22
+.byte $57,$11,$20
+.byte $57,$12,$22
+.byte $57,$1C,$12
+.byte $57,$1A,$13
+.byte $57,$23,$14
+.byte $57,$27,$10
+.byte $57,$2C,$0C
+.byte $57,$2F,$0E
+
+; 1F ; Earth Cave B4
+.byte $57,$93,$28 ; baaats
+.byte $57,$90,$26
+.byte $57,$93,$24
+.byte $57,$0A,$23
+.byte $57,$0C,$2A
+.byte $57,$18,$15
+.byte $57,$16,$17
+.byte $57,$13,$1B
+.byte $57,$15,$0C
+.byte $57,$12,$12
+.byte $57,$A7,$0C
+.byte $57,$20,$12
+.byte $57,$24,$17
+.byte $57,$21,$18
+.byte $57,$24,$17
+.byte $57,$21,$18
+
+; 20 ; Earth Cave B5
+.byte $1B,$CC,$2A ; Earth Orb
+.byte $57,$11,$31 ; dang bats
+.byte $57,$0F,$23
+.byte $57,$1A,$25
+.byte $57,$1E,$2E
+.byte $57,$1F,$32
+.byte $57,$20,$37
+.byte $57,$24,$2A
+.byte $57,$1C,$1F
+.byte $57,$12,$18
+.byte $57,$14,$1A
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 21 ; Gurgu Volcano B2
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 22 ; Gurgu Volcano B3
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 23 ; Gurgu Volcano B4
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 24 ; Gurgu Volcano B5
+.byte $1C,$C7,$37 ; Fire Orb
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 25 ; Ice Cave B2
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 26 ; Ice Cave B3
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 27 ; Bahamut's Room B2
+.byte $0E,$D5,$03 ; Bahamut
+.byte $8F,$D3,$07 ; Dragons
+.byte $90,$D7,$07
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 28 ; Mirage Tower 2F
+.byte $CC,$13,$04 ; Robot
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 29 ; Mirage Tower 3F
+.byte $CD,$C9,$0A ; Transporter 
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 2A ; Sea Shrine B5
+.byte $1D,$CC,$08 ; Water Orb
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 2B ; Sea Shrine B4
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 2C ; Sea Shrine B3
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 2D ; Sea Shrine B2
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 2E ; Sea Shrine B1
+.byte $A3,$86,$12 ; mermaids!
+.byte $A4,$93,$05
+.byte $A5,$9A,$12
+.byte $A6,$84,$19
+.byte $A7,$93,$12
+.byte $A8,$94,$0C
+.byte $A9,$8B,$0B
+.byte $AA,$84,$0B
+.byte $AB,$85,$04
+.byte $AC,$94,$1A
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 2F ; Sky Palace 1F
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 30 ; Sky Palace 2F
+.byte $16,$DA,$1B ; Earth plate? ??? 
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 31 ; Sky Palace 3F
+.byte $CF,$5E,$19 ; Window 
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 32 ; Sky Palace 4F
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 33 ; Sky Palace 5F
+.byte $1E,$C7,$05 ; Wind Orb
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 34 ; Temple of Fiends 1F
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 35 ; Temple of Fiends 2F
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 36 ; Temple of Fiends 3F
+.byte $17,$D4,$10 ; Evil plate?
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 37 ; Temple of Fiends 4F - Earth
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 38 ; Temple of Fiends 5F - Fire
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 39 ; Temple of Fiends 6F - Water
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 3A ; Temple of Fiends 7F - Wind
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 3B ; Temple of Fiends 8F - Chaos
+.byte $18,$CF,$13 ; Garland's speech
+.byte $19,$CF,$12 ; Garland's speech
+.byte $1A,$CF,$11 ; Chaos fight!
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 3C ; Titan's Tunnel
+.byte $14,$48,$07 ; Titan
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 3D ; empty map
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 3E ; empty map
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+; 3F ; empty map
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+.byte $00,$00,$00
+
+
+
+; Overworld->map teleport X coords
+lut_EntrTele_X: 
+.byte $1E ; Cardia 1 
+.byte $10 ; Coneria
+.byte $13 ; Pravoka
+.byte $29 ; Elfland
+.byte $01 ; Melmond
+.byte $0B ; Crescent Lake
+.byte $3D ; Gaia
+.byte $01 ; Onrac
+.byte $13 ; Leifen
+.byte $0E ; C ; Coneria Castle 1F
+.byte $10 ; Elfland Castle
+.byte $16 ; Northwest Castle
+.byte $0C ; Castle of Ordeals 1F
+.byte $14 ; Temple of Fiends
+.byte $17 ; Earth Cave B1
+.byte $1B ; Gurgu Volcano B1
+.byte $07 ; Ice Cave B1
+.byte $0C ; Cardia 2
+.byte $02 ; Bahamut's Room B1
+.byte $39 ; Waterfall
+.byte $16 ; Dwarf Cave
+.byte $0F ; Matoya's Cave
+.byte $12 ; Sarda's Cave
+.byte $15 ; Marsh Cave B1
+.byte $11 ; Mirage Tower 1F
+.byte $0B ; Titan's Tunnel East 
+.byte $05 ; Titan's Tunnel West
+.byte $13 ; Cardia 3
+.byte $2B ; Cardia 4
+.byte $3A ; Cardia 5
+.byte $00 ; 
+.byte $00 ; 
+
+; Overworld->map teleport Y coords
+lut_EntrTele_Y: 
+.byte $12 ; Cardia 1 
+.byte $17 ; Coneria
+.byte $20 ; Pravoka
+.byte $16 ; Elfland
+.byte $10 ; Melmond
+.byte $17 ; Crescent Lake
+.byte $3D ; Gaia
+.byte $0C ; Onrac
+.byte $17 ; Leifen
+.byte $1E ; 23 ; Coneria Castle 1F
+.byte $1F ; Elfland Castle
+.byte $18 ; Northwest Castle
+.byte $15 ; Castle of Ordeals 1F
+.byte $1E ; Temple of Fiends
+.byte $18 ; Earth Cave B1
+.byte $0F ; Gurgu Volcano B1
+.byte $01 ; Ice Cave B1
+.byte $0F ; Cardia 2
+.byte $02 ; Bahamut's Room B1
+.byte $38 ; Waterfall
+.byte $0B ; Dwarf Cave
+.byte $0B ; Matoya's Cave
+.byte $0D ; Sarda's Cave
+.byte $1B ; Marsh Cave B1
+.byte $1F ; Mirage Tower 1F
+.byte $0E ; Titan's Tunnel East 
+.byte $03 ; Titan's Tunnel West
+.byte $24 ; Cardia 3
+.byte $1D ; Cardia 4
+.byte $37 ; Cardia 5
+.byte $00 ; 
+.byte $00 ; 
+
+; Overworld->map teleport map #
+lut_EntrTele_Map: 
+.byte $10 ; Cardia 1 
+.byte $00 ; Coneria
+.byte $01 ; Pravoka
+.byte $02 ; Elfland
+.byte $03 ; Melmond
+.byte $04 ; Crescent Lake
+.byte $05 ; Gaia
+.byte $06 ; Onrac
+.byte $07 ; Leifen
+.byte $08 ; Coneria Castle 1F
+.byte $09 ; Elfland Castle
+.byte $0A ; Northwest Castle
+.byte $0B ; Castle of Ordeals 1F
+.byte $0C ; Temple of Fiends
+.byte $0D ; Earth Cave B1
+.byte $0E ; Gurgu Volcano B1
+.byte $0F ; Ice Cave B1
+.byte $10 ; Cardia 2
+.byte $11 ; Bahamut's Room B1
+.byte $12 ; Waterfall
+.byte $13 ; Dwarf Cave
+.byte $14 ; Matoya's Cave
+.byte $15 ; Sarda's Cave
+.byte $16 ; Marsh Cave B1
+.byte $17 ; Mirage Tower 1F
+.byte $3C ; Titan's Tunnel East 
+.byte $3C ; Titan's Tunnel West
+.byte $10 ; Cardia 3
+.byte $10 ; Cardia 4
+.byte $10 ; Cardia 5
+.byte $00 ; 
+.byte $00 ; 
+
+; Map->world map teleport X coords
+lut_ExitTele_X: 
+.byte $2A ; Titan's Tunnel East
+.byte $1E ; Titan's Tunnel West
+.byte $C5 ; Ice Cave
+.byte $82 ; Castle of Ordeals
+.byte $99 ; Castle of Coneria
+.byte $41 ; Earth Cave
+.byte $BC ; Gurgu Volcano
+.byte $3E ; Sea Shrine
+.byte $C2 ; Sky Castle
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+.byte $00 ; 
+
+; Map->world map teleport Y coords
+lut_ExitTele_Y: 
+.byte $AE ; Titan's Tunnel East
+.byte $AF ; Titan's Tunnel West
+.byte $B7 ; Ice Cave
+.byte $2D ; Castle of Ordeals
+.byte $9F ; Castle of Coneria
+.byte $BB ; Earth Cave
+.byte $CD ; Gurgu Volcano
+.byte $38 ; Sea Shrine
+.byte $3B ; Sky Castle
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+.byte $00 ;
+
+; Map tileset selection
+lut_Tilesets: 
+.byte $00 ; town        ; Coneria
+.byte $00 ; town        ; Pravoka
+.byte $00 ; town        ; Elfland
+.byte $00 ; town        ; Melmond
+.byte $00 ; town        ; Crescent Lake
+.byte $00 ; town        ; Gaia
+.byte $00 ; town        ; Onrac
+.byte $00 ; town        ; Leifen
+.byte $01 ; castle      ; Coneria Castle 1F
+.byte $01 ; castle      ; Elfland Castle
+.byte $01 ; castle      ; Northwest Castle
+.byte $01 ; castle      ; Castle of Ordeals 1F
+.byte $05 ; shrine      ; Temple of Fiends
+.byte $02 ; cave        ; Earth Cave B1
+.byte $02 ; cave        ; Gurgu Volcano B1
+.byte $03 ; safe cave   ; Ice Cave B1
+.byte $03 ; safe cave   ; Cardia
+.byte $03 ; safe cave   ; Bahamut's Room B1
+.byte $03 ; safe cave   ; Waterfall
+.byte $03 ; safe cave   ; Dwarf Cave
+.byte $03 ; safe cave   ; Matoya's Cave
+.byte $03 ; safe cave   ; Sarda's Cave
+.byte $04 ; tower       ; Marsh Cave B1
+.byte $04 ; tower       ; Mirage Tower 1F
+.byte $01 ; castle      ; Coneria Castle 2F
+.byte $01 ; castle      ; Castle of Ordeals 2F
+.byte $01 ; castle      ; Castle of Ordeals 3F
+.byte $04 ; tower       ; Marsh Cave B2
+.byte $04 ; tower       ; Marsh Cave B3
+.byte $02 ; cave        ; Earth Cave B2
+.byte $02 ; cave        ; Earth Cave B3
+.byte $02 ; cave        ; Earth Cave B4
+.byte $02 ; cave        ; Earth Cave B5
+.byte $02 ; cave        ; Gurgu Volcano B2
+.byte $02 ; cave        ; Gurgu Volcano B3
+.byte $02 ; cave        ; Gurgu Volcano B4
+.byte $02 ; cave        ; Gurgu Volcano B5
+.byte $03 ; safe cave   ; Ice Cave B2
+.byte $03 ; safe cave   ; Ice Cave B3
+.byte $03 ; safe cave   ; Bahamut's Room B2
+.byte $04 ; tower       ; Mirage Tower 2F
+.byte $04 ; tower       ; Mirage Tower 3F
+.byte $05 ; shrine      ; Sea Shrine B5
+.byte $05 ; shrine      ; Sea Shrine B4
+.byte $05 ; shrine      ; Sea Shrine B3
+.byte $05 ; shrine      ; Sea Shrine B2
+.byte $05 ; shrine      ; Sea Shrine B1
+.byte $06 ; sky palace  ; Sky Palace 1F
+.byte $06 ; sky palace  ; Sky Palace 2F
+.byte $06 ; sky palace  ; Sky Palace 3F
+.byte $06 ; sky palace  ; Sky Palace 4F
+.byte $06 ; sky palace  ; Sky Palace 5F
+.byte $07 ; temple      ; Temple of Fiends 1F
+.byte $07 ; temple      ; Temple of Fiends 2F
+.byte $07 ; temple      ; Temple of Fiends 3F
+.byte $07 ; temple      ; Temple of Fiends 4F - Earth
+.byte $07 ; temple      ; Temple of Fiends 5F - Fire
+.byte $07 ; temple      ; Temple of Fiends 6F - Water
+.byte $07 ; temple      ; Temple of Fiends 7F - Wind
+.byte $07 ; temple      ; Temple of Fiends 8F - Chaos
+.byte $02 ; cave        ; Titan's Tunnel
+.byte $00 ;             ; 
+.byte $00 ;             ; 
+.byte $00 ;             ; 
+
+
+
+; map->map teleport X coords
+lut_NormTele_X: 
+.byte $0C ; Coneria Castle 1
+.byte $14 ; Time Warp
+.byte $12 ; Marsh Cave 1
+.byte $22 ; Marsh Cave 2
+.byte $05 ; Marsh Cave 3
+.byte $0A ; Earth Cave 1
+.byte $1B ; Earth Cave 2
+.byte $3D ; Earth Cave 3
+.byte $19 ; Earth Cave 4
+.byte $1E ; Gurgu Volcano 1
+.byte $12 ; Gurgu Volcano 2
+.byte $03 ; Gurgu Volcano 3
+.byte $2E ; Gurgu Volcano 4
+.byte $23 ; Gurgu Volcano 5
+.byte $20 ; Gurgu Volcano 6
+.byte $1E ; Ice Cave 1
+.byte $03 ; Ice Cave 2
+.byte $37 ; Ice Cave 3
+.byte $27 ; Ice Cave 4
+.byte $06 ; Ice Cave 5
+.byte $3B ; Ice Cave 6
+.byte $33 ; Ice Cave 7
+.byte $0C ; Castle of Ordeals 1
+.byte $16 ; Castle of Ordeals 2
+.byte $02 ; Castle of Ordeals 3
+.byte $17 ; Bahamut's Room
+.byte $0E ; Castle of Ordeals 4
+.byte $0C ; Castle of Ordeals 5
+.byte $0C ; Castle of Ordeals 6
+.byte $0A ; Castle of Ordeals 7
+.byte $01 ; Castle of Ordeals 8
+.byte $06 ; Castle of Ordeals 9
+.byte $15 ; Sea Shrine 1
+.byte $2D ; Sea Shrine 2
+.byte $0C ; Sea Shrine 3
+.byte $3D ; Sea Shrine 4
+.byte $2F ; Sea Shrine 5
+.byte $36 ; Sea Shrine 6
+.byte $30 ; Sea Shrine 7
+.byte $2D ; Sea Shrine 8
+.byte $32 ; Sea Shrine 9
+.byte $10 ; Mirage Tower 1
+.byte $08 ; Mirage Tower 2
+.byte $13 ; Sky Palace 1
+.byte $13 ; Sky Palace 2
+.byte $18 ; Sky Palace 3
+.byte $03 ; Sky Palace 4
+.byte $07 ; Sky Palace 5
+.byte $08 ; Temple of Fiends 1
+.byte $10 ; Temple of Fiends 2
+.byte $01 ; Temple of Fiends 3
+.byte $14 ; Temple of Fiends 4
+.byte $28 ; Temple of Fiends 5
+.byte $03 ; Temple of Fiends 6
+.byte $0D ; Temple of Fiends 7
+.byte $01 ; Temple of Fiends 8
+.byte $01 ; Temple of Fiends 9
+.byte $0F ; Temple of Fiends 10
+.byte $04 ; Castle of Ordeals 10
+.byte $08 ; Castle of Ordeals 11
+.byte $0E ; Castle of Ordeals 12
+.byte $17 ; Castle of Ordeals 13
+.byte $0E ; Coneria Castle bottom floor
+.byte $0C ; Rescue Princess
+
+; map->map teleport Y coords
+lut_NormTele_Y: 
+.byte $12 ; Coneria Castle 1
+.byte $11 ; Time Warp
+.byte $10 ; Marsh Cave 1
+.byte $25 ; Marsh Cave 2
+.byte $06 ; Marsh Cave 3
+.byte $09 ; Earth Cave 1
+.byte $2D ; Earth Cave 2
+.byte $21 ; Earth Cave 3
+.byte $35 ; Earth Cave 4
+.byte $20 ; Gurgu Volcano 1
+.byte $02 ; Gurgu Volcano 2
+.byte $17 ; Gurgu Volcano 3
+.byte $17 ; Gurgu Volcano 4
+.byte $06 ; Gurgu Volcano 5
+.byte $1F ; Gurgu Volcano 6
+.byte $02 ; Ice Cave 1
+.byte $02 ; Ice Cave 2
+.byte $05 ; Ice Cave 3
+.byte $06 ; Ice Cave 4
+.byte $14 ; Ice Cave 5
+.byte $21 ; Ice Cave 6
+.byte $0B ; Ice Cave 7
+.byte $0C ; Castle of Ordeals 1
+.byte $16 ; Castle of Ordeals 2
+.byte $02 ; Castle of Ordeals 3
+.byte $37 ; Bahamut's Room
+.byte $0C ; Castle of Ordeals 4
+.byte $09 ; Castle of Ordeals 5
+.byte $10 ; Castle of Ordeals 6
+.byte $0C ; Castle of Ordeals 7
+.byte $14 ; Castle of Ordeals 8
+.byte $05 ; Castle of Ordeals 9
+.byte $2A ; Sea Shrine 1
+.byte $08 ; Sea Shrine 2
+.byte $1A ; Sea Shrine 3
+.byte $31 ; Sea Shrine 4
+.byte $27 ; Sea Shrine 5
+.byte $29 ; Sea Shrine 6
+.byte $0A ; Sea Shrine 7
+.byte $14 ; Sea Shrine 8
+.byte $30 ; Sea Shrine 9
+.byte $1F ; Mirage Tower 1
+.byte $01 ; Mirage Tower 2
+.byte $15 ; Sky Palace 1
+.byte $04 ; Sky Palace 2
+.byte $17 ; Sky Palace 3
+.byte $03 ; Sky Palace 4
+.byte $36 ; Sky Palace 5
+.byte $1B ; Temple of Fiends 1
+.byte $0F ; Temple of Fiends 2
+.byte $01 ; Temple of Fiends 3
+.byte $12 ; Temple of Fiends 4
+.byte $01 ; Temple of Fiends 5
+.byte $20 ; Temple of Fiends 6
+.byte $15 ; Temple of Fiends 7
+.byte $01 ; Temple of Fiends 8
+.byte $04 ; Temple of Fiends 9
+.byte $07 ; Temple of Fiends 10
+.byte $04 ; Castle of Ordeals 10
+.byte $04 ; Castle of Ordeals 11
+.byte $14 ; Castle of Ordeals 12
+.byte $16 ; Castle of Ordeals 13
+.byte $0D ; Coneria Castle bottom floor
+.byte $07 ; Rescue Princess
+
+; map->map teleport map #
+lut_NormTele_Map: 
+.byte $18 ; Coneria Castle 1     > 2F (loop - WARP magic doesn't work)
+.byte $34 ; Time Warp            > Temple of Fiends 1F
+.byte $1B ; Marsh Cave 1         > B2
+.byte $1B ; Marsh Cave 2         > B2
+.byte $1C ; Marsh Cave 3         > B3
+.byte $1D ; Earth Cave 1         > B2
+.byte $1E ; Earth Cave 2         > B3
+.byte $1F ; Earth Cave 3         > B4
+.byte $20 ; Earth Cave 4         > B5
+.byte $21 ; Gurgu Volcano 1      > B2
+.byte $22 ; Gurgu Volcano 2      > B3
+.byte $23 ; Gurgu Volcano 3      > B4
+.byte $22 ; Gurgu Volcano 4      > B3
+.byte $23 ; Gurgu Volcano 5      > B4
+.byte $24 ; Gurgu Volcano 6      > B5
+.byte $25 ; Ice Cave 1           > B2 
+.byte $26 ; Ice Cave 2           > B3
+.byte $25 ; Ice Cave 3           > B2
+.byte $26 ; Ice Cave 4           > B3
+.byte $0F ; Ice Cave 5           > B1
+.byte $26 ; Ice Cave 6           > B3
+.byte $25 ; Ice Cave 7           > B2
+.byte $19 ; Castle of Ordeals 1  > 2F
+.byte $1A ; Castle of Ordeals 2  > 3F
+.byte $0B ; Castle of Ordeals 3  > 1F
+.byte $27 ; Bahamut's Room       > B2
+.byte $19 ; Castle of Ordeals 4  > 2F (maze)
+.byte $19 ; Castle of Ordeals 5  > 2F (maze)
+.byte $19 ; Castle of Ordeals 6  > 2F (maze)
+.byte $19 ; Castle of Ordeals 7  > 2F (maze)
+.byte $19 ; Castle of Ordeals 8  > 2F (maze)
+.byte $19 ; Castle of Ordeals 9  > 2F (maze)
+.byte $2C ; Sea Shrine 1         > B3
+.byte $2D ; Sea Shrine 2         > B2 (way to mermaids?)
+.byte $2E ; Sea Shrine 3         > B1 (mermaids?)
+.byte $2B ; Sea Shrine 4         > B4
+.byte $2C ; Sea Shrine 5         > B3
+.byte $2D ; Sea Shrine 6         > B2
+.byte $2C ; Sea Shrine 7         > B3
+.byte $2B ; Sea Shrine 8         > B4
+.byte $2A ; Sea Shrine 9         > B5
+.byte $28 ; Mirage Tower 1       > 2F
+.byte $29 ; Mirage Tower 2       > 3F
+.byte $2F ; Sky Palace 1         > 1F
+.byte $30 ; Sky Palace 2         > 2F
+.byte $31 ; Sky Palace 3         > 3F
+.byte $32 ; Sky Palace 4         > 4F
+.byte $33 ; Sky Palace 5         > 5F
+.byte $37 ; Temple of Fiends 1   > 4F - Earth
+.byte $35 ; Temple of Fiends 2   > 2F
+.byte $36 ; Temple of Fiends 3   > 3F
+.byte $35 ; Temple of Fiends 4   > 2F
+.byte $34 ; Temple of Fiends 5   > 1F
+.byte $37 ; Temple of Fiends 6   > 4F - Earth
+.byte $38 ; Temple of Fiends 7   > 5F - Fire
+.byte $39 ; Temple of Fiends 8   > 6F - Water
+.byte $3A ; Temple of Fiends 9   > 7F - Wind
+.byte $3B ; Temple of Fiends 10  > 8F - Chaos
+.byte $19 ; Castle of Ordeals 10 > 2F (maze)
+.byte $19 ; Castle of Ordeals 11 > 2F (maze)
+.byte $19 ; Castle of Ordeals 12 > 2F (maze)
+.byte $19 ; Castle of Ordeals 13 > 2F (maze)
+.byte $08 ; Coneria Castle       > 1F (loop - WARP magic doesn't work)
+.byte $18 ; Rescue Princess (ToF)> Coneria Castle 2F
+
+
 
 
 .byte "END OF BANK 12"

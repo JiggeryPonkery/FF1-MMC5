@@ -13,7 +13,6 @@
 .export CHRLoadToA
 .export CallMusicPlay
 .export CallMusicPlay_L
-.export CancelNewGame
 .export ClearBattleMessageBuffer_L
 .export ClearOAM
 .export ClearUnformattedCombatBoxBuffer
@@ -49,14 +48,11 @@
 .export FillItemBox
 .export FormatBattleString
 .export GameLoaded
-.export GameStart2
 .export GameStart_L
 .export JIGS_RefreshAttributes
-.export LoadBattleSpritePalettes
 .export LoadBorderPalette_Blue
 .export LoadBridgeSceneGFX_Menu
 .export LoadMenuCHRPal
-.export LoadMenuCHRPal_Z
 .export LoadPrice
 .export LoadPriceZ
 .export LoadShopCHRPal
@@ -76,7 +72,6 @@
 .export ShiftSpriteHightoLow
 .export SkillText_BBelt
 .export SkillText_RMage
-.export StartNewGame
 .export SwapBtlTmpBytes_L
 .export UndrawBattleBlock
 .export UndrawNBattleBlocks_L
@@ -91,6 +86,8 @@
 .export lut_VehicleMusic
 .export DrawMenuString_FixedBank
 .export DrawMenuString_CharCodes_FixedBank
+.export LoadCHR_MusicPlay
+.export ReloadBridgeNT
 
 .import AssignMapTileDamage_Z
 .import BattleIcons
@@ -109,7 +106,7 @@
 .import LoadBattleSpritesForBank_Z
 .import LoadBattleTextChr
 .import LoadOWMapRow_1E
-.import LoadSprite_Bank04
+.import LoadSprite_Bank03
 .import LoadStatusBoxScrollWork
 .import LoadStoneSprites
 .import MapPoisonDamage_Z
@@ -189,6 +186,12 @@
 .import DrawMenuString_A
 .import DrawMenuString_CharCodes_A
 .import KeyItem_Add
+.import LoadShopPalette
+.import LoadAllBattleSprites_Menu
+.import LoadShopCHR_andPalettes
+.import Bridge_LoadPalette
+.import Ending_LoadPalette
+.import LoadMenuOrbs
 
 
 .segment "BANK_FIXED"
@@ -217,36 +220,27 @@ GameStart:
     TXS
     ;; Load some startup info
     
-    LDA #BANK_STARTUPINFO       ; swap in bank containing some LUTs
+    LDA #BANK_TITLE             ; swap in bank containing some LUTs
     JSR SwapPRG_L
     
     LDX #$00                        ; Loop $100 times to fill each page of unsram
-    : LDA #0
-      STA unsram, X                 ; stat page filled with zeros (proper stats will be assigned
-      STA ch_stats, X               ;   later after party generation)
-      STA inv_equip, X              ; 
-      
-      ;LDA lut_InitGameFlags, X      ; game flags page loaded from this table
-      ;STA game_flags, X            ;; JIGS - see just a bit further down for why this is commented out!
-      
-      INX                           ; loop for the full page
-      BNE :-
-      
-    ;; JIGS - and a little extra: since it loads character startings stats into music and other variables that need to start out 0.
-    ;LDX #$00
-    : LDA lut_InitUnsramFirstPage, X
-      STA unsram, X
-      INX 
-      CPX #$2F ; 4F 
-      BNE :-
-
+  : LDA #0
+    STA unsram, X                 ; stat page filled with zeros (proper stats will be assigned
+    STA ch_stats, X               ;   later after party generation)
+    STA inv_equip, X              ; 
     ;; JIGS - Rather than take up 256 bytes in Bank 0, the original game only needs to initalize game_flags all to 1, with 7 exceptions.
     LDA #1
-    LDX #0
-     @Loop:
-     STA game_flags, X
-     DEX
-     BNE @Loop
+    STA game_flags, X
+    INX                           ; loop for the full page
+    BNE :-
+
+    ;; JIGS - and a little extra: since it loads character startings stats into music and other variables that need to start out 0.
+    ;LDX #$00
+  : LDA lut_InitUnsramFirstPage, X
+    STA unsram, X
+    INX 
+    CPX #$40
+    BNE :-
  
     TXA
     STA game_flags+$12    ;   Princess in Coneria, vanished until rescued
@@ -257,56 +251,25 @@ GameStart:
     STA game_flags+$40    ;   Sage
     STA game_flags+$41    ;   Woman
     
-    LDA #5                ; reset the respond rate to zero ;; JIGS - setting it to a nice frisky 5
-    STA BattleTextSpeed   ;
-    
     LDA #$41
     STA music_track    
     ;; JIGS - begin prelude
     
-    LDA startintrocheck             ; check a random spot in memory.  This value is not inialized as powerup,
-    CMP #$4D                        ;    and will be semi-random.
-    BEQ :+                          ; if it is any value other than $4D, we can assume we just powered on...
-      LDA #$4D                      ; ... so initilize it to $4D.  From this point forward, it will always be initlialized.
-      STA startintrocheck           ; This is how the game makes the distinction between cold boot and warm reset
-            
-      LDA #BANK_INTRO               ; If we just came in from a cold boot...
-      ;; JIGS ^ bank Z, see Constants.inc
-      JSR SwapPRG_L                 ; swap in the intro story bank
-      JMP JigsIntro      
-      ;; JIGS - do my fancy new intro! It has letter-by-letter printing, doesn't reset the Prelude music, and a fancy new title screen and everything.
-      CancelNewGame: 
-      ;; JIGS - jump back here if you press B on an brand new party generation screen.
- 
-  : LDA #BANK_TITLE                 ; Then swap in the title bank
-    JSR SwapPRG_L                   ; to do the title screen
-        
-    GameStart2:
-    ;; JIGS - label required by JigsIntro! (Maybe I could have used PLA PLA to double RTS? Not sure... eh.)
+    LDA startintrocheck           ; check a random spot in memory.  This value is not inialized as powerup,
+    CMP #$4D                      ;    and will be semi-random.
+    BEQ TitleScreen               ; if it is any value other than $4D, we can assume we just powered on...
+
+    LDA #$4D                      ; ... so initilize it to $4D.  From this point forward, it will always be initlialized.
+    STA startintrocheck           ; This is how the game makes the distinction between cold boot and warm reset
+    JSR JigsIntro      
+    ;; JIGS - do my fancy new intro! It has letter-by-letter printing, doesn't reset the Prelude music, and a fancy new title screen and everything.
+
+TitleScreen:
+    JSR LoadBridgeSceneGFX_Menu     ;; draw the title (bridge) scene and menu CHR
+    JSR SaveScreenHelper
     JSR EnterTitleScreen
-    ;; JIGS ^ 
-    
-    BCS @NewGame                    ; Do a new game, if the user selected the New Game option
-    
-        ; Otherwise, they selected "Continue"...
-    JSR SaveScreen
-    BCS CancelNewGame                ; jump back to title screen if B was pressed 
-    JMP GameLoaded
-    
-    
-  @NewGame:
-  StartNewGame:
-    LDA #BANK_PARTYGEN              ; swap in party generation bank
-    JSR SwapPRG_L
-    JSR NewGamePartyGeneration      ; create a new party
-    JSR NewGame_LoadStartingStats   ;   and set their starting stats
-    
-    LDA #BANK_Z
-    JSR SwapPRG_L
-    JSR ReadjustEquipStats ;; JIGS - apply weapon stats to the starting weapons
- 
-    ; New Game and Continue meet here -- actually start up the game
-  GameLoaded: ;; JIGS - new label
+
+GameLoaded:
     JSR ClearZeroPage               ; clear Zero Page for good measure
     
     LDA unsram_ow_scroll_x          ; fetch OW scroll from unsram
@@ -449,8 +412,8 @@ DoOWTransitions:
       ;JSR StopNoise_StopSprites      ; cycle palettes with code=00 (overworld, cycle out)
 
       JSR LoadBridgeSceneGFX ; load CHR and NT for the bridge scene
-      LDA #BANK_BRIDGESCENE
-      JSR SwapPRG_L          ; swap to bank containing bridge scene
+      ;LDA #BANK_BRIDGESCENE
+      ;JSR SwapPRG_L          ; swap to bank containing bridge scene
       JSR EnterBridgeScene_L ; do the bridge scene.
       JMP EnterOW_NoWipe     ; then re-enter overworld
 
@@ -743,8 +706,7 @@ ProcessOWInput:
     ;LDA #0                  ; otherwise... they activated the minigame!
     JSR StopNoise_StopSprites
     JSR LoadBridgeSceneGFX  ; load the NT and most of the CHR for the minigame
-    LDA #BANK_MINIGAME
-    JSR SwapPRG_L        ; swap to bank containing minigame
+    ;; also swaps to the correct bank
     JSR EnterMiniGame    ; and do it!
     BCC :+               ; if they compelted the minigame successfully...
       JSR MinigameReward ;  ... give them their reward
@@ -2107,86 +2069,7 @@ PrepOverworld:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-NewGame_LoadStartingStats:
-    LDA #BANK_STARTINGSTATS ; swap in bank containing starting stats
-    JSR SwapPRG_L
-    
-    LDX #$00                ; load up the starting stats for each character
-    JSR @LoadStats
-    LDX #$40
-    JSR @LoadStats
-    LDX #$80
-    JSR @LoadStats
-    LDX #$C0
-  ; JMP @LoadStats
-    
 
-  @LoadStats:
-    LDA ch_class, X         ; get the class
-    AND #$0F                ;; JIGS - cut off high bits (sprite)
-    ;ASL A                   ; $10 bytes of starting data for each class
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    JSR ShiftLeft4
-    TAY                     ; source index in Y
-    
-    ;; lut_ClassStartingStats table contains $B bytes of data, padded to $10
-    ;;   byte 0 is a redundant and unused class ID byte.
-    ;;   The rest is as outlined below
-    
-    LDA lut_ClassStartingStats+1, Y ; starting HP
-    STA ch_curhp, X
-    STA ch_maxhp, X
-    
-    LDA lut_ClassStartingStats+2, Y ; base stats
-    STA ch_strength, X
-    LDA lut_ClassStartingStats+3, Y
-    STA ch_agility, X
-    LDA lut_ClassStartingStats+4, Y
-    STA ch_intelligence, X
-    LDA lut_ClassStartingStats+5, Y
-    STA ch_vitality, X
-    LDA lut_ClassStartingStats+6, Y
-    STA ch_speed, X
-    
-    LDA lut_ClassStartingStats+7, Y ; sub stats
-    STA ch_damage, X
-    LDA lut_ClassStartingStats+8, Y
-    STA ch_hitrate, X
-    LDA lut_ClassStartingStats+9, Y
-    STA ch_evasion, X
-    LDA lut_ClassStartingStats+$A, Y
-    STA ch_magicdefense, X
-    
-    ;; JIGS: You can use the padding in lut_ClassStartingStats to tell the game
-	;; how much mana to give! Or start with a fancy weapon! Even some spells!
-	;;
-    LDA lut_ClassStartingStats+$B, Y
-    STA ch_mp, X
-    LDA lut_ClassStartingStats+$C, Y
-    STA ch_righthand, X
-    LDA lut_ClassStartingStats+$D, Y
-    STA ch_body, X
-    LDA lut_ClassStartingStats+$E, Y
-    STA ch_spells, X
-	RTS
-    
-    ;; JIGS - starting stats does this now!
-    ; Award starting MP if the class ID is >= RM, but < KN
-  ;  LDA ch_class, X
-  ;  CMP #CLS_RM
-  ;  BCC :+
-  ;    CMP #CLS_KN
-  ;    BCS :+
-  ;      ;LDA #$02                ; start with 2 MP
-  ;      ;STA ch_curmp, X
-  ;      ;STA ch_maxmp, X
-  ;      LDA #$22    ; JIGS - high bits are current, low bits are max. One byte.
-  ;      STA ch_mp, X
-  ;   : RTS 
-
-  
  
 
 
@@ -6744,12 +6627,9 @@ LoadMapPalettes:
     JSR SwapPRG_L           ; swap to bank containing mapman palettes
 
     LDA ch_class            ; get lead party member's class
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
-    ;JSR ShiftSpriteHightoLow_Battle
-    ;ASL A                   ; double it, and put it in X
+    AND #$F0                ;; JIGS - cut off low bits to get sprite
     LSR A
     LSR A
-    ;; shift high to low, but then double them anyway!
     TAX
 
     LDA lut_MapmanPalettes, X   ; use that as an index to get that class's mapman palette
@@ -10344,31 +10224,23 @@ LoadEpilogueSceneGFX:
     STA $2001               ;   LoadBridgeSceneGFX below, except it loads CHR from
     STA $4015               ;   a different address.
     STA $5015               ;    JIGS - MMC5 AUDIO
+
+    JSR LoadMenuCHR
+
+    LDA #BANK_EPILOGUEGFX
+    JSR SwapPRG_L
     
     LDA #<data_EpilogueCHR
     STA tmp
     LDA #>data_EpilogueCHR
-    STA tmp+1
-    
-    LDX #$08
-    
-    LDA #BANK_EPILOGUEGFX
-    JSR SwapPRG_L
-    
-    LDA #$00
-    JSR CHRLoadToA
-    
-    LDX #4
-    LDA #$20
-    JSR CHRLoadToA
+    JSR SharedBridgeLoadingCode
     
     LDA #>data_EpilogueNT
     STA tmp+1
     LDX #4
     JSR CHRLoad_Cont
+    JMP Ending_LoadPalette 
     
-    JMP LoadMenuCHR
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Load Bridge Scene GFX  [$E8CB :: 0x3E8DB]
@@ -10381,7 +10253,31 @@ LoadEpilogueSceneGFX:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+SharedBridgeLoadingCode:
+    STA tmp+1
 
+    LDX #$08             ; load 8 rows of tiles ($800 bytes)
+    LDA #$00             ; destination address = ppu $0000
+    JSR CHRLoadToA       ; load 8 rows of tiles to ppu $0000
+
+    ;                    ; now this is a little tricky.  It uses the CHR loading routine
+    ;                    ;    to load NT data instead of CHR
+SharedBridgeLoadingCode_2:    
+    LDX #4               ; 4 rows of tiles = $400 bytes (1 full NT)
+    LDA #$20             ; destination address = ppu $2000! (nametable)
+    JMP CHRLoadToA       ; so this fills the whole nametable with NT data
+    ;                    ;  stored at lut_BridgeGFX + $800 (+$800 because of the 8 rows of
+    ;                    ;  tiles that were copied previously)
+
+ReloadBridgeNT:
+    LDA #BANK_BRIDGEGFX      ; swap to bank containing the graphics
+    JSR SwapPRG_L
+    LDA #<data_BridgeNT
+    STA tmp
+    LDA #>data_BridgeNT
+    STA tmp+1
+    JSR SharedBridgeLoadingCode_2
+    JMP LoadCHR_MusicPlay_Always
 
 
 LoadBridgeSceneGFX: ;; JIGS - this is for epilogue/prologue loading
@@ -10392,38 +10288,25 @@ LoadBridgeSceneGFX: ;; JIGS - this is for epilogue/prologue loading
 LoadBridgeSceneGFX_Menu: ;; JIGS -- this is for menu loading; don't want to turn off audio
     LDA #0
     STA $2001                ; turn off PPU
+
+    JSR LoadMenuCHR
+    
+    LDA #BANK_BRIDGEGFX      ; swap to bank containing the graphics
+    JSR SwapPRG_L
     
     LDA #<data_BridgeCHR     ; load a pointer to the bridge scene graphics (CHR first)
     STA tmp
     LDA #>data_BridgeCHR
+    
+    JSR SharedBridgeLoadingCode
+
+    LDA #>data_BridgeNT      ; reset the source pointer to the start of that NT data
     STA tmp+1
 
-    LDX #$08                 ; load 8 rows of tiles ($800 bytes)
+    LDX #4                   ; and set X to 4 again so we draw another $400 bytes (full NT)
+    JSR CHRLoad_Cont         ; draw the SAME nametable.  This makes the nametables at
+    JMP Bridge_LoadPalette   ;  $2000 and $2400 identical!  This is used for visual effects
 
-    LDA #BANK_BRIDGEGFX      ; swap to bank containing the graphics
-    JSR SwapPRG_L
-
-    LDA #$00                 ; destination address = ppu $0000
-    JSR CHRLoadToA           ; load 8 rows of tiles to ppu $0000
-
-                        ; now this is a little tricky.  It uses the CHR loading routine
-                        ;    to load NT data instead of CHR
-    LDX #4              ; 4 rows of tiles = $400 bytes (1 full NT)
-    LDA #$20            ; destination address = ppu $2000! (nametable)
-    JSR CHRLoadToA      ; so this fills the whole nametable with NT data
-                        ;  stored at lut_BridgeGFX + $800 (+$800 because of the 8 rows of
-                        ;  tiles that were copied previously)
-
-    LDA #>data_BridgeNT ; reset the source pointer to the start of that NT data
-    STA tmp+1
-
-    LDX #4              ; and set X to 4 again so we draw another $400 bytes (full NT)
-    JSR CHRLoad_Cont    ; draw the SAME nametable.  This makes the nametables at
-                        ;  $2000 and $2400 identical!  This is used for visual effects
-
-
-    JMP LoadMenuCHR     ; after all that, load the usual menu graphics (box borders, font, etc)
-                        ;  and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10438,7 +10321,10 @@ LoadBridgeSceneGFX_Menu: ;; JIGS -- this is for menu loading; don't want to turn
 
 LoadMenuCHRPal:                ; does not load 'lit orb' palette, or the two middle palettes ($03C0-03CB)
     JSR LoadCHR_MusicPlay   
-    JSR LoadMenuOrbBGCHRAndPalettes
+    LDA #BANK_MENUCHR          ; This is mainly for menu related CHR and palettes
+    JSR SwapPRG_L              ; Swap to Bank D
+    JSR LoadMenuOrbs
+    
 LoadMenuCHRPal_TextOnly:
 	JSR LoadMenuTextBGCHR
 	JSR LoadCHR_MusicPlay
@@ -10462,19 +10348,14 @@ LoadOWCHR:                     ; overworld map -- does not load any palettes
 	
 LoadCHR_MusicPlay:	
     LDA MenuHush              ; only update music if exiting/loading the menu
-	BEQ :+
-	JSR WaitForVBlank_L
-	JSR CallMusicPlay_L
-  :	RTS
+	BNE LoadCHR_MusicPlay_Always
+    RTS
     
-LoadMenuCHRPal_Z:
-	JSR LoadMenuTextBGCHR
-    LDA #BANK_BTLCHR
-    JSR SwapPRG_L     
-	JSR LoadBattleSpritesForBank_Z
-	LDA #BANK_Z
-    JMP SwapPRG_L      
+LoadCHR_MusicPlay_Always:    
+	JSR WaitForVBlank_L
+	JMP CallMusicPlay_L
 
+    
 
 
 
@@ -10488,8 +10369,15 @@ LoadMenuCHRPal_Z:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+ShiftSpriteHightoLow:
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    RTS
+
 LoadPlayerMapmanCHR:
-    LDA #BANK_MAPCHR
+    LDA #BANK_MAPSPRITES
     JSR SwapPRG_L
     LDA #0          ; #0 -> tmp
     STA tmp
@@ -10534,7 +10422,7 @@ LoadOWObjectCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadOWBGCHR:
-    LDA #BANK_OWMAPBGCHR
+    LDA #BANK_OWMAPTILESET
 	STA cur_bank
     JSR SwapPRG_L
 	LDA #>Overworld_Tileset
@@ -10622,7 +10510,7 @@ CHRLoad_Cont:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadTilesetAndMenuCHR:
-    LDA #BANK_TILESETCHR
+    LDA #BANK_MAPTILESETS
     JSR SwapPRG_L     ; swap to bank containing tileset CHR
     LDA #0
     STA tmp           ; set low byte of src pointer to $00
@@ -10639,27 +10527,6 @@ LoadTilesetAndMenuCHR:
           ;  no JMP or RTS -- seamlessly runs into LoadMenuCHR
 	JMP LoadMenuTextBGCHR
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Menu CHR Loading  [$E98E :: 0x3E99E]
-;;
-;;   Load CHR for menus (text, the window border, weapon icons, etc)
-;;
-;;  IN:   tmp   = assumed to be 0 (does not explicitly set it)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;LoadMenuCHR:
-;    LDA #BANK_MENUCHR
-;    JSR SwapPRG_L    ; swap to bank containing menu chr
-;    LDA #$88
-;    STA tmp+1        ; source address = $8800 (note:  low byte not explicitly set)
-;    LDA #$00
-;    STA tmp            ;; JIGS - needed for the Title Screen stuff. LAZY CODERS.
-;    LDX #8           ; 8 rows to load
-;    LDA #8           ; dest address = $0800
-;    JMP CHRLoadToA
-;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10721,7 +10588,7 @@ LoadMapObjCHR:
     LDA #<lut_SmallMapObjCHR
     STA tmp              ; CHR source pointer (tmp) now = lut_MapObjCHR + (graphic_id * $100)
 
-    LDA #BANK_MAPCHR
+    LDA #BANK_MAPSPRITES
     JSR SwapPRG_L    ; swap to bank containing mapman CHR
     TYA              ; back up obj source index by pushing it to the stack
     PHA
@@ -10751,33 +10618,12 @@ LoadMapObjCHR:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+
 LoadShopBGCHRPalettes:
-    JSR LoadShopTypeAndPalette   ; load shop palettes and type
+    LDA #BANK_MENUCHR
+    JSR SwapPRG_L        ; Swap to bank
+    JMP LoadShopCHR_andPalettes
 
-       ; LoadShopTypeAndPalette doesn't load the palettes for the title
-       ;  and money boxes -- so load those up here
-
-    LDX #$07           ; start at X=7
-  @Loop:
-      LDA lut_ShopPalettes, X
-      STA cur_pal+4, X   ; copy over the shop palettes
-      DEX                ; and loop until X wraps (8 colors copied in total)
-      BPL @Loop
-	  
-	JSR LoadCHR_MusicPlay	  
-	  
-    LDA #BANK_MENUCHR  ; swap to bank containing shop CHR
-    JSR SwapPRG_L
-
-    LDA #<lut_ShopCHR
-	STA tmp
-    LDA #>lut_ShopCHR  ; source pointer (tmp) = lut_ShopCHR
-    STA tmp+1
-
-    LDA #$00           ; dest PPU address = $0000
-    LDX #$08
-    JMP CHRLoadToA     ; load them up  (loads all shop related CHR
-	
 LoadMenuTextBGCHR:
 	JSR LoadCHR_MusicPlay	
 
@@ -10810,47 +10656,17 @@ LoadBattleBGCHRAndPalettes:
     JSR SwapPRG_L
     JSR LoadBattleTextChr		   ; also loads magic data and enemy AI into RAM
 
-    LDA #BANK_BTLCHR
+    LDA #BANK_BATTLESPRITES
     JSR SwapPRG_L
-	LDA #08
+    JSR LoadStoneSprites           ; this loads the player stone graphics to background tiles
+    ;; also loads character palettes
+
+    LDA #BANK_ATTACKSPRITES
+    JSR SwapPRG_L
+	LDA #0
     STA MMC5_tmp
-    JSR LoadSprite_Bank04           ; this loads the player>enemy attack cloud sprites
-    JSR LoadStoneSprites            ; this loads the player stone graphics to background tiles
-
-	JSR LoadBattleBackdropPalette  ; this also swaps banks
-
-    ;; JIGS - slight changes
-    
-    ;LDX ow_tile                   ; Get last OW tile we stepped on
-    ;LDA lut_BtlBackdrops, X       ; Use it as an index to get the backdrop ID
-    
-    ;; every backdrop is 1 tile of black, 1 row of graphics, and another 1 tile of black
-    ;; for a total of $120 bytes
-    ;; but they're arranged in #BANK_BATTLEBG in $10 tile rows
-    ;; So an ID of 09 would be at $8900
-   
-    ;AND #$0F                      ; mask with $0F (there are only 16 battle BGs)
-    
-    LDA tmp+1                     ; reload value saved by LoadBattleBackdropPalette
-    ORA #$80                      ; add $80 to get high byte
-    STA tmp+1                     ; save high byte
-
-    LDA #BANK_BATTLEBG           ; swap to bank with backdrops
-    JSR SwapPRG_L	
- 
-    LDA #0
-	TAX
-    STA tmp                       ; save low byte
- ;  LDY $2002                     ; reset PPU address toggle
- ;; toggled while loading attack clouds
-	JSR SetPPUAddr_XA             ; Dest address = $0000
-
-    JSR @FillBlackTile            ; and fill one tile with 0s
-    INX                           ; X = 1 row
-    TAY                           ; Y = 0 
-    
-    JSR CHRLoad_Cont			  ; this writes the backdrop graphics
-    JSR @FillBlackTile            ; fill second tile with 0s
+    JSR LoadSprite_Bank03          ; this loads the player>enemy attack cloud sprites
+    ;; This will now also load up the backdrop palette AND the graphics.
   
     LDA btlformation ; get battle formation number
     ;ASL A            ; multiply it by 16
@@ -10882,18 +10698,7 @@ LoadBattleBGCHRAndPalettes:
     INC tmp+1                      ; increment high byte of pointer (enemy CHR starts 1 row in, before that is battle backdrop)
     LDX #$07                       ; load 7 rows
     JSR CHRLoad_Cont               ; continue CHR loading from Y=$20
-	
-	JSR LoadBattleSpritePalettes
-	JMP LoadBorderPalette_Color
-    
-   @FillBlackTile:    
-    LDA #0
-    LDX #$10
-   @Loop:
-    STA $2007             ; write $10 zeros to clear the tile
-    DEX
-    BNE @Loop
-    RTS
+	JMP LoadBorderPalette_Grey
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10926,7 +10731,7 @@ LoadBattleBGCHRPointers:
        ASL A
        ORA #$80       ; and OR with $80 to get the high byte of the pointer
        STA tmp+1
-       LDA #BANK_BATTLECHR   ; and indicate first bank of Battle BG CHR
+       LDA #BANK_ENEMYCHR   ; and indicate first bank of Battle BG CHR
        JMP @FinishUp
 
 @SecondBank:
@@ -10936,7 +10741,7 @@ LoadBattleBGCHRPointers:
        ASL A          ; multiply by 8
        ORA #$80       ; and OR to get high byte
        STA tmp+1
-       LDA #BANK_BATTLECHR+1 ; and indiate second bank of Battle BG CHR
+       LDA #BANK_ENEMYCHR+1 ; and indiate second bank of Battle BG CHR
 
 @FinishUp:
     JSR SwapPRG_L     ; Swap in indicated bank
@@ -10946,29 +10751,6 @@ LoadBattleBGCHRPointers:
 
 
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Menu BG CHR and Palettes  [$EA9F :: 0x3EAAF]
-;;
-;;   Loads CHR and Palettes for menus
-;;
-;;   Does not load palettes or CHR for sprites
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadMenuOrbBGCHRAndPalettes:
-    LDA #BANK_ORBCHR                 ; This is mainly for menu related CHR and palettes
-    JSR SwapPRG_L                    ; Swap to Bank D
-    LDX #08
-    LDA #<lut_OrbCHR                 ; from source address lut_OrbCHR
-    STA tmp
-    LDA #>lut_OrbCHR
-    STA tmp+1
-    LDA #0
-    JSR CHRLoadToA                   ; load up desired CHR (this is the ORB graphics that appear in the upper-left corner of main menu
-	JMP LoadStatusBoxScrollWork      ; this loads up the scrollwork image in RAM for later drawing
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10987,69 +10769,16 @@ LoadMenuOrbBGCHRAndPalettes:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadBatSprCHRPalettes:
-    JSR LoadBatSprCHR_SetPpuAddrAndSwap
+    LDA #BANK_BATTLESPRITES
+    JSR SwapPRG_L       
     
-    ;; JIGS - here we load sprites instead of classes 
-    
-    LDA #$00
-    STA tmp              ; clear low byte of source pointer
-    LDA ch_class         ; get character 1's sprite
-    JSR @LoadSprite      ; load it
-	
-    LDA ch_class+$40     ; character 2's
-    JSR @LoadSprite
-	
-    LDA ch_class+$80     ; character 3's
-    JSR @LoadSprite
+    JSR LoadAllBattleSprites_Menu
+	JSR LoadCHR_MusicPlay
 
-    LDA ch_class+$C0     ; character 4's
-    JSR @LoadSprite
-	
-	JSR LoadCHR_MusicPlay
-    
-    LDA #>lut_BatObjCHR  ; once all character's class graphics are loaded
-    STA tmp+1            ;   change source pointer to $A800  (start of cursor and related battle CHR)
-    LDX #$08             ; signal to load 8 rows
-	LDA #0
-	STA tmp
-  
-    JSR CHRLoad; _Cont   ; load cursor and other battle related CHR
-    JSR LoadBattleSpritePalettes  ; load palettes for these sprites
-	JSR LoadCHR_MusicPlay
     LDA #BANK_MENUS
     JMP SwapPRG_L      ; and swap to bank E on exit
-
-@LoadSprite:
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR ShiftSpriteHightoLow_Battle
     
-    CLC
-    ADC #>lut_BatSprCHR ; add high byte of the source pointer
-    STA tmp+1
-    LDX #$02            ; signal to load 2 rows
-    JMP CHRLoad         ; and load them!
-
-LoadBatSprCHR_SetPpuAddrAndSwap:
-    LDA $2002               ; Common code moved here to free up some bytes
-    LDA #$10
-    STA $2006
-    LDA #$00
-    STA $2006
-    LDA #BANK_BTLCHR
-	STA cur_bank
-    JMP SwapPRG_L     
     
-ShiftSpriteHightoLow:
-   LSR A
-ShiftSpriteHightoLow_Battle:
-   LSR A
-   LSR A
-   LSR A
-   RTS
-    
-
-
-   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Load Border Palette  [$EB29 :: 0x3EB39]
@@ -11068,7 +10797,7 @@ LoadBorderPalette_Blue:
     LDA #$01
     BNE :+         ; always branches
 
-LoadBorderPalette_Color:
+LoadBorderPalette_Grey:
   ;  LDX BattleBGColor
   ;  LDA BattleBackgroundColor_LUT, X
     LDA #$10         
@@ -11080,156 +10809,6 @@ LoadBorderPalette_Color:
     LDA #$30
     STA cur_pal+$F   ; White always to color 3
     RTS   
-   
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for Shop Money and Title Boxes  [$EB74 :: 0x3EB84]
-;;
-;;   These are the purple and green box palettes used for the title and money
-;;     boxes inside of shops
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-lut_ShopPalettes:
-  ;.BYTE  $0F,$00,$04,$30,  $0F,$00,$0A,$30
-;       purple box stuff -- green box stuff 
- 
-  .BYTE  $0F,$00,$04,$30,  $0F,$00,$11,$30
- 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Shop Type and Palette [$EB42 :: 0x3EB52]
-;;
-;;    Loads the type of shop from the given shop ID number (weapon/armor/magic/what have you)
-;;  And loads the palette appropriate for the keeper of that shop type.  It also loads the
-;;  blue border palette used by most menus.
-;;
-;;  It doesn't, however, load the purple and green box palettes used by the title
-;;   and money boxes in the shop.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-LoadShopTypeAndPalette:
-    LDA #BANK_BACKDROPPAL
-    JSR SwapPRG_L        ; Swap to bank
-
-    LDA shop_id          ; Get Shop ID
-    LSR A                ; shift high bits (shop type) into low bits
-    LSR A
-    LSR A
-    LSR A
-    STA shop_type        ; save shop type
-    ASL A
-    ASL A
-    ORA #$40             ; *4 and add $40 to get offset to required backdrop palette
-    BNE LoadBackdropPalette     ; get the backdrop palette loaded
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Battle Backdrop Palette  [$EB7C :: 0x3EB8C]
-;;
-;;   Loads required battle backdrop palette.  Note the difference between this and
-;;    LoadBackdropPalette.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattleBackdropPalette:
-     LDA #BANK_BACKDROPPAL    ; Swap to required bank
-     JSR SwapPRG_L
-     LDX ow_tile              ; Get last OW tile stepped on
-     LDA lut_BtlBackdrops, X  ; use it to index and get battle backdrop ID
-     AND #$0F                 ; multiply ID by 4
-     STA tmp+1                ; save this value for just after the RTS below
-     ASL A
-     ASL A                    ; and load up the palette
-	 ;; flow into loading
-	 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Backdrop Palette  [$EB5A :: 0x3EB6A]
-;;
-;;   Fetches palette for desired backdrop (battle or shop).
-;;
-;;   Y is unchanged
-;;
-;;   IN:   A = backdrop ID * 4
-;;         * = Required bank must be swapped in
-;;
-;;   OUT:  $03C0-03C4 = backdrop palette
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBackdropPalette:
-    TAX                       ; backdrop ID * 4 in X for indexing
-    LDA lut_BackdropPal, X    ; copy the palette over
-    STA cur_pal
-    LDA lut_BackdropPal+1, X
-    STA cur_pal+1
-    LDA lut_BackdropPal+2, X
-    STA cur_pal+2
-    LDA lut_BackdropPal+3, X
-    STA cur_pal+3
-    RTS
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Battle Sprite Palettes  [$EB99 :: 0x3EBA9]
-;;
-;;    Loads palettes for all sprites in battle and in menus
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattleSpritePalettes:
-    LDX #$0F  ; start at $0F
-  @Loop:
-      LDA @BattleSpritePalettes, X
-      STA cur_pal+$10, X   ; copy color to sprite palette
-      DEX
-      BPL @Loop            ; loop until X wraps ($10 colors copied)
-      RTS
-
-@BattleSpritePalettes:
-  .BYTE $0F,$18,$21,$28,  $0F,$16,$30,$36,   $0F,$08,$17,$28,  $0F,$00,$10,$30
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  [$EBB5 :: 0x3EBC5]
-;;
-;;   Shop Type LUT.  Shop ID number is used to index this table to figure out
-;;  what type of shop it is.
-;;
-;;   There are 10 of each kind of shop (supposedly)
-;;    0 = Weapon
-;;    1 = Armor
-;;    2 = White Magic
-;;    3 = Black Magic
-;;    4 = Clinic
-;;    5 = Inn
-;;    6 = Item        Only 9 of these (10th is the Caravan)
-;;    7 = Caravan     Only 1 of these
-;;
-;;  As an additional quirk... shop IDs appear to be 1-based, not the expected 0-based
-;;  As a result... this table is off by 1 (the first byte in it goes unused)
-;;
-;;  To "compensate", there's an extra Armor shop ID (so supposedly, there's only 9 weapon
-;;   shops and 11 armor shops)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;lut_ShopTypes:
-;   .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00      ; 10 weapon shops (but first is unused)
-;   .BYTE $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01  ; 11 armor shops (to correct the off-by-1 error)
-;   .BYTE $02,$02,$02,$02,$02,$02,$02,$02,$02,$02      ; 10 white magic
-;   .BYTE $03,$03,$03,$03,$03,$03,$03,$03,$03,$03      ; 10 black magic
-;   .BYTE $04,$04,$04,$04,$04,$04,$04,$04,$04,$04      ; 10 clinics
-;   .BYTE $05,$05,$05,$05,$05,$05,$05,$05,$05,$05      ; 10 inns
-;   .BYTE $06,$06,$06,$06,$06,$06,$06,$06,$06,$07      ; 9 item shops + 1 caravan
 
 
 
@@ -14610,12 +14189,11 @@ EncounterRateOption:
 
 
 SaveScreenHelper: 
-  ;  JSR LoadMenuCHRPal
-    LDA #BANK_BTLCHR
+    LDA #0
+    STA $2001
+    LDA #BANK_BATTLESPRITES
     JSR SwapPRG
     JSR LoadBattleSpritesForBank_Z
-	JSR LoadBattleSpritePalettes
-	JSR LoadBorderPalette_Blue
     LDA #BANK_Z
     JMP SwapPRG    
     

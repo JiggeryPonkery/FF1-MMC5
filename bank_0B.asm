@@ -7,16 +7,10 @@
 .export lut_BattleRates
 .export lut_BattleFormations
 .export BattleOver_ProcessResult_L
-.export data_EpilogueCHR
-.export data_EpilogueNT
-.export data_BridgeCHR
-.export data_BridgeNT
 .export PrintEXPToNext_B
 .export lut_Domains
 .export WriteAttributesToPPU
 .export lut_BattlePalettes
-.export lut_BackdropPal
-.export lut_BtlBackdrops
 
 .import Battle_ReadPPUData_L
 .import Battle_WritePPUData_L
@@ -139,167 +133,7 @@ lut_Domains:
 .byte $00,$00,$00,$00,$00,$00,$00,$00
 
 
-; Battle backdrop palettes
 
-lut_BackdropPal:
-.byte $0F,$31,$29,$30 ; 00 ; grasslands
-.byte $0F,$0C,$17,$07 ; 01 ; cave
-.byte $0F,$1C,$2B,$1B ; 02 ; cave_2
-.byte $0F,$30,$3C,$22 ; 03 ; ocean
-.byte $0F,$18,$0A,$1C ; 04 ; forest
-.byte $0F,$3C,$1C,$0C ; 05 ; temple
-.byte $0F,$37,$31,$28 ; 06 ; desert
-.byte $0F,$27,$17,$1C ; 07 ; brambles
-.byte $0F,$1A,$17,$07 ; 08 ; cave_3
-.byte $0F,$30,$10,$00 ; 09 ; castle
-.byte $0F,$22,$1A,$10 ; 0A ; river
-.byte $0F,$37,$10,$00 ; 0B ; sky_castle
-.byte $0F,$21,$12,$03 ; 0C ; sea_shrine
-.byte $0F,$31,$22,$13 ; 0D ; cave_4
-.byte $0F,$26,$16,$06 ; 0E ; cave_5
-.byte $0F,$2B,$1C,$0C ; 0F ; waterfall
-
-.byte $0F,$30,$00,$31 ; 10 ; Weapon shop
-.byte $0F,$10,$27,$17 ; 11 ; Armor shop
-.byte $0F,$3C,$1C,$0C ; 12 ; White magic shop
-.byte $0F,$3B,$1B,$0B ; 13 ; Black magic shop
-.byte $0F,$37,$17,$07 ; 14 ; Item
-.byte $0F,$37,$16,$10 ; 15 ; Clinic
-.byte $0F,$36,$16,$07 ; 16 ; Inn
-.byte $0F,$30,$28,$16 ; 17 ; Caravan
-
-
-; Battle backdrop assignment
-
-lut_BtlBackdrops:
-.byte $00 ; grasslands
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $08 ; cave_3
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $03 ; ocean
-.byte $03 ; ocean
-.byte $03 ; ocean
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $0B ; sky_castle
-.byte $06 ; desert
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $04 ; forest
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $00 ; grasslands
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $0D ; cave_4
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $09 ; castle
-.byte $09 ; castle
-.byte $02 ; cave_2
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $0A ; river
-.byte $0A ; river
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $0A ; river
-.byte $06 ; desert
-.byte $0F ; waterfall?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $03 ; ocean
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $0A ; river
-.byte $0A ; river
-.byte $06 ; desert
-.byte $06 ; desert
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $00 ; grasslands
-.byte $05 ; temple
-.byte $05 ; temple
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $0C ; sea_shrine
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $07 ; brambles
-.byte $0E ; cave_5
-.byte $0E ; cave_5
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $02 ; cave_2
-.byte $FF ; unused?
-.byte $02 ; cave_2
-.byte $00 ; grasslands
-.byte $01 ; cave
-.byte $FF ; unused?
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $07 ; brambles
-.byte $07 ; brambles
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $00 ; grasslands
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
-.byte $FF ; unused?
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -5217,17 +5051,6 @@ lut_IBCharStatsPtrTable:
   
   
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Epilogue/Bridge scene CHR and NT  [$A800 :: 0x2E810]
-;;
-;;
 
-data_EpilogueCHR:
-  .INCBIN "chr/endingbridge_chrnt.bin"
-  
-data_EpilogueNT =       data_EpilogueCHR + $800         ; $B000
-data_BridgeCHR  =       data_EpilogueNT  + $400         ; $B400
-data_BridgeNT   =       data_BridgeCHR   + $800         ; $BC00
 
 .byte "END OF BANK B"

@@ -6,8 +6,6 @@
 .export ClearNT
 .export EnterMainMenu
 .export EnterShop
-.export IntroTitlePrepare
-
 .export PrintBattleTurn
 .export PrintCharStat
 .export PrintGold
@@ -40,9 +38,6 @@
 .import FadeOutSprites
 .import BackUpPalettes
 .import ClearSpritePalette
-.import GameStart_L
-.import LoadBattleSpritePalettes
-.import LoadBridgeSceneGFX_Menu
 .import LoadMenuCHRPal
 .import LoadPrice
 .import LoadShopCHRPal
@@ -56,7 +51,7 @@
 .import PlaySFX_Error
 .import PrintEXPToNext_B
 .import RandAX
-.import SaveScreen
+.import SaveScreen_FromMenu
 .import UpdateJoy
 .import WaitForVBlank_L
 .import lutClassBatSprPalette
@@ -74,6 +69,7 @@
 .import DrawMenuString_FixedBank
 .import DrawMenuString_CharCodes_FixedBank
 .import KeyItem_LongCall_Add
+
 
 .segment "BANK_0E"
 
@@ -1329,21 +1325,6 @@ ClearNT_Color:   ;; JIGS - now this loads either 0 or FF depending what you want
 
 
 
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  IntroTitlePrepare  [$A219 :: 0x3A229]
-;;
-;;    Does various preparation things for the intro story and title screen.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-IntroTitlePrepare:
-    ;JSR LoadMenuCHRPal     ; Load necessary CHR and palettes
-    JSR LoadBattleSpritePalettes
-    JMP LoadBridgeSceneGFX_Menu ;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4318,7 +4299,7 @@ SaveGame:
     LDA #1
     STA weasels ; weasels will help save the game
     JSR LongCall
-    .word SaveScreen
+    .word SaveScreen_FromMenu
     .byte BANK_TITLE
    
     LDA music_track             ; check the music track

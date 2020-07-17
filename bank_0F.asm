@@ -2,11 +2,15 @@
 .include "variables.inc"
 .feature force_range
 
-.export EnemyAttackPlayer_PhysicalZ, PlayerAttackEnemy_PhysicalZ
+.export EnemyAttackPlayer_PhysicalZ
+.export PlayerAttackEnemy_PhysicalZ
 .export PlayerAttackPlayer_PhysicalZ
-.export ClericCheck, CritCheck
+.export ClericCheck
+.export CritCheck
 .export SoundTestZ
-.export OptionsMenu, DrawSaveScreenNames, DrawSaveScreenSprites
+.export OptionsMenu
+.export DrawSaveScreenNames
+.export DrawSaveScreenSprites
 .export EnterTitleScreen
 .export JigsIntro
 .export SaveScreen
@@ -23,10 +27,13 @@
 .export SpiritCalculations
 .export Battle_SetPartyWeaponSpritePal
 .export MapPoisonDamage_Z
+.export lut_InitUnsramFirstPage
+.export lut_ClassStartingStats
+.export SaveScreen_FromMenu
 
-.import GameLoaded, StartNewGame, SaveScreenHelper, LoadBattleSpritesForBank_Z
+.import GameLoaded, SaveScreenHelper, LoadBattleSpritesForBank_Z
 .import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
-.import RandAX, WaitForVBlank_L, GameStart_L, GameStart2, LoadPtyGenBGCHRAndPalettes, IntroTitlePrepare, LoadBridgeSceneGFX_Menu
+.import RandAX, WaitForVBlank_L, GameStart_L, LoadPtyGenBGCHRAndPalettes, LoadBridgeSceneGFX_Menu
 .import DrawComplexString, ClearOAM, DrawPalette, CallMusicPlay, UpdateJoy, DrawSimple2x3Sprite, Draw2x2Sprite, CHRLoad, CHRLoadToA
 .import DrawCursor, WaitForVBlank_L, DrawBox, LoadMenuCHRPal, MenuCondStall, CoordToNTAddr, LoadBorderPalette_Blue
 .import UndrawBattleBlock, ShiftSpriteHightoLow, PlaySFX_Error
@@ -40,11 +47,12 @@
 .import BattleRNG_L
 .import lutClassBatSprPalette
 .import PlayDoorSFX
-.import Bridge_LoadPalette
 .import LoadCursorOnly
 .import LoadShopCHRForBank_Z
 .import ShiftLeft6
+.import ShiftLeft4
 .import SetPPUAddr_XA
+.import ReloadBridgeNT
 
 
 
@@ -2883,7 +2891,7 @@ JigsIntro:
 
     LDA #$FF
     STA MMC5_tmp
-    JSR ClearNT_Color
+    JSR ClearNT
     JSR ClearButtons
     STA cursor
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
@@ -2901,11 +2909,10 @@ JigsIntro:
       DEX
       BNE @AttrLoop
 
-    LDA #$0F
-    STA cur_pal
-    STA cur_pal+$10
     LDA #$01
+    STA cur_pal
     STA cur_pal+2
+    STA cur_pal+$10
     STA cur_pal+$12
     LDA #$30
     STA cur_pal+3
@@ -2950,7 +2957,7 @@ IntroLoop:
         STA joy_start
         STA cursor
         STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
-        JMP GameStart2
+        RTS
 
   : JSR IntroStoryText
     JMP IntroLoop
@@ -3084,29 +3091,19 @@ TurnOnScreen:
 
 
 
+
 EnterTitleScreen:
     LDA #$08               ; set soft2000 so that sprites use right pattern
     STA soft2000           ;   table while BG uses left
 
     JSR ClearButtons       ; resets all buttons and A = 0
-    STA weasels            ; 
+    STA weasels            ; needs to be 0 or else the SaveScreen will try to SAVE instead of LOAD
     STA $2001              ; turn off the PPU
     STA cursor
     STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
 
-    JSR LongCall
-    .word IntroTitlePrepare
-    .byte BANK_MENUS
-    ;; Draw the bridge scene, and load sprite palettes
-
-    JSR LongCall
-    .word Bridge_LoadPalette
-    .byte BANK_BRIDGESCENE
-    ;; and load the palette
-
-    JSR LongCall
-    .word LoadCursorOnly
-    .byte BANK_BTLCHR
+    LDA #$0F
+    STA cur_pal+$0E
 
     JSR DrawTitleWords
     JSR TurnMenuScreenOn_ClearOAM
@@ -3169,21 +3166,36 @@ EnterTitleScreen:
    @OptionChosen:
     LDA cursor
     CMP #2
-    BEQ @OptionsMenu
+    BEQ TitleScreen_OptionsMenu
     CMP #1           ; this will set C, indicating new game or continue
-    RTS              ; then return to the GameStart stuff to decide what to load next
+    BCS StartNewGame
+    
+    ; Otherwise, they selected "Continue"...
+    JSR SaveScreen
+    BCS ReenterTitleScreen            ; jump back to title screen if B was pressed     
+    RTS
 
-   @OptionsMenu:
+StartNewGame: 
+    JSR NewGamePartyGeneration      ; create a new party
+    BCS ReenterTitleScreen
+    JSR NewGame_LoadStartingStats   ;   and set their starting stats
+    JMP ReadjustEquipStats ;; JIGS - apply weapon stats to the starting weapons    
+
+TitleScreen_OptionsMenu:
     LDA #0
     STA $2001                         ; turn off the screen and menustall
     STA menustall
     LDX BattleBGColor                 ; Options screen uses the battle BG color (so you can see what you're choosing!)
     LDA BattleBackgroundColor_LUT, X
     STA cur_pal+14
-    JSR ClearNT_FillBackground        ; Clear and fill the background with a tile other than $00
+    JSR ClearNT                       ; Clear and fill the background with a tile other than $00
     JSR OptionsMenu                   ; Do the options menu!
-    JMP EnterTitleScreen              ; and re-draw the Title screen
 
+ReenterTitleScreen:
+    LDA #0
+    STA $2001      
+    JSR ReloadBridgeNT
+    JMP EnterTitleScreen
 
 DrawTitleCursor:
     LDY cursor                   ; put the cursor in Y
@@ -3198,28 +3210,117 @@ lut_TitleCursor_Y:
 
 
 
+NewGame_LoadStartingStats:
+    LDX #$00                ; load up the starting stats for each character
+    JSR @LoadStats
+    LDX #$40
+    JSR @LoadStats
+    LDX #$80
+    JSR @LoadStats
+    LDX #$C0
+
+  @LoadStats:
+    LDA ch_class, X         ; get the class
+    AND #$0F                ;; JIGS - cut off high bits (sprite)
+    ;ASL A                   ; $10 bytes of starting data for each class
+    ;ASL A
+    ;ASL A
+    ;ASL A
+    JSR ShiftLeft4
+    TAY                     ; source index in Y
+    
+    ;; lut_ClassStartingStats table contains $B bytes of data, padded to $10
+    ;;   byte 0 is a redundant and unused class ID byte.
+    ;;   The rest is as outlined below
+    
+    LDA lut_ClassStartingStats+1, Y ; starting HP
+    STA ch_curhp, X
+    STA ch_maxhp, X
+    
+    LDA lut_ClassStartingStats+2, Y ; base stats
+    STA ch_strength, X
+    LDA lut_ClassStartingStats+3, Y
+    STA ch_agility, X
+    LDA lut_ClassStartingStats+4, Y
+    STA ch_intelligence, X
+    LDA lut_ClassStartingStats+5, Y
+    STA ch_vitality, X
+    LDA lut_ClassStartingStats+6, Y
+    STA ch_speed, X
+    
+    LDA lut_ClassStartingStats+7, Y ; sub stats
+    STA ch_damage, X
+    LDA lut_ClassStartingStats+8, Y
+    STA ch_hitrate, X
+    LDA lut_ClassStartingStats+9, Y
+    STA ch_evasion, X
+    LDA lut_ClassStartingStats+$A, Y
+    STA ch_magicdefense, X
+    
+    ;; JIGS: You can use the padding in lut_ClassStartingStats to tell the game
+	;; how much mana to give! Or start with a fancy weapon! Even some spells!
+
+    LDA lut_ClassStartingStats+$B, Y
+    STA ch_mp, X
+    LDA lut_ClassStartingStats+$C, Y
+    STA ch_righthand, X
+    LDA lut_ClassStartingStats+$D, Y
+    STA ch_body, X
+    LDA lut_ClassStartingStats+$E, Y
+    STA ch_spells, X
+	RTS
+    
+    ;; JIGS - starting stats does this now!
+    ; Award starting MP if the class ID is >= RM, but < KN
+  ;  LDA ch_class, X
+  ;  CMP #CLS_RM
+  ;  BCC :+
+  ;    CMP #CLS_KN
+  ;    BCS :+
+  ;      ;LDA #$02                ; start with 2 MP
+  ;      ;STA ch_curmp, X
+  ;      ;STA ch_maxmp, X
+  ;      LDA #$22    ; JIGS - high bits are current, low bits are max. One byte.
+  ;      STA ch_mp, X
+  ;   : RTS 
+
+  
 
 
 
 
-;; This is for the Options menu on the title mostly.
-;; Because it doesn't need to reset the Bridge Scene graphics, and tile $00 is a piece of hillside for some reason.
-ClearNT_FillBackground:
-    LDA #$6B
-    STA MMC5_tmp
-    BNE ClearNT_Color
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ClearNT:
-    LDA #$00
-    STA MMC5_tmp
-
-ClearNT_Color:
     LDA $2002     ; reset PPU toggle
     LDA #$20
     STA $2006
     LDA #$00
     STA $2006     ; set PPU addr to $2000 (start of NT)
-    LDA MMC5_tmp
+    LDA #$00
     LDX #$F0      ; $03C0 / 4 = $F0.
     LDY #$40
 
@@ -3297,21 +3398,15 @@ DrawTitleWords:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ReturnToTitle:
-    PLA
-    PLA ; remove the "JSR NewGamePartyGeneration" bit from the stack?
-    JMP CancelNewGame
-    ;; JIGS - hope this works!
-
 NewGamePartyGeneration:
     LDA #$00                ; turn off the PPU
     STA $2001
 
-    JSR LoadMenuCHRPal_Z
-    ;; This loads up the menu text, as well as each class's sprites -- even the job changes!
+    LDA #$01
+    STA cur_pal+$0E
 
-    LDA #$17
-    LDX #$EE
+    LDA #$1E
+    LDX #$FE
     JSR SetPPUAddr_XA
     LDA #$7F
     STA $2007
@@ -3328,8 +3423,9 @@ NewGamePartyGeneration:
     LDA #$00                    ;   branching back to the previous char if the user
     STA char_index              ;   cancelled by pressing B
     JSR DoPartyGen_OnCharacter
-    BCS ReturnToTitle
-    ;; JIGS ^ if you accidentally clicked new game...
+    BCC @Char_1
+    RTS 
+    ;; JIGS ^ if you accidentally clicked new game... carry is set
   @Char_1:
     LDA #$13  ;; JIGS - every character has 3 more bytes in ptygen now
     STA char_index
@@ -3407,6 +3503,7 @@ NewGamePartyGeneration:
     STA playtimer+1
     STA playtimer+2
     STA playtimer+3   ; and reset the timer to 0
+    CLC
     RTS
 
 
@@ -3581,7 +3678,7 @@ DoNameInput:
     ; Some local temp vars
     @selectedtile   = tmp
 
-    JSR ClearNT ;_FillBackground
+    JSR ClearNT
     JSR DrawNameInputScreen
     JSR NameInput_DrawName
 
@@ -3798,7 +3895,7 @@ CharName_Frame:
     STA oam+$3, X          ; upper left horizontal coordinate
     LDA #$22
     STA oam+$0, X          ; upper left vertical coordinate
-    LDA #$7E
+    LDA #$F0
     STA oam+$1, X          ; graphic: _
     LDA #$01
     STA oam+$2, X          ; attribute
@@ -4286,9 +4383,97 @@ lut_PtyGenBuf:
 ; 13 - ptygen_sprite 
 
 
+lut_ClassStartingStats:
+;     Class HP   Str  Agil Int  Vit  Luck DMG  Hit% Evade MDef  MP   Weapon Armor Spells Unused
+.byte $00,  $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00,   $00 ; Fighter
+.byte $01,  $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00,   $00 ; Thief
+.byte $02,  $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00,   $00 ; BB
+.byte $03,  $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; RedMage
+.byte $04,  $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00,   $00 ; WMage
+.byte $05,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; BMage
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 1
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 2
+.byte $06,  $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00,   $00 ; Knight
+.byte $07,  $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00,   $00 ; Ninja
+.byte $08,  $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00,   $00 ; Master
+.byte $09,  $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; RedWiz
+.byte $0A,  $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00,   $00 ; WWiz 
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Bwiz
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 3
+.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 4
+;                                                                     \ 02 small knife or 03 wooden staff
+;                                                                            \ 01 cloth armour
 
+lut_InitUnsramFirstPage:
+.byte %01010000 ; 00 overworld flags
+.byte $D2 ; 01 ship X 
+.byte $99 ; 02 ship Y
+.byte $DD ; 03 airship X
+.byte $ED ; 04 airship Y
+.byte $98 ; 05 bridge X
+.byte $98 ; 06 bridge Y
+.byte $66 ; 07 canal X
+.byte $A4 ; 08 canal Y
+.byte $00 ; 09 ow2_vehicle X
+.byte $00 ; 0A ow2_vehicle Y
+.byte $00 ; 0B overworld 2 scroll x
+.byte $00 ; 0C overworld 2 scroll y
+.byte $92 ; 0D overworld scroll x
+.byte $9E ; 0E overworld scroll y
+.byte $01 ; 0F overworld vehicle
 
+.byte %00000001 ; 10 options - only auto target on
+.byte $04 ; 11 battle text speed (5)
+.byte $00 ; 12 battle text background color (0: blue)
+.byte $00 ; 13 smokebomb steps
+.byte $00 ; 14 battles won
+.byte $00 ; 15 battles fled
+.byte $90 ; 16 gold low
+.byte $01 ; 17 gold middle
+.byte $00 ; 18 gold high
+.byte $00 ; 19 play time 
+.byte $00 ; 1A
+.byte $00 ; 1B
+.byte $00 ; 1C
+.byte $00 ; 1D checksum stuff
+.byte $00 ; 1E
+.byte $00 ; 1F
 
+; Items
+.byte $00 ; 20 unused
+.byte $02 ; 21 heal -- JIGS - added two heals
+.byte $00 ; 22 X-heal
+.byte $00 ; 23 ether
+.byte $00 ; 24 elixier
+.byte $01 ; 25 pure -- JIGS - added one pure 
+.byte $00 ; 26 soft
+.byte $00 ; 27 phoenix down
+.byte $00 ; 28 tent
+.byte $00 ; 29 cabin
+.byte $00 ; 2A house
+.byte $00 ; 2B eyedrops
+.byte $00 ; 2C smokebomb
+.byte $00 ; 2D wakeup bell
+.byte $00 ; 2E nothing
+.byte $00 ; 2F nothing
+
+; Key Items
+.byte $00 ; 30 key items 1
+.byte $00 ; 31 key items 2
+.byte $00 ; 32 key items 3
+.byte $00 ; 33 key items 4
+.byte $00 ; 34 
+.byte $00 ; 35
+.byte $00 ; 36
+.byte $00 ; 37
+.byte $00 ; 38
+.byte $00 ; 39
+.byte $00 ; 3A
+.byte $00 ; 3B
+.byte $00 ; 3C fire orb
+.byte $00 ; 3D water orb
+.byte $00 ; 3E air orb 
+.byte $00 ; 3F earth orb
 
 
 DrawOptions:
@@ -5146,18 +5331,21 @@ WeaselChr:
 ;; JIGS - here is all the 3 Save File things.
 
 
+SaveScreen_FromMenu:
+    JSR SaveScreenHelper
+
 SaveScreen:
+	JSR LoadBorderPalette_Blue
     LDA #0
+    STA $2001
     STA cursor               ; flush cursor, joypad, and prev joy directions
     STA joy
     STA joy_prevdir
-    STA $2001                ; turn off the PPU
     STA menustall            ; disable menu stalling
     STA SaveGameMusic        ; clear this variable, which will help reset music later
     JSR ClearNT              ; clear the NT
     LDA #1
     STA $5113                ; swap battery-backed PRG RAM
-    JSR SaveScreenHelper
 
     LDA #1
     STA box_x

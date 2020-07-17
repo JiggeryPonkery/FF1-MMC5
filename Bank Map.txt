@@ -1,23 +1,23 @@
-00 : Enemy graphics, battle backdrops 1
-01 : Enemy graphics, battle backdrops 2
-02 : Enemy graphics, battle backdrops 3
-03 : Battle backdrops, battle icons
-04 : Character battle sprites, Weapon and magic sprites, Shop CHR, menu text, and sprite loading routines
-05 : 
+00 : Enemy graphics
+01 : Enemy graphics
+02 : Enemy graphics
+03 : Battle backdrops + palettes, battle icons, Shop CHR + palettes, Menu text CHR, Weapon and Magic CHR + loading routines
+04 : 30 Character battle sprites + sprite loading routines
+05 : Overworld tilesets
 06 : Small map tilesets
-07 : Small map tilesets - copy (unneeded)
+07 : More Small map tilesets, eventually
 08 : Magic data, battle text CHR, pre-battle loading routines
 09 : Bridge scenes and text, Minigame, Minimap
-0A : Battle messages, enemy names, item names, magic names, chest gold amounts, item prices, Enemy Scan code
+0A : Battle messages, enemy names, item names, magic names, chest gold amounts, Treasure chest contents, item prices, menu strings, Enemy Scan code
 0B : Battle set up, Enemy formations, Enemy drawing, Post-battle rewards, Level up
 0C : In-battle code
 0D : Music driver and data
 0E : Main Menu and Shop Logic, Item Descriptions
-0F : New Game, Title Screens, Sound Test, Equipment adjusting, Battle stat Loading; Enemy and weapon data
+0F : Title Screens logic, New Game/Party Gen data, Sound Test, Equipment adjusting, Battle stat Loading; Enemy and weapon data
 10 : Environmental dialogue, dialogue code
 11 : NPC dialogue
-12 : Overworld tileset, small map tile attributes and properties, Character map palettes, New Game RAM initilization
-13 : Teleport coordinates, Small map NPC coordinates, New Game Character stats, Treasure chest contents
+12 : Small map tile attributes and properties, Character map palettes, Teleport coordinates, Small map NPC coordinates, 
+13 : MiniMap
 14 : Character and NPC map sprites
 15 : 
 16 : 
@@ -27,6 +27,6 @@
 1A : Standard Map Data 4 (for expansion)
 1B : Standard Map Data 4 (for expansion)
 1C : Standard Map Data 4 (for expansion)
-1D : 
+1D : Overworld 2 Map data, eventually
 1E : Overworld Map data, Minimap decompression routine
 1F : Most game code, Overworld and Small Map loop, Text drawing routines

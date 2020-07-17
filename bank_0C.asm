@@ -45,7 +45,8 @@
 .import LoadPlayerDefenderStats_ForEnemyAttack
 .import SkillText_RMage
 .import ShiftLeft4
-.import LoadSprite_Bank04
+.import LoadSprite_Bank03
+.import LoadBattleSprite
 .import DrawItemBox_String
 .import DrawMagicBox_String
 .import DrawEquipBox_String
@@ -60,6 +61,7 @@
 .import BackUpPalettes
 .import ClearPalette
 .import DrawPalette_L
+.import LoadAllBattleSprites
 
 
 BANK_THIS = $0C
@@ -1392,16 +1394,9 @@ EnterBattlePrepareSprites:
    ;JSR SetAllNaturalPose
     
 LoadAllCharacterSprites:    
-    LDA #3
-    STA char_index
-  : LDA #01
-    STA MMC5_tmp
     JSR LongCall
-    .word LoadSprite_Bank04
-    .byte $04
-    ;JSR LoadSprite 
-    DEC char_index
-    BPL :-
+    .word LoadAllBattleSprites
+    .byte BANK_BATTLESPRITES
     RTS    
     
   ; JMP SetAllNaturalPose       ; <- flow into
@@ -1756,7 +1751,7 @@ UpdateSprites_BattleFrame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; LoadSprite: A = 01 for loading a character pose, 02 for loading a weapon sprite, 04 for loading a magic sprite
+;; LoadSprite: A = 01 for loading a weapon sprite, 02 for loading a magic sprite
 ;; For characters, btl_charactivepose must be set
 ;; For attack sprites, btlattackspr_gfx must be set using vanilla values (for now)
 
@@ -1764,7 +1759,7 @@ LoadSprite:                       ; this is for weapons/magic
     PHA                           ; when updating the on screen sprites isn't critical
     JSR BattleUpdateAudio         ; update audio early
     PLA
-    BNE DoLoadSprite
+    BNE LoadWeaponMagicSprite
 
 UpdateCharacterSprite: ; In: X = 00, 01, 02, 03
     STX char_index
@@ -1774,14 +1769,19 @@ UpdateCharacterSprite_Preset: ; char_index was set already
     ORA #$80
     STA btl_drawflagsA
     JSR UpdateSprites_BattleFrame ; load the right data into sprite buffers
-    LDA #1
 
-DoLoadSprite:
+    JSR LongCall                  ; then load the new sprites into CHR
+    .word LoadBattleSprite
+    .byte $04
+    JMP :+
+
+LoadWeaponMagicSprite:
     STA MMC5_tmp
     JSR LongCall                  ; then load the new sprites into CHR
-    .word LoadSprite_Bank04
-    .byte $04
-    JSR BattleUpdatePPU           ; set scroll, etc
+    .word LoadSprite_Bank03
+    .byte $03
+    
+  : JSR BattleUpdatePPU           ; set scroll, etc
     LDA #>oam
     STA $4014                     ; Do OAM DMA
     RTS    
@@ -6264,7 +6264,7 @@ PlayerAttackEnemy_Physical:
     LDA btl_attacker_graphic ; load the attack sprite in advance... unless its empty!
     BEQ :+
     STA btlattackspr_gfx
-    LDA #$02
+    LDA #$01
     JSR LoadSprite    
     
     ;;;;;;;;;;;;;;;;;;;;
@@ -8848,7 +8848,7 @@ DoRunic_OK:
     LDA btl_charweaponpal, X
     LDX #0
     JSR UpdateVariablePalette   ; set the variable palette to their weapon
-    LDA #02
+    LDA #01
     JSR LoadSprite              ; load up the weapon sprite
     
     JSR DrawDefenderBox         ; draw Runic user's name 
@@ -8979,7 +8979,7 @@ LoadItemSprite:
     JSR UpdateVariablePalette
     LDX #1
     STX btlmag_magicsource
-    LDA #04
+    LDA #02
     JMP LoadSprite
    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9380,7 +9380,7 @@ Player_DoMagicEffect:
     
     JSR Battle_PrepareMagic                 ; Otherwise, load up magic effect info
     
-    LDA #04
+    LDA #02
     JSR LoadSprite                          ; load up the sprite    
     JSR Battle_PlayerMagic_CastOnTarget     ; And actually cast the spell
     JMP Battle_EndMagicTurn                 ; End the turn

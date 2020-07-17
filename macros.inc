@@ -28,3 +28,12 @@
 .macro PAGECHECK lbl
   .assert >* = >lbl, warning, "Noncritical timing loop crosses page boundary"
 .endmacro
+
+
+;;
+;;  macro for using BIT as a quick "BNE :+ " to pass over 2 bytes.
+;;
+
+.macro BNEBIT
+.byte #$2C
+.endmacro
