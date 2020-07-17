@@ -4512,7 +4512,7 @@ OptionsLoop:
     CMP #RIGHT
     BEQ :+
       LDA #1              ; enter ChangeOption with A = 1 if left was pressed
-      JMP :++
+      BNE :++
 
   : LDA #0                ; enter ChangeOption with A = 0 if right was pressed
   : JSR ChangeOption
@@ -4676,8 +4676,6 @@ BattleBackgroundColor:
     STX BattleBGColor
     LDA BattleBackgroundColor_LUT, X
     STA cur_pal+14
-    ;LDA #0
-    ;STA $2002
     JMP TurnOnScreen
 
 

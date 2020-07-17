@@ -188,6 +188,7 @@
 .import lut_BatObjCHR
 .import DrawMenuString_A
 .import DrawMenuString_CharCodes_A
+.import KeyItem_Add
 
 
 .segment "BANK_FIXED"
@@ -236,7 +237,7 @@ GameStart:
     : LDA lut_InitUnsramFirstPage, X
       STA unsram, X
       INX 
-      CPX #$4F
+      CPX #$2F ; 4F 
       BNE :-
 
     ;; JIGS - Rather than take up 256 bytes in Bank 0, the original game only needs to initalize game_flags all to 1, with 7 exceptions.
@@ -1424,7 +1425,8 @@ OWCanMove:
     BNE @Success_2          ; if not, success!
 
   @NeedChime:
-    LDA item_chime       ; see if they have the chime in their inventory
+    LDA keyitems_2
+    AND #$10             ; see if they have the chime in their inventory
     BNE @Success_1       ; if they do -- success
     SEC                  ; otherwise, failure
     RTS  
@@ -1713,7 +1715,8 @@ BoardCanoe:
     AND #$02            ; check to see if a canoe move is legal here
     BNE Board_Fail      ; if it isn't, fail
 
-    LDA item_canoe       ; make sure the player has the canoe
+    LDA keyitems_3
+    AND #$80            ; make sure the player has the canoe
     BEQ Board_Fail      ; if they don't.. fail
 
     LDA #$04
@@ -2680,8 +2683,11 @@ ProcessSMInput:
       LDX talkobj        ; and index of object to talk to
       BCC @TalkToTile    ; examine C flag to see if there was an object to talk to.  If there was....
 
+        JSR DecompressKeyItems ; JIGS - do this before interacting, in case item IDs need to be read!
+
         LDA #0
         STA tileprop        ; clear tile properties (prevent unwanted teleport/battle)
+        STA item_box, X     ; and set the end of item_box 
 
         LDA #BANK_TALKTOOBJ ; swap to bank containing TalkToObject routine
         JSR SwapPRG_L
@@ -3213,7 +3219,7 @@ TalkToSMTile:
     STY tmp+10                ; backup Y
 
     LDA #BANK_DIALOGUE        ; set the bank to print from
-    STA DialogueTable_1or2        
+    STA DialogueBank        
     
     LDA tileprop              ; get 1st property byte
     AND #TP_SPEC_MASK         ;  see if its special bits indicate it's a treasure chest
@@ -3939,12 +3945,14 @@ SMMove_OK:
 ;    STA tileprop
 
 SMMove_Crown:
-    LDA item_crown              ; see if the player has the crown
+    LDA keyitems_1
+    AND #$40                    ; see if the player has the crown
     BNE SMMove_HaveSpecialItem  ; otherwise, can move (always branches)
     BEQ SMMove_OK
 
 SMMove_Cube:
-    LDA item_cube                ; see if player has the cube
+    LDA keyitems_2
+    AND #$04                     ; see if player has the cube
     BNE SMMove_HaveSpecialItem   ; otherwise, can move (always branches)    
     BEQ SMMove_OK
 
@@ -4048,13 +4056,18 @@ SMMove_CloseRoom:
  ;;  Called for TP_SPEC_DOOR and TP_SPEC_LOCKED
 
 SMMove_Door:
+    PHA
+    LDA keyitems_1
+    AND #$08
+    STA tmp
+    PLA
     LSR A                                       ; downshift to get the door bits into the low 2 bits
     LSR A  ; downshift again to return to actual tileprop id
     BCC @OpenDoor
 
     LDX #0                    ; otherwise (door is locked)
     STX tileprop+1            ; erase the secondary attribute byte (prevent it from being a locked shop)
-    LDX item_mystickey        ; check to see if the player has the key
+    LDX tmp                   ; check to see if the player has the key
     BNE @OpenDoor             ; if they do, open the door
       SEC                ; otherwise (no key, locked door), SEC to indicate player can't move here
       RTS                ; and exit
@@ -4089,7 +4102,7 @@ SetChestAddr:
     CMP #15              ; check to see if it's >= 15
     BCC :+               ;  and if it is... subtract 15 (only 15 rows on the nametable)
       SBC #15
-:   TAX                  ; put the row back in X for indexing
+  : TAX                  ; put the row back in X for indexing
 
     LDA tmp+4            ; get the X coord of the tile the player is moving to
     AND #$1F             ; mask out the low bits (column to draw on the nametables)
@@ -4120,7 +4133,7 @@ SetChestAddr:
       INC entering_shop  ;   and set the entering_shop flag
       JSR PlayDoorSFX
 
-:   CLC                  ; CLC to indicate the player can move here
+  : CLC                  ; CLC to indicate the player can move here
     RTS                  ; and exit!
 
 
@@ -7227,7 +7240,7 @@ PlaySFX_Error:
 ;;  $00 = null terminator (marks end of string)
 ;;  $01 = line break (only seems to be used in the treasure chest "You Found..." dialogue)
 ;;  $02 = control code to draw an item name (item ID whose name to draw is in dlg_itemid)
-;;  $03 = draw the name of the lead character, then stop string drawing (I believe this is BUGGED)
+;;  $03 = draw the name of the lead character, then stop string drawing (JIGS: fixed!)
 ;;  $05 = line break
 ;;  $04,$06-19 = unused, but defaults to a line break
 ;;  $1A-79 = DTE codes
@@ -7248,7 +7261,7 @@ DrawDialogueString_Done:
 DrawDialogueString:
     TAX                   ; put string ID in X temporarily
 
-    LDA DialogueTable_1or2 ; this is set by NPC's lut_MapObjTalkData stuff ; $10 if using first table, $11 if second
+    LDA DialogueBank ; this is set by NPC's lut_MapObjTalkData stuff ; $10 if using first table, $11 if second
     STA cur_bank          ; set cur_bank to bank containing dialogue text (for Music_Play)
     JSR SwapPRG_L         ; and swap to that bank
 
@@ -7401,7 +7414,7 @@ DrawDialogueString:
       STA text_ptr
       
       ;; JIGS - swap back to dialogue bank
-      LDA DialogueTable_1or2
+      LDA DialogueBank
       JSR SwapPRG_L         
       ;;
 
@@ -7702,7 +7715,7 @@ OpenTreasureChest:
     
    @Magic:
     SEC
-    SBC #ITEM_MAGICSTART     ; subtract magic offset to conver to spell ID
+    SBC #ITEM_MAGICSTART     ; subtract magic offset to convert to spell ID
     TAX
     ;LDA inv_magic, X         ; check how many of that spell is stored
     ;CMP #4                   ; no reason to have more than 4
@@ -7711,10 +7724,13 @@ OpenTreasureChest:
        BNE @OpenChest
     
    @KeyItem:
-    TAX
-    INC items, X
+    PHA
+    LDA #BANK_KEYITEMS
+    JSR SwapPRG_L
+    PLA
+    JSR KeyItem_Add
     INC dlgsfx               ; turn on key-item jingle 
-      
+
    @OpenChest:
     LDA tileprop
     LSR A 
@@ -7790,6 +7806,7 @@ IsThisAChest:
     LDA tsa_ul, Y             ; use it to index the upper left chest tile
     CMP #$2A                  ; if its not $2A, its not using the chest graphic
     RTS
+
 
 
 
@@ -11630,21 +11647,50 @@ lut_EquipStringPositions:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-FillItemBox:
-;    LDA #BANK_MENUS
-;    STA cur_bank
-    
-    LDX #0           ; X is our dest index -- start it at zero
-    STX tmp+2        ; loop counter
-    
-    LDA item_pageswap
-    BNE :+
-    
-    LDY #1           ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
-    BNE @ItemFillLoop
-    
-  : LDY #16          ; if item_pageswap is 1, set Y to look at key items  
 
+DecompressKeyItems:
+    LDA #keyitems - items - 1      ; set tmp to start of key items, -1
+    STA tmp
+
+    LDA keyitems_1                 ; load up the compressed key item byte
+    JSR Do_DecompressKeyItems      ; do the compression on it
+    LDA keyitems_2
+    JSR Do_DecompressKeyItems
+    LDA keyitems_3
+    JSR Do_DecompressKeyItems
+    LDA keyitems_4
+    
+   Do_DecompressKeyItems: 
+    LDY #9               ; start with 9, because the loop starts with decrementing Y
+  : INC tmp              ; increment tmp--the item ID--for each bit that is checked 
+    DEY                  ; Y is the loop counter, so now it starts at 8
+    BEQ @RTS             ; when it hits 0, the byte has been decompressed 
+    
+    ASL A                ; shift the high bit into carry
+    BCC :-               ; if its clear, do the loop again
+    PHA                  ; if its not, the item exists: push the compressed byte to the stack  
+    LDA tmp              ; load up the item ID
+    STA item_box, X      ; and save it in the item box
+    INX                  ; increment the item box destination index
+    PLA                  ; restore the compressed key items byte
+    JMP :-               ; and return to the loop
+    
+   @RTS:
+    DEC tmp              ; the loop incremented the item ID too far on the last one, so fix it
+    RTS
+
+
+FillItemBox:
+    LDX #0               ; X is our dest index -- start it at zero
+    STX tmp+2            ; loop counter
+    LDY #1               ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
+    
+    LDA item_pageswap    ; if item_pageswap is 1, do key items
+    BEQ @ItemFillLoop
+
+    JSR DecompressKeyItems
+    JMP ItemBoxFilled
+   
   @ItemFillLoop:
       LDA items, Y       ; check our item qty
       BEQ @IncSrc        ; if it's nonzero...
@@ -11656,9 +11702,10 @@ FillItemBox:
       INY                  ; inc our source index
       INC tmp+2            ; inc loop counter
       LDA tmp+2
-      CMP #KEYITEM_MAX     ; only display this many items at a time
+      CMP #item_qty_stop - items ; only display this many items at a time
       BCC @ItemFillLoop
 
+ItemBoxFilled:
     CPX #0                 ; if the dest index is still zero, the player has no items
     BNE @StartDrawingItems ;   otherwise (nonzero), start drawing the items they have
 
@@ -11671,27 +11718,11 @@ FillItemBox:
     STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
     STA tmp+3         ; also reset the cursor to 0 (which will be used as a loop counter below)
     STA tmp+2          ; now letter position counter
-    
-    LDA item_pageswap  ; if on page 1, item_pageswap is 0, and we need to remove key items from it
-    BNE :++
-    
-    LDX #15
-  @RemoveKeyItemsFromPage1:        ; 
-    LDA item_box, X                ; go backwards through the list
-    CMP #item_qty_stop - items     ; see if item ID is over $10
-    BCC :+                         ; if it is, set it to 0
-       LDA #0                      ; if it isn't, then don't need to check anymore, because all items before it will be under $10 
-       STA item_box, X
-  : DEX
-    CPX #0
-    BNE @RemoveKeyItemsFromPage1
  
-  : LDA #BANK_MENUS    ; set the return bank to BANK_MENUS.
-    STA ret_bank       ;   this is required for DrawComplexString (called below)
+  @DrawItemLoop:
     LDA #BANK_ITEMS    ; swap to BANK_ITEMS (bank containing item names)
     JSR SwapPRG_L
-    
-  @DrawItemLoop:
+
     LDX tmp+3          ; get current loop counter and put it in X
     LDA item_box, X    ; index the item box to see what item name we're to draw
     BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
@@ -11737,8 +11768,6 @@ FillItemBox:
     LDA #BANK_MENUS
     JSR SwapPRG_L           ; also swap to BANK_MENUS (for PrintNumber routines)
     JSR PrintNumber_2Digit  ; print the 2 digit number
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
 
     LDX tmp+2               ; restore letter position counter
     INX                     ; increase X to 10th slot
@@ -11749,7 +11778,7 @@ FillItemBox:
     LDA format_buf-1
     STA bigstr_buf, X       ; consumables will only appear on page 1
     INX
-      
+
   @SkipQty:
     INX        ; now make room for the cursor in the middle
     INX

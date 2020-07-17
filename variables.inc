@@ -48,63 +48,39 @@ playtimer        = unsram + $19 ; 1A ; 1B ; 1C - 4 bytes - game clock!
 ; assert AA      = unsram + $1F
 
 items           = unsram + $20
-item_pageswap   = items + $00
-item_heal       = items + $01
-item_x_heal     = items + $02
-item_ether      = items + $03
-item_elixir     = items + $04
-item_pure       = items + $05
-item_soft       = items + $06
-item_down       = items + $07
-item_tent       = items + $08
-item_cabin      = items + $09
-item_house      = items + $0A
-item_eyedrops   = items + $0B
-item_smokebomb  = items + $0C
-item_alarm      = items + $0D
-item_unknown1   = items + $0E
-item_unknown2   = items + $0F
-item_qty_stop   = items + $10
+item_pageswap   = items
+item_heal       = unsram + $01
+item_x_heal     = unsram + $02
+item_ether      = unsram + $03
+item_elixir     = unsram + $04
+item_pure       = unsram + $05
+item_soft       = unsram + $06
+item_down       = unsram + $07
+item_tent       = unsram + $08
+item_cabin      = unsram + $09
+item_house      = unsram + $0A
+item_eyedrops   = unsram + $0B
+item_smokebomb  = unsram + $0C
+item_alarm      = unsram + $0D
+item_unknown1   = unsram + $0E
+item_unknown2   = unsram + $0F
+item_qty_stop   = keyitems
 
-keyitems        = items + $10
-item_lute       = keyitems + $00
-item_crown      = keyitems + $01
-item_crystal    = keyitems + $02
-item_herb       = keyitems + $03
-item_mystickey  = keyitems + $04
-item_tnt        = keyitems + $05
-item_adamant    = keyitems + $06
-item_slab       = keyitems + $07
-
-item_ruby       = keyitems + $08
-item_rod        = keyitems + $09
-item_floater    = keyitems + $0A
-item_chime      = keyitems + $0B
-item_tail       = keyitems + $0C
-item_cube       = keyitems + $0D
-item_bottle     = keyitems + $0E
-item_oxyale     = keyitems + $0F
-
-item_canoe      = keyitems + $10
-item_lewds      = keyitems + $11
-item_nothing2   = keyitems + $12
-item_nothing3   = keyitems + $13
-item_nothing4   = keyitems + $14
-item_nothing5   = keyitems + $15
-item_nothing6   = keyitems + $16
-item_nothing7   = keyitems + $17
-
-item_nothing8   = keyitems + $18
-item_nothing9   = keyitems + $19
-item_bottle_alt = keyitems + $1A
-item_lewds_alt  = keyitems + $1B
-item_orb_start  = keyitems + $1C
-  orb_fire      = item_orb_start + 0 ; $1C
-  orb_water     = item_orb_start + 1 ; $1D
-  orb_air       = item_orb_start + 2 ; $1E
-  orb_earth     = item_orb_start + 3 ; $1F
-item_stop       = item_orb_start + 4 ; $20
-
+keyitems        = unsram + $30
+keyitems_1      = unsram + $31
+keyitems_2      = unsram + $32
+keyitems_3      = unsram + $33
+keyitems_4      = unsram + $34
+; unused        = unsram + $36
+; unused        = unsram + $37
+; unused        = unsram + $38
+; unused        = unsram + $39
+; unused        = unsram + $3A
+; unused        = unsram + $3B
+orb_fire        = unsram + $3C
+orb_water       = unsram + $3D
+orb_air         = unsram + $3E
+orb_earth       = unsram + $3F
 
 
 ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
@@ -285,7 +261,7 @@ submenu_targ            = $58 ; also used in battle for the ether menu
 ;; Dialogue Things - shared
 talkobj                 = $51 ; shared -- object you're talking to on SM
 dlg_itemid              = $52 ; shared
-DialogueTable_1or2      = $53 ; important for dialogue
+DialogueBank      = $53 ; important for dialogue
 treasure_offset         = $54 ; stores the chest's item name printing code (weapons and armor use a different code)
 
 ;; Menu Things - Shared 

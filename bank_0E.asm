@@ -73,6 +73,7 @@
 .import WeaponArmorSpecialDesc
 .import DrawMenuString_FixedBank
 .import DrawMenuString_CharCodes_FixedBank
+.import KeyItem_LongCall_Add
 
 .segment "BANK_0E"
 
@@ -1718,11 +1719,15 @@ ShopSelectAmount:
     
    @AddItem:    
     LDX shop_curitem
+    CPX #BOTTLE
+    BEQ BuyingBottle
+    CPX #LEWDS
+    BEQ BuyingBottle
     LDA items, X                ; load the current amount
     CLC
     ADC shop_amount_buy         ; add in the amount to buy
     STA items, X                ; and save
-    JMP FinishPurchase 
+    BNE FinishPurchase 
     
    @AddEquipment:
     LDA shop_amount_buy
@@ -1739,7 +1744,7 @@ ShopSelectAmount:
     CLC
     ADC shop_amount_buy
     STA inv_weapon, X
-    JMP FinishPurchase 
+    BNE FinishPurchase 
     
    @AddMagic: 
     LDA shop_curitem
@@ -1750,6 +1755,12 @@ ShopSelectAmount:
     CLC
     ADC shop_amount_buy
     STA inv_magic, X   
+    BNE FinishPurchase
+
+BuyingBottle:
+    JSR LongCall
+    .word KeyItem_LongCall_Add
+    .byte BANK_KEYITEMS    
     
 FinishPurchase: 
     JSR ShopPayPrice            ; subtract the price from your gold amount
@@ -1757,7 +1768,7 @@ FinishPurchase:
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
    ; JMP ShopBuy_Loop            ; and continue loop
     JMP MainShopLoop
-    
+
     
 ;;;;;;;;;;;;;;;;;;;;;
 
@@ -3223,8 +3234,10 @@ LoadShopInventory:
     STA item_box+5       ; put a null terminator at the end of the item_box
     STA item_box_offset  ; clear this so the list isn't scrolled
     
-    LDX #BOTTLE
-    LDA items, X         ; does player have the Bottle?
+    ;LDX #BOTTLE
+    ;LDA items, X         ; does player have the Bottle?
+    LDA keyitems_2
+    AND #$02
     BEQ @End             ; if not, exit
     
     LDX #4
@@ -3235,11 +3248,13 @@ LoadShopInventory:
     LDA #LEWDS           ; change the item the caravan is selling
     STA item_box, X
 
-    LDX #LEWDS           ; does the player have the new item?
-    LDA items, X          
+    ;LDX #LEWDS           ; does the player have the new item?
+    ;LDA items, X          
+    LDA keyitems_3
+    AND #$40
     BEQ @End             ; if not, exit
     
-    LDX #4               ; if yes, set the caravan's last item to nothing
+    ;LDX #4               ; if yes, set the caravan's last item to nothing
     LDA #0
     STA item_box, X
     
@@ -6329,12 +6344,17 @@ UseItem_Bottle:
 @OpenBottle:                        ; if the bottle hasn't been opened yet
     ;LDA #0
     ;STA item_bottle                 ; remove the bottle from inventory
-    DEC item_bottle
+    ;DEC item_bottle
+    
+    LDA keyitems_2
+    AND #~$02
+    STA keyitems_2
+    
     LDY #OBJID_FAIRY
     JSR LongCall
     .word ShowMapObject
     .byte BANK_DIALOGUE
-    ;JSR ShowMapObject               ; mark the fairy object as visible
+
     LDA #43                         ; Draw "Pop... a fiary pops out" etc description text
     JSR DrawItemDescBox_Fanfare     ;   with fanfare!
     JSR MenuWaitForBtn

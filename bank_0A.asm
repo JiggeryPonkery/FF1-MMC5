@@ -949,46 +949,49 @@ BLANK:
 
 
 ;; KEY ITEMS
+
+;; since these are NOT drawn by doing ComplexString stuff, they cannot use special control codes
+
 NAME_LUTE:
-.byte $95,$B8,$B7,$A8,$09,$08,$00                         ; LUTE
+.byte $95,$B8,$B7,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF     ; LUTE
 NAME_CROWN:
-.byte $8C,$B5,$B2,$BA,$B1,$09,$07,$00                     ; CROWN
+.byte $8C,$B5,$B2,$BA,$B1,$FF,$FF,$FF,$FF,$FF,$FF,$FF     ; CROWN
 NAME_CRYSTAL:
-.byte $8C,$B5,$BC,$B6,$B7,$A4,$AF,$FF,$8E,$BC,$A8,$FF,$00 ; CRYSTAL
+.byte $8C,$B5,$BC,$B6,$B7,$A4,$AF,$FF,$8E,$BC,$A8,$FF     ; CRYSTAL
 NAME_HERB:
-.byte $91,$A8,$B5,$A5,$09,$08,$00                         ; HERB
+.byte $91,$A8,$B5,$A5,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF     ; HERB
 NAME_KEY:
-.byte $96,$BC,$B6,$B7,$AC,$A6,$FF,$94,$A8,$BC,$FF,$FF,$00 ; KEY
+.byte $96,$BC,$B6,$B7,$AC,$A6,$FF,$94,$A8,$BC,$FF,$FF     ; KEY
 NAME_TNT:
-.byte $9D,$97,$9D,$09,$09,$00                             ; TNT
+.byte $9D,$97,$9D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF     ; TNT
 NAME_ADAMANT:
-.byte $8A,$A7,$A4,$B0,$A4,$B1,$B7,$AC,$B1,$A8,$FF,$FF,$00 ; ADAMANT
-NAME_SLAB:
-.byte $9B,$B2,$B6,$A8,$B7,$B7,$A4,$FF,$9C,$AF,$A4,$A5,$00 ; SLAB
-NAME_RUBY:
-.byte $9C,$B7,$A4,$B5,$FF,$9B,$B8,$A5,$BC,$FF,$FF,$FF,$00 ; RUBY
-NAME_ROD:
-.byte $8E,$A4,$B5,$B7,$AB,$FF,$9B,$B2,$A7,$FF,$FF,$FF,$00 ; ROD
-NAME_FLOATER:
-.byte $95,$A8,$B9,$AC,$B6,$B7,$B2,$B1,$A8,$FF,$FF,$FF,$00 ; FLOATER
-NAME_CHIME:
-.byte $8C,$AB,$AC,$B0,$A8,$09,$07,$00                     ; CHIME
-NAME_TAIL:
-.byte $9B,$A4,$B7,$BE,$B6,$FF,$9D,$A4,$AC,$AF,$FF,$FF,$00 ; TAIL
-NAME_CUBE:
-.byte $A0,$A4,$B5,$B3,$FF,$8C,$B8,$A5,$A8,$FF,$FF,$FF,$00 ; CUBE
-NAME_BOTTLE:
-.byte $8B,$B2,$B7,$B7,$AF,$A8,$09,$06,$00                 ; BOTTLE
-NAME_BOTTLE_ALT:
-.byte $8B,$B2,$B7,$B7,$AF,$A8,$00                         ; BOTTLE
-NAME_OXYALE:
-.byte $98,$BB,$BC,$A4,$AF,$A8,$09,$06,$00                 ; OXYALE
-NAME_CANOE:
-.byte $8C,$A4,$B1,$B2,$A8,$09,$07,$00                     ; CANOE
-NAME_LEWDS:
-.byte $95,$A8,$BA,$A7,$FF,$9D,$A8,$BB,$B7,$B6,$FF,$FF,$00 ; Lewd Texts
+.byte $8A,$A7,$A4,$B0,$A4,$B1,$B7,$AC,$B1,$A8,$FF,$FF     ; ADAMANT
+NAME_SLAB:                                                
+.byte $9B,$B2,$B6,$A8,$B7,$B7,$A4,$FF,$9C,$AF,$A4,$A5     ; SLAB
+NAME_RUBY:                                                
+.byte $9C,$B7,$A4,$B5,$FF,$9B,$B8,$A5,$BC,$FF,$FF,$FF     ; RUBY
+NAME_ROD:                                                 
+.byte $8E,$A4,$B5,$B7,$AB,$FF,$9B,$B2,$A7,$FF,$FF,$FF     ; ROD
+NAME_FLOATER:                                             
+.byte $95,$A8,$B9,$AC,$B6,$B7,$B2,$B1,$A8,$FF,$FF,$FF     ; FLOATER
+NAME_CHIME:                                               
+.byte $8C,$AB,$AC,$B0,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF     ; CHIME
+NAME_TAIL:                                                
+.byte $9B,$A4,$B7,$BE,$B6,$FF,$9D,$A4,$AC,$AF,$FF,$FF     ; TAIL
+NAME_CUBE:                                                
+.byte $A0,$A4,$B5,$B3,$FF,$8C,$B8,$A5,$A8,$FF,$FF,$FF     ; CUBE
+NAME_BOTTLE:                                              
+.byte $8B,$B2,$B7,$B7,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF     ; BOTTLE
+NAME_BOTTLE_ALT:                                          
+.byte $8B,$B2,$B7,$B7,$AF,$A8,$00                         ; BOTTLE      ; drawn in shops, so does use control codes
+NAME_OXYALE:                                              
+.byte $98,$BB,$BC,$A4,$AF,$A8,$FF,$FF,$FF,$FF,$FF,$FF     ; OXYALE
+NAME_CANOE:                                               
+.byte $8C,$A4,$B1,$B2,$A8,$FF,$FF,$FF,$FF,$FF,$FF,$FF     ; CANOE
+NAME_LEWDS:                                               
+.byte $95,$A8,$BA,$A7,$FF,$9D,$A8,$BB,$B7,$B6,$FF,$FF     ; Lewd Texts
 NAME_LEWDS_ALT:
-.byte $C5,$C5,$C5,$FF,$8B,$B2,$B2,$AE,$00                 ; ??? Book
+.byte $C5,$C5,$C5,$FF,$8B,$B2,$B2,$AE,$00                 ; ??? Book    ; drawn in shops, so does use control codes
 
 
 

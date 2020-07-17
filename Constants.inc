@@ -235,6 +235,7 @@ BANK_EQUIPSTATS   = $0F
 
 BANK_DIALOGUE     = $10 
 BANK_TALKTOOBJ    = $10
+BANK_KEYITEMS     = $10
 
 BANK_DIALOGUE_2   = $11 
 
@@ -892,15 +893,17 @@ BOTTLE         = $1E ; vanishes on use
 OXYALE         = $1F
 CANOE          = $20
 LEWDS          = $21
-BOTTLE_ALT     = $2A ; for inventory description
-LEWDS_ALT      = $2B ; for inventory description
 
-KEYITEM_MAX    = $12 ; 18 key items
+BOTTLE_ALT     = $2E ; for inventory description
+LEWDS_ALT      = $2F ; for inventory description
 
-FIREORB        = $2C
-WATERORB       = $2D
-AIRORB         = $2E
-EARTHORB       = $2F
+
+;; for TalkToObject logic
+
+FIREORB        = $0C
+WATERORB       = $0D
+AIRORB         = $0E
+EARTHORB       = $0F
 
 ;;;;;;;;;;;;;;;;;;
 ;;  magic spells
