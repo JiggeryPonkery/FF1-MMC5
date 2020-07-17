@@ -269,6 +269,13 @@ lut_ScoreData:
 .word RUINEDCASTLE_SQ3
 .word RUINEDCASTLE_SQ2
 
+;; $5A
+.word MAGICSTORM_SQ1
+.word MAGICSTORM_SQ2
+.word MAGICSTORM_TRI
+.word MAGICSTORM_SQ3
+.word MAGICSTORM_SQ4
+
 ;; With thanks to Gil Galad for their music driver disassembly for this sequence data!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -928,7 +935,7 @@ RUINEDCASTLE_SQ2:
     .byte VOLUME_MINUS,$00 ; Custom silencer off
     .byte SCORE_RETURN
 
-     RC_SQ2_BFLATBEEP:
+    RC_SQ2_BFLATBEEP:
     .byte INSTRUMENT_0 ; decay from F
     .byte $A6
     .byte VOLUME_QRTR,$A6,VOLUME_QRTR
@@ -2673,6 +2680,537 @@ BOSS_TRI:
     .byte LOOP_FOREVER
     .word BOSS_TRISTART
 
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;; "MAGIC STORM" ((C) Jiggers)                      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+MAGICSTORM_SQ1:
+    .byte TEMPO_6        
+    .byte DUTY_50
+    .byte SPEED_SET,$0D
+    .byte INSTRUMENT_F
+    .byte OCTAVE_3
+    .byte $60
+    .byte INSTRUMENT_1
+    .byte SPEED_SET,$0C
+    .byte VOLUME_MINUS, $04 ; volume = 8
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ1_ORGAN
+    .byte VOLUME_MINUS, $02 ; volume = A 
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ1_ORGAN
+    .byte VOLUME_MINUS, $00 ; volume = C 
+    
+MAGICSTORM_SQ1_ORGAN_SOLO:    
+    .byte $60,$70,$92,$72,$92,$73,$7A,$CE,$9A,$CE,$7A,$CB
+    .byte $60,$70,$81,SPEED_SET,$05,$86,$88,$88,SPEED_SET,$0C,$90
+    .byte $B1,$64,OCTAVE_4,$21,OCTAVE_3,$74,OCTAVE_4,$11,$44
+    .byte OCTAVE_3,$92,OCTAVE_4,$12,OCTAVE_3,$B1,$64
+    .byte $73,OCTAVE_4,$23,OCTAVE_3,$76,$B6,OCTAVE_4,$24,OCTAVE_3,$B4,OCTAVE_4,$44,$84,$91
+
+    
+MAGICSTORM_SQ1_ORGAN_MELODY:
+    .byte INSTRUMENT_D
+    .byte SPEED_SET,$0D
+    .byte $CB
+    .byte OCTAVE_2,$BD,OCTAVE_3,$4D,$6D,$BD,OCTAVE_4,$2D,$4D ; swoop up
+    .byte $6F,$C4,$76,$66
+    .byte $7F,$C4,$76,$96
+    .byte $6F,$C4,$76,$66
+    .byte $40,$44,$44,$44,$24
+    .byte $6F,$C4,$76,$66
+    .byte $7F,$C4,$76,$96
+    .byte $92,$40,$C4,$76,$66
+    .byte $62,OCTAVE_3,$B0,$C4,LOOP_1
+    .word MAGICSTORM_SQ1_ORGAN_MELODY
+    .byte INSTRUMENT_2, SPEED_SET, $0C
+    .byte $C4,$B0,$C0
+    .byte LOOP_FOREVER
+    .word MAGICSTORM_SQ1
+    
+MAGICSTORM_SQ1_ORGAN:
+    .byte $60,$70,$92,$72,$92,$73,$7A,$CE,$9A,$CE,$7A,$CB
+    .byte $60,$70,$80,$90,SCORE_RETURN
+
+
+
+MAGICSTORM_SQ2:
+    .byte TEMPO_6        
+    .byte DUTY_25
+    .byte SPEED_SET,$05
+    .byte INSTRUMENT_0
+    .byte VOLUME_MINUS, $02 ; volume = $0D 
+
+MAGICSTORM_SQ2_WAIT:
+    .byte $CF,$CF,$CF,$CF,$CF,$CF
+    
+MAGICSTORM_INTRO:    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR4
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR4
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ2_BAR4
+    
+    ;; second part:
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD5
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ_2_CHORD5    
+
+    ;;fade out
+    .byte OCTAVE_1
+    .byte $B6    
+    .byte VOLUME_MINUS,$03
+    .byte $B6
+    .byte VOLUME_MINUS,$04
+    .byte $B6
+    .byte VOLUME_MINUS,$05
+    .byte $B6
+    .byte VOLUME_MINUS,$06
+    .byte $B6
+    .byte VOLUME_MINUS,$07
+    .byte $B6
+    .byte VOLUME_MINUS,$08
+    .byte $B6
+    .byte VOLUME_MINUS,$09
+    .byte $B6
+    .byte VOLUME_MINUS,$0A
+    .byte $B6
+    .byte VOLUME_MINUS,$0B
+    .byte $B6
+    .byte VOLUME_MINUS,$0C
+    .byte $B6
+    .byte VOLUME_MINUS,$0D
+    .byte $B6
+    .byte VOLUME_MINUS,$0E
+    .byte $B2
+    .byte LOOP_FOREVER
+    .word MAGICSTORM_SQ2
+
+
+MAGICSTORM_SQ_2_CHORD1:
+    .byte OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$68,$B8,$98,LOOP_1
+    .word MAGICSTORM_SQ_2_CHORD1
+
+MAGICSTORM_SQ_2_CHORD2:
+    .byte OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$B8,OCTAVE_2,$28,OCTAVE_1
+    .byte $B8,$78,$B8,$98,LOOP_1
+    .word MAGICSTORM_SQ_2_CHORD2
+    .byte SCORE_RETURN
+    
+MAGICSTORM_SQ_2_CHORD3:
+    .byte OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$28,OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$28,OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$28,OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$28,OCTAVE_1
+    .byte $98,$68,$98,$78,LOOP_1
+    .word MAGICSTORM_SQ_2_CHORD3
+    
+MAGICSTORM_SQ_2_CHORD4:
+    .byte OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$18,OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$18,OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$18,OCTAVE_1
+    .byte $98,$98,OCTAVE_2,$18,OCTAVE_1
+    .byte $98,$48,$98,$78,LOOP_1
+    .word MAGICSTORM_SQ_2_CHORD4    
+    .byte SCORE_RETURN
+   
+MAGICSTORM_SQ_2_CHORD5:
+    .byte OCTAVE_2
+    .byte $18,$18,$48
+    .byte $18,$18,$48
+    .byte $18,$18,$48
+    .byte $18,$18,$48
+    .byte $18,OCTAVE_1,$98,OCTAVE_2,$18,OCTAVE_1,$B8,LOOP_1
+    .word MAGICSTORM_SQ_2_CHORD5
+
+MAGICSTORM_SQ_2_CHORD6:
+    .byte OCTAVE_2
+    .byte $48,OCTAVE_1,$B8,OCTAVE_2,$28
+    .byte $48,OCTAVE_1,$B8,OCTAVE_2,$28
+    .byte $48,OCTAVE_1,$B8,OCTAVE_2,$28
+    .byte $48,OCTAVE_1,$B8,OCTAVE_2,$28
+    .byte OCTAVE_1,$B8,$68,$B8,$98,LOOP_1
+    .word MAGICSTORM_SQ_2_CHORD6
+    .byte SCORE_RETURN
+
+
+    
+
+MAGICSTORM_SQ2_BAR1:
+    .byte OCTAVE_1,$68,$B8,OCTAVE_2,$28,OCTAVE_1,$B8,LOOP_3
+    .word MAGICSTORM_SQ2_BAR1
+MAGICSTORM_SQ2_BAR2:
+    .byte OCTAVE_1,$78,$B8,OCTAVE_2,$28,OCTAVE_1,$B8,LOOP_3
+    .word MAGICSTORM_SQ2_BAR2  
+    .byte SCORE_RETURN
+    
+MAGICSTORM_SQ2_BAR3:    
+    .byte OCTAVE_1,$98,$B8,OCTAVE_2,$18,$48
+    .byte OCTAVE_1,$98,$B8,OCTAVE_2,$18,$48
+    .byte OCTAVE_1,$78,OCTAVE_2,$18,$48,$18
+    .byte OCTAVE_1,$78,OCTAVE_2,$18,$48,$18,LOOP_1
+    .word MAGICSTORM_SQ2_BAR3    
+    .byte SCORE_RETURN
+    
+MAGICSTORM_SQ2_BAR4:
+    .byte OCTAVE_1,$88,$B8,OCTAVE_2,$28,OCTAVE_1,$B8,LOOP_1
+    .word MAGICSTORM_SQ2_BAR4
+MAGICSTORM_SQ2_BAR4_1:    
+    .byte OCTAVE_1,$88,OCTAVE_2,$28,$48,$28,LOOP_1
+    .word MAGICSTORM_SQ2_BAR4_1
+MAGICSTORM_SQ2_BAR4_2:
+    .byte OCTAVE_1,$98,OCTAVE_2,$18,$48,$18,LOOP_1
+    .word MAGICSTORM_SQ2_BAR4_2
+MAGICSTORM_SQ2_BAR4_3:
+    .byte OCTAVE_1,$98,OCTAVE_2,$18,$78,$28,LOOP_1
+    .word MAGICSTORM_SQ2_BAR4_3
+    .byte SCORE_RETURN
+
+
+MAGICSTORM_TRI:
+    .byte TEMPO_6        
+    .byte VOLUME_HALF
+    .byte OCTAVE_UP
+    .byte $C0
+    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte VOLUME_HALF
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR5
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR5
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR5    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_BAR5      
+
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD5
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD3
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD1
+    .byte SCORE_GOTO
+    .word MAGICSTORM_TRI_CHORD5
+    
+    .byte VOLUME_HALF
+    .byte $28,OCTAVE_4
+    .byte $B8,$68,$28,$B8,$68,$28
+    .byte OCTAVE_3
+    .byte $B8,$68,$28,$B8,$68,$28
+    .byte OCTAVE_2
+    .byte $B8,$68,OCTAVE_1,$B4,$C1
+    .byte VOLUME_HALF
+    
+    .byte LOOP_FOREVER
+    .word MAGICSTORM_TRI
+
+    
+    
+    ;; subtract $11 from note values still!
+MAGICSTORM_TRI_BAR1:    
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$28,$68,$B8,$28,$68,$B8
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$68,$B8,OCTAVE_5,$28,OCTAVE_4,$68,$B8,OCTAVE_5,$28
+
+MAGICSTORM_TRI_BAR2:    
+    .byte OCTAVE_2,$B8,OCTAVE_3,$78,OCTAVE_4,$28,$78,$B8,$28,$78,$B8
+    .byte OCTAVE_2,$B8,OCTAVE_3,$78,OCTAVE_4,$78,$B8,OCTAVE_5,$28,OCTAVE_4,$78,$B8,OCTAVE_5,$28
+    .byte SCORE_RETURN
+    
+MAGICSTORM_TRI_BAR3:    
+    .byte OCTAVE_3,$18,$78,OCTAVE_4,$18,$98,$B8,$18,$98,$B8
+    .byte OCTAVE_3,$18,$78,OCTAVE_4,$18,$78,OCTAVE_5,$18,OCTAVE_4,$18,$78,OCTAVE_5,$18
+    
+MAGICSTORM_TRI_BAR4:    
+    .byte OCTAVE_3,$18,$78,OCTAVE_4,$18,$98,$B8,$18,$98,$B8
+    .byte OCTAVE_3,$18,$78,OCTAVE_4,$78,OCTAVE_5,$18,$28,OCTAVE_4,$78,OCTAVE_5,$18,$28  
+    .byte SCORE_RETURN
+    
+MAGICSTORM_TRI_BAR5:    
+    .byte OCTAVE_3,$28,$88,OCTAVE_4,$28,$88,OCTAVE_5,$28,OCTAVE_4,$28,$88,OCTAVE_5,$28
+    .byte OCTAVE_3,$28,$88,OCTAVE_4,$88,OCTAVE_5,$18,$28,OCTAVE_4,$88,OCTAVE_5,$18,$28 
+
+MAGICSTORM_TRI_BAR6:    
+    .byte OCTAVE_3,$18,$98,OCTAVE_4,$48,$98,OCTAVE_5,$18,OCTAVE_4,$98,OCTAVE_5,$18,$48
+    .byte OCTAVE_3,$18,$98,OCTAVE_4,$78,$98,OCTAVE_5,$28,OCTAVE_4,$98,OCTAVE_5,$28,$78 
+    .byte SCORE_RETURN
+
+MAGICSTORM_TRI_CHORD1:
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$28,$68,$B8,$28,$68,$B8
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$68,$B8,OCTAVE_5,$28,OCTAVE_4,$68,$B8,OCTAVE_5,$28
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$B8,OCTAVE_5,$28,$68,OCTAVE_4,$B8,OCTAVE_5,$28,$68
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_5,$28,$68,$B8,$28,$68,$B8
+
+MAGICSTORM_TRI_CHORD2:
+    .byte OCTAVE_2,$B8,OCTAVE_3,$78,OCTAVE_4,$28,$78,$B8,$28,$78,$B8
+    .byte OCTAVE_2,$B8,OCTAVE_3,$78,OCTAVE_4,$78,$B8,OCTAVE_5,$28,OCTAVE_4,$78,$B8,OCTAVE_5,$28
+    .byte OCTAVE_2,$B8,OCTAVE_3,$78,OCTAVE_4,$B8,OCTAVE_5,$28,$78,OCTAVE_4,$B8,OCTAVE_5,$28,$78
+    .byte OCTAVE_2,$B8,OCTAVE_3,$78,OCTAVE_5,$28,$78,$B8,$28,$78,$B8
+    .byte SCORE_RETURN
+
+MAGICSTORM_TRI_CHORD3:
+    .byte OCTAVE_2,$98,OCTAVE_3,$68,OCTAVE_4,$28,$68,$98,$28,$68,$98
+    .byte OCTAVE_2,$98,OCTAVE_3,$68,OCTAVE_4,$78,$98,OCTAVE_5,$28,OCTAVE_4,$78,$98,OCTAVE_5,$28
+    .byte OCTAVE_2,$98,OCTAVE_3,$68,OCTAVE_4,$98,OCTAVE_5,$28,$68,OCTAVE_4,$98,OCTAVE_5,$28,$68
+    .byte OCTAVE_2,$98,OCTAVE_3,$68,OCTAVE_5,$28,$68,$98,$28,$68,$98
+
+MAGICSTORM_TRI_CHORD4:
+    .byte OCTAVE_2,$98,OCTAVE_3,$48,OCTAVE_4,$18,$48,$98,$18,$48,$98
+    .byte OCTAVE_2,$98,OCTAVE_3,$48,OCTAVE_4,$48,$98,OCTAVE_5,$18,OCTAVE_4,$48,$98,OCTAVE_5,$18
+    .byte OCTAVE_2,$98,OCTAVE_3,$48,OCTAVE_4,$98,OCTAVE_5,$18,$48,OCTAVE_4,$98,OCTAVE_5,$18,$48
+    .byte OCTAVE_2,$98,OCTAVE_3,$48,OCTAVE_5,$18,$48,$98,$18,$48,$98
+    .byte SCORE_RETURN
+
+MAGICSTORM_TRI_CHORD5:
+    .byte OCTAVE_3,$18,$98,OCTAVE_4,$48,$98,OCTAVE_5,$18,OCTAVE_4,$48,$A8,OCTAVE_5,$18
+    .byte OCTAVE_3,$18,$98,OCTAVE_4,$98,OCTAVE_5,$18,$48,OCTAVE_4,$98,OCTAVE_5,$18,$48
+    .byte OCTAVE_3,$18,$98,OCTAVE_5,$18,$48,$98,$18,$48,$98
+    .byte OCTAVE_3,$18,$98,OCTAVE_5,$48,$68,$18,$48,$98,$18
+
+MAGICSTORM_TRI_CHORD6:
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$28,$68,$B8,$28,$68,$B8
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$68,$B8,OCTAVE_5,$28,OCTAVE_4,$68,$B8,OCTAVE_5,$28
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_4,$B8,OCTAVE_5,$68,$48,OCTAVE_4,$B8,OCTAVE_5,$68,$48
+    .byte OCTAVE_2,$B8,OCTAVE_3,$68,OCTAVE_5,$28,$B8,$68,$28,$B8,$68
+    .byte SCORE_RETURN
+
+
+MAGICSTORM_SQ3:
+    .byte TEMPO_6        
+    .byte DUTY_50
+    .byte SPEED_SET,$0D
+    .byte INSTRUMENT_F
+    .byte OCTAVE_2
+    .byte $B0
+    .byte INSTRUMENT_1
+    .byte SPEED_SET,$0D
+    .byte VOLUME_MINUS, $04 ; volume = 8
+
+MAGICSTORM_SQ3_ORGAN:
+    .byte $B0,$B0,$B4,OCTAVE_3,$14,$12,OCTAVE_2,$B4,OCTAVE_3,$14,$12,OCTAVE_2
+    .byte $B0,$B0,$B2,OCTAVE_3,$22,$12,$24,$14,OCTAVE_2
+    .byte VOLUME_MINUS, $02 ; volume = A 
+    .byte LOOP_2
+    .word MAGICSTORM_SQ3_ORGAN
+    .byte $B0,$B0,$B4,OCTAVE_3,$14,$12,OCTAVE_2,$B4,OCTAVE_3,$14,$12,OCTAVE_2
+    .byte $B0,$B0,$B2,OCTAVE_3,$22,$12,$24,$16    
+   
+    .byte SPEED_SET,$0A
+    .byte INSTRUMENT_8
+    .byte VOLUME_MINUS, $00
+    .byte $0B,OCTAVE_2,$BB,$9B,$7B,$5B,$4B,$2B,$0B
+
+MAGICSTORM_SQ_3_CHORDLOOP:
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_BCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_BCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_ACHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_ACHORD    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_BCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_BCHORD    
+    .byte SCORE_GOTO    
+    .word MAGICSTORM_SQ3_CSCHORD    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ3_BCHORD    
+    .byte LOOP_1
+    .word MAGICSTORM_SQ_3_CHORDLOOP
+
+    .byte INSTRUMENT_2, OCTAVE_1, SPEED_SET, $0C
+    .byte $B0,$C0
+    .byte LOOP_FOREVER
+    .word MAGICSTORM_SQ3
+
+
+MAGICSTORM_SQ3_BCHORD:
+    .byte OCTAVE_1
+    .byte $B3,$C8,INSTRUMENT_9,$B8,INSTRUMENT_8,$B6,INSTRUMENT_9,$B4,INSTRUMENT_8,$B8,INSTRUMENT_9,$B8
+    .byte INSTRUMENT_8,$B2,OCTAVE_2,$B3
+    .byte $BB,$9B,$7B,$5B,$4B,$2B,$1B,$0B
+    .byte SCORE_RETURN
+
+MAGICSTORM_SQ3_ACHORD:
+    .byte OCTAVE_1
+    .byte $93,$C8,INSTRUMENT_9,$98,INSTRUMENT_8,$96,INSTRUMENT_9,$94,INSTRUMENT_8,$98,INSTRUMENT_9,$98
+    .byte INSTRUMENT_8,$92,OCTAVE_2,$93
+    .byte $9B,$7B,$5B,$4B,$2B,$0B,OCTAVE_1,$BB,$AB
+    .byte SCORE_RETURN
+
+MAGICSTORM_SQ3_CSCHORD:
+    .byte OCTAVE_2
+    .byte $13,$C8,INSTRUMENT_9,$18,INSTRUMENT_8,$16,INSTRUMENT_9,$14,INSTRUMENT_8,$18,INSTRUMENT_9,$18
+    .byte INSTRUMENT_8,$12,OCTAVE_2,$13
+    .byte OCTAVE_3,$1B,OCTAVE_2,$BB,$9B,$7B,$5B,$4B,$3B,$2B
+    .byte SCORE_RETURN    
+
+
+MAGICSTORM_SQ4:
+    .byte TEMPO_6        
+    .byte DUTY_50
+    .byte SPEED_SET,$0D
+    .byte INSTRUMENT_F
+    .byte OCTAVE_3
+    .byte $20
+    .byte INSTRUMENT_1
+    .byte SPEED_SET,$0D
+    .byte VOLUME_MINUS, $04 ; volume = 8
+
+MAGICSTORM_SQ4_ORGAN:
+    .byte OCTAVE_3
+    .byte $20,$20,$40,$40
+    .byte $20,$20,$22,$42,$42,$72
+    .byte VOLUME_MINUS, $02 ; volume = A 
+    .byte LOOP_2
+    .word MAGICSTORM_SQ4_ORGAN
+    .byte $20,$20,$40,$40
+    .byte $20,$20,$22,$42,$42,$73
+    
+    .byte SPEED_SET,$0A
+    .byte INSTRUMENT_8
+    .byte VOLUME_MINUS, $00
+    .byte $7B,$5B,$4B,$2B,$0B,OCTAVE_2,$BB,$9B,$7B
+
+MAGICSTORM_SQ_4_CHORDLOOP:
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_FSCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_GCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_FSCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_ECHORD    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_FSCHORD
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_GCHORD    
+    .byte SCORE_GOTO    
+    .word MAGICSTORM_SQ4_ACHORD    
+    .byte SCORE_GOTO
+    .word MAGICSTORM_SQ4_DOODLE
+    .byte LOOP_1
+    .word MAGICSTORM_SQ_4_CHORDLOOP
+
+    .byte INSTRUMENT_2, OCTAVE_3, SPEED_SET, $0C
+    .byte $60,$C0
+    .byte LOOP_FOREVER
+    .word MAGICSTORM_SQ4
+
+
+MAGICSTORM_SQ4_FSCHORD:
+    .byte $63,$C8,INSTRUMENT_9,$68,INSTRUMENT_8,$66,INSTRUMENT_9,$64,INSTRUMENT_8,$68,INSTRUMENT_9,$68
+    .byte INSTRUMENT_8,$62,OCTAVE_3,$63
+    .byte $6B,$4B,$3B,$1B,OCTAVE_2,$BB,$9B,$8B,$7B
+    .byte SCORE_RETURN
+
+MAGICSTORM_SQ4_GCHORD:
+    .byte $73,$C8,INSTRUMENT_9,$78,INSTRUMENT_8,$76,INSTRUMENT_9,$74,INSTRUMENT_8,$78,INSTRUMENT_9,$78
+    .byte INSTRUMENT_8,$72,OCTAVE_3,$73
+    .byte $7B,$5B,$4B,$2B,$0B,OCTAVE_2,$BB,$AB,$9B
+    .byte SCORE_RETURN
+
+MAGICSTORM_SQ4_ECHORD:
+    .byte $43,$C8,INSTRUMENT_9,$48,INSTRUMENT_8,$46,INSTRUMENT_9,$44,INSTRUMENT_8,$48,INSTRUMENT_9,$48
+    .byte INSTRUMENT_8,$42,OCTAVE_3,$43
+    .byte $4B,$2B,$0B,OCTAVE_2,$BB,$9B,$7B,$6B,$5B
+    .byte SCORE_RETURN    
+
+MAGICSTORM_SQ4_ACHORD:
+    .byte $93,$C8,INSTRUMENT_9,$98,INSTRUMENT_8,$96,INSTRUMENT_9,$94,INSTRUMENT_8,$98,INSTRUMENT_9,$98
+    .byte INSTRUMENT_8,$92,OCTAVE_3,$93
+    .byte $9B,$7B,$5B,$4B,$2B,$0B,OCTAVE_2,$BB,$AB
+    .byte SCORE_RETURN    
+
+MAGICSTORM_SQ4_DOODLE:
+    .byte OCTAVE_3,$66,$46,$28,$1A,$2A,OCTAVE_2,$B6
+    .byte OCTAVE_3,$66,$46,$28,$1A,$2A,OCTAVE_2,$B6
+    .byte OCTAVE_3,$66,$46,$28,$1A,$2A,OCTAVE_2,$B6
+    .byte OCTAVE_3,$66,$46,$28,$1A,$2A,OCTAVE_2,$B6
+    .byte SCORE_RETURN
+
+
 ;;
 ;;        0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
 ;; .byte $90,$60,$48,$30,$24,$18,$12,$0C,$09,$06,$03,$03,$04,$10,$08,$08 ; FB (75 bpm)
@@ -2732,26 +3270,12 @@ Music_NewSong:
       AND #$3F             ; here if bit 6 was set.  Isolate the low bits (track number)
       STA music_track      ; and write back to the music track
 
-      LDA #0
-      STA mu_chanprimer   ; zero the channel primer
+      JSR ClearChannels   ; A = 0 when exiting
 
-      ;LDA #0
-      ;; JIGS - already 0!
+      STA mu_chanprimer   ; zero the channel primer
       STA sq2_sfx         ; zero sq2_sfx (seems strange to do here)
 
-      STA $4002           ; then zero each of the channels output freq (including noise)
-      STA $4003           ; This in effect silences the squares
-      STA $4006           ;  and SLOPPILY silences the tri (tri will pop)
-      STA $4007           ;  but does not silence noise -- instead it just makes it crazy high pitched
-      STA $400A
-      STA $400B
-      STA $400E
-
-      STA $5002           ; MMC5 Square 1 (Square 3) - JIGS
-      STA $5003           ; MMC5 Square 1 (Square 3) - JIGS
-      STA $5006           ; MMC5 Square 2 (Square 4) - JIGS
-      STA $5007           ; MMC5 Square 2 (Square 4) - JIGS
-      
+     
       LDX #$50  
      @ClearChannels:
       STA CHAN_START-1, X
@@ -2764,14 +3288,8 @@ Music_NewSong:
       STA TriangleHush
       ;; JIGS - and turn off the force-hush bit
 
-      LDA #$30            ; *then* set channel volumes to zero -- this will properly
-      STA $4000           ;  silence the squares and noise... and will eventually silence
-      STA $4004           ;  triangle (next linear counter clock).
-      STA $4008
-      STA $400C
-      STA $5000           ; MMC5 Square 1 (Square 3) - JIGS
-      STA $5004           ; MMC5 Square 2 (Square 4) - JIGS
-
+      JSR SilenceAPU
+      
   @PrimeChannel:
     LDA music_track       ; get the music track to play
     SEC                   ; subtract 1 to make it zero based.  Had to be 1-based before
@@ -4075,7 +4593,7 @@ lut_EnvPatterns:
   .BYTE  $04,$05,$06,$07,$08,$07,$06,$05,$04,$05,$06,$07,$08,$09,$0A,$0B ;  fade C->4->B with tremolo
 
   .BYTE  $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EF ; JIGS - only used in my prelude melody
-  .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$09,$08,$07,$06,$05,$04,$03,$01 ;  fade in then out with tremolo
+  .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$09,$08,$07,$06,$05,$04,$03,$01 ;  fade from 1->C->4->9->1
 
  ;; JIGS - some alternate patterns:
 ;   .BYTE  $0C,$0B,$0A,$0B,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$05,$06,$07
@@ -4087,6 +4605,32 @@ lut_EnvPatterns:
 ;  Note that with the half-volume control, you don't need pattern E2 or E3;
 ;  You can use pattern E0 or E1 and just put the hush on it to have it almost the same! Almost.
 ;  Many other patterns can be taken out and replaced with this.
+
+ClearChannels:
+    LDA #0
+    STA $4002           ; then zero each of the channels output freq (including noise)
+    STA $4003           ; This in effect silences the squares
+    STA $4006           ;  and SLOPPILY silences the tri (tri will pop)
+    STA $4007           ;  but does not silence noise -- instead it just makes it crazy high pitched
+    STA $400A
+    STA $400B
+    STA $400E
+   
+    STA $5002           ; MMC5 Square 1 (Square 3) - JIGS
+    STA $5003           ; MMC5 Square 1 (Square 3) - JIGS
+    STA $5006           ; MMC5 Square 2 (Square 4) - JIGS
+    STA $5007           ; MMC5 Square 2 (Square 4) - JIGS
+    RTS
+
+SilenceAPU:
+    LDA #$30            ; *then* set channel volumes to zero -- this will properly
+    STA $4000           ;  silence the squares and noise... and will eventually silence
+    STA $4004           ;  triangle (next linear counter clock).
+    STA $4008
+    STA $400C
+    STA $5000           ; MMC5 Square 1 (Square 3) - JIGS
+    STA $5004           ; MMC5 Square 2 (Square 4) - JIGS
+    RTS
 
 BackupMapMusic:
     LDA #1
@@ -4106,13 +4650,8 @@ BackupMapMusic:
 
 
 RestoreMapMusic:
-    LDA #$30
-    STA $4000   ; set Squares and Noise volume to 0
-    STA $4004   ;  clear triangle's linear counter (silencing it next clock)
-    STA $4008
-    STA $400C
-    STA $5000   ; set MMC5 Squares volume to 0
-    STA $5004   ;
+    JSR ClearChannels
+    JSR SilenceAPU
 
     LDA #1
     STA $5113         ; swap RAM
@@ -4124,6 +4663,26 @@ RestoreMapMusic:
     INX
     CPX #80
     BNE @MainLoop
+    
+    LDA CHAN_SQ1 + ch_freq+1  
+    AND #~$80
+    STA CHAN_SQ1 + ch_freq+1  ; turn off high bit to indicate freq should update
+    
+    LDA CHAN_SQ2 + ch_freq+1  
+    AND #~$80
+    STA CHAN_SQ2 + ch_freq+1  ; turn off high bit to indicate freq should update
+    
+    LDA CHAN_SQ3 + ch_freq+1  
+    AND #~$80
+    STA CHAN_SQ3 + ch_freq+1  ; turn off high bit to indicate freq should update
+    
+    LDA CHAN_SQ4 + ch_freq+1  
+    AND #~$80
+    STA CHAN_SQ4 + ch_freq+1  ; turn off high bit to indicate freq should update
+    
+    LDA CHAN_TRI + ch_freq+1  
+    AND #~$80
+    STA CHAN_TRI + ch_freq+1  ; turn off high bit to indicate freq should update
 
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ; Get SM flag, and shift it into C
@@ -4133,7 +4692,7 @@ RestoreMapMusic:
     ;LDA lut_TilesetMusicTrack, X  ; use it to get the music track tied to this tileset
     LDX cur_map
     LDA lut_MapMusicTrack, X
-    JMP @End
+    BNE @End
   
   : LDX vehicle
     LDA lut_VehicleMusic, X

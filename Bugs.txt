@@ -1,10 +1,12 @@
 Map:
-* Music does not come back after using minimap.
 * Castle Coneria coordinates wrong.
 * Minimap sprites don't load correctly in some maps.
 
 
 Battle:
+* Imps regen HP
+* BlackBelt not using fists
+
 * SelectPlayerTarget has some obfuscating code that I will need to hijack for Multi-targeting.
 
 * Regen/Poison - make sure its loading the right division bytes and ORA-ing the other right one.

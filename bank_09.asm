@@ -3232,8 +3232,8 @@ EnterMinimap:
     STA $2005
     STA $2005
     STA $2001
-    STA $4015                ; turn off PPU and APU
-    STA $5015                ; and silence the MMC5 APU. (JIGS)    
+   ; STA $4015                ; turn off PPU and APU
+   ; STA $5015                ; and silence the MMC5 APU. (JIGS)    
     STA joy_b                
     STA joy_select
     LDA soft2000             ; clear the sprites-as-background-tiles flag
