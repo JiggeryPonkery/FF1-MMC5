@@ -84,8 +84,12 @@ orb_water       = unsram + $3D
 orb_air         = unsram + $3E
 orb_earth       = unsram + $3F
 
+inv_equip       = unsram + $40
+inv_weapon      = inv_equip        ; 64 bytes
+inv_armor       = inv_weapon + $40 ; 64 bytes
+inv_magic       = inv_armor + $80  ; 64 bytes, 1 per spell
 
-ch_stats          = unsram + $0100  ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
+ch_stats          = unsram + $0100 ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00 ; high bits = sprite, low bits = class
 ch_ailments       = ch_stats + $01
 ch_name           = ch_stats + $02 ; 03, 04, 05, 06, 07, 08 - 7 bytes 
@@ -106,8 +110,6 @@ ch_evasion        = ch_stats + $19
 ch_magicdefense   = ch_stats + $1A
 ch_critrate       = ch_stats + $1B ; effected by equipment, needs to refresh after battle
 ch_morale         = ch_stats + $1C
-ch_damagebackup   = ch_stats + $1D ; effected by equipment
-ch_basehp         = ch_stats + $1E ; 1F
 
 ch_righthand      = ch_stats + $20
 ch_lefthand       = ch_stats + $21
@@ -127,12 +129,13 @@ ch_elementresist  = ch_stats + $2E ; effected by equipment, needs to refresh aft
 ch_elementweak    = ch_stats + $2F ; effected by equipment, needs to refresh after battle
 
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
-ch_spells         = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 
-inv_equip         = unsram + $200
-inv_weapon        = inv_equip ; 64 bytes
-inv_armor         = inv_equip + $40 ; 64 bytes
-inv_magic         = unsram + $280 ; 64 bytes, 1 per spell
+ch_spells         = ch_stats + $100 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
+ch_classlevels    = ch_spells + $18
+ch_damagebackup   = ch_classlevels + $1E
+ch_defensebackup  = ch_classlevels + $1F
+ch_basehp         = ch_classlevels + $20 
+
 
 game_flags        = unsram + $0300  ; must be on page bound
 

@@ -14,6 +14,7 @@
 .import WaitForVBlank_L
 .import LongCall
 .import CHRLoad
+.import CHRLoadToA
 .import CallMusicPlay_L
 .import WaitForVBlank_L
 
@@ -368,10 +369,34 @@ LoadStoneSprites:
     ADC #$40
     STA char_index
     BNE @CharLoop                  ; when char_index loops back to $00, all 4 are done 
-    RTS
+    JMP LoadBattleSpritePalettes
     
+
 LoadAllBattleSprites_Menu:
-    JSR LoadAllBattleSprites
+    JSR LoadCursor
+    LDA #3
+    STA char_index
+  : LDA char_index
+    TAY
+    CLC
+    ROR A
+    ROR A
+    ROR A
+    TAX
+    LDA ch_class, X 
+    AND #$F0                        ; get sprite from class
+    LSR A 
+    LSR A                           ; shift down twice -- since what we want is the low bits shifted up twice!
+    TAX                             ; so $F0 = $0F, then * 4   
+    LDA LoadBattleSpritesLUT_1+3,X  ; only bother with the high byte, the low byte is always $0
+    STA tmp+1                       
+    LDA #0
+    STA tmp
+    LDA MenuCharPositions_LUT, Y
+    LDX #2
+    JSR CHRLoadToA
+    DEC char_index
+    BPL :-
     
 LoadBattleSpritePalettes:
     LDX #$0F  ; start at $0F
@@ -395,7 +420,7 @@ LoadAllBattleSprites:
   : JSR LoadBattleSprite
     DEC char_index
     BPL :-
-    RTS    
+    RTS
 
 LoadBattleSprite:   
     LDA char_index
@@ -489,6 +514,12 @@ BattleCharStonePositions_LUT:
    .byte $0D,$70    ; character 1 
    .byte $0E,$00    ; character 2 
    .byte $0E,$70    ; character 3 
+   
+MenuCharPositions_LUT:
+   .byte $10        ; character 0 
+   .byte $12        ; character 1 
+   .byte $14        ; character 2 
+   .byte $16        ; character 3    
    
 BattleCharPositions_LUT:
    .byte $11,$00    ; character 0 
