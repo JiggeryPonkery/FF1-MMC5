@@ -92,28 +92,34 @@ inv_magic       = inv_armor + $80  ; 64 bytes, 1 per spell
 ch_stats          = unsram + $0100 ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00 
 ch_sprite         = ch_stats + $01
-ch_level          = ch_stats + $02 ; OB this is 0 based, IB this is 1 based
-ch_ailments       = ch_stats + $03
+;                 = ch_stats + $02
+;                 = ch_stats + $03
 ;                 = ch_stats + $04
 ;                 = ch_stats + $05
-ch_exp            = ch_stats + $06 ; 07, 08 - 3 bytes
-ch_name           = ch_stats + $09 ; 0A, 0B, 0C, 0D, 0E, 0F - 7 bytes 
+;                 = ch_stats + $06
+;                 = ch_stats + $07
+;                 = ch_stats + $08
+;                 = ch_stats + $09
+;                 = ch_stats + $0A
+;                 = ch_stats + $0B
+ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
+ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
 
-ch_strength       = ch_stats + $10
-ch_agility        = ch_stats + $11
-ch_intelligence   = ch_stats + $12 
-ch_vitality       = ch_stats + $13
-ch_speed          = ch_stats + $14
- ch_substats      = ch_stats + $15
-ch_damage         = ch_stats + $15
-ch_hitrate        = ch_stats + $16
-ch_defense        = ch_stats + $17
-ch_evasion        = ch_stats + $18
-ch_magicdefense   = ch_stats + $19
-ch_critrate       = ch_stats + $1A ; effected by equipment, needs to refresh after battle
-ch_morale         = ch_stats + $1B
-ch_curhp          = ch_stats + $1C ; 0D - 2 bytes
-ch_maxhp          = ch_stats + $1E ; 0F - 2 bytes
+ch_level          = ch_stats + $10 ; OB this is 0 based, IB this is 1 based
+ch_strength       = ch_stats + $11
+ch_agility        = ch_stats + $12
+ch_intelligence   = ch_stats + $13 
+ch_vitality       = ch_stats + $14
+ch_speed          = ch_stats + $15
+ ch_substats      = ch_stats + $16
+ch_damage         = ch_stats + $16
+ch_hitrate        = ch_stats + $17
+ch_defense        = ch_stats + $18
+ch_evasion        = ch_stats + $19
+ch_magicdefense   = ch_stats + $1A
+ch_critrate       = ch_stats + $1B ; effected by equipment, needs to refresh after battle
+ch_morale         = ch_stats + $1C
+ch_exp            = ch_stats + $1D ; 1E, 1F - 3 bytes
 
 ch_righthand      = ch_stats + $20
 ch_lefthand       = ch_stats + $21
@@ -133,6 +139,8 @@ ch_elementresist  = ch_stats + $2E ; effected by equipment, needs to refresh aft
 ch_elementweak    = ch_stats + $2F ; effected by equipment, needs to refresh after battle
 
 ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
+ch_name           = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E - 7 bytes 
+ch_ailments       = ch_stats + $3F
 
 ch_spells         = ch_stats + $100 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
 ch_classlevels    = ch_spells + $18
@@ -384,26 +392,25 @@ btldraw_blockptrstart   = $8C
 btldraw_blockptrend     = $8E
 
 ;;General NES things    
-;; for randomization, framecounter has been replaced with playtimer
-;; leaving framecounter 1 and 2 for actual frame counting for effects
 
-framecounter            = $90 ; 2 bytes! Used for frame effects (palettes, flashing, ship noise)
-ppu_dest                = $92 ; 2 bytes
-cur_bank                = $94
-ret_bank                = $95
-actual_bank             = $96
-sprindex                = $97
-spr_x                   = $98
-spr_y                   = $99
-NTsoft2000              = $9A ; same as soft2000, but used to track coarse NT scroll
-soft2000                = $9B
-menustall               = $9C ; see MenuCondStall in bank $1F for explanation
-ScreenShakeCounter      = $9D ; used in battle and silent errors
-dlgbox_row              = $9D ; counts down from 7 when drawing dialogue box; nothing else 
-npcdir_seed             = $9E ; RNG seed for determining direction for NPCs to walk
+ppu_dest                = $90 ; 2 bytes
+cur_bank                = $92
+ret_bank                = $93
+actual_bank             = $94
+sprindex                = $95
+spr_x                   = $96
+spr_y                   = $97
+NTsoft2000              = $98 ; same as soft2000, but used to track coarse NT scroll
+soft2000                = $9A
+menustall               = $9B ; see MenuCondStall in bank $1F for explanation
+ScreenShakeCounter      = $9B ; used in battle and silent errors
+dlgbox_row              = $9C ; counts down from 7 when drawing dialogue box; nothing else 
+npcdir_seed             = $9D ; RNG seed for determining direction for NPCs to walk
+framecounter            = $9E ; Used for frame effects (palettes, flashing, ship noise)
 InBattle                = $9F
 RAMSwap                 = $A0 ; 0 for normal RAM, 1 for extra
-PaletteFade             = $A1 ; for fading palettes during screen transitions
+PaletteFade             = $A0 ; for fading palettes during screen transitions ; ends up 0
+PaletteCounter          = $A1 
 
 ;; Music stuff          
 SaveGameMusic           = $A3 

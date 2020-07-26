@@ -560,7 +560,6 @@ PrintCharStat:
     ; Carry is clear from the branch
     ADC char_index
     TAX
-    DEX
     LDA ch_stats, X
   : STA tmp
     JMP PrintNumber_2Digit
@@ -570,10 +569,6 @@ PrintCharStat:
     ; Carry is clear from the branch
     ADC char_index      ; add character index
     TAX
-    DEX 
-    ;; JIGS - main stats were shifted 1 backward... ch_strength should be ch_Stats + $11 but it is +$10 now
-    ;; ideally, the control codes and all strings should be changed to reflect this...
-    
     LDA ch_stats, X     ; get the substat
     STA tmp             ; write it as low byte
     LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
@@ -2518,7 +2513,7 @@ EnterInn:
     JSR ShopFrameNoCursor 
     JSR BackUpPalettes
     LDA #8
-    STA framecounter            ; vanilla FF1 value more or less - 8 frames per palette change
+    STA PaletteCounter          ; vanilla FF1 value more or less - 8 frames per palette change
     JSR FadeOutSprites          ; and fade the party out
     JSR MenuWaitForBtn_SFX  
     

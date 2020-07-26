@@ -1516,7 +1516,7 @@ GetBattleFormation:
     JSR SwapPRG_L        ; swap to bank containing domain information
 
     ;INC battlecounter    ; increment the battle counter
-    LDX playtimer        ;battlecounter    ; and put it in X
+    LDX framecounter     ; battlecounter    ; and put it in X
     LDA lut_RNG, X       ; use it as seed to get a random number
 
     AND #$3F                    ; drop the 2 high bits of the random number
@@ -13925,12 +13925,12 @@ PaletteFrame:
     JMP CallMusicPlay_L      ; update music engine, then exit
 
 PaletteFrame_Loop:
-   LDA framecounter            ; amount of frames to wait
-   STA framecounter+1
- : JSR PaletteFrame            ; do a frame (updating palettes)
-   DEC framecounter+1
-   BNE :-
-   RTS   
+    LDA PaletteCounter          ; amount of frames to wait
+    STA tmp+3
+  : JSR PaletteFrame            ; do a frame (updating palettes)
+    DEC tmp+3
+    BNE :-
+    RTS   
 
 
 ;    INC framecounter            ; increment the frame counter

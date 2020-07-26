@@ -88,7 +88,7 @@ ExitBattle:
     
   : ;JSR BattleFadeOut               ; else, just fade out
     LDA #8
-    STA framecounter
+    STA PaletteCounter
     JSR FadeOutAllPalettes
     
   : JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
@@ -158,7 +158,7 @@ FinishBattlePrepAndFadeIn:
     JSR ClearPalette    
     JSR DoFrame_UpdatePalette    
     LDA #5
-    STA framecounter        ; 5 frames per palette fade amount
+    STA PaletteCounter        ; 5 frames per palette fade amount
     JSR FadeInBG
     JSR FadeInSprites
     JMP Battle_AfterFadeIn
@@ -236,7 +236,7 @@ CheckForEndOfBattle:
 BattleFadeOutAndRestartGame:
 	DEC InBattle
     LDA #10
-    STA framecounter
+    STA PaletteCounter
     JSR FadeOutAllPalettes
     JMP GameStart_L     ; then jump to GameStart, which returns the user to the title screen.
     
