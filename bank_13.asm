@@ -1011,7 +1011,7 @@ DoMiniMapDrawVBlank:
     BPL @WaitForScanline199
     
    @Scanline199:   
-    LDX #$10   
+    LDX #$0E  
   : DEX        
     BNE :-    
     LDA soft2000         ; still has bit $10 set, so will set sprite CHR as background tiles again
