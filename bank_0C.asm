@@ -38,12 +38,10 @@
 .import DrawManaString_ForBattle
 .import ShiftLeft6
 .import StealFromEnemyZ
-.import SkillText_BBelt
 .import RestoreMapMusic
 .import JIGS_RefreshAttributes
 .import ScanEnemyString
 .import LoadPlayerDefenderStats_ForEnemyAttack
-.import SkillText_RMage
 .import ShiftLeft4
 .import LoadSprite_Bank03
 .import LoadBattleSprite
@@ -89,6 +87,8 @@ ExitBattle:
     JMP :++                         ; does its own fadeout, so skip this one
     
   : ;JSR BattleFadeOut               ; else, just fade out
+    LDA #8
+    STA framecounter
     JSR FadeOutAllPalettes
     
   : JSR ReSortPartyByAilment        ; rearrange party to put sick/dead members in the back
@@ -157,6 +157,8 @@ FinishBattlePrepAndFadeIn:
     JSR BackUpPalettes   
     JSR ClearPalette    
     JSR DoFrame_UpdatePalette    
+    LDA #5
+    STA framecounter        ; 5 frames per palette fade amount
     JSR FadeInBG
     JSR FadeInSprites
     JMP Battle_AfterFadeIn
@@ -233,7 +235,8 @@ CheckForEndOfBattle:
 
 BattleFadeOutAndRestartGame:
 	DEC InBattle
-    ;JSR BattleFadeOut
+    LDA #10
+    STA framecounter
     JSR FadeOutAllPalettes
     JMP GameStart_L     ; then jump to GameStart, which returns the user to the title screen.
     
@@ -500,8 +503,7 @@ GetCharacterBattleCommand:
     STA CharacterIndexBackup        ; convert current command character 
     TAX
     LDA ch_class, X                 
-    AND #$0F                        ; get class, throw away sprite bits
-    
+   
     ;; JIGS - to use all 16 clases, just "STA battle_class" here
     CMP #CLASS_PROMOTION            ; if its higher than the starting classes, subtract
     BCC :+                          
@@ -4166,7 +4168,7 @@ DrawAttackBox:
     
   @Skill:
     LDY battle_class
-    LDX @skillname_lut, Y
+    LDX BoxSkillname_lut, Y
     LDA #$0F
 
   @Print:
@@ -4182,7 +4184,7 @@ DrawAttackBox:
   : LDA #BOX_ATTACK
   : JMP DrawCombatBox
     
-   @skillname_lut:
+BoxSkillname_lut:
    .byte BTLMSG_NOTHING
    .byte BTLMSG_STEALING
    .byte BTLMSG_NOTHING
@@ -7823,10 +7825,8 @@ BackupOneCharacterBattleStats:
     STA btl_tmpindex                ; store char index (temporarily)
     JSR PrepCharStatPointers        ; prep stat pointers
     
-    LDY #ch_class - ch_stats
+    LDY #ch_sprite - ch_stats
     LDA (CharStatsPointer), Y       ; get char class
-    AND #$F0                        ;; JIGS - cut off low bits to get sprite
-    JSR ShiftSpriteHightoLow    
     TAY                             ;  use as index to get assigned palette
     LDA lut_InBattleCharPaletteAssign, Y
     LDY btl_tmpindex
@@ -8853,8 +8853,8 @@ DoRunic_OK:
     
     JSR DrawDefenderBox         ; draw Runic user's name 
 
-    LDX #<SkillText_RMage
-    LDY #>SkillText_RMage
+    LDX #<RunicMessage
+    LDY #>RunicMessage
     LDA #BOX_DAMAGE
     JSR DrawCombatBox           ; draws "Runic" in the damage/hits box
     
@@ -8955,6 +8955,9 @@ DoRunic_OK:
   ; STA btl_animatingchar
    SEC
    RTS
+
+RunicMessage:
+   .byte BTLMSG_RUNIC, $00
 
 Runic_MP_LUT: ; 0-based level for MP to be given to, so  7 = level 8
    .byte $00,$01,$02,$03,$04,$05,$06,$07 ; normal spells ; spell ID is divided by 8 
@@ -9864,7 +9867,8 @@ Battle_CastMagicOnAllPlayers:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-PlayerMagDefenderStats_LUT: ; 42 bytes!
+PlayerMagDefenderStats_LUT: ; 44 bytes!
+.byte btlmag_defender_class - btlmag_defender,           ch_class - ch_stats           ; * 
 .byte btlmag_defender_ailments - btlmag_defender,        ch_ailments - ch_stats        ; *
 .byte btlmag_defender_hp - btlmag_defender,              ch_curhp - ch_stats           ; *
 .byte btlmag_defender_hp+1 - btlmag_defender,            ch_curhp+1 - ch_stats         ; *
@@ -9928,13 +9932,7 @@ BtlMag_LoadPlayerDefenderStats:
     LDA #$0
     STA btlmag_defender_category    ; This only matters for HARM spells, which check the Undead bit. 
     
-    LDY #ch_class - ch_stats        ;
-    LDA (CharStatsPointer), Y    
-    AND #$F0
-    JSR ShiftSpriteHightoLow
-    STA btlmag_defender_class
-    
-    LDX #42
+    LDX #44
    @Loop: 
     LDY PlayerMagDefenderStats_LUT-1, X
     LDA (CharStatsPointer), Y

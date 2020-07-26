@@ -90,26 +90,30 @@ inv_armor       = inv_weapon + $40 ; 64 bytes
 inv_magic       = inv_armor + $80  ; 64 bytes, 1 per spell
 
 ch_stats          = unsram + $0100 ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
-ch_class          = ch_stats + $00 ; high bits = sprite, low bits = class
-ch_ailments       = ch_stats + $01
-ch_name           = ch_stats + $02 ; 03, 04, 05, 06, 07, 08 - 7 bytes 
-ch_exp            = ch_stats + $09 ; 0A, 0B - 3 bytes
-ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
-ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
-ch_level          = ch_stats + $10 ; OB this is 0 based, IB this is 1 based
-ch_strength       = ch_stats + $11
-ch_agility        = ch_stats + $12
-ch_intelligence   = ch_stats + $13 
-ch_vitality       = ch_stats + $14
-ch_speed          = ch_stats + $15
-  ch_substats       = ch_stats + $16
-ch_damage         = ch_stats + $16
-ch_hitrate        = ch_stats + $17
-ch_defense        = ch_stats + $18
-ch_evasion        = ch_stats + $19
-ch_magicdefense   = ch_stats + $1A
-ch_critrate       = ch_stats + $1B ; effected by equipment, needs to refresh after battle
-ch_morale         = ch_stats + $1C
+ch_class          = ch_stats + $00 
+ch_sprite         = ch_stats + $01
+ch_level          = ch_stats + $02 ; OB this is 0 based, IB this is 1 based
+ch_ailments       = ch_stats + $03
+;                 = ch_stats + $04
+;                 = ch_stats + $05
+ch_exp            = ch_stats + $06 ; 07, 08 - 3 bytes
+ch_name           = ch_stats + $09 ; 0A, 0B, 0C, 0D, 0E, 0F - 7 bytes 
+
+ch_strength       = ch_stats + $10
+ch_agility        = ch_stats + $11
+ch_intelligence   = ch_stats + $12 
+ch_vitality       = ch_stats + $13
+ch_speed          = ch_stats + $14
+ ch_substats      = ch_stats + $15
+ch_damage         = ch_stats + $15
+ch_hitrate        = ch_stats + $16
+ch_defense        = ch_stats + $17
+ch_evasion        = ch_stats + $18
+ch_magicdefense   = ch_stats + $19
+ch_critrate       = ch_stats + $1A ; effected by equipment, needs to refresh after battle
+ch_morale         = ch_stats + $1B
+ch_curhp          = ch_stats + $1C ; 0D - 2 bytes
+ch_maxhp          = ch_stats + $1E ; 0F - 2 bytes
 
 ch_righthand      = ch_stats + $20
 ch_lefthand       = ch_stats + $21
@@ -380,7 +384,10 @@ btldraw_blockptrstart   = $8C
 btldraw_blockptrend     = $8E
 
 ;;General NES things    
-framecounter            = $90 ; 2 bytes!
+;; for randomization, framecounter has been replaced with playtimer
+;; leaving framecounter 1 and 2 for actual frame counting for effects
+
+framecounter            = $90 ; 2 bytes! Used for frame effects (palettes, flashing, ship noise)
 ppu_dest                = $92 ; 2 bytes
 cur_bank                = $94
 ret_bank                = $95

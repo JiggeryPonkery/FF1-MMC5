@@ -333,10 +333,9 @@ LoadStoneSprites:
     STA char_index
    @CharLoop:
     TAX
-    LDA ch_class, X
-    AND #$F0
-    LSR A
-    LSR A
+    LDA ch_sprite, X
+    ASL A
+    ASL A
     TAY
     LDA LoadBattleSpritesLUT_1+3,Y ; high byte only
     STA tmp+1
@@ -383,10 +382,9 @@ LoadAllBattleSprites_Menu:
     ROR A
     ROR A
     TAX
-    LDA ch_class, X 
-    AND #$F0                        ; get sprite from class
-    LSR A 
-    LSR A                           ; shift down twice -- since what we want is the low bits shifted up twice!
+    LDA ch_sprite, X 
+    ASL A
+    ASL A 
     TAX                             ; so $F0 = $0F, then * 4   
     LDA LoadBattleSpritesLUT_1+3,X  ; only bother with the high byte, the low byte is always $0
     STA tmp+1                       
@@ -429,11 +427,10 @@ LoadBattleSprite:
     ROR A    
     ROR A    
     TAX
-    LDA ch_class, X 
-    AND #$F0                        ; get sprite from class
-    LSR A 
-    LSR A                           ; shift down twice -- since what we want is the low bits shifted up twice!
-    TAY                             ; so $F0 = $0F, then * 4   
+    LDA ch_sprite, X 
+    ASL A
+    ASL A
+    TAY                             ; sprite * 4
     LDA LoadBattleSpritesLUT_1+3,Y  ; only bother with the high byte, the low byte is always $0
     STA tmp+1                       
     LDY char_index

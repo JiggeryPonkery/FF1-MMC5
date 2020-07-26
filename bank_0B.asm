@@ -1666,7 +1666,6 @@ data_ChaosTSA:
 LvlUp_AdjustBBSubStats:
     LDY #ch_class - ch_stats        ; check to make sure this is a BB/Master
     LDA (lvlup_chstats), Y
-    AND #$0F                        ;; JIGS - cut off high bits (sprite)
     CMP #CLASS_BB
     BEQ :+
     CMP #CLASS_MA
@@ -2286,7 +2285,6 @@ LvlUp_LevelUp:
     
     LDY #ch_class - ch_stats
     LDA (lvlup_chstats), Y
-    AND #$0F                        ;; JIGS - cut off high bits (sprite)
     ASL A
     TAY                             ; put 2* class ID in Y (to use as index)
     

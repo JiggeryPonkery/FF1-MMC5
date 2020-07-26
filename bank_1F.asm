@@ -70,8 +70,6 @@
 .export ShiftLeft4
 .export ShiftLeft6
 .export ShiftSpriteHightoLow
-.export SkillText_BBelt
-.export SkillText_RMage
 .export SwapBtlTmpBytes_L
 .export UndrawBattleBlock
 .export UndrawNBattleBlocks_L
@@ -112,7 +110,6 @@
 .import MapPoisonDamage_Z
 .import MinimapDecompress
 .import MusicPlay_L
-.import NewGamePartyGeneration
 .import PrepBattleVarsAndEnterBattle_L
 .import PrintBattleTurn
 .import PrintCharStat
@@ -141,7 +138,6 @@
 .import lut_BattlePalettes
 .import lut_BattleRates
 .import lut_BtlBackdrops
-.import lut_ClassStartingStats
 .import lut_CommonStringPtrTbl
 .import lut_DialoguePtrTbl
 .import lut_DialoguePtrTbl_2
@@ -192,6 +188,7 @@
 .import Bridge_LoadPalette
 .import Ending_LoadPalette
 .import LoadMenuOrbs
+.import lut_ClassSkills
 
 
 .segment "BANK_FIXED"
@@ -326,20 +323,18 @@ OverworldLoop_2:
     STA $4014
 
     INC framecounter
-    BNE :+
-        INC framecounter+1
-  :     
-   
     JSR OverworldMovement      ; do any pending movement animations and whatnot
                                ;   also does any required map drawing and updates
                                ;   the scroll appropriately
+        
+    
     LDA music_track        ; if no music track is playing...
     BPL :+
       LDA dlgmusic_backup  ; start the overworld music! 
       STA music_track
     
 :   JSR CallMusicPlay_NoSwap   ; Keep the music playing
-    
+
     LDA mapdraw_job            ; check to see if drawjob number 1 is pending
     CMP #1
     BNE :+
@@ -884,7 +879,7 @@ OverworldMovement:
     BEQ :+
     
     LDA framecounter      ; check framecounter
-    AND #$1               ; skip moving every other frame
+    AND #$01               ; skip moving every other frame
     BEQ @SlowMove
     
   : JSR SM_MovePlayer
@@ -1521,7 +1516,7 @@ GetBattleFormation:
     JSR SwapPRG_L        ; swap to bank containing domain information
 
     ;INC battlecounter    ; increment the battle counter
-    LDX framecounter ;battlecounter    ; and put it in X
+    LDX playtimer        ;battlecounter    ; and put it in X
     LDA lut_RNG, X       ; use it as seed to get a random number
 
     AND #$3F                    ; drop the 2 high bits of the random number
@@ -2342,19 +2337,9 @@ StandardMapLoop:
     STA $4014
     JSR StandardMapMovement    ; then do movement stuff (involves possible screen drawing)
                                ;   this also sets the scroll
-    ;LDA framecounter
-    ;CLC                        ; increment the two byte frame counter
-    ;ADC #1                     ;  seriously... what did Nasir have against INC?
-    ;STA framecounter           ;  this is criminally inefficient
-    ;LDA framecounter+1
-    ;ADC #0
-    ;STA framecounter+1
-    
+  
     INC framecounter
-      BNE :+
-      INC framecounter+1  ;   inc high byte if low byte wrapped
-    
-  : LDA music_track        ; if no music track is playing...
+    LDA music_track        ; if no music track is playing...
     BPL :+
       LDA dlgmusic_backup  ;; JIGS - start map music again!
       STA music_track
@@ -3159,11 +3144,8 @@ TalkToSMTile:
     
     JSR WaitForVBlank
     JSR CallMusicPlay_NoSwap
-      INC framecounter
-      BNE :+
-      INC framecounter+1  ;   inc high byte if low byte wrapped
-    
-  : DEC tmp+10
+    INC framecounter
+    DEC tmp+10
     BNE @FlashyLoop
     
     LDA #%00011110        ; turn off blue colour emphasis, keep PPU on, no greyscale
@@ -6626,8 +6608,7 @@ LoadMapPalettes:
     LDA #BANK_MAPMANPAL
     JSR SwapPRG_L           ; swap to bank containing mapman palettes
 
-    LDA ch_class            ; get lead party member's class
-    AND #$F0                ;; JIGS - cut off low bits to get sprite
+    LDA ch_sprite           ; get lead party member's sprite
     LSR A
     LSR A
     TAX
@@ -8134,7 +8115,6 @@ ComplexString_CharCode_MagicName:
 
 ComplexString_CharCode_Class:
     LDA ch_class, X      ; get character's class
-    AND #$0F             ;; JIGS - cut off high bits (sprite)
     CLC                  ; add #$F0 (start of class names)
     ADC #ITEM_CLASSSTART ; draw it (yes I know, class names are not items, but they're stored with items)
     JMP ComplexString_ItemName_FromCharCode
@@ -10381,9 +10361,7 @@ LoadPlayerMapmanCHR:
     JSR SwapPRG_L
     LDA #0          ; #0 -> tmp
     STA tmp
-    LDA ch_class    ; Get lead party member's class
-    AND #$F0        ;; JIGS - cut off low bits to get sprite
-    JSR ShiftSpriteHightoLow
+    LDA ch_sprite   ; Get lead party member's sprite
     
     ORA #>lut_MapObjCHR ; ORA with #$90, and put in tmp+1
     STA tmp+1       ; (tmp) is now $9x00 (where x=lead party member's class).
@@ -10836,10 +10814,8 @@ DrawOBSprite:
     LSR A                 ;  divide char index by 2
     STA tmp               ;  and put it in tmp  (tmp is now $00,$20,$40, or $60 -- 2 rows of tiles per character)
 
-    LDA ch_class, X               ; get the char's class
-    AND #$F0             ;; JIGS - cut off low bits to get sprite
-    JSR ShiftSpriteHightoLow
-    TAY                           ; use it as an index
+    LDY ch_sprite, X               ; get the char's class
+    ;TAY                           ; use it as an index
     LDA lutClassBatSprPalette, Y  ;  to find which palette that class's battle sprite uses
     STA tmp+1                     ;  put palette in tmp+1
 
@@ -11002,6 +10978,8 @@ DrawCursor:
 lutClassBatSprPalette:
   .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; unpromoted classes
   .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; promoted classes
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; extra classes
+  .BYTE $01,$02,$00,$01,$01,$00            ; 30 in total
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -12581,7 +12559,23 @@ SetCReturnBank:
     JMP SwapPRG_L
     
 
- 
+SkillText_LUT:
+.byte $00 ; Fighter
+.byte $01 ; Thief
+.byte $02 ; BBelt
+.byte $03 ; RedMage
+.byte $04 ; WMage
+.byte $05 ; BMage
+.byte $1E ; *
+.byte $1E ; *
+.byte $00 ; Knight
+.byte $01 ; Ninja
+.byte $02 ; Master
+.byte $03 ; RedWiz
+.byte $04 ; WWiz
+.byte $05 ; BWiz
+.byte $1E ; *
+.byte $1E ; *
 
 CommandString:
 .BYTE $FF,$FF,$8F,$AC,$AA,$AB,$B7,$FF,$FF,$90,$B8,$A4,$B5,$A7,$01   ; "Fight__Guard"
@@ -12590,16 +12584,6 @@ CommandString:
 .BYTE $FF,$FF,$90,$A8,$A4,$B5,$D4,$FF,$FF,$8F,$AF,$A8,$A8,$00       ; "Gear(sword)__Flee"
 
 ;; $9C, $AE, $AC, $AF, $AF ; "Skill" - for reference
-
-SkillText_LUT:
-SkillText_Fighter:   .BYTE $8C,$B2,$B9,$A8,$B5,$00    ; Cover
-SkillText_Thief:     .BYTE $9C,$B7,$A8,$A4,$AF,$00    ; Steal
-SkillText_BBelt:     .BYTE $99,$A4,$B5,$B5,$BC,$00    ; Parry
-SkillText_RMage:     .BYTE $9B,$B8,$B1,$AC,$A6,$00    ; Runic
-SkillText_WMage:     .BYTE $99,$B5,$A4,$BC,$FF,$00    ; Pray
-SkillText_BMage:     .BYTE $8F,$B2,$A6,$B8,$B6,$00    ; Focus
-SkillText_Blank:     .BYTE $FF,$FF,$FF,$FF,$FF,$00    ; _____  
-SkillText_Blank2:    .BYTE $FF,$FF,$FF,$FF,$FF,$00    ; _____  
   
 PlayerBoxString:
 .BYTE $04,$FF,$13,$00,$05,$7A,$13,$00,$06,$01 ; Name_CurrentHP/MaxHP
@@ -13052,21 +13036,19 @@ DrawBattleString_ControlCode:
     
    @PrintClassSkill:
     LDA #5
-    STA btldraw_subsrc           ; use the subsource pointer as a counter this time
-    LDA battle_class             ; get class ID
+    STA tmp+5                    ; use the subsource pointer as a counter this time
+    LDA #BANK_ITEMS
+    JSR SwapPRG_L
+    LDX battle_class             ; get class ID
+    LDA SkillText_LUT, X
     ASL A
-    ASL A
-    ASL A                        ; multiply by 8
-    ;LDX #6
-    ;JSR MultiplyXA               ; multiply by 6
     TAX
-  : LDA SkillText_LUT, X         ; use as index for the text string to print
-    JSR DrawBattleString_DrawChar
-    INX
-    DEC btldraw_subsrc           ; when 5 characters are copied over, exit
-    BNE :-
-    RTS
-    
+    LDA lut_ClassSkills, X
+    STA btldraw_subsrc
+    LDA lut_ClassSkills+1, X
+    STA btldraw_subsrc+1
+    JMP DrawBattleSubString
+
    @DrawPlayerHP:
     JMP DrawPlayerHP
 
@@ -13686,8 +13668,7 @@ WaitForVBlank:
         LDA #159
         STA $5203
         LDX BattleBGColor
-        LDA BattleBackgroundColor_LUT, X
-        TAY
+        LDY BattleBackgroundColor_LUT, X
 
 OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moot    
 @LoopForever:
@@ -13707,8 +13688,8 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     STY $2007  ; write Y to palette $3F0E
 
     ;; scroll setting?
-    LDY #%00000010 
-    LDA #%10000000 
+    LDY #$02
+    LDA #$80
     STY $2006
     STA $2006  
     LDA btl_soft2001 ;#$1E
@@ -13722,7 +13703,7 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     STA $5203      ; Clear trigger 
 
    @ContinueLooping: 
-    JMP @LoopForever     ; then loop forever! (or really until the NMI is triggered)
+    BEQ @LoopForever     ; then loop forever! (or really until the NMI is triggered)
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13944,12 +13925,19 @@ PaletteFrame:
     JMP CallMusicPlay_L      ; update music engine, then exit
 
 PaletteFrame_Loop:
-    JSR PaletteFrame            ; do a frame (updating palettes)
-    INC framecounter            ; increment the frame counter
-    LDA framecounter
-    AND #$07                    ; check low 3 bits of frame counter
-    BNE PaletteFrame_Loop       ; and loop until they're all clear (effectively waits 8 frames)
-    RTS
+   LDA framecounter            ; amount of frames to wait
+   STA framecounter+1
+ : JSR PaletteFrame            ; do a frame (updating palettes)
+   DEC framecounter+1
+   BNE :-
+   RTS   
+
+
+;    INC framecounter            ; increment the frame counter
+;    LDA framecounter
+;    AND #$07                    ; check low 3 bits of frame counter
+;    BNE PaletteFrame_Loop       ; and loop until they're all clear (effectively waits 8 frames)
+;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -14442,9 +14430,8 @@ JigsBoxDrawToBuffer:
     LDX #1
     STX $5113                 ; X = 1 : swap to backup RAM
     STA (tmp), Y              ; save the screen buffer tile to backup RAM box buffer
-    LDX #0
-    STX $5113
-    ;STY $5113                 ; Y = 0 : swap to normal RAM
+    DEX
+    STX $5113                 ; X = 0 : swap to normal RAM
     
    @HPUpdate:                 ; (for HP updating, only copy new text over)
     LDA (tmp), Y              ; then copy box to draw it to the screen buffer
@@ -14455,33 +14442,21 @@ JigsBoxDrawToBuffer:
     LDX #1
     STX $5113               ; X = 1 : swap to backup RAM
     LDA (tmp), Y            ; Get the tile from the backup RAM
-    LDX #0
-    STX $5113
-    ;STY $5113               ; Y = 0 : swap to normal RAM
+    DEX
+    STX $5113               ; swap to normal RAM
     STA (tmp+2), Y
 
   @INC_pointer:
-    INY
-    BNE :+
-        INC tmp+1
+    INY 
+    BNE :+                  ; if Y wraps, 
+        INC tmp+1           ; inc the high bytes of the pointers
         INC tmp+3
-  : DEC tmp+10
+  : DEC tmp+10              ; decrement tiles left in row counter
     BNE @TransferBoxTile
-
-;   @INC_pointer:
-;    INC tmp
-;    BNE :+
-;        INC tmp+1
-;  : INC tmp+2
-;    BNE :+
-;        INC tmp+3
-;
-;  : DEC tmp+10
-;    BNE @TransferBoxTile
    
    @NextRow:   
-    LDA #32                 ; screen width
-    SEC
+    LDA #32+1                 ; screen width +1 to set fake-carry
+    ;SEC
     SBC tmp+6               ; minus width of box
     CLC
     ADC tmp+2               ; add it to save address low

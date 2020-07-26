@@ -1,3 +1,6 @@
+New game:
+* Tried to start a new game and couldn't? Kept getting kicked back to title screen. Couldn't replicate the bug again.
+
 Map:
 * Castle Coneria coordinates wrong.
 * Minimap sprites don't load correctly in some maps.
@@ -41,6 +44,8 @@ Menu:
 * Shop: Characters pose when able to learn a spell.
 
 * Fade in and out palette when switching screens.
+
+* Enemy battle dialogue.
 
 
 

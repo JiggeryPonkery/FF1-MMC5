@@ -9,15 +9,12 @@
 .export CritCheck
 .export SoundTestZ
 .export OptionsMenu
-.export DrawSaveScreenNames
-.export DrawSaveScreenSprites
 .export EnterTitleScreen
 .export JigsIntro
 .export SaveScreen
 .export ReadjustEquipStats
 .export UnadjustEquipStats
 .export LoadEnemyStats
-.export NewGamePartyGeneration
 .export StealFromEnemyZ
 .export AssignMapTileDamage_Z
 .export LoadPlayerDefenderStats_ForEnemyAttack
@@ -28,7 +25,6 @@
 .export Battle_SetPartyWeaponSpritePal
 .export MapPoisonDamage_Z
 .export lut_InitUnsramFirstPage
-.export lut_ClassStartingStats
 .export SaveScreen_FromMenu
 
 .import GameLoaded, SaveScreenHelper, LoadBattleSpritesForBank_Z
@@ -1970,7 +1966,6 @@ Battle_SetPartyWeaponSpritePal:
     
    @CheckForFist:
     LDA ch_class, X
-    AND #$0F
     CMP #CLASS_BB
     BEQ :+
     CMP #CLASS_MA
@@ -1981,12 +1976,7 @@ Battle_SetPartyWeaponSpritePal:
     LDX char_index
     LDA #$AC
     STA btl_charweaponsprite, X
-    LDA ch_class, Y
-    AND #$F0
-    LSR A
-    LSR A
-    LSR A
-    LSR A
+    LDA ch_sprite, Y
     TAY
     LDA lut_InBattleCharPaletteAssign, Y
     STA btl_charweaponsprite, X
@@ -2154,9 +2144,7 @@ UnadjustEquipStats:
 UnadjustBBEquipStats:
     ;LDX tmp+7           ; get char index into X
     LDA ch_class, X     ; get the char's class
-    AND #$0F            ;; JIGS - cut off high bits (sprite)
-
-    CMP #CLASS_BB         ; check if he's a black belt or master
+    CMP #CLASS_BB       ; check if he's a black belt or master
     BEQ @BlackBelt      ; if blackbelt, do the thing
     CMP #CLASS_MA         
     BNE @Armor          ; if not, do armor normally
@@ -2401,9 +2389,7 @@ ReadjustBBEquipStats:
   ;  STA ch_numhitsmult, X
 
     LDA ch_class, X    ; get this char's class
-    AND #$0F             ;; JIGS - cut off high bits (sprite)
-
-    CMP #CLASS_BB        ; see if he's a black belt or master... if yes, jump ahead
+    CMP #CLASS_BB      ; see if he's a black belt or master... if yes, jump ahead
     BEQ @BlackBelt     ; otherwise, exit
     CMP #CLASS_MA
     BNE @Exit
@@ -3211,62 +3197,60 @@ lut_TitleCursor_Y:
 
 
 NewGame_LoadStartingStats:
-    LDX #$00                ; load up the starting stats for each character
+    LDA #$00                ; load up the starting stats for each character
     JSR @LoadStats
-    LDX #$40
+    LDA #$40
     JSR @LoadStats
-    LDX #$80
+    LDA #$80
     JSR @LoadStats
-    LDX #$C0
+    LDA #$C0
 
   @LoadStats:
+    PHA
+    TAX
     LDA ch_class, X         ; get the class
-    AND #$0F                ;; JIGS - cut off high bits (sprite)
-    ;ASL A                   ; $10 bytes of starting data for each class
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    JSR ShiftLeft4
+    LDX #STARTING_STATS
+    JSR MultiplyXA
     TAY                     ; source index in Y
+    PLA
+    TAX
     
-    ;; lut_ClassStartingStats table contains $B bytes of data, padded to $10
-    ;;   byte 0 is a redundant and unused class ID byte.
-    ;;   The rest is as outlined below
+    ;; lut_ClassStartingStats table contains $D bytes of data
     
-    LDA lut_ClassStartingStats+1, Y ; starting HP
+    LDA lut_ClassStartingStats, Y ; starting HP
     STA ch_curhp, X
     STA ch_maxhp, X
     
-    LDA lut_ClassStartingStats+2, Y ; base stats
+    LDA lut_ClassStartingStats+1, Y ; base stats
     STA ch_strength, X
-    LDA lut_ClassStartingStats+3, Y
+    LDA lut_ClassStartingStats+2, Y
     STA ch_agility, X
-    LDA lut_ClassStartingStats+4, Y
+    LDA lut_ClassStartingStats+3, Y
     STA ch_intelligence, X
-    LDA lut_ClassStartingStats+5, Y
+    LDA lut_ClassStartingStats+4, Y
     STA ch_vitality, X
-    LDA lut_ClassStartingStats+6, Y
+    LDA lut_ClassStartingStats+5, Y
     STA ch_speed, X
     
-    LDA lut_ClassStartingStats+7, Y ; sub stats
+    LDA lut_ClassStartingStats+6, Y ; sub stats
     STA ch_damage, X
-    LDA lut_ClassStartingStats+8, Y
+    LDA lut_ClassStartingStats+7, Y
     STA ch_hitrate, X
-    LDA lut_ClassStartingStats+9, Y
+    LDA lut_ClassStartingStats+8, Y
     STA ch_evasion, X
-    LDA lut_ClassStartingStats+$A, Y
+    LDA lut_ClassStartingStats+$9, Y
     STA ch_magicdefense, X
     
     ;; JIGS: You can use the padding in lut_ClassStartingStats to tell the game
-	;; how much mana to give! Or start with a fancy weapon! Even some spells!
+	;; how much mana to give! Or start with a fancy weapon! Even a spell!
 
-    LDA lut_ClassStartingStats+$B, Y
+    LDA lut_ClassStartingStats+$A, Y
     STA ch_mp, X
-    LDA lut_ClassStartingStats+$C, Y
+    LDA lut_ClassStartingStats+$B, Y
     STA ch_righthand, X
-    LDA lut_ClassStartingStats+$D, Y
+    LDA lut_ClassStartingStats+$C, Y
     STA ch_body, X
-    LDA lut_ClassStartingStats+$E, Y
+    LDA lut_ClassStartingStats+$D, Y
     STA ch_spells, X
 	RTS
     
@@ -3405,8 +3389,8 @@ NewGamePartyGeneration:
     LDA #$01
     STA cur_pal+$0E
 
-    LDA #$1E
-    LDX #$FE
+    LDX #$1E
+    LDA #$FE
     JSR SetPPUAddr_XA
     LDA #$7F
     STA $2007
@@ -3480,11 +3464,9 @@ NewGamePartyGeneration:
     TAY                     ; Y is the ch_stats dest index  ($40 bytes per character)
 
     LDA ptygen_sprite, X ; get sprite
-    ASL A                ; shift the low bits into the high bits
-    ASL A
-    ASL A
-    ASL A
-    ORA ptygen_class, X  ; combine with class bits
+    STA ch_sprite, Y
+
+    LDA ptygen_class, X  ; get class
     STA ch_class, Y      ; and save!
 
     LDA #7
@@ -3877,7 +3859,7 @@ PtyGen_Frame:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Blinker_LUT:
+Blinker_LUT:               ; positions for the blinker under letters
 .byte $60, $68, $70, $78, $80, $88, $90, $90
 
 CharName_Frame:
@@ -3895,7 +3877,7 @@ CharName_Frame:
     STA oam+$3, X          ; upper left horizontal coordinate
     LDA #$22
     STA oam+$0, X          ; upper left vertical coordinate
-    LDA #$F0
+    LDA #$EF
     STA oam+$1, X          ; graphic: _
     LDA #$01
     STA oam+$2, X          ; attribute
@@ -4384,23 +4366,23 @@ lut_PtyGenBuf:
 
 
 lut_ClassStartingStats:
-;     Class HP   Str  Agil Int  Vit  Luck DMG  Hit% Evade MDef  MP   Weapon Armor Spells Unused
-.byte $00,  $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00,   $00 ; Fighter
-.byte $01,  $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00,   $00 ; Thief
-.byte $02,  $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00,   $00 ; BB
-.byte $03,  $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; RedMage
-.byte $04,  $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00,   $00 ; WMage
-.byte $05,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; BMage
-.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 1
-.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 2
-.byte $06,  $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00,   $00 ; Knight
-.byte $07,  $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00,   $00 ; Ninja
-.byte $08,  $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00,   $00 ; Master
-.byte $09,  $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; RedWiz
-.byte $0A,  $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00,   $00 ; WWiz 
-.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Bwiz
-.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 3
-.byte $0B,  $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00,   $00 ; Unused Class 4
+;     HP   Str  Agil Int  Vit  Luck DMG  Hit% Evade MDef  MP   Weapon Armor Spell  
+.byte $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00 ; Fighter
+.byte $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00 ; Thief
+.byte $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00 ; BB
+.byte $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00 ; RedMage
+.byte $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00 ; WMage
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; BMage
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 1
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 2
+.byte $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00 ; Knight
+.byte $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00 ; Ninja
+.byte $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00 ; Master
+.byte $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00 ; RedWiz
+.byte $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00 ; WWiz 
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Bwiz
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 3
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 4
 ;                                                                     \ 02 small knife or 03 wooden staff
 ;                                                                            \ 01 cloth armour
 
@@ -4632,7 +4614,7 @@ ReenterOptionsMenu:
 OptionsLoop:
     JSR ClearOAM
     JSR DrawOptionsCursor        ; draw the cursor
-    JSR OptionsMenuFrame         ; Do a frame
+    JSR MenuFrame                ; Do a frame
     
     LDA joy_a                    ; check to see if A has been pressed
     BNE @A_Pressed
@@ -4875,32 +4857,6 @@ DrawOptionsCursor:
 lut_OptionsCursor_Y:
    .BYTE  $40,$50,$60,$70,$80,$90,$A0
 
-OptionsMenuFrame:
-    JSR WaitForVBlank_L    ; wait for VBlank
-    LDA #>oam              ; Do sprite DMA (update the 'real' OAM)
-    STA $4014
-
-    LDA soft2000           ; reset scroll and PPU data
-    STA $2000
-    LDA #0
-    STA $2005
-    STA $2005
-
-    LDA music_track        ; if no music track is playing...
-    BPL :+
-     LDA dlgmusic_backup   ; restore from backup
-     STA music_track
-
-:   LDA #BANK_THIS         ; record this bank as the return bank
-    STA cur_bank           ; then call the music play routine (keep music playing)
-    JSR CallMusicPlay
-
-    INC framecounter       ; increment the frame counter to count this frame
-
-    LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
-    STA joy_a              ;   nonzero state
-    STA joy_b
-    JMP UpdateJoy          ; update joypad info, then exit
 
 
 
@@ -5122,9 +5078,7 @@ SoundTestFrame:
     BEQ :+                 ; or else every frame here will count as a second for total playtime
         DEC playtimer
 
-  : INC framecounter       ; increment the frame counter to count this frame
-
-    JSR ClearButtons
+  : JSR ClearButtons
     JMP UpdateJoy          ; update joypad info, then exit
 
 SoundTestSelect:
@@ -5811,9 +5765,6 @@ SaveScreenFrame:
     LDA #BANK_THIS         ; record this bank as the return bank
     STA cur_bank           ; then call the music play routine (keep music playing)
     JSR CallMusicPlay
-
-    INC framecounter       ; increment the frame counter to count this frame
-
     JSR ClearButtons
     JMP UpdateJoy          ; update joypad info, then exit
 
@@ -5840,77 +5791,112 @@ SaveScreenTitleTextPosition:
 
 
 DrawSaveScreenNames:
-    LDX #0
-    STX MMC5_tmp
-    LDA MMC5_tmp
+    LDA #0
+    STA tmp                    ; tmp = character counter
+    TAX                        ; X = string buffer position
 
    @LoopStart:
     JSR SaveScreenCharPointer
-    LDY #2 ; 0 is class, 1 is ailments, 2 is start of name
+    LDY #ch_name - ch_stats
 
    @Loop:
     LDA (CharStatsPointer), Y  ; get name byte
-    CMP #0
     BNE :+
-    LDA #$FF
-  : STA SaveScreenCharBuf, X  ; put in string buffer
+    LDA #$FF                   ; if its 0, replace with a space
+  : STA SaveScreenCharBuf, X   ; put in string buffer
     INY
     INX
-    CPY #9 ; name is 7 letters
+    CPY #ch_name - ch_stats + 7 ; stop when Y has read the whole name
     BNE @Loop
+    
+;;  The low 2 bits of each number in the counter are as such:
+;;  00 - first character in slot
+;;  01 - second character in slot
+;;  10 - third character in slot
+;;  11 - fourth character in slot
+;; so by shifting the bits out, we can tell which character's name is being drawn...
+;; and append the necessary control codes!
 
-    INX ; make a space for control codes and ... spaces!
+    LDA tmp
+    LSR A
+    BCC @FirstOrThirdCharacterInSlot
+    
+    LSR A     
+    BCS @FourthCharacterInSlot
+    
+   @SecondCharacterInSlot: 
+    LDA #05                       ; three single line breaks
+    BNE :+
+    
+   @FourthCharacterInSlot:
+    LDA #01                       ; two double line breaks, then one single line break
+    STA SaveScreenCharBuf, X
     INX
-    INX ; inc X until its 10, 10 bytes per character = 120 bytes
-    INC MMC5_tmp
-    LDA MMC5_tmp  ; 12 characters yet?
+    STA SaveScreenCharBuf, X
+    INX
+    LDA #05
+    BNE :++
+    
+   @FirstOrThirdCharacterInSlot:  ; if the character counter = 0, 2, 4, 6, 8, or A, then put 3 spaces
+    LDA #$FF
+  : STA SaveScreenCharBuf, X
+    INX
+    STA SaveScreenCharBuf, X
+    INX    
+  : STA SaveScreenCharBuf, X
+    
+   @Resume:
+    INX      ; inc X until its 10, 10 bytes per character = 120 bytes
+    INC tmp
+    LDA tmp  ; 12 characters yet?
     CMP #12
     BNE @LoopStart
 
 ;; JIGS - I DON'T CARE, IT WORKS. >:(
+;; (Edit: I did care and made it better once I got smarter)
 
-    LDA #$FF ; spaces to put between names on the same line, or just to fill blank space
-    ; because every character has 10 letters in this
-    STA SaveScreenCharBuf+7   ; character 1
-    STA SaveScreenCharBuf+8
-    STA SaveScreenCharBuf+9
-    STA SaveScreenCharBuf+27  ; character 3
-    STA SaveScreenCharBuf+28
-    STA SaveScreenCharBuf+29
-    STA SaveScreenCharBuf+47 ; character 5
-    STA SaveScreenCharBuf+48
-    STA SaveScreenCharBuf+49
-    STA SaveScreenCharBuf+67 ; character 7
-    STA SaveScreenCharBuf+68
-    STA SaveScreenCharBuf+69
-    STA SaveScreenCharBuf+87 ; character 9
-    STA SaveScreenCharBuf+88
-    STA SaveScreenCharBuf+89
-    STA SaveScreenCharBuf+107 ; character 11
-    STA SaveScreenCharBuf+108
-    STA SaveScreenCharBuf+109
-
-    LDA #01 ; two lines breaks
-    STA SaveScreenCharBuf+37 ; character 4
-    STA SaveScreenCharBuf+38
-    STA SaveScreenCharBuf+77 ; character 8
-    STA SaveScreenCharBuf+78
-
-    LDA #05 ; one line break
-    STA SaveScreenCharBuf+17 ; character 2
-    STA SaveScreenCharBuf+18 ; character 2
-    STA SaveScreenCharBuf+19 ; character 2
-    STA SaveScreenCharBuf+39 ; character 4
-    STA SaveScreenCharBuf+57 ; character 6
-    STA SaveScreenCharBuf+58 ; character 6
-    STA SaveScreenCharBuf+59 ; character 6
-    STA SaveScreenCharBuf+79 ; character 8
-    STA SaveScreenCharBuf+97 ; character 10
-    STA SaveScreenCharBuf+98 ; character 10
-    STA SaveScreenCharBuf+99 ; character 10
+;    LDA #$FF ; spaces to put between names on the same line, or just to fill blank space
+;    ; because every character has 10 letters in this
+;    STA SaveScreenCharBuf+7   ; character 0
+;    STA SaveScreenCharBuf+8
+;    STA SaveScreenCharBuf+9
+;    STA SaveScreenCharBuf+27  ; character 2
+;    STA SaveScreenCharBuf+28
+;    STA SaveScreenCharBuf+29
+;    STA SaveScreenCharBuf+47 ; character 4
+;    STA SaveScreenCharBuf+48
+;    STA SaveScreenCharBuf+49
+;    STA SaveScreenCharBuf+67 ; character 6
+;    STA SaveScreenCharBuf+68
+;    STA SaveScreenCharBuf+69
+;    STA SaveScreenCharBuf+87 ; character 8
+;    STA SaveScreenCharBuf+88
+;    STA SaveScreenCharBuf+89
+;    STA SaveScreenCharBuf+107 ; character A
+;    STA SaveScreenCharBuf+108
+;    STA SaveScreenCharBuf+109
+;
+;    LDA #01 ; two lines breaks
+;    STA SaveScreenCharBuf+37 ; character 3
+;    STA SaveScreenCharBuf+38
+;    STA SaveScreenCharBuf+77 ; character 7
+;    STA SaveScreenCharBuf+78
+;
+;    LDA #05 ; one line break
+;    STA SaveScreenCharBuf+17 ; character 1
+;    STA SaveScreenCharBuf+18 ; character 1
+;    STA SaveScreenCharBuf+19 ; character 1
+;    STA SaveScreenCharBuf+39 ; character 3
+;    STA SaveScreenCharBuf+57 ; character 5
+;    STA SaveScreenCharBuf+58 ; character 5
+;    STA SaveScreenCharBuf+59 ; character 5
+;    STA SaveScreenCharBuf+79 ; character 7
+;    STA SaveScreenCharBuf+97 ; character 9
+;    STA SaveScreenCharBuf+98 ; character 9
+;    STA SaveScreenCharBuf+99 ; character 9
 
     LDA #0 ; end
-    STA SaveScreenCharBuf+117 ; character 12
+    STA SaveScreenCharBuf+117 ; character B
 
     LDA #13
     STA dest_x
@@ -5922,7 +5908,7 @@ DrawSaveScreenNames:
     STA text_ptr+1
     JMP DrawComplexString
 
-
+;; these values are set in Constants, and point to different save ram slots.
 SaveScreenChar_LUT:
 .word SaveScreenChar1  ; 0, 1
 .word SaveScreenChar2  ; 2, 3
@@ -5947,67 +5933,62 @@ SaveScreenCharPointer:
     RTS
 
 DrawSaveScreenSprites:
-    LDA #0
-    STA MMC5_tmp               ; loop counter
+    LDA #4
+    STA tmp+2               ; loop counter
     LDA cursor
-    LDX #8
-    JSR MultiplyXA
-    STA MMC5_tmp+1 ; slot 1 = 0, slot 2 = 8, slot 3 = 16
-    LSR A
-    STA MMC5_tmp+2 ; slot 1 = 0, slot 2 = 4, slot 3 = 8
+    ASL A
+    ASL A
+    STA tmp+4               ; cursor * 4: slot 1 = 0, slot 2 = 4, slot 3 = 8
+    ASL A
+    STA tmp+3               ; cursor * 8: slot 1 = 0, slot 2 = 8, slot 3 = 16
 
 @LoopStart:
-    LDA MMC5_tmp+2
+    LDA tmp+4                  
     JSR SaveScreenCharPointer
-    LDY #2
-    LDA (CharStatsPointer), Y  ; get first letter of first character's name in this save slot
-    BEQ @RTS                  ; if its 0, this save slot must be empty, so skip drawing sprites
-    LDX MMC5_tmp+1
-    LDA SaveScreenCharSprite_LUT, X ; MMC5_tmp+1 just gets the position to draw the sprite on the screen.
+    LDY #ch_maxhp - ch_stats
+    LDA (CharStatsPointer), Y  ; get max HP for this character
+    BEQ @RTS                   ; if its 0, this save slot must be empty, so skip drawing sprites
+    LDX tmp+3 
+    LDA SaveScreenCharSprite_LUT, X ; tmp+3 just gets the position to draw the sprite on the screen.
     STA spr_x
-    INX
-    LDA SaveScreenCharSprite_LUT, X
+    INX                             ; increment X
+    LDA SaveScreenCharSprite_LUT, X ; instead of doing a +1 to SaveScreenCharSprite_LUT
     STA spr_y
-    INX
-    STX MMC5_tmp+1
+    INX                             ; increment X again and save it
+    STX tmp+3
 
-    LDY #0
-    LDA (CharStatsPointer), Y  ; get sprite from different save slots
-    AND #$F0                  ; knock off class bits
-    JSR ShiftSpriteHightoLow
+    LDY #ch_sprite - ch_stats
+    LDA (CharStatsPointer), Y       ; get sprite from different save slots
     TAY
-    LDA lutClassBatSprPalette, Y ; get sprite palette
+    LDA lutClassBatSprPalette, Y    ; get sprite palette
     STA tmp+1
-    LDA lutClassBatSpriteID, Y ; get tile ID in CHR
-    STA tmp
+    TYA                             ; move sprite ID back to A
+    LDX #6
+    JSR MultiplyXA                  ; multiply sprite by 6
+    STA tmp                         ; tmp and tmp+1 now have the needed values for drawing the sprite
     JSR DrawSimple2x3Sprite
-    INC MMC5_tmp               ; loop counter
-    INC MMC5_tmp+2             ; thing that gets the right character
-    LDA MMC5_tmp
-    CMP #4                     ; only draw 4 sprites
+    INC tmp+4                       ; increment the save screen character index counter
+    DEC tmp+2                       ; and decrement the loop counter
     BNE @LoopStart
 
    @RTS:
     RTS
 
-
-lutClassBatSpriteID:
-  .BYTE $00,$06,$0C,$12,$18,$1E    ; unpromoted classes
-  .BYTE $24,$2A,$30,$36,$3C,$42    ; promoted classes
-
  SaveScreenCharSprite_LUT:
   .byte $56,$27
   .byte $A6,$27
   .byte $56,$40
-  .byte $A6,$40
+  .byte $A6,$40 ; positions for character sprites in slot 1 
+  
   .byte $56,$67
   .byte $A6,$67
   .byte $56,$80
-  .byte $A6,$80
+  .byte $A6,$80 ; slot 2
+  
   .byte $56,$A7
   .byte $A6,$A7
   .byte $56,$C0
-  .byte $A6,$C0
+  .byte $A6,$C0 ; and slot 3
 
 
 
@@ -6141,13 +6122,8 @@ MenuFrame:
 :   LDA #BANK_THIS         ; record this bank as the return bank
     STA cur_bank           ; then call the music play routine (keep music playing)
     JSR CallMusicPlay
-
-    INC framecounter       ; increment the frame counter to count this frame
-
     JSR ClearButtons
     JMP UpdateJoy          ; update joypad info, then exit
-
-
 
 
 

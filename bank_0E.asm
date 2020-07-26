@@ -560,6 +560,7 @@ PrintCharStat:
     ; Carry is clear from the branch
     ADC char_index
     TAX
+    DEX
     LDA ch_stats, X
   : STA tmp
     JMP PrintNumber_2Digit
@@ -569,6 +570,10 @@ PrintCharStat:
     ; Carry is clear from the branch
     ADC char_index      ; add character index
     TAX
+    DEX 
+    ;; JIGS - main stats were shifted 1 backward... ch_strength should be ch_Stats + $11 but it is +$10 now
+    ;; ideally, the control codes and all strings should be changed to reflect this...
+    
     LDA ch_stats, X     ; get the substat
     STA tmp             ; write it as low byte
     LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
@@ -2347,7 +2352,6 @@ ShopPayPrice:
     ShopThief:         ; JIGS - HEEHEE
     LDX #0
     LDA ch_class, X    ; check if thief is party leader.
-    AND #$0F           ; cut off high bits (sprite)
     CMP #CLASS_TH      ; IF thief, goto ShopSteal
     BEQ @ShopSteal
     CMP #CLASS_NJ
@@ -2513,6 +2517,8 @@ EnterInn:
 
     JSR ShopFrameNoCursor 
     JSR BackUpPalettes
+    LDA #8
+    STA framecounter            ; vanilla FF1 value more or less - 8 frames per palette change
     JSR FadeOutSprites          ; and fade the party out
     JSR MenuWaitForBtn_SFX  
     
@@ -5247,19 +5253,19 @@ MagicMenu_Loop:
 ;;;;;;;;;;;;;;;
 
 CureSpellPotency:    
-    LDA framecounter        ; use the frame counter as a make-shift pRNG
+    JSR BattleRNG_L         ; use the frame counter as a make-shift pRNG
     AND #$0F                ; mask out the low bits
     ORA #$10                ; and ORA (effective range:  16-31)
     RTS
 
 Cure2SpellPotency:
-    LDA framecounter        ; same deal, but double the recovery
+    JSR BattleRNG_L         ; same deal, but double the recovery
     AND #$1F
     ORA #$20                ; (effective range:  32-63)
     RTS
 
 Cure3SpellPotency:
-    LDA framecounter        ; same deal -- but double it again
+    JSR BattleRNG_L         ; same deal -- but double it again
     AND #$3F
     ORA #$40                ; (effective range:  64-127)
     RTS
@@ -5912,7 +5918,6 @@ DrawLearnSpellMenu:
 TryLearnSpell:
     LDX CharacterIndexBackup      ; load index 
     LDA ch_class, X               ; use it to get his class
-    AND #$0F                      ; cut off high bits (sprite)
     ASL A                         ; double it (2 bytes per pointer)
     TAX                           ; and put in X for indexing
 
@@ -7824,8 +7829,6 @@ MainMenuFrame:
 :   LDA #BANK_THIS         ; record this bank as the return bank
     STA cur_bank           ; then call the music play routine (keep music playing)
     JSR CallMusicPlay
-
-    INC framecounter       ; increment the frame counter to count this frame
 
     LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
     STA joy_a              ;   nonzero state
@@ -9897,7 +9900,6 @@ IsEquipLegal:
    
     LDX CharacterIndexBackup
     LDA ch_class, X   ; get the character's class
-    AND #$0F             ;; JIGS - cut off high bits (sprite)
   ;  ASL A             ; double it (2 bytes for equip permissions)
     TAX               ; and put in X to index the equip bit
     

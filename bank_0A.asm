@@ -19,6 +19,7 @@
 .export DrawMenuString_CharCodes_A
 .export lut_Treasure
 .export lut_Treasure_2
+.export lut_ClassSkills
 
 .import DrawComplexString
 .import ConvertBattleNumber
@@ -60,6 +61,27 @@ lut_EnemyAttack:
 .word EnemyAttack25  ; 18
 .word EnemyAttack26  ; 19
 .word EnemyAttack27  ; 1A
+.word EnemyAttack28  ; 1B
+.word EnemyAttack29  ; 1C
+.word EnemyAttack30  ; 1D
+.word EnemyAttack31  ; 1E
+.word EnemyAttack32  ; 1F
+.word EnemyAttack33  ; 20
+.word EnemyAttack34  ; 21
+.word EnemyAttack35  ; 22
+.word EnemyAttack36  ; 23
+.word EnemyAttack37  ; 24
+.word EnemyAttack38  ; 25
+.word EnemyAttack39  ; 26
+.word EnemyAttack40  ; 27
+.word EnemyAttack41  ; 28
+.word EnemyAttack42  ; 29
+.word EnemyAttack43  ; 2A
+.word EnemyAttack44  ; 2B
+.word EnemyAttack45  ; 2C
+.word EnemyAttack46  ; 2D
+.word EnemyAttack47  ; 2E
+.word EnemyAttack48  ; 2F
 
 EnemyAttack1:
 .byte $8F,$9B,$98,$9C,$9D,$00             ; FROST
@@ -114,6 +136,27 @@ EnemyAttack25:
 EnemyAttack26:
 .byte $9D,$98,$9B,$97,$8A,$8D,$98,$00     ; TORNADO
 EnemyAttack27:
+EnemyAttack28:
+EnemyAttack29:
+EnemyAttack30:
+EnemyAttack31:
+EnemyAttack32:
+EnemyAttack33:
+EnemyAttack34:
+EnemyAttack35:
+EnemyAttack36:
+EnemyAttack37:
+EnemyAttack38:
+EnemyAttack39:
+EnemyAttack40:
+EnemyAttack41:
+EnemyAttack42:
+EnemyAttack43:
+EnemyAttack44:
+EnemyAttack45:
+EnemyAttack46:
+EnemyAttack47:
+EnemyAttack48:
 .byte $92,$96,$99,$FF,$99,$9E,$97,$8C,$91,$00 ; IMP PUNCH
 
 
@@ -126,7 +169,7 @@ data_EnemyNames:
 .word ENEMYNAME3
 .word ENEMYNAME4
 .word ENEMYNAME5
-.word ENEMYNAME6
+.word ENEMYNAME67
 .word ENEMYNAME7
 .word ENEMYNAME8
 .word ENEMYNAME9
@@ -499,6 +542,91 @@ ENEMYNAME123:
 .byte $9D,$92,$8A,$96,$8A,$9D,$00            ; TIAMAT
 ENEMYNAME124:
 .byte $8C,$91,$8A,$98,$9C,$00                ; CHAOS
+
+
+lut_ClassSkills:
+.word ClassSkill1     ; 00
+.word ClassSkill2     ; 01
+.word ClassSkill3     ; 02
+.word ClassSkill4     ; 03
+.word ClassSkill5     ; 04
+.word ClassSkill6     ; 05
+.word ClassSkill7     ; 06
+.word ClassSkill8     ; 07
+.word ClassSkill9     ; 08
+.word ClassSkill10    ; 09
+.word ClassSkill11    ; 0A
+.word ClassSkill12    ; 0B
+.word ClassSkill13    ; 0C
+.word ClassSkill14    ; 0D
+.word ClassSkill15    ; 0E
+.word ClassSkill16    ; 0F
+.word ClassSkill17    ; 10
+.word ClassSkill18    ; 11
+.word ClassSkill19    ; 12
+.word ClassSkill20    ; 13
+.word ClassSkill21    ; 14
+.word ClassSkill22    ; 15
+.word ClassSkill23    ; 16
+.word ClassSkill24    ; 17
+.word ClassSkill25    ; 18
+.word ClassSkill26    ; 19
+.word ClassSkill27    ; 1A
+.word ClassSkill28    ; 1B
+.word ClassSkill29    ; 1C
+.word ClassSkill30    ; 1D
+.word ClassSkillBlank ; 1E
+
+
+ClassSkill1:
+.BYTE $8C,$B2,$B9,$A8,$B5,$00    ; Cover
+ClassSkill2:
+.BYTE $9C,$B7,$A8,$A4,$AF,$00    ; Steal
+ClassSkill3:
+.BYTE $99,$A4,$B5,$B5,$BC,$00    ; Parry
+ClassSkill4:
+.BYTE $9B,$B8,$B1,$AC,$A6,$00    ; Runic
+ClassSkill5:
+.BYTE $99,$B5,$A4,$BC,$FF,$00    ; Pray
+ClassSkill6:
+.BYTE $8F,$B2,$A6,$B8,$B6,$00    ; Focus
+ClassSkill7:
+ClassSkill8:
+ClassSkill9:
+ClassSkill10:
+ClassSkill11:
+ClassSkill12:
+ClassSkill13:
+ClassSkill14:
+ClassSkill15:
+ClassSkill16:
+ClassSkill17:
+ClassSkill18:
+ClassSkill19:
+ClassSkill20:
+ClassSkill21:
+ClassSkill22:
+ClassSkill23:
+ClassSkill24:
+ClassSkill25:
+ClassSkill26:
+ClassSkill27:
+ClassSkill28:
+ClassSkill29:
+ClassSkill30:
+ClassSkillBlank:
+.BYTE $FF,$FF,$FF,$FF,$FF,$00    ; _____  
+
+
+
+
+
+
+
+
+
+
+
 
 ; But here's all the items and some more!
 ; When the game looks up an item name, it first gets the pointer--the two byte .word names here--and then looks that up from a table of sorts?
