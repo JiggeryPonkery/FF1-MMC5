@@ -860,7 +860,7 @@ MiniMapFrame:
     STA joy_b
     JSR UpdateJoy_L        ; then update joypad data
 
-    INC framecounter       ; inc the frame counter
+    ;INC framecounter       ; inc the frame counter
 
     LDA framecounter
     AND #$08               ; use bit 3 of frame counter to toggle between

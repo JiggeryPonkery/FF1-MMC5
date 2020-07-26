@@ -3361,6 +3361,7 @@ Music_NewSong:
 
 MusicPlay_L:   ; JMP MusicPlay
 MusicPlay:
+    INC framecounter
     INC playtimer      ; frames
     LDA playtimer
     CMP #60

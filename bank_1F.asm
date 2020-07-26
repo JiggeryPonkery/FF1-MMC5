@@ -322,7 +322,6 @@ OverworldLoop_2:
     LDA #>oam                  ; and do sprite DMA
     STA $4014
 
-    INC framecounter
     JSR OverworldMovement      ; do any pending movement animations and whatnot
                                ;   also does any required map drawing and updates
                                ;   the scroll appropriately
@@ -2338,7 +2337,6 @@ StandardMapLoop:
     JSR StandardMapMovement    ; then do movement stuff (involves possible screen drawing)
                                ;   this also sets the scroll
   
-    INC framecounter
     LDA music_track        ; if no music track is playing...
     BPL :+
       LDA dlgmusic_backup  ;; JIGS - start map music again!
@@ -3144,7 +3142,6 @@ TalkToSMTile:
     
     JSR WaitForVBlank
     JSR CallMusicPlay_NoSwap
-    INC framecounter
     DEC tmp+10
     BNE @FlashyLoop
     
@@ -8598,13 +8595,6 @@ AirshipTransitionFrame:
     LDA #>oam             ; then do sprite DMA
     STA $4014
 
-    ;LDA framecounter      ; increment the frame counter by 1
-    ;CLC                   ;   (why doesn't it just use INC?)
-    ;ADC #$01
-    ;STA framecounter
-
-    INC framecounter
-
     JSR SetOWScroll_PPUOn     ; Set Scroll
     JSR ClearOAM              ; Clear OAM
     JSR CallMusicPlay_NoSwap  ; And call music play
@@ -13926,18 +13916,12 @@ PaletteFrame:
 
 PaletteFrame_Loop:
     LDA PaletteCounter          ; amount of frames to wait
-    STA tmp+3
+    STA tmp+3                   ; tmp+3 shouldn't be used by MusicPlay
   : JSR PaletteFrame            ; do a frame (updating palettes)
     DEC tmp+3
     BNE :-
     RTS   
 
-
-;    INC framecounter            ; increment the frame counter
-;    LDA framecounter
-;    AND #$07                    ; check low 3 bits of frame counter
-;    BNE PaletteFrame_Loop       ; and loop until they're all clear (effectively waits 8 frames)
-;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

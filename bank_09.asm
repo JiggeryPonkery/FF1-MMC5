@@ -44,7 +44,7 @@ MiniGame_ShufflePuzzle:
     BNE :+              ; and once it's zero...
       RTS               ; ... exit
 
-:   INC framecounter    ; otherwise, increment the frame counter
+:   ;INC framecounter    ; otherwise, increment the frame counter
     LDY framecounter    ; and use it as a seed to get a random number from the RNG lut
     LDA lut_RNG, Y
 
@@ -1177,7 +1177,7 @@ EnterMiniGame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MiniGameLoop:
-    INC framecounter              ; increment the frame counter to keep animations working
+    ;INC framecounter              ; increment the frame counter to keep animations working
     JSR WaitForVBlank_L           ; wait for vblank
     LDA #>oam
     STA $4014                     ; do sprite DMA
@@ -1344,7 +1344,7 @@ MiniGame_CheckVictory:
     STA $2005               ;  it doing double writes of 0 to $2006.  If DrawPalette didn't do that, however, this could
                             ;  be a serious problem
 
-    INC framecounter        ; increment the frame counter
+    ;INC framecounter        ; increment the frame counter
 
     LDA framecounter        ; use the frame counter to cycle the palette
     ASL A                   ;  double it
@@ -1744,7 +1744,7 @@ Story_Wait:
     BNE @Exit           ;  if they did, exit.  Otherwise, count the frame
 
   @CountFrame:
-    INC framecounter    ; increment the frame counter
+    LDA framecounter    ; increment the frame counter
     BNE @Loop           ; if it didn't wrap, continue looping
     DEC story_timer     ;  if it did wrap, decrement story_timer (story_timer decrements once
     BNE @Loop           ;  every 256 frames).  Loop until story_timer expires.  At which point, exit.
@@ -1816,7 +1816,7 @@ Story_CloseShutters:
 
     JSR CallMusicPlay_L
 
-    INC framecounter
+    ;INC framecounter
     LDA framecounter
     AND #$01
     BNE @Frame
@@ -1936,7 +1936,7 @@ Story_OpenShutters:
 
     JSR CallMusicPlay_L    ; keep the music playing
 
-    INC framecounter   ; increment the fame counter
+    ;INC framecounter   ; increment the fame counter
     LDA framecounter   ; and check the low bit
     AND #$01
     BNE @Frame         ; if the low bit is set, repeat the same frame we just did
