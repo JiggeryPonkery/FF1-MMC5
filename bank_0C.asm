@@ -24,7 +24,7 @@
 .import GameStart_L
 .import LoadEnemyStats
 .import LongCall
-.import Magic_ConvertBitsToBytes
+;.import Magic_ConvertBitsToBytes
 .import MultiplyXA
 .import PlayerAttackEnemy_PhysicalZ
 .import PlayerAttackPlayer_PhysicalZ
@@ -37,7 +37,7 @@
 .import PlayDoorSFX
 .import DrawManaString_ForBattle
 .import ShiftLeft6
-.import StealFromEnemyZ
+.import StealFromEnemy
 .import RestoreMapMusic
 .import JIGS_RefreshAttributes
 .import ScanEnemyString
@@ -60,6 +60,7 @@
 .import ClearPalette
 .import DrawPalette_L
 .import LoadAllBattleSprites
+.import LoadSpellForBattle
 
 
 BANK_THIS = $0C
@@ -87,6 +88,8 @@ ExitBattle:
     JMP :++                         ; does its own fadeout, so skip this one
     
   : ;JSR BattleFadeOut               ; else, just fade out
+    LDA #BANK_THIS
+    STA cur_bank
     LDA #8
     STA PaletteCounter
     JSR FadeOutAllPalettes
@@ -950,7 +953,7 @@ BattleSubMenu_Magic:
 
 BattleSubMenu_Magic_NoUndraw:
     LDA btlcmd_curchar              ; <- This is never used
-    JSR Magic_ConvertBitsToBytes    ; JIGS is using it!
+    ;JSR Magic_ConvertBitsToBytes    ; JIGS is using it!
     
     LDA btlcmd_curchar
     JSR ShiftLeft6
@@ -1299,7 +1302,7 @@ BattleSubMenu_Equipment:
     .word GetEquipmentSpell
     .byte BANK_Z
     
-    LDA tmp+10
+    LDX tmp+10
     
   @GetSpellCast:
     DEX                            ; DEX to make it 0-based (FF becomes "no spell")
@@ -2844,7 +2847,7 @@ MenuSelection_2x4:
     BNE :+                          ; If there was no change in input...
       JSR UpdateInputDelayCounter   ; update delay counter
       BEQ @MainLoop                 ; not accepting input, repeat from main loop
-      JMP @CheckButtons             ; then check buttons
+      BNE @CheckButtons             ; then check buttons
       
   : LDA #$05                        ; if there was a change of input, reset the delay counter (make it a little
     STA inputdelaycounter           ;   longer than normal), and then check buttons
@@ -4138,20 +4141,15 @@ DrawAttackBox:
     
     ; source = magic
     LDA btl_attackid        ; see if the attack type is magic or a special attack
-    CMP #ENEMY_ATTACK_START
-    BCS @EnemyAttack        ; if its an enemy attack, skip changing the ID
-     ; CLC
-      ADC #MG_START         ; add MG_START to the index to convert from a magic index to an item index.
-      BNE :+
-    @EnemyAttack:
-      SBC #ENEMY_ATTACK_START ; subtract all the other magic spells to make it a 0-based index for the names
-      JMP :+ 
-      
+    TAX
+    LDA #$18
+    BNE @Print
+
   @NotMagic:
     CMP #$01                ; if source=1, it's a Item
     BNE @Equipment                  ; for Items....
       LDA btl_attackid              ; ... get the item ID for heal/pure potions
-    : TAX
+      TAX
       LDA #$0E                      ; preface it with 0E, the command to draw an attack (item) name
       BNE @Print                    ; (always branch)
       
@@ -4363,10 +4361,14 @@ RespondDelay_ClearCombatBoxes:
 RespondDelay:
     LDA btl_responddelay        ; get the delay
     STA btl_respondrate_tmp     ; stuff it in temp ram as loop counter
-    : JSR WaitForVBlank_L ; wait that many frames
-      JSR BattleUpdateAudio     ; updating audio each frame
+    : ;JSR WaitForVBlank_L ; wait that many frames
+      ;JSR BattleUpdateAudio     ; updating audio each frame
+      JSR DoFrame_WithInput      
+      AND #$03                  ; check for A/B only
+      BNE @EndDelay
       DEC btl_respondrate_tmp
       BNE :-
+   @EndDelay:   
     RTS
 
     
@@ -5476,7 +5478,7 @@ Battle_DoPlayerTurn:
        JSR UpdateCharacterSprite
     
   : JSR LongCall
-    .word StealFromEnemyZ
+    .word StealFromEnemy
     .byte BANK_ENEMYSTATS
     
     LDA battle_stealsuccess
@@ -6096,7 +6098,7 @@ Player_Confused:
    
 PlayerRandomSpell:
     LDA BattleCharID
-    JSR Magic_ConvertBitsToBytes
+    ;JSR Magic_ConvertBitsToBytes
 
     LDA #7
     STA tmp

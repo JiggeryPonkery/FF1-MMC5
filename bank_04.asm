@@ -474,10 +474,10 @@ StackLoader:
 
     LDY #0
    @StackLoad_Loop:
-    LDA (tmp), Y      ; read a byte from source pointer
-    STA $0100, Y      ; save to the top of the stack
+    LDA (tmp), Y                  ; read a byte from source pointer
+    STA TempSpriteLoading, Y      ; save to the top of the stack
     INY
-    CPY tmp+2         ; and stop when all the bytes are loaded
+    CPY tmp+2                     ; and stop when all the bytes are loaded
     BNE @StackLoad_Loop
     
     JSR WaitForVBlank_L
@@ -488,22 +488,56 @@ StackLoader:
     LDY $2002
     STA $2006         ; write high byte of dest address
     STX $2006         ; write low byte
-    
-    TSX       ; move stack pointer to X
-    STX tmp+3 ; backup stack pointer    
-    LDX #$FF  ; start at the top of the stack
-    TXS       ; transfer to the stack pointer
 
     LDX tmp+2 ; get amount of bytes to write    
    @PullStackLoop:
-    PLA
+    LDA TempSpriteLoading, X
     STA $2007
     DEX
     BNE @PullStackLoop
-    
-    LDX tmp+3
-    TXS       ; restore stack pointer
     RTS
+    
+;; JIGS - PLA is the same amount of cycles as LDA, X
+;; the below version uses the stack, while the above version uses TempSpriteLoading    
+;; the above version is better, since the stack holds teleport information
+;; and if too many teleports are taken (say in Castle of Ordeals), this will eventually clobber that data
+    
+;    PHA       ; backup A
+;    TXA       ; backup X
+;    PHA
+;
+;    LDY #0
+;   @StackLoad_Loop:
+;    LDA (tmp), Y      ; read a byte from source pointer
+;    STA $0100, Y      ; save to the top of the stack
+;    INY
+;    CPY tmp+2         ; and stop when all the bytes are loaded
+;    BNE @StackLoad_Loop
+;    
+;    JSR WaitForVBlank_L
+;    
+;    PLA       ; restore X    
+;    TAX
+;    PLA       ; restore A 
+;    LDY $2002
+;    STA $2006         ; write high byte of dest address
+;    STX $2006         ; write low byte
+;    
+;    TSX       ; move stack pointer to X
+;    STX tmp+3 ; backup stack pointer    
+;    LDX #$FF  ; start at the top of the stack
+;    TXS       ; transfer to the stack pointer
+;
+;    LDX tmp+2 ; get amount of bytes to write    
+;   @PullStackLoop:
+;    PLA
+;    STA $2007
+;    DEX
+;    BNE @PullStackLoop
+;    
+;    LDX tmp+3
+;    TXS       ; restore stack pointer
+;    RTS    
 
 
 BattleCharStonePositions_LUT:

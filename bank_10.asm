@@ -12,7 +12,8 @@
 
 .import MultiplyXA
 .import FindEmptyWeaponSlot
-
+.import Set_Inv_Weapon
+.import ADD_ITEM
 
 
 .segment "BANK_10"
@@ -1073,9 +1074,11 @@ Talk_Smith:
       LDA tmp+1            ; ... simply print [1]
       RTS
 
-  @HaveAdamant:             ; otherwise, make the sword!
-    LDX #WPNID_XCALBUR     ; put the XCalbur in the previously found slot
-    INC inv_weapon, X      ; JIGS - tiny bit of changes here
+  @HaveAdamant:            ; otherwise, make the sword!
+    JSR Set_Inv_Weapon
+    LDA #WPNID_XCALBUR     ; put the XCalbur in the previously found slot
+    JSR ADD_ITEM
+   
     LDY #OBJID_SMITH       ; set Smith's event flag to mark that we made the sword
     JSR SetGameEventFlag
   
@@ -1834,30 +1837,19 @@ lut_MapObjTalkData:
 
 
 DoClassChange:
-    LDA ch_class        ; simply bump up every party member's class ID number
-    CLC                 ; to up them to the promoted version of their class
-    ADC #8
-    ADC #$80            ; JIGS - and sprite
-    STA ch_class
-
-    LDA ch_class+(1<<6)
+    LDA #0
+  : TAX    
+    LDA ch_class, X       ; simply bump up every party member's class ID number
+    ORA #$10               ; to up them to the promoted version of their class
+    STA ch_class, X
+    LDA ch_sprite, X
+    ORA #$10
+    STA ch_sprite, X
+    TXA
     CLC
-    ADC #8
-    ADC #$80
-    STA ch_class+(1<<6)
+    ADC #$40
+    BNE :-
 
-    LDA ch_class+(2<<6)
-    CLC
-    ADC #8
-    ADC #$80
-    STA ch_class+(2<<6)
-
-    LDA ch_class+(3<<6)
-    CLC
-    ADC #8
-    ADC #$80
-    STA ch_class+(3<<6)
- 
     INC dlgflg_reentermap  ; set flag to indicate map needs reentering 
     RTS                    ;   in order to reload party's mapman graphic
 

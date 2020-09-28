@@ -7,57 +7,132 @@
 BANK_THIS = $17
 
 .export lut_SMPtrTbl
+.export lut_MapBanks
 
 ;; Info from Anomie's disassembly!
 
 ; Map offsets from this address. Of the 16-bit value, bits 0-13 are the pointer
 ; within the bank and bits 14-15 select the bank.
 
+lut_MapBanks:
+.byte BANK_MAPS   ; Coneria                    ; 00 ;
+.byte BANK_MAPS   ; Pravoka                    ; 01 ;
+.byte BANK_MAPS   ; Elfland                    ; 02 ;
+.byte BANK_MAPS   ; Melmond                    ; 03 ;
+.byte BANK_MAPS   ; Crescent_Lake              ; 04 ;
+.byte BANK_MAPS   ; Gaia                       ; 05 ;
+.byte BANK_MAPS   ; Onrac                      ; 06 ;
+.byte BANK_MAPS   ; Leifen                     ; 07 ;
+.byte BANK_MAPS   ; Coneria_Castle_1F          ; 08 ;
+.byte BANK_MAPS   ; Elfland_Castle             ; 09 ;
+.byte BANK_MAPS   ; Northwest_Castle           ; 0A ;
+.byte BANK_MAPS   ; Castle_of_Ordeals_1F       ; 0B ;
+.byte BANK_MAPS   ; Temple_of_Friends_Present  ; 0C ;
+.byte BANK_MAPS   ; Earth_Cave_B1              ; 0D ;
+.byte BANK_MAPS   ; Gurgu_Volcano_B1           ; 0E ;
+.byte BANK_MAPS   ; Ice_Cave_B1                ; 0F ;
+.byte BANK_MAPS   ; Cardia                     ; 10 ;
+.byte BANK_MAPS   ; Bahamut_Room_B1            ; 11 ;
+.byte BANK_MAPS   ; Waterfall                  ; 12 ;
+.byte BANK_MAPS   ; Dwarf_Cave                 ; 13 ;
+.byte BANK_MAPS   ; Matoya_Cave                ; 14 ;
+.byte BANK_MAPS   ; Sardas_Cave                ; 15 ;
+.byte BANK_MAPS   ; Marsh_Cave_B1              ; 16 ;
+.byte BANK_MAPS+1 ; Mirage_Tower_1F            ; 17 ;
+.byte BANK_MAPS+1 ; Coneria_Castle_2F          ; 18 ;
+.byte BANK_MAPS+1 ; Castle_of_Ordeals_2F       ; 19 ;
+.byte BANK_MAPS+1 ; Castle_of_Ordeals_3F       ; 1A ;
+.byte BANK_MAPS+1 ; Marsh_Cave_B2              ; 1B ;
+.byte BANK_MAPS+1 ; Marsh_Cave_B3              ; 1C ;
+.byte BANK_MAPS+1 ; Earth_Cave_B2              ; 1D ;
+.byte BANK_MAPS+1 ; Earth_Cave_B3              ; 1E ;
+.byte BANK_MAPS+1 ; Earth_Cave_B4              ; 1F ;
+.byte BANK_MAPS+1 ; Earth_Cave_B5              ; 20 ;
+.byte BANK_MAPS+1 ; Gurgu_Volcano_B2           ; 21 ;
+.byte BANK_MAPS+1 ; Gurgu_Volcano_B3           ; 22 ;
+.byte BANK_MAPS+1 ; Gurgu_Volcano_B4           ; 23 ;
+.byte BANK_MAPS+1 ; Gurgu_Volcano_B5           ; 24 ;
+.byte BANK_MAPS+1 ; Ice_Cave_B2                ; 25 ;
+.byte BANK_MAPS+1 ; Ice_Cave_B3                ; 26 ;
+.byte BANK_MAPS+1 ; Bahamuts_Room_B2           ; 27 ;
+.byte BANK_MAPS+1 ; Mirage_Tower_2F            ; 28 ;
+.byte BANK_MAPS+1 ; Mirage_Tower_3F            ; 29 ;
+.byte BANK_MAPS+1 ; Sea_Shrine_B5              ; 2A ;
+.byte BANK_MAPS+2 ; Sea_Shrine_B4              ; 2B ;
+.byte BANK_MAPS+2 ; Sea_Shrine_B3              ; 2C ;
+.byte BANK_MAPS+2 ; Sea_Shrine_B2              ; 2D ;
+.byte BANK_MAPS+2 ; Sea_Shrine_B1              ; 2E ;
+.byte BANK_MAPS+2 ; Sky_Palace_1F              ; 2F ;
+.byte BANK_MAPS+2 ; Sky_Palace_2F              ; 30 ;
+.byte BANK_MAPS+2 ; Sky_Palace_3F              ; 31 ;
+.byte BANK_MAPS+2 ; Sky_Palace_4F              ; 32 ;
+.byte BANK_MAPS+2 ; Sky_Palace_5F              ; 33 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_1F        ; 34 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_2F        ; 35 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_3F        ; 36 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_4F_Earth  ; 37 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_5F_Fire   ; 38 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_6F_Water  ; 39 ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_7F_Wind   ; 3A ;
+.byte BANK_MAPS+2 ; Temple_of_Fiends_8F_Chaos  ; 3B ;
+.byte BANK_MAPS+2 ; Titans_Tunnel              ; 3C ;
+
+
+
+
+
+
+
+
+
+
+
+
 lut_SMPtrTbl:
-.WORD Coneria
-.WORD Pravoka
-.WORD Elfland
-.WORD Melmond
-.WORD Crescent_Lake
-.WORD Gaia
-.WORD Onrac
-.WORD Leifen
-.WORD Coneria_Castle_1F
-.WORD Elfland_Castle
-.WORD Northwest_Castle
-.WORD Castle_of_Ordeals_1F
-.WORD Temple_of_Friends_Present
-.WORD Earth_Cave_B1
-.WORD Gurgu_Volcano_B1
-.WORD Ice_Cave_B1
-.WORD Cardia
-.WORD Bahamut_Room_B1
-.WORD Waterfall
-.WORD Dwarf_Cave
-.WORD Matoya_Cave
-.WORD Sardas_Cave
-.WORD Marsh_Cave_B1
-.WORD Mirage_Tower_1F
-.WORD Coneria_Castle_2F
-.WORD Castle_of_Ordeals_2F ; 19 ; Castle of Ordeals 2F
-.WORD Castle_of_Ordeals_3F ; 1A ; Castle of Ordeals 3F
-.WORD Marsh_Cave_B2        ; 1B ; Marsh Cave B2
-.WORD Marsh_Cave_B3        ; 1C ; Marsh Cave B3
-.WORD Earth_Cave_B2        ; 1D ; Earth Cave B2
-.WORD Earth_Cave_B3        ; 1E ; Earth Cave B3
-.WORD Earth_Cave_B4        ; 1F ; Earth Cave B4
-.WORD Earth_Cave_B5        ; 20 ; Earth Cave B5
-.WORD Gurgu_Volcano_B2     ; 21 ; Gurgu Volcano B2
-.WORD Gurgu_Volcano_B3     ; 22 ; Gurgu Volcano B3
-.WORD Gurgu_Volcano_B4     ; 23 ; Gurgu Volcano B4
-.WORD Gurgu_Volcano_B5     ; 24 ; Gurgu Volcano B5
-.WORD Ice_Cave_B2          ; 25 ; Ice Cave B2
-.WORD Ice_Cave_B3          ; 26 ; Ice Cave B3
-.WORD Bahamuts_Room_B2     ; 27 ; Bahamut's Room B2
-.WORD Mirage_Tower_2F      ; 28 ; Mirage Tower 2F
-.WORD Mirage_Tower_3F      ; 29 ; Mirage Tower 3F
-.WORD Sea_Shrine_B5              ; 2A ; Sea Shrine B5
-.WORD Sea_Shrine_B4              ; 2B ; Sea Shrine B4
+.WORD Coneria                    ; 00 ; 
+.WORD Pravoka                    ; 01 ; 
+.WORD Elfland                    ; 02 ; 
+.WORD Melmond                    ; 03 ; 
+.WORD Crescent_Lake              ; 04 ; 
+.WORD Gaia                       ; 05 ; 
+.WORD Onrac                      ; 06 ; 
+.WORD Leifen                     ; 07 ; 
+.WORD Coneria_Castle_1F          ; 08 ; 
+.WORD Elfland_Castle             ; 09 ; 
+.WORD Northwest_Castle           ; 0A ; 
+.WORD Castle_of_Ordeals_1F       ; 0B ; 
+.WORD Temple_of_Friends_Present  ; 0C ; 
+.WORD Earth_Cave_B1              ; 0D ; 
+.WORD Gurgu_Volcano_B1           ; 0E ; 
+.WORD Ice_Cave_B1                ; 0F ; 
+.WORD Cardia                     ; 10 ; 
+.WORD Bahamut_Room_B1            ; 11 ; 
+.WORD Waterfall                  ; 12 ; 
+.WORD Dwarf_Cave                 ; 13 ; 
+.WORD Matoya_Cave                ; 14 ; 
+.WORD Sardas_Cave                ; 15 ; 
+.WORD Marsh_Cave_B1              ; 16 ; 
+.WORD Mirage_Tower_1F            ; 17 ; 
+.WORD Coneria_Castle_2F          ; 18 ; 
+.WORD Castle_of_Ordeals_2F       ; 19 ; 
+.WORD Castle_of_Ordeals_3F       ; 1A ; 
+.WORD Marsh_Cave_B2              ; 1B ; 
+.WORD Marsh_Cave_B3              ; 1C ; 
+.WORD Earth_Cave_B2              ; 1D ; 
+.WORD Earth_Cave_B3              ; 1E ; 
+.WORD Earth_Cave_B4              ; 1F ; 
+.WORD Earth_Cave_B5              ; 20 ; 
+.WORD Gurgu_Volcano_B2           ; 21 ; 
+.WORD Gurgu_Volcano_B3           ; 22 ; 
+.WORD Gurgu_Volcano_B4           ; 23 ; 
+.WORD Gurgu_Volcano_B5           ; 24 ; 
+.WORD Ice_Cave_B2                ; 25 ; 
+.WORD Ice_Cave_B3                ; 26 ; 
+.WORD Bahamuts_Room_B2           ; 27 ; 
+.WORD Mirage_Tower_2F            ; 28 ; 
+.WORD Mirage_Tower_3F            ; 29 ; 
+.WORD Sea_Shrine_B5              ; 2A ; 
+.WORD Sea_Shrine_B4              ; 2B ; 
 .WORD Sea_Shrine_B3              ; 2C ;
 .WORD Sea_Shrine_B2              ; 2D ;
 .WORD Sea_Shrine_B1              ; 2E ;
@@ -75,21 +150,6 @@ lut_SMPtrTbl:
 .WORD Temple_of_Fiends_7F_Wind   ; 3A ;
 .WORD Temple_of_Fiends_8F_Chaos  ; 3B ;
 .WORD Titans_Tunnel              ; 3C ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

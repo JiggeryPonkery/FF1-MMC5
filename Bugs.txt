@@ -1,12 +1,7 @@
 New game:
 * Tried to start a new game and couldn't? Kept getting kicked back to title screen. Couldn't replicate the bug again.
 
-Map:
-* Castle Coneria coordinates wrong.
-* Minimap sprites don't load correctly in some maps.
-
 Menu:
-Menu > Map will load overworld sprites before map sprites. 
 Using Cure, the cursor starts below the box of HP and names:
 > Start new game, buy Cure, go to fourth character, Choose Cast (toggle error and automatic cursor movement), press A to learn, choose Cure, learn it, use it.
 Forgetting a spell does not erase it.

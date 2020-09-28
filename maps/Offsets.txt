@@ -1,0 +1,62 @@
+           X   Y 
+00 ; 00 ;  16  20 ; Coneria
+01 ; 01 ;  12  15 ; Pravoka
+02 ; 02 ;  11  17 ; Elfland
+03 ; 03 ;  15  18 ; Melmond  (not 16 x?)
+04 ; 04 ;  6   19 ; Crescent Lake
+05 ; 05 ; -3  -3  ; Gaia
+06 ; 06 ;  6   12 ; Onrac
+07 ; 07 ;  4   20 ; Leifen
+08 ; 08 ;  19  12 ; Coneria Castle 1F
+09 ; 09 ;  18  16 ; Elfland Castle
+0A ; 10 ;  15  19 ; Northwest Castle
+0B ; 11 ;  19  19 ; Castle of Ordeals 1F
+0C ; 12 ;  11  13 ; Temple of Fiends
+0D ; 13 ;  6  -3  ; Earth Cave B1
+0E ; 14 ;  15  16 ; Gurgu Volcano B1
+0F ; 15 ;  6   16 ; Ice Cave B1
+10 ; 16 ;  0   0  ; Cardia
+11 ; 17 ;  29  4  ; Bahamut's Room B1
+12 ; 18 ;  0   1  ; Waterfall
+13 ; 19 ;  19  4  ; Dwarf Cave
+14 ; 20 ;  23  24 ; Matoya's Cave
+15 ; 21 ;  18  23 ; Sarda's Cave
+16 ; 22 ;  8   3  ; Marsh Cave B1
+17 ; 23 ;  16  15 ; Mirage Tower 1F
+18 ; 24 ;  19  14 ; Coneria Castle 2F
+19 ; 25 ;  19  19 ; Castle of Ordeals 2F
+1A ; 26 ;  19  19 ; Castle of Ordeals 3F
+1B ; 27 ;  1   1  ; Marsh Cave B2
+1C ; 28 ;  1   2  ; Marsh Cave B3
+1D ; 29 ;  6   2  ; Earth Cave B2
+1E ; 30 ;  1   4  ; Earth Cave B3
+1F ; 31 ; -3   3  ; Earth Cave B4
+20 ; 32 ;  8  -8  ; Earth Cave B5
+21 ; 33 ;  16  15 ; Gurgu Volcano B2
+22 ; 34 ;  6   6  ; Gurgu Volcano B3
+23 ; 35 ;  7   7  ; Gurgu Volcano B4
+24 ; 36 ;  0   0  ; Gurgu Volcano B5
+25 ; 37 ;  1   16 ; Ice Cave B2
+26 ; 38 ;  1   7  ; Ice Cave B3
+27 ; 39 ;  10  3  ; Bahamut's Room B2
+28 ; 40 ;  16  15 ; Mirage Tower 2F
+29 ; 41 ;  23  23 ; Mirage Tower 3F
+2A ; 42 ;  3   2  ; Sea Shrine B5
+2B ; 43 ; -2   5  ; Sea Shrine B4
+2C ; 44 ;  4   9  ; Sea Shrine B3
+2D ; 45 ; -1   7  ; Sea Shrine B2
+2E ; 46 ;  16  16 ; Sea Shrine B1
+2F ; 47 ;  12  9  ; Sky Palace 1F
+30 ; 48 ;  12  10 ; Sky Palace 2F
+31 ; 49 ;  8   4  ; Sky Palace 3F
+32 ; 50 ; -4  -4  ; Sky Palace 4F
+33 ; 51 ;  24  4  ; Sky Palace 5F
+34 ; 52 ;  11  13 ; Temple of Fiends 1F
+35 ; 53 ;  11  13 ; Temple of Fiends 2F
+36 ; 54 ;  11  13 ; Temple of Fiends 3F
+37 ; 55 ;  12  15 ; Temple of Fiends 4F - Earth
+38 ; 56 ;  4   2  ; Temple of Fiends 5F - Fire
+39 ; 57 ;  16  16 ; Temple of Fiends 6F - Water
+3A ; 58 ;  5   12 ; Temple of Fiends 7F - Wind
+3B ; 59 ;  16  15 ; Temple of Fiends 8F - Chaos
+3C ; 60 ;  23  20 ; Titan's Tunnel

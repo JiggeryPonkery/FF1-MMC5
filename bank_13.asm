@@ -113,6 +113,13 @@ lut_ZoomMapTilesetID:
 .byte $08 ; 3B - Temple_of_Fiends_8F_Chaos     
 .byte $04 ; 3C - Titans_Tunnel 
 
+
+;; FillTile is a 4x4 area of the map (aligned to grid) that contains all the same tile palette
+;; this palette color will then be used to fill the map's background
+;; the easiest way to find the right tile is to use Mesen's PPU viewer,
+;; scan over the CHR viewer, and use the Tile Index when you find the tile cluster to use
+;; You could even make a 4x4 fill pattern by putting some tiles off-screen on your map!
+
 lut_MapTilesetFillTile:
 .byte $FF ; 00 - CONERIA
 .byte $FF ; 01 - PRAVOKA
@@ -120,7 +127,7 @@ lut_MapTilesetFillTile:
 .byte $FF ; 03 - MELMOND
 .byte $FF ; 04 - CRESCENT_LAKE
 .byte $00 ; 05 - GAIA
-.byte $DF ; 06 - ONRAC
+.byte $F0 ; 06 - ONRAC
 .byte $FF ; 07 - LEIFEN
 .byte $FF ; 08 - Coneria_CASTLE_1F
 .byte $FF ; 09 - ELFLAND_CASTLE
@@ -389,7 +396,7 @@ lut_TownMiniMapTileset: ; 1
   .BYTE 5,5,5,5,5,5,5,0, 6,5,5,5,5,5,5,5
   .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,5,5,5
   .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,5,5,5
-  .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,3,5,2
+  .BYTE 5,5,5,5,5,5,5,5, 5,5,5,5,5,3,2,2
 
 ; 0, 4 = yellow - floor, fluff items, exit
 ; 1, 5 = grey - wall, bridge
@@ -400,8 +407,8 @@ lut_CastleMiniMapTileset: ; 2
   .BYTE 1,1,1,1,0,1,1,0, 1,0,0,0,1,0,0,0
   .BYTE 0,0,0,0,0,0,0,0, 0,0,0,0,7,0,0,0
   .BYTE 0,3,0,0,0,0,0,0, 0,0,0,0,0,0,0,0
-  .BYTE 1,0,1,1,1,1,5,5, 2,7,0,5,0,7,0,0
-  .BYTE 7,0,0,0,5,5,0,0, 5,5,0,0,2,2,2,2
+  .BYTE 1,0,1,1,1,1,5,5, 2,0,0,5,0,0,0,0
+  .BYTE 0,0,0,0,5,5,0,0, 5,5,0,0,2,2,2,2
   .BYTE 2,2,2,2,2,2,0,0, 2,0,0,0,0,0,0,0
   .BYTE 0,7,7,2,2,2,2,2, 2,2,2,2,2,2,2,2
   .BYTE 2,2,2,2,2,2,2,2, 2,0,0,0,0,0,0,0  
@@ -644,8 +651,6 @@ EnterMinimap:
     STA $2005
     STA $2005
     STA $2001
-   ; STA $4015                ; turn off PPU and APU
-   ; STA $5015                ; and silence the MMC5 APU. (JIGS)    
     STA joy_b                
     STA joy_select
     LDA soft2000             ; clear the sprites-as-background-tiles flag
@@ -667,8 +672,6 @@ EnterMinimap:
   : JSR LongCall
     .WORD RestoreMapMusic
     .byte BANK_MUSIC
-    ;; why isn't this working? music_track is 0 ... 
-    
     RTS
     
     
@@ -853,7 +856,7 @@ MiniMapFrame:
     ;JSR CallMusicPlay_L    ; keep the music playing
     ;; at this point, the next frame may have started, so its important
     ;; that soft2000 has the sprites-as-background-tiles bit set before the screen is turned on
-    ;; (not that if CallMusicPlay is not done here, its probably NOT started on the next frame!)
+    ;; (note that if CallMusicPlay is not done here, its probably NOT started on the next frame!)
 
     LDA #0
     STA joy_a              ; clear A and B button catchers

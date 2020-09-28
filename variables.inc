@@ -85,23 +85,27 @@ orb_air         = unsram + $3E
 orb_earth       = unsram + $3F
 
 inv_equip       = unsram + $40
-inv_weapon      = inv_equip        ; 64 bytes
-inv_armor       = inv_weapon + $40 ; 64 bytes
-inv_magic       = inv_armor + $80  ; 64 bytes, 1 per spell
+inv_weapon      = unsram + $40 ; 32 bytes compressed, 2 weapons per byte
+inv_armor       = unsram + $60 ; 32 bytes compressed, 2 armors per byte
+inv_magic       = unsram + $80 ; 64 bytes compressed, 2 spells per byte 
+inv_enskill     = unsram + $C0 ; 48 bytes compressed, 2 attacks per byte
+inv_skills      = unsram + $D8 ; 16 bytes compressed, 2 skills per byte
+inv_class       = unsram + $E8 ; 16 bytes compressed, 2 skills per byte
+
+;ONLY NEEDS 4 BYTES FOR SKILLS AND CLASSES!! 
 
 ch_stats          = unsram + $0100 ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00 
 ch_sprite         = ch_stats + $01
-;                 = ch_stats + $02
-;                 = ch_stats + $03
-;                 = ch_stats + $04
-;                 = ch_stats + $05
+ch_skill1         = ch_stats + $02
+ch_skill2         = ch_stats + $03
+ch_jobexp         = ch_stats + $04
+ch_joblevel       = ch_stats + $05
 ;                 = ch_stats + $06
 ;                 = ch_stats + $07
-;                 = ch_stats + $08
-;                 = ch_stats + $09
-;                 = ch_stats + $0A
-;                 = ch_stats + $0B
+ch_damagebackup   = ch_stats + $08
+ch_defensebackup  = ch_stats + $09
+ch_basehp         = ch_stats + $0A ; 0B - 2 bytes
 ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
 ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
 
@@ -142,12 +146,8 @@ ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
 ch_name           = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E - 7 bytes 
 ch_ailments       = ch_stats + $3F
 
-ch_spells         = ch_stats + $100 ; 39, 3A, 3B, 3C, 3D, 3E, 3F - 8 bytes
-ch_classlevels    = ch_spells + $18
-ch_damagebackup   = ch_classlevels + $1E
-ch_defensebackup  = ch_classlevels + $1F
-ch_basehp         = ch_classlevels + $20 
-
+ch_spells         = ch_stats + $100 ; $18 bytes
+ch_classlevels    = ch_spells + $18 ; $28 bytes
 
 game_flags        = unsram + $0300  ; must be on page bound
 
@@ -278,7 +278,7 @@ submenu_targ            = $58 ; also used in battle for the ether menu
 ;; Dialogue Things - shared
 talkobj                 = $51 ; shared -- object you're talking to on SM
 dlg_itemid              = $52 ; shared
-DialogueBank      = $53 ; important for dialogue
+DialogueBank            = $53 ; important for dialogue
 treasure_offset         = $54 ; stores the chest's item name printing code (weapons and armor use a different code)
 
 ;; Menu Things - Shared 
@@ -313,12 +313,13 @@ shop_listdrawn          = $6D
 shop_listactive         = $6E
 char_index              = $6F ; for printing character stats in menus and sprites in battle
 
-ItemToUnequip           = $70
-ItemToEquip             = $71
-slotcheck               = $72
-equip_impossible        = $73
-shop_x_price            = $74
-shop_drawmarks          = $75
+ItemToUnequip           = $70 ; also used in equip menu
+ItemToEquip             = $71 ; also used in equip menu
+ItemOverflow            = $72 ; also used in equip menu
+slotcheck               = $73
+equip_impossible        = $74 ; also used in equip menu
+shop_x_price            = $75
+shop_drawmarks          = $76
 
 ;; Battle Things - Shared
 
@@ -377,6 +378,8 @@ ZoomMapPointer          = $80 ; for mini map stuff
 ZoomMapTilesetPtr       = $82
 MiniMap_DrawBuf         = $84 
 MiniMap_OWDrawBuf       = $86 
+
+EquipPermissions        = $8C ; 8D, 8E, 8F ; 4 bytes
 
 CharStatsPointer        = $80 
 CharBackupStatsPointer  = $82 ; these get loaded up at the same time
@@ -664,6 +667,9 @@ LevelUp_StatIndex   = $6004
 LevelUp_StatBuffer  = $6005 ; 6, 7, 8, 9 - 5 bytes
 
 TileShiftBuffer     = $6000
+
+EquipStats_RAM      = $6000
+SpellData_RAM       = $6000
 
 TempSpellList        = $6000 ; to 6017 ; 24 bytes
 TempSpellListIndex   = $6018
@@ -961,7 +967,10 @@ btltmp_backseat         = $69F0 ; $10 byte buffer -- backup of btltmp
 
 
 lut_MagicData   = $7000  ; $400 bytes
-lut_EnemyAi     = $7400  ; $90 bytes
+lut_EnemyAi     = $7100  ; $90 bytes
+;; JIGS - these two no longer needed once magic loading works better
+
+TempSpriteLoading    = $7400 ; $E0 bytes - used in battle
 
 PlayerHPString_RAM   = $74E0 ; $20 bytes
 

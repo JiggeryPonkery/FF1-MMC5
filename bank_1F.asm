@@ -54,10 +54,10 @@
 .export LoadBridgeSceneGFX_Menu
 .export LoadMenuCHRPal
 .export LoadPrice
-.export LoadPriceZ
+.export LoadPrice_Long
 .export LoadShopCHRPal
 .export LongCall
-.export Magic_ConvertBitsToBytes
+;.export Magic_ConvertBitsToBytes
 .export MenuCondStall
 .export MultiplyXA
 .export PaletteFrame
@@ -86,11 +86,17 @@
 .export DrawMenuString_CharCodes_FixedBank
 .export LoadCHR_MusicPlay
 .export ReloadBridgeNT
+.export ADD_ITEM
+.export REMOVE_ITEM
+.export DOES_ITEM_EXIST
+.export Set_Inv_Magic
+.export Set_Inv_Weapon
+.export SwapPRG_L
+.export ItemDescriptions
 
 .import AssignMapTileDamage_Z
 .import BattleIcons
 .import ClearNT
-.import DumbBottleThing
 .import EnterBridgeScene_L
 .import EnterEndingScene
 .import EnterIntroStory
@@ -138,11 +144,9 @@
 .import lut_BattlePalettes
 .import lut_BattleRates
 .import lut_BtlBackdrops
-.import lut_CommonStringPtrTbl
 .import lut_DialoguePtrTbl
 .import lut_DialoguePtrTbl_2
 .import lut_Domains
-.import lut_EnemyAttack
 .import lut_EntrTele_Map
 .import lut_EntrTele_X
 .import lut_EntrTele_Y
@@ -150,7 +154,6 @@
 .import lut_ExitTele_Y
 .import lut_InitGameFlags
 .import lut_InitUnsramFirstPage
-.import lut_ItemNamePtrTbl
 .import lut_ItemPrices
 .import lut_MapObjGfx
 .import lut_MapObjects
@@ -169,9 +172,6 @@
 .import lut_SMTilesetTSA
 .import lut_ShopCHR
 .import lut_Tilesets
-.import lut_Treasure
-.import lut_Treasure_2
-.import lut_WeaponArmorNamePtrTbl
 .import lut_MapObjCHR
 .import lut_OWMapObjCHR
 .import lut_SmallMapObjCHR
@@ -188,8 +188,31 @@
 .import Bridge_LoadPalette
 .import Ending_LoadPalette
 .import LoadMenuOrbs
-.import lut_ClassSkills
-
+.import lut_MapBanks
+.import LoadSmallMapPalettes
+.import lut_MapObjectCount
+.import DecompressSMAttributes
+.import lut_ItemNames_Low
+.import lut_ItemNames_High
+.import lut_Treasure
+.import lut_Treasure_2
+.import lut_EquipmentNames_Low
+.import lut_EquipmentNames_High
+.import lut_MagicNames_Low
+.import lut_MagicNames_High
+.import lut_PriceTable_Low
+.import lut_PriceTable_High
+.import lut_TreasureTable_Low
+.import lut_TreasureTable_High
+.import lut_BattleMessages_Low
+.import lut_BattleMessages_High
+.import lut_EnemyNames_Low
+.import lut_EnemyNames_High
+.import lut_GoldNames_Low
+.import lut_GoldNames_High
+.import LoadPlayerMapPalette
+.import lut_ItemDescStrings_Low
+.import lut_ItemDescStrings_High
 
 .segment "BANK_FIXED"
 
@@ -843,16 +866,9 @@ LoadOWTilesetData:
     STA tmp+3
 
     LDX #4              ; high byte of loop counter ($400 iterations)
-    LDY #0              ; low byte of loop counter and index
-
-  @Loop:
-    LDA (tmp), Y        ; copy over a byte
-    STA (tmp+2), Y
-    INY                 ; inc our index
-    BNE @Loop           ; loop until it wraps
-
+   @Loop: 
+    JSR Copy256
     INC tmp+1           ; once it wraps, inc high bytes of both pointers
-    INC tmp+3
     DEX                 ; and decrement overall loop counter
 
     BNE @Loop           ; and keep looping until that expires ($400 iterations)
@@ -1395,7 +1411,7 @@ OWCanMove:
     ;LDA #$01             ; otherwise, we need to indicate the player is entering the caravan
     ;STA entering_shop    ; set entering_shop to nonzero
     INC entering_shop
-    LDA #$7F
+    LDA #SHOP_CARAVAN_ID ; 90
     STA shop_id          ; shop ID=70 ($46) = caravan's shop ID
 
     @Success_2:
@@ -3169,86 +3185,39 @@ LoadSMTilesetData:
     LDA #BANK_SMINFO          ; swap to bank containing desired info
     JSR SwapPRG_L
 
-    LDA #0
-    STA tmp                   ; zero low bytes of source pointer
-    STA tmp+2                 ; and dest pointer
-
  ; load tileset properties
 
-    LDA cur_tileset           ; set src pointer to point to lut_SMTilesetProp+(tileset*256)
-    CLC                       ; 256 bytes of tile properties per tileset 
-    ADC #>lut_SMTilesetProp
+    LDA cur_tileset           ; set src pointer to point to lut_SMTilesetProp
+    ASL A
+    TAX
+    LDA lut_SMTilesetProp, X
+    STA tmp
+    LDA lut_SMTilesetProp+1, X
     STA tmp+1
-
-    LDA #>tileset_data        ; set high byte of dest pointer to point to tileset_data
+    
+    LDA #<tileset_data
+    STA tmp+2
+    LDA #>tileset_data        ; set destination to tileset_data
     STA tmp+3
 
     JSR Copy256               ; load 256 byte of tile properties (incs dest pointer)
+    ;; note this does not touch X
 
  ; load tileset TSA
 
-    LDA cur_tileset           ; get tileset
-    ASL A                     ; *2 (it's assumed this clears C as well -- tileset is less than $80)
-    ADC #>lut_SMTilesetTSA    ; set high byte of src pointer to lut_SMTilesetTSA+(tileset*512)
-    STA tmp+1                 ;  512 bytes of TSA data per tileset
+    LDA lut_SMTilesetTSA, X
+    STA tmp
+    LDA lut_SMTilesetTSA+1, X
+    STA tmp+1
 
     JSR Copy256               ; copy the first 256 bytes of tsa data
     INC tmp+1                 ; inc src pointer
     JSR Copy256               ; and copy the second 256 bytes of tsa data
 
  ; load tileset attributes
-
-    LDA cur_tileset           ; get tileset one more time
-    LSR A                     ; halve it (this sets C for an upcoming check)
-    ORA #>lut_SMTilesetAttr   ; set src ptr to point to lut_SMTilesetAttr+(tileset*128)
-    STA tmp+1
-
-    BCC @AttrLoop             ; if above LSR had carry, we need to adjust the low byte of the pointer
-      LDA #$80                ; to point to halfway in the page
-      STA tmp
-
-    @AttrLoop:
-      LDA (tmp), Y            ; copy $80 bytes
-      STA tsa_attr, Y
-      INY
-      BPL @AttrLoop           ; loop until Y=$80
-
- ; load map palettes
-
-    LDA #0
-    STA tmp+1
-
-    LDA cur_map             ; get current map and multiply it by $30, rotating carry into tmp+1
-    ASL A                   ; first, shift left by 4 to multiply by $10
-    ASL A
-    ASL A
-    ROL tmp+1
-    ASL A
-    ROL tmp+1
-    STA tmp
-
-    LDX tmp+1               ; load high byte into X.  Here X and A are *$10
-
-    ASL tmp                 ; shift RAM by 1 more to multiply by $20
-    ROL tmp+1
-
-    CLC                     ; add *$10 (in A,X) to the *$20 (in tmp,tmp+1) to get *$30
-    ADC tmp
-    STA tmp
-    TXA
-    ADC tmp+1
-    ORA #>lut_SMPalettes    ; OR high byte with high byte of palette LUT
-    STA tmp+1
-
-    LDY #0
-    @PalLoop:
-      LDA (tmp), Y          ; copy $30 bytes from source pointer
-      STA load_map_pal, Y   ; to load_map_pal
-      INY
-      CPY #$30
-      BCC @PalLoop
-
-    RTS                     ; then exit
+ 
+    JMP DecompressSMAttributes ; will also load the palette
+    ;JMP LoadSmallMapPalettes
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4148,9 +4117,7 @@ LoadStandardMapAndObjects:
     STA $2001             ; turn off PPU
 
     JSR LoadStandardMap   ; decompress the map
-    JSR LoadMapObjects    ; load up the objects for this map (townspeople/bats/etc)
-    RTS                   ; exit
-
+    JMP LoadMapObjects    ; load up the objects for this map (townspeople/bats/etc)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4192,8 +4159,8 @@ PrepStandardMap:
     STA tileprop+1
     STA entering_shop
 
-    JSR LoadSMCHR           ; load all the necessary CHR
     JSR LoadSMTilesetData   ; load tileset and TSA data
+    JSR LoadSMCHR           ; load all the necessary CHR    
 
     ;; JIGS - here, it checks all the tile properties of the map's tileset to see if there's a chest
     ;; When it finds a chest, it checks to see if its open
@@ -4673,25 +4640,51 @@ ScrollUpOneRow:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadStandardMap:
+   ; LDA #BANK_MAPS
+   ; JSR SwapPRG_L         ; swap to bank containing start of standard maps
+   ; LDA cur_map           ; get current map ID
+   ; ASL A                 ; double it, and throw it in X (to get index for pointer table)
+   ; TAX
+   ; LDA lut_SMPtrTbl, X   ; get low byte of pointer
+   ; STA tmp               ; put in tmp (low byte of our source pointer)
+   ; LDA lut_SMPtrTbl+1, X ; get high byte of pointer
+   ; TAY                   ; copy to Y (temporary hold)
+   ; AND #$3F              ; convert pointer to useable CPU address (bank will be loaded into $8000-FFFF)
+   ; ORA #$80              ;   AND with #$3F and ORA with #$80 will determine where in the bank the map will start
+   ; STA tmp+1             ; put converted high byte to our pointer.  (tmp) is now the pointer to the start of the map
+   ; ;                     ;   provided the proper bank is swapped in
+   ; TYA                   ; restore original high byte of pointer
+   ; ROL A
+   ; ROL A                  ; right shift it by 6 (high 2 bytes become low 2 bytes).
+   ; ROL A                  ;    These ROLs are a shorter way to do it than LSRs.  Effectively dividing the pointer by $4000
+   ; AND #$03               ; mask out low 2 bits (gets bank number for start of this map)
+   ; ORA #BANK_MAPS         ; Add standard map bank (use ORA to avoid unwanted carry from above ROLs)
+   ; STA tmp+5              ; put bank number in temp ram for future reference
+   ; JSR SwapPRG_L          ; swap to desired bank
+   ;
+   ; LDA #<mapdata
+   ; STA tmp+2
+   ; LDA #>mapdata     ; set destination pointer to point to mapdata (start of decompressed map data in RAM).
+   ; STA tmp+3         ; (tmp+2) is now the dest pointer, (tmp) is now the source pointer
+   ; JMP DecompressMap ; start decompressing the map
+
+
     LDA #BANK_MAPS
     JSR SwapPRG_L         ; swap to bank containing start of standard maps
     LDA cur_map           ; get current map ID
+    TAY
     ASL A                 ; double it, and throw it in X (to get index for pointer table)
     TAX
     LDA lut_SMPtrTbl, X   ; get low byte of pointer
     STA tmp               ; put in tmp (low byte of our source pointer)
     LDA lut_SMPtrTbl+1, X ; get high byte of pointer
-    TAY                   ; copy to Y (temporary hold)
+    ;TAY                   ; copy to Y (temporary hold)
     AND #$3F              ; convert pointer to useable CPU address (bank will be loaded into $8000-FFFF)
     ORA #$80              ;   AND with #$3F and ORA with #$80 will determine where in the bank the map will start
-    STA tmp+1             ; put converted high byte to our pointer.  (tmp) is now the pointer to the start of the map
-    ;                     ;   provided the proper bank is swapped in
-    TYA                   ; restore original high byte of pointer
-    ROL A
-    ROL A                  ; right shift it by 6 (high 2 bytes become low 2 bytes).
-    ROL A                  ;    These ROLs are a shorter way to do it than LSRs.  Effectively dividing the pointer by $4000
-    AND #$03               ; mask out low 2 bits (gets bank number for start of this map)
-    ORA #BANK_MAPS         ; Add standard map bank (use ORA to avoid unwanted carry from above ROLs)
+    STA tmp+1             ; put converted high byte to our pointer. 
+    TYA
+    TAX
+    LDA lut_MapBanks, X
     STA tmp+5              ; put bank number in temp ram for future reference
     JSR SwapPRG_L          ; swap to desired bank
  
@@ -4700,6 +4693,8 @@ LoadStandardMap:
     LDA #>mapdata     ; set destination pointer to point to mapdata (start of decompressed map data in RAM).
     STA tmp+3         ; (tmp+2) is now the dest pointer, (tmp) is now the source pointer
     JMP DecompressMap ; start decompressing the map
+
+
 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6352,8 +6347,7 @@ StartScreenWipe:
 UpdateJoy_L: 
 UpdateJoy:
     JSR ReadJoypadData
-    JSR ProcessJoyButtons
-    RTS
+    JMP ProcessJoyButtons
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6595,29 +6589,16 @@ WaitVBlank_NoSprites:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadMapPalettes:
+    LDA #BANK_MAPMANPAL
+    JSR SwapPRG_L           ; swap to bank containing mapman palettes
+    JSR LoadPlayerMapPalette
+
     LDX #$2F                ; X is loop counter
   @Loop:
       LDA load_map_pal, X   ; copy colors from temp palette buffer
       STA cur_pal, X        ; to our actual palette
       DEX
       BPL @Loop             ; loop until X wraps ($30 iterations)
-
-    LDA #BANK_MAPMANPAL
-    JSR SwapPRG_L           ; swap to bank containing mapman palettes
-
-    LDA ch_sprite           ; get lead party member's sprite
-    LSR A
-    LSR A
-    TAX
-
-    LDA lut_MapmanPalettes, X   ; use that as an index to get that class's mapman palette
-    STA cur_pal+$12
-    LDA lut_MapmanPalettes+1, X
-    STA cur_pal+$16
-    LDA lut_MapmanPalettes+2, X   
-    STA cur_pal+$13
-    LDA lut_MapmanPalettes+3, X
-    STA cur_pal+$17
     RTS                     ; then exit
 
 
@@ -7231,38 +7212,23 @@ DrawDialogueString:
       ;; 
       
       LDA treasure_offset
-      CMP #2
-      BNE @PrintItem
+      BEQ @PrintItem
       
       ;; print weapon or armor name instead
-      LDA dlg_itemid
-      ASL A
-      TAX 
+      LDX dlg_itemid
       DEX
-      DEX
-      LDA lut_WeaponArmorNamePtrTbl, X 
+      LDA lut_EquipmentNames_Low, X 
       STA text_ptr
-      LDA lut_WeaponArmorNamePtrTbl+1, X
+      LDA lut_EquipmentNames_High, X
       JMP @ItemPtrLoaded  
       
      @PrintItem:
-      LDA dlg_itemid       ; get the item ID whose name we're to print
-      ASL A                ; double it (2 bytes per pointer)
-      TAX                  ; and put in X for indexing
-      BCS @ItemHiTbl       ; if the item ID was >= $80, use second half of pointer table
-
-      @ItemLoTbl:
-        LDA lut_ItemNamePtrTbl, X    ; load pointer from first half if ID <= $7F
-        STA text_ptr
-        LDA lut_ItemNamePtrTbl+1, X
-        JMP @ItemPtrLoaded
-
-      @ItemHiTbl:
-        LDA lut_ItemNamePtrTbl+$100, X   ; or from 2nd half if ID >= $80
-        STA text_ptr
-        LDA lut_ItemNamePtrTbl+$101, X
-
-     @ItemPtrLoaded:
+      LDX dlg_itemid       ; get the item ID whose name we're to print
+      LDA lut_ItemNames_Low, X   ; or from 2nd half if ID >= $80
+      STA text_ptr
+      LDA lut_ItemNames_High, X
+      
+     @ItemPtrLoaded: 
       STA text_ptr+1
       JSR @Loop            ; once pointer is loaded, JSR to the @Loop to draw the item name
 
@@ -7489,72 +7455,58 @@ OpenTreasureChest:
     LDA #BANK_TREASURE       ; swap to bank containing treasure chest info
     JSR SwapPRG_L
 
-    LDA tileprop
-    LSR A                    ; shift the low bit into carry
-    BCC @ChestTable_2        ; check the first tile property to see if the chest is treasure table 1 or 2
+    LDA tileprop             ; get either 0 or 1 from the tile properties 
+    AND #$01                 ; 1 = first table of treasure
+    TAX                      ; 0 = second table of treasure
+    LDA lut_TreasureTable_Low, X
+    STA tmp
+    LDA lut_TreasureTable_High, X
+    STA tmp+1
     
-   @ChestTable_1: 
-    LDA tileprop+1           ; double chest index and put in X
-    ASL A                    ; carry set if its over $7F
-    TAX
-    BCC :+
+    LDA tileprop+1
+    ASL A
+    BCC @LoadTreasure
     
-    LDA lut_Treasure+$101, X ; if treasure chest is over $7F, check the second half of the LUT
+    INC tmp+1
+    
+   @LoadTreasure:
+    TAY 
+    LDA (tmp), Y
+    STA shop_type 
+    INY
+    LDA (tmp), Y
     STA dlg_itemid
-    LDA lut_Treasure+$100, X
-    STA treasure_offset
-    JMP @CheckTreasure
-    
-  : LDA lut_Treasure+1, X    ; use it to get the contents of the chest
-    STA dlg_itemid           ; record that as the item id so it can be printed in the dialogue box
-    LDA lut_Treasure, X 
-    STA treasure_offset
-    JMP @CheckTreasure
-    
-   @ChestTable_2: 
-    LDA tileprop+1           ; double chest index and put in X
-    ASL A                    ; this might set carry
-    TAX
-    BCC :+
-    
-    LDA lut_Treasure_2+$101, X ; if treasure chest is over $7F, check the second half of the LUT
-    STA dlg_itemid
-    LDA lut_Treasure_2+$100, X
-    STA treasure_offset
-    JMP @CheckTreasure
-    
-  : LDA lut_Treasure_2+1, X    ; use it to get the contents of the chest
-    STA dlg_itemid           ; record that as the item id so it can be printed in the dialogue box
-    LDA lut_Treasure_2, X 
+    LDA #0
     STA treasure_offset
   
    @CheckTreasure:
-    BEQ @Gold                ; if 0, its gold
-
-    CMP #1                   
-    BEQ @Item                ; if 1, its a consumable, key item, or magic spell
-
-    ;; Otherwise, its equipment!
-    
-    LDX dlg_itemid
-    LDA inv_weapon, X
-    CMP #99
-    BCS @TooFull
-        INC inv_weapon, X    ; says inv_weapon, but armor IDs are +$40 so it works
-        INC dlg_itemid
-        BNE @OpenChest
-    
-   @Gold:
+    LDA shop_type
+    CMP #SHOP_ARMOR          ; 0-1 = equipment
+    BCC @Equipment
+    CMP #SHOP_ITEM           ; 2-5 = magic
+    BCC @Magic
+    BEQ @Items               ; 6 = item
+  
+   ;; if it didn't branch to magic or items, its gotta be gold!
     LDA dlg_itemid
-    JSR LoadTreasurePrice    ; get the price of the item (the amount of gold in the chest)
+    JSR LoadPrice            ; get the price of the item (the amount of gold in the chest)
     JSR AddGPToParty         ; add that price to the party's GP
     JMP @OpenChest           ; then mark the chest as open, and exit
+  
+   @Equipment:
+    JSR Set_Inv_Weapon
+    INC treasure_offset      ; turn on treasure_offset for the Dialogue box drawing
+    BNE :+
     
-   @Item:
+   @Magic:
+    JSR Set_Inv_Magic
+  : LDA dlg_itemid
+    JSR ADD_ITEM
+    BCS @TooFull
+    BCC @OpenChest    
+    
+   @Items:
     LDA dlg_itemid
-    CMP #ITEM_MAGICSTART     ; if its a magic thing...
-    BCS @Magic
-    
     CMP #ITEM_KEYITEMSTART   ; if its a key item
     BCS @KeyItem
     
@@ -7570,16 +7522,6 @@ OpenTreasureChest:
    @TooFull:                  ; If too full...
     LDA #DLGID_CANTCARRY     ; select "You can't carry any more" text
     RTS
-    
-   @Magic:
-    SEC
-    SBC #ITEM_MAGICSTART     ; subtract magic offset to convert to spell ID
-    TAX
-    ;LDA inv_magic, X         ; check how many of that spell is stored
-    ;CMP #4                   ; no reason to have more than 4
-    ;BCS @TooFull            ;; JIGS - why not, you can sell 'em now
-       INC inv_magic, X      ;; and something else is wrong if you're pulling over 99 from chests
-       BNE @OpenChest
     
    @KeyItem:
     PHA
@@ -7776,7 +7718,7 @@ DrawMenuString_CharCodes_FixedBank:
 ;;  03 xx = price of item 'xx'
 ;;  04    = current GP amount
 ;;  05    = single line break
-;;  06    = JIGS - Common substring
+;;  06 xx = JIGS - Magic item name
 ;;  07 xx = JIGS - Weapon/Armor item name
 ;;  08    = JIGS - Decrement X
 ;;  09    = JIGS - print spaces (# of spaces in next byte)
@@ -7915,7 +7857,7 @@ ComplexStringControlCode:
     BEQ ComplexString_SingleLineBreak
     CMP #$06
     BNE :+
-        JMP ComplexString_CommonSubString
+        JMP ComplexString_MagicName
   : CMP #$07
     BNE :+
         JMP ComplexString_WeaponArmorName
@@ -7994,39 +7936,31 @@ ComplexString_ItemName:
     JSR ComplexString_GetNextByte        ;; get the item ID
     
 ComplexString_ItemName_FromCharCode:    
-    JSR ComplexString_DrawItemPrep       ;; swaps to the Item name bank, saves the pointer
-    JSR DumbBottleThing                  ;; checks if the item = bottle
-    BCS @itemHigh                        ; if doubling A caused a carry (item ID >= $80)... jump ahead
-      LDA lut_ItemNamePtrTbl, X          ;  if item ID was < $80... read pointer from first half of pointer table
-      STA text_ptr                       ;  low byte of pointer
-      LDA lut_ItemNamePtrTbl+1, X        ;  high byte of pointer (will be written after jump)
-      JMP :+
-      
-  @itemHigh:                             ; item high -- if item ID was >= $80
-      LDA lut_ItemNamePtrTbl+$100, X     ;  load pointer from second half of pointer table
-      STA text_ptr                       ;  write low byte of pointer
-      LDA lut_ItemNamePtrTbl+$101, X     ;  high byte (written next inst)
-
+    JSR DumbBottleThing                  ;; checks if the item = bottle, then flows into...
+    ;JSR ComplexString_DrawItemPrep      ;; swaps to the Item name bank, saves the pointer
+    LDA lut_ItemNames_Low, X    
+    STA text_ptr                     
+    LDA lut_ItemNames_High, X   
   : STA text_ptr+1                       ; finally write high byte of pointer
     JSR ComplexString_GetNext            ; recursively draw the substring
     JMP ComplexString_RestoreTextPointer ; then restore original string and continue
 
-ComplexString_CommonSubString:
+ComplexString_MagicName:
     JSR ComplexString_GetNextByte
     JSR ComplexString_DrawItemPrep
-      LDA lut_CommonStringPtrTbl, X   
+      DEX  
+      LDA lut_MagicNames_Low, X   
       STA text_ptr                       
-      LDA lut_CommonStringPtrTbl+1, X 
+      LDA lut_MagicNames_High, X 
       JMP :-
 
 ComplexString_WeaponArmorName:
     JSR ComplexString_GetNextByte
     JSR ComplexString_DrawItemPrep
-      DEX
       DEX                                  ; weapons and armour need to be shifted 1 to a 0 based ID
-      LDA lut_WeaponArmorNamePtrTbl, X   
+      LDA lut_EquipmentNames_Low, X   
       STA text_ptr                       
-      LDA lut_WeaponArmorNamePtrTbl+1, X 
+      LDA lut_EquipmentNames_High, X 
       JMP :-
 
 ComplexString_ItemPrice:
@@ -8045,15 +7979,6 @@ ComplexString_GetNextByte:         ;; support routine, just gets the next byte a
     BNE :+
       INC text_ptr+1
   : RTS
-  
-ComplexString_DrawItemPrep: ;; support routine for item names
-    TAX                     ;; backup item ID
-    LDA #BANK_ITEMS
-    JSR ComplexString_SaveTextPointer_Swap
-    TXA                     ; get item ID
-    ASL A                   ; double it (for pointer table lookup)
-    TAX                     ; put low byte in X for indexing   
-    RTS  
     
 ComplexString_CharacterStatCode:
     ;;;; Control Codes $10-13
@@ -8099,11 +8024,13 @@ ComplexString_CharCode_Name:
     JSR ComplexString_GetNext            ; recursively draw it
     JMP ComplexString_RestoreTextPointer ; then restore original string and continue
     
-ComplexString_CharCode_MagicName:
+ComplexString_CharCode_MagicName:   ; $40 - $57 ... 18 spell IDs total
+    ; carry is clear from the branch
+    ADC char_index                  ; add char_index 
     SEC
-    SBC #$40                        ; subtract #$14 to get it zero based
-    TAX                             ; use that as an index
-    LDA TempSpellList, X 
+    SBC #$40                        ; subtract #$40 to get it zero based
+    TAX
+    LDA ch_spells, X 
     BEQ :+                          ; if 0, skip ahead and draw nothing (no spell)
       CLC
       ADC #ITEM_MAGICSTART-1
@@ -8132,7 +8059,7 @@ ComplexString_CharCode_AilmentIcon:
     LDA #$EB  ; poison
     BNE @DrawIcon
   : LSR A  
-    BCC :+
+    BCC @Healthy
     LDA #$EC  ; blind
     BNE @DrawIcon
    @Healthy: 
@@ -8172,6 +8099,23 @@ ComplexString_RestoreTextPointer:
     STA cur_bank
     JSR SwapPRG_L              ; swap the data bank back in
     JMP ComplexString_GetNext  ;  and continue with text processing
+
+DumbBottleThing:
+    CMP #BOTTLE
+    BEQ @ChangeBottleName
+    CMP #LEWDS
+    BNE ComplexString_DrawItemPrep
+
+   @ChangeLewdsName:
+    LDA #LEWDS_ALT
+    BNE ComplexString_DrawItemPrep
+
+   @ChangeBottleName:
+    LDA #BOTTLE_ALT
+
+ComplexString_DrawItemPrep: ;; support routine for item names
+    TAX                     ;; backup item ID
+    LDA #BANK_ITEMS
 
 ComplexString_SaveTextPointer_Swap:
    ; STA cur_bank 
@@ -10041,45 +9985,33 @@ lut_2x2MapObj_Down:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LoadMapObjects:
+    LDA #BANK_OBJINFO     ; swap to the bank containing map object information
+    JSR SwapPRG_L
+
     LDA #<mapobj
     STA tmp+14
     LDA #>mapobj
     STA tmp+15      ; set dest pointer to point to 'mapobj'
 
-    LDA #$0F        ; set loop counter to $0F ($0F objects to load per map)
-    STA tmp+11
+    LDA #0          ; JIGS - first, clear out any previous data
+    TAY
+  @ClearLoop:
+    STA (tmp+14), Y
+    DEY
+    BNE @ClearLoop
 
-   ; LDA #0
-   ; STA tmp+13      ; zero high byte of source pointer
-    LDA cur_map     ; get current map
-   ; ASL A           ;  all this shifting and mathmatics is to multiply by $30
-   ; ROL tmp+13      ;    ($30 bytes per map)
-   ; ASL A           ;  This is done by shifting to get *$20 and *$10, then adding them together
-   ; ROL tmp+13
-   ; ASL A
-   ; ROL tmp+13
-   ; ASL A
-   ; ROL tmp+13
-   ; LDY tmp+13
-   ; STA tmp+12
-   ; ASL tmp+12
-   ; ROL tmp+13
-   ; CLC
-   ; ADC tmp+12
-   ; STA tmp+12
-   ; TYA
-   ; ADC tmp+13            ;  here, we have "cur_map * $30"
-   
-    LDX #$30
-    JSR MultiplyXA
+    LDX cur_map
+    LDA lut_MapObjectCount, X
+    BEQ @NoObjects
+    STA tmp+11      ; set loop counter to $0F ($0F objects to load per map)
+
+    LDA cur_map
+    ASL A
+    TAX 
+    LDA lut_MapObjects, X
     STA tmp+12
-    TXA
-    CLC
-    ADC #>lut_MapObjects  ;  add the pointer to the LUT to the high byte to get the final source pointer
-    STA tmp+13            ;  tmp+12 now points to "lut_MapObjects + (cur_map * $30)"
-
-    LDA #BANK_OBJINFO     ; swap to the bank containing map object information
-    JSR SwapPRG_L
+    LDA lut_MapObjects+1, X
+    STA tmp+13
 
   @Loop:
      LDY #0
@@ -10096,7 +10028,7 @@ LoadMapObjects:
 
      DEC tmp+11           ; decrement loop counter
      BNE @Loop            ; and loop until all $F objects have been loaded
-
+   @NoObjects:
     RTS        ; then exit!
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10121,49 +10053,49 @@ LoadSingleMapObject:
     LDY #0                  ; reset Y to zero so we can start copying the rest of the object info
     TAX                     ; put object ID in X for indexing
     LDA game_flags, X       ; get the object's visibility flag
-    AND #$01                ; isolate it
+    AND #GMFLG_OBJVISIBLE   ; isolate it
     BEQ :+                  ;   if the object is invisible, replace the ID with zero (no object)
       TXA                   ;   otherwise, restore the raw ID into A (unchanged)
-:   STA (tmp+14), Y         ; record raw ID (or 0 if sprite is invisible) as the 'to-use' object ID
+  : STA (tmp+14), Y         ; record raw ID (or 0 if sprite is invisible) as the 'to-use' object ID
 
     INY                     ; inc Y to look at next source byte
     LDA (tmp+12), Y         ; get next source byte (X coord and behavior flags)
-    STA tmp+6               ; back it up
+    PHA                     ; back it up
     AND #$C0                ; isolate the behavior flags
     STA (tmp+14), Y         ; record them
 
     INY                     ; inc Y to look at next source byte
     LDA (tmp+12), Y         ; get next source byte (Y coord)
-    STA tmp+7               ; back it up
-    LDA tmp+6               ; reload backed up X coord
+    TAX                     ; back it up
+    PLA                     ; reload backed up X coord
     AND #$3F                ; mask out the low bits (remove behavior flags, wrap to 64 tiles)
     STA (tmp+14), Y         ; and record it as this object's physical X position
     LDY #<mapobj_gfxX
     STA (tmp+14), Y         ;  and as the object's graphical X position
 
-    LDA tmp+7               ; restore backed up Y coord
+    TXA                     ; restore backed up Y coord
     AND #$3F                ; isolate low bits (wrap to 64 tiles)
     LDY #<mapobj_physY
     STA (tmp+14), Y         ; record as physical Y coord
     LDY #<mapobj_gfxY
     STA (tmp+14), Y         ; and graphical Y coord
 
-    LDY #<mapobj_ctrX       ; zero movement counters and speed vars
-    LDA #0
-    STA (tmp+14), Y
-    INY
-    STA (tmp+14), Y
-    INY
-    STA (tmp+14), Y
-    INY
-    STA (tmp+14), Y
-
-    LDY #<mapobj_movectr    ; zero some other stuff
-    STA (tmp+14), Y
-    INY
-    STA (tmp+14), Y
-    INY
-    STA (tmp+14), Y
+   ; LDY #<mapobj_ctrX       ; zero movement counters and speed vars
+   ; LDA #0
+   ; STA (tmp+14), Y
+   ; INY
+   ; STA (tmp+14), Y
+   ; INY
+   ; STA (tmp+14), Y
+   ; INY
+   ; STA (tmp+14), Y
+   ;
+   ; LDY #<mapobj_movectr    ; zero some other stuff
+   ; STA (tmp+14), Y
+   ; INY
+   ; STA (tmp+14), Y
+   ; INY
+   ; STA (tmp+14), Y
 
     LDY #<mapobj_tsaptr      ; set the object's TSA pointer so that they're facing downward
     LDA #<lut_2x2MapObj_Down
@@ -10359,6 +10291,10 @@ LoadPlayerMapmanCHR:
     LDX #1          ; X=1  (load 1 row of tiles)
     LDA #$10        ; A=$10 (high byte of dest address:  $1000)
     JSR CHRLoadToA  ; jump to CHR loader
+    LDA mapflags
+    LSR A
+    BCC LoadOWObjectCHR
+    RTS
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10511,39 +10447,22 @@ LoadMapObjCHR:
     LDA #$00
     STA $2006      ; set PPU Addr to $1100 (start of map object CHR)
 
-  ;  LDA #0
-  ;  STA tmp+5      ; 0 -> tmp+5
+    LDA #BANK_OBJINFO  ; swap to bank containing object info
+    JSR SwapPRG_L
+
     LDA cur_map    ; get current map ID
-  ;  ASL A          ; multiply by 16 (rotating carry into tmp+5)
-  ;  ROL tmp+5
-  ;  ASL A
-  ;  ROL tmp+5
-  ;  ASL A
-  ;  ROL tmp+5
-  ;  ASL A
-  ;  ROL tmp+5
-  ;  STA tmp+4      ; tmp+4 is now 16-bit value:  map_id*16
-
-  ;  LDY tmp+5      ; put high byte in Y (temporary).
-  ;  ASL tmp+4      ; shift again (*32)
-  ;  ROL tmp+5      ; tmp+4 is now 16-bit value:  map_id*32... A,Y are now 16-bit value:  map_id*16
-
-  ;  CLC
-  ;  ADC tmp+4
-  ;  STA tmp+4
-  ;  TYA
-  ;  ADC tmp+5             ; add them together (effectively multiplying by 48).  Carry after this is impossible even if map_id == FF
-  
-    LDX #48
-    JSR MultiplyXA
+    ASL A
+    TAX
+    LDA lut_MapObjects, X
     STA tmp+4
-    TXA
-    CLC
-    ADC #>lut_MapObjects  ; add to the high byte of our pointer
-    STA tmp+5             ; (tmp+4) now effectively a pointer to:  lut_MapObjects + map_id*48
-
+    LDA lut_MapObjects+1, X
+    STA tmp+5
+    
+    LDX cur_map
+    LDA lut_MapObjectCount, X
+    STA tmp+6
+    
     LDY #0         ; zero out Y (our source index)
-
   @ObjLoop:
     LDA #BANK_OBJINFO  ; swap to bank containing object info
     JSR SwapPRG_L
@@ -10570,8 +10489,8 @@ LoadMapObjCHR:
     CLC
     ADC #$03         ; increment it by 3
     TAY              ; put it back in Y
-    CMP #15*3        ; loop until 15 objects have been loaded
-    BCC @ObjLoop
+    DEC tmp+6        ; loop until proper amount of objects have been loaded
+    BNE @ObjLoop
 
     RTS              ; then exit
 
@@ -11003,46 +10922,49 @@ lutCursor2x2SpriteTable:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-LoadPriceZ:
+LoadPrice_Long:
     JSR LoadPrice
-    LDA #BANK_Z
+    LDA #BANK_BATTLE
     JMP SwapPRG_L
 
 LoadPrice:
-    STA tmp+2
-    
-    LDA shop_type
-    CMP #2
-    BCS :+
-    
-    DEC tmp+2
-    LDA tmp+2
-    ASL A        ; double item index (2 bytes per price)
-    STA tmp+2    ; store low byte in $12
-    LDA #>WeaponArmorPrices
-    JMP :++
-
-  : LDA tmp+2
+    ASL A             ; double item ID
+    TAY               ; backup item ID
+    DEY 
+    DEY               ; convert to 0-based
   
-LoadTreasurePrice:
-    ASL A
-    STA tmp+2
-    LDA #>lut_ItemPrices
-  : ADC #0
-    STA tmp+3                  ; store as high byte of pointer at tmp+3
-    
     LDA #BANK_ITEMPRICES
     JSR SwapPRG_L  ; swap to bank A (for item prices)
-
-    LDY #0         ; zero Y (our source index)
-    LDA (tmp+2), Y ; get low byte of price
+  
+    LDX shop_type
+    LDA lut_PriceTable_Low, X
+    STA tmp+1
+    LDA lut_PriceTable_High, X
+    STA tmp+2
+    
+    CPX #SHOP_WHITEMAGIC
+    BCC @Normal
+    CPX #SHOP_ITEM
+    BCS @Normal
+    
+   @MagicPrices:
+    LDA shop_curitem ; get the spell ID
+    LSR A            ; shift to get spell level
+    LSR A
+    LSR A
+    LSR A            ; bump off that last bit of the low nybble
+    ASL A            ; then * 2  
+    TAY              ; spells only have 8 prices
+    
+   @Normal: 
+    LDA (tmp+1), Y ; get low byte of price
     STA tmp
     INY
-    LDA (tmp+2), Y ; and high byte
+    LDA (tmp+1), Y ; and high byte
     STA tmp+1
 
     LDA #0
-    STA tmp+2       ; 3rd byte is always 0 (no item costs more that 65535)
+    STA tmp+2       ; 3rd byte is always 0 (no item costs more than 65535)
 
     LDA #BANK_MENUS ; swap back to bank E
     JMP SwapPRG_L   ; and return
@@ -11070,7 +10992,7 @@ DrawEquipMenuStrings:
     LDA #0                       ; string will be placed at str_buf+$40, and will be 8 bytes long
     STA str_buf+$48              ; so put the null terminator at the end right-off
     
-    LDA CharacterIndexBackup
+    LDA char_index
     CLC
     ADC #ch_righthand - ch_stats
     STA MMC5_tmp    
@@ -11125,13 +11047,11 @@ DrawEquipMenuStrings:
      ; BNE @NotEquipped           ; then skip ahead (always branches)
 
   @LoadName:                     ; if the slot is not empty....
-    ASL A                        ; double it
     TAX                          ; and stuff it in X to load up the pointer
-    DEX
-    DEX                          ; basically subtracts 1 from the item ID
-    LDA lut_WeaponArmorNamePtrTbl, X    ; fetch the pointer and store it to (tmp)
+    DEX                          ; subtract 1 from the item ID
+    LDA lut_EquipmentNames_Low, X  ; fetch the pointer and store it to (tmp)
     STA tmp
-    LDA lut_WeaponArmorNamePtrTbl+1, X
+    LDA lut_EquipmentNames_High, X
     STA tmp+1
 
     LDY #$07                     ; copy 8 characters from the item name (doesn't look for null termination)
@@ -11263,7 +11183,7 @@ ItemBoxFilled:
   @StartDrawingItems:
     LDA #0
     STA item_box, X    ; put a null terminator at the end of the item box (needed for following loop)
-    STA tmp+3         ; also reset the cursor to 0 (which will be used as a loop counter below)
+    STA tmp+3          ; also reset the cursor to 0 (which will be used as a loop counter below)
     STA tmp+2          ; now letter position counter
  
   @DrawItemLoop:
@@ -11274,16 +11194,13 @@ ItemBoxFilled:
     LDA item_box, X    ; index the item box to see what item name we're to draw
     BEQ @Exit          ; if the item ID is zero, it's a null terminator, which means we're done
 
-    ASL A              ; otherwise double the item ID
+    PHA                ; push the item ID
     TAX                ;  and put it in X to index (will be used to index the string pointer table)
 
-    LDA lut_ItemNamePtrTbl, X   ; get the pointer to this item name
+    LDA lut_ItemNames_Low, X   ; get the pointer to this item name
     STA tmp                     ;  and put it in (tmp)
-    LDA lut_ItemNamePtrTbl+1, X
+    LDA lut_ItemNames_High, X
     STA tmp+1
-    
-    TXA
-    PHA
 
     ;; JIGS quite a few changes in here, starting with 12 letter quest item names and 8 letter consumable names!
     ;; Quest items draw 12 characters out, while consumables look for a null terminator.
@@ -11300,12 +11217,11 @@ ItemBoxFilled:
       INY 
       CPY #12
       BNE @CopyLoop        ; loop until Y wraps (copies 12 characters)
-      PLA
+      PLA                  ; pull the item ID  
       JMP @SkipQty    
       
-  : STX tmp+2               ; backup letter postion counter
-    PLA                     ; put X back in A and right-shift it
-    LSR A                   ; this restores the unedited item ID number
+  : STX tmp+2               ; backup letter position counter
+    PLA                     ; pull the item ID
     CMP #item_qty_stop - items ; double-check its a quest item
     BCS @SkipQty
     TAX                     ; put item ID in X
@@ -12349,12 +12265,12 @@ DrawMagicBox_String:
     LDA TempSpellList, X
     BEQ @Blank
     CLC
-    ADC #MG_START-1
-    ASL A
+    ADC #01 ;#MG_START-1
+    ;ASL A
     TAX
-    LDA lut_ItemNamePtrTbl, X
+    LDA lut_ItemNames_Low, X
     STA tmp
-    LDA lut_ItemNamePtrTbl+1, X
+    LDA lut_ItemNames_High, X
     STA tmp+1
 
     LDX tmp+2
@@ -12493,12 +12409,12 @@ DrawItemBox_String:
     BMI @Exit          ; exit if it hits an $FF
 
     PHA                ; otherwise, back it up
-    ASL A              ; then double the item ID
+    ;ASL A              ; then double the item ID
     TAX                ; and put it in X to index (will be used to index the string pointer table)
 
-    LDA lut_ItemNamePtrTbl, X   ; get the pointer to this item name
+    LDA lut_ItemNames_Low, X   ; get the pointer to this item name
     STA tmp                     ;  and put it in (tmp)
-    LDA lut_ItemNamePtrTbl+1, X
+    LDA lut_ItemNames_High, X
     STA tmp+1
     
     LDX tmp+2
@@ -12549,28 +12465,10 @@ SetCReturnBank:
     JMP SwapPRG_L
     
 
-SkillText_LUT:
-.byte $00 ; Fighter
-.byte $01 ; Thief
-.byte $02 ; BBelt
-.byte $03 ; RedMage
-.byte $04 ; WMage
-.byte $05 ; BMage
-.byte $1E ; *
-.byte $1E ; *
-.byte $00 ; Knight
-.byte $01 ; Ninja
-.byte $02 ; Master
-.byte $03 ; RedWiz
-.byte $04 ; WWiz
-.byte $05 ; BWiz
-.byte $1E ; *
-.byte $1E ; *
-
 CommandString:
 .BYTE $FF,$FF,$8F,$AC,$AA,$AB,$B7,$FF,$FF,$90,$B8,$A4,$B5,$A7,$01   ; "Fight__Guard"
 .BYTE $FF,$FF,$96,$A4,$AA,$AC,$A6,$FF,$FF,$92,$B7,$A8,$B0,$B6,$01   ; "Magic__Items"
-.BYTE $FF,$FF,$14,$FF,$FF,$91,$AC,$A7,$A8,$FF,$01                   ; "(Skill)__Hide_" 
+.BYTE $FF,$FF,$14,$FF,$FF,$FF,$91,$AC,$A7,$A8,$FF,$01               ; "(Skill_)__Hide_" 
 .BYTE $FF,$FF,$90,$A8,$A4,$B5,$D4,$FF,$FF,$8F,$AF,$A8,$A8,$00       ; "Gear(sword)__Flee"
 
 ;; $9C, $AE, $AC, $AF, $AF ; "Skill" - for reference
@@ -12628,15 +12526,12 @@ ConfirmRunAway:
 ;;  09       = print enemy roster entry 1
 ;;  0A       = print enemy roster entry 2
 ;;  0B       = print enemy roster entry 3
-;;  0C xx yy = yyxx is a pointer to a number to print
-;;  0D xx    = print attack name for weapons and armour - v
-;;  0E xx    = print attack name.  For player attacks, 'xx' is the item index (which can also
-;;             be a magic name).
-;;             For enemy attacks, 'xx' is either a special enemy attack index (like "FROST", etc)
-;;             or is an item index.  Whether it is special attack or not is determined by btl_attackid
+;;  0C xx    = Magic name
+;;  0D xx    = Equipment name
+;;  0E xx    = Item name
 ;;  0F xx    = Draws a battle message.  xx = the ID to the battle message.  Note that this ID is
 ;;             1-based, NOT zero based like you'd expect
-;;  10 xx    = print a run of spaces.  xx = the run length
+;;  10 xx    = Gold amount
 ;;  11 xx yy = yyxx is a number to print
 ;;  12       = converts btl_defender_index to name
 ;;  13 xx yy = print character stat, xx = character ID, yy = stat
@@ -12644,6 +12539,8 @@ ConfirmRunAway:
 ;;  15 xx    = print defender's MP stat, where xx = stat to print
 ;;  16       = force a VBlank wait before continuing
 ;;  17       = print battle turn
+;;  18 xx yy = yyxx is a pointer to a number to print
+;;  19 xx    = print a run of spaces.  xx = the run length   
 ;;
 ;;  Values >= $48 are printed as normal tiles.
 ;;
@@ -12730,14 +12627,22 @@ DrawBattleString_ExpandChar:
 ;; Credit goes to Lenophis for this fix! 
 ;; Adds DTE functions to battle text!
 
-    STA btltmp+$E   ; char code
-    PHA             ; backup A/X/Y
-    TXA
-    PHA
+;    STA btltmp+$E   ; char code
+;    PHA             ; backup A/X/Y
+;    TXA
+;    PHA
+;    TYA
+;    PHA
+;    LDA btltmp+$E   ; get the char code
+;    CMP #$7A        ;(are we beyond the DTE range?)
+
+;; JIGS - no need to backup X I believe...?
+
+    TAX
     TYA
     PHA
-    LDA btltmp+$E   ; get the char code
-    CMP #$7A        ;(are we beyond the DTE range?)
+    TXA
+    CMP #$7A
     BCS :+          ;(branch if so)
     SEC
     SBC #$1A         ;(make DTE zero-based)
@@ -12751,9 +12656,9 @@ DrawBattleString_ExpandChar:
 :   JSR DrawBattleString_DrawChar  ;(draw the letter)
     PLA
     TAY
-    PLA
-    TAX
-    PLA
+;    PLA
+;    TAX
+;    PLA
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12907,31 +12812,30 @@ DrawBattleString_ControlCode:
     BCC @PrintCharacterName        ; codes: 04-07
     CMP #$0C
     BCC @PrintRoster               ; codes: 08-0B
-    BEQ @DrawBattleNumber_Indirect ; code:  0C
-    CMP #$0D
-    BEQ @PrintEquipmentName        ; code:  0D
-    CMP #$0E
-    BEQ @PrintAttackName           ; code:  0E
+    CMP #$11                       
+    BCC @PrintItemName             ; codes: 0C-10
     JMP @DrawBattleString_ControlCode_2
     
-  @PrintAttacker:       ; code: 02
+   @PrintAttacker:       ; code: 02
     LDA btl_attacker
     JMP DrawEntityName
-  @PrintDefender:       ; code: 03
+    
+   @PrintDefender:       ; code: 03
     LDA btl_defender
     JMP DrawEntityName
-  @PrintDefenderIndex:  ; code: 12 
+    
+   @PrintDefenderIndex:  ; code: 12 
     LDA btl_defender_index  
     JMP :+
   
-  @PrintCharacterName:  ; codes:  04-07
+   @PrintCharacterName:  ; codes:  04-07
     SEC
     SBC #$04            ; subtract 4 to make it zero based
   : ORA #$80            ; OR with $80 to make it a character entity ID
     JMP DrawEntityName  ; then print it as an entity
 
     ; Print an entry on the enemy roster
-  @PrintRoster:             ; codes: 08-0B
+   @PrintRoster:             ; codes: 08-0B
     SEC                     ; subtract 8 to make it zero based
     SBC #$08
     TAX
@@ -12940,55 +12844,20 @@ DrawBattleString_ControlCode:
     BEQ @Exit               ; if 'FF', that signals an empty slot, so don't print anything.
     JSR DrawEnemyName       ; then draw that enemy's name
     JMP DrawEnemyNumber        
-   @Exit:
-    RTS 
-    
-  @DrawBattleNumber_Indirect:  ; print a number (indirect)
-    JSR DrawBattle_IncSrcPtr
-    LDA (btldraw_src), Y       ; pointer to a pointer to the number to print
-    STA btldraw_subsrc
-    JSR DrawBattle_IncSrcPtr
-    LDA (btldraw_src), Y
-    STA btldraw_subsrc+1
-    JMP DrawBattle_Number      ; flow into this routine
-  
-  @PrintEquipmentName:     ; code:  0D
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-    LDA #>lut_WeaponArmorNamePtrTbl
-    LDX #<lut_WeaponArmorNamePtrTbl
-    JMP @DrawAttackName
-    
-  @PrintAttackName:     ; code:  0E
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-    ;LDA btl_attacker                ; check the attacker.  If the high bit is set (it's a player).
-    ;BMI @PrintAttackName_AsItem     ; Player special attacks are always items (or spells, which are stored with items)
-    ;; JIGS - kind of pointless... also now items can do enemy attacks?
-    
-    LDA btl_attackid                ; otherwise, this is an enemy, so get his attack
-    CMP #ENEMY_ATTACK_START         ; if it's >= then it's a special enemy attack, C is set
-    BCC @PrintAttackName_AsItem
-    
-    LDA #>lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ; subtract $40*2 from the start of the lookup table because the enemy attack
-    LDX #<lut_EnemyAttack ;(lut_EnemyAttack - #ENEMY_ATTACK_START*2) ;   index starts at $41
-    BEQ @DrawAttackName ;; low byte is 0 since its at the start of the bank?    
-
-   @PrintAttackName_AsItem: ; attack is less than $42
-    LDA #>lut_ItemNamePtrTbl
-    LDX #<lut_ItemNamePtrTbl
    
-   @DrawAttackName:   
-    JSR BattleDrawLoadSubSrcPtr
-    JMP DrawBattleSubString_Max8
+   @Exit:
+    RTS
+  
+   @PrintItemName:          ; code:  0E
+    PHA 
+    LDA #BANK_ITEMS
+    JSR SwapPRG_L   
+    PLA
+    JSR BattleDraw_LoadObjectNamePtr
+    JMP DrawBattleSubString
 
-@DrawBattleString_ControlCode_2:
-    CMP #$0F
-    BEQ @DrawBattleMessage        ; code:  0F
-    CMP #$10
-    BEQ @DrawString_SpaceRun      ; code:  10
-    CMP #$11
-    BEQ @DrawBattleString_Code11  ; code:  11
+ @DrawBattleString_ControlCode_2:
+    BEQ @DrawBattleString_Number  ; code:  11
     CMP #$12
     BEQ @PrintDefenderIndex       ; code:  12
     CMP #$13
@@ -12998,47 +12867,23 @@ DrawBattleString_ControlCode:
     CMP #$15
     BEQ @DrawPlayerMP             ; code:  15
     CMP #$17
-    BEQ @PrintBattleTurnNumber
+    BEQ @PrintBattleTurnNumber    ; code:  17
+    CMP #$18
+    BEQ @DrawBattleNumber_Indirect ; code:  18
+    CMP #$19
+    BEQ @DrawString_SpaceRun       ; code:  19
     ;; and if its 16-47, do a VBlank.
     JMP DrawBox_WaitForVBlank
-  
-  @DrawBattleMessage:
-    LDA #BANK_BTLMESSAGES
-    JSR SwapPRG_L
-    LDA #>(data_BattleMessages - 2)     ; -2 because battle message is 1-based
-    LDX #<(data_BattleMessages - 2)
-    JSR BattleDrawLoadSubSrcPtr
-    LDA #$3F 
-    STA btldraw_max
-    JMP DrawBattleSubString  
-
-  @DrawString_SpaceRun:
-    JSR DrawBattle_IncSrcPtr    ; inc ptr
-    LDA (btldraw_src), Y        ; get the run length
-    TAX
-    LDA #$FF                    ; blank space tile
-    : ;LDY #$00
-      STA (btldraw_dst), Y      ; print top/bottom portions as empty space
-      JSR DrawBattleString_IncDstPtr
-      DEX
-      BNE :-
-    RTS    
     
    @PrintClassSkill:
-    LDA #5
-    STA tmp+5                    ; use the subsource pointer as a counter this time
-    LDA #BANK_ITEMS
-    JSR SwapPRG_L
-    LDX battle_class             ; get class ID
-    LDA SkillText_LUT, X
-    ASL A
-    TAX
-    LDA lut_ClassSkills, X
-    STA btldraw_subsrc
-    LDA lut_ClassSkills+1, X
-    STA btldraw_subsrc+1
-    JMP DrawBattleSubString
-
+    LDA battle_class             ; get class ID
+    CLC
+    ADC #ITEM_SKILLSTART
+    INY
+    STA (btldraw_src), Y         ; replace the byte in the source
+    DEY
+    JMP @PrintItemName           ; and print it as an item
+    
    @DrawPlayerHP:
     JMP DrawPlayerHP
 
@@ -13051,7 +12896,7 @@ DrawBattleString_ControlCode:
     LDA format_buf-1
     JMP DrawBattleString_DrawChar 
     
-  @DrawBattleString_Code11:            ; print a number 
+  @DrawBattleString_Number:         ; print a number 
     JSR DrawBattle_IncSrcPtr        ;   pointer to the number to print is in the source string
     LDA btldraw_src
     STA btldraw_subsrc              ; since the number is embedded in the source string, just use
@@ -13085,9 +12930,26 @@ DrawBattleString_ControlCode:
     LDA format_buf-1    
     JMP DrawBattleString_DrawChar ; draws max MP 
     
+   @DrawBattleNumber_Indirect:  ; print a number (indirect)
+    JSR DrawBattle_IncSrcPtr
+    LDA (btldraw_src), Y        ; pointer to a pointer to the number to print
+    STA btldraw_subsrc
+    JSR DrawBattle_IncSrcPtr
+    LDA (btldraw_src), Y
+    STA btldraw_subsrc+1
+    JMP DrawBattle_Number       ; flow into this routine
 
-
-
+   @DrawString_SpaceRun:
+    JSR DrawBattle_IncSrcPtr    ; inc ptr
+    LDA (btldraw_src), Y        ; get the run length
+    TAX
+    LDA #$FF                    ; blank space tile
+    : ;LDY #$00
+      STA (btldraw_dst), Y      ; print top/bottom portions as empty space
+      JSR DrawBattleString_IncDstPtr
+      DEX
+      BNE :-
+    RTS    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13157,35 +13019,73 @@ DrawBattle_Number:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-BattleDrawLoadSubSrcPtr:
-    STA btltmp+7 ; $97      ; high byte of pointer table
+BattleItemName_LUT_Low:
+    .word lut_MagicNames_Low      ; $0C
+    .word lut_EquipmentNames_Low  ; $0D
+    .word lut_ItemNames_Low       ; $0E
+    .word lut_GoldNames_Low       ; $0F
+    .word lut_BattleMessages_Low  ; $10
+    
+BattleItemName_LUT_High:
+    .word lut_MagicNames_High     ; $0C
+    .word lut_EquipmentNames_High ; $0D
+    .word lut_ItemNames_High      ; $0E
+    .word lut_GoldNames_High      ; $0F
+    .word lut_BattleMessages_High ; $10    
+
+BattleDraw_LoadObjectNamePtr:
+    SEC
+    SBC #$0C                    ; turn control code into 0-based
+    TAX
+    LDA BattleItemName_LUT_Low, X
+    STA btltmp+6
+    LDA BattleItemName_LUT_Low+1, X
+    STA btltmp+7
+    LDA BattleItemName_LUT_High, X
+    STA btltmp+8
+    LDA BattleItemName_LUT_High+1, X
+    STA btltmp+9
     
     JSR DrawBattle_IncSrcPtr
-    LDA (btldraw_src), Y    ; get the desired index
-    
-    ASL A                   ; multiply by 2 (2 bytes per pointer)
-    PHP                     ; backup the carry
-    STA btltmp+6 ; $96      ; use as low byte
-    
-    TXA                     ; get X (low byte of pointer table)
-    CLC
-    ADC btltmp+6 ; $96      ; add with low byte of index
-    STA btltmp+6 ; $96      ; use as final low byte
-    
-    LDA #$00                ; add the carry from the X addition
-    ADC btltmp+7 ; $97
-    PLP                     ; also add the carry from the above *2
-    ADC #$00
-    STA btltmp+7 ; $97      ; use as final high byte
-    
-    LDY #$00                ; get the pointer, store in btldraw_subsrc
+    LDA (btldraw_src), Y    ; get the desired index    
+    TAY
     LDA (btltmp+6), Y
     STA btldraw_subsrc
-    INY
-    LDA (btltmp+6), Y
+    LDA (btltmp+8), Y
     STA btldraw_subsrc+1
-    
-    RTS    
+    RTS
+
+
+
+;
+; STA btltmp+7 ; $97      ; high byte of pointer table
+; 
+; JSR DrawBattle_IncSrcPtr
+; LDA (btldraw_src), Y    ; get the desired index
+;
+; ASL A                   ; multiply by 2 (2 bytes per pointer)
+; PHP                     ; backup the carry
+; STA btltmp+6            ; use as low byte
+; 
+; TXA                     ; get X (low byte of pointer table)
+; CLC
+; ADC btltmp+6            ; add with low byte of index
+; STA btltmp+6            ; use as final low byte
+; 
+; LDA #$00                ; add the carry from the X addition
+; ADC btltmp+7   
+; PLP                     ; also add the carry from the above *2
+; ADC #$00
+; STA btltmp+7            ; use as final high byte
+; 
+; LDY #$00                ; get the pointer, store in btldraw_subsrc
+; LDA (btltmp+6), Y
+; STA btldraw_subsrc
+; INY
+; LDA (btltmp+6), Y
+; STA btldraw_subsrc+1
+; 
+; RTS    
 
 
     
@@ -13207,13 +13107,20 @@ DrawEntityName:
     
     ; otherwise, it's a player
     AND #$03                    ; mask out the low bits to get the player ID
-    ASL A                       ; @2 for pointer table
-    TAX
-    LDA lut_CharacterNamePtr, X ; run it though a lut to get the pointer to the player's name
+  ;  ASL A                       ; @2 for pointer table
+  ;  TAX
+  ;  LDA lut_CharacterNamePtr, X ; run it though a lut to get the pointer to the player's name
+  ;  STA btldraw_subsrc
+  ;  INX
+  ;  LDA lut_CharacterNamePtr, X
+  ;  STA btldraw_subsrc+1
+    LSR A                      ; LSR instead of ROR to clear carry
+    ROR A
+    ROR A                      ; convert low 2 bits to $00, $40, $80, or $C0
+    ADC #ch_name - ch_stats    ; add in name byte
+    STA btldraw_subsrc+1       ; save as high byte
+    LDA #<ch_stats             ; low byte is always the same for stats
     STA btldraw_subsrc
-    INX
-    LDA lut_CharacterNamePtr, X
-    STA btldraw_subsrc+1
     
     LDY #$00
     @Nameloop:
@@ -13253,33 +13160,14 @@ DrawEntityName:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawEnemyName:
-    PHA                     ; back up enemy ID
+    TAX
     LDA #BANK_ENEMYNAMES
     JSR SwapPRG_L           ; swap in bank with enemy names
-    PLA                     ; get enemy ID
-    ASL A                   ; *2 to use as index
-    TAX
     
-    LDA data_EnemyNames, X      ; get source pointer from pointer table
+    LDA lut_EnemyNames_Low, X      ; get source pointer from pointer table
     STA btldraw_subsrc
-    LDA data_EnemyNames+1, X
+    LDA lut_EnemyNames_High, X
     STA btldraw_subsrc+1
-    
-  ; JMP DrawBattleSubString_Max8   ; <- flow into drawing routine (max 8 characters)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawBattleSubString_Max8  [$FC8D :: 0x3FC9D]
-;;
-;;  Same as DrawBattleSubString, but sets the maximum string length to 8 characters
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawBattleSubString_Max8:
-    LDA #$0B ;08 -- JIGS - enemy names can be 11 letters long
-    STA btldraw_max
-    ;JMP DrawBattleSubString
-    ;; JIGS - flowww
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13305,11 +13193,8 @@ DrawBattleSubString:
     LDA (btldraw_subsrc), Y         ; get a byte of text
     BEQ @Exit                       ; if null terminator, exit
     JSR DrawBattleString_ExpandChar ; Draw it
-    
     INY                             ; keep looping until null terminator is found
-    CPY btldraw_max                 ;  or until we reach the given maximum
-    BEQ @Exit
-    BNE @Loop
+    JMP @Loop
     
   @Exit:
     LDA battle_bank                 ; swap back to battle bank
@@ -13362,11 +13247,11 @@ DrawEnemyNumber:
 ;;
 ;;  Lut to get a character's name by their index  [$FCAA :: 0x3FCBA]
 
-lut_CharacterNamePtr:
-  .WORD ch_name
-  .WORD ch_name+$40
-  .WORD ch_name+$80
-  .WORD ch_name+$C0
+;lut_CharacterNamePtr:
+;  .WORD ch_name
+;  .WORD ch_name+$40
+;  .WORD ch_name+$80
+;  .WORD ch_name+$C0
   
 
 
@@ -13770,7 +13655,7 @@ ClearPalette:
     DEX
     CPX PaletteFade
     BNE @Loop   ; repeat $10 times (entire BG palette)
-    RTS
+    BEQ ResetRAMSwap
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -13819,7 +13704,12 @@ DimPalette:
     CPX PaletteFade    ; see if it reaches the limit set previously
     BNE @Loop          ; and keep looping until it reaches 0 (only 7 iterations because color 0 is transparent)
     CPY #$01           ; set C if Y is nonzero (to indicate some colors are not yet black)
-    RTS                ; then exit
+    
+ResetRAMSwap:
+    LDA #0
+    STA RAMSwap
+    RTS
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -13877,7 +13767,7 @@ BrightenPalettes:
     BNE @Loop
 
     CPY #$01            ; then set C if Y is nonzero (to indicate not all colors are fully bright)
-    RTS
+    JMP ResetRAMSwap
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -14177,105 +14067,105 @@ BattleBackgroundColor_LUT:
 .byte $2D,$0F,$14,$11    
     
     
-Magic_ConvertBitsToBytes:
-; A = character index, either 80, 81, 82, 83, or 00, 01, 02, 03
-    AND #$03                 ; Strip away high bits, in case its in the 80s
-    CLC                      ; Battle spell list will mess up without this!
-    ROR A                    ; Right-shift 3 times (this uses the carry; doing it in Windows calculator, only shift twice)
-    ROR A                    ; 
-    ROR A                    ; 
-    STA CharacterIndexBackup ; back up the character index 
-    TAX
-    LDA #0
-    ;STA TempSpellListIndex  ; Now set this to 0 to start
-    ;STA SpellLevelIndex  ; and this too.
-    ;STA SpellListLoopCounter
-    LDY #26                 ; 24 spells max - 3 per level, 8 levels; + 2 for those 3 variables, since 0 counts as 1!
-
-   @ClearTempSpellList:
-    STA TempSpellList, Y    ; Fill the temp list with 0s
-    DEY                     ; decrement Y
-    BPL @ClearTempSpellList ; When Y = FF, list is cleared!
-
-   @SpellLoop: 
-    TXA
-    CLC
-    ADC SpellListLoopCounter
-    TAX   
-    LDA ch_spells, X   ; level 1 spells
-    JSR UnrollSpell
-    INC SpellListLoopCounter
-    LDA SpellListLoopCounter
-    CMP #$08
-    BNE @SpellLoop
-    RTS
-
-UnrollSpell:
-   @Spell8:
-    ASL A
-    BCC @Spell7
-        LDY #$01
-        JSR UnrollSpell_ConvertToSpellList
-   @Spell7:
-    ASL A
-    BCC @Spell6
-        LDY #$02
-        JSR UnrollSpell_ConvertToSpellList
-   @Spell6:
-    ASL A
-    BCC @Spell5
-        LDY #$03 
-        JSR UnrollSpell_ConvertToSpellList
-   @Spell5:
-    ASL A
-    BCC @Spell4
-        LDY #$04 
-        JSR UnrollSpell_ConvertToSpellList
-   @Spell4:
-    ASL A
-    BCC @Spell3
-        LDY #$05
-        JSR UnrollSpell_ConvertToSpellList  
-   @Spell3:
-    ASL A
-    BCC @Spell2
-        LDY #$06 
-        JSR UnrollSpell_ConvertToSpellList   
-   @Spell2:
-    ASL A
-    BCC @Spell1
-        LDY #$07 
-        JSR UnrollSpell_ConvertToSpellList   
-   @Spell1:
-    ASL A
-    BCC @End
-        LDY #$08 
-        JSR UnrollSpell_ConvertToSpellList
-        
-   @End:                       ; no more spells left to fiddle with...
-    INC SpellLevelIndex        ; increase for each level: 0, 1, 2, 3, 4, 5, 6, 7
-    LDA SpellLevelIndex
-    LDX #03                     ; 3 spells max per level!
-    JSR MultiplyXA              ; Multiply 3 * Spell Level Index
-    STA TempSpellListIndex      ; and save as the temp spell list index. So level 1 * 3 is 3, level 2 * 3 is 6...
-    LDA SpellLevelIndex         ; So even if a character knows more than 3 spells, the list will swap back to write over them
-    LDX CharacterIndexBackup    ; ...I hope
-    RTS
-  
-UnrollSpell_ConvertToSpellList:
-    PHA                     ; backup the whole lot of this level's spells
-    LDX SpellLevelIndex     ; Spell level (0 based)
-    LDA #$08
-    JSR MultiplyXA          ; spell level * 8
-    STA tmp
-    TYA                     ; Spell ID - spell level
-    CLC
-    ADC tmp                 ; Spell ID + Spell Level = Real Spell ID! 
-    LDX TempSpellListIndex 
-    STA TempSpellList, X    
-    INC TempSpellListIndex  
-    PLA                     ; and pull back from the stack to continue
-    RTS
+;Magic_ConvertBitsToBytes:
+;; A = character index, either 80, 81, 82, 83, or 00, 01, 02, 03
+;    AND #$03                 ; Strip away high bits, in case its in the 80s
+;    CLC                      ; Battle spell list will mess up without this!
+;    ROR A                    ; Right-shift 3 times (this uses the carry; doing it in Windows calculator, only shift twice)
+;    ROR A                    ; 
+;    ROR A                    ; 
+;    STA CharacterIndexBackup ; back up the character index 
+;    TAX
+;    LDA #0
+;    ;STA TempSpellListIndex  ; Now set this to 0 to start
+;    ;STA SpellLevelIndex  ; and this too.
+;    ;STA SpellListLoopCounter
+;    LDY #26                 ; 24 spells max - 3 per level, 8 levels; + 2 for those 3 variables, since 0 counts as 1!
+;
+;   @ClearTempSpellList:
+;    STA TempSpellList, Y    ; Fill the temp list with 0s
+;    DEY                     ; decrement Y
+;    BPL @ClearTempSpellList ; When Y = FF, list is cleared!
+;
+;   @SpellLoop: 
+;    TXA
+;    CLC
+;    ADC SpellListLoopCounter
+;    TAX   
+;    LDA ch_spells, X   ; level 1 spells
+;    JSR UnrollSpell
+;    INC SpellListLoopCounter
+;    LDA SpellListLoopCounter
+;    CMP #$08
+;    BNE @SpellLoop
+;    RTS
+;
+;UnrollSpell:
+;   @Spell8:
+;    ASL A
+;    BCC @Spell7
+;        LDY #$01
+;        JSR UnrollSpell_ConvertToSpellList
+;   @Spell7:
+;    ASL A
+;    BCC @Spell6
+;        LDY #$02
+;        JSR UnrollSpell_ConvertToSpellList
+;   @Spell6:
+;    ASL A
+;    BCC @Spell5
+;        LDY #$03 
+;        JSR UnrollSpell_ConvertToSpellList
+;   @Spell5:
+;    ASL A
+;    BCC @Spell4
+;        LDY #$04 
+;        JSR UnrollSpell_ConvertToSpellList
+;   @Spell4:
+;    ASL A
+;    BCC @Spell3
+;        LDY #$05
+;        JSR UnrollSpell_ConvertToSpellList  
+;   @Spell3:
+;    ASL A
+;    BCC @Spell2
+;        LDY #$06 
+;        JSR UnrollSpell_ConvertToSpellList   
+;   @Spell2:
+;    ASL A
+;    BCC @Spell1
+;        LDY #$07 
+;        JSR UnrollSpell_ConvertToSpellList   
+;   @Spell1:
+;    ASL A
+;    BCC @End
+;        LDY #$08 
+;        JSR UnrollSpell_ConvertToSpellList
+;        
+;   @End:                       ; no more spells left to fiddle with...
+;    INC SpellLevelIndex        ; increase for each level: 0, 1, 2, 3, 4, 5, 6, 7
+;    LDA SpellLevelIndex
+;    LDX #03                     ; 3 spells max per level!
+;    JSR MultiplyXA              ; Multiply 3 * Spell Level Index
+;    STA TempSpellListIndex      ; and save as the temp spell list index. So level 1 * 3 is 3, level 2 * 3 is 6...
+;    LDA SpellLevelIndex         ; So even if a character knows more than 3 spells, the list will swap back to write over them
+;    LDX CharacterIndexBackup    ; ...I hope
+;    RTS
+;  
+;UnrollSpell_ConvertToSpellList:
+;    PHA                     ; backup the whole lot of this level's spells
+;    LDX SpellLevelIndex     ; Spell level (0 based)
+;    LDA #$08
+;    JSR MultiplyXA          ; spell level * 8
+;    STA tmp
+;    TYA                     ; Spell ID - spell level
+;    CLC
+;    ADC tmp                 ; Spell ID + Spell Level = Real Spell ID! 
+;    LDX TempSpellListIndex 
+;    STA TempSpellList, X    
+;    INC TempSpellListIndex  
+;    PLA                     ; and pull back from the stack to continue
+;    RTS
     
 ;;;;;;;;;;;;;;;;
 
@@ -14566,19 +14456,121 @@ BoxTiles:
 ;; and then update the screen...?
 
 
+ADD_ITEM:
+    JSR Item_Compression_Shared
+    CMP tmp+2           ; compare to max amount
+    BCS @Full           ; if the compare sets carry, jump to the RTS
+  
+    LDA (tmp), Y        ; load the compressed equipment/spell
+    ADC tmp+3           ; add the amount to high or low nybble
+    STA (tmp), Y        ; then save 
+   @Full:               ; carry set when unable to add more
+    RTS                 ; carry clear when successful
+  
+REMOVE_ITEM:
+    JSR Item_Compression_Shared
+    BEQ @Empty          ; if its 0, there is nothing to subtract
+ 
+    LDA (tmp), Y        ; load the compressed equipment/spell
+    SEC
+    SBC tmp+3           ; subtract the amount from high or low nybble
+    STA (tmp), Y        ; then save 
+    CLC                 ; clear carry to indicate success
+    RTS
+   
+   @Empty:              ; manually set carry to indicate failure
+    SEC
+    RTS
+  
 
-
-
-
-
-
-
-
-
-
-
+Item_Compression_Shared:
+    PHA
+    LSR A               ; halve the ID
+    TAY                 ; put it in Y for indexing
+ 
+    PLA                 ; then restore the ID
+    AND #$01            ; see if its even or odd by cutting out all but the lowest bit
+    BEQ @High           ; if its set, its an odd numbered ID
+ 
+   @Low: 
+    LDA #$01            ; amount to add when low
+    LDX #$0F            ; bits to cut/keep, plus max amount when low
+    BNE @Check
+ 
+   @High:
+    LDA #$10
+    LDX #$F0
+ 
+   @Check:
+    STX tmp+2           ; tmp+2 are the bits to cut/keep with AND
+    STA tmp+3           ; tmp+3 is amount to subtract
+   
+    LDA (tmp), Y        ; tmp, tmp+1 points to weapon, armor, or spells
+    AND tmp+2           ; cut/keep the appropriate bits
+    RTS   
+  
+  
+DOES_ITEM_EXIST:       ; input: A = item ID - output: item amount
+    PHA
+    LSR A               ; halve the ID
+    TAY                 ; put it in Y for indexing
+  
+    PLA
+    AND #$01            ; see if its even or odd by cutting out all but the lowest bit
+    BEQ @High           ; if its set, its an odd numbered ID
+  
+   @Low: 
+    LDA #$0F            
+    BNE @Compare
     
+   @High:
+    LDA #$F0
+  
+   @Compare:
+    STA tmp+2           ; put the bits to cut or keep into tmp+2
+    LDA (tmp), Y        ; tmp, tmp+1 points to weapon, armor, or spells
+    AND tmp+2           
+    BEQ @Empty          ; if its 0, there is nothing there 
+  
+    CMP #$10            ; check if it was low or high
+    BCC @HaveLow        ; if it was low, do nothing but exit
+   
+   @HaveHigh:
+    LSR A               ; this shifts the high nybble to low to get item count for output
+    LSR A               ; as well as clearing out carry
+    LSR A   
+    LSR A
     
+   @HaveLow:
+    RTS
+   
+   @Empty:              ; manually set carry to indicate failure
+    SEC
+    RTS  
+   
+
+Set_Inv_Magic:
+    LDA #<inv_magic - unsram
+    STA tmp
+    LDA #>inv_magic - unsram
+    STA tmp+1
+    RTS
+
+
+Set_Inv_Weapon:
+    LDA #<inv_weapon - unsram
+    STA tmp
+    LDA #>inv_weapon - unsram
+    STA tmp+1
+    RTS
+
+ItemDescriptions:
+    JSR SwapPRG_L    
+    LDA lut_ItemDescStrings_Low, X
+    STA text_ptr
+    LDA lut_ItemDescStrings_High, X    
+    STA text_ptr+1
+    JMP DrawComplexString
 
     
 

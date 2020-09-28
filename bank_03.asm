@@ -115,10 +115,13 @@ lut_BackdropPal:
 .byte $0F,$10,$27,$17 ; 11 ; Armor shop
 .byte $0F,$3C,$1C,$0C ; 12 ; White magic shop
 .byte $0F,$3B,$1B,$0B ; 13 ; Black magic shop
-.byte $0F,$37,$17,$07 ; 14 ; Item
-.byte $0F,$37,$16,$10 ; 15 ; Clinic
-.byte $0F,$36,$16,$07 ; 16 ; Inn
-.byte $0F,$30,$28,$16 ; 17 ; Caravan
+.byte $0F,$3C,$1C,$0C ; 14 ; Green magic shop
+.byte $0F,$3B,$1B,$0B ; 15 ; Time magic shop
+.byte $0F,$3B,$1B,$0B ; 16 ; Skills
+.byte $0F,$37,$17,$07 ; 17 ; Item
+.byte $0F,$37,$16,$10 ; 18 ; Clinic
+.byte $0F,$36,$16,$07 ; 19 ; Inn
+.byte $0F,$30,$28,$16 ; 1A ; Caravan
 
 ; Battle backdrop assignment
 
@@ -277,19 +280,55 @@ LoadShopCHR_andPalettes:
     DEX                ; and loop until X wraps (8 colors copied in total)
     BPL @Loop
     
-    LDA #BANK_THIS
-    STA cur_bank
-    
-    JSR LoadCHR_MusicPlay ;; update music, swaps back
+;    LDA #BANK_THIS
+;    STA cur_bank
+;    JSR LoadCHR_MusicPlay ;; update music, swaps back
 
+    JSR LoadShopPointers
+    
+    LDA #$07           ; dest PPU address = $0700
+    LDX #$01           ; load just one row
+    JMP CHRLoadToA     ; 
+
+LoadShopPointers:
     LDA #<lut_ShopCHR
 	STA tmp
-    LDA #>lut_ShopCHR  ; source pointer (tmp) = lut_ShopCHR
+    LDA shop_type      ; get shop type
+    CLC
+    ADC #>lut_ShopCHR  ; source pointer (tmp) = lut_ShopCHR
     STA tmp+1
+    RTS
 
-    LDA #$00           ; dest PPU address = $0000
+LoadShopCHRForBank_Z: ;; JIGS - Its either put this here or copy all of lut_ShopCHR to Bank Z as well.
+    LDA #$08
+    STA soft2000           ; 
+    LDA $2002              ; reset toggle
+    LDA #0
+    STA $2001              ; turn off the PPU
+    STA $2006              ; set address to $0000
+    STA $2006           
+    JSR FillBlackTile      ; fill the blank tile at the start of CHR RAM
+
+    JSR LoadShopCHR_andPalettes ; then load up the shop graphics
+    LDY #$08
+    JSR LoadMenuText            ; then load up the menu text
+
+    JSR LoadBlackTiles_Sprite   ; then do the blank tile as a sprite
+    JSR LoadShopPointers        ; load the shop pointers for sprites
+    
+    LDA #$17               ; dest PPU address = $1700
+    LDX #$01               ; load just one row
+    JSR CHRLoadToA          
+    
+    LDY #$18               ; and end with doing menu text for sprites
+LoadMenuText:
+    LDA #<lut_MenuTextCHR
+    STA tmp
+    LDA #>lut_MenuTextCHR
+    STA tmp+1
     LDX #$08
-    JMP CHRLoadToA     ; load them up  (loads all shop related CHR    
+    TYA
+    JMP CHRLoadToA
 
 LoadBGPalette:
     TAX                       ; backdrop ID * 4 in X for indexing
@@ -321,31 +360,6 @@ LoadBattleBackdrop_AndPalette:
     INX
     JSR CHRLoad
     JMP FillBlackTile
-
-LoadShopCHRForBank_Z: ;; JIGS - Its either put this here or copy all of lut_ShopCHR to Bank Z as well.
-    LDA #$08
-    STA soft2000           ; 
-    LDA $2002              ; reset toggle
-    LDA #0
-    STA $2001              ; turn off the PPU
-    STA $2006              ; set write address to $0000
-    STA $2006
-
-    JSR LoadShopCHR
-
-    LDA $2002          ; Set address to $1000 
-    LDA #>$1000
-    STA $2006
-    LDA #<$1000
-    STA $2006
-    
-LoadShopCHR:
-    LDA #>lut_ShopCHR
-    STA tmp+1        
-    LDA #<lut_ShopCHR
-    STA tmp
-    LDX #16    
-    JMP CHRLoad
 
 CHRLoadToAX:
     LDY InBattle
@@ -475,6 +489,7 @@ LoadMagicSprite:
 
 ;; JIGS - this is really just so I don't see garbage in the PPU viewer while testing battle graphics...
 ;; since now it displays sprites instead of background tiles
+;; JIGS - but now also helpful for the intro screen!
 
 LoadBlackTiles_Sprite:
     LDX #>$1000

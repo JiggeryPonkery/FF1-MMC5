@@ -2,11 +2,7 @@
 .include "variables.inc"
 .feature force_range
 
-.export EnemyAttackPlayer_PhysicalZ
-.export PlayerAttackEnemy_PhysicalZ
-.export PlayerAttackPlayer_PhysicalZ
-.export ClericCheck
-.export CritCheck
+
 .export SoundTestZ
 .export OptionsMenu
 .export EnterTitleScreen
@@ -14,41 +10,67 @@
 .export SaveScreen
 .export ReadjustEquipStats
 .export UnadjustEquipStats
-.export LoadEnemyStats
-.export StealFromEnemyZ
 .export AssignMapTileDamage_Z
-.export LoadPlayerDefenderStats_ForEnemyAttack
 .export WeaponArmorShopStats
 .export WeaponArmorSpecialDesc
+.export GetWeaponDataPointer
 .export GetEquipmentSpell
-.export SpiritCalculations
-.export Battle_SetPartyWeaponSpritePal
 .export MapPoisonDamage_Z
 .export lut_InitUnsramFirstPage
 .export SaveScreen_FromMenu
+.export LoadSpellForBattle
+.export GetEquipPermissions
 
-.import GameLoaded, SaveScreenHelper, LoadBattleSpritesForBank_Z
-.import SwapPRG_L, LongCall, DrawCombatBox_L, CallMusicPlay_L, WaitForVBlank_L, MultiplyXA, AddGPToParty, LoadShopCHRForBank_Z
-.import RandAX, WaitForVBlank_L, GameStart_L, LoadPtyGenBGCHRAndPalettes, LoadBridgeSceneGFX_Menu
-.import DrawComplexString, ClearOAM, DrawPalette, CallMusicPlay, UpdateJoy, DrawSimple2x3Sprite, Draw2x2Sprite, CHRLoad, CHRLoadToA
-.import DrawCursor, WaitForVBlank_L, DrawBox, LoadMenuCHRPal, MenuCondStall, CoordToNTAddr, LoadBorderPalette_Blue
-.import UndrawBattleBlock, ShiftSpriteHightoLow, PlaySFX_Error
-.import BattleBackgroundColor_LUT
-.import BattleBGColorDigits
-.import DrawPalette_L
-.import CancelNewGame
-.import LoadMenuCHRPal_Z
+.import ADD_ITEM
 .import AddGPToParty
-.import LoadPriceZ
+.import BattleBGColorDigits
+.import BattleBackgroundColor_LUT
 .import BattleRNG_L
-.import lutClassBatSprPalette
-.import PlayDoorSFX
+.import CHRLoad
+.import CHRLoadToA
+.import CallMusicPlay
+.import CallMusicPlay_L
+.import CancelNewGame
+.import ClearOAM
+.import CoordToNTAddr
+.import Draw2x2Sprite
+.import DrawBox
+.import DrawCombatBox_L
+.import DrawComplexString
+.import DrawCursor
+.import DrawPalette
+.import DrawPalette_L
+.import DrawSimple2x3Sprite
+.import GameLoaded
+.import GameStart_L
+.import LoadBattleSpritesForBank_Z
+.import LoadBorderPalette_Blue
+.import LoadBridgeSceneGFX_Menu
 .import LoadCursorOnly
+.import LoadMenuCHRPal
+.import LoadMenuCHRPal_Z
+.import LoadPtyGenBGCHRAndPalettes
 .import LoadShopCHRForBank_Z
-.import ShiftLeft6
-.import ShiftLeft4
-.import SetPPUAddr_XA
+.import LongCall
+.import MenuCondStall
+.import MultiplyXA
+.import PlayDoorSFX
+.import PlaySFX_Error
+.import RandAX
 .import ReloadBridgeNT
+.import SaveScreenHelper
+.import SetPPUAddr_XA
+.import Set_Inv_Magic
+.import Set_Inv_Weapon
+.import ShiftLeft4
+.import ShiftLeft6
+.import ShiftSpriteHightoLow
+.import SwapPRG_L
+.import UndrawBattleBlock
+.import UpdateJoy
+.import WaitForVBlank_L
+.import lutClassBatSprPalette
+
 
 
 
@@ -67,72 +89,73 @@ lut_WeaponData:
 ;                              v --------- Category effectiveness
 ;                                  v ----- Graphic
 ;                                      v - Palette
+;                                          v - EQUIP PERMISSIONS
 
-.byte $00,$0C,$0A,$00,$00,$00,$00,$A8,$27 ; 00  Wooden nunchucks
-.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20 ; 01  Small knife
-.byte $00,$06,$01,$00,$00,$00,$00,$A0,$27 ; 02  Wooden staff
-.byte $05,$09,$0A,$00,$00,$00,$00,$90,$20 ; 03  Rapier
-.byte $00,$09,$01,$00,$00,$00,$00,$94,$27 ; 04  Iron hammer
-.byte $0A,$0F,$05,$00,$00,$00,$00,$80,$20 ; 05  Short sword
-.byte $05,$10,$03,$00,$00,$00,$00,$9C,$20 ; 06  Hand axe
-.byte $0A,$0A,$05,$00,$00,$00,$00,$84,$2B ; 07  Scimitar
-.byte $00,$10,$0A,$00,$00,$00,$00,$A8,$20 ; 08  Iron nunchucks
-.byte $0A,$07,$05,$00,$00,$00,$00,$98,$20 ; 09  Large knife
-.byte $00,$0E,$01,$10,$1E,$00,$00,$A4,$20 ; 0A  Iron Staff      - might cause STUN
-.byte $05,$0D,$0A,$00,$00,$00,$00,$90,$20 ; 0B  Sabre
-.byte $0A,$14,$05,$00,$00,$00,$00,$8C,$20 ; 0C  Long sword
-.byte $05,$16,$03,$00,$00,$00,$00,$9C,$25 ; 0D  Great axe
-.byte $0A,$0F,$05,$00,$00,$00,$00,$88,$20 ; 0E  Falchion
-.byte $0F,$0A,$05,$00,$00,$00,$00,$98,$2C ; 0F  Silver knife
-.byte $0F,$17,$05,$00,$00,$00,$00,$8C,$2C ; 10  Silver Sword
-.byte $05,$0C,$01,$00,$00,$00,$00,$94,$2C ; 11  Silver Hammer
-.byte $0A,$19,$04,$00,$00,$00,$00,$9C,$2C ; 12  Silver Axe
-.byte $14,$1A,$05,$00,$00,$10,$88,$88,$26 ; 13  Flame sword
-.byte $19,$1D,$05,$00,$00,$20,$00,$8C,$21 ; 14  Ice sword
-.byte $0F,$13,$0A,$00,$00,$00,$02,$90,$2B ; 15  Dragon sword
-.byte $14,$15,$05,$00,$00,$00,$04,$80,$22 ; 16  Giant sword
-.byte $1E,$20,$05,$08,$1E,$00,$08,$8C,$27 ; 17  Sun sword       - might cause DARK
-.byte $0F,$13,$0A,$00,$00,$00,$20,$90,$25 ; 18  Coral sword
-.byte $0F,$12,$05,$00,$00,$00,$10,$80,$24 ; 19  Were sword
-.byte $0F,$12,$05,$40,$1E,$00,$41,$88,$23 ; 1A  Rune sword      - might cause MUTE
-.byte $00,$0C,$01,$00,$00,$00,$00,$A0,$2A ; 1B  Power staff
-.byte $0F,$1C,$03,$08,$2F,$00,$08,$9C,$23 ; 1C  Light axe       - casts HARM 2, might cause DARK
-.byte $00,$06,$01,$00,$00,$00,$00,$A4,$21 ; 1D  Heal staff      - casts HEAL
-.byte $0A,$0C,$01,$00,$00,$00,$00,$A4,$25 ; 1E  Mage staff      - casts FIRE 2
-.byte $23,$1E,$05,$00,$00,$00,$00,$80,$27 ; 1F  Defense swrd    - casts SHIELD
-.byte $0F,$0F,$01,$00,$00,$00,$00,$A4,$2C ; 20  Wizard staff    - casts CONFUSE
-.byte $19,$18,$1E,$00,$00,$00,$00,$88,$21 ; 21  Vorpal sword
-.byte $23,$16,$05,$00,$00,$00,$00,$98,$2C ; 22  CatClaw
-.byte $0F,$12,$01,$00,$00,$00,$00,$94,$24 ; 23  Thor Hammer     - casts BOLT 2
-.byte $14,$16,$0A,$04,$14,$00,$00,$90,$22 ; 24  Bane sword      - casts BANE, might cause POISON
-.byte $23,$21,$1E,$00,$00,$00,$00,$98,$27 ; 25  Katana
-.byte $23,$2D,$05,$00,$00,$FF,$FF,$8C,$28 ; 26  Excalibur
-.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20 ; 27  Masamune
-.byte $28,$00,$0A,$00,$FF,$00,$14,$98,$28 ; 28  Chicken Knife
-.byte $20,$00,$05,$00,$00,$00,$0A,$8C,$2A ; 29  Brave Blade
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2A
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2B
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2C
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2D
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2E
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 2F
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 30
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 31
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 32
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 33
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 34
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 35
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 36
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 37
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 38
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 39
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3A
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3B
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3C
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3D
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3E
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 3F
-.byte $00,$00,$00,$00,$00,$00,$00,$00,$00 ; 40
+.byte $00,$0C,$0A,$00,$00,$00,$00,$A8,$27, %00100000, %00000000, %01100000, %00000000 ; 00  Wooden nunchucks
+.byte $0A,$05,$05,$00,$00,$00,$00,$98,$20, %11010100, %00000000, %11010100, %00000000 ; 01  Small knife
+.byte $00,$06,$01,$00,$00,$00,$00,$A0,$27, %10111100, %00000000, %11111100, %00000000 ; 02  Wooden staff
+.byte $05,$09,$0A,$00,$00,$00,$00,$90,$20, %11010000, %00000000, %11010000, %00000000 ; 03  Rapier
+.byte $00,$09,$01,$00,$00,$00,$00,$94,$27, %10001000, %00000000, %11001000, %00000000 ; 04  Iron hammer
+.byte $0A,$0F,$05,$00,$00,$00,$00,$80,$20, %10010000, %00000000, %11010000, %00000000 ; 05  Short sword
+.byte $05,$10,$03,$00,$00,$00,$00,$9C,$20, %10000000, %00000000, %11000000, %00000000 ; 06  Hand axe
+.byte $0A,$0A,$05,$00,$00,$00,$00,$84,$2B, %11010000, %00000000, %11010000, %00000000 ; 07  Scimitar
+.byte $00,$10,$0A,$00,$00,$00,$00,$A8,$20, %00100000, %00000000, %01100000, %00000000 ; 08  Iron nunchucks
+.byte $0A,$07,$05,$00,$00,$00,$00,$98,$20, %11010100, %00000000, %11010100, %00000000 ; 09  Large knife
+.byte $00,$0E,$01,$10,$1E,$00,$00,$A4,$20, %10100000, %00000000, %11100000, %00000000 ; 0A  Iron Staff      - might cause STUN
+.byte $05,$0D,$0A,$00,$00,$00,$00,$90,$20, %11010000, %00000000, %11010000, %00000000 ; 0B  Sabre
+.byte $0A,$14,$05,$00,$00,$00,$00,$8C,$20, %10010000, %00000000, %11010000, %00000000 ; 0C  Long sword
+.byte $05,$16,$03,$00,$00,$00,$00,$9C,$25, %10000000, %00000000, %11000000, %00000000 ; 0D  Great axe
+.byte $0A,$0F,$05,$00,$00,$00,$00,$88,$20, %11010000, %00000000, %11010000, %00000000 ; 0E  Falchion
+.byte $0F,$0A,$05,$00,$00,$00,$00,$98,$2C, %11010100, %00000000, %11010100, %00000000 ; 0F  Silver knife
+.byte $0F,$17,$05,$00,$00,$00,$00,$8C,$2C, %10010000, %00000000, %11010000, %00000000 ; 10  Silver Sword
+.byte $05,$0C,$01,$00,$00,$00,$00,$94,$2C, %10001000, %00000000, %11001000, %00000000 ; 11  Silver Hammer
+.byte $0A,$19,$04,$00,$00,$00,$00,$9C,$2C, %10000000, %00000000, %11000000, %00000000 ; 12  Silver Axe
+.byte $14,$1A,$05,$00,$00,$10,$88,$88,$26, %10010000, %00000000, %11010000, %00000000 ; 13  Flame sword
+.byte $19,$1D,$05,$00,$00,$20,$00,$8C,$21, %10010000, %00000000, %11010000, %00000000 ; 14  Ice sword
+.byte $0F,$13,$0A,$00,$00,$00,$02,$90,$2B, %10110000, %00000000, %11010000, %00000000 ; 15  Dragon sword
+.byte $14,$15,$05,$00,$00,$00,$04,$80,$22, %10010000, %00000000, %11010000, %00000000 ; 16  Giant sword
+.byte $1E,$20,$05,$08,$1E,$00,$08,$8C,$27, %10010000, %00000000, %11010000, %00000000 ; 17  Sun sword       - might cause DARK
+.byte $0F,$13,$0A,$00,$00,$00,$20,$90,$25, %10110000, %00000000, %11010000, %00000000 ; 18  Coral sword
+.byte $0F,$12,$05,$00,$00,$00,$10,$80,$24, %10010000, %00000000, %11010000, %00000000 ; 19  Were sword
+.byte $0F,$12,$05,$40,$1E,$00,$41,$88,$23, %10110000, %00000000, %11010000, %00000000 ; 1A  Rune sword      - might cause MUTE
+.byte $00,$0C,$01,$00,$00,$00,$00,$A0,$2A, %10101100, %00000000, %11101100, %00000000 ; 1B  Power staff
+.byte $0F,$1C,$03,$08,$2F,$00,$08,$9C,$23, %10000000, %00000000, %11000000, %00000000 ; 1C  Light axe       - casts HARM 2, might cause DARK
+.byte $00,$06,$01,$00,$00,$00,$00,$A4,$21, %00001000, %00000000, %01001000, %00000000 ; 1D  Heal staff      - casts HEAL
+.byte $0A,$0C,$01,$00,$00,$00,$00,$A4,$25, %00000100, %00000000, %01000100, %00000000 ; 1E  Mage staff      - casts FIRE 2
+.byte $23,$1E,$05,$00,$00,$00,$00,$80,$27, %00000000, %00000000, %11010000, %00000000 ; 1F  Defense swrd    - casts SHIELD
+.byte $0F,$0F,$01,$00,$00,$00,$00,$A4,$2C, %00000000, %00000000, %00000100, %00000000 ; 20  Wizard staff    - casts CONFUSE
+.byte $19,$18,$1E,$00,$00,$00,$00,$88,$21, %00000000, %00000000, %11010000, %00000000 ; 21  Vorpal sword
+.byte $23,$16,$05,$00,$00,$00,$00,$98,$2C, %00000000, %00000000, %11010100, %00000000 ; 22  CatClaw
+.byte $0F,$12,$01,$00,$00,$00,$00,$94,$24, %00000000, %00000000, %11001000, %00000000 ; 23  Thor Hammer     - casts BOLT 2
+.byte $14,$16,$0A,$04,$14,$00,$00,$90,$22, %00000000, %00000000, %11010000, %00000000 ; 24  Bane sword      - casts BANE, might cause POISON
+.byte $23,$21,$1E,$00,$00,$00,$00,$98,$27, %00000000, %00000000, %01000000, %00000000 ; 25  Katana
+.byte $23,$2D,$05,$00,$00,$FF,$FF,$8C,$28, %00000000, %00000000, %10000000, %00000000 ; 26  Excalibur
+.byte $32,$38,$0A,$00,$00,$00,$00,$84,$20, %11111111, %00000000, %11111111, %00000000 ; 27  Masamune
+.byte $28,$00,$0A,$00,$FF,$00,$14,$98,$28, %11010100, %00000000, %11011100, %00000000 ; 28  Chicken Knife
+.byte $20,$00,$05,$00,$00,$00,$0A,$8C,$2A, %11010000, %00000000, %11010000, %00000000 ; 29  Brave Blade
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2A
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2B
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2C
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2D
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2E
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2F
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 30
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 31
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 32
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 33
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 34
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 35
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 36
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 37
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 38
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 39
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3A
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3B
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3C
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3D
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3E
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3F
+.byte $00,$00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 40
 
 
 
@@ -189,76 +212,75 @@ lut_ArmorData:
 ;      v - Evade penalty
 ;          v - Absorb boost
 ;              v - Magic Defense Boost
-;                 v - Elemental defense
-;                           v - Elemental weakness
-;                                      v - Status defense
-
-;.byte $02,$01,$00,%00000000,%00000000,%00000000 ; Cloth T ;; original
-.byte $00,$02,$00,%00000000,%00000000,%00000000 ; 00 Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
-.byte $08,$04,$00,%00000000,%00000000,%00000000 ; 01 Wooden armor
-.byte $0F,$0F,$00,%00000000,%00000000,%00000000 ; 02 Chain armor
-.byte $17,$18,$00,%00000000,%00000000,%00000000 ; 03 Iron armor
-.byte $21,$22,$00,%00000000,%00000000,%00010000 ; 04 Steel armor
-.byte $08,$12,$00,%00000000,%00000000,%00000000 ; 05 Silver armor
-.byte $0A,$22,$00,%00100000,%00010000,%00000000 ; 06 Flame armor
-.byte $0A,$22,$00,%00010000,%00100000,%00000000 ; 07 Ice armor
-.byte $0A,$2A,$00,%01000000,%00000000,%00000000 ; 08 Opal armor
-.byte $0A,$2A,$00,%01110000,%00000000,%00000000 ; 09 Dragon armor
-.byte $01,$04,$00,%00000000,%00000000,%00000000 ; 0A Copper Q
-.byte $01,$0F,$00,%00000000,%00000000,%00000000 ; 0B Silver Q
-.byte $01,$18,$00,%00000000,%00000000,%00000000 ; 0C Gold Q
-.byte $01,$22,$00,%00000000,%00000000,%00000000 ; 0D Opal Q
-.byte $02,$18,$00,%00011000,%00000000,%00011000 ; 0E white T        - casts INVIS 2
-.byte $02,$18,$00,%00100100,%00000000,%00100100 ; 0F Black T        - casts ICE 2
-.byte $00,$02,$00,%00000000,%00000000,%00000000 ; 10 Wooden shield
-.byte $00,$04,$00,%00000000,%00000000,%00000000 ; 11 Iron shield
-.byte $00,$08,$00,%00000000,%00000000,%00000000 ; 12 Silver shield
-.byte $00,$0C,$00,%00100000,%00010000,%00000000 ; 13 Flame shield
-.byte $00,$0C,$00,%00010000,%00100000,%00000000 ; 14 Ice shield
-.byte $00,$10,$00,%01000000,%00000000,%00000000 ; 15 Opal shield
-.byte $00,$10,$00,%00000100,%00000000,%11000000 ; 16 Aegis shield
-.byte $00,$02,$00,%00000000,%00000000,%00000000 ; 17 Buckler
-.byte $02,$08,$00,%00000000,%00000000,%00000001 ; 18 Protect cape
-.byte $01,$01,$00,%00000000,%00000000,%00000000 ; 19 Cap
-.byte $03,$03,$00,%00000000,%00000000,%00000000 ; 1A Wooden helm
-.byte $05,$05,$00,%00000000,%00000000,%00000000 ; 1B Iron helm
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 1C Silver helm
-.byte $03,$08,$00,%00000000,%00000000,%00000000 ; 1D Opal helm
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 1E Heal helm      - casts HEAL
-.byte $01,$01,$00,%00000000,%00000000,%11111111 ; 1F Ribbon
-.byte $01,$01,$00,%00000000,%00000000,%00000000 ; 20 Gloves
-.byte $03,$02,$00,%00000000,%00000000,%00000000 ; 21 Copper Gauntlet
-.byte $05,$04,$00,%00000000,%00000000,%00000000 ; 22 Iron Gauntlet
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 23 Silver Gauntlet
-.byte $03,$06,$00,%00000000,%00000000,%00010000 ; 24 Zeus Gauntlet  - casts BOLT 2
-.byte $03,$06,$00,%00000000,%00000000,%00000000 ; 25 Power Gauntlet - casts SABER
-.byte $03,$08,$00,%00000000,%00000000,%00000000 ; 26 Opal Gauntlet
-.byte $01,$08,$00,%00001000,%00000000,%00000001 ; 27 Protect Ring
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
-.byte $00,$00,$00,$00,$00,$00
+;                   v - Elemental defense
+;                              v - Elemental weakness
+;                                         v - Status defense
+;                                                    v- EQUIP PERMISSIONS    
+;.byte $02,$01,$00,%00000000, %00000000, %00000000, %00000011, $11111111, %00000011, %11111111 ; Cloth T ;; original
+.byte $00,$02,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 00 Cloth T  ;; JIGS - c'mon, that's just mean... At least make it a little useful.
+.byte $08,$04,$00, %00000000, %00000000, %00000000, %11110000, $00000000, %11110000, %00000000 ; 01 Wooden armor
+.byte $0F,$0F,$00, %00000000, %00000000, %00000000, %10010000, $00000000, %11010000, %00000000 ; 02 Chain armor
+.byte $17,$18,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 03 Iron armor
+.byte $21,$22,$00, %00000000, %00000000, %00010000, %10000000, $00000000, %10000000, %00000000 ; 04 Steel armor
+.byte $08,$12,$00, %00000000, %00000000, %00000000, %10010000, $00000000, %11010000, %00000000 ; 05 Silver armor
+.byte $0A,$22,$00, %00100000, %00010000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 06 Flame armor
+.byte $0A,$22,$00, %00010000, %00100000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 07 Ice armor
+.byte $0A,$2A,$00, %01000000, %00000000, %00000000, %00000000, $00000000, %10000000, %00000000 ; 08 Opal armor
+.byte $0A,$2A,$00, %01110000, %00000000, %00000000, %00000000, $00000000, %10000000, %00000000 ; 09 Dragon armor
+.byte $01,$04,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 0A Copper Q
+.byte $01,$0F,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 0B Silver Q
+.byte $01,$18,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 0C Gold Q
+.byte $01,$22,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 0D Opal Q
+.byte $02,$18,$00, %00011000, %00000000, %00011000, %00000000, $00000000, %00001000, %00000000 ; 0E white T        - casts INVIS 2
+.byte $02,$18,$00, %00100100, %00000000, %00100100, %00000000, $00000000, %00000100, %00000000 ; 0F Black T        - casts ICE 2
+.byte $00,$02,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 10 Wooden shield
+.byte $00,$04,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 11 Iron shield
+.byte $00,$08,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 12 Silver shield
+.byte $00,$0C,$00, %00100000, %00010000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 13 Flame shield
+.byte $00,$0C,$00, %00010000, %00100000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 14 Ice shield
+.byte $00,$10,$00, %01000000, %00000000, %00000000, %00000000, $00000000, %10000000, %00000000 ; 15 Opal shield
+.byte $00,$10,$00, %00000100, %00000000, %11000000, %00000000, $00000000, %10000000, %00000000 ; 16 Aegis shield
+.byte $00,$02,$00, %00000000, %00000000, %00000000, %11010000, $00000000, %11010000, %00000000 ; 17 Buckler
+.byte $02,$08,$00, %00000000, %00000000, %00000001, %11011100, $00000000, %11011100, %00000000 ; 18 Protect cape
+.byte $01,$01,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 19 Cap
+.byte $03,$03,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 1A Wooden helm
+.byte $05,$05,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 1B Iron helm
+.byte $03,$06,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 1C Silver helm
+.byte $03,$08,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %10000000, %00000000 ; 1D Opal helm
+.byte $03,$06,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %11000000, %00000000 ; 1E Heal helm      - casts HEAL
+.byte $01,$01,$00, %00000000, %00000000, %11111111, %11111111, $00000000, %11111111, %00000000 ; 1F Ribbon
+.byte $01,$01,$00, %00000000, %00000000, %00000000, %11111100, $00000000, %11111100, %00000000 ; 20 Gloves
+.byte $03,$02,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 21 Copper Gauntlet
+.byte $05,$04,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11000000, %00000000 ; 22 Iron Gauntlet
+.byte $03,$06,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11010000, %00000000 ; 23 Silver Gauntlet
+.byte $03,$06,$00, %00000000, %00000000, %00010000, %00000000, $00000000, %11010000, %00000000 ; 24 Zeus Gauntlet  - casts BOLT 2
+.byte $03,$06,$00, %00000000, %00000000, %00000000, %10000000, $00000000, %11010000, %00000000 ; 25 Power Gauntlet - casts SABER
+.byte $03,$08,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %10000000, %00000000 ; 26 Opal Gauntlet
+.byte $01,$08,$00, %00001000, %00000000, %00000001, %11111100, $00000000, %11111100, %00000000 ; 27 Protect Ring
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 28
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 29
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 2A
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 2B
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 2C
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 2D
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 2E
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 2F
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 30
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 31
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 32
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 33
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 34
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 35
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 36
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 37
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 38
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 39
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 3A
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 3B
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 3C
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 3D
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 3E
+.byte $00,$00,$00, %00000000, %00000000, %00000000, %00000000, $00000000, %00000000, %00000000 ; 3F
 
 lut_EquipmentSpells:
 .byte $00     ;00; Wooden nunchucks
@@ -289,15 +311,15 @@ lut_EquipmentSpells:
 .byte $00     ;19; Were sword
 .byte $00     ;1A; Rune sword
 .byte $00     ;1B; Power staff
-.byte MG_HRM2 ;1C; $12 ; Light axe       - casts HARM 2
-.byte MG_HEAL ;1D; $14 ; Heal staff      - casts HEAL
-.byte MG_FIR2 ;1E; $15 ; Mage staff      - casts FIRE 2
-.byte MG_FOG  ;1F; $04 ; Defense swrd    - casts SHIELD
-.byte MG_CONF ;20; $1F ; Wizard staff    - casts CONFUSE
+.byte MG_HRM2 ;1C; Light axe       - casts HARM 2
+.byte MG_HEAL ;1D; Heal staff      - casts HEAL
+.byte MG_FIR2 ;1E; Mage staff      - casts FIRE 2
+.byte MG_FOG  ;1F; Defense swrd    - casts SHIELD
+.byte MG_CONF ;20; Wizard staff    - casts CONFUSE
 .byte $00     ;21; Vorpal sword
 .byte $00     ;22; CatClaw
-.byte MG_LIT2 ;23; $17 ; Thor Hammer     - casts BOLT 2
-.byte MG_BANE ;24; $26 ; Bane sword      - casts BANE
+.byte MG_LIT2 ;23; Thor Hammer     - casts BOLT 2
+.byte MG_BANE ;24; Bane sword      - casts BANE
 .byte $00     ;25; Katana
 .byte $00     ;26; Excalibur
 .byte $00     ;27; Masamune
@@ -326,70 +348,70 @@ lut_EquipmentSpells:
 .byte $00     ;3E;
 .byte $00     ;3F;
 
-.byte $00 ; Cloth T
-.byte $00 ; Wooden armor
-.byte $00 ; Chain armor
-.byte $00 ; Iron armor
-.byte $00 ; Steel armor
-.byte $00 ; Silver armor
-.byte $00 ; Flame armor
-.byte $00 ; Ice armor
-.byte $00 ; Opal armor
-.byte $00 ; Dragon armor
-.byte $00 ; Copper Q
-.byte $00 ; Silver Q
-.byte $00 ; Gold Q
-.byte $00 ; Opal Q
-.byte MG_INV2 ; 44  ;$2C ; white T        - casts INVIS 2
-.byte MG_ICE2 ; 32  ;$20 ; Black T        - casts ICE 2
-.byte $00 ; Wooden shield
-.byte $00 ; Iron shield
-.byte $00 ; Silver shield
-.byte $00 ; Flame shield
-.byte $00 ; Ice shield
-.byte $00 ; Opal shield
-.byte $00 ; Aegis shield
-.byte $00 ; Buckler
-.byte $00 ; Protect cape
-.byte $00 ; Cap
-.byte $00 ; Wooden helm
-.byte $00 ; Iron helm
-.byte $00 ; Silver helm
-.byte $00 ; Opal helm
-.byte MG_HEAL ; 20  ;$14 ; Heal helm      - casts HEAL
-.byte $00 ; Ribbon
-.byte $00 ; Gloves
-.byte $00 ; Copper Gauntlet
-.byte $00 ; Iron Gauntlet
-.byte $00 ; Silver Gauntlet
-.byte MG_LIT2 ; 23  ;$17 ; Zeus Gauntlet  - casts BOLT 2
-.byte MG_SABR ; 55  ;$37 ; Power Gauntlet - casts SABER
-.byte $00 ; Opal Gauntlet
-.byte $00 ; Protect Ring
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
-.byte $00 ;
+.byte $00     ;40; Cloth T
+.byte $00     ;41; Wooden armor
+.byte $00     ;42; Chain armor
+.byte $00     ;43; Iron armor
+.byte $00     ;44; Steel armor
+.byte $00     ;45; Silver armor
+.byte $00     ;46; Flame armor
+.byte $00     ;47; Ice armor
+.byte $00     ;48; Opal armor
+.byte $00     ;49; Dragon armor
+.byte $00     ;4A; Copper Q
+.byte $00     ;4B; Silver Q
+.byte $00     ;4C; Gold Q
+.byte $00     ;4D; Opal Q
+.byte MG_INV2 ;4E; White T        - casts INVIS 2
+.byte MG_ICE2 ;4F; Black T        - casts ICE 2
+.byte $00     ;50; Wooden shield
+.byte $00     ;51; Iron shield
+.byte $00     ;52; Silver shield
+.byte $00     ;53; Flame shield
+.byte $00     ;54; Ice shield
+.byte $00     ;55; Opal shield
+.byte $00     ;56; Aegis shield
+.byte $00     ;57; Buckler
+.byte $00     ;58; Protect cape
+.byte $00     ;59; Cap
+.byte $00     ;5A; Wooden helm
+.byte $00     ;5B; Iron helm
+.byte $00     ;5C; Silver helm
+.byte $00     ;5D; Opal helm
+.byte MG_HEAL ;5E; Heal helm      - casts HEAL
+.byte $00     ;5F; Ribbon
+.byte $00     ;60; Gloves
+.byte $00     ;61; Copper Gauntlet
+.byte $00     ;62; Iron Gauntlet
+.byte $00     ;63; Silver Gauntlet
+.byte MG_LIT2 ;64; Zeus Gauntlet  - casts BOLT 2
+.byte MG_SABR ;65; Power Gauntlet - casts SABER
+.byte $00     ;66; Opal Gauntlet
+.byte $00     ;67; Protect Ring
+.byte $00     ;68; 
+.byte $00     ;69; 
+.byte $00     ;6A; 
+.byte $00     ;6B; 
+.byte $00     ;6C; 
+.byte $00     ;6D; 
+.byte $00     ;6E; 
+.byte $00     ;6F; 
+.byte $00     ;70; 
+.byte $00     ;71; 
+.byte $00     ;72; 
+.byte $00     ;73; 
+.byte $00     ;74; 
+.byte $00     ;75; 
+.byte $00     ;76; 
+.byte $00     ;77; 
+.byte $00     ;78; 
+.byte $00     ;79; 
+.byte $00     ;7A; 
+.byte $00     ;7B; 
+.byte $00     ;7C; 
+.byte $00     ;7D; 
+.byte $00     ;7E; 
+.byte $00     ;7F; 
 
 ;; As you can see here, to set a spell, you can abandon the $ and just use the number of the spell.
 ;; Reference Bank A for the spell list in normal people numbers, or Constants.inc for hex!
@@ -399,1608 +421,291 @@ GetEquipmentSpell:
     LDA lut_EquipmentSpells, X
     STA tmp+10
     RTS
+    
+LoadSpellForBattle:
+;; A = Spell ID
+    DEC LongCall_A          ; turn spell ID to 0-based
+    LDA LongCall_A          
+    LDX #12                 ; multiply by 8 bytes 
+    JSR MultiplyXA        
+    CLC                   
+    ADC #<MagicData       
+    STA MagicPointer      
+    TXA                   
+    CLC                   
+    ADC #>MagicData       
+    STA MagicPointer+1      ; get the pointer to the spell data
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for Enemy AI [$9020 :: 0x31030]
-;;
-;;    $10 bytes per AI
-;;
-;;  byte      0 = chance to cast spell         ($00-80)
-;;  byte      1 = chance to use special attack ($00-80)
-;;  bytes   2-9 = magic spells available.  Each entry 0-based.  Or 'FF' for nothing.
-;;  bytes $B-$F = special attacks (0 based), or 'FF' for nothing.
-
-EnemyAIData:
-
-;      0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-.byte $00,$05,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$FF,$FF,$FF,$FF ;00 IMP	   ; [IMP PUNCH]
-.byte $00,$15,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$1A,$1A,$1A,$1A,$1A ;01 GrIMP	   ; [IMP PUNCH x5]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;02 WOLF	   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;03 GrWolf   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;04 WrWolf   ;
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$00,$00,$00,$00,$FF ;05 FrWOLF   ; [FROST x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;06 IGUANA   ;
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$01,$01,$01,$01,$FF ;07 AGAMA    ; [HEAT x4]
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$02,$02,$02,$02,$FF ;08 SAURIA   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;09 GIANT    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0A FrGIANT  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0B R`GIANT  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0C SAHAG    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0D R`SAHAG  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0E WzSAHAG  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;0F PIRATE   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;10 KYZOKU   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;11 SHARK    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;12 GrSHARK  ;
-.byte $00,$80,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$03,$03,$03,$FF ;13 OddEYE   ; [GAZE x4]
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$03,$04,$03,$04,$FF ;14 BigEYE   ; [GAZE, FLASH, GAZE, FLASH]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;15 BONE     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;16 R`BONE   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;17 CREEP    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;18 CRAWL    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;19 HYENA    ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$05,$05,$05,$05,$FF ;1A CEREBUS  ; [SCORCH x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1B OGRE     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1C GrOGRE   ;
-.byte $40,$00,$03,$0D,$05,$15,$1F,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1D WzOGRE   ; <RUSE, DARK, SLEP, HOLD, ICE2>
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1E ASP      ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;1F COBRA    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;20 SeaSNAKE ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;21 SCORPION ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;22 LOBSTER  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;23 BULL     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;24 ZomBULL  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;25 TROLL    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;26 SeaTROLL ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;27 SHADOW   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;28 IMAGE    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;29 WRAITH   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2A GHOST    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2B ZOMBIE   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2C GHOUL    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2D GEIST    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2E SPECTER  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;2F WORM     ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$06,$06,$06,$06,$FF ;30 Sand W   ; [CRACK x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;31 Grey W   ;
-.byte $50,$50,$3F,$35,$2D,$16,$15,$09,$0F,$05,$FF,$02,$07,$03,$08,$FF ;32 EYE      ; <XXXX, BRAK, RUB, LIT2, HOLD, MUTE, SLOW, SLEP> [GLANCE, SQUINT, GAZE, STARE]
-.byte $40,$40,$3D,$3E,$3B,$35,$2D,$15,$09,$0F,$FF,$09,$09,$09,$09,$FF ;33 PHANTOM  ; <STOP, ZAP!, XFER, BRAK, RUB, HOLD, MUTE, SLOW> [GLARE x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;34 MEDUSA   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;35 GrMEDUSA ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;36 CATMAN   ;
-.byte $60,$00,$14,$0F,$0D,$05,$04,$07,$00,$05,$FF,$FF,$FF,$FF,$FF,$FF ;37 MANCAT   ; <FIR2, SLOW, DARK, SLEP, FIRE, LIT, CURE, SLEP>
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;38 PEDE     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;39 GrPEDE   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3A TIGER    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3B Saber T  ;
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$17,$17,$17,$17,$FF ;3C VAMPIRE  ; [DAZZLE x4]
-.byte $20,$20,$12,$09,$1F,$1F,$16,$16,$14,$14,$FF,$17,$17,$17,$17,$FF ;3D WzVAMP   ; <AFIR, MUTE, ICE2 x2, LIT2 x2, FIR2 x2> [DAZZLE x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3E GARGOYLE ;
-.byte $40,$00,$14,$15,$04,$04,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;3F R`GOYLE  ; <FIR2, HOLD, FIRE x2>
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;40 EARTH    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;41 FIRE     ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0A,$0A,$0A,$FF,$FF ;42 Frost D  ; [BLIZZARD x3]
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0B,$0B,$0B,$FF,$FF ;43 Red D    ; [BLAZE x3]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;44 ZombieD  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;45 SCUM     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;46 MUCK     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;47 OOZE     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;48 SLIME    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;49 SPIDER   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4A ARACHNID ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$16,$16,$16,$16,$FF ;4B MANTICOR ; [STINGER x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4C SPHINX   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4D R`ANKYLO ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4E ANKYLO   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;4F MUMMY    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;50 WzMUMMY  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;51 COCTRICE ;
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$07,$07,$07,$07,$FF ;52 PERILISK ; [SQUINT x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;53 WYVERN   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;54 WYRM     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;55 TYRO     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;56 T REX    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;57 CARIBE   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;58 R`CARIBE ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;59 GATOR    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5A FrGATOR  ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5B OCHO     ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5C NAOCHO   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5D HYDRA    ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$FF,$FF,$FF ;5E R`HYDRA  ; [CREMATE x2]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;5F GAURD    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;60 SENTRY   ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;61 WATER    ;
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;62 AIR      ;
-.byte $60,$00,$16,$15,$0F,$0D,$07,$06,$05,$07,$FF,$FF,$FF,$FF,$FF,$FF ;63 NAGA     ; <LIT2, LOCK, SLEP, LIT, LIT2, HOLD, SLOW, DARK>
-.byte $60,$00,$03,$09,$0F,$0D,$05,$04,$07,$13,$FF,$FF,$FF,$FF,$FF,$FF ;64 GrNAGA   ; <RUSE, MUTE, SLOW, DARK, SLEP, FIRE, LIT, HEAL>
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0D,$0D,$FF,$FF ;65 CHIMERA  ; [CREMATE x3]
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0D,$0E,$0D,$0E,$FF ;66 JIMERA   ; [CREMATE, POISON, CREMATE, POISON]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;67 WIZARD   ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$0F,$0F,$0F,$0F,$FF ;68 SORCERER ; [TRANCE x4]
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;69 GARLAND  ;
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$10,$10,$10,$FF,$FF ;6A Gas D    ; [POISON x3]
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$11,$11,$FF,$FF ;6B Blue D   ; [THUNDER x3]
-.byte $20,$00,$1D,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6C MudGOL   ; <FAST>
-.byte $30,$00,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$FF,$FF,$FF,$FF,$FF,$FF ;6D RockGOL  ; <SLOW x8>
-.byte $00,$10,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$12,$12,$12,$12,$FF ;6E IronGOL  ; [TOXIC x4]
-.byte $20,$00,$3B,$3C,$3B,$3F,$37,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;6F BADMAN   ; <XFER, NUKE, XFER, XXXX, BLND>
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;70 EVILMAN  ;
-.byte $60,$00,$2D,$27,$1D,$14,$16,$0F,$0D,$05,$FF,$FF,$FF,$FF,$FF,$FF ;71 ASTOS    ; <RUB, SLO2, FAST, FIR2, LIT2, SLOW, DARK, SLEP>
-.byte $40,$00,$2D,$2C,$24,$25,$27,$24,$2F,$2C,$FF,$FF,$FF,$FF,$FF,$FF ;72 MAGE     ; <RUB, LIT3 ,FIR3 ,BANE, SLO2, FIR3, STUN, LIT3>
-.byte $30,$00,$3A,$3B,$33,$2A,$2B,$30,$23,$20,$FF,$FF,$FF,$FF,$FF,$FF ;73 FIGHTER  ; <WALL, XFER, HEL3, FOG2, INV2, CUR4 ,HEL2, CUR3>
-.byte $00,$00,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF ;74 MADPONY  ;
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$13,$13,$13,$13,$FF ;75 NITEMARE ; [SNORTING x4]
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$14,$14,$14,$14,$FF ;76 WarMECH  ; [NUCLEAR x4]
-.byte $60,$00,$1F,$1C,$1D,$16,$15,$14,$0F,$05,$FF,$FF,$FF,$FF,$FF,$FF ;77 LICH     ; <ICE2, SLP2, FAST, LIT2, HOLD, FIR2, SLOW, SLEP>
-.byte $60,$00,$3C,$3D,$3E,$3F,$3C,$3D,$3E,$3F,$FF,$FF,$FF,$FF,$FF,$FF ;78 LICH 2   ; <NUKE, STOP, ZAP!, XXXX>
-.byte $30,$00,$14,$0D,$14,$0D,$14,$15,$14,$15,$FF,$FF,$FF,$FF,$FF,$FF ;79 KARY     ; <FIR2, DARK, FIR2, DARK, FIR2, HOLD, FIR2, HOLD>
-.byte $30,$00,$24,$2D,$24,$2D,$24,$2F,$24,$2F,$FF,$FF,$FF,$FF,$FF,$FF ;7A KARY 2   ; <FIR3, RUB>
-.byte $00,$20,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$15,$15,$15,$15,$FF ;7B KRAKEN   ; [INK x4]
-.byte $30,$20,$16,$16,$16,$16,$16,$16,$16,$16,$FF,$15,$15,$15,$15,$FF ;7C KRAKEN 2 ; [INK x4]
-.byte $00,$40,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$11,$10,$0A,$0B,$FF ;7D TIAMAT   ; [THUNDER, POISON, BLIZZARD, BLAZE]
-.byte $40,$40,$25,$1F,$16,$14,$25,$1F,$16,$14,$FF,$11,$10,$0A,$0B,$FF ;7E TIAMAT 2 ; <BANE, ICE2, LIT2, FIR2, BANE, ICE2, LIT2, FIR2> [THUNDER, POISON, BLIZZARD, BLAZE]
-.byte $40,$40,$34,$2C,$27,$30,$24,$1F,$1D,$3C,$FF,$06,$0C,$18,$19,$FF ;7F CHAOS    ; <ICE3, LIT3, SLO2, CUR4, FIR3, ICE2, FAST, NUKE> [CRACK, INFERNO, SWIRL, TORNADO]
-
-
-
-
-data_EnemyStats:
-
-;; I just stole all this again from the FFbytes docs by Dienyddiwr Da - http://www.romhacking.net/documents/81/ !
-
-;     ENROMSTAT_EXP
-;     |       ENROMSTAT_GP
-;     |       |       ENROMSTAT_HPMAX
-;     |       |       |      ENROMSTAT_MORALE
-;     |       |       |       |   ENROMSTAT_STATRESIST
-;     |       |       |       |   |   ENROMSTAT_EVADE
-;     |       |       |       |   |   |   ENROMSTAT_ABSORB
-;     |       |       |       |   |   |   |   ENROMSTAT_NUMHITS - low bit = number of hits per attack ; high bits = number of unique attacks
-;     |       |       |       |   |   |   |   |   ENROMSTAT_HITRATE
-;     |___¸   |___¸   |___¸   |   |   |   |   |   |   ENROMSTAT_DAMAGE
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_CRITRATE
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_AILCHANCE
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ATTACKAIL
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_CATEGORY
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_MAGDEF
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMWEAK
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMRESIST
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ELEMATTACK
-;     2   1   2   1   2   1   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_SPEED
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_LEVEL
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_ITEM
-;     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   ENROMSTAT_BLANK
-;     |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__ |__  ID Name
-.byte $06,$00,$06,$00,$08,$00,$6A,$00,$06,$04,$11,$02,$04,$01,$00,$00,$04,$10,$00,$00,$00,$05,$01,$01,$00 ;00 IMP
-.byte $12,$00,$12,$00,$10,$00,$78,$00,$09,$06,$11,$04,$08,$01,$00,$00,$04,$17,$00,$00,$00,$08,$02,$01,$00 ;01 GrIMP
-.byte $18,$00,$06,$00,$14,$00,$69,$00,$24,$00,$11,$05,$08,$01,$00,$00,$00,$1C,$00,$00,$00,$07,$01,$00,$00 ;02 WOLF
-.byte $5D,$00,$16,$00,$48,$00,$6C,$00,$36,$00,$11,$12,$0E,$01,$00,$00,$00,$2E,$00,$00,$00,$09,$02,$00,$00 ;03 GrWolf
-.byte $87,$00,$43,$00,$44,$00,$78,$04,$2A,$06,$11,$11,$0E,$01,$64,$04,$91,$2D,$00,$00,$01,$0C,$04,$00,$00 ;04 WrWolf
-.byte $92,$01,$C8,$00,$5C,$00,$C8,$00,$36,$00,$11,$17,$19,$01,$00,$00,$00,$37,$10,$20,$20,$10,$0C,$00,$00 ;05 FrWOLF
-.byte $99,$00,$32,$00,$5C,$00,$86,$00,$18,$0C,$11,$17,$12,$0A,$00,$00,$02,$37,$00,$00,$00,$05,$03,$00,$00 ;06 IGUANA
-.byte $A8,$09,$B0,$04,$28,$01,$C8,$00,$24,$12,$12,$4A,$1F,$01,$00,$00,$02,$8F,$20,$10,$10,$0C,$02,$00,$00 ;07 AGAMA
-.byte $B9,$07,$92,$02,$C4,$00,$C8,$00,$18,$14,$11,$36,$1E,$01,$00,$00,$02,$5B,$00,$00,$00,$10,$0B,$00,$00 ;08 SAURIA
-.byte $6F,$03,$6F,$03,$F0,$00,$88,$00,$30,$0C,$11,$3C,$26,$01,$00,$00,$04,$78,$00,$00,$00,$0C,$10,$01,$00 ;09 GIANT
-.byte $D8,$06,$D8,$06,$50,$01,$C8,$00,$30,$10,$11,$4E,$3C,$01,$00,$00,$04,$96,$10,$20,$20,$12,$1B,$01,$00 ;0A FrGIANT
-.byte $E2,$05,$E2,$05,$2C,$01,$C8,$00,$30,$14,$11,$53,$49,$01,$00,$00,$04,$87,$20,$10,$10,$14,$16,$01,$00 ;0B R`GIANT
-.byte $1E,$00,$1E,$00,$1C,$00,$6E,$00,$48,$04,$11,$07,$0A,$01,$00,$00,$20,$1C,$40,$90,$00,$09,$03,$01,$00 ;0C SAHAG
-.byte $69,$00,$69,$00,$40,$00,$8E,$00,$4E,$08,$11,$10,$0F,$01,$00,$00,$20,$2E,$40,$90,$00,$10,$05,$01,$00 ;0D R`SAHAG
-.byte $72,$03,$72,$03,$CC,$00,$C8,$80,$60,$14,$11,$33,$2F,$01,$00,$00,$20,$65,$40,$90,$20,$15,$14,$01,$00 ;0E WzSAHAG
-.byte $28,$00,$28,$00,$06,$00,$FF,$00,$0C,$00,$11,$02,$08,$01,$00,$00,$00,$0F,$00,$00,$00,$16,$04,$01,$00 ;0F PIRATE
-.byte $3C,$00,$78,$00,$32,$00,$6A,$00,$18,$06,$11,$0D,$0E,$01,$00,$00,$00,$25,$00,$80,$00,$10,$05,$01,$00 ;10 KYZOKU
-.byte $0B,$01,$42,$00,$78,$00,$79,$00,$48,$00,$11,$1E,$16,$01,$00,$00,$20,$46,$40,$90,$00,$0C,$07,$00,$00 ;11 SHARK
-.byte $39,$09,$58,$02,$58,$01,$C8,$00,$48,$08,$11,$56,$32,$01,$00,$00,$20,$AA,$40,$90,$00,$20,$15,$00,$00 ;12 GrSHARK
-.byte $2A,$00,$0A,$00,$0A,$00,$6E,$00,$54,$00,$11,$02,$04,$01,$00,$00,$00,$0E,$40,$90,$08,$0F,$03,$00,$00 ;13 OddEYE
-.byte $07,$0E,$07,$0E,$30,$01,$C8,$00,$18,$10,$12,$4C,$1E,$01,$00,$00,$20,$9C,$40,$90,$08,$1F,$14,$00,$00 ;14 BigEYE
-.byte $09,$00,$03,$00,$0A,$00,$7C,$01,$0C,$00,$11,$02,$0A,$01,$00,$00,$08,$11,$10,$2B,$01,$09,$04,$01,$00 ;15 BONE
-.byte $7A,$01,$7A,$01,$90,$00,$9C,$01,$2A,$0C,$11,$24,$1A,$01,$00,$00,$08,$4C,$10,$2B,$01,$16,$08,$01,$00 ;16 R`BONE
-.byte $3F,$00,$0F,$00,$38,$00,$68,$00,$18,$08,$11,$0E,$11,$01,$00,$00,$00,$28,$10,$00,$00,$03,$04,$00,$00 ;17 CREEP
-.byte $BA,$00,$C8,$00,$54,$00,$6A,$00,$2A,$08,$18,$15,$01,$01,$64,$10,$00,$33,$00,$00,$00,$06,$07,$00,$00 ;18 CRAWL
-.byte $20,$01,$48,$00,$78,$00,$7A,$00,$30,$04,$11,$1E,$16,$01,$00,$00,$00,$4C,$00,$00,$00,$16,$0A,$00,$00 ;19 HYENA
-.byte $9E,$04,$58,$02,$C0,$00,$92,$00,$30,$08,$11,$30,$1E,$01,$00,$00,$00,$67,$20,$10,$10,$23,$10,$00,$00 ;1A CEREBUS
-.byte $C3,$00,$C3,$00,$64,$00,$74,$00,$12,$0A,$11,$19,$12,$01,$00,$00,$04,$41,$00,$00,$00,$12,$07,$01,$00 ;1B OGRE
-.byte $1A,$01,$2C,$01,$84,$00,$7E,$00,$1E,$0E,$11,$21,$17,$01,$00,$00,$04,$47,$00,$00,$00,$16,$0A,$01,$00 ;1C GrOGRE
-.byte $D3,$02,$D3,$02,$90,$00,$86,$80,$36,$0A,$11,$24,$17,$01,$00,$00,$C4,$50,$00,$80,$80,$20,$0F,$01,$00 ;1D WzOGRE
-.byte $7B,$00,$32,$00,$38,$00,$6B,$04,$1E,$06,$11,$0E,$06,$01,$53,$04,$02,$2E,$00,$00,$00,$1C,$05,$00,$00 ;1E ASP
-.byte $A5,$00,$32,$00,$50,$00,$6E,$04,$24,$0A,$11,$14,$16,$1F,$00,$00,$02,$38,$00,$00,$00,$22,$0E,$00,$00 ;1F COBRA
-.byte $BD,$03,$58,$02,$E0,$00,$C8,$04,$30,$0C,$11,$38,$23,$00,$00,$00,$22,$74,$40,$90,$08,$29,$16,$00,$00 ;20 SeaSNAKE
-.byte $E1,$00,$46,$00,$54,$00,$70,$04,$36,$0A,$12,$15,$16,$01,$75,$04,$00,$37,$00,$00,$00,$12,$0E,$00,$00 ;21 SCORPION
-.byte $7F,$02,$2C,$01,$94,$00,$C8,$04,$3C,$12,$13,$25,$23,$01,$86,$04,$20,$55,$40,$90,$00,$18,$16,$00,$00 ;22 LOBSTER
-.byte $E9,$01,$E9,$01,$A4,$00,$7C,$00,$30,$04,$12,$29,$16,$01,$00,$00,$00,$5F,$00,$00,$00,$16,$0A,$01,$00 ;23 BULL
-.byte $1A,$04,$1A,$04,$E0,$00,$88,$00,$24,$0E,$11,$38,$28,$01,$00,$00,$08,$74,$10,$2B,$01,$10,$14,$01,$00 ;24 ZomBULL
-.byte $6D,$02,$6D,$02,$B8,$00,$88,$00,$30,$0C,$13,$2E,$18,$01,$00,$00,$80,$64,$10,$00,$80,$1C,$09,$01,$00 ;25 TROLL
-.byte $54,$03,$54,$03,$D8,$00,$C8,$00,$30,$14,$11,$36,$28,$01,$00,$00,$A0,$6E,$40,$80,$08,$26,$13,$01,$00 ;26 SeaTROLL
-.byte $5A,$00,$2D,$00,$32,$00,$7C,$8F,$24,$00,$11,$0D,$0A,$01,$53,$08,$09,$25,$10,$AB,$01,$06,$06,$00,$00 ;27 SHADOW
-.byte $E7,$00,$E7,$00,$56,$00,$A0,$8F,$5A,$04,$11,$16,$16,$01,$64,$10,$09,$34,$10,$AB,$01,$0C,$0A,$00,$00 ;28 IMAGE
-.byte $B0,$01,$B0,$01,$72,$00,$A0,$8F,$6C,$0C,$11,$1D,$28,$01,$75,$10,$09,$43,$10,$AB,$01,$16,$10,$00,$00 ;29 WRAITH
-.byte $DE,$03,$DE,$03,$B4,$00,$B8,$8F,$24,$1E,$11,$2D,$5D,$01,$86,$10,$09,$55,$10,$AB,$01,$24,$20,$00,$00 ;2A GHOST
-.byte $18,$00,$0C,$00,$14,$00,$78,$31,$06,$00,$11,$05,$0A,$01,$00,$00,$08,$19,$10,$AB,$01,$02,$05,$01,$00 ;2B ZOMBIE
-.byte $5D,$00,$32,$00,$30,$00,$7C,$31,$0C,$06,$13,$0C,$08,$01,$42,$10,$08,$24,$10,$2B,$01,$04,$08,$01,$00 ;2C GHOUL
-.byte $75,$00,$75,$00,$38,$00,$A0,$31,$2E,$0A,$13,$0E,$08,$01,$53,$10,$08,$28,$10,$2B,$01,$0D,$12,$01,$00 ;2D GEIST
-.byte $96,$00,$96,$00,$34,$00,$A0,$31,$2A,$0C,$11,$0D,$14,$01,$64,$10,$08,$2D,$10,$2B,$01,$18,$15,$01,$00 ;2E SPECTER
-.byte $F8,$10,$E8,$03,$00,$01,$C8,$00,$24,$0A,$11,$70,$41,$0A,$00,$00,$00,$C8,$00,$80,$80,$10,$15,$00,$00 ;2F WORM
-.byte $7B,$0A,$84,$03,$C8,$00,$7C,$00,$3E,$0E,$11,$32,$2E,$01,$00,$00,$00,$67,$00,$80,$80,$20,$20,$00,$00 ;30 Sand W
-.byte $87,$06,$90,$01,$18,$01,$C8,$00,$04,$1F,$11,$46,$32,$01,$00,$00,$00,$8F,$20,$90,$80,$30,$25,$00,$00 ;31 Grey W
-.byte $99,$0C,$99,$0C,$A2,$00,$C8,$F1,$0C,$1E,$21,$2A,$1E,$01,$97,$80,$40,$5C,$00,$80,$01,$30,$20,$00,$00 ;32 EYE
-.byte $01,$00,$01,$00,$68,$01,$C8,$F1,$18,$3C,$21,$96,$78,$28,$97,$10,$89,$A0,$10,$AB,$03,$30,$30,$00,$00 ;33 PHANTOM
-.byte $BB,$02,$BB,$02,$44,$00,$96,$02,$24,$0A,$11,$11,$14,$01,$53,$04,$00,$37,$00,$00,$00,$15,$10,$01,$00 ;34 MEDUSA
-.byte $C2,$04,$C2,$04,$60,$00,$C8,$02,$48,$0C,$1A,$18,$0B,$01,$75,$10,$01,$46,$10,$A0,$00,$1C,$18,$01,$00 ;35 GrMEDUSA
-.byte $0C,$03,$0C,$03,$A0,$00,$94,$00,$30,$10,$12,$28,$1E,$01,$64,$04,$91,$5D,$00,$00,$00,$20,$11,$01,$00 ;36 CATMAN
-.byte $5B,$02,$20,$03,$6E,$00,$96,$00,$3C,$1E,$13,$1C,$14,$01,$00,$00,$40,$3E,$00,$FB,$00,$2C,$19,$01,$00 ;37 MANCAT
-.byte $AA,$04,$2C,$01,$DE,$00,$6F,$04,$30,$14,$11,$38,$27,$01,$64,$04,$00,$74,$00,$00,$00,$10,$12,$00,$00 ;38 PEDE
-.byte $C4,$08,$E8,$03,$40,$01,$B0,$04,$30,$18,$11,$50,$49,$01,$00,$00,$00,$B9,$00,$30,$00,$20,$20,$00,$00 ;39 GrPEDE
-.byte $B6,$01,$6C,$00,$84,$00,$74,$00,$30,$08,$12,$21,$16,$19,$00,$00,$00,$55,$00,$00,$00,$20,$0B,$00,$00 ;3A TIGER
-.byte $4B,$03,$F4,$01,$C8,$00,$B4,$00,$2A,$08,$12,$32,$18,$46,$00,$00,$00,$6A,$00,$00,$00,$30,$13,$00,$00 ;3B Saber T
-.byte $B0,$04,$D0,$07,$9C,$00,$C8,$01,$48,$18,$11,$27,$4C,$01,$75,$10,$89,$4B,$10,$AB,$01,$1D,$10,$01,$00 ;3C VAMPIRE
-.byte $51,$09,$B8,$0B,$2C,$01,$C8,$01,$48,$1C,$11,$2A,$5A,$01,$97,$10,$C9,$54,$10,$AB,$01,$26,$20,$01,$00 ;3D WzVAMP
-.byte $84,$00,$50,$00,$50,$00,$84,$02,$2D,$08,$14,$14,$0C,$01,$00,$00,$01,$35,$00,$80,$80,$08,$0B,$00,$00 ;3E GARGOYLE
-.byte $83,$01,$83,$01,$5E,$00,$86,$02,$48,$20,$14,$18,$0A,$01,$00,$00,$01,$7F,$00,$B0,$90,$15,$1B,$00,$00 ;3F R`GOYLE
-.byte $00,$06,$00,$03,$20,$01,$C8,$80,$12,$14,$11,$48,$42,$01,$00,$00,$01,$82,$10,$EB,$80,$10,$0F,$01,$00 ;40 EARTH
-.byte $54,$06,$20,$03,$14,$01,$C8,$88,$2A,$14,$11,$45,$32,$01,$00,$00,$01,$82,$20,$9B,$10,$20,$17,$01,$00 ;41 FIRE
-.byte $A5,$06,$D0,$07,$C8,$00,$C8,$00,$78,$08,$11,$32,$35,$01,$00,$00,$02,$C4,$50,$A2,$24,$20,$20,$01,$00 ;42 Frost D
-.byte $58,$0B,$A0,$0F,$F8,$00,$C8,$00,$60,$1E,$11,$3E,$4B,$01,$00,$00,$02,$C8,$22,$90,$14,$26,$20,$01,$00 ;43 Red D
-.byte $1B,$09,$E7,$03,$0C,$01,$C8,$01,$18,$1E,$11,$43,$38,$01,$97,$10,$0A,$87,$10,$AB,$05,$10,$20,$01,$00 ;44 ZombieD
-.byte $54,$00,$14,$00,$18,$00,$7C,$04,$00,$FF,$11,$01,$01,$01,$64,$04,$00,$24,$30,$CB,$00,$01,$05,$00,$00 ;45 SCUM
-.byte $FF,$00,$46,$00,$4C,$00,$98,$04,$04,$07,$11,$13,$1E,$01,$00,$00,$00,$37,$40,$BB,$00,$01,$0A,$00,$00 ;46 MUCK
-.byte $FC,$00,$46,$00,$4C,$00,$90,$04,$06,$06,$11,$13,$20,$01,$00,$00,$00,$37,$30,$CB,$00,$01,$0F,$00,$00 ;47 OOZE
-.byte $4D,$04,$84,$03,$9C,$00,$C8,$04,$18,$FF,$11,$27,$31,$01,$64,$04,$00,$55,$10,$EB,$00,$01,$14,$00,$00 ;48 SLIME
-.byte $1E,$00,$08,$00,$1C,$00,$6D,$04,$1E,$00,$11,$07,$0A,$01,$00,$00,$00,$1C,$00,$00,$00,$20,$03,$00,$00 ;49 SPIDER
-.byte $8D,$00,$32,$00,$40,$00,$6F,$04,$18,$0C,$11,$10,$05,$01,$53,$04,$00,$2E,$00,$00,$00,$30,$08,$00,$00 ;4A ARACHNID
-.byte $25,$05,$8A,$02,$A4,$00,$96,$04,$48,$08,$12,$29,$16,$01,$00,$00,$00,$5F,$00,$80,$02,$1C,$0F,$01,$00 ;4B MATICOR
-.byte $88,$04,$88,$04,$E4,$00,$84,$04,$78,$0C,$13,$39,$17,$01,$00,$00,$00,$73,$00,$80,$02,$2D,$16,$01,$00 ;4C SPHINX
-.byte $94,$05,$2C,$01,$00,$01,$92,$00,$38,$26,$13,$40,$3C,$01,$00,$00,$00,$82,$00,$00,$00,$20,$20,$00,$00 ;4D R`ANKYLO
-.byte $32,$0A,$01,$00,$60,$01,$90,$00,$30,$30,$11,$58,$62,$01,$00,$00,$00,$9C,$00,$00,$00,$10,$18,$00,$00 ;4E ANKYLO
-.byte $2C,$01,$2C,$01,$50,$00,$AC,$01,$18,$14,$11,$14,$1E,$01,$53,$20,$08,$3C,$10,$2B,$01,$08,$0E,$01,$00 ;4F MUMMY
-.byte $D8,$03,$E8,$03,$BC,$00,$94,$01,$18,$18,$11,$2F,$2B,$01,$75,$20,$08,$5F,$10,$2B,$01,$20,$17,$01,$00 ;50 WzMUMMY
-.byte $BA,$00,$C8,$00,$32,$00,$7C,$00,$48,$04,$11,$0A,$01,$01,$53,$02,$00,$2F,$00,$80,$04,$20,$0A,$00,$00 ;51 COCTRICE
-.byte $A7,$01,$F4,$01,$2C,$00,$7C,$00,$48,$04,$11,$0B,$14,$01,$00,$00,$00,$2D,$20,$90,$04,$30,$16,$00,$00 ;52 PERILISK
-.byte $95,$04,$32,$00,$D4,$00,$96,$00,$60,$0C,$11,$35,$1E,$01,$64,$04,$02,$73,$00,$80,$04,$1F,$15,$01,$00 ;53 WYVERN
-.byte $C2,$04,$F6,$01,$04,$01,$96,$00,$3C,$16,$11,$41,$28,$01,$00,$00,$02,$83,$00,$80,$04,$28,$1F,$01,$00 ;54 WYRM
-.byte $3B,$0D,$F6,$01,$E0,$01,$90,$00,$3C,$0A,$11,$85,$41,$01,$00,$00,$02,$C8,$00,$00,$00,$20,$26,$00,$00 ;55 TYRO
-.byte $20,$1C,$58,$02,$58,$02,$96,$00,$3C,$0A,$11,$90,$73,$1E,$00,$00,$02,$C8,$00,$00,$00,$30,$30,$00,$00 ;56 T REX
-.byte $F0,$00,$14,$00,$5C,$00,$8A,$00,$48,$00,$11,$17,$16,$01,$00,$00,$00,$44,$40,$90,$08,$26,$0A,$00,$00 ;57 CARIBE
-.byte $22,$02,$2E,$00,$AC,$00,$8E,$00,$48,$14,$11,$2B,$25,$01,$00,$00,$00,$53,$00,$90,$08,$36,$11,$00,$00 ;58 R`CARIBE
-.byte $30,$03,$84,$03,$B8,$00,$8A,$00,$30,$10,$12,$2E,$2A,$01,$00,$00,$00,$67,$40,$90,$08,$18,$0D,$00,$00 ;59 GATOR
-.byte $62,$07,$D0,$07,$20,$01,$8E,$00,$30,$14,$12,$48,$38,$01,$00,$00,$02,$8F,$40,$90,$28,$24,$16,$00,$00 ;5A FrGATOR
-.byte $C8,$04,$66,$00,$D0,$00,$B0,$00,$18,$18,$13,$34,$14,$01,$64,$04,$00,$74,$40,$90,$00,$14,$10,$00,$00 ;5B OCHO
-.byte $75,$0C,$F4,$01,$58,$01,$C8,$00,$18,$20,$13,$56,$23,$01,$97,$04,$00,$AA,$00,$00,$00,$20,$20,$00,$00 ;5C NAOCHO
-.byte $93,$03,$96,$00,$D4,$00,$8A,$00,$24,$0E,$23,$35,$1E,$01,$00,$00,$02,$74,$00,$00,$70,$20,$10,$00,$00 ;5D HYDRA
-.byte $BF,$04,$90,$01,$B6,$00,$98,$00,$24,$0E,$23,$2E,$14,$01,$00,$00,$02,$67,$20,$10,$D0,$30,$20,$00,$00 ;5E R`HYDRA
-.byte $C8,$04,$90,$01,$C8,$00,$C8,$00,$48,$28,$12,$32,$19,$01,$64,$10,$00,$6E,$40,$0B,$00,$26,$20,$01,$00 ;5F GAURD
-.byte $A0,$0F,$D0,$07,$90,$01,$96,$00,$60,$30,$11,$5A,$66,$01,$00,$00,$00,$A0,$40,$BB,$00,$40,$28,$01,$00 ;60 SENTRY
-.byte $AA,$07,$20,$03,$2C,$01,$C8,$00,$48,$14,$11,$44,$45,$01,$00,$00,$01,$82,$20,$9B,$28,$1F,$28,$00,$00 ;61 WATER
-.byte $4E,$06,$27,$03,$66,$01,$C8,$00,$90,$04,$11,$3E,$35,$01,$00,$00,$01,$82,$00,$8B,$44,$30,$28,$00,$00 ;62 AIR
-.byte $33,$09,$33,$09,$64,$01,$C8,$00,$48,$08,$11,$47,$09,$01,$64,$04,$60,$74,$40,$90,$00,$18,$12,$00,$00 ;63 NAGA
-.byte $A1,$0D,$A0,$0F,$A4,$01,$9A,$00,$30,$10,$11,$58,$07,$01,$97,$04,$40,$8F,$00,$00,$40,$26,$1A,$00,$00 ;64 GrNAGA
-.byte $10,$08,$C4,$09,$2C,$01,$C8,$00,$48,$14,$14,$3C,$1E,$01,$00,$00,$02,$82,$20,$90,$02,$20,$12,$00,$00 ;65 CHIMERA
-.byte $E8,$11,$88,$13,$5E,$01,$C8,$00,$3C,$12,$14,$46,$28,$01,$00,$00,$02,$8F,$20,$90,$02,$34,$1A,$00,$00 ;66 JIMERA
-.byte $14,$01,$2C,$01,$54,$00,$7E,$00,$42,$10,$12,$15,$1E,$01,$53,$80,$21,$62,$00,$33,$00,$10,$0A,$01,$00 ;67 WIZARD
-.byte $36,$03,$E7,$03,$70,$00,$82,$00,$30,$0C,$13,$1C,$01,$01,$64,$01,$00,$BB,$00,$00,$00,$1C,$14,$01,$00 ;68 SORCERER
-.byte $82,$00,$FA,$00,$6A,$00,$FF,$90,$0C,$0A,$21,$1B,$0F,$01,$00,$00,$00,$40,$00,$00,$00,$08,$06,$01,$00 ;69 GARLAND
-.byte $E4,$0F,$88,$13,$60,$01,$C8,$04,$60,$10,$11,$44,$48,$01,$00,$00,$02,$C8,$20,$80,$04,$26,$26,$01,$00 ;6A Gas D
-.byte $CA,$0C,$D0,$07,$C6,$01,$C8,$08,$60,$14,$11,$56,$5C,$01,$00,$00,$02,$C8,$10,$00,$44,$28,$26,$01,$00 ;6B Blue D
-.byte $E9,$04,$20,$03,$B0,$00,$C8,$00,$1C,$07,$11,$2C,$40,$01,$75,$04,$41,$5D,$00,$7B,$80,$08,$10,$01,$00 ;6C MudGOL
-.byte $51,$09,$E8,$03,$C8,$00,$C8,$00,$18,$10,$11,$32,$46,$01,$00,$00,$41,$6E,$00,$FB,$80,$10,$16,$01,$00 ;6D RockGOL
-.byte $3D,$1A,$B8,$0B,$30,$01,$C8,$00,$18,$64,$11,$4C,$5D,$01,$00,$00,$01,$8F,$00,$BB,$80,$16,$1F,$01,$00 ;6E IronGOL
-.byte $EF,$04,$08,$07,$04,$01,$C8,$00,$24,$26,$12,$41,$2C,$01,$00,$00,$00,$87,$00,$00,$01,$30,$11,$01,$00 ;6F BADMAN
-.byte $8C,$0A,$B8,$0B,$BE,$00,$C8,$00,$2A,$20,$11,$30,$37,$01,$00,$00,$41,$AD,$00,$0B,$01,$38,$18,$01,$00 ;70 EVILMAN
-.byte $CA,$08,$D0,$07,$A8,$00,$FF,$80,$4E,$28,$21,$2A,$1A,$01,$64,$80,$00,$AA,$00,$00,$00,$24,$12,$01,$00 ;71 ASTOS
-.byte $47,$04,$47,$04,$69,$00,$C8,$00,$4E,$28,$11,$1B,$1A,$01,$00,$00,$40,$AA,$00,$00,$00,$26,$10,$01,$00 ;72 MAGE
-.byte $5C,$0D,$5C,$0D,$C8,$00,$9E,$00,$5A,$26,$11,$2D,$28,$01,$00,$00,$40,$BA,$00,$00,$00,$28,$14,$01,$00 ;73 FIGHTER
-.byte $3F,$00,$0F,$00,$40,$00,$6A,$00,$16,$02,$12,$10,$0A,$01,$00,$00,$00,$28,$00,$00,$00,$20,$03,$00,$00 ;74 MADPONY
-.byte $F8,$04,$BC,$02,$C8,$00,$C8,$00,$84,$18,$13,$32,$1E,$01,$00,$00,$01,$64,$20,$9B,$01,$30,$10,$00,$00 ;75 NITEMARE
-.byte $00,$7D,$00,$7D,$E8,$03,$C8,$FF,$60,$50,$12,$C8,$80,$01,$00,$00,$80,$C8,$00,$FB,$54,$40,$40,$01,$00 ;76 WarMECH
-.byte $98,$08,$B8,$0B,$90,$01,$FF,$B7,$18,$28,$11,$31,$28,$01,$75,$10,$49,$78,$10,$2B,$81,$18,$1C,$81,$00 ;77 LICH
-.byte $D0,$07,$01,$00,$F4,$01,$FF,$B7,$30,$32,$11,$40,$32,$01,$97,$10,$49,$8C,$00,$2B,$81,$28,$24,$81,$00 ;78 LICH (reprise)
-.byte $AB,$09,$B8,$0B,$58,$02,$FF,$BF,$30,$32,$36,$3F,$28,$01,$00,$00,$41,$B7,$01,$72,$10,$20,$20,$81,$00 ;79 KARY
-.byte $D0,$07,$01,$00,$BC,$02,$FF,$BF,$3C,$3C,$36,$3F,$3C,$01,$00,$00,$41,$B7,$00,$72,$10,$28,$28,$81,$00 ;7A KARY (reprise)
-.byte $95,$10,$88,$13,$20,$03,$FF,$BF,$54,$3C,$48,$5A,$32,$01,$64,$08,$20,$A0,$40,$90,$28,$30,$24,$81,$00 ;7B KRAKEN
-.byte $D0,$07,$01,$00,$84,$03,$FF,$BF,$62,$46,$48,$72,$46,$01,$97,$08,$20,$C8,$00,$90,$28,$38,$2C,$81,$00 ;7C KRAKEN (reprise)
-.byte $78,$15,$70,$17,$E8,$03,$FF,$FB,$48,$50,$24,$50,$31,$01,$64,$80,$02,$C8,$02,$F0,$44,$40,$28,$81,$00 ;7D TIAMAT
-.byte $D0,$07,$01,$00,$4C,$04,$FF,$FF,$5A,$5A,$24,$55,$4B,$01,$97,$80,$42,$C8,$00,$F0,$44,$48,$30,$81,$00 ;7E TIAMAT (reprise)
-.byte $00,$00,$00,$00,$D0,$07,$FF,$FF,$64,$64,$12,$C8,$64,$01,$A8,$10,$00,$C8,$00,$FF,$03,$3F,$35,$81,$00 ;7F CHAOS
-
-DoesEnemyXExist:
-    LDA btl_enemyIDs, X
-    CMP #$FF
-    RTS
-
-GetEnemyRAMPtr:
-    LDX #28                ; multiply enemy index by $1C  (number of bytes per enemy)
-    JSR MultiplyXA
-    CLC                     ; then add btl_enemystats to the result
-    ADC #<btl_enemystats                ;; FB
-    STA EnemyRAMPointer
-    TXA
-    ADC #>btl_enemystats                ;; 6B
-    STA EnemyRAMPointer+1
-    RTS
-
-LoadEnemyStats:
-    LDA #0
-    LDY #0
-   @ClearLoop:
-    STA btl_enemystats, Y
-    STA btl_enemystats+$24, Y
+    LDY #7                  ; start at the last spell data byte
+    LDA InBattle            ; see if its in battle, or in a shop
+    BEQ @Permissions_Start  ; if not in battle, then only want to load permissions
+    
+    ; in battle, no reason to load permissions at all!
+   @NormalMagicData: 
+    LDA (MagicPointer), Y
+    STA TempSpellList, Y
     DEY
-    BNE @ClearLoop
+    BPL @NormalMagicData 
+    
+    LDA #<TempSpellList    ; then set the MagicPointer to the temp spell data in RAM
+    STA MagicPointer
+    LDA #>TempSpellList
+    STA MagicPointer+1
+    RTS
 
-    LDA #$09
-    STA btl_loadenstats_count              ; loop down-counter
-    LDA #$00
-    STA btl_loadenstats_index               ; loop up-counter / enemy index
-
-    ;LDA #0
-    STA tmp
-    STA tmp+1
-   @EnemyLoop:
-    LDA btl_loadenstats_index               ; Put a pointer to the current enemy's stat RAM
-    JSR GetEnemyRAMPtr                         ;    in btltmp+A
-
-    LDX btl_loadenstats_index              ; Check to see if this enemy even exists
-    JSR DoesEnemyXExist
-    BNE :+
-
-      LDA tmp
-      CLC
-      ADC #4
-      STA tmp
-      LDA tmp+1
-      CLC
-      ADC #28
-      STA tmp+1
-      JMP @NextEnemy        ; if it doesn't, skip ahead...
-
-  : LDX #25                ; multiply current enemy ID by #25  (25 bytes of data per enemy)
-    JSR MultiplyXA          ;   add the result to data_EnemyStats to generate a pointer to the enemy
-    CLC                     ;   data in ROM.
-    ADC #<data_EnemyStats
-    STA EnemyROMPointer
-    TXA
-    ADC #>data_EnemyStats
-    STA EnemyROMPointer+1
-
-    LDX tmp
-    LDY #0
-   @RewardLoop:
-    LDA (EnemyROMPointer), Y
-    STA btl_enemyrewards, X
-    INX
+   @Permissions:             
+    LDA (MagicPointer), Y
+    STA EquipPermissions-8, Y ; -8 since Y is 8, but want to write to EquipPermissions 0
+   @Permissions_Start:        ; Y = 7, so start by incrementing it! 
     INY
-    CPY #4
-    BNE @RewardLoop
-
-    STX tmp
-    LDX tmp+1
-
-    ; Y = 4 here, is pointing at HP max
-   @Loop:
-    LDA (EnemyROMPointer), Y
-    STA btl_enemystats, X
-    INX
-    INY
-    CPY #25                  ; copy the next 21 bytes of ROM data into RAM.
-    BNE @Loop
-
-    LDA #1
-    STA btl_enemystats, X    ; <- en_numhitsmult, default to hit multiplier of 1
-
-    ;; skip 3 stats that were set to 0 by the clearing of the RAM 
-    ;; en_unused, en_extraAI, and en_ailments
-
-    TXA
-    CLC
-    ADC #7                   ; add 7 to the "btl_enemystats, X" position
-    STA tmp+1                ;
-
-    LDY #ENROMSTAT_HPMAX
-    LDA (EnemyROMPointer), Y ; load max HP low byte
-    PHA                      ; push low byte
-    INY
-    LDA (EnemyROMPointer), Y ; load max HP high byte
-
-    LDY #en_hp+1             ; Y = $19, or 26
-    STA (EnemyRAMPointer), Y ; save as current HP high byte
-    PLA                      ; pull low byte
-    DEY
-    STA (EnemyRAMPointer), Y ; save as current HP low byte
-
-    LDX btl_loadenstats_index   ; get the enemy ID
-    LDA btl_enemyIDs, X
-    LDY #en_enemyid
-    STA (EnemyRAMPointer), Y
-
-    ;; level is already set, but this will randomize things a bit!
-    
-    LDY #ENROMSTAT_LEVEL        ; get enemy level
-    LDA (EnemyROMPointer), Y
-    STA tmp+2                   ; save in tmp+2
-
-    JSR BattleRNG_L
-    AND #$0F                    ; get a random number between 0-15
-    TAX                         ; and fetch an alteration number from this little LUT
-    LDA EnemyLevelRandomizer_LUT, X 
-    BEQ @SaveLevel             ; then increase or decrease the level 
-    BMI @DecreaseLevel
-    
-    ;; 0   = do nothing
-    ;; 1-3 = increase level by this amount
-    ;; 4   = decrease level twice
-    ;; 255 = decrease level
-    
-    CMP #4
-    BEQ @DecreaseLevel_2
-    
-    CLC
-    ADC tmp+2
-    BNE @SaveLevel
-    
-   @DecreaseLevel_2: 
-    LDA tmp+2        ; compare level (minimum of 1)
-    CMP #1           ; to 1
-    BEQ @SaveLevel   ; if its equal, don't decrease it
-    DEC tmp+2
-    
-   @DecreaseLevel: 
-    LDA tmp+2        ; compare level (minimum of 1)
-    CMP #1           ; to 1
-    BEQ @SaveLevel   ; if its equal, don't decrease it   
-    DEC tmp+2   
-
-   @SaveLevel:
-    LDA tmp+2             
-    LDY #en_level
-    STA (EnemyRAMPointer), Y    ; save level -- this gives a little bit of randomness to level-based checks
-
-   @NextEnemy:
-    INC btl_loadenstats_index           ; inc up-counter to look at next enemy
-    DEC btl_loadenstats_count           ; dec down-counter
-    BEQ :+
-      JMP @EnemyLoop    ; loop until all 9 enemies processed
-
-   ;; JIGS - and now on to filling the enemy's AI RAM!!
-
-  : LDA #0
-    STA tmp+2                ; enemy ID counter
-    STA tmp+3                ; AI index for writing to RAM
-   @EnemyAI_Loop:
-    JSR GetEnemyRAMPtr
-    LDY #en_enemyid
-    LDA (EnemyRAMPointer), Y
-    AND #$7F                 ; cap at $7F, in case not enough enemies were loaded and old data wasn't overwritten with the right values here
-    LDX #$10
-    JSR MultiplyXA
-    CLC
-    ADC #<EnemyAIData
-    STA EnemyROMPointer
-    TXA
-    ADC #>EnemyAIData
-    STA EnemyROMPointer+1    ; ROM pointer now points to their AI data
- 
-    LDY #0
-    LDX tmp+3
-   @FillAI:
-    LDA (EnemyROMPointer), Y
-    STA lut_EnemyAi, X
-    INX
-    INY
-    CPY #$10
-    BNE @FillAI
-
-    STX tmp+3                ; save RAM write position
-    INC tmp+2                ; inc tmp+2 for next enemy
-    LDA tmp+2
-    CMP #$09
-    BNE @EnemyAI_Loop
+    CPY #8+4                  ; 4 bytes of permission data
+    BNE @Permissions
     RTS
-
-
-EnemyLevelRandomizer_LUT:
-;     0, 1, 2, 3, 4,   5, 6, 7, 8, 9, A, B, C, D, E,   F
-.byte 0, 1, 2, 0, 255, 0, 1, 4, 2, 0, 1, 4, 0, 0, 255, 3
-
-;;
-;; For the enemy's ITEM byte above:
-;; $01 = has item, $10 = has secondary item, $80 = has special item
-;; So $91 means has all 3 items to steal
-;;
-;; First byte: item type  -- $00: gold, $01: consumable, $02: weapon/armor, $03: spell
-;; almost just like treasure chests!
-;;
-;; Second byte: item name; for gold, its the index for the money chests
-;;
-
-lut_StealList:
-.byte $00, GOLD1      , $00, $00, $00, $00         ; 10 gold        ,      ,                 ; 00 IMP
-.byte $02, ARM26      , $00, $00, $00, $00         ; cap            ,      ,                 ; 01 GrIMP
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 02 WOLF
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 03 GrWolf
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 04 WrWolf
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 05 FrWOLF
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 06 IGUANA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 07 AGAMA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 08 SAURIA
-.byte $02, ARM11      , $00, $00, $00, $00         ; Copper bracelet,      ,                 ; 09 GIANT
-.byte $02, ARM12      , $00, $00, $00, $00         ; Silver bracelet,      ,                 ; 0A FrGIANT
-.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0B R`GIANT
-.byte $01, HEAL       , $00, $00, $00, $00         ; Heal           ,      ,                 ; 0C SAHAG
-.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 0D R`SAHAG
-.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0E WzSAHAG
-.byte $02, WEP8       , $00, $00, $00, $00         ; Scimitar       ,      ,                 ; 0F PIRATE
-.byte $02, WEP15      , $00, $00, $00, $00         ; Falchion       ,      ,                 ; 10 KYZOKU
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 11 SHARK
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 12 GrSHARK
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 13 OddEYE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 14 BigEYE
-.byte $02, WEP3       , $00, $00, $00, $00         ; Wooden staff   ,      ,                 ; 15 BONE
-.byte $02, WEP11      , $00, $00, $00, $00         ; Iron staff     ,      ,                 ; 16 R`BONE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 17 CREEP
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 18 CRAWL
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 19 HYENA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1A CEREBUS
-.byte $02, WEP5       , $00, $00, $00, $00         ; Iron hammer    ,      ,                 ; 1B OGRE
-.byte $02, WEP18      , $00, $00, $00, $00         ; Silver hammer  ,      ,                 ; 1C GrOGRE
-.byte $03, MG_ICE2    , $00, $00, $00, $00         ; Ice 2 scroll   ,      ,                 ; 1D WzOGRE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1E ASP
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 1F COBRA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 20 SeaSNAKE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 21 SCORPION
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 22 LOBSTER
-.byte $00, GOLD13     , $00, $00, $00, $00         ; 240 gold -     ,      ,                 ; 23 BULL
-.byte $03, MG_AICE    , $00, $00, $00, $00         ; AICE scroll    ,      ,                 ; 24 ZomBULL
-.byte $00, GOLD14     , $00, $00, $00, $00         ; 255 gold       ,      ,                 ; 25 TROLL
-.byte $00, GOLD31     , $00, $00, $00, $00         ; 880 gold       ,      ,                 ; 26 SeaTROLL
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 27 SHADOW
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 28 IMAGE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 29 WRAITH
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2A GHOST
-.byte $02, ARM1       , $00, $00, $00, $00         ; Cloth T        ,      ,                 ; 2B ZOMBIE
-.byte $00, GOLD5      , $00, $00, $00, $00         ; 55 gold        ,      ,                 ; 2C GHOUL
-.byte $00, GOLD7      , $00, $00, $00, $00         ; 85 gold        ,      ,                 ; 2D GEIST
-.byte $00, GOLD12     , $00, $00, $00, $00         ; 180 gold       ,      ,                 ; 2E SPECTER
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2F WORM
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 30 Sand W
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 31 Grey W
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 32 EYE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 33 PHANTOM
-.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA
-.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA
-.byte $01, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN
-.byte $03, MG_FIR2    , $00, $00, $00, $00         ; Fire 2 scroll  ,      ,                 ; 37 MANCAT
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 38 PEDE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 39 GrPEDE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3A TIGER
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3B Saber T
-.byte $01, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 3C VAMPIRE
-.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3E GARGOYLE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3F R`GOYLE
-.byte $01, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH
-.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE
-.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D
-.byte $00, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D
-.byte $00, GOLD41     , $00, $00, $00, $00         ; 5000 gold      ,      ,                 ; 44 ZombieD
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 45 SCUM
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 46 MUCK
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 47 OOZE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 48 SLIME
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 49 SPIDER
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4A ARACHNID
-.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 4B MANTICOR
-.byte $00, GOLD36     , $00, $00, $00, $00         ; 1760 gold      ,      ,                 ; 4C SPHINX
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4D R`ANKYLO
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4E ANKYLO
-.byte $01, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 4F MUMMY
-.byte $01, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 50 WzMUMMY
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 51 COCTRICE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 52 PERILISK
-.byte $00, GOLD32     , $00, $00, $00, $00         ; 1020 gold      ,      ,                 ; 53 WYVERN
-.byte $00, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 54 WYRM
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 55 TYRO
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 56 T REX
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 57 CARIBE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 58 R`CARIBE
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 59 GATOR
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5A FrGATOR
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5B OCHO
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5C NAOCHO
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5D HYDRA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5E R`HYDRA
-.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 5F GAURD
-.byte $01, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 60 SENTRY
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 61 WATER
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 62 AIR
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 63 NAGA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 64 GrNAGA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 65 CHIMERA
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 66 JIMERA
-.byte $03, MG_LIT     , $00, $00, $00, $00         ; Bolt 2 scroll  ,      ,                 ; 67 WIZARD
-.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 68 SORCERER
-.byte $02, WEP6       , $00, $00, $00, $00         ; Short sword    ,      ,                 ; 69 GARLAND
-.byte $00, GOLD45     , $00, $00, $00, $00         ; 6720 gold      ,      ,                 ; 6A Gas D
-.byte $00, GOLD47     , $00, $00, $00, $00         ; 7690 gold      ,      ,                 ; 6B Blue D
-.byte $03, MG_FAST    , $00, $00, $00, $00         ; Fast scroll    ,      ,                 ; 6C MudGOL
-.byte $03, MG_SLOW    , $00, $00, $00, $00         ; Slow scroll    ,      ,                 ; 6D RockGOL
-.byte $02, ARM4       , $00, $00, $00, $00         ; Iron armor     ,      ,                 ; 6E IronGOL
-.byte $02, ARM6       , $00, $00, $00, $00         ; Silver armor   ,      ,                 ; 6F BADMAN
-.byte $02, WEP17      , $00, $00, $00, $00         ; Silver sword   ,      ,                 ; 70 EVILMAN
-.byte $03, MG_RUB     , $00, $00, $00, $00         ; Rub scroll     ,      ,                 ; 71 ASTOS
-.byte $01, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 72 MAGE
-.byte $03, MG_FOG2    , $00, $00, $00, $00         ; Fog 2 scroll   ,      ,                 ; 73 FIGHTER
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 74 MADPONY
-.byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 75 NITEMARE
-.byte $01, ELIXIR     , $00, $00, $00, $00         ; Elixir         ,      ,                 ; 76 WarMECH
-.byte $01, PHOENIXDOWN, $00, $00, $03, MG_QAKE     ; Phoenix Down   ,      , Quake scroll    ; 77 LICH
-.byte $01, PHOENIXDOWN, $00, $00, $02, ARM23       ; Phoenix Down   ,      , Aegis Shield    ; 78 LICH (reprise)
-.byte $03, MG_FIR3    , $00, $00, $02, ARM20       ; Fire 3 scroll  ,      , Flame Shield    ; 79 KARY
-.byte $01, SMOKEBOMB  , $00, $00, $02, ARM32       ; Smokebomb      ,      , Ribbon          ; 7A KARY (reprise)
-.byte $02, ARM14      , $00, $00, $02, ARM25       ; Opal bracelet  ,      , Protect Cape    ; 7B KRAKEN
-.byte $01, ETHER      , $00, $00, $02, ARM38       ; Ether          ,      , Power Gauntlet  ; 7C KRAKEN (reprise)
-.byte $01, ELIXIR     , $00, $00, $02, ARM10       ; Elixir         ,      , Dragon armor    ; 7D TIAMAT
-.byte $01, ELIXIR     , $00, $00, $02, WEP40       ; Elixir         ,      , Masamune        ; 7E TIAMAT (reprise)
-.byte $01, ELIXIR     , $00, $00, $01, PHOENIXDOWN ; Elixir         ,      , Elixer          ; 7F CHAOS
-
-;
-; JIGS - tried to copy the stealing algorithm from FF6, as seen in MasterZed's faq:
-; https://gamefaqs.gamespot.com/ps/562865-final-fantasy-vi/faqs/11114
-;
-
-;1. If the monster has no items, then you automatically fail to steal.
-;
-;2. If your level is >= 205 (hacks only), you automatically steal.
-;   (Skip steps 3 through 7)
-;
-;3. StealValue = Your Level + 50 - Monster's level
-;
-;4. If StealValue < 0 then you fail to steal.
-;
-;5. If StealValue >=128 then you automatically steal.  (Skip steps 6 and 7)
-;
-;6. If you have a Sneak Ring equipped:
-;      StealValue = StealValue * 2
-;
-;7. If StealValue <= [0..99] then you fail to steal.
-;
-;8. You have 1 in 8 chance of getting a rare item; otherwise, you get a common
-;   item.
-;
-;9. If the monster doesn't have an item to steal in that slot, then you fail to
-;   steal; otherwise, you successfully steal that item.
-;
-
-
-StealFromEnemyZ:
-    LDA #$0F
-    STA btl_unformattedstringbuf ; message code
-    LDA #BTLMSG_STOLE
-    STA btl_unformattedstringbuf+1 ; message "Stole"
-    LDA #$0E
-    STA btl_unformattedstringbuf+2 ; put the item name code into the message buffer
-
-    LDA #0
-    STA btl_unformattedstringbuf+4 ; 44 must be 0'd if its a normal item
-    STA btl_unformattedstringbuf+6 ; if its a scroll, 44 and 45 are written over, so end at 46
-    STA MMC5_tmp+2
-    STA MMC5_tmp+1
-    STA battle_stealsuccess
-
-    LDA btl_defender
-    JSR GetEnemyRAMPtr
-
-    LDY #en_item
-    LDA (EnemyRAMPointer), Y        ; get their "has item" byte
-    BEQ @Nothing                    ; battle_stealsuccess remains 0
-
-    PHA                             ; backup their "has item" byte
-    LDA btl_attacker
-    AND #03
-    TAX
-   ; JSR PrepCharStatPointers
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_DARK
-    BEQ :+
-        LDA #30
-        STA MMC5_tmp+1
-  : LDA btl_charhidden, X
-    BEQ :+
-        LDA #15
-        STA MMC5_tmp+2
-  : LDY #en_level
-    LDA (EnemyRAMPointer), Y        ; get enemy level
-    STA tmp+1
-    LDA MMC5_tmp                    ; load thief's level (was saved in Bank C)
-    CLC
-    ADC #50                         ; add 50
-    ADC MMC5_tmp+2                  ; add 15 if hidden
-    SEC
-    SBC tmp+1                       ; subtract enemy level
-    SBC MMC5_tmp+1                  ; subtract 30 if blind
-    STA MMC5_tmp                    ; if neither hidden or blind, then StealValue = Level + 50 - Enemy's level
-    BCC @Fail                       ; Carry clear = StealValue is less than 0
-    CMP #100
-    BCS @Success                    ; StealValue is maxed
-
-    LDA #0
-    LDX #99                         ; get 1-99
-    JSR RandAX
-    CMP MMC5_tmp                    ; Carry set on fail: StealValue is higher than the roll
-    BCC @Success
-
-  @Fail:
-    PLA                             ; undo the push
-  @Fail_NoPush:
-    DEC battle_stealsuccess
-
-  @Nothing:
-    RTS
-
-  @Success:
-    LDY #en_enemyid
-    LDA (EnemyRAMPointer), Y        ; get the enemy's index
-    LDX #6
-    JSR MultiplyXA                  ; multiply by 6 (6 bytes in the steal list)
-    CLC
-    ADC #<lut_StealList
-    STA tmp
-    TXA
-    ADC #>lut_StealList
-    STA tmp+1                       ; (tmp) now points to the first byte in their inventory
-
-    PLA                             ; get the enemy's backed up "Has Item" byte
-    BPL @StealNormal                ; if the high bit was NOT set, they have no special items
-
-    JSR BattleRNG_L
-    AND #$07                        ; 1 in 8 chance that it pulls a 0 now
-    BEQ @StealSpecial
-
-   @StealNormal:
-    LDY #en_item
-    LDA (EnemyRAMPointer), Y
-    AND #$11
-    BEQ @Fail_NoPush
-
-    LDA (EnemyRAMPointer), Y
-    PHA                             ; push it again...
-    AND #~$11
-    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen
-
-    PLA                             ; and pull to see if they ever had a secondary item
-    AND #$10
-    BEQ @StealNormal_1              ; they have no secondary item to steal
-
-    JSR BattleRNG_L
-    AND #01
-    BNE @StealNormal_2
-
-   @StealNormal_1:
-    LDY #0
-    BEQ @FindItem
-
-   @StealNormal_2:
-    LDY #2
-    BNE @FindItem
-
-   @StealSpecial:
-    LDY #en_item
-    LDA (EnemyRAMPointer), Y
-    AND #~$80
-    STA (EnemyRAMPointer), Y        ; then clear it out so it can't be stolen
-    LDY #4
-
-   @FindItem:
-    INC battle_stealsuccess
-    LDA (tmp), Y
-    BEQ @StealGold
-
-    CMP #1
-    BEQ @StealItem
-
-    CMP #2
-    BEQ @StealEquipment
-
-   @StealMagic:                     ; do all the different ways of putting items in your inventory
-    INY
-    LDA (tmp), Y
-    STA btl_unformattedstringbuf+3  ; put the item name next in the message buffer
-    SEC
-    SBC #ITEM_MAGICSTART
-    TAX
-    INC inv_magic, X
-    LDA #$0F
-    STA btl_unformattedstringbuf+4
-    LDA #BTLMSG_SCROLL
-    STA btl_unformattedstringbuf+5  ; and put _scroll at the end of the message
-    RTS
-
-   @StealEquipment:
-    LDA #$0D
-    STA btl_unformattedstringbuf+2   ; here, re-write the item name byte with equipment name byte
-    INY
-    LDA (tmp), Y
-    TAX
-    STX btl_unformattedstringbuf+3
-    INC inv_weapon, X
-    RTS
-
-   @StealItem:
-    INY
-    LDA (tmp), Y
-    STA btl_unformattedstringbuf+3
-    TAX
-    INC items, X
-    RTS
-
-   @StealGold:
-    LDA #3
-    STA shop_type                    ; needed to make sure LoadPrice works right
-
-    INY
-    LDA (tmp), Y
-    STA btl_unformattedstringbuf+3
-    JSR LoadPriceZ                   ; get the price of the item (the amount of gold stolen)
-    JSR AddGPToParty                 ; add that to the party's GP
-    RTS
-
-
-
-
-
-
-
-
-;; This checks if the player attacker is a cleric, and doubles their crit chance against undead enemies.
-;; JIGS - leaving this here as proof of concept... My hack idea originally turned fighters/knights into undead-slayers. You can do the same!
-
- ClericCheck:
-;    LDA battle_defenderisplayer     ; is it player attacking?
-;    BNE @return
-;    LDA btl_defender_class
-;    BEQ :+                          ; if fighter
-;    CMP #$06                        ; or knight
-;    BNE @return
-;  : LDA btl_defender_category
-;    AND #CATEGORY_UNDEAD+CATEGORY_WERE
-;    BEQ @return
-;    ASL math_critchance             ; *2 Crit chance against undead/cursed
-;    @return:
-;    RTS
-
-;; This checks if the player attacker is a given class, and gives a status effect to their critical hits.
-
-CritCheck:
-    LDA #0
-    STA MMC5_tmp
-    LDA battle_attackerisplayer
-    BEQ @CritReturn                 ; don't do any of these if confusedly attacking another character
-
-    LDA btl_attacker
-    JSR PrepCharStatPointers
-    LDY #ch_speed - ch_stats        ;
-    LDA (CharStatsPointer), Y       ; get speed (luck)
-    ASL A
-    LDX #100                        ;
-    JSR RandAX                      ; Random number between speed/luck and 100
-    CMP #75                         ; Gotta roll over 75 to do the thing
-    BCC @CritReturn
-
-    LDA btl_attacker_class
-    AND #$0F             ;; JIGS - cut off high bits (hidden state)
-    CMP #CLASS_TH                   ; IF thief, goto CritCrit
-    BEQ @CritCrit              
-    CMP #CLASS_NJ                   ; IF ninja, goto CritCrit
-    BEQ @CritCrit              
-    CMP #CLASS_BB                   ; IF bbelt, goto CritStun
-    BEQ @CritStun              
-    CMP #CLASS_MA                   ; IF master, goto CritStun
-    BEQ @CritStun              
-    CMP #CLASS_RM                   ; IF redmage, goto CritSlow
-    BEQ @CritSlow              
-    CMP #CLASS_RW                   ; IF redwiz, goto CritSlow
-    BEQ @CritSlow              
-    CMP #CLASS_BM                   ; IF blackmage, goto CritConfuse
-    BEQ @CritConfuse           
-    CMP #CLASS_BW                   ; IF blackwiz, goto CritConfuse
-    BEQ @CritConfuse           
-    CMP #CLASS_WM                   ; IF whitemage, goto CritStrength
-    BEQ @CritStrength          
-    CMP #CLASS_WW                   ; IF whitewiz, goto CritStrength
-    BEQ @CritStrength
-   @CritReturn:
-    RTS
-
-   @CritCrit:
-    LDA btl_attacker_critrate
-    CLC
-    ADC #4
-    BCC :+
-      LDA #$FF
- : 	LDY #ch_critrate - ch_stats
-    STA (CharStatsPointer), Y
-    LDA #BTLMSG_CRITUP
-    STA MMC5_tmp
-    RTS
-
-   @CritStun:
-    LDA btl_defender_elementresist
-    AND #$01
-    BEQ :+                          ; if defender resists the special attack's element (stun 01)
-    RTS                             ; cancel specialty
-  : LDA #BTLMSG_PARALYZED
-    STA MMC5_tmp
-    LDA #AIL_STUN                   ; Stun ailment as used by STUN's effectivity in original game
-    JMP @CritAddAilment
-
-   @CritSlow:
-    LDA btl_defender
-    LDY #en_numhitsmult
-    LDA (EnemyRAMPointer), Y        ; hit multiplier from RAM stats
-    STA MMC5_tmp
-    DEC MMC5_tmp                    ; Decrease their hit multiplier
-    LDA MMC5_tmp
-    BNE :+
-        RTS                         ; if it went to 0, don't save it
-
- :  STA (EnemyRAMPointer), Y
-    LDA #BTLMSG_LOSTINTELLIGENCE
-    STA MMC5_tmp
-    RTS
-
-   @CritStrength:
-    LDA btl_attacker_damage
-    CLC
-    ADC #4
-    BCC :+
-      LDA #$FF
- : 	LDY #ch_damage - ch_stats
-    STA (CharStatsPointer), Y
-    LDA #BTLMSG_WEAPONSSTRONGER
-    STA MMC5_tmp
-    RTS
-
-   @CritConfuse:
-    LDA btl_defender_elementresist
-    AND #$08
-    BEQ :+                          ; if defender resists the special attack's element (dark/confuses 08)
-    RTS                             ; cancel specialty
-  : LDA #BTLMSG_CONFUSED
-    STA MMC5_tmp
-    LDA #AIL_CONF                   ; Confuse ailment as used by CONF's effectivity in original game
-    JMP @CritAddAilment
-
-   @CritAddAilment:
-    BIT btl_defender_ailments
-    BNE @noailment
-    ORA btl_defender_ailments    ; add to existing ailments
-    STA btl_defender_ailments
-    LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
-
-   @noailment:
-    RTS
-
-
-
-HiddenCheck:
-    LDA btl_attacker_hitrate ; regardless of class, double their hit rate
-    ASL A
-    BCC :+
-        LDA #$FF              ; cap at FF
-  :	STA btl_attacker_hitrate
-
-    LDA btl_attacker_critrate ; regardless of class, 1.5x their crit rate
-    LSR A                     ; halve it, then add in original value
-    CLC
-    ADC btl_attacker_critrate
-    BCC :+
-        LDA #$FF              ; cap at FF
-  :	STA btl_attacker_critrate
-
-    LDA btl_attacker_class
-    CMP #CLASS_TH             ; if thief
-    BEQ @HiddenBoost
-    CMP #CLASS_NJ             ; if ninja
-    BEQ @HiddenBoost
-    RTS
-
-   @HiddenBoost:
- ;  LDA btl_attacker_damage
- ;  LSR A                        ; divide by 2
- ;  CLC
- ;  ADC btl_attacker_damage
- ;  BCC :+
- ;      LDA #$FF                 ; cap at FF
- ;:	STA btl_attacker_damage      ; I think this should basically make the strength 50% higher, or x1.5
-    LDA btl_attacker_damage
-    ASL A
-    BCC :+
-        LDA #$FF
-  : STA btl_attacker_damage
-
-    LDA btl_attacker_attackailment
-    CLC
-    ADC btl_attacker_critrate
-    BCC :+
-        LDA #$FF                 ; cap at FF
-  :	STA btl_attacker_critrate    ; Thieves get x2 CritRate
-    RTS
-
-
-
-
-CoverStuff:
-    LDA btl_charcover, X
-    BEQ @NoCover
-
-    LDA btl_attacker
-    CMP btl_charcover+4, X         ; get the knight doing the covering
-    BEQ @NoCover                   ; skip if the knight is confused and doing the attacking!
-
-    JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_DEAD | AIL_STOP | AIL_SLEEP
-    BNE @NoCover                   ; the knight is immobile and can't help!
-    LDA (CharStatsPointer), Y
-    AND #AIL_STUN
-    BEQ @Cover
-        JSR BattleRNG_L
-        AND #01
-        BEQ @NoCover               ; the knight is stunned, 50/50 chance to perform action
-
-   @Cover:
-    INC attackblocked              ; set to 1
-    LDA btl_defender_index         ; get the original target
-    ORA #$80                       ; convert to ID
-    STA btl_defender
-    ;; important to note: this is used by the DefenderBox drawing thing, but not really used for players otherwise!
-    ;; everything else uses btl_defender_index... so btl_defender is now the ORIGINAL target
-    LDA btl_charcover+4, X         ; get the knight doing the covering
-    AND #$03
-    STA btl_defender_index         ; and set as the new defender
-
-   @NoCover:
-    LDA btl_defender_index
-    RTS
-
-
-
-SpiritCalculations:
-    LDA battle_hitsconnected
-    BEQ @Exit                   ; attack was a miss
-
-    LDA battle_attackerisplayer
-    BEQ @Decrement              ; enemy is attacker
-
-   ; player is attacker:
-    LDA battle_defenderisplayer 
-    BEQ @IncreaseSpirit_Undead  ; defender is enemy
     
-    JSR @SubtractSpirit         ; player vs player: subtract 1 from the defender
-    LDA btl_attacker
-    JSR PrepCharStatPointers
-    JMP @SubtractSpirit         ; then subtract 1 from the attacker    
     
-    ; enemy is attacker
-   @Decrement:
-    LDA battle_defenderisplayer
-    BEQ @Exit                    ; enemy vs enemy; do nothing
+MagicData:    
+;    
+; JIGS - I highly recommend using FFHackster to design your magic, then copy-p    
+;        and comment out the stuff below. For weapons and armours, too.    
+;    
+;; JIGS note - When loading up magic data, about #90 bytes can be saved by cha    
+;; A = magic ID    
+;; LDX #7    
+;; JSR MultiplyXA    
+;; ...then deleting the unused byte from all of these.    
+       
+;      ╒ Hit Rate    
+;      |   ╒ Effectivity    
+;      |   |   ╒ Element
+;      |   |   |   ╒ Target
+;      |   |   |   |   ╒ Effect
+;      |   |   |   |   |   ╒ Graphic (low bits: 1 = move left, 2 = move up, 0 = don't move sprite)
+;      |   |   |   |   |   |   ╒ Palette
+;      |   |   |   |   |   |   |   ╒ Message
+;      |   |   |   |   |   |   |   |    CLASS PERMISSIONS
+;      v   v   v   v   v   v   v   v    v 
+.byte $00,$10,$00,$10,$07,$C1,$29,$01, %00011000, %00000000, %10011000, %00000000 ; 00 CURE           ; HP up!
+.byte $18,$14,$00,$01,$02,$C9,$21,$00, %00001000, %00000000, %00001000, %00000000 ; 01 HARM           
+.byte $00,$08,$00,$10,$09,$B1,$29,$02, %00011000, %00000000, %10011000, %00000000 ; 02 SHIELD         ; Armor up
+.byte $00,$50,$00,$04,$10,$B1,$22,$03, %00001000, %00000000, %10011000, %00000000 ; 03 BLINK          ; Easy to dodge
+.byte $18,$0A,$10,$02,$01,$D1,$26,$00, %00010100, %00000000, %01010100, %00000000 ; 04 FIRE           
+.byte $18,$20,$01,$01,$03,$E8,$2B,$00, %00010100, %00000000, %01010100, %00000000 ; 05 SLEEP          
+.byte $40,$14,$00,$02,$0E,$B9,$28,$05, %00010100, %00000000, %01010100, %00000000 ; 06 LOCK           ; Easy to hit
+.byte $18,$0A,$40,$02,$01,$C9,$28,$00, %00010100, %00000000, %01010100, %00000000 ; 07 BOLT           
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 08 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 09 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 0A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 0B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 0C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 0D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 0E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 0F Time 
+.byte $00,$08,$00,$10,$08,$E2,$27,$00, %00011000, %00000000, %10011000, %00000000 ; 10 LAMP           
+.byte $40,$40,$01,$01,$03,$E8,$2C,$00, %00011000, %00000000, %10011000, %00000000 ; 11 MUTE           
+.byte $00,$40,$00,$08,$0A,$B1,$28,$08, %00011000, %00000000, %10011000, %00000000 ; 12 BOLT (Shield)  ; Defend lightning
+.byte $00,$28,$00,$10,$10,$B1,$23,$03, %00011000, %00000000, %10011000, %00000000 ; 13 INVISBL        ; Easy to dodge
+.byte $18,$14,$20,$02,$01,$D1,$21,$00, %00010100, %00000000, %01010100, %00000000 ; 14 ICE            
+.byte $18,$08,$01,$01,$03,$E8,$23,$00, %00010100, %00000000, %01010100, %00000000 ; 15 DARK           
+.byte $00,$0E,$00,$10,$0B,$B9,$2B,$0A, %00010100, %00000000, %01010100, %00000000 ; 16 TEMPER         ; Weapons stronger
+.byte $40,$00,$01,$01,$04,$E8,$2A,$0B, %00010100, %00000000, %01010100, %00000000 ; 17 SLOW           ; Lost intelligence
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 18 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 19 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 1A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 1B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 1C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 1D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 1E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 1F Time 
+.byte $00,$21,$00,$10,$07,$C1,$2B,$01, %00011000, %00000000, %10011000, %00000000 ; 20 CURE 2         ; HP up!
+.byte $18,$28,$00,$01,$02,$C9,$23,$00, %00001000, %00000000, %00001000, %00000000 ; 21 HARM 2         
+.byte $00,$10,$00,$08,$0A,$B1,$26,$0C, %00011000, %00000000, %10011000, %00000000 ; 22 FIRE (shield)  ; Defend fire
+.byte $03,$20,$00,$08,$15,$C1,$28,BTLMSG_REGENERATING, %00001000, %00000000, %00001000, %00000000 ; 23 REGEN    ;; JIGS - Heal spells temporarily replaced
+;.byte $00,$0C,$00,$08,$07,$C0,$28,$00, %00001000, %00000000, %00001000, %00000000 ; 23 HEAL     ;; backup of original spell
+.byte $18,$1E,$10,$01,$01,$D1,$27,$00, %00010100, %00000000, %01010100, %00000000 ; 24 FIRE 2 
+.byte $40,$10,$01,$02,$03,$E8,$27,$0D, %00010100, %00000000, %01010100, %00000000 ; 25 HOLD            ; Attack halted
+.byte $18,$1E,$40,$01,$01,$C9,$27,$00, %00010100, %00000000, %01010100, %00000000 ; 26 BOLT 2          
+.byte $40,$14,$00,$01,$0E,$B9,$27,$05, %00010100, %00000000, %01010100, %00000000 ; 27 LOCK 2          ; Easy to hit
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 28 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 29 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 2F Time 
+.byte $00,$04,$00,$10,$08,$E2,$2A,$00, %00011000, %00000000, %00011000, %00000000 ; 30 PURE            
+.byte $18,$28,$01,$01,$05,$E8,$25,$0F, %00001000, %00000000, %00001000, %00000000 ; 31 FEAR            ; Became terrified
+.byte $00,$20,$00,$08,$0A,$B1,$21,$10, %00011000, %00000000, %00011000, %00000000 ; 32 ICE (shield)    ; Defend cold
+.byte $00,$40,$00,$10,$08,$E2,$2C,$00, %00001000, %00000000, %00011000, %00000000 ; 33 VOICE           
+.byte $40,$20,$00,$02,$03,$E8,$21,$00, %00010100, %00000000, %01010100, %00000000 ; 34 SLEEP 2         
+.byte $00,$00,$00,$10,$0C,$B9,$2A,$12, %00010100, %00000000, %01010100, %00000000 ; 35 FAST            ; Quick shot
+.byte $40,$80,$01,$01,$03,$E8,$26,$00, %00010100, %00000000, %01010100, %00000000 ; 36 CONFUSE         
+.byte $18,$28,$20,$01,$01,$D1,$22,$00, %00010100, %00000000, %01010100, %00000000 ; 37 ICE 2           
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 38 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 39 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 3F Time 
+.byte $00,$42,$00,$10,$07,$C1,$2C,$01, %00011000, %00000000, %00011000, %00000000 ; 40 CURE 3          ; HP up!
+.byte $00,$01,$00,$10,$06,$E2,$21,$4F, %00001000, %00000000, %00011000, %00000000 ; 41 LIFE     ; JIGS- will now cure death ; Revived from the brink!
+.byte $18,$3C,$00,$01,$02,$C9,$25,$00, %00001000, %00000000, %00001000, %00000000 ; 42 HARM 3 
+.byte $04,$40,$00,$08,$15,$C1,$27,BTLMSG_REGENERATING, %00001000, %00000000, %00001000, %00000000 ; 43 REGEN 2
+;.byte $00,$18,$00,$08,$07,$C0,$27,$00, %00001000, %00000000, %00001000, %00000000 ; 43 HEAL 2
+.byte $18,$32,$10,$01,$01,$D1,$25,$00, %00010100, %00000000, %00010100, %00000000 ;FIR3 ; 44 FIRE 3    
+.byte $28,$01,$02,$01,$03,$E8,$22,$4D, %00000100, %00000000, %00010100, %00000000 ;BANE ; 45 BANE             ; Poison smoke
+.byte $FF,$00,$00,$08,$00,$00,$00,$4A, %00000000, %00000000, %00010100, %00000000 ;WARP ; 46 WARP             ; Ineffective now
+.byte $40,$00,$00,$02,$04,$E8,$29,$0B, %00010100, %00000000, %00010100, %00000000 ;SLO2 ; 47 SLOW 2           ; Lost intelligence
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 48 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 49 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 4A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 4B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 4C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 4D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 4E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 4F Time 
+.byte $00,$02,$00,$10,$14,$E2,$20,$00, %00001000, %00000000, %00001000, %00000000 ;SOFT ; 50 SOFT             ; JIGS - will now cure stone
+.byte $FF,$00,$00,$08,$00,$00,$00,$4A, %00000000, %00000000, %00011000, %00000000 ;EXIT ; 51 EXIT             ; Ineffective now
+.byte $00,$0C,$00,$08,$09,$B1,$2A,$02, %00001000, %00000000, %00011000, %00000000 ;FOG2 ; 52 SHIELD2          ; Armor up
+.byte $00,$28,$00,$08,$10,$B1,$24,$03, %00001000, %00000000, %00011000, %00000000 ;INV2 ; 53 INVIS 2          ; Easy to dodge
+.byte $18,$3C,$40,$01,$01,$C9,$22,$00, %00000100, %00000000, %00010100, %00000000 ;LIT3 ; 54 BOLT 3           
+.byte $18,$01,$08,$02,$03,$D9,$20,$15, %00000100, %00000000, %00000100, %00000000 ;RUB ; 55 RUB              ; Erased
+.byte $28,$01,$80,$01,$03,$B9,$26,$16, %00000100, %00000000, %00000100, %00000000 ;QAKE ; 56 QUAKE            ; Fell into crack
+.byte $00,$10,$01,$02,$12,$E8,$28,$00, %00000100, %00000000, %00000100, %00000000 ;STUN ; 57 STUN   
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 58 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 59 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 5A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 5B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 5C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 5D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 5E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ;???? ; 5F Time 
+.byte $00,$00,$00,$10,$0F,$C1,$21,$18, %00000000, %00000000, %00001000, %00000000 ;CUR4 ; 60 CURE 4           ; HP max! 
+.byte $30,$50,$00,$01,$02,$C9,$2C,$00, %00000000, %00000000, %00001000, %00000000 ;HRM4 ; 61 HARM 4           
+.byte $00,$89,$00,$08,$0A,$B1,$25,$19, %00001000, %00000000, %00011000, %00000000 ;ARUB ; 62 RUB (shield)     ; Defend magic ;; JIGS should be "defend death?"
+.byte $05,$60,$00,$08,$15,$C1,$25,BTLMSG_REGENERATING, %00001000, %00000000, %00001000, %00000000 ; 63 REGEN 3
+;.byte $30,$30,$00,$08,$07,$C0,$25,$00, %00001000, %00000000, %00001000, %00000000 ; 63 HEAL 3
+.byte $18,$46,$20,$01,$01,$D1,$2B,$00, %00000100, %00000000, %00010100, %00000000 ; 64 ICE 3  
+.byte $40,$02,$02,$02,$03,$C9,$20,$00, %00000000, %00000000, %00000100, %00000000 ; 65 BREAK  
+.byte $0F,$10,$00,$04,$0D,$B9,$20,$00, %00000000, %00000000, %00000100, %00000000 ; 66 SABER             ; Weapon became enchanted (JIGS - added $0F to Hit Rate)
+.byte $00,$08,$01,$02,$12,$E8,$24,$00, %00000100, %00000000, %00000100, %00000000 ; 67 BLIND             
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 68 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 69 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 6A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 6B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 6C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 6D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 6E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 6F Time 
+.byte $00,$01,$00,$10,$13,$D9,$21,$00, %00000000, %00000000, %00001000, %00000000 ; 70 LIFE 2 (Cures death now!) ; Revived from the brink!
+.byte $6B,$50,$00,$01,$01,$C9,$24,$00, %00000000, %00000000, %00001000, %00000000 ; 71 HOLY              
+.byte $00,$FF,$00,$10,$0A,$B1,$20,$00, %00000000, %00000000, %00001000, %00000000 ; 72 WALL              ; Defend all
+.byte $6B,$00,$00,$02,$11,$B9,$20,$00, %00000000, %00000000, %00001000, %00000000 ; 73 DISPEL            ; Defenseless
+.byte $6B,$64,$00,$01,$01,$D1,$28,$00, %00000000, %00000000, %00000100, %00000000 ; 74 FLARE             
+.byte $30,$10,$04,$01,$03,$E8,$20,$00, %00000000, %00000000, %00000100, %00000000 ; 75 STOP              ; Time stopped
+.byte $20,$01,$04,$01,$03,$D9,$2B,$00, %00000000, %00000000, %00000100, %00000000 ; 76 BANISH            ; Exile to 4th dimension
+.byte $00,$01,$08,$02,$12,$D9,$28,$00, %00000000, %00000000, %00000100, %00000000 ; 77 DOOM              ; Erased
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 78 Green 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 79 Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 7A Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 7B Green
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 7C Time 
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 7D Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 7E Time
+.byte $00,$00,$00,$00,$00,$00,$00,$00, %00000000, %00000000, %00000000, %00000000 ; 7F Time 
+; $400 bytes ^ 
 
-   ; enemy vs player, so check if the player is covering someone else
-    LDX btl_defender_index
-    LDY #4
-  : LDA btl_charcover+4, X
-    CMP btl_defender
-    BEQ @IncrementCover     ; found the slot where the player is set to be covering someone!
-    INX                     ; so give a boost to spirit
-    DEY
-    BNE :-                  ; loop until all 4 slots checked
+;      ╒ Hit Rate
+;      |   ╒ Effectivity
+;      |   |   ╒ Element
+;      |   |   |   ╒ Target
+;      |   |   |   |   ╒ Effect
+;      |   |   |   |   |   ╒ Graphic
+;      |   |   |   |   |   |   ╒ Palette
+;      |   |   |   |   |   |   |   ╒ Message
+;      v   v   v   v   v   v   v   v  
+.byte $00,$0C,$00,$08,$07,$C1,$28,$01 ; 80 HEAL                   
+.byte $00,$18,$00,$08,$07,$C1,$27,$01 ; 81 HEAL 2                 
+.byte $30,$30,$00,$08,$07,$C1,$25,$01 ; 82 HEAL 3                 
+.byte $00,$08,$00,$10,$FC,$C1,$20,$00 ; 83 Pray - Cure Ailment    
+.byte $00,$05,$00,$04,$18,$B1,$2C,BTLMSG_DEFENDALL ; 84 Reflect   
+.byte $00,$00,$00,$00,$00,$00,$00,BTLMSG_DEFENDALL ; 85 Reflect 2 
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 86 ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 87 ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 88 ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 89 ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 8A ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 8B ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 8C ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 8D ????                   
+.byte $00,$00,$00,$00,$00,$00,$00,$00 ; 8E ????                   
+.byte $00,$00,$00,$04,$17,$00,$00,BTLMSG_QUICKSHOT ; 8F Counter   
+;; $80 bytes
+;; removed heal and pure data
 
-   ; player defender isn't covering anyone, but are they doing anything else?
-    LDX btl_defender_index
-    LDA btl_charguard, X
-    ORA btl_charparry, X
-    ORA btl_charpray, X
-    ORA btl_charrunic, X
-    ORA btl_charfocus, X
-    ORA btl_charrush, X
-    ORA btl_charhidden, X
-    BNE @IncrementNormal
-    ; if doing ANY of these, increase spirit instead!
-
-   @SubtractSpirit:
-    LDY #ch_morale - ch_stats
-    LDA (CharStatsPointer), Y
-    BEQ @Exit
-        SEC
-        SBC #1
-        STA (CharStatsPointer), Y
- 
-   @Exit:
-    RTS
-   
-   @IncreaseSpirit_Undead:
-    LDA btl_defender_category
-    AND #CATEGORY_UNDEAD
-    BEQ @IncrementNormal
-        LDA #3               ; 3 spirit for hitting an undead enemy
-        STA tmp
-        BNE @Increment
-        
-   @IncrementCover:
-    LDA #7                   ; 7 spirit for covering an ally and being hit while doing so
-    STA tmp
-    BNE @Increment
-
-   @IncrementNormal:
-    LDA #1
-    STA tmp
+;; Enemy attacks
+.byte $20,$18,$20,$01,$01,$00,$20,$00 ; 00 FROST      ; 90   
+.byte $20,$0C,$10,$01,$01,$00,$20,$00 ; 01 HEAT       ; 91   
+.byte $05,$02,$02,$02,$03,$00,$20,$00 ; 02 GLANCE     ; 92   
+.byte $00,$10,$01,$02,$03,$00,$20,$00 ; 03 GAZE       ; 93   
+.byte $18,$08,$01,$01,$03,$00,$20,$00 ; 04 FLASH      ; 94   
+.byte $20,$07,$10,$01,$01,$00,$20,$00 ; 05 SCORCH     ; 95   
+.byte $10,$01,$80,$01,$03,$00,$20,$16 ; 06 CRACK      ; 96   ; Fell into crack
+.byte $00,$01,$08,$02,$03,$00,$20,$15 ; 07 SQUINT     ; 97   ; Erased
+.byte $18,$11,$00,$02,$01,$00,$20,$00 ; 08 STARE      ; 98   ; 
+.byte $10,$01,$04,$02,$03,$00,$20,$1F ; 09 GLARE      ; 99   ; Exile to 4th dimension
+.byte $20,$32,$20,$01,$01,$00,$20,$00 ; 0A BLIZZARD   ; 9A   ; 
+.byte $20,$40,$10,$01,$01,$00,$20,$00 ; 0B BLAZE      ; 9B   ; 
+.byte $20,$60,$10,$01,$01,$00,$20,$00 ; 0C INFERNO    ; 9C   ; 
+.byte $20,$18,$10,$01,$01,$00,$20,$00 ; 0D CREMATE    ; 9D   ; 
+.byte $05,$02,$02,$01,$03,$00,$20,$4D ; 0E POISON     ; 9E   ; Poison smoke - JIGS - doesn't make sense, never did. Poison turns to stone? Sure it stops time now, why not.
+.byte $00,$10,$00,$01,$03,$00,$20,$00 ; 0F TRANCE     ; 9F   ; 
+.byte $20,$44,$02,$01,$01,$00,$20,$00 ; 10 POISON     ; A0   ; 
+.byte $20,$4C,$40,$01,$01,$00,$20,$00 ; 11 THUNDER    ; A1   ; 
+.byte $00,$01,$08,$01,$03,$00,$20,$15 ; 12 TOXIC      ; A2   ; Erased
+.byte $18,$08,$01,$02,$03,$00,$20,$00 ; 13 SNORTING   ; A3   
+.byte $30,$50,$00,$01,$01,$00,$20,$00 ; 14 NUCLEAR    ; A4   
+.byte $18,$08,$01,$01,$03,$00,$20,$00 ; 15 INK        ; A5   
+.byte $00,$04,$02,$01,$03,$00,$20,$00 ; 16 STINGER    ; A6   
+.byte $20,$10,$01,$02,$03,$00,$20,$00 ; 17 DAZZLE     ; A7   
+.byte $20,$40,$00,$01,$01,$00,$20,$00 ; 18 SWIRL      ; A8   
+.byte $20,$40,$00,$01,$01,$00,$20,$00 ; 19 TORNADO    ; A9   
+; $D0 bytes
+;      ╒ Hit Rate
+;      |   ╒ Effectivity
+;      |   |   ╒ Element
+;      |   |   |   ╒ Target
+;      |   |   |   |   ╒ Effect
+;      |   |   |   |   |   ╒ Graphic
+;      |   |   |   |   |   |   ╒ Palette
+;      |   |   |   |   |   |   |   ╒ Message
+;      v   v   v   v   v   v   v   v  
+.byte $10,$05,$00,$02,$01,$00,$20,$00 ; 1A IMP PUNCH  ; AA
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1B            ; AB
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1C            ; AC
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1D            ; AD
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1E            ; AE
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 1F            ; AF
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 20            ; B0
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 21            ; B1
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 22            ; B2
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 23            ; B3
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 24            ; B4
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 25            ; B5
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 26            ; B6
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 27            ; B7
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 28            ; B8
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 29            ; B9
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2A            ; BA
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2B            ; BB
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2C            ; BC
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2D            ; BD
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2E            ; BE
+.byte $00,$00,$00,$00,$00,$00,$20,$00 ; 2F            ; BF
     
-   @Increment:
-    LDY #ch_morale - ch_stats
-    LDA (CharStatsPointer), Y
-    CMP #$FF
-    BEQ @Exit
-        CLC
-        ADC tmp
-        STA (CharStatsPointer), Y
-    RTS    
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;; whether or not this saves space, this makes loading stats SO much easier
-;; if you plan on re-arranging any variables in RAM
-PlayerAttackerStats_LUT:
-.byte btl_attacker_damage - btl_attacker,         ch_damage - ch_stats
-.byte btl_attacker_hitrate - btl_attacker,        ch_hitrate - ch_stats
-.byte btl_attacker_numhits - btl_attacker,        ch_numhits - ch_stats
-.byte btl_attacker_critrate - btl_attacker,       ch_critrate - ch_stats
-.byte btl_attacker_category - btl_attacker,       ch_weaponcategory - ch_stats
-.byte btl_attacker_element - btl_attacker,        ch_weaponelement - ch_stats
-.byte btl_attacker_attackailment - btl_attacker,  ch_attackailment - ch_stats
-.byte btl_attacker_ailments - btl_attacker,       ch_ailments - ch_stats
-.byte btl_attacker_class - btl_attacker,          ch_class - ch_stats
-.byte btl_attacker_ailmentchance - btl_attacker,  ch_attackailproc - ch_stats
-
-PlayerDefenderStats_LUT: 
-.byte btl_defender_ailments - btl_attacker,         ch_ailments - ch_stats
-.byte btl_defender_statusresist - btl_attacker,     ch_statusresist - ch_stats
-.byte btl_defender_elementweakness - btl_attacker,  ch_elementweak - ch_stats
-.byte btl_defender_evasion - btl_attacker,          ch_evasion - ch_stats
-.byte btl_defender_defense - btl_attacker,          ch_defense - ch_stats
-.byte btl_defender_class - btl_attacker,            ch_class - ch_stats 
-.byte btl_defender_magicdefense - btl_attacker,     ch_magicdefense - ch_stats
-.byte btl_defender_elementresist - btl_attacker,    ch_elementresist - ch_stats
-.byte btl_defender_hp - btl_attacker,               ch_curhp - ch_stats
-.byte btl_defender_hp+1 - btl_attacker,             ch_curhp+1 - ch_stats 
-
-EnemyAttackerStats_LUT:
-.byte btl_attacker_damage - btl_attacker,          en_strength
-.byte btl_attacker_category - btl_attacker,        en_category
-.byte btl_attacker_element - btl_attacker,         en_elemattack
-.byte btl_attacker_hitrate - btl_attacker,         en_hitrate
-.byte btl_attacker_numhitsmult - btl_attacker,     en_numhitsmult
-.byte btl_attacker_numhits - btl_attacker,         en_numhits
-.byte btl_attacker_critrate - btl_attacker,        en_critrate
-.byte btl_attacker_ailmentchance - btl_attacker,   en_ailproc
-.byte btl_attacker_attackailment - btl_attacker,   en_attackail
-.byte btl_attacker_ailments - btl_attacker,        en_ailments
-
-EnemyDefenderStats_LUT:
-.byte btl_defender_ailments - btl_attacker,        en_ailments
-.byte btl_defender_category - btl_attacker,        en_category
-.byte btl_defender_statusresist - btl_attacker,    en_statusresist
-.byte btl_defender_elementweakness - btl_attacker, en_elemweakness
-.byte btl_defender_evasion - btl_attacker,         en_evade
-.byte btl_defender_defense - btl_attacker,         en_defense
-.byte btl_defender_hp - btl_attacker,              en_hp
-.byte btl_defender_hp+1 - btl_attacker,            en_hp+1
-
-
-
-
-PrepCharStatPointers:
-    ASL A                               ; 2* for pointer lut
-    TAY
-    LDA lut_IBCharStatsPtrTable, Y      ; copy pointers from pointer luts
-    STA CharBackupStatsPointer
-    LDA lut_IBCharStatsPtrTable+1, Y
-    STA CharBackupStatsPointer+1
-    LDA lut_CharStatsPtrTable, Y
-    STA CharStatsPointer
-    LDA lut_CharStatsPtrTable+1, Y
-    STA CharStatsPointer+1
-    RTS
-
-EnemyExistLoop:
-    LDA #$00
-    LDX #$08
-    JSR RandAX
-    TAX                     ; random enemy slot [0,8]
-
-CheckTargetLoop:
-    LDA btl_enemyIDs, X
-    CMP #$FF
-    BEQ EnemyExistLoop               ; if no, then loop to find one
-    RTS
-
-PlayerAttackEnemy_PhysicalZ:
-    LDA BattleCharID
-    ORA #$80
-    STA btl_attacker
-
-    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
-
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_CONF
-    BEQ :+
-       JSR EnemyExistLoop
-
-  : LDA AutoTarget
-    BEQ @SkipAutoTarget
-
-    JSR CheckTargetLoop             ; JIGS - doublecheck the enemy you're attacking exists!
-
-   @SkipAutoTarget:
-    STX btl_defender_index       ; set defender index
-    STX btl_defender
-
-    TXA
-    JSR GetEnemyRAMPtr
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Attacker/PLAYER stats
-    
-    LDX #20
-   @Loop: 
-    LDY PlayerAttackerStats_LUT-1, X
-    LDA (CharStatsPointer), Y
-    DEX
-    LDY PlayerAttackerStats_LUT-1, X
-    STA btl_attacker, Y
-    DEX
-    BNE @Loop
-    
-    STX battle_defenderisplayer     ; clear this value to zero to indicate the defender is an enemy
-    INX ;#1
-    STX battle_attackerisplayer     
-
-    LDA btl_attacker_class
-    AND #$0F                        ;; cut off high bits to get class
-    STA btl_attacker_class
-
-    LDX BattleCharID
-    LDA btl_charhitmult, X
-    STA btl_attacker_numhitsmult
-
-    LDA btl_charweaponsprite, X
-    STA btl_attacker_graphic
-    
-    LDA btl_charweaponpal, X
-    STA btl_attacker_varplt
-
-    LDA btl_charrush, X
-    BEQ :+
-        LDA btl_attacker_hitrate
-        LSR A
-        LSR A
-        STA btl_attacker_hitrate ; one quarter hit rate
-
-        LDY #ch_level - ch_stats
-        LDA (CharStatsPointer), Y
-        ASL A
-        CLC
-        ADC btl_attacker_damage ; level * 2 on top of damage. That's 100 extra damage at level 50!
-        STA btl_attacker_damage
-
-        DEC btl_charrush, X
-
-  : LDA btl_charhidden, X          ;; get hidden state
-    BEQ @Defender
- 
-    JSR HiddenCheck ;; JIGS - this upgrades stats a bit if they're hidden.
-    ;; 2x hit rate
-    ;; 1.5x crit rate (2x for thief/ninja)
-    ;; 2x damage for thief/ninja
-
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Defender/ENEMY stats
-   @Defender:
-    LDX #16
-   @EnemyLoop: 
-    LDY EnemyDefenderStats_LUT-1, X
-    LDA (EnemyRAMPointer), Y
-    DEX
-    LDY EnemyDefenderStats_LUT-1, X
-    STA btl_attacker, Y
-    DEX
-    BNE @EnemyLoop   
-
-    STX btl_defender_class
-    RTS
-
-
-
-PlayerAttackPlayer_PhysicalZ:
-    LDA BattleCharID
-    ORA #$80
-    STA btl_attacker
-    ;; ^ this might not be necessary, as the attacker drawing box sets it when confused
-
-   ; AND #$03
-   ; JSR PrepCharStatPointers        ; this was done during confusion checks
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Attacker/PLAYER stats
-
-    LDX #20
-   @Loop: 
-    LDY PlayerAttackerStats_LUT-1, X
-    LDA (CharStatsPointer), Y
-    DEX
-    LDY PlayerAttackerStats_LUT-1, X
-    STA btl_attacker, Y
-    DEX
-    BNE @Loop
-
-    INX
-    STX battle_attackerisplayer
-    STX battle_defenderisplayer
-
-    LDA btl_attacker_class
-    AND #$0F                        ;; cut off high bits to get class
-    STA btl_attacker_class
-
-    LDX BattleCharID    
-    LDA btl_charhitmult, X
-    STA btl_attacker_numhitsmult
-
-    LDA btl_charweaponsprite, X
-    STA btl_attacker_graphic
-    
-    LDA btl_charweaponpal, X
-    STA btl_attacker_varplt
-
-    LDA btl_attacker_damage
-    LSR A                           ;; damage for player > player is half
-    STA btl_attacker_damage
-
-    LDA btl_attacker_critrate
-    LSR A                           ;; crit rate for player > player is half
-    STA btl_attacker_critrate
-
-    ;; ignore Hidden bonuses
-
-   @FindTarget:
-    JSR BattleRNG_L
-    AND #$03
-    STA btl_defender_index
-    TAX
-    ORA #$80
-    STA btl_defender
-    JSR PrepCharStatPointers        ; get pointer to attacker's OB and IB stats
-
-    LDY #ch_ailments - ch_stats
-    LDA (CharStatsPointer), Y
-    AND #AIL_DEAD | AIL_STOP
-    BNE @FindTarget
-    
-    JSR CoverStuff
-    JMP PlayerDefenderStats
-
-
-;;  input:
-;;    A = defending player index
-;;    X = attacking enemy slot index
-
- EnemyAttackPlayer_PhysicalZ:
-    LDA btl_attacker
-    JSR GetEnemyRAMPtr
-
-    ;;;;;;;;;;;;;;;;;;;;;
-    ; Attacker ENEMY stats
-    
-    LDX #20
-   @Loop: 
-    LDY EnemyAttackerStats_LUT-1, X
-    LDA (EnemyRAMPointer), Y
-    DEX
-    LDY EnemyAttackerStats_LUT-1, X
-    STA btl_attacker, Y
-    DEX
-    BNE @Loop    
-    
-    STX btl_attacker_class          ; enemy has no class, and also thus can't be hidden
-    STX battle_attackerisplayer
-    INX ;#1
-    STX battle_defenderisplayer
-
-    LDA btl_attacker_numhits
-    PHA
-    AND #$0F
-    STA btl_attacker_numhits
-    PLA 
-    AND #$F0
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    STA btl_attacker_limbs
-    
-    LDA btl_retaliate
-    BEQ LoadPlayerDefenderStats_ForEnemyAttack
-        LDA #1
-        STA btl_attacker_limbs
-    ;; if this attack is a counter attack, only do the one attack
-
-LoadPlayerDefenderStats_ForEnemyAttack:
-    LDA btl_randomplayer
-
-    AND #$03
-    STA btl_defender_index       ; record the defender index
-    TAX
-    ORA #$80
-    STA btl_defender
-
-    JSR CoverStuff
-    
-PlayerDefenderStats:
-    JSR PrepCharStatPointers        ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
-
-    LDX #20
-   @Loop: 
-    LDY PlayerDefenderStats_LUT-1, X
-    LDA (CharStatsPointer), Y
-    DEX
-    LDY PlayerDefenderStats_LUT-1, X
-    STA btl_attacker, Y
-    DEX
-    BNE @Loop   
-    
-    STX btl_defender_category
-    
-    LDA btl_defender_class
-    AND #$0F                         ;; cut off high bits to get class
-    STA btl_defender_class
-
-    LDX btl_defender_index
-    LDA btl_charhidden, X
-    BEQ :+
-    LDA btl_defender_class
-    ORA #$10
-    STA btl_defender_class        ; high bit is used for player defenders in Bank C
-
-  : LDA btl_charguard, X          ; check battlestate for Guarding
-    BEQ @Done                     ; if not guarding, finish up
-
-    LDA btl_defender_ailments
-    AND #AIL_STUN
-    BEQ @Guard
-
-    JSR BattleRNG_L               ; 50/50 chance for guarding to fail
-    AND #01                       ; if stunned
-    BEQ @Done
-
-    LDX btl_defender_index
-    DEC btl_charguard, X
-
-   @Guard: 
-    LDY #(ch_level - ch_stats)
-    LDA (CharStatsPointer), Y     ; guard defense is level * 2
-    ASL A
-    CLC
-    ADC btl_defender_defense
-    BCC :+
-       LDA #$FF
-  : STA btl_defender_defense
-
-   @Done:
-    RTS
-
-
-
-
-
-
-
-
-;; this also sets hit multiplier for the party!
-Battle_SetPartyWeaponSpritePal:
-    LDX #8
-   @Clear: 
-    STA btl_charweaponpal-1, X
-    DEX
-    BNE @Clear
-
-    LDA #3
-    STA char_index
-   @Loop: 
-    LDA char_index
-    JSR ShiftLeft6
-    TAX
-    LDA ch_righthand, X
-    BEQ @CheckForFist
-    
-    JSR GetWeaponDataPointer
-    
-    LDX char_index
-    LDY #7
-    LDA (tmp), Y
-    STA btl_charweaponsprite, X
-    INY
-    LDA (tmp), Y
-   @SetWeaponPal:
-    STA btl_charweaponpal, X
-    LDA #01                    ; hit multiplier starts at 1
-    
-   @Next:
-    STA btl_charhitmult, X   
-    DEC char_index
-    BPL @Loop
-    RTS
-   
-   @Empty:   
-    LDX char_index
-    LDA #$20                   ; set the palette to white/grey
-    BNE @SetWeaponPal          ; jump to save palette
-    
-   @CheckForFist:
-    LDA ch_class, X
-    CMP #CLASS_BB
-    BEQ :+
-    CMP #CLASS_MA
-    BNE @Empty
-    
-  : TXA
-    TAY
-    LDX char_index
-    LDA #$AC
-    STA btl_charweaponsprite, X
-    LDA ch_sprite, Y
-    TAY
-    LDA lut_InBattleCharPaletteAssign, Y
-    STA btl_charweaponsprite, X
-    LDA #02                   ; hit multiplier is 2 for unarmed BB/Master
-    BNE @Next
-
-lut_InBattleCharPaletteAssign:
-  .BYTE $21 ; Fighter
-  .BYTE $22 ; Thief
-  .BYTE $20 ; BBelt
-  .BYTE $21 ; RMage
-  .BYTE $21 ; WMage
-  .BYTE $20 ; BMage
-  .BYTE $21 ; 
-  .BYTE $21 ; 
-  
-  .BYTE $21 ; Knight
-  .BYTE $22 ; Ninja
-  .BYTE $20 ; Master
-  .BYTE $21 ; RedWiz
-  .BYTE $21 ; W.Wiz
-  .BYTE $20 ; B.Wiz
-  .BYTE $21 ; 
-  .BYTE $21 ; 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2317,7 +1022,15 @@ ReadjustEquipStats:
     ORA (tmp), Y
     STA ch_statusresist, X
     RTS
-
+    
+    
+GetEquipPermissions:
+    LDA LongCall_A
+    LDX shop_type
+    BEQ GetWeaponDataPointer
+    CPX #1
+    BEQ GetPointerToArmorData
+    JMP LoadSpellForBattle
 
 GetWeaponDataPointer:
    ; SEC
@@ -2327,21 +1040,24 @@ GetWeaponDataPointer:
     TXA                    ; then push X to stack
     PHA
     TYA                    ; restore A
-    LDX #9
+    LDX #13
     JSR MultiplyXA
-    ; I think nomally we'd add the low byte of the pointer, but since the weapon data is
-    ; at the very start of the bank, we'd just be adding 0.
     CLC
-    ;ADC #<lut_WeaponData
+    ADC #<lut_WeaponData
 
     STA tmp                ; put in tmp as low byte of our pointer
     TXA
     ADC #>lut_WeaponData   ; add high byte of our pointer
     STA tmp+1              ; fill tmp+1 to complete our pointer
-    PLA
-    TAX                    ; then restore X
-    LDY #0                 ; and set Y to 0 for later
-    RTS
+    
+    LDY #0
+   @Loop: 
+    LDA (tmp), Y
+    STA EquipStats_RAM, Y  ; fill temp RAM with equipment info
+    INY
+    CPY #13-4
+    BNE @Loop
+    JMP SetEquipPermissions
 
 GetPointerToArmorData:
     SEC
@@ -2350,7 +1066,7 @@ GetPointerToArmorData:
     TXA                    ; then push X to stack
     PHA
     TYA                    ; restore A
-    LDX #6
+    LDX #10
     JSR MultiplyXA
     CLC
     ADC #<lut_ArmorData    ; add low byte of our pointer
@@ -2358,11 +1074,31 @@ GetPointerToArmorData:
     TXA
     ADC #>lut_ArmorData    ; add high byte of our pointer
     STA tmp+1              ; fill tmp+1 to complete our pointer
+
+    LDY #0
+   @Loop: 
+    LDA (tmp), Y
+    STA EquipStats_RAM, Y  ; fill temp RAM with equipment info
+    INY
+    CPY #10-4
+    BNE @Loop
+    
+SetEquipPermissions:    
+    LDA InBattle      ; don't bother doing this in battle, it will overwrite other pointers
+    BNE :+
+
+    LDX #0
+   @Loop: 
+    LDA (tmp), Y           ; last 4 bytes go here
+    STA EquipPermissions, X
+    INY
+    INX
+    CPX #4
+    BNE @Loop    
+    LDY #0                 ; and set Y to 0 for later   
     PLA
     TAX                    ; then restore X
-    LDY #0                 ; and set Y to 0 for later
-    RTS
-
+  : RTS
 
 ;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2475,28 +1211,40 @@ WeaponArmorShopStats:
     BNE @SaveWeaponDamage
 
     LDA battleswon
-
-   @SaveWeaponDamage:
-    STA bigstr_buf+12            ; space stats 3 bytes apart
-    INY
-    LDA (tmp), Y ; Critical
-    STA bigstr_buf+20
-    RTS
-
+    JMP @SaveWeaponDamage
+    
    @Armor:
    ; CLC
    ; ADC #1 ; the following JSR subtracts +1 too many, but needs to stay doing that for other routines
     JSR GetPointerToArmorData
 
-    LDA (tmp), Y ; Evade penalty
+    LDA (tmp), Y ; Evade penalty for armor | Hit rate for weapon
     STA bigstr_buf+16
     INY
-    LDA (tmp), Y ; Absorb
+    LDA (tmp), Y ; Absorb for armor        | Damage for weapon
+    
+   @SaveWeaponDamage:    
     STA bigstr_buf+12
     INY
-    LDA (tmp), Y ; Magic Defense
+    LDA (tmp), Y ; Magic Defense for armor | Critical for weapon
     STA bigstr_buf+20
     RTS
+
+
+;; Now, if it were possible to show these numbers for only 1 character... and palette #2 was set to make white text green
+;; then if Hit Rate was higher than their current stat, you'd want to set the high nybble of $23EB to 7, and the high nybble of $23EC to D
+;; and if Damage was higher than their current stat, you'd want to set the low nybble of $23EB to 7, and the low nybble of $23EC to D
+;; and if Critical hit was higher, then set the low nybble of $23F3 to 7 and the low nybble of $23F4 to D
+;; and this would highlight those stats in green...
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2507,7 +1255,7 @@ M_EquipDescBox_Weapon:
 
 M_EquipDescBox_Armor:
 .byte $99,$4D,$53,$A6,$B7,$E4,$FE,$01     ; Protect:
-.byte $8E,$45,$34,$B1,$B7,$E4,$FE,$01     ; Element:
+.byte $9B,$2C,$30,$B7,$E4,$FE,$FF,$01     ; Resist:
 .byte $9C,$B3,$A8,$4E,$E4,$FF,$FF,$FE     ; Spell:__
 
 SillyWeaponArmorSpecialDesc_LUT:
@@ -2520,13 +1268,8 @@ WeaponArmorSpecialDesc:
     LDA #03
     STA dest_x
 
-    LDX ItemToEquip
-    BNE :+
-      RTS            ; save time and just return
-
-  : DEX
-    STX tmp+10
-    CPX #ARMORSTART
+    LDX ItemToEquip      ; 1-based
+    CPX #ARMORSTART+1
     BCS @Armor
 
    @Weapon:
@@ -2566,6 +1309,10 @@ WeaponArmorSpecialDesc:
     JMP @Resume
 
    @SortOutBytes:
+    ;LDA ItemToEquip
+    ;SEC
+    ;SBC #1           ; temporarily set it to 0-based again
+    ;STA tmp+10       ; save the 0-based version for GetEquipmentSpell
     LDA ItemToEquip
     CMP #ARMORSTART+1
     BCS @ArmorBytes
@@ -2584,33 +1331,32 @@ WeaponArmorSpecialDesc:
     LDA (tmp), Y ; Element to attack with (weapon) / Status defended against (armor)
     STA tmp+12
 
-    LDA ItemToEquip
-    CMP #ARMORSTART+1
+    LDA tmp+10        ; 0-based item ID
+    CMP #ARMORSTART
     BCC :+
 
-   @FixArmorBytes:
+   @FixArmorBytes:   ; swap the Elemental resist and Status defense bytes for display purposes
     LDX tmp+12
     LDY tmp+11
     STX tmp+11
     STY tmp+12
-
+  
   : JSR GetEquipmentSpell
     BEQ @NoSpell
-
+    
     STA str_buf+$BB   ; spell ID
-    LDA #$02
-    STA str_buf+$BA   ; control code for item name, before spell ID
+    LDA #$06
+    STA str_buf+$BA   ; control code for magic name, before spell ID
     LDA #$0A
     STA str_buf+$BD   ; amount of spaces after spell
     BNE @FinishUp
 
    @NoSpell:
     LDA #$02
-    STA str_buf+$BD   ; amount of spaces after "no spell"
-    LDA #$06
-    STA str_buf+$BA   ; control code for common string
-    LDA #$1D
-    STA str_buf+$BB   ; followed by the string for "no spell"
+    STA str_buf+$BD   ; amount of spaces after "no spell"    
+    STA str_buf+$BA   ; also the control code for items and common strings
+    LDA #$8D
+    STA str_buf+$BB   ; followed by the string ID for "no spell"
 
    @FinishUp:
     LDA #$09
@@ -2632,9 +1378,9 @@ WeaponArmorSpecialDesc:
     ;; Element:_*_*_*_*_*_*_*_*__ 01
     ;; Spell:___XXXXXXX__________ 00
     ;; it may look messier in RAM.
-    ;; Spell: FF FF FF 02 XX 09 09 00
+    ;; Spell: FF FF FF 02 XX 09 0A 00
 
-    ;; now to convert the bits in the other two stats into tiles!
+    ;; now to convert the other two stats into tiles!
 
     LDA tmp+11 ; start with ailment
     LDX #$07   ; how far into the string to print the icons
@@ -2729,6 +1475,1033 @@ WeaponArmorSpecialDesc:
     LDY #$F1
     PLA
     RTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Exp to advance to the next level  [$9000 :: 0x2D010]
+
+lut_ExpToAdvance:
+  .FARADDR     40 ; level 2 
+  .FARADDR    196 ; level 3 
+  .FARADDR    547 ; level 4 
+  .FARADDR   1171 ; level 5 
+  .FARADDR   2146 ; level 6 
+  .FARADDR   3550 ; level 7 
+  .FARADDR   5461 ; level 8 
+  .FARADDR   7957 ; level 9 
+  .FARADDR  11116 ; level 10
+  .FARADDR  15016 ; level 11
+  .FARADDR  19735 ; level 12
+  .FARADDR  25351 ; level 13
+  .FARADDR  31942 ; level 14
+  .FARADDR  39586 ; level 15
+  .FARADDR  48361 ; level 16
+  .FARADDR  58345 ; level 17
+  .FARADDR  69617 ; level 18
+  .FARADDR  82253 ; level 19
+  .FARADDR  96332 ; level 20
+  .FARADDR 111932 ; level 21
+  .FARADDR 129131 ; level 22
+  .FARADDR 148008 ; level 23
+  .FARADDR 168639 ; level 24
+  .FARADDR 191103 ; level 25
+  .FARADDR 215479 ; level 26
+  .FARADDR 241843 ; level 27
+  .FARADDR 270275 ; level 28
+  .FARADDR 300851 ; level 29
+  .FARADDR 333651 ; level 30
+  .FARADDR 366450 ; level 31
+  .FARADDR 399250 ; level 32
+  .FARADDR 432049 ; level 33
+  .FARADDR 464849 ; level 34
+  .FARADDR 497648 ; level 35
+  .FARADDR 530448 ; level 36
+  .FARADDR 563247 ; level 37
+  .FARADDR 596047 ; level 38
+  .FARADDR 628846 ; level 39
+  .FARADDR 661646 ; level 40
+  .FARADDR 694445 ; level 41
+  .FARADDR 727245 ; level 42
+  .FARADDR 760044 ; level 43
+  .FARADDR 792844 ; level 44
+  .FARADDR 825643 ; level 45
+  .FARADDR 858443 ; level 46
+  .FARADDR 891242 ; level 47
+  .FARADDR 924042 ; level 48
+  .FARADDR 956841 ; level 49
+  .FARADDR 989641 ; level 50
+
+  ;; in hex, it would look like this:
+  ;.byte $00,$00,$28 ; level 2
+  ;.byte #00,$00,$C4 ; level 3
+  ;.byte #00,$02,$23 ; level 4
+  ;.byte #00,$04,$93 ; level 5
+  ;.byte #00,$08,$62 ; level 6
+  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Level up data!  [$9094 :: 0x2D0A4]
+;;
+;;  Data consists of 2 bytes per level.
+;;  49 levels per class
+;;   6 classes (promoted classes share their unpromoted data)
+;;
+;;  Byte 0:  bit 5:  set if level up is "strong" (extra 20-24 HP bonus)
+;;           bit 4:  set for guaranteed Str increase
+;;           bit 3:  set for guaranteed Agil increase
+;;           bit 2:  set for guaranteed Int increase
+;;           bit 1:  set for guaranteed Vit increase
+;;           bit 0:  set for guaranteed Luck increase
+;;
+;;  Byte 1:  MP up.  Each bit corresponds to a level of spell.
+;;            Ex:  bit 0 means you'll get a level 1 charge
+;;                 bit 7 means you'll get a level 8 charge
+
+data_LevelUpData_Raw:
+
+;; ...still, I'd rather use FFHackster and just cut/paste the data into the .bin...
+
+;; JIGS - alternate explanation of the bits: 1 means do the boost, 0 means nothing!
+;; 7, 6, 5,  4,   3,    2,   1,   0    ::             7, 6, 5, 4, 3, 2, 1, 0
+;; x, x, HP, Str, Agil, Int, Vit, Luck ;; Magic Level 8, 7, 6, 5, 4, 3, 2, 1 
+
+data_LevelUpData_Class1: ;; Class 1 - Fighter
+.byte %00111010, %00000000 ; Level 1 
+.byte %00111011, %00000000 ; Level 2 
+.byte %00111101, %00000000 ; Level 3 
+.byte %00111010, %00000000 ; Level 4 
+.byte %00111011, %00000000 ; Level 5 
+.byte %00111101, %00000000 ; Level 6 
+.byte %00111010, %00000000 ; Level 7 
+.byte %00111011, %00000000 ; Level 8 
+.byte %00111101, %00000000 ; Level 9 
+.byte %00111010, %00000000 ; Level 10
+.byte %00011011, %00000000 ; Level 11
+.byte %00111101, %00000000 ; Level 12
+.byte %00111010, %00000000 ; Level 13
+.byte %00011011, %00000000 ; Level 14
+.byte %00111101, %00000000 ; Level 15
+.byte %00111010, %00000000 ; Level 16
+.byte %00011011, %00000000 ; Level 17
+.byte %00111101, %00000000 ; Level 18
+.byte %00111010, %00000000 ; Level 19
+.byte %00010011, %00000000 ; Level 20
+.byte %00111101, %00000000 ; Level 21
+.byte %00111010, %00000000 ; Level 22
+.byte %00010011, %00000000 ; Level 23
+.byte %00011101, %00000000 ; Level 24
+.byte %00111010, %00000000 ; Level 25
+.byte %00010011, %00000000 ; Level 26
+.byte %00011101, %00000000 ; Level 27
+.byte %00111010, %00000000 ; Level 28
+.byte %00010011, %00000000 ; Level 29
+.byte %00011101, %00000000 ; Level 30
+.byte %00110010, %00000000 ; Level 31
+.byte %00011001, %00000000 ; Level 32
+.byte %00010110, %00000000 ; Level 33
+.byte %00111001, %00000000 ; Level 34
+.byte %00010010, %00000000 ; Level 35
+.byte %00011101, %00000000 ; Level 36
+.byte %00110010, %00000000 ; Level 37
+.byte %00011001, %00000000 ; Level 38
+.byte %00010110, %00000000 ; Level 39
+.byte %00111000, %00000000 ; Level 40
+.byte %00010000, %00000000 ; Level 41
+.byte %00011100, %00000000 ; Level 42
+.byte %00110000, %00000000 ; Level 43
+.byte %00011000, %00000000 ; Level 44
+.byte %00010000, %00000000 ; Level 45
+.byte %00111000, %00000000 ; Level 46
+.byte %00010000, %00000000 ; Level 47
+.byte %00011000, %00000000 ; Level 48
+.byte %00110000, %00000000 ; Level 49
+
+;; 27 HP
+;; 49 Strength
+;; 35 Agililty
+;; 14 Intelligence
+;; 25 Vitality
+;; 24 Speed
+
+;; Class 2 - Thief
+data_LevelUpData_Class2:
+.byte %00111001, %00000000 ; Level 1 
+.byte %00110111, %00000000 ; Level 2 
+.byte %00111001, %00000000 ; Level 3 
+.byte %00110101, %00000000 ; Level 4 
+.byte %00011011, %00000000 ; Level 5 
+.byte %00110101, %00000000 ; Level 6 
+.byte %00011001, %00000000 ; Level 7 
+.byte %00110011, %00000000 ; Level 8 
+.byte %00011101, %00000000 ; Level 9 
+.byte %00100001, %00000000 ; Level 10
+.byte %00011011, %00000000 ; Level 11
+.byte %00110101, %00000000 ; Level 12
+.byte %00001001, %00000000 ; Level 13
+.byte %00110011, %00000000 ; Level 14
+.byte %00011101, %00000000 ; Level 15
+.byte %00001001, %00000000 ; Level 16
+.byte %00110011, %00000000 ; Level 17
+.byte %00011101, %00000000 ; Level 18
+.byte %00001001, %00000000 ; Level 19
+.byte %00110011, %00000000 ; Level 20
+.byte %00011101, %00000000 ; Level 21
+.byte %00001001, %00000000 ; Level 22
+.byte %00110011, %00000000 ; Level 23
+.byte %00011101, %00000000 ; Level 24
+.byte %00001001, %00000000 ; Level 25
+.byte %00110011, %00000000 ; Level 26
+.byte %00011101, %00000000 ; Level 27
+.byte %00001001, %00000000 ; Level 28
+.byte %00100011, %00000000 ; Level 29
+.byte %00011101, %00000000 ; Level 30
+.byte %00001001, %00000000 ; Level 31
+.byte %00111011, %00000000 ; Level 32
+.byte %00011101, %00000000 ; Level 33
+.byte %00001001, %00000000 ; Level 34
+.byte %00011011, %00000000 ; Level 35
+.byte %00111101, %00000000 ; Level 36
+.byte %00001001, %00000000 ; Level 37
+.byte %00011011, %00000000 ; Level 38
+.byte %00011101, %00000000 ; Level 39
+.byte %00101001, %00000000 ; Level 40
+.byte %00010011, %00000000 ; Level 41
+.byte %00001101, %00000000 ; Level 42
+.byte %00010001, %00000000 ; Level 43
+.byte %00001011, %00000000 ; Level 44
+.byte %00110101, %00000000 ; Level 45
+.byte %00001001, %00000000 ; Level 46
+.byte %00010011, %00000000 ; Level 47
+.byte %00001101, %00000000 ; Level 48
+.byte %00010001, %00000000 ; Level 49
+
+;; 18 HP
+;; 33 Strength
+;; 32 Agililty
+;; 17 Intelligence
+;; 16 Vitality
+;; 49 Speed
+
+;; Class 3 - Black Belt
+data_LevelUpData_Class3:
+.byte %00101011, %00000000 ; Level 1 
+.byte %00010111, %00000000 ; Level 2 
+.byte %00101010, %00000000 ; Level 3 
+.byte %00010111, %00000000 ; Level 4 
+.byte %00001011, %00000000 ; Level 5 
+.byte %00110110, %00000000 ; Level 6 
+.byte %00001011, %00000000 ; Level 7 
+.byte %00010111, %00000000 ; Level 8 
+.byte %00101010, %00000000 ; Level 9 
+.byte %00010111, %00000000 ; Level 10
+.byte %00001011, %00000000 ; Level 11
+.byte %00110110, %00000000 ; Level 12
+.byte %00001011, %00000000 ; Level 13
+.byte %00010111, %00000000 ; Level 14
+.byte %00101010, %00000000 ; Level 15
+.byte %00110111, %00000000 ; Level 16
+.byte %00001011, %00000000 ; Level 17
+.byte %00110110, %00000000 ; Level 18
+.byte %00001011, %00000000 ; Level 19
+.byte %00010111, %00000000 ; Level 20
+.byte %00101010, %00000000 ; Level 21
+.byte %00010111, %00000000 ; Level 22
+.byte %00001011, %00000000 ; Level 23
+.byte %00110110, %00000000 ; Level 24
+.byte %00001011, %00000000 ; Level 25
+.byte %00010111, %00000000 ; Level 26
+.byte %00101010, %00000000 ; Level 27
+.byte %00010111, %00000000 ; Level 28
+.byte %00001011, %00000000 ; Level 29
+.byte %00110110, %00000000 ; Level 30
+.byte %00101011, %00000000 ; Level 31
+.byte %00010111, %00000000 ; Level 32
+.byte %00101010, %00000000 ; Level 33
+.byte %00010111, %00000000 ; Level 34
+.byte %00001011, %00000000 ; Level 35
+.byte %00110110, %00000000 ; Level 36
+.byte %00001011, %00000000 ; Level 37
+.byte %00010111, %00000000 ; Level 38
+.byte %00101010, %00000000 ; Level 39
+.byte %00010111, %00000000 ; Level 40
+.byte %00001011, %00000000 ; Level 41
+.byte %00110110, %00000000 ; Level 42
+.byte %00001010, %00000000 ; Level 43
+.byte %00010111, %00000000 ; Level 44
+.byte %00101010, %00000000 ; Level 45
+.byte %00110110, %00000000 ; Level 46
+.byte %00001011, %00000000 ; Level 47
+.byte %00110110, %00000000 ; Level 48
+.byte %00001010, %00000000 ; Level 49
+
+;; 20 HP
+;; 24 Strength
+;; 25 Agililty
+;; 24 Intelligence
+;; 49 Vitality
+;; 30 Speed
+
+;;Class 4 - Red Mage
+data_LevelUpData_Class4:
+.byte %00110011, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110011, %00000001 ; Level 3 
+.byte %00001110, %00000010 ; Level 4 
+.byte %00110011, %00000100 ; Level 5 
+.byte %00001100, %00000101 ; Level 6 
+.byte %00110011, %00000010 ; Level 7 
+.byte %00101100, %00000100 ; Level 8 
+.byte %00110001, %00001001 ; Level 9 
+.byte %00000110, %00001000 ; Level 10
+.byte %00111001, %00000100 ; Level 11
+.byte %00000111, %00001010 ; Level 12
+.byte %00110000, %00000001 ; Level 13
+.byte %00001111, %00010000 ; Level 14
+.byte %00110001, %00011100 ; Level 15
+.byte %00100110, %00000010 ; Level 16
+.byte %00011000, %00010000 ; Level 17
+.byte %00000111, %00001000 ; Level 18
+.byte %00010001, %00100100 ; Level 19
+.byte %00001110, %00110001 ; Level 20
+.byte %00010000, %00000001 ; Level 21
+.byte %00000111, %00100000 ; Level 22
+.byte %00011001, %00001010 ; Level 23
+.byte %00000100, %00010000 ; Level 24
+.byte %00010010, %01100000 ; Level 25
+.byte %00101101, %01000100 ; Level 26
+.byte %00010001, %00000010 ; Level 27
+.byte %00000110, %01100000 ; Level 28
+.byte %00011000, %00011000 ; Level 29
+.byte %00000101, %10000000 ; Level 30
+.byte %00010011, %11000100 ; Level 31
+.byte %00001100, %00100000 ; Level 32
+.byte %00010000, %10000000 ; Level 33
+.byte %00000111, %01010000 ; Level 34
+.byte %00011001, %10000000 ; Level 35
+.byte %00100100, %00001000 ; Level 36
+.byte %00010010, %01000000 ; Level 37
+.byte %00001101, %10000000 ; Level 38
+.byte %00010001, %00100000 ; Level 39
+.byte %00000110, %00000010 ; Level 40
+.byte %00011000, %00010000 ; Level 41
+.byte %00000101, %10000000 ; Level 42
+.byte %00010011, %01000000 ; Level 43
+.byte %00001100, %00000100 ; Level 44
+.byte %00010000, %00100000 ; Level 45
+.byte %00100111, %10000000 ; Level 46
+.byte %00011001, %00001000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00010010, %00010000 ; Level 49
+
+;; 13 HP
+;; 25 Strength
+;; 17 Agililty
+;; 24 Intelligence
+;; 22 Vitality
+;; 25 Speed
+ 
+;;Class 5 - White Mage
+data_LevelUpData_Class5:
+.byte %00111101, %00000011 ; Level 1 
+.byte %00011110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00001110, %00000110 ; Level 4 
+.byte %00100101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00101101, %00001100 ; Level 7 
+.byte %00000110, %00001010 ; Level 8 
+.byte %00110101, %00000001 ; Level 9 
+.byte %00001110, %00001100 ; Level 10
+.byte %00100101, %00010000 ; Level 11
+.byte %00010110, %00010010 ; Level 12
+.byte %00101101, %00001001 ; Level 13
+.byte %00000110, %00010100 ; Level 14
+.byte %00010101, %00100000 ; Level 15
+.byte %00101110, %00100010 ; Level 16
+.byte %00000101, %00011000 ; Level 17
+.byte %00010110, %00100001 ; Level 18
+.byte %00101101, %01000100 ; Level 19
+.byte %00000110, %01000000 ; Level 20
+.byte %00010100, %00110000 ; Level 21
+.byte %00001101, %01001000 ; Level 22
+.byte %00100110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00001101, %11000000 ; Level 25
+.byte %00000110, %00010100 ; Level 26
+.byte %00110100, %10000010 ; Level 27
+.byte %00001101, %01001000 ; Level 28
+.byte %00000110, %10100000 ; Level 29
+.byte %00010000, %00000100 ; Level 30
+.byte %00101001, %00010000 ; Level 31
+.byte %00000010, %10000000 ; Level 32
+.byte %00010000, %01000000 ; Level 33
+.byte %00001001, %00001000 ; Level 34
+.byte %00000010, %00100000 ; Level 35
+.byte %00110000, %10000000 ; Level 36
+.byte %00001001, %00000010 ; Level 37
+.byte %00000010, %01000000 ; Level 38
+.byte %00010000, %00010000 ; Level 39
+.byte %00001001, %10000000 ; Level 40
+.byte %00100010, %00100000 ; Level 41
+.byte %00010000, %00000100 ; Level 42
+.byte %00001001, %01000000 ; Level 43
+.byte %00000010, %10000000 ; Level 44
+.byte %00010000, %00001000 ; Level 45
+.byte %00101001, %00010000 ; Level 46
+.byte %00000010, %00100000 ; Level 47
+.byte %00010000, %01000000 ; Level 48
+.byte %00001001, %10000000 ; Level 49
+
+;; 15 HP
+;; 18 Strength
+;; 18 Agililty
+;; 29 Intelligence
+;; 19 Vitality
+;; 20 Speed
+
+;;Class 6 - Black Mage
+data_LevelUpData_Class6:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+
+data_LevelUpData_Class7:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class8:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+;; 12 HP
+;; 13 Strength
+;; 13 Agililty
+;; 49 Intelligence
+;; 14 Vitality
+;; 14 Speed
+
+;; Class 9 - Knight  
+data_LevelUpData_Class9:
+.byte %00111010, %00000000 ; Level 1 
+.byte %00111011, %00000000 ; Level 2 
+.byte %00111101, %00000000 ; Level 3 
+.byte %00111010, %00000000 ; Level 4 
+.byte %00111011, %00000000 ; Level 5 
+.byte %00111101, %00000000 ; Level 6 
+.byte %00111010, %00000000 ; Level 7 
+.byte %00111011, %00000000 ; Level 8 
+.byte %00111101, %00000000 ; Level 9 
+.byte %00111010, %00000000 ; Level 10
+.byte %00011011, %00000000 ; Level 11
+.byte %00111101, %00000000 ; Level 12
+.byte %00111010, %00000000 ; Level 13
+.byte %00011011, %00000111 ; Level 14
+.byte %00111101, %00000000 ; Level 15
+.byte %00111010, %00000111 ; Level 16
+.byte %00011011, %00000000 ; Level 17
+.byte %00111101, %00000111 ; Level 18
+.byte %00111010, %00000000 ; Level 19
+.byte %00010011, %00000111 ; Level 20
+.byte %00111101, %00000000 ; Level 21
+.byte %00111010, %00000111 ; Level 22
+.byte %00010011, %00000000 ; Level 23
+.byte %00011101, %00000111 ; Level 24
+.byte %00111010, %00000000 ; Level 25
+.byte %00010011, %00000111 ; Level 26
+.byte %00011101, %00000000 ; Level 27
+.byte %00111010, %00000111 ; Level 28
+.byte %00010011, %00000000 ; Level 29
+.byte %00011101, %00000111 ; Level 30
+.byte %00110010, %00000000 ; Level 31
+.byte %00011001, %00000111 ; Level 32
+.byte %00010110, %00000000 ; Level 33
+.byte %00111001, %00000111 ; Level 34
+.byte %00010010, %00000000 ; Level 35
+.byte %00011101, %00000111 ; Level 36
+.byte %00110010, %00000000 ; Level 37
+.byte %00011001, %00000111 ; Level 38
+.byte %00010110, %00000000 ; Level 39
+.byte %00111000, %00000111 ; Level 40
+.byte %00010000, %00000000 ; Level 41
+.byte %00011100, %00000111 ; Level 42
+.byte %00110000, %00000000 ; Level 43
+.byte %00011000, %00000111 ; Level 44
+.byte %00010000, %00000000 ; Level 45
+.byte %00111000, %00000111 ; Level 46
+.byte %00010000, %00000000 ; Level 47
+.byte %00011000, %00000111 ; Level 48
+.byte %00110000, %00000000 ; Level 49
+
+;; Class 8 - Ninja
+data_LevelUpData_Class10:
+.byte %00111001, %00000000 ; Level 1 
+.byte %00110111, %00000000 ; Level 2 
+.byte %00111001, %00000000 ; Level 3 
+.byte %00110101, %00000000 ; Level 4 
+.byte %00011011, %00000000 ; Level 5 
+.byte %00110101, %00000000 ; Level 6 
+.byte %00011001, %00000000 ; Level 7 
+.byte %00110011, %00000000 ; Level 8 
+.byte %00011101, %00000000 ; Level 9 
+.byte %00100001, %00000000 ; Level 10
+.byte %00011011, %00000000 ; Level 11
+.byte %00110101, %00000000 ; Level 12
+.byte %00001001, %00000000 ; Level 13
+.byte %00110011, %00001111 ; Level 14
+.byte %00011101, %00000000 ; Level 15
+.byte %00001001, %00001111 ; Level 16
+.byte %00110011, %00000000 ; Level 17
+.byte %00011101, %00001111 ; Level 18
+.byte %00001001, %00000000 ; Level 19
+.byte %00110011, %00001111 ; Level 20
+.byte %00011101, %00000000 ; Level 21
+.byte %00001001, %00001111 ; Level 22
+.byte %00110011, %00000000 ; Level 23
+.byte %00011101, %00001111 ; Level 24
+.byte %00001001, %00000000 ; Level 25
+.byte %00110011, %00001111 ; Level 26
+.byte %00011101, %00000000 ; Level 27
+.byte %00001001, %00001111 ; Level 28
+.byte %00100011, %00000000 ; Level 29
+.byte %00011101, %00001111 ; Level 30
+.byte %00001001, %00000000 ; Level 31
+.byte %00111011, %00001111 ; Level 32
+.byte %00011101, %00000000 ; Level 33
+.byte %00001001, %00001111 ; Level 34
+.byte %00011011, %00000000 ; Level 35
+.byte %00111101, %00001111 ; Level 36
+.byte %00001001, %00000000 ; Level 37
+.byte %00011011, %00001111 ; Level 38
+.byte %00011101, %00000000 ; Level 39
+.byte %00101001, %00001111 ; Level 40
+.byte %00010011, %00000000 ; Level 41
+.byte %00001101, %00001111 ; Level 42
+.byte %00010001, %00000000 ; Level 43
+.byte %00001011, %00001111 ; Level 44
+.byte %00110101, %00000000 ; Level 45
+.byte %00001001, %00001111 ; Level 46
+.byte %00010011, %00000000 ; Level 47
+.byte %00001101, %00001111 ; Level 48
+.byte %00010001, %00000000 ; Level 49
+
+;; Class 9 - Master
+data_LevelUpData_Class11:
+.byte %00101011, %00000000 ; Level 1 
+.byte %00010111, %00000000 ; Level 2 
+.byte %00101010, %00000000 ; Level 3 
+.byte %00010111, %00000000 ; Level 4 
+.byte %00001011, %00000000 ; Level 5 
+.byte %00110110, %00000000 ; Level 6 
+.byte %00001011, %00000000 ; Level 7 
+.byte %00010111, %00000000 ; Level 8 
+.byte %00101010, %00000000 ; Level 9 
+.byte %00010111, %00000000 ; Level 10
+.byte %00001011, %00000000 ; Level 11
+.byte %00110110, %00000000 ; Level 12
+.byte %00001011, %00000000 ; Level 13
+.byte %00010111, %00000000 ; Level 14
+.byte %00101010, %00000000 ; Level 15
+.byte %00110111, %00000000 ; Level 16
+.byte %00001011, %00000000 ; Level 17
+.byte %00110110, %00000000 ; Level 18
+.byte %00001011, %00000000 ; Level 19
+.byte %00010111, %00000000 ; Level 20
+.byte %00101010, %00000000 ; Level 21
+.byte %00010111, %00000000 ; Level 22
+.byte %00001011, %00000000 ; Level 23
+.byte %00110110, %00000000 ; Level 24
+.byte %00001011, %00000000 ; Level 25
+.byte %00010111, %00000000 ; Level 26
+.byte %00101010, %00000000 ; Level 27
+.byte %00010111, %00000000 ; Level 28
+.byte %00001011, %00000000 ; Level 29
+.byte %00110110, %00000000 ; Level 30
+.byte %00101011, %00000000 ; Level 31
+.byte %00010111, %00000000 ; Level 32
+.byte %00101010, %00000000 ; Level 33
+.byte %00010111, %00000000 ; Level 34
+.byte %00001011, %00000000 ; Level 35
+.byte %00110110, %00000000 ; Level 36
+.byte %00001011, %00000000 ; Level 37
+.byte %00010111, %00000000 ; Level 38
+.byte %00101010, %00000000 ; Level 39
+.byte %00010111, %00000000 ; Level 40
+.byte %00001011, %00000000 ; Level 41
+.byte %00110110, %00000000 ; Level 42
+.byte %00001010, %00000000 ; Level 43
+.byte %00010111, %00000000 ; Level 44
+.byte %00101010, %00000000 ; Level 45
+.byte %00110110, %00000000 ; Level 46
+.byte %00001011, %00000000 ; Level 47
+.byte %00110110, %00000000 ; Level 48
+.byte %00001010, %00000000 ; Level 49
+
+;;Class 10 - Red Wizard 
+data_LevelUpData_Class12:
+.byte %00110011, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110011, %00000001 ; Level 3 
+.byte %00001110, %00000010 ; Level 4 
+.byte %00110011, %00000100 ; Level 5 
+.byte %00001100, %00000101 ; Level 6 
+.byte %00110011, %00000010 ; Level 7 
+.byte %00101100, %00000100 ; Level 8 
+.byte %00110001, %00001001 ; Level 9 
+.byte %00000110, %00001000 ; Level 10
+.byte %00111001, %00000100 ; Level 11
+.byte %00000111, %00001010 ; Level 12
+.byte %00110000, %00000001 ; Level 13
+.byte %00001111, %00010000 ; Level 14
+.byte %00110001, %00011100 ; Level 15
+.byte %00100110, %00000010 ; Level 16
+.byte %00011000, %00010000 ; Level 17
+.byte %00000111, %00001000 ; Level 18
+.byte %00010001, %00100100 ; Level 19
+.byte %00001110, %00110001 ; Level 20
+.byte %00010000, %00000001 ; Level 21
+.byte %00000111, %00100000 ; Level 22
+.byte %00011001, %00001010 ; Level 23
+.byte %00000100, %00010000 ; Level 24
+.byte %00010010, %01100000 ; Level 25
+.byte %00101101, %01000100 ; Level 26
+.byte %00010001, %00000010 ; Level 27
+.byte %00000110, %01100000 ; Level 28
+.byte %00011000, %00011000 ; Level 29
+.byte %00000101, %10000000 ; Level 30
+.byte %00010011, %11000100 ; Level 31
+.byte %00001100, %00100000 ; Level 32
+.byte %00010000, %10000000 ; Level 33
+.byte %00000111, %01010000 ; Level 34
+.byte %00011001, %10000000 ; Level 35
+.byte %00100100, %00001000 ; Level 36
+.byte %00010010, %01000000 ; Level 37
+.byte %00001101, %10000000 ; Level 38
+.byte %00010001, %00100000 ; Level 39
+.byte %00000110, %00000010 ; Level 40
+.byte %00011000, %00010000 ; Level 41
+.byte %00000101, %10000000 ; Level 42
+.byte %00010011, %01000000 ; Level 43
+.byte %00001100, %00000100 ; Level 44
+.byte %00010000, %00100000 ; Level 45
+.byte %00100111, %10000000 ; Level 46
+.byte %00011001, %00001000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00010010, %00010000 ; Level 49
+ 
+;;Class 11 - White Wizard
+data_LevelUpData_Class13:
+.byte %00111101, %00000011 ; Level 1 
+.byte %00011110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00001110, %00000110 ; Level 4 
+.byte %00100101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00101101, %00001100 ; Level 7 
+.byte %00000110, %00001010 ; Level 8 
+.byte %00110101, %00000001 ; Level 9 
+.byte %00001110, %00001100 ; Level 10
+.byte %00100101, %00010000 ; Level 11
+.byte %00010110, %00010010 ; Level 12
+.byte %00101101, %00001001 ; Level 13
+.byte %00000110, %00010100 ; Level 14
+.byte %00010101, %00100000 ; Level 15
+.byte %00101110, %00100010 ; Level 16
+.byte %00000101, %00011000 ; Level 17
+.byte %00010110, %00100001 ; Level 18
+.byte %00101101, %01000100 ; Level 19
+.byte %00000110, %01000000 ; Level 20
+.byte %00010100, %00110000 ; Level 21
+.byte %00001101, %01001000 ; Level 22
+.byte %00100110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00001101, %11000000 ; Level 25
+.byte %00000110, %00010100 ; Level 26
+.byte %00110100, %10000010 ; Level 27
+.byte %00001101, %01001000 ; Level 28
+.byte %00000110, %10100000 ; Level 29
+.byte %00010000, %00000100 ; Level 30
+.byte %00101001, %00010000 ; Level 31
+.byte %00000010, %10000000 ; Level 32
+.byte %00010000, %01000000 ; Level 33
+.byte %00001001, %00001000 ; Level 34
+.byte %00000010, %00100000 ; Level 35
+.byte %00110000, %10000000 ; Level 36
+.byte %00001001, %00000010 ; Level 37
+.byte %00000010, %01000000 ; Level 38
+.byte %00010000, %00010000 ; Level 39
+.byte %00001001, %10000000 ; Level 40
+.byte %00100010, %00100000 ; Level 41
+.byte %00010000, %00000100 ; Level 42
+.byte %00001001, %01000000 ; Level 43
+.byte %00000010, %10000000 ; Level 44
+.byte %00010000, %00001000 ; Level 45
+.byte %00101001, %00010000 ; Level 46
+.byte %00000010, %00100000 ; Level 47
+.byte %00010000, %01000000 ; Level 48
+.byte %00001001, %10000000 ; Level 49
+
+;;Class 12 - Black Wizard
+data_LevelUpData_Class14:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+   
+   
+data_LevelUpData_Class15:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class16:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2854,21 +2627,24 @@ MapPoisonDamage_Z:
 ;; The screen is 32 tiles wide, so...
      ; 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32
 
-.byte $FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$B9,$A8,$AC,$AF,$A8,$A7,$FF,$AC,$B1,$78
-.byte $FF,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$C0,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$AC,$B1,$A7,$FF,$B6,$B7,$B2,$B3,$B6,$BF,$78
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$B7,$AB,$A8,$FF,$B6,$A8,$A4,$FF,$AC,$B6,$FF,$BA,$AC,$AF,$A7,$BF,$78
-.byte $FF,$A4,$B1,$A7,$FF,$B7,$AB,$A8,$FF,$A8,$A4,$B5,$B7,$AB,$FF,$A5,$A8,$AA,$AC,$B1,$B6,$FF,$B7,$B2,$FF,$B5,$B2,$B7,$C0,$78
-.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$B3,$A8,$B2,$B3,$AF,$A8,$FF,$BA,$A4,$AC,$B7,$BF,$FF,$78
-.byte $B7,$AB,$A8,$AC,$B5,$FF,$B2,$B1,$AF,$BC,$FF,$AB,$B2,$B3,$A8,$BF,$FF,$A4,$FF,$B3,$B5,$B2,$B3,$AB,$A8,$A6,$BC,$C3,$C0,$78,$78
-.byte $C6,$A0,$AB,$A8,$B1,$FF,$B7,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$AC,$B1,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$78
-.byte $FF,$FF,$FF,$8F,$B2,$B8,$B5,$FF,$A0,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B0,$A8,$C3,$79,$78,$78
-.byte $FF,$FF,$FF,$FF,$FF,$8A,$A9,$B7,$A8,$B5,$FF,$A4,$FF,$AF,$B2,$B1,$AA,$FF,$AD,$B2,$B8,$B5,$B1,$A8,$BC,$BF,$78
-.byte $FF,$FF,$A9,$B2,$B8,$B5,$FF,$BC,$B2,$B8,$B1,$AA,$FF,$BA,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$A4,$B5,$B5,$AC,$B9,$A8,$BF,$78
+.byte $FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$B9,$A8,$AC,$AF,$A8,$A7,$FF,$AC,$B1,$70
+.byte $FF,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$C0,$FF,$FF,$9D,$AB,$A8,$FF,$BA,$AC,$B1,$A7,$FF,$B6,$B7,$B2,$B3,$B6,$BF,$70
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$B7,$AB,$A8,$FF,$B6,$A8,$A4,$FF,$AC,$B6,$FF,$BA,$AC,$AF,$A7,$BF,$70
+.byte $FF,$A4,$B1,$A7,$FF,$B7,$AB,$A8,$FF,$A8,$A4,$B5,$B7,$AB,$FF,$A5,$A8,$AA,$AC,$B1,$B6,$FF,$B7,$B2,$FF,$B5,$B2,$B7,$C0,$70
+.byte $FF,$FF,$FF,$FF,$FF,$FF,$FF,$9D,$AB,$A8,$FF,$B3,$A8,$B2,$B3,$AF,$A8,$FF,$BA,$A4,$AC,$B7,$BF,$FF,$70
+.byte $B7,$AB,$A8,$AC,$B5,$FF,$B2,$B1,$AF,$BC,$FF,$AB,$B2,$B3,$A8,$BF,$FF,$A4,$FF,$B3,$B5,$B2,$B3,$AB,$A8,$A6,$BC,$C3,$C0,$70,$70
+.byte $C6,$A0,$AB,$A8,$B1,$FF,$B7,$AB,$A8,$FF,$BA,$B2,$B5,$AF,$A7,$FF,$AC,$B6,$FF,$AC,$B1,$FF,$A7,$A4,$B5,$AE,$B1,$A8,$B6,$B6,$70
+.byte $FF,$FF,$FF,$8F,$B2,$B8,$B5,$FF,$A0,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$BA,$AC,$AF,$AF,$FF,$A6,$B2,$B0,$A8,$C3,$7E,$70,$70
+.byte $FF,$FF,$FF,$FF,$FF,$8A,$A9,$B7,$A8,$B5,$FF,$A4,$FF,$AF,$B2,$B1,$AA,$FF,$AD,$B2,$B8,$B5,$B1,$A8,$BC,$BF,$70
+.byte $FF,$FF,$A9,$B2,$B8,$B5,$FF,$BC,$B2,$B8,$B1,$AA,$FF,$BA,$A4,$B5,$B5,$AC,$B2,$B5,$B6,$FF,$A4,$B5,$B5,$AC,$B9,$A8,$BF,$70
 .byte $FF,$FF,$FF,$FF,$FF,$A8,$A4,$A6,$AB,$FF,$AB,$B2,$AF,$A7,$AC,$B1,$AA,$FF,$A4,$B1,$FF,$98,$9B,$8B,$C0,$00
 ;; It's the intro text... I'm not gonna spell it out here. :I I just made some edits to spiff it up a bit. Some spaces here, a better ... there, added in a proper ` for the quotation part...
 
 
 JigsIntro:
+    LDA #$10
+    STA shop_id
+    
     ;; some prep work done in LoadShopCHRForBank_Z in Bank $04 -- turns off screen, sets soft2000, and loads Shop graphics (intro sprites as well)
     ;; The shop graphics have the extra .' tile this screen uses, as well as loading the menu text.
     JSR LongCall
@@ -2927,11 +2703,6 @@ IntroLoop:
    @loop:
     JSR NextLetter           ; gets the next tile to print, set it up in OAM, updates the sprite palette
     JSR TurnOnScreen         ; does all the frame work! Loads the new palette, updates sprites, sets scroll, does music...
-
-    DEC tmp+6
-    BNE @loop
-    ;; Do 4 frames, then...
-
     JSR UpdateJoy         ; Update joypad data
     LDA joy
     AND #BTN_START        ; see if start was pressed
@@ -2945,7 +2716,11 @@ IntroLoop:
         STA joy_prevdir        ; as well as resetting the cursor and previous joy direction
         RTS
 
-  : JSR IntroStoryText
+  : DEC tmp+6
+    BNE @loop
+    ;; Do 4 frames, then...
+
+    JSR IntroStoryText
     JMP IntroLoop
 
 
@@ -2997,7 +2772,7 @@ IntroStoryText:
     BNE :+
       INC text_ptr+1  ;   inc high byte if low byte wrapped
 
-:   CMP #$78
+:   CMP #$70
     BEQ @ControlCode  ;   if it is, jump ahead
 
     LDX $2002         ; reset PPU toggle
