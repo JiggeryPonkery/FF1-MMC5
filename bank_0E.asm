@@ -3072,28 +3072,28 @@ ShopFrameNoCursor:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+ShopAttributes:    
+.byte $D3,$CB,$DB ; attribute position
+.byte $00,$0F,$00 ; attribute value
+
 DrawShop:
     JSR ClearNT                ; clear the nametable
     LDA $2002                  ; reset the PPU toggle
 
-    LDA #>$23CB
+    LDX #$02
+    LDY #$23
+   @Loop:
+    STY $2006
+    LDA ShopAttributes, X
     STA $2006
-    LDA #<$23CB
-    STA $2006
-    LDA #$0F
+    LDA ShopAttributes+3, X
     STA $2007
-    LDA #>$23D3
-    STA $2006
-    LDA #<$23D3
-    STA $2006
-    LDA #0
-    STA tmp+2                  ; no additive for the DrawImageRect routine
-    STA $2007
-    LDX #>$23DB
-    STX $2006
-    LDX #<$23DB
-    STX $2006
-    STA $2007                  ; JIGS - only fill these three attribute bytes!
+    DEX
+    BPL @Loop
+
+    ; last byte of that little loop is $00, so that's still in A...
+    STA menustall                ; disable menu stalling (PPU is off)
+    STA tmp+2                    ; no additive for the DrawImageRect routine
   
     ; Draw the shopkeeper
     ;LDX shop_type                ; get the shop type in X
@@ -3115,9 +3115,6 @@ DrawShop:
     STA image_ptr+1
 
     JSR DrawImageRect            ; draw the image rect
-
-    LDA #0
-    STA menustall                ; disable menu stalling (PPU is off)
 
     LDA #SHOPBOX_TITLE
     JSR DrawMainItemBox          ; draw shop box ID=1  (the title box)
@@ -3886,17 +3883,17 @@ DisplayDescription:
     ADC #15           ; #14 normal items, then description strings start doing magic
 
    @DoItems:
+    JSR Shop_SpellDescription
+    JMP _CommonShopLoop_Main
+
+Shop_SpellDescription: ;; also used by the learning magic menu
     TAX
     LDA #BANK_ITEMDESC
     STA cur_bank    
     JSR ItemDescriptions
     LDA #BANK_MENUS
     STA cur_bank    
-    JMP _CommonShopLoop_Main
-
-
-
-
+    RTS
 
 
    
@@ -4395,9 +4392,10 @@ lut_ShopkeepImage:
 ;;  string) that functionality is removed by having those palettes unchanged.
 
 lutMenuPalettes:
-  .BYTE  $0F,$30,$01,$22 ; ,  $0F,$00,$01,$30,  $0F,$00,$01,$30
+.BYTE  $0F,$30,$01,$22,  $0F,$00,$0F,$30,  $0F,$35,$01,$15
 
-
+lutSpellMenuPalettes:
+.BYTE  $0F,$00,$01,$0F,  $0F,$10,$01,$1A,  $0F,$10,$01,$13
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4428,7 +4426,7 @@ PlaySFX_MenuSel:
 
     LDA Options
     AND #SFX_MUTED
-    BNE @Done
+    BEQ @Done
 
     LDA #%00010100
     STA $400C
@@ -4439,7 +4437,7 @@ PlaySFX_MenuSel:
     LDA #%00001010
     STA $400E
 
-    @Done:
+   @Done:
     RTS              ;  and exit!
 
 
@@ -4468,7 +4466,7 @@ PlaySFX_MenuMove:
 
     LDA Options
     AND #SFX_MUTED
-    BNE @Done
+    BEQ @Done
 
     LDA #%00000010
     STA $400C
@@ -4479,7 +4477,7 @@ PlaySFX_MenuMove:
     LDA #$0
     STA $400E
     
-    @Done:
+   @Done:
     RTS              ;  and exit!
     
     
@@ -4488,7 +4486,7 @@ PlaySFX_MenuMove:
 PlayHealSFX:
     LDA Options
     AND #SFX_MUTED
-    BNE SFX_Done
+    BEQ SFX_Done
  
 PlayHealSFX_Map:
     LDA #%01000111 ; 
@@ -4513,7 +4511,7 @@ PlayHealSFX_Map:
 PlaySFX_CharSwap:
     LDA Options
     AND #SFX_MUTED
-    BNE @Done
+    BEQ @Done
     
     LDA #%10111010   ; 50% duty, length disabed, decay disabed, volume=$A
     STA $4004
@@ -4613,18 +4611,11 @@ EnterMainMenu:
     STA $2001           ; turn off the PPU (we need to do some drawing)  
     LDA #BANK_THIS
     STA cur_bank          ; set cur_bank to this bank
-
     JSR LoadMenuCHRPal        ; load menu related CHR and palettes
-    LDX #$04 ;B
-  @Loop:                      ; load a few other main menu related palettes
-      LDA lutMenuPalettes, X  ; fetch the palette from the LUT
-      STA cur_pal, X          ; and write it to the palette buffer
-      DEX
-      BPL @Loop               ; loop until X wraps ($0C colors copied)
 
 ;; ResumeMainMenu is called to redraw and reenter the main menu from other
 ;;  sub menus (like from the item menu).  This will redraw the main menu, but
-;;  won't restart the music or reload CHR/Palettes like EnterMainMenu does
+;;  won't restart the music or reload CHR like EnterMainMenu does
 
 ResumeMainMenu:
     LDA #0
@@ -4633,6 +4624,14 @@ ResumeMainMenu:
     STA joy
     STA joy_prevdir
     STA item_pageswap    
+
+    ;; reload first 3 palettes
+    LDX #$0B
+  @Loop:                      ; load a few other main menu related palettes
+      LDA lutMenuPalettes, X  ; fetch the palette from the LUT
+      STA cur_pal, X          ; and write it to the palette buffer
+      DEX
+      BPL @Loop               ; loop until X wraps ($0C colors copied)
 
     JSR DrawMainMenu                ; draw the main menu
     LDA #BANK_THIS
@@ -4842,6 +4841,8 @@ MainMenuSubTarget_NoClear:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+
 DrawMagicMenu:
     LDA #0
     STA $2001                      ; turn off PPU
@@ -4894,7 +4895,7 @@ EnterMagicSubMenu:
     STA menustall
     JSR DrawMagicSubMenuString
  
-    NoLocal_MagicSubMenuLoop:
+NoLocal_MagicSubMenuLoop:
   @MagicSubMenuLoop:
     JSR ClearOAM                ; clear OAM
     JSR DrawMagicSubMenuCursor  ; draw the cursor
@@ -4923,9 +4924,9 @@ EnterMagicSubMenu:
     BEQ CannotEnterMagic
     LDA #2
     STA item_pageswap          ; set to 2 to indicate that selecting a spell will forget it
-    JMP :+
+    BNE :+
     
-  EnterMagicMenu_PrepareCursor:
+EnterMagicMenu_PrepareCursor:
     LDA item_pageswap          ; is set to 0 if no spells are known
     BEQ CannotEnterMagic
     CMP #2
@@ -4936,11 +4937,11 @@ EnterMagicSubMenu:
     JSR EnterMagicMenu_Cast
     JMP EnterMagicSubMenu
     
-  CannotEnterMagic:
+CannotEnterMagic:
     JSR PlaySFX_Error
     LDA #1
     STA cursor               ; put cursor on Learn to suggest learning a spell first...
-    JMP NoLocal_MagicSubMenuLoop
+    BNE NoLocal_MagicSubMenuLoop
     
 EnterMagicMenu_Redraw:
     PLA 
@@ -4972,10 +4973,10 @@ MagicMenu_Loop:
     JSR MoveMagicMenuCursor   ; otherwise, move the cursor if a direction was pressed
     JMP MagicMenu_Loop        ; and keep looping
 
-  @B_Pressed:
+   @B_Pressed:
     RTS                       ; if B pressed, just exit
 
-  @A_Pressed:
+   @A_Pressed:
     JSR PlaySFX_MenuSel         ; play the selection sound effect
     LDA item_pageswap
     CMP #1
@@ -4990,7 +4991,7 @@ MagicMenu_Loop:
       JSR CloseDescBox
       JMP EnterMagicMenu_Cast
       
-    @ForgetSpell:  
+   @ForgetSpell:  
     JSR MagicMenu_ForgetSpell   ; if A was pressed, forget the spell  
     LDA item_pageswap
     BEQ @B_Pressed              ; if item_pageswap hits 0, there's no spells left to forget, so return to the submenu
@@ -5006,14 +5007,17 @@ MagicMenu_Loop:
       JSR DrawItemDescBox       ;  print "you don't have enough MP" or whatever message (description text ID=$32)
       JMP EnterMagicMenu_Cast   ;  and return to loop
 
-  @HaveMP:
+   @HaveMP:
+    LDA #0
+    STA backup_cursor_targ
+   
     LDA submenu_targ
     PHA
-    LDX cursor
-    LDA TempSpellList, X
-    CLC 
-    ADC #MG_START-1
-    
+    LDA cursor
+    CLC
+    ADC char_index
+    TAX
+    LDA ch_spells, X
 
        ;  This is all a hardcoded mess.  Which I guess is fine because only a handful
        ; of spells can be cast outside of battle.  This code just checks the above calculated
@@ -5024,47 +5028,47 @@ MagicMenu_Loop:
     CMP #MG_CURE             ; just keep CMPing with every spell you can cast out of battle
     BNE :+                   ;  until we find a match
       JMP UseMagic_CURE      ;  then jump to that spell's routine
-:   CMP #MG_CUR2
+  : CMP #MG_CUR2
     BNE :+
       JMP UseMagic_CUR2
-:   CMP #MG_CUR3
+  : CMP #MG_CUR3
     BNE :+
       JMP UseMagic_CUR3
-:   CMP #MG_CUR4
+  : CMP #MG_CUR4
     BNE :+
       JMP UseMagic_CUR4
-:   CMP #MG_HEAL
+  : CMP #MG_HEAL
     BNE :+
       JMP UseMagic_HEAL
-:   CMP #MG_HEL3
+  : CMP #MG_HEL3
     BNE :+
       JMP UseMagic_HEL3
-:   CMP #MG_HEL2
+  : CMP #MG_HEL2
     BNE :+
       JMP UseMagic_HEL2
-:   CMP #MG_PURE
+  : CMP #MG_PURE
     BNE :+
       JMP UseMagic_PURE
-:   CMP #MG_LIFE
+  : CMP #MG_LIFE
     BNE :+
       JMP UseMagic_LIFE
-:   CMP #MG_LIF2
+  : CMP #MG_LIF2
     BNE :+
       JMP UseMagic_LIF2
-:   CMP #MG_WARP
+  : CMP #MG_WARP
     BNE :+
       JMP UseMagic_WARP
-:   CMP #MG_SOFT
+  : CMP #MG_SOFT
     BNE :+
       JMP UseMagic_SOFT
-:   CMP #MG_EXIT
+  : CMP #MG_EXIT
     BNE :+
       JMP UseMagic_EXIT
-:   CMP #MG_LAMP
+  : CMP #MG_LAMP
     BNE :+
       JMP UseMagic_LAMP
 
-:   PLA
+  : PLA
     LDA #64                 ; gets here if no match found.
     JSR DrawItemDescBox     ; print description text ("can't cast that here")
     JMP MagicMenu_Loop      ; and return to magic loop
@@ -5474,34 +5478,19 @@ UseMagic_CheckMP:
     RTS             ; JIGS - BEQ to CantUse after calling this
     
 MagicMenu_ForgetSpell:
-    LDX cursor
-    LDA BigSpellLevel_LUT, X         ; get spell level
-    STA SpellLevelIndex           ; store in this snazzy variable
-    
-    LDX cursor
-    LDA TempSpellList, X             ; get spell ID
-    BEQ @Oops
-    SEC
-    SBC #1                           ; subtract 1 to shift the ID to 0-based
-    JSR REMOVE_ITEM
-
-
+    JSR Set_Inv_Magic
+    LDA cursor
+    CLC
+    ADC char_index
     TAX
-    INC inv_magic, X                 ; increase the amount of this spell in inventory
-    AND #$0F                         ; then cut off the high bits
-    TAX                              ; put in X again
-    LDA ConvertSpellByteToBit_LUT, X ; convert the ID to a single bit
-    STA tmp                          ; store in tmp
-    
-    LDA SpellLevelIndex              ; get the spell level
-    CLC                        
-    ADC char_index                   ; add the character's index
-    ADC #ch_spells - ch_stats        ; and ch_spells
-    TAX                              ; X is now pointing at the stat byte for this spell's level
-    LDA ch_stats, X                  ; load the stat
-    SEC
-    SBC tmp                          ; subtract that bit
-    STA ch_stats, X                  ; save it without that spell's bit  
+    LDA ch_spells, X                 ; get spell ID
+    BEQ @Oops
+    TAY
+    LDA #0
+    STA ch_spells, X                 ; clear that byte in their spell list
+    DEY
+    TYA                              ; subtract 1 to shift the ID to 0-based
+    JSR ADD_ITEM                     ; put it back in the inventory
 
     JSR DrawMagicMenu                ; reload the magic screen to show the spell has vanished
     JMP TurnMenuScreenOn_ClearOAM    ; clear OAM and turn the screen on
@@ -5513,9 +5502,43 @@ MagicMenu_ForgetSpell:
     
 MagicMenu_LearnSpell:
     JSR DrawLearnSpellMenu
+    LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
+    JSR DrawMainItemBox    
     JSR TurnMenuScreenOn_ClearOAM
+    LDA #1
+    STA cursor_change     ; trigger this to happen on page load
+    STA descboxopen
     
-@LearnSpell_MainLoop:
+   @LearnSpell_MainLoop:
+    LDA cursor_change
+    BEQ @NoDescription
+  
+    DEC cursor_change     ; to stop this part from happening every frame
+    STA menustall         ; cursor_change was 1, so set menustall to 1
+    LDA #$8
+    STA dest_x
+    LDA #$17
+    STA dest_y
+    LDA cursor            ; get cursor, shift it 3 times, add the max, that's the spell ID!
+    ASL A
+    ASL A
+    ASL A
+    ADC cursor_max
+    STA tmp+8             ; backup spell ID 
+    JSR @DoesSpellExist    
+    BNE @DoDescription 
+
+   @ClearDescriptionBox:
+    LDA #MBOX_ITEMDESC    ; redraw the description box to clear it
+    JSR DrawMainItemBox    
+    JMP @LearnSpell_MainLoop
+    
+   @DoDescription:
+    LDA tmp+8
+    ADC #15               ; add 15 to skip the item descriptions and use magic ones    
+    JSR Shop_SpellDescription
+
+   @NoDescription:
     JSR ClearOAM                  ; clear OAM
     JSR DrawMagicLearnMenuCursor  ; draw the cursor
     JSR MenuFrame                 ; and do a frame
@@ -5529,36 +5552,34 @@ MagicMenu_LearnSpell:
     JMP @LearnSpell_MainLoop       ; and keep looping
 
    @B_Pressed:
-    RTS                       ; if B pressed, just exit
+    RTS                        ; if B pressed, just exit
     
    @A_Pressed:
-    LDA cursor
-    ASL A
-    ASL A
-    ASL A
-    CLC
-    ADC cursor_max
-    STA tmp+2
-    STA tmp+5
-    TAX
-    LDA inv_magic, X          ; check if the spell exists
+    JSR @DoesSpellExist
     BEQ @NoSpell
 
     JSR PlaySFX_MenuSel 
     JSR TryLearnSpell
-    BCS @LearnSpell_MainLoop   ; carry set if couldn't learn
+    BCS @ClearDescriptionBox   ; carry set if couldn't learn
 
     JMP MagicMenu_LearnSpell
-    
-    ;LDX tmp+5
-    ;LDA inv_magic, X         ; check if more copies of the spell exist
-    ;BEQ MagicMenu_LearnSpell ; if not, re-draw screen to remove it
-    ;JMP @LearnSpell_MainLoop       ; and keep looping
 
    @NoSpell:
     JSR PlaySFX_Error
-    JMP @LearnSpell_MainLoop       ; and keep looping
+    JMP @LearnSpell_MainLoop   ; and keep looping
 
+   @DoesSpellExist:
+    JSR Set_Inv_Magic
+    LDA tmp+8
+    JMP DOES_ITEM_EXIST
+
+
+LearnMenuAttributes:    
+.byte $CC,$D4,$DC,$E4,$D8,$E0 ; attribute positions
+.byte $77,$77,$BB,$BB,$33,$33 ; values
+
+LearnMenuSpellLevelStrings:
+.byte 72,73,73,73,73,73,73,74
    
 DrawLearnSpellMenu:    
     LDA #0
@@ -5567,6 +5588,26 @@ DrawLearnSpellMenu:
     STA descboxopen                ; and mark description box as closed
     
     JSR ClearNT
+    
+    ;; make the right page have green/purple orbs (or whatever color set by the palettes)
+    LDX #5
+    LDY #$23
+   @AttrLoop: 
+    STY $2006
+    LDA LearnMenuAttributes, X
+    STA $2006
+    LDA LearnMenuAttributes+6, X
+    STA $2007
+    DEX
+    BPL @AttrLoop
+    
+    ;; load first 3 palettes
+    LDX #$0B
+  @PalLoop:                        ; load a few other main menu related palettes
+      LDA lutSpellMenuPalettes, X  ; fetch the palette from the LUT
+      STA cur_pal, X               ; and write it to the palette buffer
+      DEX
+      BPL @PalLoop                 ; loop until X wraps ($0C colors copied)    
     
 	LDA #MBOX_MAGIC_L
     JSR DrawMainItemBox          ; draw these first so the name and submenu boxes overlap
@@ -5585,206 +5626,165 @@ DrawLearnSpellMenu:
     LDA #11
     STA dest_x
 	
-;    LDA item_pageswap
-;    BEQ @Page1Title
-;    CMP #1
-;    BEQ @Page2Title
-;    CMP #2
-;    BEQ @Page3Title
-    
-;    @Page4Title:
-;    LDA #75
-;    JMP :+
-    
-;    @Page3Title:
-;    LDA #74
-;    JMP :+
-    
-;    @Page2Title:
-;    LDA #73
-;    JMP :+
-    
-;    @Page1Title:
-;    LDA #72
-
-    ;; JIGS -- this is why organizing your text string tables is good!
-    LDA #72
-    CLC
-    ADC item_pageswap
-
-    JSR DrawMenuString         ; draw White / Black magic submenu
+    LDX item_pageswap
+    LDA LearnMenuSpellLevelStrings, X
+    JSR DrawMenuString             ; Draw Spell Level
   
+    ;; print the spell level inside the above string  
+  
+    LDA #>$205A
+    STA $2006
+    LDA #<$205A
+    STA $2006
     LDA item_pageswap
-    BEQ @Page1
-    CMP #1
-    BEQ @Page2
-    CMP #2
-    BEQ @Page3
-    
-   @Page4:
-    LDX #$30
-    JMP :+
-    
-   @Page3:
-    LDX #$20
-    JMP :+
-    
-   @Page2:
-    LDX #$10
-    JMP :+
-    
-   @Page1:
-    LDX #0
-  : STX MMC5_tmp+2
-    LDY #0
-    STY MMC5_tmp        ; spell level counter
-    STY MMC5_tmp+1      ; left or right counter
+    CLC
+    ADC #$81
+    STA $2007
+
+    ;; now check what spells exist in your inventory, and put them in a buffer to print
+
+    LDA item_pageswap ; 0-7, convert to high nybble
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+
+    STA tmp+3      ; spell ID counter
+    LDA #0
+    STA tmp+4      ; left or right counter
+    STA tmp+6      ; and Y backup
   
    @Loop: 
-    LDX MMC5_tmp+2
-    LDA inv_magic, X
+    JSR Set_Inv_Magic   ; reset tmp and tmp+1 
+    LDA tmp+3           ; get spell ID 
+    INC tmp+3           ; inc spell ID
+    JSR DOES_ITEM_EXIST ; uses tmp+2
+    STA tmp             ; save amount for printing 
     BEQ @SkipOne
-    
-    STA tmp             ; save for PrintNumber
-    
-    TXA                 ; turn X into spell ID
-    STA MMC5_tmp+2
-    CLC
-    ADC #ITEM_MAGICSTART
-    
-    STA bigstr_buf+1, Y ; spell ID in 2nd slot
-    LDA #02
-    STA bigstr_buf, Y   ; item name code in 1st slot
-    LDA #$FF
-    STA bigstr_buf+2, Y ; space
-    LDA #01
-    STA bigstr_buf+5, Y ; double line break
-    
-    JSR PrintNumber_2Digit
-    LDA format_buf-1     ; numbers!
-    STA bigstr_buf+4, Y  ; tens 
-    LDA format_buf-2
-    STA bigstr_buf+3, Y  ; ones
-    
-    TYA
-    CLC
-    ADC #6
-    TAY
-    
-   @ResumeLoop:
-    INC MMC5_tmp+2     ; inc the backed up X counter
-    INC MMC5_tmp
-    LDA MMC5_tmp
-    CMP #8             ; if spell level counter is over 8, end inner loop and reset to 0
-    BNE @Loop
-    
-    LDA #0             ; put the null terminator in
-    STA MMC5_tmp       ; reset spell counter
-    STA bigstr_buf, Y
 
-    LDA #<(bigstr_buf)    ; fill text_ptr with the pointer to our item names in the big string buffer
-    STA text_ptr
-    LDA #>(bigstr_buf)
-    STA text_ptr+1
+    LDY tmp+6
+    LDA #$E5            ; magic orb tile
+    STA bigstr_buf, Y   ; in first slot
+    LDA #$FF            ; space
+    STA bigstr_buf+1, Y ; in second slot
+    STA bigstr_buf+4, Y ; and fourth slot
+    LDA #06
+    STA bigstr_buf+2, Y ; magic name code in third slot
+    LDA tmp+3           ; get spell (now +1)
+    STA bigstr_buf+3, Y ; spell ID in fourth slot
     
-    INC MMC5_tmp+1
-    LDA MMC5_tmp+1
-    CMP #2
-    BEQ @DrawRightSide
+    JSR PrintNumber_2Digit ; uses tmp to get the numbers
+    LDA format_buf-2
+    CMP #$FF
+    BNE @DoubleDigits
     
-   @DrawLeftSide:
-    LDA #04 
-    STA dest_x 
-    LDA #05
-    STA dest_y
-    JSR DrawComplexString  ; Draw all the item names
+   @SingleDigits: 
+    LDA format_buf-1     
+    STA bigstr_buf+5, Y    ; 
+    LDA #$FF
+    BNE :+
     
-    LDY #0
-    JMP @Loop
-    
-    @DrawRightSide:
-    LDA #20
-    STA dest_x 
-    JSR DrawComplexString  ; Draw all the item names
-    
-    LDA #03
-    STA dest_x
-    LDA #76
-    JSR DrawMenuString     ; draw left side orbs
-    
-    LDA #19
-    STA dest_x
-    LDA #76
-    JMP DrawMenuString     ; draw right side orbs
-    
-   @SkipOne:
-    LDA #$C2  
-    STA bigstr_buf, Y
-    STA bigstr_buf+1, Y
-    STA bigstr_buf+2, Y
-    STA bigstr_buf+3, Y
-    STA bigstr_buf+4, Y
-    STA bigstr_buf+5, Y
-    STA bigstr_buf+6, Y
+   @DoubleDigits: 
+    STA bigstr_buf+5, Y    ; 
+    LDA format_buf-1     
+  : STA bigstr_buf+6, Y    ; 
+
     LDA #01
-    STA bigstr_buf+7, Y
+    STA bigstr_buf+7, Y    ; double line break
+
     TYA
     CLC
     ADC #8
     TAY
+    
+   @ResumeLoop:
+    STY tmp+6
+    INC tmp+4          ; and 0-7 counter
+    LDA tmp+4
+    CMP #8             ; if counter is 8, end inner loop
+    BNE @Loop
+    
+    LDA #0             ; put the null terminator in
+    STA tmp+4          ; and reset 0-7 counter
+    STA tmp+6          ; and Y backup
+    STA bigstr_buf, Y
+
+    LDA #<(bigstr_buf) ; fill text_ptr with the pointer to our item names in the big string buffer
+    STA text_ptr
+    LDA #>(bigstr_buf)
+    STA text_ptr+1
+    
+    LDA tmp+3          ; get spell ID, see if its wrapped to $x0
+    AND #$0F           ; by removing all the high bits
+    BEQ @DrawRightSide
+    
+   @DrawLeftSide:
+    LDA #03 
+    STA dest_x 
+    LDA #05
+    STA dest_y
+    JSR DrawComplexString  ; Draw all the item names
+    JMP @Loop
+    
+   @DrawRightSide:
+    LDA #19
+    STA dest_x 
+    JMP DrawComplexString  ; Draw all the item names
+    
+   @SkipOne:
+    LDX #7
+    LDA #$E5                ; magic orb tile
+    LDY tmp+6
+    STA bigstr_buf, Y       
+    INY
+    LDA #$FF
+    STA bigstr_buf, Y        
+    INY    
+    LDA #$C2                ; draw ------- (7) followed by a double line break
+   @SkipLoop: 
+    STA bigstr_buf, Y
+    INY
+    DEX
+    BNE @SkipLoop
+    LDA #01
+    STA bigstr_buf, Y
+    INY
     JMP @ResumeLoop
 
     
     
     
 TryLearnSpell:
-    LDX char_index      ; load index 
-    LDA ch_class, X     ; use it to get his class
-    ASL A               ; double it (2 bytes per pointer)
-    ASL A
-    ASL A               ; class * 4
-    STA tmp             ; save as tmp
-
-    LDA tmp+2           ; load stored magic ID
-    AND #$07            ; get low 3 bits.  This will indicate the bit to use for permissions
-    STA tmp+3           ; store it in tmp+3 for future use
-
-    LDA tmp+2           ; get the magic ID
-    LSR A               ; divide by 8 (gets the level of the spell)
-    LSR A
-    LSR A
-    STA tmp+1           ;; JIGS - save this for learning the spell later!
-    
-    CLC
-    ADC tmp             ; add class * 4 to spell level
-    STA tmp             ; this gets the correct spell level from the class's magic permissions table
-
-    LDX tmp+3           ; get required bit position
-    LDA lut_BIT, X      ; use as index in the BIT lut to get the desired bit
-    AND tmp             ; AND with permissions byte
-    BEQ @HasPermission  ;  if result is zero, they have permission to learn
+    LDA #3
+    STA shop_type       ; set shop_type for equip permissions...
+    INC tmp+8           ; convert to 1-based ID
+    LDA tmp+8           ; load magic ID
+    JSR IsEquipLegal
+    BNE @HasPermission  ;  if result is zero, they have permission to learn
 
     LDA #68             ; Print "Can't learn that" 
     BNE @FailedToLearn
 
    @HasPermission:
-    INC tmp+2 ; since spells are stored +1 - this also allows Cure to be learned, since otherwise it would CMP/BEQ at 0...
-   
-    LDA tmp+2              ; spell ID
+    LDA tmp+8              ; spell ID
     LDX char_index
     LDY #24
    @KnownSpellsLoop:
-    CMP ch_spells-1, X
+    CMP ch_spells, X
     BEQ @AlreadyKnow
     INX 
     DEY                    ; check all 24 spell slots
     BPL @KnownSpellsLoop
    
-    LDA tmp+1              ; Spell level, 0-7 
-    ASL A                  ; * 2 
+    LDA tmp+8
+    LSR A
+    LSR A
+    LSR A
+    LSR A                  ; shift spell level to low nybble
+    LDX #3                 ; * 3
+    JSR MultiplyXA
     CLC
-    ADC tmp+1              ; spell level * 3  
-    ADC char_index         
+    ADC char_index
     TAX                    ; X now points to the first slot this spell can be in
     
     ;; start from 0 and work up to 3, so that spells are saved sequentually instead of filling the 3rd slot first
@@ -5805,23 +5805,25 @@ TryLearnSpell:
 
    @FailedToLearn: 
     JSR DrawItemDescBox    ; "You already know that"
-   ;JSR MenuWaitForBtn
+    
+    JSR MenuWaitForBtn
+    INC cursor_change      ; trigger re-drawing the original spell's text after
     SEC
     RTS
 
    @FoundEmptySlot:       ;  All conditions are met
-    DEC tmp+2
-    LDA tmp+2
+    JSR Set_Inv_Magic     ; reset tmp and tmp+1 
+    LDA tmp+8
     STA ch_spells, X      ; X is still pointing to the empty slot
-
-    DEC inv_magic, X      ; and remove it from inventory
-    ;; JIGS - this part still broken
+    SEC 
+    SBC #1                ; return the spell ID to 0-based
+    JSR REMOVE_ITEM       ; and remove it from inventory
     
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
     LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
     JSR DrawMainItemBox
-    INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
+  ;  INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
     LDA #77
     JSR DrawCharMenuString  ; draw "Character learned the spell!" text in the box
     JSR MenuWaitForBtn
@@ -7151,21 +7153,13 @@ EnterStatusMenu:
     LDY #4
     DEX
     BNE @AttributeLoop
-    
-    LDA #$0F
-    STA cur_pal+6
-    LDA #$35
-    STA cur_pal+9
-    LDA #$15
-    STA cur_pal+11
 
     LDA #3
     STA dest_y    
     LDA #20
     STA dest_x
-    ;LSR A ; #10
     LDA #9
-    STA dest_ht               ; 8 tiles wide and 10 tall
+    STA dest_ht               ; 8 tiles wide and 9 tall
     LDA #8
     STA dest_wd
     
@@ -7675,33 +7669,33 @@ MainMenuFrame:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MoveCursorUpDown:
-    LDA joy           ; get joypad data
-    AND #$0C          ;  isolate up/down buttons
-    CMP joy_prevdir   ;  compare it to previously checked button states
-    BEQ @Exit         ; if they equal, do nothing (button has already been pressed and is currently just held)
+    LDA joy             ; get joypad data
+    AND #$0C            ;  isolate up/down buttons
+    CMP joy_prevdir     ;  compare it to previously checked button states
+    BEQ MoveCursor_Exit ; if they equal, do nothing (button has already been pressed and is currently just held)
 
-    STA joy_prevdir   ; otherwise, button state has changed, so record new button state in prevdir
-    CMP #$00          ;  and check to see if a button is being pressed or released (nonzero=pressed)
-    BEQ @Exit         ;  if zero, button is being released, so do nothing and just exit
+    STA joy_prevdir     ; otherwise, button state has changed, so record new button state in prevdir
+    CMP #$00            ;  and check to see if a button is being pressed or released (nonzero=pressed)
+    BEQ MoveCursor_Exit ;  if zero, button is being released, so do nothing and just exit
 
-    CMP #$04          ; see if the user pressed down or up
+    CMP #$04            ; see if the user pressed down or up
     BNE @Up
 
-  @Down:              ; moving down...
-    LDA cursor        ;  get cursor, and increment by 1
+  @Down:                ; moving down...
+    LDA cursor          ;  get cursor, and increment by 1
     CLC
     ADC #$01
-    CMP cursor_max    ;  if it's < cursor_max, it's still in range, so
-    BCC @Move         ;   jump ahead to move
-    LDA #0            ;  otherwise, it needs to be wrapped to zero
-    BEQ @Move         ;   (always branches)
+    CMP cursor_max      ;  if it's < cursor_max, it's still in range, so
+    BCC @Move           ;   jump ahead to move
+    LDA #0              ;  otherwise, it needs to be wrapped to zero
+    BEQ @Move           ;   (always branches)
 
-  @Up:                ; up is the same deal...
-    LDA cursor        ;  get cursor, decrement by 1
+  @Up:                  ; up is the same deal...
+    LDA cursor          ;  get cursor, decrement by 1
     SEC
     SBC #$01
-    BPL @Move         ; if the result didn't wrap (still positive), jump ahead to move
-    LDA cursor_max    ;  otherwise wrap so that it equals cursor_max-1
+    BPL @Move           ; if the result didn't wrap (still positive), jump ahead to move
+    LDA cursor_max      ;  otherwise wrap so that it equals cursor_max-1
     SEC
     SBC #$01
 
@@ -7709,7 +7703,7 @@ MoveCursorUpDown:
     STA cursor            ; set cursor to changed value
     JMP PlaySFX_MenuMove  ; then play that hideous sound effect and exit
 
-  @Exit:
+MoveCursor_Exit:
     RTS
 
 
@@ -7723,17 +7717,19 @@ MoveMagicLearnMenuCursor:
     LDA joy                      ; get joypad state
     AND #$0F                     ; isolate directional buttons
     CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
-    BEQ @Exit                    ; if there's no change, just exit
+    BEQ MoveCursor_Exit          ; if there's no change, just exit
     STA joy_prevdir              ;  otherwise record changes
     CMP #0                       ; see if buttons have been pressed (rather than released)
-    BEQ @Exit                    ; if no buttons pressed, just exit
+    BEQ MoveCursor_Exit          ; if no buttons pressed, just exit
+
+    INC cursor_change
 
     CMP #$04               ; now see which button was pressed
     BCS @UpDown            ; check for up/down
     CMP #$01               ; otherwise, check for left/right
     BNE @Left
     
-    @Right:
+   @Right:
     INC cursor
     LDX cursor
     LDA @CursorSwapPage_LUT, X
@@ -7744,13 +7740,10 @@ MoveMagicLearnMenuCursor:
     
     DEC cursor
     
-    @Done:
-    JMP CloseDescBox_Sfx 
+   @Done:
+    JMP PlaySFX_MenuMove ; CloseDescBox_Sfx 
     
-    @Exit:
-    RTS ; do this if no buttons were pressed, so as not to close the message box
-    
-    @Left:
+   @Left:
     DEC cursor
     LDX cursor
     LDA @CursorSwapPage_LUT, X
@@ -7762,51 +7755,50 @@ MoveMagicLearnMenuCursor:
     BNE @Done
     
     INC cursor
-    JMP CloseDescBox_Sfx 
+    JMP PlaySFX_MenuMove ; CloseDescBox_Sfx 
     
-    @SwapPageLeft:
+   @SwapPageLeft:
     DEC item_pageswap
     JMP :+
     
-    @SwapPageRight:
+   @SwapPageRight:
     INC item_pageswap
     
   : PLA
     PLA
     JSR PlaySFX_MenuMove
     JMP MagicMenu_LearnSpell
-
-    @CursorSwapPage_LUT:
-    ; traveling right, swap when it hits 0, stop at $FF
-    ; traveling left,  swap when it hits 1
-    ;    ; page 1  ; page 2  ; page 3  ; page 4  ; 
-    .byte $02, $01, $00, $01, $00, $01, $00, $01, $FF
-    
-    @UpDown:         ; if we pressed up or down... see which
+   
+   @UpDown:         ; if we pressed up or down... see which
     BNE @Up
 
-    @Down:      
+   @Down:      
     INC cursor_max
     LDA cursor_max
     CMP #8
     BCC @UpDownDone
     
     LDA #0
-    STA cursor_max
-    JMP CloseDescBox_Sfx 
+    BEQ :+
     
-    @Up:
+   @Up:
     DEC cursor_max
     LDA cursor_max
     CMP #$FF
     BNE @UpDownDone
     
     LDA #7
-    STA cursor_max
-    @UpDownDone:
-    JMP CloseDescBox_Sfx 
+  : STA cursor_max
+   @UpDownDone:
+    JMP PlaySFX_MenuMove; CloseDescBox_Sfx 
  
- 
+  @CursorSwapPage_LUT:
+    ; traveling right, swap when it hits 0, stop at $FF
+    ; traveling left,  swap when it hits 1
+    ;    ; page 1  ; page 2  ; page 3  ; page 4  ; 
+    ;    ; page 5  ; page 6  ; page 7  ; page 8  ; 
+    .byte $02, $01, $00, $01, $00, $01, $00, $01
+    .byte $00, $01, $00, $01, $00, $01, $00, $01, $FF    
  
  
  
@@ -7815,29 +7807,23 @@ MoveMagicLearnMenuCursor:
     
 
 MoveMagicSubMenuCursor:
-    LDA joy                      ; get joypad state
-    AND #$03                     ; isolate left/right directional buttons
-    CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
-    BEQ MoveMagicMenuCursor_Exit ; if there's no change, just exit
-    STA joy_prevdir              ;  otherwise record changes
-    CMP #0                       ; see if buttons have been pressed (rather than released)
-    BEQ MoveMagicMenuCursor_Exit ; if no buttons pressed, just exit
+    JSR MoveMagicMenuCursor_Shared
 
     CMP #$01               ; otherwise, check for left/right
     BNE @Left
 
-    @Right:
+   @Right:
     INC cursor
     LDA cursor
     CMP #3
     BNE @Done
     LDA #0
     
-    @Done:
+   @Done:
     STA cursor
     JMP PlaySFX_MenuMove
     
-    @Left:
+   @Left:
     DEC cursor
     LDA cursor
     CMP #$FF
@@ -7846,9 +7832,11 @@ MoveMagicSubMenuCursor:
     JMP @Done
     
 MoveMagicMenuCursor_Exit:
+    PLA
+    PLA
     RTS
 
-MoveMagicMenuCursor:
+MoveMagicMenuCursor_Shared:
     LDA joy                      ; get joypad state
     AND #$0F                     ; isolate directional buttons
     CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
@@ -7856,7 +7844,10 @@ MoveMagicMenuCursor:
     STA joy_prevdir              ;  otherwise record changes
     CMP #0                       ; see if buttons have been pressed (rather than released)
     BEQ MoveMagicMenuCursor_Exit ; if no buttons pressed, just exit
-    
+    RTS
+
+MoveMagicMenuCursor:
+    JSR MoveMagicMenuCursor_Shared
     INC cursor_change
 
     CMP #$04               ; now see which button was pressed
@@ -7873,7 +7864,7 @@ MoveMagicMenuCursor:
      BEQ @Right
      JMP CloseDescBox_Sfx
           
-   @OopsRight:
+  @OopsRight:
    LDA #0     
    STA cursor
    JSR @CheckCursor
@@ -7889,14 +7880,14 @@ MoveMagicMenuCursor:
      BEQ @Left
      JMP CloseDescBox_Sfx
           
-   @OopsLeft:
+  @OopsLeft:
    LDA #23
    STA cursor
   : JSR @CheckCursor
     BEQ @MoreLeft
     JMP CloseDescBox_Sfx 
    
-   @MoreLeft:
+  @MoreLeft:
    DEC cursor
    JMP :-
    
@@ -7954,7 +7945,7 @@ MoveMagicMenuCursor:
     BEQ @Up         
     JMP CloseDescBox_Sfx   
     
-   ;;;;;;
+  ;;;;;;
   ;;  A little mini local subroutine here that checks to see if the cursor
   ;;    is on a spell or an empty slot.
   ;;
@@ -7963,8 +7954,11 @@ MoveMagicMenuCursor:
   ;;;;;;
 
   @CheckCursor:
-    LDX cursor
-    LDA TempSpellList, X
+    LDA cursor
+    CLC
+    ADC char_index
+    TAX
+    LDA ch_spells, X
 UpdateMP_Exit:    
     RTS              ; then exit.
 
@@ -7980,14 +7974,8 @@ UpdateMP:
     LDA item_pageswap
     CMP #2
     BEQ UpdateMP_Exit         ; don't display MP if forgetting spells  
-    
-   ; LDA #80
-   ; ASL A                   ; double A (pointers are 2 bytes)
-   ; TAX                     ; put in X to index menu string pointer table
-   ; LDA lut_MenuText, X
-   ; STA text_ptr
-   ; LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
-   ; STA text_ptr+1
+    LDA cursor_change
+    BEQ UpdateMP_Exit   
    
     LDA #<MagicMenuMPTitle
     STA text_ptr 
@@ -7995,6 +7983,7 @@ UpdateMP:
     STA text_ptr+1
     
     LDY #0
+    STY cursor_change
    @Loop:
     LDA (text_ptr), Y
     STA str_buf, Y
@@ -8069,7 +8058,7 @@ CloseDescBox_Sfx:
     JSR PlaySFX_MenuMove     ; play the menu move sound effect
     LDA descboxopen          ; see if the box is currently open
     BNE CloseDescBox         ;  if it is, close it... otherwise
-    RTS                    ;    just exit
+    RTS                      ;    just exit
 
 CloseDescBox:
     LDA #0
@@ -8623,10 +8612,10 @@ DrawItemDescBox:
     PHA                   ; push menu string ID to back it up
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
+    STA descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
     LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
     JSR DrawMainItemBox
     PLA                   ; restore menu string ID
-    INC descboxopen       ; set descboxopen to a nonzero value to mark the description box as open
 
     ;;;  no JMP or RTS -- code flows seamlessly into DrawMenuString
 
@@ -8910,12 +8899,13 @@ DrawMagicMenuMainBox:
     JSR DrawCharMenuString_Len   ;   -- ALL the text in one string!)
    
     LDX char_index
-    LDY #18
+    LDY #0
   @Loop:
     LDA ch_spells, X
     BNE @FoundSpell
     INX
-    DEY
+    INY
+    CPY #24
     BNE @Loop         ; loop until we've checked every spell
 
     LDA #0
@@ -8923,7 +8913,7 @@ DrawMagicMenuMainBox:
     RTS
 
   @FoundSpell:
-    TXA               ; if we found a spell... move which spell into A
+    TYA               ; if we found a spell... move which spell into A
     STA backup_cursor ; put found spell in this variable
     RTS               ; and exit
 

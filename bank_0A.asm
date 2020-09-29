@@ -5103,94 +5103,94 @@ lut_Treasure_2:
 ;; A few things were edited to fit the new menu layouts.
 
 lut_MenuText:                 
-.word M_Gold                  ; 0  ; 0 
-.word M_Options               ; 1  ; 1 
-.word M_ItemTitle             ; 2  ; 2 
-.word M_QuestItemsTitle       ; 3  ; 3 
-.word M_EquipPage1            ; 4  ; 4 
-.word M_EquipPage2            ; 5  ; 5 
-.word M_EquipPage3            ; 6  ; 6 
-.word M_Char1Name             ; 7  ; 7 
-.word M_Char2Name             ; 8  ; 8 
-.word M_Char3Name             ; 9  ; 9 
-.word M_Char4Name             ; A  ; 10
-.word M_EquipNameClass        ; B  ; 11
-.word M_EquipmentSlots        ; C  ; 12
-.word M_EquipStats            ; D  ; 13
-.word M_MP_List_Level         ; E  ; 14
-.word M_MP_List_MP            ; F  ; 15
-.word M_Elixir_List_MP        ; 10 ; 16
-.word M_HP_List               ; 11 ; 17
-.word M_MagicList             ; 12 ; 18
-.word M_CharLevelStats        ; 13 ; 19
-.word M_CharMainStats         ; 14 ; 20
-.word M_CharSubStats          ; 15 ; 21
-.word M_ItemNothing           ; 16 ; 22
-.word M_KeyItem1_Desc         ; 17 ; 23 ; Lute
-.word M_KeyItem2_Desc         ; 18 ; 24 ; Crown
-.word M_KeyItem3_Desc         ; 19 ; 25 ; Crystal
-.word M_KeyItem4_Desc         ; 1A ; 26 ; Herb
-.word M_KeyItem5_Desc         ; 1B ; 27 ; Mystic Key
-.word M_KeyItem6_Desc         ; 1C ; 28 ; TNT
-.word M_KeyItem7_Desc         ; 1D ; 29 ; Adamant
-.word M_KeyItem8_Desc         ; 1E ; 30 ; Slab
-.word M_KeyItem9_Desc         ; 1F ; 31 ; Ruby
-.word M_KeyItem10_Desc        ; 20 ; 32 ; Rod
-.word M_KeyItem11_Desc        ; 21 ; 33 ; Floater
-.word M_KeyItem12_Desc        ; 22 ; 34 ; Chime
-.word M_KeyItem13_Desc        ; 23 ; 35 ; Tail
-.word M_KeyItem14_Desc        ; 24 ; 36 ; Cube
-.word M_KeyItem15_Desc        ; 25 ; 37 ; Bottle
-.word M_KeyItem16_Desc        ; 26 ; 38 ; Oxyale
-.word M_KeyItem17_Desc        ; 27 ; 39 ; Canoe
-.word M_KeyItem1_Use          ; 28 ; 40 ; Lute use
-.word M_KeyItem10_Use         ; 29 ; 41 ; Rod use
-.word M_KeyItem11_Use         ; 2A ; 42 ; Floater use
-.word M_KeyItem15_Use         ; 2B ; 43 ; Bottle use
-.word M_ItemHeal              ; 2C ; 44 ; CURE magic
-.word M_ItemEther             ; 2D ; 45
-.word M_ItemElixir            ; 2E ; 46 
-.word M_ItemPure              ; 2F ; 47 ; PURE magic
-.word M_ItemSoft              ; 30 ; 48 ; SOFT magic
-.word M_ItemPhoenixDown       ; 31 ; 49 ; LIFE magic
-.word M_ItemAlarmClock        ; 32 ; 50
-.word M_ItemEyedrop           ; 33 ; 51
-.word M_ItemSmokebomb         ; 34 ; 52
-.word M_ItemUseTentCabin      ; 35 ; 53 ; HEAL magic
-.word M_ItemUseTentCabin_Save ; 36 ; 54
-.word M_ItemUseHouse_Save     ; 37 ; 55
-.word M_ItemUseHouse          ; 38 ; 56
-.word M_ItemCannotSleep       ; 39 ; 57
-.word M_NowSaving             ; 3A ; 58
-.word M_ItemCannotUse         ; 3B ; 59
-.word M_HealMagic             ; 3C ; 60 ; unused
-.word M_WarpMagic             ; 3D ; 61
-.word M_ExitMagic             ; 3E ; 62
-.word M_NoMana                ; 3F ; 63
-.word M_CannotUseMagic        ; 40 ; 64
-.word M_OrbGoldBoxLink        ; 41 ; 65
-.word M_ItemSubmenu           ; 42 ; 66
-.word M_MagicSubmenu          ; 43 ; 67
-.word M_MagicCantLearn        ; 44 ; 68
-.word M_MagicAlreadyKnow      ; 45 ; 69
-.word M_MagicLevelFull        ; 46 ; 70
-.word M_MagicForget           ; 47 ; 71
-.word M_MagicMenuSpellLevel12 ; 48 ; 72
-.word M_MagicMenuSpellLevel34 ; 49 ; 73
-.word M_MagicMenuSpellLevel56 ; 4A ; 74
-.word M_MagicMenuSpellLevel78 ; 4B ; 75
-.word M_MagicMenuOrbs         ; 4C ; 76
-.word M_MagicNameLearned      ; 4D ; 77
-.word M_EquipPage4            ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
-.word M_FixInventoryWindow    ; 4F ; 79 ; 
-.word M_MagicMenuMPTitle      ; 50 ; 80 ; MP in magic menu title
-.word M_EquipStats_Blank      ; 51 ; 81 ; 
-.word M_EquipInventoryWeapon  ; 52 ; 82 ; 
-.word M_EquipInventoryArmor   ; 53 ; 83 ; 
-.word M_EquipInventorySelect  ; 54 ; 84 ; 
-.word M_KeyItem18_Desc        ; 55 ; 85 ; 
-.word M_LampMagic             ; 56 ; 86 ; LAMP magic
-.word M_EquipInventoryClear   ; 57 ; 87 ; 
+.word M_Gold                          ; 0  ; 0 
+.word M_Options                       ; 1  ; 1 
+.word M_ItemTitle                     ; 2  ; 2 
+.word M_QuestItemsTitle               ; 3  ; 3 
+.word M_EquipPage1                    ; 4  ; 4 
+.word M_EquipPage2                    ; 5  ; 5 
+.word M_EquipPage3                    ; 6  ; 6 
+.word M_Char1Name                     ; 7  ; 7 
+.word M_Char2Name                     ; 8  ; 8 
+.word M_Char3Name                     ; 9  ; 9 
+.word M_Char4Name                     ; A  ; 10
+.word M_EquipNameClass                ; B  ; 11
+.word M_EquipmentSlots                ; C  ; 12
+.word M_EquipStats                    ; D  ; 13
+.word M_MP_List_Level                 ; E  ; 14
+.word M_MP_List_MP                    ; F  ; 15
+.word M_Elixir_List_MP                ; 10 ; 16
+.word M_HP_List                       ; 11 ; 17
+.word M_MagicList                     ; 12 ; 18
+.word M_CharLevelStats                ; 13 ; 19
+.word M_CharMainStats                 ; 14 ; 20
+.word M_CharSubStats                  ; 15 ; 21
+.word M_ItemNothing                   ; 16 ; 22
+.word M_KeyItem1_Desc                 ; 17 ; 23 ; Lute
+.word M_KeyItem2_Desc                 ; 18 ; 24 ; Crown
+.word M_KeyItem3_Desc                 ; 19 ; 25 ; Crystal
+.word M_KeyItem4_Desc                 ; 1A ; 26 ; Herb
+.word M_KeyItem5_Desc                 ; 1B ; 27 ; Mystic Key
+.word M_KeyItem6_Desc                 ; 1C ; 28 ; TNT
+.word M_KeyItem7_Desc                 ; 1D ; 29 ; Adamant
+.word M_KeyItem8_Desc                 ; 1E ; 30 ; Slab
+.word M_KeyItem9_Desc                 ; 1F ; 31 ; Ruby
+.word M_KeyItem10_Desc                ; 20 ; 32 ; Rod
+.word M_KeyItem11_Desc                ; 21 ; 33 ; Floater
+.word M_KeyItem12_Desc                ; 22 ; 34 ; Chime
+.word M_KeyItem13_Desc                ; 23 ; 35 ; Tail
+.word M_KeyItem14_Desc                ; 24 ; 36 ; Cube
+.word M_KeyItem15_Desc                ; 25 ; 37 ; Bottle
+.word M_KeyItem16_Desc                ; 26 ; 38 ; Oxyale
+.word M_KeyItem17_Desc                ; 27 ; 39 ; Canoe
+.word M_KeyItem1_Use                  ; 28 ; 40 ; Lute use
+.word M_KeyItem10_Use                 ; 29 ; 41 ; Rod use
+.word M_KeyItem11_Use                 ; 2A ; 42 ; Floater use
+.word M_KeyItem15_Use                 ; 2B ; 43 ; Bottle use
+.word M_ItemHeal                      ; 2C ; 44 ; CURE magic
+.word M_ItemEther                     ; 2D ; 45
+.word M_ItemElixir                    ; 2E ; 46 
+.word M_ItemPure                      ; 2F ; 47 ; PURE magic
+.word M_ItemSoft                      ; 30 ; 48 ; SOFT magic
+.word M_ItemPhoenixDown               ; 31 ; 49 ; LIFE magic
+.word M_ItemAlarmClock                ; 32 ; 50
+.word M_ItemEyedrop                   ; 33 ; 51
+.word M_ItemSmokebomb                 ; 34 ; 52
+.word M_ItemUseTentCabin              ; 35 ; 53 ; HEAL magic
+.word M_ItemUseTentCabin_Save         ; 36 ; 54
+.word M_ItemUseHouse_Save             ; 37 ; 55
+.word M_ItemUseHouse                  ; 38 ; 56
+.word M_ItemCannotSleep               ; 39 ; 57
+.word M_NowSaving                     ; 3A ; 58
+.word M_ItemCannotUse                 ; 3B ; 59
+.word M_HealMagic                     ; 3C ; 60 ; unused
+.word M_WarpMagic                     ; 3D ; 61
+.word M_ExitMagic                     ; 3E ; 62
+.word M_NoMana                        ; 3F ; 63
+.word M_CannotUseMagic                ; 40 ; 64
+.word M_OrbGoldBoxLink                ; 41 ; 65
+.word M_ItemSubmenu                   ; 42 ; 66
+.word M_MagicSubmenu                  ; 43 ; 67
+.word M_MagicCantLearn                ; 44 ; 68
+.word M_MagicAlreadyKnow              ; 45 ; 69
+.word M_MagicLevelFull                ; 46 ; 70
+.word M_MagicForget                   ; 47 ; 71
+.word M_MagicMenuSpellLevel_Right     ; 48 ; 72
+.word M_MagicMenuSpellLevel_LeftRight ; 49 ; 73
+.word M_MagicMenuSpellLevel_Left      ; 4A ; 74
+.word M_ItemNothing                   ; 4B ; 75 ; unused
+.word M_MagicMenuOrbs                 ; 4C ; 76 ; unused
+.word M_MagicNameLearned              ; 4D ; 77
+.word M_EquipPage4                    ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
+.word M_FixInventoryWindow            ; 4F ; 79 ; 
+.word M_MagicMenuMPTitle              ; 50 ; 80 ; MP in magic menu title
+.word M_EquipStats_Blank              ; 51 ; 81 ; 
+.word M_EquipInventoryWeapon          ; 52 ; 82 ; 
+.word M_EquipInventoryArmor           ; 53 ; 83 ; 
+.word M_EquipInventorySelect          ; 54 ; 84 ; 
+.word M_KeyItem18_Desc                ; 55 ; 85 ; 
+.word M_LampMagic                     ; 56 ; 86 ; LAMP magic
+.word M_EquipInventoryClear           ; 57 ; 87 ; 
 
 M_Gold: 
 .byte $04,$FF,$90,$00 ; _G - for gold on menu
@@ -5334,7 +5334,7 @@ M_ItemNothing:
 .byte $A2,$B2,$64,$41,$B9,$1A,$B1,$B2,$1C,$1F,$AA,$C0,$00 ; You have nothing.
 
 M_KeyItem1_Desc: 
-.byte $8B,$A8,$A4,$B8,$57,$A9,$B8,$AF,$42,$B8,$B6,$AC,$A6,$43,$AC,$4E,$B6,$05
+.byte $8B,$A8,$A4,$B8,$57,$A9,$B8,$AF,$42,$B8,$B6,$AC,$A6,$43,$AC,$4E,$B6,$01
 .byte $B7,$AB,$1A,$A4,$AC,$B5,$C0,$00 ; Beautiful music fills[enter]the air.
 
 M_KeyItem2_Desc: 
@@ -5344,7 +5344,7 @@ M_KeyItem3_Desc:
 .byte $8A,$FF,$A5,$A4,$4E,$42,$A4,$A7,$1A,$4C,$FF,$8C,$9B,$A2,$9C,$9D,$8A,$95,$C0,$00 ; A ball made of CRYSTAL.
 
 M_KeyItem4_Desc: 
-.byte $A2,$B8,$A6,$AE,$C4,$FF,$9D,$3D,$1E,$34,$A7,$AC,$A6,$1F,$A8,$05
+.byte $A2,$B8,$A6,$AE,$C4,$FF,$9D,$3D,$1E,$34,$A7,$AC,$A6,$1F,$A8,$01
 .byte $AC,$B6,$1B,$B2,$2E,$A5,$5B,$B7,$25,$C4,$00 ; Yuck! This medicine[enter]is too bitter!
 
 M_KeyItem5_Desc:
@@ -5357,61 +5357,61 @@ M_KeyItem7_Desc:
 .byte $9D,$AB,$1A,$45,$AA,$3A,$A7,$2F,$4B,$34,$B7,$5F,$C0,$00 ; The legendary metal.
 
 M_KeyItem8_Desc:  
-.byte $9E,$B1,$AE,$B1,$46,$B1,$24,$BC,$B0,$A5,$B2,$AF,$1E,$A6,$B2,$B9,$25,$05
+.byte $9E,$B1,$AE,$B1,$46,$B1,$24,$BC,$B0,$A5,$B2,$AF,$1E,$A6,$B2,$B9,$25,$01
 .byte $B7,$AB,$1A,$9C,$95,$8A,$8B,$C0,$00 ; Unknown symbols cover[enter]the SLAB.
 
 M_KeyItem9_Desc:  
 .byte $8A,$FF,$AF,$2F,$AA,$1A,$23,$A7,$24,$28,$5A,$C0,$00 ; A large red stone.
 
 M_KeyItem10_Desc:  
-.byte $9D,$AB,$1A,$9B,$98,$8D,$1B,$2E,$23,$B0,$B2,$B9,$1A,$1C,$A8,$05
+.byte $9D,$AB,$1A,$9B,$98,$8D,$1B,$2E,$23,$B0,$B2,$B9,$1A,$1C,$A8,$01
 .byte $B3,$AF,$39,$1A,$A9,$B5,$49,$1B,$AB,$1A,$2B,$B5,$1C,$C0,$00 ; The ROD to remove the[enter]plate from the earth.
 
 M_KeyItem11_Desc: 
 .byte $8A,$FF,$B0,$BC,$37,$25,$AC,$26,$1E,$4D,$A6,$AE,$C0,$00 ; A mysterious rock.
 
 M_KeyItem12_Desc: 
-.byte $9C,$B7,$A4,$B0,$B3,$A8,$27,$3C,$1B,$AB,$1A,$A5,$B2,$B7,$28,$B0,$69,$05
+.byte $9C,$B7,$A4,$B0,$B3,$A8,$27,$3C,$1B,$AB,$1A,$A5,$B2,$B7,$28,$B0,$69,$01
 .byte $96,$8A,$8D,$8E,$FF,$92,$97,$FF,$95,$8E,$8F,$8E,$92,$97,$00 ; Stamped on the bottom..[enter]MADE IN LEFEIN. 
 
 M_KeyItem13_Desc: 
-.byte $98,$98,$91,$91,$C4,$C4,$FF,$92,$21,$37,$1F,$AE,$B6,$C4,$05
-.byte $9D,$AB,$B5,$46,$2D,$21,$B2,$B9,$25,$69,$05
+.byte $98,$98,$91,$91,$C4,$C4,$FF,$92,$21,$37,$1F,$AE,$B6,$C4,$01
+.byte $9D,$AB,$B5,$46,$2D,$21,$B2,$B9,$25,$69,$01
 .byte $97,$B2,$C4,$FF,$8D,$3C,$BE,$21,$A7,$B2,$1B,$AB,$39,$C4,$C4,$00 ; OOHH!! It stinks![enter]Throw it over..[enter]No! Don't do that!!
 
 M_KeyItem14_Desc:
-.byte $8C,$B2,$AF,$35,$1E,$AA,$A4,$1C,$25,$20,$3B,$05
+.byte $8C,$B2,$AF,$35,$1E,$AA,$A4,$1C,$25,$20,$3B,$01
 .byte $B6,$BA,$AC,$B5,$58,$1F,$1B,$AB,$1A,$8C,$9E,$8B,$8E,$C0,$00 ; Colors gather and[enter]swirl in the CUBE.
 
 M_KeyItem15_Desc: 
 ;.byte $92,$B7,$2D,$1E,$A8,$B0,$B3,$B7,$BC,$C0,$00 ; It is empty.
 
 M_KeyItem16_Desc:
-.byte $9D,$AB,$1A,$98,$A1,$A2,$8A,$95,$8E,$43,$55,$B1,$30,$1D,$B6,$05
+.byte $9D,$AB,$1A,$98,$A1,$A2,$8A,$95,$8E,$43,$55,$B1,$30,$1D,$B6,$01
 .byte $A9,$B5,$2C,$AB,$20,$AC,$B5,$C0,$00 ; The OXYALE furnishes[enter]fresh air. 
 
 M_KeyItem17_Desc: 
 .byte $A2,$B2,$B8,$38,$22,$FF,$A6,$4D,$B6,$B6,$1B,$AB,$1A,$5C,$B9,$25,$C0,$00 ; You can cross the river.
 
 M_KeyItem18_Desc:
-.byte $C6,$9D,$1D,$23,$BE,$1E,$B1,$2E,$B3,$AC,$A6,$B7,$55,$2C,$C5,$C4,$BE,$05
-.byte $C6,$9E,$3E,$50,$26,$44,$AC,$B0,$A4,$AA,$1F,$39,$AC,$3C,$C4,$BE,$05
+.byte $C6,$9D,$1D,$23,$BE,$1E,$B1,$2E,$B3,$AC,$A6,$B7,$55,$2C,$C5,$C4,$BE,$01
+.byte $C6,$9E,$3E,$50,$26,$44,$AC,$B0,$A4,$AA,$1F,$39,$AC,$3C,$C4,$BE,$01
 .byte $C6,$8A,$BA,$BF,$1B,$41,$B7,$BE,$1E,$A5,$35,$1F,$AA,$C4,$BE,$00
 
 M_KeyItem1_Use:
-.byte $9D,$AB,$1A,$B7,$B8,$B1,$1A,$B3,$AF,$A4,$BC,$B6,$BF,$05
+.byte $9D,$AB,$1A,$B7,$B8,$B1,$1A,$B3,$AF,$A4,$BC,$B6,$BF,$01
 .byte $B5,$A8,$B9,$2B,$AF,$1F,$AA,$20,$24,$B7,$A4,$AC,$B5,$5D,$BC,$C0,$00 ; The tune plays,[enter]revealing a stairway.
 
 M_KeyItem10_Use: 
-.byte $9D,$AB,$1A,$B3,$AF,$39,$1A,$B6,$AB,$39,$B7,$25,$B6,$BF,$05
+.byte $9D,$AB,$1A,$B3,$AF,$39,$1A,$B6,$AB,$39,$B7,$25,$B6,$BF,$01
 .byte $B5,$A8,$B9,$2B,$AF,$1F,$AA,$20,$24,$B7,$A4,$AC,$B5,$5D,$BC,$C4,$00 ; The plate shatters,[enter]revealing a stairway!
 
 M_KeyItem11_Use: 
-.byte $9D,$AB,$1A,$8A,$92,$9B,$9C,$91,$92,$99,$31,$A8,$AA,$1F,$B6,$1B,$B2,$05
+.byte $9D,$AB,$1A,$8A,$92,$9B,$9C,$91,$92,$99,$31,$A8,$AA,$1F,$B6,$1B,$B2,$01
 .byte $B5,$AC,$B6,$1A,$A9,$B5,$49,$1B,$AB,$1A,$A7,$2C,$25,$B7,$C0,$00 ; The AIRSHIP begins to[enter]rise from the desert.
 
 M_KeyItem15_Use: 
-.byte $99,$B2,$B3,$C4,$FF,$8A,$43,$A4,$AC,$B5,$BC,$20,$B3,$B3,$2B,$63,$BF,$05
+.byte $99,$B2,$B3,$C4,$FF,$8A,$43,$A4,$AC,$B5,$BC,$20,$B3,$B3,$2B,$63,$BF,$01
 .byte $B7,$AB,$A8,$29,$AC,$1E,$AA,$3C,$A8,$C0,$00 ; Pop! A fairy appears,[enter]then is gone.
 
 M_ItemHeal:  
@@ -5419,7 +5419,7 @@ M_CureMagic:
 .byte $9E,$3E,$1B,$2E,$23,$A6,$B2,$32,$44,$91,$99,$C0,$00 ; Use to recover HP.[END]
 
 M_ItemEther:
-.byte $9E,$3E,$1B,$2E,$23,$A6,$B2,$32,$44,$96,$99,$05
+.byte $9E,$3E,$1B,$2E,$23,$A6,$B2,$32,$44,$96,$99,$01
 .byte $A9,$35,$36,$5A,$24,$B3,$A8,$4E,$65,$A8,$32,$AF,$C0,$00 ; Use to recover MP[ENTER]for one spell level.[END]
 
 M_ItemElixir:
@@ -5439,64 +5439,64 @@ M_LifeMagic:
 .byte $9E,$3E,$1B,$2E,$23,$B9,$AC,$32,$1B,$1D,$24,$B3,$AC,$5C,$B7,$C0,$00 ; Use to revive the spirit.[END]
 
 M_ItemAlarmClock:
-.byte $9E,$3E,$1B,$2E,$4D,$B8,$3E,$1B,$1D,$4F,$2F,$B7,$BC,$05
+.byte $9E,$3E,$1B,$2E,$4D,$B8,$3E,$1B,$1D,$4F,$2F,$B7,$BC,$01
 .byte $A9,$4D,$B0,$24,$45,$A8,$B3,$2D,$29,$A5,$39,$B7,$45,$C0,$00 ; Use to rouse the party[ENTER]from sleep in battle.[END]
 
 M_ItemEyedrop:
 .byte $9E,$3E,$1B,$2E,$23,$AA,$A4,$1F,$FF,$B6,$AC,$AA,$AB,$B7,$C0,$00 ; Use to regain sight.[END]
 
 M_ItemSmokebomb:
-.byte $9E,$3E,$1B,$2E,$3D,$A7,$1A,$A8,$32,$B5,$56,$5A,$2D,$29,$A5,$39,$B7,$45,$05
-.byte $B2,$44,$A8,$AF,$B8,$A7,$1A,$3A,$A8,$B0,$AC,$2C,$2D,$29,$A7,$B8,$2A,$A8,$3C,$B6,$C0,$05 ; Use to hide everyone in battle,[ENTER]Or elude enemies in dungeons.[END]
+.byte $9E,$3E,$1B,$2E,$3D,$A7,$1A,$A8,$32,$B5,$56,$5A,$2D,$29,$A5,$39,$B7,$45,$01
+.byte $B2,$44,$A8,$AF,$B8,$A7,$1A,$3A,$A8,$B0,$AC,$2C,$2D,$29,$A7,$B8,$2A,$A8,$3C,$B6,$C0,$01 ; Use to hide everyone in battle,[ENTER]Or elude enemies in dungeons.[END]
 .byte $9E,$3E,$FF,$AC,$B7,$C5,$FF,$99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$FF,$99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; Use it? Push A..YES Push B..NO
 
 M_ItemUseTentCabin:
-.byte $9B,$A8,$A6,$B2,$32,$44,$91,$99,$43,$35,$20,$4E,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
+.byte $9B,$A8,$A6,$B2,$32,$44,$91,$99,$43,$35,$20,$4E,$C5,$01
+.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$01
 .byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00; Recover HP for all?[ENTER]Push A..YES[ENTER]Push B..NO[END]
 
 M_ItemUseTentCabin_Save:
-.byte $91,$99,$FF,$23,$A6,$B2,$32,$23,$A7,$C0,$FF,$9C,$A4,$32,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
+.byte $91,$99,$FF,$23,$A6,$B2,$32,$23,$A7,$C0,$FF,$9C,$A4,$32,$C5,$01
+.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$01
 .byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; HP recovered. SAVE?[enter]Push A..YES[enter]Push B..NO
 
 M_ItemUseHouse_Save:
-.byte $91,$99,$20,$3B,$FF,$96,$99,$FF,$23,$A6,$B2,$32,$23,$A7,$C0,$FF,$9C,$A4,$32,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
+.byte $91,$99,$20,$3B,$FF,$96,$99,$FF,$23,$A6,$B2,$32,$23,$A7,$C0,$FF,$9C,$A4,$32,$C5,$01
+.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$01
 .byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; HP and MP recovered. Save?[ENTER]Push A..YES[ENTER]Push B..NO[END]
 
 M_ItemUseHouse:  
-.byte $9B,$A8,$A6,$B2,$32,$44,$91,$99,$20,$3B,$FF,$96,$99,$43,$35,$20,$4E,$C5,$05
-.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$05
+.byte $9B,$A8,$A6,$B2,$32,$44,$91,$99,$20,$3B,$FF,$96,$99,$43,$35,$20,$4E,$C5,$01
+.byte $99,$B8,$B6,$AB,$FF,$8A,$69,$A2,$8E,$9C,$01
 .byte $99,$B8,$B6,$AB,$FF,$8B,$69,$97,$98,$00 ; Recover HP and MP for all?[ENTER]Push A..YES[ENTER]Push B..NO[END]
 
 M_ItemCannotSleep:  
-.byte $A2,$B2,$B8,$38,$22,$B1,$B2,$21,$B6,$45,$A8,$B3,$FF,$1D,$23,$C4,$00 ; You cannot sleep here!
+.byte $FF,$A2,$B2,$B8,$38,$22,$B1,$B2,$21,$B6,$45,$A8,$B3,$FF,$1D,$23,$C4,$00 ; You cannot sleep here!
 
 M_NowSaving:   
-.byte $97,$B2,$BA,$24,$A4,$B9,$1F,$AA,$69,$C4,$00 ; Now saving...! 
+.byte $FF,$97,$B2,$BA,$24,$A4,$B9,$1F,$AA,$69,$C4,$00 ; Now saving...! 
 
 M_ItemCannotUse: 
-.byte $A2,$B2,$B8,$38,$22,$B1,$B2,$21,$B8,$B6,$1A,$AC,$21,$1D,$23,$C4,$00 ; You cannot use it here!
+.byte $FF,$A2,$B2,$B8,$38,$22,$B1,$B2,$21,$B8,$B6,$1A,$AC,$21,$1D,$23,$C4,$00 ; You cannot use it here!
 
 M_HealMagic:   ; unused
 
 M_WarpMagic:  
-.byte $8A,$FF,$B0,$A4,$AA,$AC,$A6,$1B,$2E,$23,$B7,$55,$29,$3C,$A8,$05
-.byte $A9,$AF,$B2,$35,$C0,$FF,$97,$46,$33,$2F,$B3,$31,$5E,$AE,$C4,$00 ; A magic to return one[enter]floor. Now warp back!
+.byte $FF,$8A,$FF,$B0,$A4,$AA,$AC,$A6,$1B,$2E,$23,$B7,$55,$29,$3C,$A8,$01
+.byte $FF,$A9,$AF,$B2,$35,$C0,$FF,$97,$46,$33,$2F,$B3,$31,$5E,$AE,$C4,$00 ; A magic to return one[enter]floor. Now warp back!
 
 M_ExitMagic:  
-.byte $95,$B2,$37,$C5,$FF,$97,$2E,$5D,$4B,$26,$B7,$C5,$05
-.byte $92,$B6,$2D,$21,$AB,$B2,$B3,$A8,$AF,$2C,$B6,$C5,$FF,$9E,$B6,$1A,$1C,$30,$05
-.byte $B6,$B3,$A8,$4E,$1B,$2E,$A8,$BB,$5B,$C4,$00 ; Lost? No way out?[return]Is it hopeless? Use this[return]spell to exit!
+.byte $FF,$95,$B2,$37,$C5,$FF,$97,$2E,$5D,$4B,$26,$B7,$C5,$01
+.byte $FF,$92,$B6,$2D,$21,$AB,$B2,$B3,$A8,$AF,$2C,$B6,$C5,$FF,$9E,$B6,$1A,$1C,$30,$01
+.byte $FF,$B6,$B3,$A8,$4E,$1B,$2E,$A8,$BB,$5B,$C4,$00 ; Lost? No way out?[return]Is it hopeless? Use this[return]spell to exit!
 
 M_NoMana:  
-.byte $8A,$AF,$AF,$36,$A9,$1B,$41,$21,$45,$32,$AF,$BE,$B6,$05
-.byte $B6,$B3,$A8,$4E,$1E,$2F,$1A,$A8,$BB,$41,$B8,$37,$40,$C0,$00 ; All of that level's[enter]spells are exhausted.
+.byte $FF,$8A,$AF,$AF,$36,$A9,$1B,$41,$21,$45,$32,$AF,$BE,$B6,$01
+.byte $FF,$B6,$B3,$A8,$4E,$1E,$2F,$1A,$A8,$BB,$41,$B8,$37,$40,$C0,$00 ; All of that level's[enter]spells are exhausted.
 
 M_CannotUseMagic:  
-.byte $9C,$B2,$B5,$B5,$BC,$BF,$50,$26,$38,$22,$B1,$B2,$21,$B8,$3E,$05
-.byte $B7,$AB,$A4,$21,$B6,$B3,$A8,$4E,$FF,$1D,$23,$C0,$00 ; Sorry, you cannot use[enter]that spell here.
+.byte $FF,$9C,$B2,$B5,$B5,$BC,$BF,$50,$26,$38,$22,$B1,$B2,$21,$B8,$3E,$01
+.byte $FF,$B7,$AB,$A4,$21,$B6,$B3,$A8,$4E,$FF,$1D,$23,$C0,$00 ; Sorry, you cannot use[enter]that spell here.
 
 M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape and timer box...
 .byte $6C,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$6D,$01
@@ -5510,29 +5510,26 @@ M_MagicSubmenu:
 .byte $FF,$FF,$8C,$3F,$21,$FF,$95,$2B,$B5,$29,$FF,$8F,$35,$66,$B7,$00 ; Cast __ Learn __ Forget
 
 M_MagicCantLearn:      
-.byte $A2,$26,$38,$22,$B1,$B2,$21,$45,$2F,$29,$1C,$39,$24,$B3,$A8,$4E,$C0,$00 ; You cannot learn that spell.[END]
+.byte $FF,$A2,$26,$38,$22,$B1,$B2,$21,$45,$2F,$29,$1C,$39,$24,$B3,$A8,$4E,$C0,$00 ; You cannot learn that spell.[END]
 
 M_MagicAlreadyKnow:     
-.byte $A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$1B,$41,$21,$B6,$B3,$A8,$4E,$C0,$00 ; You already know that spell.[END]
+.byte $FF,$A2,$26,$20,$AF,$23,$A4,$A7,$4B,$AE,$B1,$46,$1B,$41,$21,$B6,$B3,$A8,$4E,$C0,$00 ; You already know that spell.[END]
 
 M_MagicLevelFull:       
-.byte $A2,$26,$38,$22,$B1,$B2,$21,$45,$2F,$29,$22,$4B,$B0,$35,$A8,$05
-.byte $B6,$B3,$A8,$4E,$1E,$A9,$35,$1B,$3D,$1E,$B6,$B3,$A8,$4E,$65,$A8,$32,$AF,$C4,$00 ; You cannot learn any more[ENTER]spells for this spell level![END]
+.byte $FF,$A2,$26,$38,$22,$B1,$B2,$21,$45,$2F,$29,$22,$4B,$B0,$35,$A8,$01
+.byte $FF,$B6,$B3,$A8,$4E,$1E,$A9,$35,$1B,$3D,$1E,$B6,$B3,$A8,$4E,$65,$A8,$32,$AF,$C4,$00 ; You cannot learn any more[ENTER]spells for this spell level![END]
 
 M_MagicForget:
 .byte $8F,$35,$66,$21,$1C,$30,$24,$B3,$A8,$4E,$C5,$00
 
-M_MagicMenuSpellLevel12:
-.byte $FF,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$81,$C2,$82,$FF,$C7,$00
+M_MagicMenuSpellLevel_Right:
+.byte $09,$03,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$09,$03,$C7,$00
 
-M_MagicMenuSpellLevel34:
-.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$83,$C2,$84,$FF,$C7,$00
+M_MagicMenuSpellLevel_LeftRight:
+.byte $C1,$FF,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$09,$03,$C7,$00
 
-M_MagicMenuSpellLevel56:
-.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$85,$C2,$86,$FF,$C7,$00
-
-M_MagicMenuSpellLevel78:
-.byte $C1,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$87,$C2,$88,$00
+M_MagicMenuSpellLevel_Left:
+.byte $C1,$FF,$FF,$9C,$B3,$A8,$4E,$FF,$95,$A8,$32,$58,$09,$04,$00
 
 M_MagicMenuOrbs:
 .byte $E5,$01,$E5,$01,$E5,$01,$E5,$01,$E6,$01,$E6,$01,$E6,$01,$E6,$00

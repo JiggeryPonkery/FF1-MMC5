@@ -247,14 +247,14 @@ GameStart:
   : LDA #0
     STA unsram, X                 ; stat page filled with zeros (proper stats will be assigned
     STA ch_stats, X               ;   later after party generation)
-    STA inv_equip, X              ; 
+    STA ch_spells, X              ; 
     ;; JIGS - Rather than take up 256 bytes in Bank 0, the original game only needs to initalize game_flags all to 1, with 7 exceptions.
     LDA #1
     STA game_flags, X
     INX                           ; loop for the full page
     BNE :-
 
-    ;; JIGS - and a little extra: since it loads character startings stats into music and other variables that need to start out 0.
+    ;; JIGS - and a little extra: since it loads character startings stats, intro music, and other variables that need to start out 0.
     ;LDX #$00
   : LDA lut_InitUnsramFirstPage, X
     STA unsram, X
@@ -7002,7 +7002,7 @@ PlaySFX_Error:
 
     LDA Options
     AND #SFX_MUTED
-    BNE @Muted
+    BEQ @Muted
     
     LDA #%00000010
     STA $400C
@@ -7682,6 +7682,13 @@ DrawMenuString_CharCodes_FixedBank:
     JSR SwapPRG_L
     JMP DrawMenuString_CharCodes_A
 
+ItemDescriptions: ; called from Bank E, swaps to bank A
+    JSR SwapPRG_L    
+    LDA lut_ItemDescStrings_Low, X
+    STA text_ptr
+    LDA lut_ItemDescStrings_High, X    
+    STA text_ptr+1
+    JMP DrawComplexString
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7918,6 +7925,7 @@ ComplexString_DoubleLineBreak:
     
 ComplexString_SpaceString:    ;; prints spaces! Simple
     JSR ComplexString_GetNextByte
+ComplexString_SpaceString_ManualEntry: 
     TAX
     LDA #$FF
   : JSR ComplexString_JustDraw
@@ -7947,6 +7955,7 @@ ComplexString_ItemName_FromCharCode:
 
 ComplexString_MagicName:
     JSR ComplexString_GetNextByte
+ComplexString_MagicName_FromCharacterStatCode:    
     JSR ComplexString_DrawItemPrep
       DEX  
       LDA lut_MagicNames_Low, X   
@@ -8032,10 +8041,11 @@ ComplexString_CharCode_MagicName:   ; $40 - $57 ... 18 spell IDs total
     TAX
     LDA ch_spells, X 
     BEQ :+                          ; if 0, skip ahead and draw nothing (no spell)
-      CLC
-      ADC #ITEM_MAGICSTART-1
-      JMP ComplexString_ItemName_FromCharCode
- : JMP ComplexString_CheckMenuStall ; jumps here when spell=0.  Simply do nothing and continue with string processing    
+      JMP ComplexString_MagicName_FromCharacterStatCode
+  : LDA #7
+    JMP ComplexString_SpaceString_ManualEntry
+ 
+ ;JMP ComplexString_CheckMenuStall ; jumps here when spell=0.  Simply do nothing and continue with string processing    
 
 ComplexString_CharCode_Class:
     LDA ch_class, X      ; get character's class
@@ -14564,13 +14574,7 @@ Set_Inv_Weapon:
     STA tmp+1
     RTS
 
-ItemDescriptions:
-    JSR SwapPRG_L    
-    LDA lut_ItemDescStrings_Low, X
-    STA text_ptr
-    LDA lut_ItemDescStrings_High, X    
-    STA text_ptr+1
-    JMP DrawComplexString
+
 
     
 

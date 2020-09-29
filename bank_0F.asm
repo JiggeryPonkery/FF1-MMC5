@@ -426,13 +426,12 @@ LoadSpellForBattle:
 ;; A = Spell ID
     DEC LongCall_A          ; turn spell ID to 0-based
     LDA LongCall_A          
-    LDX #12                 ; multiply by 8 bytes 
+    LDX #12                 ; multiply by 8 bytes (+4 more for permissions)
     JSR MultiplyXA        
     CLC                   
     ADC #<MagicData       
     STA MagicPointer      
     TXA                   
-    CLC                   
     ADC #>MagicData       
     STA MagicPointer+1      ; get the pointer to the spell data
 
@@ -1095,10 +1094,10 @@ SetEquipPermissions:
     INX
     CPX #4
     BNE @Loop    
-    LDY #0                 ; and set Y to 0 for later   
+  : LDY #0                 ; and set Y to 0 for later   
     PLA
     TAX                    ; then restore X
-  : RTS
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4483,10 +4482,10 @@ ChangeOption:
     LDA MuteSFXOption     ; whether left or right is pressed, all you can do is switch it on/off
     BEQ :+
       DEC MuteSFXOption
-      RTS
+      BEQ :++
 
   : INC MuteSFXOption
-    RTS
+  : JMP SaveOptions       ; update this one instantly
 
    @JMP_BattleBackground:
     JMP BattleBackgroundColor
@@ -5852,7 +5851,7 @@ MenuWaitForBtn_SFX:
 PlaySFX_MenuSel:
     LDA Options
     AND #SFX_MUTED
-    BNE @Done
+    BEQ @Done
     LDA #%00010100
     STA $400C
     LDA #%10001000
@@ -5867,7 +5866,7 @@ PlaySFX_MenuSel:
 PlaySFX_MenuMove:
     LDA Options
     AND #SFX_MUTED
-    BNE @Done
+    BEQ @Done
     LDA #%00000010
     STA $400C
     LDA #%01000000

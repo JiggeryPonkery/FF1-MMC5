@@ -915,15 +915,15 @@ EnemyLevelRandomizer_LUT:
 ;; First byte: item shop type, just like treasure chests
 ;; 0 - weapon
 ;; 1 - armor 
-;; 2-5 - magic
-;; 6 - item
-;; 7 - gold
+;; 2-6 - magic
+;; 7 - item
+;; 8 - gold
 ;;
 ;; Second byte: item name; for gold, its the index for the money chests
 ;;
 
 lut_StealList:
-.byte $07, GOLD1      , $00, $00, $00, $00         ; 10 gold        ,      ,                 ; 00 IMP
+.byte $08, GOLD1      , $00, $00, $00, $00         ; 10 gold        ,      ,                 ; 00 IMP
 .byte $01, ARM26      , $00, $00, $00, $00         ; cap            ,      ,                 ; 01 GrIMP
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 02 WOLF
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 03 GrWolf
@@ -934,10 +934,10 @@ lut_StealList:
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 08 SAURIA
 .byte $01, ARM11      , $00, $00, $00, $00         ; Copper bracelet,      ,                 ; 09 GIANT
 .byte $01, ARM12      , $00, $00, $00, $00         ; Silver bracelet,      ,                 ; 0A FrGIANT
-.byte $06, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0B R`GIANT
-.byte $06, HEAL       , $00, $00, $00, $00         ; Heal           ,      ,                 ; 0C SAHAG
-.byte $06, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 0D R`SAHAG
-.byte $06, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0E WzSAHAG
+.byte $07, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0B R`GIANT
+.byte $07, HEAL       , $00, $00, $00, $00         ; Heal           ,      ,                 ; 0C SAHAG
+.byte $07, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 0D R`SAHAG
+.byte $07, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 0E WzSAHAG
 .byte $00, WEP8       , $00, $00, $00, $00         ; Scimitar       ,      ,                 ; 0F PIRATE
 .byte $00, WEP15      , $00, $00, $00, $00         ; Falchion       ,      ,                 ; 10 KYZOKU
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 11 SHARK
@@ -958,56 +958,56 @@ lut_StealList:
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 20 SeaSNAKE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 21 SCORPION
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 22 LOBSTER
-.byte $07, GOLD13     , $00, $00, $00, $00         ; 240 gold -     ,      ,                 ; 23 BULL
+.byte $08, GOLD13     , $00, $00, $00, $00         ; 240 gold -     ,      ,                 ; 23 BULL
 .byte $03, MG_AICE    , $00, $00, $00, $00         ; AICE scroll    ,      ,                 ; 24 ZomBULL
-.byte $07, GOLD14     , $00, $00, $00, $00         ; 255 gold       ,      ,                 ; 25 TROLL
-.byte $07, GOLD31     , $00, $00, $00, $00         ; 880 gold       ,      ,                 ; 26 SeaTROLL
+.byte $08, GOLD14     , $00, $00, $00, $00         ; 255 gold       ,      ,                 ; 25 TROLL
+.byte $08, GOLD31     , $00, $00, $00, $00         ; 880 gold       ,      ,                 ; 26 SeaTROLL
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 27 SHADOW
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 28 IMAGE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 29 WRAITH
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2A GHOST
 .byte $01, ARM1       , $00, $00, $00, $00         ; Cloth T        ,      ,                 ; 2B ZOMBIE
-.byte $07, GOLD5      , $00, $00, $00, $00         ; 55 gold        ,      ,                 ; 2C GHOUL
-.byte $07, GOLD7      , $00, $00, $00, $00         ; 85 gold        ,      ,                 ; 2D GEIST
-.byte $07, GOLD12     , $00, $00, $00, $00         ; 180 gold       ,      ,                 ; 2E SPECTER
+.byte $08, GOLD5      , $00, $00, $00, $00         ; 55 gold        ,      ,                 ; 2C GHOUL
+.byte $08, GOLD7      , $00, $00, $00, $00         ; 85 gold        ,      ,                 ; 2D GEIST
+.byte $08, GOLD12     , $00, $00, $00, $00         ; 180 gold       ,      ,                 ; 2E SPECTER
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 2F WORM
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 30 Sand W
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 31 Grey W
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 32 EYE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 33 PHANTOM
-.byte $06, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA
-.byte $06, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA
-.byte $06, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN
+.byte $07, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 34 MEDUSA
+.byte $07, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 35 GrMEDUSA
+.byte $07, PURE       , $00, $00, $00, $00         ; Pure           ,      ,                 ; 36 CATMAN
 .byte $04, MG_FIR2    , $00, $00, $00, $00         ; Fire 2 scroll  ,      ,                 ; 37 MANCAT
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 38 PEDE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 39 GrPEDE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3A TIGER
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3B Saber T
-.byte $06, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 3C VAMPIRE
-.byte $06, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP
+.byte $07, X_HEAL     , $00, $00, $00, $00         ; X_Heal         ,      ,                 ; 3C VAMPIRE
+.byte $07, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 3D WzVAMP
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3E GARGOYLE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 3F R`GOYLE
-.byte $06, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH
-.byte $06, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE
-.byte $07, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D
-.byte $07, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D
-.byte $07, GOLD41     , $00, $00, $00, $00         ; 5000 gold      ,      ,                 ; 44 ZombieD
+.byte $07, SOFT       , $00, $00, $00, $00         ; Soft           ,      ,                 ; 40 EARTH
+.byte $07, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 41 FIRE
+.byte $08, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 42 Frost D
+.byte $08, GOLD39     , $00, $00, $00, $00         ; 2750 gold      ,      ,                 ; 43 Red D
+.byte $08, GOLD41     , $00, $00, $00, $00         ; 5000 gold      ,      ,                 ; 44 ZombieD
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 45 SCUM
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 46 MUCK
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 47 OOZE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 48 SLIME
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 49 SPIDER
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4A ARACHNID
-.byte $07, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 4B MANTICOR
-.byte $07, GOLD36     , $00, $00, $00, $00         ; 1760 gold      ,      ,                 ; 4C SPHINX
+.byte $08, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 4B MANTICOR
+.byte $08, GOLD36     , $00, $00, $00, $00         ; 1760 gold      ,      ,                 ; 4C SPHINX
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4D R`ANKYLO
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 4E ANKYLO
-.byte $06, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 4F MUMMY
-.byte $06, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 50 WzMUMMY
+.byte $07, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 4F MUMMY
+.byte $07, ALARMCLOCK , $00, $00, $00, $00         ; Alarm Clock    ,      ,                 ; 50 WzMUMMY
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 51 COCTRICE
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 52 PERILISK
-.byte $07, GOLD32     , $00, $00, $00, $00         ; 1020 gold      ,      ,                 ; 53 WYVERN
-.byte $07, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 54 WYRM
+.byte $08, GOLD32     , $00, $00, $00, $00         ; 1020 gold      ,      ,                 ; 53 WYVERN
+.byte $08, GOLD33     , $00, $00, $00, $00         ; 1250 gold      ,      ,                 ; 54 WYRM
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 55 TYRO
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 56 T REX
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 57 CARIBE
@@ -1018,8 +1018,8 @@ lut_StealList:
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5C NAOCHO
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5D HYDRA
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 5E R`HYDRA
-.byte $06, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 5F GAURD
-.byte $06, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 60 SENTRY
+.byte $07, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 5F GAURD
+.byte $07, SMOKEBOMB  , $00, $00, $00, $00         ; Smokebomb      ,      ,                 ; 60 SENTRY
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 61 WATER
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 62 AIR
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 63 NAGA
@@ -1027,10 +1027,10 @@ lut_StealList:
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 65 CHIMERA
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 66 JIMERA
 .byte $04, MG_LIT     , $00, $00, $00, $00         ; Bolt 2 scroll  ,      ,                 ; 67 WIZARD
-.byte $06, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 68 SORCERER
+.byte $07, ETHER      , $00, $00, $00, $00         ; Ether          ,      ,                 ; 68 SORCERER
 .byte $00, WEP6       , $00, $00, $00, $00         ; Short sword    ,      ,                 ; 69 GARLAND
-.byte $07, GOLD45     , $00, $00, $00, $00         ; 6720 gold      ,      ,                 ; 6A Gas D
-.byte $07, GOLD47     , $00, $00, $00, $00         ; 7690 gold      ,      ,                 ; 6B Blue D
+.byte $08, GOLD45     , $00, $00, $00, $00         ; 6720 gold      ,      ,                 ; 6A Gas D
+.byte $08, GOLD47     , $00, $00, $00, $00         ; 7690 gold      ,      ,                 ; 6B Blue D
 .byte $04, MG_FAST    , $00, $00, $00, $00         ; Fast scroll    ,      ,                 ; 6C MudGOL
 .byte $04, MG_SLOW    , $00, $00, $00, $00         ; Slow scroll    ,      ,                 ; 6D RockGOL
 .byte $01, ARM4       , $00, $00, $00, $00         ; Iron armor     ,      ,                 ; 6E IronGOL
@@ -1041,16 +1041,16 @@ lut_StealList:
 .byte $03, MG_FOG2    , $00, $00, $00, $00         ; Fog 2 scroll   ,      ,                 ; 73 FIGHTER
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 74 MADPONY
 .byte $00, $00        , $00, $00, $00, $00         ; *              *      *                 ; 75 NITEMARE
-.byte $06, ELIXIR     , $00, $00, $00, $00         ; Elixir         ,      ,                 ; 76 WarMECH
-.byte $06, PHOENIXDOWN, $00, $00, $04, MG_QAKE     ; Phoenix Down   ,      , Quake scroll    ; 77 LICH
-.byte $06, PHOENIXDOWN, $00, $00, $01, ARM23       ; Phoenix Down   ,      , Aegis Shield    ; 78 LICH (reprise)
+.byte $07, ELIXIR     , $00, $00, $00, $00         ; Elixir         ,      ,                 ; 76 WarMECH
+.byte $07, PHOENIXDOWN, $00, $00, $04, MG_QAKE     ; Phoenix Down   ,      , Quake scroll    ; 77 LICH
+.byte $07, PHOENIXDOWN, $00, $00, $01, ARM23       ; Phoenix Down   ,      , Aegis Shield    ; 78 LICH (reprise)
 .byte $04, MG_FIR3    , $00, $00, $01, ARM20       ; Fire 3 scroll  ,      , Flame Shield    ; 79 KARY
-.byte $06, SMOKEBOMB  , $00, $00, $01, ARM32       ; Smokebomb      ,      , Ribbon          ; 7A KARY (reprise)
+.byte $07, SMOKEBOMB  , $00, $00, $01, ARM32       ; Smokebomb      ,      , Ribbon          ; 7A KARY (reprise)
 .byte $01, ARM14      , $00, $00, $01, ARM25       ; Opal bracelet  ,      , Protect Cape    ; 7B KRAKEN
-.byte $06, ETHER      , $00, $00, $01, ARM38       ; Ether          ,      , Power Gauntlet  ; 7C KRAKEN (reprise)
-.byte $06, ELIXIR     , $00, $00, $01, ARM10       ; Elixir         ,      , Dragon armor    ; 7D TIAMAT
-.byte $06, ELIXIR     , $00, $00, $00, WEP40       ; Elixir         ,      , Masamune        ; 7E TIAMAT (reprise)
-.byte $06, ELIXIR     , $00, $00, $06, PHOENIXDOWN ; Elixir         ,      , Elixer          ; 7F CHAOS
+.byte $07, ETHER      , $00, $00, $01, ARM38       ; Ether          ,      , Power Gauntlet  ; 7C KRAKEN (reprise)
+.byte $07, ELIXIR     , $00, $00, $01, ARM10       ; Elixir         ,      , Dragon armor    ; 7D TIAMAT
+.byte $07, ELIXIR     , $00, $00, $00, WEP40       ; Elixir         ,      , Masamune        ; 7E TIAMAT (reprise)
+.byte $07, ELIXIR     , $00, $00, $07, PHOENIXDOWN ; Elixir         ,      , Elixer          ; 7F CHAOS
 
 ;
 ; JIGS - tried to copy the stealing algorithm from FF6, as seen in MasterZed's faq:
@@ -1210,7 +1210,7 @@ StealFromEnemy:
     STA btl_unformattedstringbuf+3    
     ;; pulling this before the compare saves having to do it 4 different times!
     
-    CPX #SHOP_ARMOR          ; 0-1 = equipment
+    CPX #SHOP_WHITEMAGIC     ; 0-1 = equipment
     BCC @Equipment
     CPX #SHOP_ITEM           ; 2-5 = magic
     BCC @Magic
@@ -1240,6 +1240,8 @@ StealFromEnemy:
     BCC :+
         JMP @Fail_NoPush            ; can't carry any more of that spell/equipment
   : RTS
+  
+    ;; JIGS - how could I cap magic at 9 here...?
   
    @Items:
     TAX
@@ -2554,6 +2556,10 @@ EndOfBattleWrapUp:
 
 PrintEXPToNext_B:
 
+    ;; JIGS - this is going to be broken until I move character stat stuff.
+    ;; all the level up data is in Bank F!
+
+
 ;    JSR LvlUp_AwardExp          ; award exp to this player
     LDA char_index
     LSR A
@@ -2562,7 +2568,7 @@ PrintEXPToNext_B:
     LSR A
     LSR A
     
-    ;ASL A
+    ;ASL A ; want to get 0, 1, 2, 3 * 2 
     TAY
     
     LDA lut_CharStatsPtrTable, Y    ; get their stat pointer
