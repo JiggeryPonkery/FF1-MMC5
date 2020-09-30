@@ -7,7 +7,6 @@
 .export lut_BattleRates
 .export lut_BattleFormations
 .export BattleOver_ProcessResult_L
-.export PrintEXPToNext_B
 .export lut_Domains
 .export WriteAttributesToPPU
 .export lut_BattlePalettes
@@ -2191,19 +2190,7 @@ SubtractOneFromVal:
     
     RTS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  data_MaxRewardPlusOne  [$99A3 :: 0x2D9B3]
-;;    note that this is actually 1 higher than the max for some reason...
-;;  Also note this name is slightly misleading.  It's not the maximum reward, it's the
-;;  maximum value you can have AFTER being rewarded.  Effectively it is the GP/XP cap.
-    
-data_MaxRewardPlusOne:
-  .FARADDR 1000000          ; 'FARADDR' stores a 3-byte value  (even though this isn't an addr)
-  
-data_MaxHPPlusOne:          ; 99A6
-  .WORD 1000                ; max HP + 1
-  
+
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2532,95 +2519,29 @@ EndOfBattleWrapUp:
     JSR RespondDelay_UndrawAllCombatBoxes       ; then delay, and undraw
     
     LDA #$00                    ; award XP to all 4 party members
-    ;JSR LvlUp_AwardAndUpdateExp
     JSR LvlUp_AwardExp
     LDA #$01
-    ;JSR LvlUp_AwardAndUpdateExp
     JSR LvlUp_AwardExp
     LDA #$02
-    ;JSR LvlUp_AwardAndUpdateExp
     JSR LvlUp_AwardExp
     LDA #$03
-    ;JMP LvlUp_AwardAndUpdateExp
     JMP LvlUp_AwardExp
+
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  LvlUp_AwardAndUpdateExp  [$9B7F :: 0x2DB8F]
-;;
-;;  input:  A = character index whose XP to update
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  data_MaxRewardPlusOne  [$99A3 :: 0x2D9B3]
+;;    note that this is actually 1 higher than the max for some reason...
+;;  Also note this name is slightly misleading.  It's not the maximum reward, it's the
+;;  maximum value you can have AFTER being rewarded.  Effectively it is the GP/XP cap.
+    
+data_MaxRewardPlusOne:
+  .FARADDR 1000000          ; 'FARADDR' stores a 3-byte value  (even though this isn't an addr)
+  
+data_MaxHPPlusOne:          ; 99A6
+  .WORD 1000                ; max HP + 1
 
-;LvlUp_AwardAndUpdateExp:
-
-PrintEXPToNext_B:
-
-    ;; JIGS - this is going to be broken until I move character stat stuff.
-    ;; all the level up data is in Bank F!
-
-
-;    JSR LvlUp_AwardExp          ; award exp to this player
-    LDA char_index
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    
-    ;ASL A ; want to get 0, 1, 2, 3 * 2 
-    TAY
-    
-    LDA lut_CharStatsPtrTable, Y    ; get their stat pointer
-    STA lvlup_chstats
-    LDA lut_CharStatsPtrTable+1, Y
-    STA lvlup_chstats+1
-        
-    ; Now that XP is updated, update the 'ch_exptonext' stat
-    JSR LvlUp_GetCharExp        ; get the Xp pointer
-    JSR LvlUp_GetExpToAdvance   ; and Xp to advance pointer
-    
-    LDY #ch_level - ch_stats    ; see if they're at level 50
-    LDA (lvlup_chstats), Y
-    CMP #50 - 1                 ; (-1 because it's 0 based)
-    BNE :+
-      LDA #$00                  ; if at level 50, just set "0" for exptonext
-      PHA               ; push low
-      PHA               ; push high
-      JMP @UpdateToAdvance
-    
-  : LDX #$03                    ; if not level 50, subtract curexp from exptoadvance
-    LDY #$00                    ;  and push the result (low byte first)
-    SEC                         ; loop 3 times (3 bytes of data)
-  @FindDifLoop:
-      LDA (LevelUp_Reward), Y
-      SBC (LevelUp_Pointer), Y
-      PHA
-      INY
-      DEX
-      BNE @FindDifLoop
-    PLA                         ; drop the highest byte (only 2 bytes stored in exptonext)
-    
-   @UpdateToAdvance:
-    PLA                         ; pull high byte
-    STA tmp+1 ; LongCall_tmp+1                   ; write it
-    PLA                         ; pull low byte
-    STA tmp ; LongCall_tmp                     ; write it
-    LDA #00
-    STA tmp+2
-    RTS
-    
-    
-;  @UpdateToAdvance:
-;    LDY #ch_exptonext - ch_stats + 1
-;    PLA                         ; pull high byte
-;    STA ($86), Y                ; write it
-;    DEY
-;    PLA                         ; pull low byte
-;    STA ($86), Y                ; write it
-;    
-;   RTS             ; Done!
-;; JIGS - called from status menu now, exptonext is not saved in ch_stats
     
     
     
@@ -2665,7 +2586,7 @@ LvlUp_AwardExp:
     
         ; <-- "jump here" point  (see end of LvlUp_LevelUp for explanation of this note)
     
-    JSR LvlUp_GetExpToAdvance       ; Get exp to advance
+  ;  JSR LvlUp_GetExpToAdvance       ; Get exp to advance
     LDY #3 - 1                      ; compare 3 bytes (LevelUp_Pointer to lvlup_exptoadv)
     JSR MultiByteCmp
     
@@ -2705,21 +2626,21 @@ LvlUp_GetCharExp:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-LvlUp_GetExpToAdvance:
-    LDY #ch_level - ch_stats    ; get their level
-    LDA (lvlup_chstats), Y
-    ASL A
-    CLC
-    ADC (lvlup_chstats), Y      ; A = level*3
-    
-    ADC #<lut_ExpToAdvance      ; Add to address of exp LUT
-    STA LevelUp_Reward          ; $82
-    
-    LDA #$00
-    ADC #>lut_ExpToAdvance
-    STA LevelUp_Reward+1        ; $83
-    
-    RTS
+;LvlUp_GetExpToAdvance:
+;    LDY #ch_level - ch_stats    ; get their level
+;    LDA (lvlup_chstats), Y
+;    ASL A
+;    CLC
+;    ADC (lvlup_chstats), Y      ; A = level*3
+;    
+;    ADC #<lut_ExpToAdvance      ; Add to address of exp LUT
+;    STA LevelUp_Reward          ; $82
+;    
+;    LDA #$00
+;    ADC #>lut_ExpToAdvance
+;    STA LevelUp_Reward+1        ; $83
+;    
+;    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2730,254 +2651,254 @@ LvlUp_GetExpToAdvance:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 LvlUp_LevelUp:
-    LDY #ch_level - ch_stats        ; check to see if they're are the max level
-    LDA (lvlup_chstats), Y          ; level 50 is max (-1 because OB level is stored 0-based
-    CMP #50 - 1                     ;   so it'd actually be stored as 49)
-    BEQ LvlUp_AwardExp_RTS          ; if at max level, branch to a nearby RTS
-
-    
-   ; LevelUp_LevelIndex         @levindex = $6BAD       ; local, stores the index to level up stats
-   ; LevelUp_Pointer            @lvlupptr = $82         ; local, pointer to level up data
-   ; LevelUp_ClassID            @classid  = $688E       ; local, stores class ID
-            
-    STA LevelUp_LevelIndex          ; record old level
-    
-    CLC                             ; add 1
-    ADC #1
-    STA (lvlup_chstats), Y          ; change actual player stat
-    STA eobtext_print_level         ; and write to the print space in RAM so it can be drawn later
-                                    ;  (note that this will need to be INC'd later since it is 0-based now
-                                    ;   and we'd want to print it as 1-based)
-    
-    LDY #ch_class - ch_stats
-    LDA (lvlup_chstats), Y
-    ASL A
-    TAY                             ; put 2* class ID in Y (to use as index)
-    
-    ASL LevelUp_LevelIndex              ; double level index (2 bytes of data per level per class)
-    
-    LDA lut_LevelUpDataPtrs, Y      ; calc the pointer to the level up data for this level for
-    CLC                             ;   this class.
-    ADC LevelUp_LevelIndex
-    STA LevelUp_Pointer
-    LDA lut_LevelUpDataPtrs+1, Y
-    ADC #$00
-    STA LevelUp_Pointer+1                 ; @lvlupptr now points to the 2-byte level up data to use
-    
-    LDA #$00
-    STA eobtext_print_level+1       ; clear high-byte of print level
-    INC eobtext_print_level         ; convert print level to 1-based (it is now OK to print)
-    
-    LDX #$00
-    LDA (lvlup_chstats, X)          ; get the first byte of chstats (happens to be class ID)
-    AND #$0F                        ;; JIGS - cut off high bits again 
-    STA LevelUp_ClassID                    ; store class ID 
-    TAX                             ; and throw it in X to use as index
-    
-    ;;---- start assigning bonuses
-    LDY #ch_hitrate - ch_stats      ; assign Hit Rate bonus
-    LDA (lvlup_chstats), Y
-    CLC
-    ADC lut_LvlUpHitRateBonus, X
-    JSR CapAAt200                   ; cap hit rate at 200
-    STA (lvlup_chstats), Y
-    
-    LDY #ch_magicdefense - ch_stats       ; assign Magic Defense bonus
-    LDA (lvlup_chstats), Y
-    CLC
-    ADC lut_LvlUpMagDefBonus, X
-    JSR CapAAt200                   ; cap at 200
-    STA (lvlup_chstats), Y
-    
-    ;;---- increase spell charges!
-    
-    ;; JIGS - edited to use ch_stats and for current and max MP being in the same byte
-    
-   ; LDA LevelUp_ClassID
-   ; BEQ @SkipMPGain                 ; skip MP increase for Fighters (class 0)
-   ; CMP #CLS_TH                     ; and thieves.  This is necessary because
-   ; BEQ @SkipMPGain                 ; Knights/Ninjas get magic, and they share the same data.
-   ;; JIGS - they do not share the same data now
-    
-    LDY #$01
-    LDA (LevelUp_Pointer), Y              ; get leveldata[1] byte (MP gains)
-    LDY #ch_mp - ch_stats           ; set Y to index max MP
-   @MagicUpLoop:
-      LSR A                         ; shift out low bit
-      BCC :+                        ; if set...
-        PHA
-        LDA (lvlup_chstats), Y        ; increase max MP for this level by 1
-        CLC
-        ADC #$01
-        STA (lvlup_chstats), Y
-        PLA
-    : INY                               ; INY to look at next spell level
-      CPY #ch_mp - ch_stats + 8  ; loop for all 8 bits (and all 8 spell levels)
-      BNE @MagicUpLoop
-    
-    ;;---- Cap spell charges at a maximum
-    LDA LevelUp_ClassID            ; check the class
-    CMP #CLASS_KN
-    BEQ :+
-    CMP #CLASS_NJ
-    BEQ :+                  ; Knights/Ninjas cap at 4 MP
-        LDA #9+1            ;  all other classes cap at 9 MP
-        BNE :++
-  : LDA #4+1                ;(KN/NJ jumps here)
-  
-    ;  At this point, A = max_charges+1
-  : LDY #ch_mp - ch_stats           ; similar loop as above
-    STA MMC5_tmp
-  @MagicCapLoop:
-      LDA (lvlup_chstats), Y   ; MP byte
-      AND #$0F                 ; destroy high bit (current mp)
-      CMP MMC5_tmp             ; see if MP max is == one beyond max
-      BCC :+                                ; if it is...
-        LDA (lvlup_chstats), Y              ; ... decrease it by one to cap it
-        SEC
-        SBC #$01
-        STA (lvlup_chstats), Y
-    : INY                                   ; repeat for all 8 spell levels
-      CPY #ch_mp - ch_stats + 8
-      BNE @MagicCapLoop
-     
-    ;; JIGS - hopefully that sorts it out. 
-
-  
-  @SkipMPGain:      ; jumps here for fighters/thieves (prevent them from getting MP)
-    
-    ;;---- Record stat byte
-                ;@statbyte = $688E   ; local, the stat gains byte from the level up data
-    LDY #$00
-    LDA (LevelUp_Pointer), Y              ; get leveldata[0] byte (other stat gains)
-    STA LevelUp_StatByte                   ; record it!
-    
-    ;;---- HP gain
-    LDY #ch_vitality - ch_stats  ; Base HP gain depends on vitality
-    LDA (lvlup_chstats), Y
-    LSR A
-    LSR A
-    CLC
-    ADC #$01                ; Vit/4 + 1
-    PHA                     ;  (push it for later)
-    
-    LDA LevelUp_StatByte           ; check the stat byte
-    AND #$20                ; see if the "strong" bit is set
-    BEQ :+                  ; if this is a strong level....
-      LDA #20               ;   get an additional HP bonus of rand[20,25]
-      LDX #25
-      JSR RandAX
-      JMP :++
-  : LDA #$00                ; for non-strong levels, no extra bonus
-  
-  : STA tmp+6               ; store strong bonus in scratch ram
-    PLA                     ; pull base HP gain
-    CLC
-    ADC tmp+6               ; add with strong bonus
-    STA battlereward        ; record HP bonus as battle reward
-    LDA #$00
-    STA battlereward+1      ; (zero high byte of battle reward)
-    STA battlereward+2
-    
-    LDA lvlup_chstats       ; set $80 to point to character's Max HP
-    CLC
-    ADC #ch_maxhp - ch_stats
-    STA LevelUp_Pointer
-    LDA lvlup_chstats+1
-    ADC #$00
-    STA LevelUp_Pointer+1
-    
-    JSR GiveHpBonusToChar   ; Finally, apply the HP bonus!
-    
-    ;;---- other stat gains (str/vit/etc)
-    ; LevelUp_LoopCounter              @loopctr = $6856 
-    ; LevelUp_StatIndex                @statidx = $6858 
-    ; LevelUp_StatBuffer               @statupbuffer = $6AAC ; 5 bytes indicating which stats have been incrased 
-                
-    ASL LevelUp_StatByte               ; drop the high 3 bits of the stat byte, other bits
-    ASL LevelUp_StatByte              ;   will be shifted out the high end
-    ASL LevelUp_StatByte
-    
-    LDA #$00                    ; zero our loop counter
-    STA LevelUp_LoopCounter
-    LDA #ch_strength - ch_stats      ; and initialize our stat index 
-    STA LevelUp_StatIndex
-    
-    ; Loop 5 times, possibly increasing each of the base stats
-  @StatUpLoop:
-      ASL LevelUp_StatByte             ; shift out the high bit of the stat byte
-      BCC @StatUpRandomChance   ; if clear, stat has a random chance of increase
-
-    @IncreaseStat:              ; if set, stat has a guaranteed increase
-      LDA #$01                  ;   increase by 1
-      BNE @ApplyStatBonus       ;   (always branch)
-    
-    @StatUpRandomChance:        ; stat byte was clear
-      JSR BattleRNG_L           ; get a random number
-      AND #$03
-      BEQ @IncreaseStat         ; 25% chance of increase
-      LDA #$00                  ; otherwise, no increase (or rather, increase by 0)
-    
-    @ApplyStatBonus:
-      STA tmp
-      LDY LevelUp_LoopCounter              ; record stat increase in this statup buffer
-      STA LevelUp_StatBuffer, Y      ;   so that this can be reported back to the user later
-      
-      LDY LevelUp_StatIndex
-      CLC
-      ADC (lvlup_chstats), Y    ; add bonus to stat
-      CMP #100
-      BEQ :+                    ; but only apply it if < 100
-        STA (lvlup_chstats), Y
-      
-      ;; JIGS - fixing the bug mentioned below?
-    : LDA tmp
-      LDY LevelUp_LoopCounter              ; record stat increase in this statup buffer
-      STA LevelUp_StatBuffer, Y      ;   so that this can be reported back to the user later
-     
-  ;  :     
-      INC LevelUp_StatIndex              ; move to next stat
-    
-      INC LevelUp_LoopCounter              ; and loop until all 5 stats processed
-      LDA LevelUp_LoopCounter
-      CMP #$05
-      BNE @StatUpLoop
-    
-    ; The above is slightly BUGGED -- if the stat was maxed out, it will not be increased, but
-    ;  @statupbuffer will be set indicating it was, so misinformation will be reported to the player
-    ;  when statupbuffer is printed below.
-    
-    ;;---- substat changes  (damage/absorb/etc)
-    ;  So much of this below code is fishy.  There are ALL SORTS of edge cases where a stat might
-    ; not be properly increased, or it might increase when it shouldn't.  It would be so much smarter
-    ; to just recalculate substats from scratch -- rather than try to adjust them on-the-fly like this.
-    ; This is undoubtedly BUGGED for edge cases, but I'm not going to point them all out.
-    
-    LDY #ch_strength - ch_stats      ; damage goes up 1 pt for each 2pts of strength
-    LDA LevelUp_StatBuffer+0         ; so check to see if strength has gone up
-    BEQ :+                      ; if yes...
-      LDA (lvlup_chstats), Y
-      LSR A
-      BCS :+                    ; ...see if it went up to an even number
-      LDY #ch_damage - ch_stats    ;    if yes, add 1 to damage stat
-      LDA (lvlup_chstats), Y    ;    capping at 200
-      CLC
-      ADC #$01
-      CMP #201
-      BEQ :+
-        STA (lvlup_chstats), Y
-      
-  : LDY #ch_evasion - ch_stats    ; evade goes up 1 if agility went up
-    LDA LevelUp_StatBuffer+1
-    BEQ :+                      ; did agility go up?
-      LDA (lvlup_chstats), Y
-      CLC
-      ADC #$01
-      CMP #201                  ; cap at 200
-      BEQ :+
-        STA (lvlup_chstats), Y
-    
-  : JSR LvlUp_AdjustBBSubStats  ; adjust dmg and absorb for BB/Masters
+;    LDY #ch_level - ch_stats        ; check to see if they're are the max level
+;    LDA (lvlup_chstats), Y          ; level 50 is max (-1 because OB level is stored 0-based
+;    CMP #50 - 1                     ;   so it'd actually be stored as 49)
+;    BEQ LvlUp_AwardExp_RTS          ; if at max level, branch to a nearby RTS
+;
+;    
+;   ; LevelUp_LevelIndex         @levindex = $6BAD       ; local, stores the index to level up stats
+;   ; LevelUp_Pointer            @lvlupptr = $82         ; local, pointer to level up data
+;   ; LevelUp_ClassID            @classid  = $688E       ; local, stores class ID
+;            
+;    STA LevelUp_LevelIndex          ; record old level
+;    
+;    CLC                             ; add 1
+;    ADC #1
+;    STA (lvlup_chstats), Y          ; change actual player stat
+;    STA eobtext_print_level         ; and write to the print space in RAM so it can be drawn later
+;                                    ;  (note that this will need to be INC'd later since it is 0-based now
+;                                    ;   and we'd want to print it as 1-based)
+;    
+;    LDY #ch_class - ch_stats
+;    LDA (lvlup_chstats), Y
+;    ASL A
+;    TAY                             ; put 2* class ID in Y (to use as index)
+;    
+;    ASL LevelUp_LevelIndex              ; double level index (2 bytes of data per level per class)
+;    
+;    LDA lut_LevelUpDataPtrs, Y      ; calc the pointer to the level up data for this level for
+;    CLC                             ;   this class.
+;    ADC LevelUp_LevelIndex
+;    STA LevelUp_Pointer
+;    LDA lut_LevelUpDataPtrs+1, Y
+;    ADC #$00
+;    STA LevelUp_Pointer+1                 ; @lvlupptr now points to the 2-byte level up data to use
+;    
+;    LDA #$00
+;    STA eobtext_print_level+1       ; clear high-byte of print level
+;    INC eobtext_print_level         ; convert print level to 1-based (it is now OK to print)
+;    
+;    LDX #$00
+;    LDA (lvlup_chstats, X)          ; get the first byte of chstats (happens to be class ID)
+;    AND #$0F                        ;; JIGS - cut off high bits again 
+;    STA LevelUp_ClassID                    ; store class ID 
+;    TAX                             ; and throw it in X to use as index
+;    
+;    ;;---- start assigning bonuses
+;    LDY #ch_hitrate - ch_stats      ; assign Hit Rate bonus
+;    LDA (lvlup_chstats), Y
+;    CLC
+;    ADC lut_LvlUpHitRateBonus, X
+;    JSR CapAAt200                   ; cap hit rate at 200
+;    STA (lvlup_chstats), Y
+;    
+;    LDY #ch_magicdefense - ch_stats       ; assign Magic Defense bonus
+;    LDA (lvlup_chstats), Y
+;    CLC
+;    ADC lut_LvlUpMagDefBonus, X
+;    JSR CapAAt200                   ; cap at 200
+;    STA (lvlup_chstats), Y
+;    
+;    ;;---- increase spell charges!
+;    
+;    ;; JIGS - edited to use ch_stats and for current and max MP being in the same byte
+;    
+;   ; LDA LevelUp_ClassID
+;   ; BEQ @SkipMPGain                 ; skip MP increase for Fighters (class 0)
+;   ; CMP #CLS_TH                     ; and thieves.  This is necessary because
+;   ; BEQ @SkipMPGain                 ; Knights/Ninjas get magic, and they share the same data.
+;   ;; JIGS - they do not share the same data now
+;    
+;    LDY #$01
+;    LDA (LevelUp_Pointer), Y              ; get leveldata[1] byte (MP gains)
+;    LDY #ch_mp - ch_stats           ; set Y to index max MP
+;   @MagicUpLoop:
+;      LSR A                         ; shift out low bit
+;      BCC :+                        ; if set...
+;        PHA
+;        LDA (lvlup_chstats), Y        ; increase max MP for this level by 1
+;        CLC
+;        ADC #$01
+;        STA (lvlup_chstats), Y
+;        PLA
+;    : INY                               ; INY to look at next spell level
+;      CPY #ch_mp - ch_stats + 8  ; loop for all 8 bits (and all 8 spell levels)
+;      BNE @MagicUpLoop
+;    
+;    ;;---- Cap spell charges at a maximum
+;    LDA LevelUp_ClassID            ; check the class
+;    CMP #CLASS_KN
+;    BEQ :+
+;    CMP #CLASS_NJ
+;    BEQ :+                  ; Knights/Ninjas cap at 4 MP
+;        LDA #9+1            ;  all other classes cap at 9 MP
+;        BNE :++
+;  : LDA #4+1                ;(KN/NJ jumps here)
+;  
+;    ;  At this point, A = max_charges+1
+;  : LDY #ch_mp - ch_stats           ; similar loop as above
+;    STA MMC5_tmp
+;  @MagicCapLoop:
+;      LDA (lvlup_chstats), Y   ; MP byte
+;      AND #$0F                 ; destroy high bit (current mp)
+;      CMP MMC5_tmp             ; see if MP max is == one beyond max
+;      BCC :+                                ; if it is...
+;        LDA (lvlup_chstats), Y              ; ... decrease it by one to cap it
+;        SEC
+;        SBC #$01
+;        STA (lvlup_chstats), Y
+;    : INY                                   ; repeat for all 8 spell levels
+;      CPY #ch_mp - ch_stats + 8
+;      BNE @MagicCapLoop
+;     
+;    ;; JIGS - hopefully that sorts it out. 
+;
+;  
+;  @SkipMPGain:      ; jumps here for fighters/thieves (prevent them from getting MP)
+;    
+;    ;;---- Record stat byte
+;                ;@statbyte = $688E   ; local, the stat gains byte from the level up data
+;    LDY #$00
+;    LDA (LevelUp_Pointer), Y              ; get leveldata[0] byte (other stat gains)
+;    STA LevelUp_StatByte                   ; record it!
+;    
+;    ;;---- HP gain
+;    LDY #ch_vitality - ch_stats  ; Base HP gain depends on vitality
+;    LDA (lvlup_chstats), Y
+;    LSR A
+;    LSR A
+;    CLC
+;    ADC #$01                ; Vit/4 + 1
+;    PHA                     ;  (push it for later)
+;    
+;    LDA LevelUp_StatByte           ; check the stat byte
+;    AND #$20                ; see if the "strong" bit is set
+;    BEQ :+                  ; if this is a strong level....
+;      LDA #20               ;   get an additional HP bonus of rand[20,25]
+;      LDX #25
+;      JSR RandAX
+;      JMP :++
+;  : LDA #$00                ; for non-strong levels, no extra bonus
+;  
+;  : STA tmp+6               ; store strong bonus in scratch ram
+;    PLA                     ; pull base HP gain
+;    CLC
+;    ADC tmp+6               ; add with strong bonus
+;    STA battlereward        ; record HP bonus as battle reward
+;    LDA #$00
+;    STA battlereward+1      ; (zero high byte of battle reward)
+;    STA battlereward+2
+;    
+;    LDA lvlup_chstats       ; set $80 to point to character's Max HP
+;    CLC
+;    ADC #ch_maxhp - ch_stats
+;    STA LevelUp_Pointer
+;    LDA lvlup_chstats+1
+;    ADC #$00
+;    STA LevelUp_Pointer+1
+;    
+;    JSR GiveHpBonusToChar   ; Finally, apply the HP bonus!
+;    
+;    ;;---- other stat gains (str/vit/etc)
+;    ; LevelUp_LoopCounter              @loopctr = $6856 
+;    ; LevelUp_StatIndex                @statidx = $6858 
+;    ; LevelUp_StatBuffer               @statupbuffer = $6AAC ; 5 bytes indicating which stats have been incrased 
+;                
+;    ASL LevelUp_StatByte               ; drop the high 3 bits of the stat byte, other bits
+;    ASL LevelUp_StatByte              ;   will be shifted out the high end
+;    ASL LevelUp_StatByte
+;    
+;    LDA #$00                    ; zero our loop counter
+;    STA LevelUp_LoopCounter
+;    LDA #ch_strength - ch_stats      ; and initialize our stat index 
+;    STA LevelUp_StatIndex
+;    
+;    ; Loop 5 times, possibly increasing each of the base stats
+;  @StatUpLoop:
+;      ASL LevelUp_StatByte             ; shift out the high bit of the stat byte
+;      BCC @StatUpRandomChance   ; if clear, stat has a random chance of increase
+;
+;    @IncreaseStat:              ; if set, stat has a guaranteed increase
+;      LDA #$01                  ;   increase by 1
+;      BNE @ApplyStatBonus       ;   (always branch)
+;    
+;    @StatUpRandomChance:        ; stat byte was clear
+;      JSR BattleRNG_L           ; get a random number
+;      AND #$03
+;      BEQ @IncreaseStat         ; 25% chance of increase
+;      LDA #$00                  ; otherwise, no increase (or rather, increase by 0)
+;    
+;    @ApplyStatBonus:
+;      STA tmp
+;      LDY LevelUp_LoopCounter              ; record stat increase in this statup buffer
+;      STA LevelUp_StatBuffer, Y      ;   so that this can be reported back to the user later
+;      
+;      LDY LevelUp_StatIndex
+;      CLC
+;      ADC (lvlup_chstats), Y    ; add bonus to stat
+;      CMP #100
+;      BEQ :+                    ; but only apply it if < 100
+;        STA (lvlup_chstats), Y
+;      
+;      ;; JIGS - fixing the bug mentioned below?
+;    : LDA tmp
+;      LDY LevelUp_LoopCounter              ; record stat increase in this statup buffer
+;      STA LevelUp_StatBuffer, Y      ;   so that this can be reported back to the user later
+;     
+;  ;  :     
+;      INC LevelUp_StatIndex              ; move to next stat
+;    
+;      INC LevelUp_LoopCounter              ; and loop until all 5 stats processed
+;      LDA LevelUp_LoopCounter
+;      CMP #$05
+;      BNE @StatUpLoop
+;    
+;    ; The above is slightly BUGGED -- if the stat was maxed out, it will not be increased, but
+;    ;  @statupbuffer will be set indicating it was, so misinformation will be reported to the player
+;    ;  when statupbuffer is printed below.
+;    
+;    ;;---- substat changes  (damage/absorb/etc)
+;    ;  So much of this below code is fishy.  There are ALL SORTS of edge cases where a stat might
+;    ; not be properly increased, or it might increase when it shouldn't.  It would be so much smarter
+;    ; to just recalculate substats from scratch -- rather than try to adjust them on-the-fly like this.
+;    ; This is undoubtedly BUGGED for edge cases, but I'm not going to point them all out.
+;    
+;    LDY #ch_strength - ch_stats      ; damage goes up 1 pt for each 2pts of strength
+;    LDA LevelUp_StatBuffer+0         ; so check to see if strength has gone up
+;    BEQ :+                      ; if yes...
+;      LDA (lvlup_chstats), Y
+;      LSR A
+;      BCS :+                    ; ...see if it went up to an even number
+;      LDY #ch_damage - ch_stats    ;    if yes, add 1 to damage stat
+;      LDA (lvlup_chstats), Y    ;    capping at 200
+;      CLC
+;      ADC #$01
+;      CMP #201
+;      BEQ :+
+;        STA (lvlup_chstats), Y
+;      
+;  : LDY #ch_evasion - ch_stats    ; evade goes up 1 if agility went up
+;    LDA LevelUp_StatBuffer+1
+;    BEQ :+                      ; did agility go up?
+;      LDA (lvlup_chstats), Y
+;      CLC
+;      ADC #$01
+;      CMP #201                  ; cap at 200
+;      BEQ :+
+;        STA (lvlup_chstats), Y
+;    
+;  : JSR LvlUp_AdjustBBSubStats  ; adjust dmg and absorb for BB/Masters
   
   
     ;;---- Display the actual ... display to indicate to the user that they levelled up
@@ -3079,66 +3000,6 @@ Draw4EobBoxes:
     RTS
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  lut - Hit rate bonus for each class (assigned at level up)  [$9DDC :: 0x2DDEC]
-
-lut_LvlUpHitRateBonus:
-  .BYTE  3,  2,  3,  2,  1,  1,  0,  0,   3,  2,  3,  2,  1,  1,  0,  0
-  ;     FT  TH  BB  RM  WM  BM  C1  C2   KN  NJ  MA  RW  WW  BW, C3, C4
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  lut - Mag Def bonus for each class (assigned at level up)  [$9DE8 :: 0x2DDF8]
-;;
-;;    This is arguably BUGGED -- since MA gets penalized, and fighters get more magdef than
-;;  fighters, which doesn't make any sense.  It's almost as if these should be inverted
-;;  to be 5-their_value.
-  
-lut_LvlUpMagDefBonus:
-  ;.BYTE  3,  2,  4,  2,  2,  2,   3,  2,  1,  2,  2,  2
-  .BYTE  2,  2,  2,  1,  2,  3,  0,  0,   2,  2,  2,  4,  2,  3,  0,  0
-  ;     FT  TH  BB  RM  WM  BM  C1  C2   KN  NJ  MA  RW  WW  BW, C3, C4
-  ;; JIGS - I reversed this, but I like the idea of Masters being so anti-magic that they can defend against it well!
-  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  [$9DF4 :: 0x2DE04]
-;;    Lut - pointer table to level up data for each class
-;;  see data_LevelUpData_Raw for explanation of data format
-
-lut_ExpToAdvance:  
-lut_LevelUpDataPtrs:
-;.word data_LevelUpData_Class1
-;.word data_LevelUpData_Class2
-;.word data_LevelUpData_Class3
-;.word data_LevelUpData_Class4
-;.word data_LevelUpData_Class5
-;.word data_LevelUpData_Class6
-;.word data_LevelUpData_Class7
-;.word data_LevelUpData_Class8
-;.word data_LevelUpData_Class9
-;.word data_LevelUpData_Class10
-;.word data_LevelUpData_Class11
-;.word data_LevelUpData_Class12
-;.word data_LevelUpData_Class13
-;.word data_LevelUpData_Class14
-;.word data_LevelUpData_Class15
-;.word data_LevelUpData_Class16
-
-;  .WORD data_LevelUpData_Raw + (49*2 * 0)      ; Fighter
-;  .WORD data_LevelUpData_Raw + (49*2 * 1)      ; Thief
-;  .WORD data_LevelUpData_Raw + (49*2 * 2)      ; BlBelt
-;  .WORD data_LevelUpData_Raw + (49*2 * 3)      ; RedMage
-;  .WORD data_LevelUpData_Raw + (49*2 * 4)      ; WhiteMage
-;  .WORD data_LevelUpData_Raw + (49*2 * 5)      ; BlackMage
-;;; JIGS - woo, now all 12 classes can be different!
-;  .WORD data_LevelUpData_Raw + (49*2 * 6)      ; Knight
-;  .WORD data_LevelUpData_Raw + (49*2 * 7)      ; Ninja
-;  .WORD data_LevelUpData_Raw + (49*2 * 8)      ; Master
-;  .WORD data_LevelUpData_Raw + (49*2 * 9)      ; RedWiz
-;  .WORD data_LevelUpData_Raw + (49*2 * 10)     ; WhiteWiz
-;  .WORD data_LevelUpData_Raw + (49*2 * 11)     ; BlackWiz
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3231,7 +3092,7 @@ GiveHpBonusToChar:
     
     LDY #$00                    ; copy the cap over to the max HP
     : LDA (LevelUp_Reward), Y
-      STA (LevelUp_Pointer), Y
+      STA (LevelUp_Pointer), Y ; < HP max
       INY
       CPY #$02
       BNE :-

@@ -49,7 +49,6 @@
 .import OptionsMenu
 .import PaletteFrame
 .import PlaySFX_Error
-.import PrintEXPToNext_B
 .import RandAX
 .import SaveScreen_FromMenu
 .import UpdateJoy
@@ -646,9 +645,7 @@ PrintCharStat:
     
     ;;; all other codes default to Exp to Next level
 @ExpToNext:
-    JSR LongCall
-    .word PrintEXPToNext_B
-    .byte BANK_BTLDATA
+    JSR PrintEXPToNext
     JMP PrintNumber_5Digit
 
 @Exp:
@@ -698,6 +695,121 @@ PrintCharStat:
     LDA ch_stats+2, X
     STA tmp+2           ; and print it as 6-digits
     JMP PrintNumber_6Digit
+
+
+PrintEXPToNext:
+    LDA char_index
+    TAX
+    LDA ch_exp, X
+    STA tmp
+    LDA ch_exp+1, X
+    STA tmp+1
+    LDA ch_exp+2, X
+    STA tmp+2, X      ; save current exp in tmp
+    LDA ch_level, X
+    CMP #50-1         ; see if they're level 50
+    BNE :+            ; if so, clear output to 0 and return 
+        LDA #0
+        STA tmp
+        STA tmp+1
+        STA tmp+2
+        RTS
+        
+  : LDX #3            ; level * 3 because there's 3 bytes of exp data for each level
+    JSR MultiplyXA
+    TAX
+    LDA lut_ExpToAdvance, X
+    STA tmp+3
+    LDA lut_ExpToAdvance+1, X
+    STA tmp+4
+    LDA lut_ExpToAdvance+2, X
+    STA tmp+5
+
+    LDY #3       ; use Y as a counter, because comparing X messes with carry
+    SEC          ; a bad thing to do when subtracting in a loop!
+   @Subtract:
+    LDA tmp+3, X ; EXP to next
+    SBC tmp, X   ; current EXP
+    STA tmp, X
+    INX
+    DEY
+    BNE @Subtract
+    
+    LDA #0       ; always clear tmp+2 for output; EXP to Next is really only 2 bytes
+    STA tmp+2    ; since its the number between level up values
+    RTS          ; so from level 3 to 4, its 547 - 196 = 351 
+    
+   
+   
+
+lut_ExpToAdvance:
+  .FARADDR     40 ; level 2 
+  .FARADDR    196 ; level 3 
+  .FARADDR    547 ; level 4 
+  .FARADDR   1171 ; level 5 
+  .FARADDR   2146 ; level 6 
+  .FARADDR   3550 ; level 7 
+  .FARADDR   5461 ; level 8 
+  .FARADDR   7957 ; level 9 
+  .FARADDR  11116 ; level 10
+  .FARADDR  15016 ; level 11
+  .FARADDR  19735 ; level 12
+  .FARADDR  25351 ; level 13
+  .FARADDR  31942 ; level 14
+  .FARADDR  39586 ; level 15
+  .FARADDR  48361 ; level 16
+  .FARADDR  58345 ; level 17
+  .FARADDR  69617 ; level 18
+  .FARADDR  82253 ; level 19
+  .FARADDR  96332 ; level 20
+  .FARADDR 111932 ; level 21
+  .FARADDR 129131 ; level 22
+  .FARADDR 148008 ; level 23
+  .FARADDR 168639 ; level 24
+  .FARADDR 191103 ; level 25
+  .FARADDR 215479 ; level 26
+  .FARADDR 241843 ; level 27
+  .FARADDR 270275 ; level 28
+  .FARADDR 300851 ; level 29
+  .FARADDR 333651 ; level 30
+  .FARADDR 366450 ; level 31
+  .FARADDR 399250 ; level 32
+  .FARADDR 432049 ; level 33
+  .FARADDR 464849 ; level 34
+  .FARADDR 497648 ; level 35
+  .FARADDR 530448 ; level 36
+  .FARADDR 563247 ; level 37
+  .FARADDR 596047 ; level 38
+  .FARADDR 628846 ; level 39
+  .FARADDR 661646 ; level 40
+  .FARADDR 694445 ; level 41
+  .FARADDR 727245 ; level 42
+  .FARADDR 760044 ; level 43
+  .FARADDR 792844 ; level 44
+  .FARADDR 825643 ; level 45
+  .FARADDR 858443 ; level 46
+  .FARADDR 891242 ; level 47
+  .FARADDR 924042 ; level 48
+  .FARADDR 956841 ; level 49
+  .FARADDR 989641 ; level 50
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1852,18 +1964,31 @@ FinishSale:
     JSR ShopEarnGold            ; add the price to your gold amount
     LDA #$19
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
+    JSR ShopLoop_YesNo
+    BCS StopSelling             ; if B was pressed... 
+    LDA cursor
+    BNE StopSelling
+    
     JSR ConvertInventoryToItemBox
-    BEQ :+
-    JMP ShopSell_Loop           ; and continue loop    
+    BEQ @NothingLeft            ; 
+    JMP ShopSell_Loop           ; else continue loop    
+    
+   @NothingLeft: 
+    LDA #SHOPBOX_INV
+    JSR EraseMainItemBox        ; erase shop box 2 (inventory)    
+    JMP :+                      ; and jump to stop selling
+    
+StopSelling:
+    LDA #$1A 
+    JSR DrawShopDialogueBox     ; "eh, alright then, what else?"    
+    JMP :+
     
 NothingToSell:    
     LDA #$15
     JSR DrawShopDialogueBox
     JSR MenuWaitForBtn
-  : LDA #SHOPBOX_INV
-    JSR EraseMainItemBox        ; erase shop box 2 (inventory)
-	LDA #$0
-    STA shop_selling
+  : LDA #0
+    STA shop_selling            ; A = 0
     STA shop_listdrawn
     JMP MainShopLoop    
     
@@ -3053,6 +3178,8 @@ ShopFrameNoCursor:
     JMP PlaySFX_MenuMove       ; otherwise, play the movement sound effec, and exit
 
   @Exit:
+  
+ClearABButtons:  
     LDA #0
     STA joy_a
     STA joy_b
@@ -4395,7 +4522,7 @@ lutMenuPalettes:
 .BYTE  $0F,$30,$01,$22,  $0F,$00,$0F,$30,  $0F,$35,$01,$15
 
 lutSpellMenuPalettes:
-.BYTE  $0F,$00,$01,$0F,  $0F,$10,$01,$1A,  $0F,$10,$01,$13
+.BYTE  $0F,$04,$01,$0F,  $0F,$2A,$01,$1A,  $0F,$24,$01,$13
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5660,42 +5787,73 @@ DrawLearnSpellMenu:
     INC tmp+3           ; inc spell ID
     JSR DOES_ITEM_EXIST ; uses tmp+2
     STA tmp             ; save amount for printing 
-    BEQ @SkipOne
-
+    PHA
+    
+    ;; start doing the string...
+    
     LDY tmp+6
-    LDA #$E5            ; magic orb tile
-    STA bigstr_buf, Y   ; in first slot
-    LDA #$FF            ; space
-    STA bigstr_buf+1, Y ; in second slot
-    STA bigstr_buf+4, Y ; and fourth slot
+    LDA #$E5            ; 
+    STA bigstr_buf, Y   ; magic orb tile in first slot
+    LDA #$FF            ; 
+    STA bigstr_buf+1, Y ; space in second slot    
+    
+    PLA
+    BNE @Spellname
+    
+    LDA #$0B            ; if blank spell slot...
+    STA bigstr_buf+2, Y ; repeat code in third slot
+    LDA #$07
+    STA bigstr_buf+3, Y ; repeat amount in fourth slot
+    LDA #$C2 
+    STA bigstr_buf+4, Y ; repeat tile in fifth slot 
+    INY
+    BNE @Amount    
+
+   @Spellname:
     LDA #06
     STA bigstr_buf+2, Y ; magic name code in third slot
     LDA tmp+3           ; get spell (now +1)
     STA bigstr_buf+3, Y ; spell ID in fourth slot
     
+   @Amount: 
+    LDA #$FF              
+    STA bigstr_buf+4, Y ; another space in fifth slot
+    LDA #$F1
+    STA bigstr_buf+5, Y ; tiny x in sixth slot
+   
     JSR PrintNumber_2Digit ; uses tmp to get the numbers
     LDA format_buf-2
-    CMP #$FF
-    BNE @DoubleDigits
+    BPL @DoubleDigits      ; is the tens column empty?
     
    @SingleDigits: 
     LDA format_buf-1     
-    STA bigstr_buf+5, Y    ; 
+    STA bigstr_buf+6, Y    ; single digit in seventh slot
     LDA #$FF
     BNE :+
     
    @DoubleDigits: 
-    STA bigstr_buf+5, Y    ; 
+    STA bigstr_buf+6, Y    ; tens column in seventh slot
     LDA format_buf-1     
-  : STA bigstr_buf+6, Y    ; 
+  : STA bigstr_buf+7, Y    ; ones column in eighth slot | or a space
 
     LDA #01
-    STA bigstr_buf+7, Y    ; double line break
+    STA bigstr_buf+8, Y    ; double line break
 
     TYA
     CLC
-    ADC #8
+    ADC #9
     TAY
+    
+    ;; Spell:
+    ;;  0      1     2    3     4    5    6  7    8 
+    ;; $E5 - $FF - $06 - ID - $FF - $F1 - ## ## - $01 
+    
+    ;; NoSpell:                   INY  4     5    6  7     8
+    ;;  0      1     2    3     4   >  5     6    7  8     9 
+    ;; $E5 - $FF - $0B - $07 - $C2  - $FF - $F1 - ## ## - $01 
+    
+    ;; [ @ CONFUSE x15][ @ ------- x0 ]
+    ;; [ @ ICE   2 x1 ][ @ ------- x0 ]    
     
    @ResumeLoop:
     STY tmp+6
@@ -5719,7 +5877,7 @@ DrawLearnSpellMenu:
     BEQ @DrawRightSide
     
    @DrawLeftSide:
-    LDA #03 
+    LDA #02 
     STA dest_x 
     LDA #05
     STA dest_y
@@ -5727,29 +5885,9 @@ DrawLearnSpellMenu:
     JMP @Loop
     
    @DrawRightSide:
-    LDA #19
+    LDA #18
     STA dest_x 
     JMP DrawComplexString  ; Draw all the item names
-    
-   @SkipOne:
-    LDX #7
-    LDA #$E5                ; magic orb tile
-    LDY tmp+6
-    STA bigstr_buf, Y       
-    INY
-    LDA #$FF
-    STA bigstr_buf, Y        
-    INY    
-    LDA #$C2                ; draw ------- (7) followed by a double line break
-   @SkipLoop: 
-    STA bigstr_buf, Y
-    INY
-    DEX
-    BNE @SkipLoop
-    LDA #01
-    STA bigstr_buf, Y
-    INY
-    JMP @ResumeLoop
 
     
     
@@ -8279,8 +8417,8 @@ DrawMagicLearnMenuCursor:
     JMP DrawCursor               ; then draw the cursor
 
 lut_MagicLearnCursor_X:
-  .BYTE   $08
-  .BYTE   $88
+  .BYTE   $00
+  .BYTE   $80
     
 lut_MagicLearnCursor_Y:
   .BYTE   $28

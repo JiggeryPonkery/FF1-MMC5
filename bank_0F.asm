@@ -717,12 +717,12 @@ MagicData:
 
 
 UnadjustEquipStats:
- LDA #0
- STA equipmenu_tmp
+    LDA #0
+    STA equipmenu_tmp
 
- @Loop:
- AND #$C0
- TAX
+   @Loop:
+    AND #$C0
+    TAX
 
     LDA ch_righthand, X
     BEQ :+
@@ -1022,6 +1022,77 @@ ReadjustEquipStats:
     STA ch_statusresist, X
     RTS
     
+
+;;;;;;;;;;;;;;;;;;;
+;;
+;;  ReadjustBBEquipStats  [$EEDB :: 0x3EEEB]
+;;
+;;    This is sort of a continuation of above 'ReadjustEquipStats' routine
+;;  This checks BlackBelts to see if they have equipment equipped, and adjusts their
+;;  stats appropriately (since they have special bonuses for being unequipped).
+;;
+;;;;;;;;;;;;;;;;;;;
+
+ReadjustBBEquipStats:
+    LDA ch_hitrate, X
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    LSR A
+    CLC
+    ADC #$01
+    STA ch_numhits, X  ; figure out numhits! for everyone!
+
+  ;  LDA #$01                  ; always 1 until a spell changes it
+  ;  STA ch_numhitsmult, X
+
+    LDA ch_class, X    ; get this char's class
+    CMP #CLASS_BB      ; see if he's a black belt or master... if yes, jump ahead
+    BEQ @BlackBelt     ; otherwise, exit
+    CMP #CLASS_MA
+    BNE @Exit
+
+  @BlackBelt:
+    LDA ch_righthand, X
+    BEQ @NoWeaponEquipped     ; if zero, we know this BB has no weapon equipped
+
+  @WeaponEquipped:
+    LDA ch_strength, X        ; if a weapon is equipped... get strength stat
+    LSR A                     ;  /2
+    ;CLC ;; JIGS  - fixes rounding error, if its a bug?
+    ADC ch_damage, X          ; and add to damage
+    STA ch_damage, X
+    JMP @Armor ;RTS                       ; equipped BB's dmg = (str/2 + weapon)
+
+  @NoWeaponEquipped:
+    LDA ch_level, X           ; if unequipped, get current experience level
+    CLC
+    ADC #$01                  ; add 1 (levels are stored 0 based in RAM -- ie '0' is really level 1)
+    ASL A                     ; multiply by 2
+    STA ch_damage, X          ; and set dmg.  Unequipped BB's dmg = (level*2)
+    STA ch_critrate, X        ; JIGS - so is crit rate
+
+    ;; - adding numhits, since battle prep doesn't do it anymore!
+
+    LDA ch_numhits, X ; and double numhits
+    ASL A
+    STA ch_numhits, X
+
+  @Armor:                     ; for armor....
+    LDA ch_defense, X         ; get absorb
+    BNE @Exit                 ; if nonzero he has something equipped (absorb would be 0 otherwise), so just exit
+
+    LDA ch_level, X           ; otherwise, get level + 1
+    CLC
+    ADC #$01
+    STA ch_defense, X         ; Unequipped BB's absorb=level
+
+  @Exit:
+    RTS                       ; and exit
+
+
+
     
 GetEquipPermissions:
     LDA LongCall_A
@@ -1098,76 +1169,6 @@ SetEquipPermissions:
     PLA
     TAX                    ; then restore X
     RTS
-
-;;;;;;;;;;;;;;;;;;;
-;;
-;;  ReadjustBBEquipStats  [$EEDB :: 0x3EEEB]
-;;
-;;    This is sort of a continuation of above 'ReadjustEquipStats' routine
-;;  This checks BlackBelts to see if they have equipment equipped, and adjusts their
-;;  stats appropriately (since they have special bonuses for being unequipped).
-;;
-;;;;;;;;;;;;;;;;;;;
-
-ReadjustBBEquipStats:
-    LDA ch_hitrate, X
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    CLC
-    ADC #$01
-    STA ch_numhits, X  ; figure out numhits! for everyone!
-
-  ;  LDA #$01                  ; always 1 until a spell changes it
-  ;  STA ch_numhitsmult, X
-
-    LDA ch_class, X    ; get this char's class
-    CMP #CLASS_BB      ; see if he's a black belt or master... if yes, jump ahead
-    BEQ @BlackBelt     ; otherwise, exit
-    CMP #CLASS_MA
-    BNE @Exit
-
-  @BlackBelt:
-    LDA ch_righthand, X
-    BEQ @NoWeaponEquipped     ; if zero, we know this BB has no weapon equipped
-
-  @WeaponEquipped:
-    LDA ch_strength, X        ; if a weapon is equipped... get strength stat
-    LSR A                     ;  /2
-    ;CLC ;; JIGS  - fixes rounding error, if its a bug?
-    ADC ch_damage, X          ; and add to damage
-    STA ch_damage, X
-    JMP @Armor ;RTS                       ; equipped BB's dmg = (str/2 + weapon)
-
-  @NoWeaponEquipped:
-    LDA ch_level, X           ; if unequipped, get current experience level
-    CLC
-    ADC #$01                  ; add 1 (levels are stored 0 based in RAM -- ie '0' is really level 1)
-    ASL A                     ; multiply by 2
-    STA ch_damage, X          ; and set dmg.  Unequipped BB's dmg = (level*2)
-    STA ch_critrate, X        ; JIGS - so is crit rate
-
-    ;; - adding numhits, since battle prep doesn't do it anymore!
-
-    LDA ch_numhits, X ; and double numhits
-    ASL A
-    STA ch_numhits, X
-
-  @Armor:                     ; for armor....
-    LDA ch_defense, X         ; get absorb
-    BNE @Exit                 ; if nonzero he has something equipped (absorb would be 0 otherwise), so just exit
-
-    LDA ch_level, X           ; otherwise, get level + 1
-    CLC
-    ADC #$01
-    STA ch_defense, X         ; Unequipped BB's absorb=level
-
-  @Exit:
-    RTS                       ; and exit
-
-
 
 
 
@@ -2464,6 +2465,1183 @@ data_LevelUpData_Class16:
 .byte %00000110, %00100000 ; Level 47
 .byte %00000100, %01000000 ; Level 48
 .byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class17:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class18:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class19:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class20:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class21:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class22:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class23:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class24:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class25:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class26:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class27:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class28:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class29:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class30:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class31:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+data_LevelUpData_Class32:
+.byte %00100100, %00000011 ; Level 1 
+.byte %00001110, %00000010 ; Level 2 
+.byte %00110101, %00000001 ; Level 3 
+.byte %00000110, %00000110 ; Level 4 
+.byte %00101101, %00000100 ; Level 5 
+.byte %00010110, %00000001 ; Level 6 
+.byte %00100101, %00001100 ; Level 7 
+.byte %00001110, %00001010 ; Level 8 
+.byte %00010101, %00000001 ; Level 9 
+.byte %00100100, %00001100 ; Level 10
+.byte %00001110, %00010000 ; Level 11
+.byte %00010100, %00010010 ; Level 12
+.byte %00100101, %00001001 ; Level 13
+.byte %00001100, %00010100 ; Level 14
+.byte %00010110, %00100000 ; Level 15
+.byte %00000100, %00100010 ; Level 16
+.byte %00101101, %00011000 ; Level 17
+.byte %00010100, %00100001 ; Level 18
+.byte %00000110, %01000100 ; Level 19
+.byte %00001100, %01000000 ; Level 20
+.byte %00110101, %00110000 ; Level 21
+.byte %00000100, %01001000 ; Level 22
+.byte %00001110, %00000011 ; Level 23
+.byte %00010100, %10100000 ; Level 24
+.byte %00100101, %11000000 ; Level 25
+.byte %00001100, %00010100 ; Level 26
+.byte %00010110, %10000010 ; Level 27
+.byte %00000100, %01001000 ; Level 28
+.byte %00101101, %10100000 ; Level 29
+.byte %00010100, %00000100 ; Level 30
+.byte %00000110, %00010000 ; Level 31
+.byte %00001100, %10000000 ; Level 32
+.byte %00010101, %01000000 ; Level 33
+.byte %00100100, %00001000 ; Level 34
+.byte %00001110, %00100000 ; Level 35
+.byte %00010100, %10000000 ; Level 36
+.byte %00000101, %00000010 ; Level 37
+.byte %00001100, %01000000 ; Level 38
+.byte %00010110, %00010000 ; Level 39
+.byte %00100100, %10000000 ; Level 40
+.byte %00000101, %00100000 ; Level 41
+.byte %00000100, %00000100 ; Level 42
+.byte %00000110, %01000000 ; Level 43
+.byte %00000100, %10000000 ; Level 44
+.byte %00000101, %00001000 ; Level 45
+.byte %00000100, %00010000 ; Level 46
+.byte %00000110, %00100000 ; Level 47
+.byte %00000100, %01000000 ; Level 48
+.byte %00000101, %10000000 ; Level 49
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  data_MaxRewardPlusOne  [$99A3 :: 0x2D9B3]
+;;    note that this is actually 1 higher than the max for some reason...
+;;  Also note this name is slightly misleading.  It's not the maximum reward, it's the
+;;  maximum value you can have AFTER being rewarded.  Effectively it is the GP/XP cap.
+    
+data_MaxRewardPlusOne:
+  .FARADDR 1000000          ; 'FARADDR' stores a 3-byte value  (even though this isn't an addr)
+  
+data_MaxHPPlusOne:          ; 99A6
+  .WORD 1000                ; max HP + 1
+  
+
+LevelUp_ClassDataPointers:
+.word data_LevelUpData_Class1
+.word data_LevelUpData_Class2
+.word data_LevelUpData_Class3
+.word data_LevelUpData_Class4
+.word data_LevelUpData_Class5
+.word data_LevelUpData_Class6
+.word data_LevelUpData_Class7
+.word data_LevelUpData_Class8
+.word data_LevelUpData_Class9
+.word data_LevelUpData_Class10
+.word data_LevelUpData_Class11
+.word data_LevelUpData_Class12
+.word data_LevelUpData_Class13
+.word data_LevelUpData_Class14
+.word data_LevelUpData_Class15
+.word data_LevelUpData_Class16
+.word data_LevelUpData_Class17
+.word data_LevelUpData_Class18
+.word data_LevelUpData_Class19
+.word data_LevelUpData_Class20
+.word data_LevelUpData_Class21
+.word data_LevelUpData_Class22
+.word data_LevelUpData_Class23
+.word data_LevelUpData_Class24
+.word data_LevelUpData_Class25
+.word data_LevelUpData_Class26
+.word data_LevelUpData_Class27
+.word data_LevelUpData_Class28
+.word data_LevelUpData_Class29
+.word data_LevelUpData_Class30
+.word data_LevelUpData_Class31
+.word data_LevelUpData_Class32
+
+LevelUp_HitRateBonus:
+  .byte 3 ; 01 Fighter
+  .byte 2 ; 02 Thief
+  .byte 3 ; 03 BlackBelt
+  .byte 2 ; 04 RedMage
+  .byte 1 ; 05 WhiteMage
+  .byte 1 ; 06 BlackMAge
+  .byte 0 ; 07 Unused
+  .byte 0 ; 08 Unused 
+  .byte 0 ; 09 Unused 
+  .byte 0 ; 10 Unused 
+  .byte 0 ; 11 Unused 
+  .byte 0 ; 12 Unused 
+  .byte 0 ; 13 Unused 
+  .byte 0 ; 14 Unused 
+  .byte 0 ; 15 Unused 
+  .byte 0 ; 16 Unused 
+  .byte 3 ; 17 Knight
+  .byte 2 ; 18 Ninja
+  .byte 3 ; 19 Master
+  .byte 2 ; 20 RedWizard
+  .byte 1 ; 21 WhiteWizard
+  .byte 1 ; 22 BlackWizard
+  .byte 0 ; 23 Unused 
+  .byte 0 ; 24 Unused   
+  .byte 0 ; 25 Unused 
+  .byte 0 ; 26 Unused
+  .byte 0 ; 27 Unused 
+  .byte 0 ; 28 Unused 
+  .byte 0 ; 29 Unused 
+  .byte 0 ; 30 Unused 
+  .byte 0 ; 31 Unused 
+  .byte 0 ; 32 Unused   
+  
+
+LevelUp_MagicDefenseBonus:
+  .byte 2 ; 01 Fighter
+  .byte 2 ; 02 Thief
+  .byte 2 ; 03 BlackBelt
+  .byte 1 ; 04 RedMage
+  .byte 2 ; 05 WhiteMage
+  .byte 3 ; 06 BlackMAge
+  .byte 0 ; 07 Unused
+  .byte 0 ; 08 Unused 
+  .byte 0 ; 09 Unused 
+  .byte 0 ; 10 Unused 
+  .byte 0 ; 11 Unused 
+  .byte 0 ; 12 Unused 
+  .byte 0 ; 13 Unused 
+  .byte 0 ; 14 Unused 
+  .byte 0 ; 15 Unused 
+  .byte 0 ; 16 Unused 
+  .byte 2 ; 17 Knight
+  .byte 2 ; 18 Ninja
+  .byte 2 ; 19 Master
+  .byte 4 ; 20 RedWizard
+  .byte 2 ; 21 WhiteWizard
+  .byte 3 ; 22 BlackWizard
+  .byte 0 ; 23 Unused 
+  .byte 0 ; 24 Unused   
+  .byte 0 ; 25 Unused 
+  .byte 0 ; 26 Unused
+  .byte 0 ; 27 Unused 
+  .byte 0 ; 28 Unused 
+  .byte 0 ; 29 Unused 
+  .byte 0 ; 30 Unused 
+  .byte 0 ; 31 Unused 
+  .byte 0 ; 32 Unused   
+  
+
+LevelUp_MPCap_LUT:
+  .byte 0 ; 01 Fighter
+  .byte 0 ; 02 Thief
+  .byte 0 ; 03 BlackBelt
+  .byte 9 ; 04 RedMage
+  .byte 9 ; 05 WhiteMage
+  .byte 9 ; 06 BlackMAge
+  .byte 0 ; 07 Unused
+  .byte 0 ; 08 Unused 
+  .byte 0 ; 09 Unused 
+  .byte 0 ; 10 Unused 
+  .byte 0 ; 11 Unused 
+  .byte 0 ; 12 Unused 
+  .byte 0 ; 13 Unused 
+  .byte 0 ; 14 Unused 
+  .byte 0 ; 15 Unused 
+  .byte 0 ; 16 Unused 
+  .byte 4 ; 17 Knight
+  .byte 4 ; 18 Ninja
+  .byte 0 ; 19 Master
+  .byte 9 ; 20 RedWizard
+  .byte 9 ; 21 WhiteWizard
+  .byte 9 ; 22 BlackWizard
+  .byte 0 ; 23 Unused 
+  .byte 0 ; 24 Unused   
+  .byte 0 ; 25 Unused 
+  .byte 0 ; 26 Unused
+  .byte 0 ; 27 Unused 
+  .byte 0 ; 28 Unused 
+  .byte 0 ; 29 Unused 
+  .byte 0 ; 30 Unused 
+  .byte 0 ; 31 Unused 
+  .byte 0 ; 32 Unused     
+
+
+CancelLevelUp:
+    JMP ReadjustEquipStats     ; return equipment
+
+LevelUp:
+    JSR UnadjustEquipStats     ; remove equipment so it doesn't interfere with stat boosts
+    
+    LDX char_index
+    LDA ch_level, X
+    CMP #50 - 1
+    BEQ CancelLevelUp
+    
+    PHA                        ; back it up for just a bit 
+
+    INC ch_level, X            ; add 1 to level
+    LDA ch_level, X
+    CLC
+    ADC #1                     ; add 1 more for printing it
+    STA LevelUp_PrintLevel     ; save new level for printing 
+    LDA #0
+    STA LevelUp_PrintLevel+1   ; high byte clear 
+    
+    LDA ch_class, X            ; get the pointers for the class's level up data
+    ASL A
+    TAY
+    LDA LevelUp_ClassDataPointers, Y
+    STA tmp
+    LDA LevelUp_ClassDataPointers+1, Y
+    STA tmp+1
+    
+    PLA                        ; pull old level
+    ASL A                      ; * 2 and put in Y
+    TAY
+    LDA (tmp), Y                
+    STA LevelUp_StatData       ; data for stat boosts
+    INY
+    LDA (tmp), Y                
+    STA LevelUp_MPData         ; data for MP boosts
+    
+    LDA ch_class, X            ; use class to get magic defense bonus  
+    TAY
+    LDA LevelUp_MagicDefenseBonus, Y
+    CLC
+    ADC ch_magicdefense, X
+    JSR CapAAt200
+    STA ch_magicdefense, X      ; add and save the bonus
+    
+    LDA LevelUp_HitRateBonus, Y ; do the same for hit rate
+    CLC
+    ADC ch_hitrate, X
+    JSR CapAAt200
+    STA ch_hitrate, X
+    
+    LDA LevelUp_MPCap_LUT, Y     ; get max amount of MP per level for this class
+    STA LevelUp_MPCap
+
+    ;; do MP stuff!
+    
+    LDY #8                       ; use Y as a loop counter 
+    LDA LevelUp_MPData
+   @MP_Loop: 
+    LSR A                        ; shift out the low bit
+    BCC @Next_MP_NoPull
+        PHA                      ; backup shifted MP data
+        LDA ch_mp, X
+        AND #$0F                 ; remove high bits (current MP)
+        CMP LevelUp_MPCap        ; see if this level of MP is capped already
+        BEQ @Next_MP             ; if so, skip it
+        
+        LDA ch_mp, X             ; else, add 1 to the low bits (max MP) and save
+        CLC
+        ADC #01
+        STA ch_mp, X
+
+   @Next_MP:
+    PLA
+   @Next_MP_NoPull: 
+    INX                          ; move X to next MP byte                 
+    DEY           
+    BNE @MP_Loop 
+    
+    ;; now do stat boosts!
+    ;; LevelUp_StatData bits are:
+    ;; 00011111
+    ;;    ^^^^^
+    ;;    |||||  Stat:     Loop Iteration:
+    ;;    ||||-- Speed     (4) first
+    ;;    |||--- Vitality  (3) second
+    ;;    ||---- Intellect (2) third
+    ;;    |----- Agility   (1) fourth
+    ;;    ------ Strength  (0) fifth
+    
+    LDA #4
+    STA tmp                       ; loop counter
+    
+   @StatUpdate_Loop: 
+    LSR LevelUp_StatData
+    BCS @IncreaseStat             ; if set, increase the stat
+
+   @RandomChance:                 ; else...
+    JSR BattleRNG_L               ; get a random number
+    AND #$03
+    BEQ @IncreaseStat             ; if its 0, (25% chance), increase it
+    LDA #0                        ; else, set the stat buffer byte for this stat to 0
+    BEQ @NextStat
+    
+   @IncreaseStat:
+    LDA char_index
+    CLC
+    ADC tmp                       ; add loop counter to char_index to get proper stat
+    TAX
+    INC ch_mainstats, X           ; increment the stat     
+    LDA ch_mainstats, X
+    CMP #100
+    BNE @NextStat
+      DEC ch_mainstats, X         ; oops, it was over 100, decrement it back to 99
+      LDA ch_mainstats, X
+    
+   @NextStat:                     ; A = 0 from failing the random chance, or the new stat
+    LDY tmp
+    STA LevelUp_StatBuffer, Y     ; fill the buffer that tells the level up boxes what messages to display
+    
+    DEY
+    STY tmp
+    BPL @StatUpdate_Loop          ; end loop when counter rolls over to $FF
+    
+   ;; and finally, HP
+   
+    LDX char_index
+    LDA ch_vitality, X
+    LSR A
+    LSR A
+    CLC
+    ADC #01                       ; base HP bonus is vitality / 4 + 1 
+    PHA                     
+   
+    LDA LevelUp_StatData
+    AND #$01                      ; is the strong level up bit set? (it was shifted into the lowest bit)
+    BEQ :+
+        LDA #20                   ; if it is, get between 20-25 extra HP 
+        LDX #25
+        JSR RandAX
+  : STA tmp                       ; store the bonus here (0 if the level up bit was not set!)
+    PLA                           ; pull base HP bonus
+    CLC
+    ADC tmp                       ; add strong bonus, if it exists
+    
+    LDX char_index                ; reset X to char_index
+    ADC ch_maxhp, X               ; add level up HP bonus to max HP
+    STA ch_maxhp, X
+    STA LevelUp_PrintHP           ; and put the new max into this, for printing
+    LDA ch_maxhp+1, X
+    ADC #0
+    STA ch_maxhp+1, X             ; save any carry-over
+    STA LevelUp_PrintHP+1
+    CMP #HP_MAX_HIGH              ; now compare to max possible values ($03)
+    BCC @Finished                 ; if its $00, $01, $02, skip ahead
+    
+   @CheckLowHP:
+    LDA #HP_MAX_HIGH              ; in case it was over 3, save it as 3
+    STA ch_maxhp+1, X   
+    STA LevelUp_PrintHP+1
+    
+    LDA ch_maxhp, X               ; compare low byte to max value ($E7)
+    CMP #HP_MAX_LOW
+    BCC @Finished                 ; if that is also under, skip ahead
+        LDA #HP_MAX_LOW           ; otherwise, set HP to max value (high byte already = its own max value)
+        STA ch_maxhp, X
+        STA LevelUp_PrintHP       ; and update the printing byte as well    
+    
+   @Finished:    
+    JMP ReadjustEquipStats        ; and re-do all the substats with the new base stats!
+
+
+CapAAt200:
+    CMP #201
+    BCC :+
+      LDA #200
+  : RTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4141,22 +5319,39 @@ lut_PtyGenBuf:
 
 lut_ClassStartingStats:
 ;     HP   Str  Agil Int  Vit  Luck DMG  Hit% Evade MDef  MP   Weapon Armor Spell  
-.byte $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00 ; Fighter
-.byte $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00 ; Thief
-.byte $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00 ; BB
-.byte $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00 ; RedMage
-.byte $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00 ; WMage
-.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; BMage
-.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 1
-.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 2
-.byte $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00 ; Knight
-.byte $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00 ; Ninja
-.byte $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00 ; Master
-.byte $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00 ; RedWiz
-.byte $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00 ; WWiz 
-.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Bwiz
-.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 3
-.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused Class 4
+.byte $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00 ; Fighter ; 0
+.byte $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00 ; Thief   ; 1
+.byte $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00 ; BB      ; 2
+.byte $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00 ; RedMage ; 3
+.byte $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00 ; WMage   ; 4
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; BMage   ; 5
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 6
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 7
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 8
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 9
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 10
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 11
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 12
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 13
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 14
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 15
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 16
+.byte $23, $14, $05, $01, $0A, $05, $0A, $0A, $35,  $0F,  $00, $02,   $41,  $00 ; Knight  ; 17
+.byte $1E, $05, $0A, $05, $05, $0F, $02, $05, $3A,  $0F,  $00, $02,   $41,  $00 ; Ninja   ; 18
+.byte $21, $05, $05, $05, $14, $05, $02, $05, $35,  $0A,  $00, $00,   $41,  $00 ; Master  ; 19
+.byte $1E, $0A, $0A, $0A, $05, $05, $05, $07, $3A,  $14,  $22, $03,   $41,  $00 ; RedWiz  ; 20
+.byte $1C, $05, $05, $0F, $0A, $05, $02, $05, $35,  $14,  $22, $03,   $41,  $00 ; WWiz    ; 21
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Bwiz    ; 22
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 23
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 24
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 25
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 26
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 27
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 28
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 29
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 30
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 31
+.byte $19, $01, $0A, $14, $01, $0A, $01, $05, $3A,  $14,  $22, $03,   $41,  $00 ; Unused  ; 32
 ;                                                                     \ 02 small knife or 03 wooden staff
 ;                                                                            \ 01 cloth armour
 

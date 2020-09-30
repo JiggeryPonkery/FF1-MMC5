@@ -110,6 +110,7 @@ ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
 ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
 
 ch_level          = ch_stats + $10 ; OB this is 0 based, IB this is 1 based
+ ch_mainstats     = ch_stats + $11
 ch_strength       = ch_stats + $11
 ch_agility        = ch_stats + $12
 ch_intelligence   = ch_stats + $13 
@@ -357,6 +358,14 @@ btlsfxnse_ptr           = $6D ; + E
 
 ;; Battle Temp          
 btltmp                  = $70 ; 16 bytes
+
+;; Level up things
+
+LevelUp_PrintHP         = $69 ; + A
+LevelUp_PrintLevel      = $6B ; + C
+LevelUp_StatData        = $6D
+LevelUp_MPData          = $6E
+LevelUp_MPCap           = $6F
 
 
 ;;

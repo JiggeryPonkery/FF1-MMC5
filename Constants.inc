@@ -1366,7 +1366,8 @@ END_SONG     = $FF
 MAX_SONG                 = $1B ; total number of music tracks the soundtest screen can play ; 0 based
 FAST_HITCAP              = $03 ; How many times the Fast spell can boost the hit multiplyer
 STARTING_STATS           = $0E ; number of starting stats for each class ; 1 based
-
+HP_MAX_LOW               = $E7
+HP_MAX_HIGH              = $03 ; these two = 999
 
 
 
