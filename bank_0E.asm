@@ -5823,7 +5823,8 @@ DrawLearnSpellMenu:
    
     JSR PrintNumber_2Digit ; uses tmp to get the numbers
     LDA format_buf-2
-    BPL @DoubleDigits      ; is the tens column empty?
+    CMP #$FF
+    BNE @DoubleDigits      ; is the tens column empty?
     
    @SingleDigits: 
     LDA format_buf-1     
