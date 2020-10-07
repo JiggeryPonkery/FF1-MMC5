@@ -75,6 +75,8 @@
 .import Set_Inv_Weapon
 .import SetPPUAddr_XA
 .import GetEquipPermissions
+.import SetCharStats
+.import GetExpToNext
 
 
 .segment "BANK_0E"
@@ -635,9 +637,8 @@ PrintCharStat:
    @SubStats:
     ;; A = substat
     ; Carry is clear from the branch
-    ADC char_index      ; add character index
     TAX
-    LDA ch_stats, X     ; get the substat
+    LDA MenuStats-$16, X ; get the substat, -$16 since X will be offset by $16 from the control code
     STA tmp             ; write it as low byte
     LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
     STA tmp+1           ;  and print as 3 digits
@@ -698,38 +699,26 @@ PrintCharStat:
 
 
 PrintEXPToNext:
-    LDA char_index
-    TAX
-    LDA ch_exp, X
-    STA tmp
-    LDA ch_exp+1, X
-    STA tmp+1
-    LDA ch_exp+2, X
-    STA tmp+2, X      ; save current exp in tmp
+    LDX char_index
     LDA ch_level, X
-    CMP #50-1         ; see if they're level 50
-    BNE :+            ; if so, clear output to 0 and return 
+    CMP #50
+    BNE :+
         LDA #0
-        STA tmp
-        STA tmp+1
-        STA tmp+2
+        STA tmp+6
+        STA tmp+7
+        STA tmp+8
         RTS
         
-  : LDX #3            ; level * 3 because there's 3 bytes of exp data for each level
-    JSR MultiplyXA
-    TAX
-    LDA lut_ExpToAdvance, X
-    STA tmp+3
-    LDA lut_ExpToAdvance+1, X
-    STA tmp+4
-    LDA lut_ExpToAdvance+2, X
-    STA tmp+5
+  : JSR LongCall
+    .word GetExpToNext
+    .byte BANK_Z
 
+    LDX #0
     LDY #3       ; use Y as a counter, because comparing X messes with carry
     SEC          ; a bad thing to do when subtracting in a loop!
    @Subtract:
-    LDA tmp+3, X ; EXP to next
-    SBC tmp, X   ; current EXP
+    LDA tmp+9, X ; EXP to next
+    SBC tmp+6, X ; current EXP
     STA tmp, X
     INX
     DEY
@@ -739,78 +728,6 @@ PrintEXPToNext:
     STA tmp+2    ; since its the number between level up values
     RTS          ; so from level 3 to 4, its 547 - 196 = 351 
     
-   
-   
-
-lut_ExpToAdvance:
-  .FARADDR     40 ; level 2 
-  .FARADDR    196 ; level 3 
-  .FARADDR    547 ; level 4 
-  .FARADDR   1171 ; level 5 
-  .FARADDR   2146 ; level 6 
-  .FARADDR   3550 ; level 7 
-  .FARADDR   5461 ; level 8 
-  .FARADDR   7957 ; level 9 
-  .FARADDR  11116 ; level 10
-  .FARADDR  15016 ; level 11
-  .FARADDR  19735 ; level 12
-  .FARADDR  25351 ; level 13
-  .FARADDR  31942 ; level 14
-  .FARADDR  39586 ; level 15
-  .FARADDR  48361 ; level 16
-  .FARADDR  58345 ; level 17
-  .FARADDR  69617 ; level 18
-  .FARADDR  82253 ; level 19
-  .FARADDR  96332 ; level 20
-  .FARADDR 111932 ; level 21
-  .FARADDR 129131 ; level 22
-  .FARADDR 148008 ; level 23
-  .FARADDR 168639 ; level 24
-  .FARADDR 191103 ; level 25
-  .FARADDR 215479 ; level 26
-  .FARADDR 241843 ; level 27
-  .FARADDR 270275 ; level 28
-  .FARADDR 300851 ; level 29
-  .FARADDR 333651 ; level 30
-  .FARADDR 366450 ; level 31
-  .FARADDR 399250 ; level 32
-  .FARADDR 432049 ; level 33
-  .FARADDR 464849 ; level 34
-  .FARADDR 497648 ; level 35
-  .FARADDR 530448 ; level 36
-  .FARADDR 563247 ; level 37
-  .FARADDR 596047 ; level 38
-  .FARADDR 628846 ; level 39
-  .FARADDR 661646 ; level 40
-  .FARADDR 694445 ; level 41
-  .FARADDR 727245 ; level 42
-  .FARADDR 760044 ; level 43
-  .FARADDR 792844 ; level 44
-  .FARADDR 825643 ; level 45
-  .FARADDR 858443 ; level 46
-  .FARADDR 891242 ; level 47
-  .FARADDR 924042 ; level 48
-  .FARADDR 956841 ; level 49
-  .FARADDR 989641 ; level 50
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2129,11 +2046,12 @@ EquipShop_GiveItemToChar:
     RTS
     
    @NoSwap: 
-    JSR UnEquipStats          ; does not use char_index
+    ;JSR UnEquipStats          ; does not use char_index
     LDX char_index 
     LDA ItemToEquip
     STA ch_stats, X
-    JMP ReEquipStats
+    RTS
+    ;JMP ReEquipStats
     
 CannotEquip:
     LDA #$1F                  
@@ -2143,18 +2061,18 @@ CannotEquip:
     PLA
     JMP EquipOnCharacter
 
-ReEquipStats:
-    JSR LongCall
-    .word ReadjustEquipStats
-    .byte BANK_EQUIPSTATS
-    CLC
-    RTS      
-
-UnEquipStats:
-    JSR LongCall
-    .word UnadjustEquipStats
-    .byte BANK_EQUIPSTATS
-    RTS    
+;ReEquipStats:
+;    JSR LongCall
+;    .word ReadjustEquipStats
+;    .byte BANK_EQUIPSTATS
+;    CLC
+;    RTS      
+;
+;UnEquipStats:
+;    JSR LongCall
+;    .word UnadjustEquipStats
+;    .byte BANK_EQUIPSTATS
+;    RTS    
     
     
     
@@ -7272,6 +7190,7 @@ StatusMenuAttributes:
 
 EnterStatusMenu:
     LDA #0
+    STA DualWieldStats
     STA $2001               ; turn off the PPU
     STA menustall           ; disable menu stalling
     STA tmp+2               ; set additive for scrollwork
@@ -7309,6 +7228,18 @@ EnterStatusMenu:
     JSR DrawImageRect        ; draw the image rect
 
 @ReenterStatusMenu:
+    JSR WaitForVBlank_L
+    LDA #0                  ; Turn off the PPU
+    STA $2001
+
+    LDA submenu_targ        ; get target character ID
+    LSR A
+    ROR A
+    ROR A
+    STA char_index          
+    
+    JSR ResetCharStats
+
     LDX #02
     STX dest_x
     INX ;#03
@@ -7328,13 +7259,7 @@ EnterStatusMenu:
     STA spr_x
     LDA #$30 ;3C
     STA spr_y
-
-    LDA submenu_targ        ; get target character ID
-    LSR A
-    ROR A
-    ROR A
-    ;AND #$C0                ; shift to make ID a usable index
-    STA char_index          ;; JIGS - adding this
+   
     JSR TurnMenuScreenOn    ; turn the screen on
     
    @Loop: 
@@ -7364,7 +7289,21 @@ EnterStatusMenu:
     JSR MenuFrame
     JSR @MoveCursorLeftRight
     
-    LDA joy_a
+    LDA joy_select
+    ORA joy_start
+    BEQ :+
+        LDX char_index
+        LDA ch_lefthand, X  ; see if they have a weapon equipped
+        BEQ :+
+        CMP #ARMORSTART     ; or if its armor
+        BCS :+
+        
+        LDA DualWieldStats  ; only do this if they have a weapon
+        EOR #1              ; else, the display will mess up probably
+        STA DualWieldStats
+        JMP @ReenterStatusMenu
+    
+  : LDA joy_a
     ORA joy_b
     BEQ @Loop                     ; check if A pressed  
 
@@ -7403,8 +7342,8 @@ EnterStatusMenu:
     PLA
     PLA
     JSR @ResetStatusMenuCharPose
-    LDA #0                      ; Turn off the PPU
-    STA $2001
+    LDA #0
+    STA DualWieldStats
     JMP @ReenterStatusMenu
   
   @Exit:
@@ -9193,7 +9132,7 @@ EnterEquipInventory:
     
   @B_Pressed:                 ; if B pressed....
     JSR PlaySFX_MenuSel  
-    JSR UnEquipStats
+    ;JSR UnEquipStats
     JSR Set_Inv_Weapon
     LDA equipoffset
     CLC 
@@ -9207,7 +9146,7 @@ EnterEquipInventory:
     SEC
     SBC #1
     JSR REMOVE_ITEM          ; and if it was more than 0, take it out of inventory again
-  : JMP ReEquipStats
+  : JMP ResetCharStats
 
   @ResetSelectLoop:
     LDA #0
@@ -9255,9 +9194,16 @@ EnterEquipInventory:
     JSR EquipStatsDescBoxString_Special
     JMP @Loop
 
+
+ResetCharStats:
+    JSR LongCall
+    .word SetCharStats
+    .byte BANK_Z
+    RTS
+
     
 UpdateEquipInventoryStats:    
-    JSR UnEquipStats        
+;    JSR UnEquipStats        
 
 ;; every time the cursor moves (plus at the very start) the equipped weapon changes:
 ;; if it can be equipped, it is, and the stats are adjusted to show that it is--
@@ -9355,7 +9301,7 @@ UpdateEquipInventoryStats:
     STA ch_righthand, X      ; clear slot
 
    @Continue:
-    JSR ReEquipStats
+    JSR ResetCharStats
     DEC cursor_change
 
     LDA #1
@@ -9404,27 +9350,27 @@ EquipStatsDescBoxNumbers:
     
    @FetchStats:    
     LDX #$08       
-    LDY #$16         ; damage
+    LDY #$00; 16         ; damage
     JSR @TheThing
   
     LDX #$14
-    LDY #$18         ; defense
+    LDY #$03 ;18         ; defense
     JSR @TheThing
     
     LDX #$1F
-    LDY #$17         ; accuracy
+    LDY #$01 ;17         ; accuracy
     JSR @TheThing
    
     LDX #$2B
-    LDY #$19         ; evasion
+    LDY #$04 ;19         ; evasion
     JSR @TheThing
     
     LDX #$35
-    LDY #$1B         ; critical
+    LDY #$02 ;1B         ; critical
     JSR @TheThing
     
     LDX #$43
-    LDY #$1A         ; magic defense    
+    LDY #$05 ;1A         ; magic defense    
    
    @TheThing:
     LDA slotcheck
@@ -9432,22 +9378,19 @@ EquipStatsDescBoxNumbers:
     BNE :+    
   
    @WrongSlot:          ; can equip it, but not in this slot!
-    LDA #$FF
-    STA str_buf, X
     LDA #$C4            ; shows ! tile
-    STA str_buf+1, X
-    STA str_buf+2, X
-    RTS  
+    BNE @xx_Stats
    
   : LDA equip_impossible
     BEQ :+
    
    @XStats:             ; cannot equip it
-    LDA #$FF
-    STA str_buf, X
     LDA #$F0            ; shows fancy X 
+   @xx_Stats:
     STA str_buf+1, X
     STA str_buf+2, X
+    LDA #$FF
+    STA str_buf, X
     RTS   
 
   : TXA
@@ -9779,7 +9722,23 @@ IsEquipLegal:
     .word GetEquipPermissions
     .byte BANK_EQUIPSTATS
    
-    LDX char_index
+    LDX char_index   
+    LDA shop_type
+    BEQ @Weapon
+    CMP #SHOP_WHITEMAGIC
+    BCS @NormalPermissions
+    
+   @Armor:
+    LDA ch_armormastery, X
+    JMP :+
+    
+   @Weapon:
+    LDA ch_weaponmastery, X   ; if their mastery stat has 1 bit that matches the equipment's type, they can equip it
+  : AND EquipPermissions
+    BEQ @NormalPermissions
+    RTS    
+    
+   @NormalPermissions:
     LDA ch_class, X   ; get the character's class
     TAX               ; and put in X to index the equip bit
     
@@ -9805,18 +9764,18 @@ IsEquipLegal:
     ;;  01234567   89ABCDEF  +1 01234567   89ABCDEF
     ;; which is the same value that doing this v would have gotten
 
-    LDA EquipPermissions           ; Check first byte of permissions
+    LDA EquipPermissions+1         ; Check first byte of permissions
     AND tmp                        ; mask with low byte of class permissions
-    STA EquipPermissions           ;  temporarily store result
-    LDA EquipPermissions+1         ; then do the same with the next byte of the permissions 
+    STA EquipPermissions+1         ;  temporarily store result
+    LDA EquipPermissions+2         ; then do the same with the next byte of the permissions 
     AND tmp+1                      ;  mask with next byte of class permissions
-    ORA EquipPermissions           ; then combine with results of the first
-    LDA EquipPermissions+2
-    AND tmp+2
-    ORA EquipPermissions
+    ORA EquipPermissions+1         ; then combine with results of the first
     LDA EquipPermissions+3
+    AND tmp+2
+    ORA EquipPermissions+1
+    LDA EquipPermissions+4
     AND tmp+3
-    ORA EquipPermissions
+    ORA EquipPermissions+1
     ;CMP #$01                       ;  here... any nonzero value will indicate that the item CAN be equipped
     RTS
 
@@ -10141,177 +10100,6 @@ DrawEquipMenu:
 
 
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Magic permissions LUT [$AD00 :: 0x3AD10]
-;;
-;;    Each class has an 8-byte LUT to indicate which spells
-;;  he can learn.  There is also a pointer table that points
-;;  to each of these LUTs, so the game can use the character's class
-;;  as an index to find the start of the desired permissions table
-;;
-;;    Personally... that seems like a waste, since you can just multiply
-;;  the class ID by 8 to get the offset of the permissions table.  If they
-;;  were going to use a pointer table, they should've at least shared
-;;  common permissions tables (ie:  have fighter, thief, BB, master all share
-;;  the same table, since none of them can learn any spells).  But the games
-;;  doesn't do that.  Oh well... whatever.
-;;
-;;    Anyway, in the permissions tables... each byte represents 8 spells.
-;;  The first byte represents level 1 spells, next byte is level 2 spells,
-;;  etc.  The high bit reprents the first spell on that level (ie:  white
-;;  magic is the high 4 bits).  If the cooresponding bit is set... that means
-;;  that class CANNOT cast that spell
-
-
-;; JIGS - doing permissions by class, for 128 spells, would be 512 bytes + the class table (64)
-;; doing it on a spell by spell basis, its only 256 bytes -- and easier to edit.
-
-   ; pointer table -- one entry for each class
-lut_MagicPermisPtr:
-
-;.byte %, % ; MG_CURE
-;.byte %, % ; MG_HARM
-;.byte %, % ; MG_FOG 
-;.byte %, % ; MG_RUSE
-;.byte %, % ; MG_FIRE
-;.byte %, % ; MG_SLEP
-;.byte %, % ; MG_LOCK
-;.byte %, % ; MG_LIT 
-;.byte %, % ; MG_GR01
-;.byte %, % ; MG_GR02
-;.byte %, % ; MG_GR03
-;.byte %, % ; MG_GR04
-;.byte %, % ; MG_TM01
-;.byte %, % ; MG_TM02
-;.byte %, % ; MG_TM03
-;.byte %, % ; MG_TM04
-;.byte %, % ; MG_LAMP
-;.byte %, % ; MG_MUTE
-;.byte %, % ; MG_ALIT
-;.byte %, % ; MG_INVS
-;.byte %, % ; MG_ICE 
-;.byte %, % ; MG_DARK
-;.byte %, % ; MG_TMPR
-;.byte %, % ; MG_SLOW
-;.byte %, % ; MG_GR05
-;.byte %, % ; MG_GR06
-;.byte %, % ; MG_GR07
-;.byte %, % ; MG_GR08
-;.byte %, % ; MG_TM05
-;.byte %, % ; MG_TM06
-;.byte %, % ; MG_TM07
-;.byte %, % ; MG_TM08
-;.byte %, % ; MG_CUR2
-;.byte %, % ; MG_HRM2
-;.byte %, % ; MG_AFIR
-;.byte %, % ; MG_REGN
-;.byte %, % ; MG_FIR2
-;.byte %, % ; MG_HOLD
-;.byte %, % ; MG_LIT2
-;.byte %, % ; MG_LOK2
-;.byte %, % ; MG_GR09
-;.byte %, % ; MG_GR10
-;.byte %, % ; MG_GR11
-;.byte %, % ; MG_GR12
-;.byte %, % ; MG_TM09
-;.byte %, % ; MG_TM10
-;.byte %, % ; MG_TM11
-;.byte %, % ; MG_TM12
-;.byte %, % ; MG_PURE
-;.byte %, % ; MG_FEAR
-;.byte %, % ; MG_AICE
-;.byte %, % ; MG_AMUT
-;.byte %, % ; MG_SLP2
-;.byte %, % ; MG_FAST
-;.byte %, % ; MG_CONF
-;.byte %, % ; MG_ICE2
-;.byte %, % ; MG_GR13
-;.byte %, % ; MG_GR14
-;.byte %, % ; MG_GR15
-;.byte %, % ; MG_GR16
-;.byte %, % ; MG_TM13
-;.byte %, % ; MG_TM14
-;.byte %, % ; MG_TM15
-;.byte %, % ; MG_TM16
-;.byte %, % ; MG_CUR3
-;.byte %, % ; MG_LIFE
-;.byte %, % ; MG_HRM3
-;.byte %, % ; MG_RGN2
-;.byte %, % ; MG_FIR3
-;.byte %, % ; MG_BANE
-;.byte %, % ; MG_WARP
-;.byte %, % ; MG_SLO2
-;.byte %, % ; MG_GR17
-;.byte %, % ; MG_GR18
-;.byte %, % ; MG_GR19
-;.byte %, % ; MG_GR20
-;.byte %, % ; MG_TM17
-;.byte %, % ; MG_TM18
-;.byte %, % ; MG_TM19
-;.byte %, % ; MG_TM20
-;.byte %, % ; MG_SOFT
-;.byte %, % ; MG_EXIT
-;.byte %, % ; MG_FOG2
-;.byte %, % ; MG_INV2
-;.byte %, % ; MG_LIT3
-;.byte %, % ; MG_RUB 
-;.byte %, % ; MG_QAKE
-;.byte %, % ; MG_STUN
-;.byte %, % ; MG_GR21
-;.byte %, % ; MG_GR22
-;.byte %, % ; MG_GR23
-;.byte %, % ; MG_GR24
-;.byte %, % ; MG_TM21
-;.byte %, % ; MG_TM22
-;.byte %, % ; MG_TM23
-;.byte %, % ; MG_TM24
-;.byte %, % ; MG_CUR4
-;.byte %, % ; MG_HRM4
-;.byte %, % ; MG_ARUB
-;.byte %, % ; MG_RGN3
-;.byte %, % ; MG_ICE3
-;.byte %, % ; MG_BRAK
-;.byte %, % ; MG_SABR
-;.byte %, % ; MG_BLND
-;.byte %, % ; MG_GR25
-;.byte %, % ; MG_GR26
-;.byte %, % ; MG_GR27
-;.byte %, % ; MG_GR28
-;.byte %, % ; MG_TM25
-;.byte %, % ; MG_TM26
-;.byte %, % ; MG_TM27
-;.byte %, % ; MG_TM28
-;.byte %, % ; MG_LIF2
-;.byte %, % ; MG_FADE
-;.byte %, % ; MG_WALL
-;.byte %, % ; MG_XFER
-;.byte %, % ; MG_NUKE
-;.byte %, % ; MG_STOP
-;.byte %, % ; MG_ZAP 
-;.byte %, % ; MG_XXXX
-;.byte %, % ; MG_GR29
-;.byte %, % ; MG_GR30
-;.byte %, % ; MG_GR31
-;.byte %, % ; MG_GR32
-;.byte %, % ; MG_TM29
-;.byte %, % ; MG_TM30
-;.byte %, % ; MG_TM31
-;.byte %, % ; MG_TM32
-
-
- ;@BlackBelt:    .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
- ;@RedMage:      .BYTE $50,$00,$50,$50,$76,$FF,$FF,$FF
- ;@WhiteMage:    .BYTE $0F,$0F,$0F,$0F,$0F,$4F,$CF,$FF
- ;@BlackMage:    .BYTE $F0,$F0,$F0,$F0,$F2,$F0,$F6,$FF
- ;@Knight:       .BYTE $4F,$0F,$5F,$FF,$FF,$FF,$FF,$FF
- ;@Ninja:        .BYTE $F0,$F0,$F0,$F0,$FF,$FF,$FF,$FF
- ;@Master:       .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
- ;@RedWizard:    .BYTE $40,$00,$50,$40,$30,$87,$D7,$FF
- ;@WhiteWizard:  .BYTE $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
- ;@BlackWizard:  .BYTE $F0,$F0,$F0,$F0,$F0,$F0,$F0,$F0
 
 
 

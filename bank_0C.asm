@@ -61,6 +61,7 @@
 .import DrawPalette_L
 .import LoadAllBattleSprites
 .import LoadSpellForBattle
+.import SetPartyStats
 
 
 BANK_THIS = $0C
@@ -129,14 +130,13 @@ FinishBattlePrepAndFadeIn:
     .word LoadEnemyStats              ; this is all pretty self explanitory
     .byte BANK_ENEMYSTATS
    
-    JSR BackupCharacterBattleStats
     JSR ClearBattleMessageBuffer_L
     JSR ClearCharBuffers
     JSR LongCall
-    .word Battle_SetPartyWeaponSpritePal
+    .word SetPartyStats
     .byte BANK_EQUIPSTATS
     JSR EnterBattlePrepareSprites
-    ;; this clears shadow OAM, sets the buffers for location, then laods the sprites up.
+    ;; this clears shadow OAM, sets the buffers for location, then loads the sprites up.
     JSR DrawCharacterStatus    
     ;; this sets their natural pose (crouching/standing/dead) and updates the background tiles if stone, does a frame with those sprites, and then updates the ailment BG tiles behind the party.
     JSR LoadAllCharacterSprites
@@ -3701,18 +3701,6 @@ lut_CharStatsPtrTable:
   .WORD ch_stats+$80
   .WORD ch_stats+$C0
   
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  [$9F65 :: 0x31F75]
-;;  Lut - pointer table to the beginning of each character's IB stats in RAM
-
-lut_IBCharStatsPtrTable_alt:    ;; JIGS - moved this label
-lut_IBCharStatsPtrTable:
-  .WORD ch_backupstats
-  .WORD ch_backupstats + (1*$10)
-  .WORD ch_backupstats + (2*$10)
-  .WORD ch_backupstats + (3*$10)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4541,11 +4529,6 @@ FlashAllCharacterSprites:
 PrepCharStatPointers:
     ASL A                               ; 2* for pointer lut
     TAY
-    
-    LDA lut_IBCharStatsPtrTable, Y      ; copy pointers from pointer luts
-    STA CharBackupStatsPointer
-    LDA lut_IBCharStatsPtrTable+1, Y
-    STA CharBackupStatsPointer+1
     
     LDA lut_CharStatsPtrTable, Y
     STA CharStatsPointer
@@ -6563,18 +6546,17 @@ DoPhysicalAttack_NoAttackerBox:
         BEQ :+
         JSR HitChance_Add40
       
-  : LDA btl_defender_class         ; if defender is hidden, subtract another 40 from the attacker's hit chance
-    AND #$F0
+  : LDX btl_defender 
+    BPL :+                          ; skip if defender is enemy
+    AND #$03
+    TAX
+    LDA btl_charhidden, X           ; if defender is hidden, subtract another 40 from the attacker's hit chance
     BEQ :+
       JSR HitChance_Subtract40
       
-      LDA btl_defender_class        ; thieves and ninjas get an extra 40 for hiding
-      AND #$0F                      ; cut off hiding bit
-      CMP #CLASS_TH
-      BEQ @Boost
-      CMP #CLASS_NJ
-      BNE :+
-     @Boost:
+      LDA btl_defender_perks        ; thieves and ninjas get an extra 40 for hiding
+      AND #STEALTHY                 ; 
+      BEQ :+
         JSR HitChance_Subtract40    ; if the enemy is blind, hitchance is #48 now
 
   : LDA btl_attacker_category       ; see if attacker category matches defender category
@@ -7408,10 +7390,36 @@ DrawCharacterStatus_Fast:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+FistPalette:
+    PHA
+    PHA
+    AND #$70
+    LSR A
+    LSR A                ; get palette ID 0, 1, or 2
+    STA tmp
+    PLA                  
+    AND #$0C
+    LSR A
+    LSR A                ; get palette color ID 1, 2, or 3
+    CLC
+    ADC tmp              ; add with palette ID, put in X
+    TAX
+    LDA cur_pal + $10, X ; get existing color 
+    STA cur_pal + $1D    ; save as fist wristband color
+    PLA
+    AND #$03
+    CLC
+    ADC tmp              ; one more time
+    TAX
+    LDA cur_pal + $10, X
+    STA cur_pal + $1F    ; save as fist skin color
+    BNE DoFrame_UpdatePalette
+
 UpdateVariablePalette:
     PHA
     JSR ResetBattlePalette
     PLA
+    BMI FistPalette
     STA cur_pal + $1D        ; set first shade
     SEC
     SBC #$10
@@ -7770,131 +7778,8 @@ ReSortPartyByAilment:
     
     RTS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  TransferByte  [$ACE1 :: 0x32CF1]
-;;
-;;  Transfer a byte between two buffers (specifically for transferring OB char stats to IB stats)
-;;
-;;  input:
-;;    CharBackupStatsPointer = pointer to dest buffer
-;;    CharStatsPointer = pointer to source buffer
-;;                      A = dest index
-;;                      Y = source index
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-TransferByte:
-    PHA                             ; backup A
-    LDA (CharStatsPointer), Y       ; Load the source stat
-    TAX                             ; stick it in X
-    PLA                             ; restore A, put in Y
-    TAY
-    TXA                             ; get the source stat
-    STA (CharBackupStatsPointer), Y ; write it to the dest
-    RTS
-    
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LoadAllCharacterIBStats  [$ACEB :: 0x32CFB]
-;;
-;;    Loads the in-battle stats for all charaters
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;LoadAllCharacterIBStats:
-BackupCharacterBattleStats:
-    LDA #$00                    ; just load each of them one at a time
-    JSR BackupOneCharacterBattleStats
-    LDA #$01
-    JSR BackupOneCharacterBattleStats
-    LDA #$02
-    JSR BackupOneCharacterBattleStats
-    LDA #$03
-    ;; flow
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LoadOneCharacterIBStats  [$ACFF :: 0x32D0F]
-;;
-;;    Loads the in-battle stats for one character (in A)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-BackupOneCharacterBattleStats:
-    STA btl_tmpindex                ; store char index (temporarily)
-    JSR PrepCharStatPointers        ; prep stat pointers
-    
-    LDY #ch_sprite - ch_stats
-    LDA (CharStatsPointer), Y       ; get char class
-    TAY                             ;  use as index to get assigned palette
-    LDA lut_InBattleCharPaletteAssign, Y
-    LDY btl_tmpindex
-    STA btl_charattrib, Y
-    
-    LDY #ch_intelligence - ch_stats
-    LDA #ch_intelligence_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_speed - ch_stats
-    LDA #ch_speed_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_damage - ch_stats
-    LDA #ch_damage_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_hitrate - ch_stats
-    LDA #ch_hitrate_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_defense - ch_stats
-    LDA #ch_defense_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_evasion - ch_stats
-    LDA #ch_evasion_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_magicdefense - ch_stats
-    LDA #ch_magicdefense_backup - ch_backupstats
-    JSR TransferByte
-
-    LDY #ch_critrate - ch_stats
-    LDA #ch_critrate_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_weaponelement - ch_stats
-    LDA #ch_weaponelement_backup - ch_backupstats
-    JSR TransferByte
-
-    LDY #ch_weaponcategory - ch_stats
-    LDA #ch_weaponcategory_backup - ch_backupstats
-    JSR TransferByte
-
-    LDY #ch_attackailment - ch_stats
-    LDA #ch_attackailment_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_attackailproc - ch_stats
-    LDA #ch_attackailproc_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_elementweak - ch_stats
-    LDA #ch_elementweak_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_elementresist - ch_stats
-    LDA #ch_elementresist_backup - ch_backupstats
-    JSR TransferByte
-    
-    LDY #ch_statusresist - ch_stats
-    LDA #ch_statusresist_backup - ch_backupstats
-    JMP TransferByte    
-    
-    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8765,15 +8650,15 @@ Runic:
     
 ConfirmRunic:
     LDA ActiveRunic
-    BNE :+
-        CLC               ; not active, clear C and exit
-        RTS
-  : LDA btl_attacker      ; do it if caster is enemy
+    BEQ @ExitEarly
+    LDA btl_attacker      ; do it if caster is enemy
     BPL @CheckTarget
     LDA ConfusedMagic     ; do it if caster is a confused player
     BNE @CheckTarget
-        CLC
-        RTS
+    
+   @ExitEarly:
+    CLC
+    RTS
   
   @CheckTarget:
    ;LDY #MAGDATA_TARGET   
@@ -9298,7 +9183,7 @@ UseItem_End_RemoveItem:
 
 RestoreColor:    
     LDX tmp+9
-    LDY btlmag_defender_class
+    LDY btlmag_defender_sprite
     LDA lut_InBattleCharPaletteAssign, Y
     STA btl_charattrib, X
     JMP UpdateSprites_BattleFrame
@@ -9869,29 +9754,36 @@ Battle_CastMagicOnAllPlayers:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-PlayerMagDefenderStats_LUT: ; 44 bytes!
-.byte btlmag_defender_class - btlmag_defender,           ch_class - ch_stats           ; * 
+PlayerMagDefenderStats_LUT: ; 14 bytes!
 .byte btlmag_defender_ailments - btlmag_defender,        ch_ailments - ch_stats        ; *
 .byte btlmag_defender_hp - btlmag_defender,              ch_curhp - ch_stats           ; *
 .byte btlmag_defender_hp+1 - btlmag_defender,            ch_curhp+1 - ch_stats         ; *
-.byte btlmag_defender_intelligence - btlmag_defender,    ch_intelligence - ch_stats    ; *
-.byte btlmag_defender_speed - btlmag_defender,           ch_speed - ch_stats           ; *
-.byte btlmag_defender_damage - btlmag_defender,          ch_damage - ch_stats          ; *
-.byte btlmag_defender_hitrate - btlmag_defender,         ch_hitrate - ch_stats         ; *
-.byte btlmag_defender_defense - btlmag_defender,         ch_defense - ch_stats         ; *
-.byte btlmag_defender_evasion - btlmag_defender,         ch_evasion - ch_stats         ; *
-.byte btlmag_defender_magicdefense - btlmag_defender,    ch_magicdefense - ch_stats    ; *
-.byte btlmag_defender_statusresist - btlmag_defender,    ch_statusresist - ch_stats    ; *
-.byte btlmag_defender_elementresist - btlmag_defender,   ch_elementresist - ch_stats   ; *
-.byte btlmag_defender_elementweakness - btlmag_defender, ch_elementweak - ch_stats     ; *
-.byte btlmag_defender_attackailment - btlmag_defender,   ch_attackailment - ch_stats   ; *
-.byte btlmag_defender_attackailproc - btlmag_defender,   ch_attackailproc - ch_stats   ; *
-.byte btlmag_defender_critrate - btlmag_defender,        ch_critrate - ch_stats        ; *
-.byte btlmag_defender_weaponelement - btlmag_defender,   ch_weaponelement - ch_stats   ; *
-.byte btlmag_defender_weaponcategory - btlmag_defender,  ch_weaponcategory - ch_stats  ; *
 .byte btlmag_defender_morale - btlmag_defender,          ch_morale - ch_stats          ; *
 .byte btlmag_defender_hpmax - btlmag_defender,           ch_maxhp - ch_stats           ; Loaded but not saved
 .byte btlmag_defender_hpmax+1 - btlmag_defender,         ch_maxhp+1 - ch_stats         ; Loaded but not saved
+.byte btlmag_defender_sprite - btlmag_defender,          ch_sprite - ch_stats          ; Loaded but not saved
+
+;; best not to mess with the order of these bytes
+
+PlayerMagDefenderBattleStats_LUT: ; 9 bytes
+.byte btlmag_defender_intelligence - btlmag_defender
+.byte btlmag_defender_speed - btlmag_defender
+.byte btlmag_defender_numhitsmult - btlmag_defender      
+.byte btlmag_defender_evasion - btlmag_defender
+.byte btlmag_defender_defense - btlmag_defender
+.byte btlmag_defender_magicdefense - btlmag_defender
+.byte btlmag_defender_statusresist - btlmag_defender
+.byte btlmag_defender_elementresist - btlmag_defender
+.byte btlmag_defender_elementweakness - btlmag_defender
+
+PlayerMagDefenderWeaponStats_LUT: ; 7 bytes
+.byte btlmag_defender_hitrate - btlmag_defender
+.byte btlmag_defender_damage - btlmag_defender
+.byte btlmag_defender_critrate - btlmag_defender
+.byte btlmag_defender_attackailment - btlmag_defender
+.byte btlmag_defender_attackailproc - btlmag_defender
+.byte btlmag_defender_weaponelement - btlmag_defender
+.byte btlmag_defender_weaponcategory - btlmag_defender
 
 EnemyMagDefenderStats_LUT: ; 36 bytes!
 .byte btlmag_defender_ailments - btlmag_defender,         en_ailments     ; *
@@ -9914,27 +9806,61 @@ EnemyMagDefenderStats_LUT: ; 36 bytes!
 .byte btlmag_defender_hpmax+1 - btlmag_defender,          en_hpmax+1      ; Loaded but not saved
 
 
+Set_RAM_stats: 
+    CLC
+    ADC tmp+9
+    TAY
+    LDA (CharStatsPointer), Y
+    LDY PlayerMagDefenderBattleStats_LUT-1, X
+    STA btlmag_defender, Y
+    RTS    
 
-
-
-BtlMag_LoadPlayerDefenderStats:
+BtlMagPlayerStats_Shared:
     LDA btl_defender
     AND #$03
+    STA tmp+9                 ; backup index for items and stone curing + these loops
     TAX
-    STA tmp+9                       ; backup index for items and stone curing
+    
+    LDA #<btlstats_mainstats
+    STA CharStatsPointer
+    LDA #>btlstats_mainstats
+    STA CharStatsPointer+1
+    RTS
+
+BtlMag_LoadPlayerDefenderStats:
+    JSR BtlMagPlayerStats_Shared
+    
+    LDX #9+7
+   @WeaponStatsLoop: ; for this its stat * 8 + character ID 
+    TXA
+    ASL A
+    ASL A
+    ASL A 
+    JSR Set_RAM_stats
+    DEX
+    CPX #7
+    BNE @WeaponStatsLoop
+    
+   @BattleStatsLoop:  ; for this, its stat * 4 + character ID 
+    TXA
+    ASL A
+    ASL A
+    JSR Set_RAM_stats
+    DEX
+    BPL @BattleStatsLoop    
+
+    LDA tmp+9                       
+    TAX
     JSR PrepCharStatPointers        ; prep entityptr's
     
     LDA btl_charregen, X            ; load up any current regen stuff just in case...
     ORA btl_charreflect, X          ; and ORA with any reflection status 
     STA btlmag_defender_battlestate
-    
-    LDA btl_charhitmult, X
-    STA btlmag_defender_numhitsmult
  
     LDA #$0
     STA btlmag_defender_category    ; This only matters for HARM spells, which check the Undead bit. 
     
-    LDX #44
+    LDX #7*2
    @Loop: 
     LDY PlayerMagDefenderStats_LUT-1, X
     LDA (CharStatsPointer), Y
@@ -9944,6 +9870,8 @@ BtlMag_LoadPlayerDefenderStats:
     DEX
     BPL @Loop
     RTS
+    
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9953,12 +9881,43 @@ BtlMag_LoadPlayerDefenderStats:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+Save_RAM_stats:
+    CLC
+    ADC tmp+9
+    STA tmp+10
+    
+    LDY PlayerMagDefenderBattleStats_LUT-1, X
+    LDA btlmag_defender, Y
+    LDY tmp+10
+    STA (CharStatsPointer), Y
+    RTS
+    
+
 BtlMag_SavePlayerDefenderStats:
-    LDA btl_defender
-    AND #$03
-    PHA
-    TAX
+    JSR BtlMagPlayerStats_Shared
     JSR HideCharacter
+
+    LDX #9+7
+   @WeaponStatsLoop: ; for this its stat * 8 + character ID 
+    TXA
+    ASL A
+    ASL A
+    ASL A 
+    JSR Set_RAM_stats
+    DEX
+    CPX #7
+    BNE @WeaponStatsLoop
+    
+   @BattleStatsLoop:  ; for this, its stat * 4 + character ID 
+    TXA
+    ASL A
+    ASL A
+    JSR Set_RAM_stats
+    DEX
+    BPL @BattleStatsLoop    
+
+    LDA tmp+9
+    TAX
     JSR PrepCharStatPointers
 
     LDA btlmag_defender_battlestate
@@ -9969,10 +9928,7 @@ BtlMag_SavePlayerDefenderStats:
     AND #STATE_REGENALL | STATE_REGENERATING
     STA btl_charregen, X
 
-    LDA btlmag_defender_numhitsmult
-    STA btl_charhitmult, X
-
-    LDX #38
+    LDX #4*2
    @Loop: 
     DEX                                 ; needs to read the left byte in the table first
     LDY PlayerMagDefenderStats_LUT-1, X

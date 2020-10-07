@@ -10,7 +10,6 @@
 .export lut_Domains
 .export WriteAttributesToPPU
 .export lut_BattlePalettes
-.export Battle_SetPartyWeaponSpritePal
 .export SpiritCalculations
 .export StealFromEnemy
 .export LoadPlayerDefenderStats_ForEnemyAttack
@@ -1280,114 +1279,122 @@ StealFromEnemy:
 ;; This checks if the player attacker is a given class, and gives a status effect to their critical hits.
 
 CritCheck:
-    LDA #0
-    STA MMC5_tmp
     LDA battle_attackerisplayer
-    BEQ @CritReturn                 ; don't do any of these if confusedly attacking another character
+    BEQ @NoMessage                  ; don't do any of these if confusedly attacking another character
 
     LDA btl_attacker
     JSR PrepCharStatPointers
     LDY #ch_speed - ch_stats        ;
-    LDA (CharStatsPointer), Y       ; get speed (luck)
-    ASL A
-    LDX #100                        ;
-    JSR RandAX                      ; Random number between speed/luck and 100
-    CMP #75                         ; Gotta roll over 75 to do the thing
-    BCC @CritReturn
+    LDA (CharStatsPointer), Y       ; get speed (luck) \ 2 
+    LSR A
+    LDX #200                        ;
+    JSR RandAX                      ; Random number between luck/2 and 200
+    CMP #180                        ; Gotta roll over 180 to do the thing
+    BCC @NoMessage
 
-    LDA btl_attacker_class
-    AND #$0F             ;; JIGS - cut off high bits (hidden state)
-    CMP #CLASS_TH                   ; IF thief, goto CritCrit
-    BEQ @CritCrit              
-    CMP #CLASS_NJ                   ; IF ninja, goto CritCrit
-    BEQ @CritCrit              
-    CMP #CLASS_BB                   ; IF bbelt, goto CritStun
-    BEQ @CritStun              
-    CMP #CLASS_MA                   ; IF master, goto CritStun
-    BEQ @CritStun              
-    CMP #CLASS_RM                   ; IF redmage, goto CritSlow
-    BEQ @CritSlow              
-    CMP #CLASS_RW                   ; IF redwiz, goto CritSlow
-    BEQ @CritSlow              
-    CMP #CLASS_BM                   ; IF blackmage, goto CritConfuse
-    BEQ @CritConfuse           
-    CMP #CLASS_BW                   ; IF blackwiz, goto CritConfuse
-    BEQ @CritConfuse           
-    CMP #CLASS_WM                   ; IF whitemage, goto CritStrength
-    BEQ @CritStrength          
-    CMP #CLASS_WW                   ; IF whitewiz, goto CritStrength
-    BEQ @CritStrength
+    LDX #0
+    LDA btl_attacker_battleperks
+    LSR A
+    BCS @CritAilment
+    INX
+    LSR A
+    BCS @CriticalUp
+    INX
+    LSR A
+    BCS @CritAilment
+    INX
+    LSR A
+    BCS @CritAilment
+    INX
+    LSR A
+    BCS @CritAilment
+    INX
+    LSR A
+    BCS @CritStrengthUp
+    INX
+    LSR A
+    BCS @CritSlow
+    INX
+    LSR A
+    BCS @CritAilment
+
+   @NoMessage: 
+    LDX #0
    @CritReturn:
-    RTS
-
-   @CritCrit:
-    LDA btl_attacker_critrate
-    CLC
-    ADC #4
-    BCC :+
-      LDA #$FF
- : 	LDY #ch_critrate - ch_stats
-    STA (CharStatsPointer), Y
-    LDA #BTLMSG_CRITUP
+    LDA @CritMessages_LUT, X
     STA MMC5_tmp
     RTS
 
-   @CritStun:
-    LDA btl_defender_elementresist
-    AND #$01
-    BEQ :+                          ; if defender resists the special attack's element (stun 01)
-    RTS                             ; cancel specialty
-  : LDA #BTLMSG_PARALYZED
-    STA MMC5_tmp
-    LDA #AIL_STUN                   ; Stun ailment as used by STUN's effectivity in original game
-    JMP @CritAddAilment
-
+   @CriticalUp:
+    LDA #<btl_charweaponcritrate   
+    STA tmp
+    LDA #>btl_charweaponcritrate
+    BNE :+
+   
+   @CritStrengthUp:
+    LDA #<btl_chardamage
+    STA tmp
+    LDA #>btl_chardamage
+  : STA tmp+1
+    BNE @StatUp
+    
    @CritSlow:
-    LDA btl_defender
     LDY #en_numhitsmult
     LDA (EnemyRAMPointer), Y        ; hit multiplier from RAM stats
-    STA MMC5_tmp
-    DEC MMC5_tmp                    ; Decrease their hit multiplier
-    LDA MMC5_tmp
-    BNE :+
-        RTS                         ; if it went to 0, don't save it
+    STA tmp+7
+    DEC tmp+7                       ; Decrease their hit multiplier
+    LDA tmp+7
+    BEQ @NoMessage                  ; if it went to 0, don't save it
 
- :  STA (EnemyRAMPointer), Y
-    LDA #BTLMSG_LOSTINTELLIGENCE
-    STA MMC5_tmp
-    RTS
+    STA (EnemyRAMPointer), Y
+    BNE @CritReturn
 
-   @CritStrength:
-    LDA btl_attacker_damage
+   @CritAilment:
+    LDA btl_defender_statusresist
+    AND btl_attacker_battleperks
+    BNE @NoMessage
+    
+    BIT btl_defender_ailments    ; do a bit check to see if the enemy has this ailment already
+    BNE @NoMessage
+    
+    ORA btl_defender_ailments
+    STA btl_defender_ailments
+    BNE @CritReturn
+
+   @StatUp:
+    TXA 
+    PHA
+    LDY BattleCharID
+    LDX #2
+   @StatUp_Loop: 
+    LDA (tmp), Y
     CLC
     ADC #4
     BCC :+
-      LDA #$FF
- : 	LDY #ch_damage - ch_stats
-    STA (CharStatsPointer), Y
-    LDA #BTLMSG_WEAPONSSTRONGER
-    STA MMC5_tmp
-    RTS
+        LDA #$FF
+  : STA (tmp), Y
+    INY
+    INY
+    INY
+    INY
+    DEX
+    BNE @StatUp_Loop
+   
+    PLA
+    TAX
+    BNE @CritReturn
 
-   @CritConfuse:
-    LDA btl_defender_elementresist
-    AND #$08
-    BEQ :+                          ; if defender resists the special attack's element (dark/confuses 08)
-    RTS                             ; cancel specialty
-  : LDA #BTLMSG_CONFUSED
-    STA MMC5_tmp
-    LDA #AIL_CONF                   ; Confuse ailment as used by CONF's effectivity in original game
-    JMP @CritAddAilment
+   @CritMessages_LUT:
+    .byte $00
+    .byte BTLMSG_CRITUP
+    .byte BTLMSG_POISONED
+    .byte BTLMSG_DARKNESS
+    .byte BTLMSG_PARALYZED
+    .byte BTLMSG_WEAPONSSTRONGER
+    .byte BTLMSG_LOSTINTELLIGENCE
+    .byte BTLMSG_CONFUSED
 
-   @CritAddAilment:
-    BIT btl_defender_ailments
-    BNE @noailment
-    ORA btl_defender_ailments    ; add to existing ailments
-    STA btl_defender_ailments
-    LDA (CharStatsPointer), Y    ; Check the class (Y is still character class)
 
-   @noailment:
-    RTS
 
 
 
@@ -1406,11 +1413,9 @@ HiddenCheck:
         LDA #$FF              ; cap at FF
   :	STA btl_attacker_critrate
 
-    LDA btl_attacker_class
-    CMP #CLASS_TH             ; if thief
-    BEQ @HiddenBoost
-    CMP #CLASS_NJ             ; if ninja
-    BEQ @HiddenBoost
+    LDA btl_attacker_perks
+    AND #STEALTHY
+    BNE @HiddenBoost
     RTS
 
    @HiddenBoost:
@@ -1508,13 +1513,19 @@ SpiritCalculations:
 
    ; player defender isn't covering anyone, but are they doing anything else?
     LDX btl_defender_index
-    LDA btl_charguard, X
-    ORA btl_charparry, X
-    ORA btl_charpray, X
-    ORA btl_charrunic, X
-    ORA btl_charfocus, X
-    ORA btl_charrush, X
-    ORA btl_charhidden, X
+    LDA btl_charhidden, X  ; get the first action
+    
+    LDY #7
+   @BattleActionsLoop:
+    INX                    ; add 4 to check the next buffer
+    INX
+    INX
+    INX
+    ORA btl_charhidden, X  
+    DEY
+    BNE @BattleActionsLoop
+    
+    CMP #0                 
     BNE @IncrementNormal
     ; if doing ANY of these, increase spirit instead!
 
@@ -1564,28 +1575,34 @@ SpiritCalculations:
 ;; whether or not this saves space, this makes loading stats SO much easier
 ;; if you plan on re-arranging any variables in RAM
 PlayerAttackerStats_LUT:
-.byte btl_attacker_damage - btl_attacker,         ch_damage - ch_stats
-.byte btl_attacker_hitrate - btl_attacker,        ch_hitrate - ch_stats
-.byte btl_attacker_numhits - btl_attacker,        ch_numhits - ch_stats
-.byte btl_attacker_critrate - btl_attacker,       ch_critrate - ch_stats
-.byte btl_attacker_category - btl_attacker,       ch_weaponcategory - ch_stats
-.byte btl_attacker_element - btl_attacker,        ch_weaponelement - ch_stats
-.byte btl_attacker_attackailment - btl_attacker,  ch_attackailment - ch_stats
 .byte btl_attacker_ailments - btl_attacker,       ch_ailments - ch_stats
-.byte btl_attacker_class - btl_attacker,          ch_class - ch_stats
-.byte btl_attacker_ailmentchance - btl_attacker,  ch_attackailproc - ch_stats
+.byte btl_attacker_perks - btl_attacker,          ch_perks - ch_stats
+.byte btl_attacker_battleperks - btl_attacker,    ch_battleperks - ch_stats
+
+PlayerAttackerBattleStats_LUT:
+.byte btl_attacker_hitrate - btl_attacker        
+.byte btl_attacker_damage - btl_attacker         
+.byte btl_attacker_attackailment - btl_attacker  
+.byte btl_attacker_ailmentchance - btl_attacker  
+.byte btl_attacker_critrate - btl_attacker       
+.byte btl_attacker_element - btl_attacker        
+.byte btl_attacker_category - btl_attacker       
+.byte btl_attacker_graphic - btl_attacker 
+.byte btl_attacker_varplt - btl_attacker 
+.byte btl_attacker_numhits - btl_attacker        
 
 PlayerDefenderStats_LUT: 
 .byte btl_defender_ailments - btl_attacker,         ch_ailments - ch_stats
-.byte btl_defender_statusresist - btl_attacker,     ch_statusresist - ch_stats
-.byte btl_defender_elementweakness - btl_attacker,  ch_elementweak - ch_stats
-.byte btl_defender_evasion - btl_attacker,          ch_evasion - ch_stats
-.byte btl_defender_defense - btl_attacker,          ch_defense - ch_stats
-.byte btl_defender_class - btl_attacker,            ch_class - ch_stats 
-.byte btl_defender_magicdefense - btl_attacker,     ch_magicdefense - ch_stats
-.byte btl_defender_elementresist - btl_attacker,    ch_elementresist - ch_stats
 .byte btl_defender_hp - btl_attacker,               ch_curhp - ch_stats
 .byte btl_defender_hp+1 - btl_attacker,             ch_curhp+1 - ch_stats 
+
+PlayerDefenderBattleStats_LUT:
+.byte btl_defender_statusresist - btl_attacker
+.byte btl_defender_elementweakness - btl_attacker
+.byte btl_defender_evasion - btl_attacker
+.byte btl_defender_defense - btl_attacker
+.byte btl_defender_magicdefense - btl_attacker
+.byte btl_defender_elementresist - btl_attacker
 
 EnemyAttackerStats_LUT:
 .byte btl_attacker_damage - btl_attacker,          en_strength
@@ -1650,7 +1667,7 @@ PlayerAttackEnemy_PhysicalZ:
     ;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Attacker/PLAYER stats
     
-    LDX #20
+    LDX #6
    @Loop: 
     LDY PlayerAttackerStats_LUT-1, X
     LDA (CharStatsPointer), Y
@@ -1660,30 +1677,21 @@ PlayerAttackEnemy_PhysicalZ:
     DEX
     BNE @Loop
     
-    STX battle_defenderisplayer     ; clear this value to zero to indicate the defender is an enemy
-    INX ;#1
-    STX battle_attackerisplayer     
-
-    LDA btl_attacker_class
-    AND #$0F                        ;; cut off high bits to get class
-    STA btl_attacker_class
-
-    LDX BattleCharID
-    LDA btl_charhitmult, X
-    STA btl_attacker_numhitsmult
-
-    LDA btl_charweaponsprite, X
-    STA btl_attacker_graphic
+    STX tmp+9        ; = 0 
     
-    LDA btl_charweaponpal, X
-    STA btl_attacker_varplt
+    JSR PlayerAttackerAttackStats
 
     LDA btl_charrush, X
     BEQ :+
         LDA btl_attacker_hitrate
         LSR A
         LSR A
-        STA btl_attacker_hitrate ; one quarter hit rate
+        LSR A
+        STA tmp
+        ASL A                    ; hit rate / 4 
+        CLC                      ; + hit rate / 8 
+        ADC tmp
+        STA btl_attacker_hitrate ; somewhere between 25% and 50% ?
 
         LDY #ch_level - ch_stats
         LDA (CharStatsPointer), Y
@@ -1715,8 +1723,6 @@ PlayerAttackEnemy_PhysicalZ:
     STA btl_attacker, Y
     DEX
     BNE @EnemyLoop   
-
-    STX btl_defender_class
     RTS
 
 
@@ -1733,7 +1739,7 @@ PlayerAttackPlayer_PhysicalZ:
     ;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Attacker/PLAYER stats
 
-    LDX #20
+    LDX #6
    @Loop: 
     LDY PlayerAttackerStats_LUT-1, X
     LDA (CharStatsPointer), Y
@@ -1742,24 +1748,13 @@ PlayerAttackPlayer_PhysicalZ:
     STA btl_attacker, Y
     DEX
     BNE @Loop
-
+    
+    STX tmp+9        ; = 0 
     INX
     STX battle_attackerisplayer
     STX battle_defenderisplayer
-
-    LDA btl_attacker_class
-    AND #$0F                        ;; cut off high bits to get class
-    STA btl_attacker_class
-
-    LDX BattleCharID    
-    LDA btl_charhitmult, X
-    STA btl_attacker_numhitsmult
-
-    LDA btl_charweaponsprite, X
-    STA btl_attacker_graphic
     
-    LDA btl_charweaponpal, X
-    STA btl_attacker_varplt
+    JSR PlayerAttackerAttackStats
 
     LDA btl_attacker_damage
     LSR A                           ;; damage for player > player is half
@@ -1788,6 +1783,38 @@ PlayerAttackPlayer_PhysicalZ:
     JSR CoverStuff
     JMP PlayerDefenderStats
 
+  PlayerAttackerAttackStats:
+    LDA #<btlstats_weaponstats
+    STA CharStatsPointer
+    LDA #>btlstats_weaponstats
+    STA CharStatsPointer+1
+
+    LDA DualAttack
+    BEQ :+
+     LDA #4
+     STA tmp+9       ; offset for second weapon
+
+  : LDX #6
+   @BattleStatsLoop: ; for this its stat * 4 + character ID 
+    TXA
+    ASL A
+    ASL A
+    ASL A
+    CLC
+    ADC BattleCharID
+    ADC tmp+9
+    TAY
+    LDA (CharStatsPointer), Y
+    LDY PlayerAttackerBattleStats_LUT-1, X
+    STA btl_attacker, Y
+    DEX
+    BNE @BattleStatsLoop        
+
+    LDX BattleCharID    
+    LDA btl_charhitmult, X
+    STA btl_attacker_numhitsmult
+    RTS
+
 
 ;;  input:
 ;;    A = defending player index
@@ -1810,7 +1837,7 @@ PlayerAttackPlayer_PhysicalZ:
     DEX
     BNE @Loop    
     
-    STX btl_attacker_class          ; enemy has no class, and also thus can't be hidden
+    STX btl_attacker_perks          ; enemy has no perks, and also thus can't be hidden
     STX battle_attackerisplayer
     INX ;#1
     STX battle_defenderisplayer
@@ -1842,12 +1869,32 @@ LoadPlayerDefenderStats_ForEnemyAttack:
     ORA #$80
     STA btl_defender
 
-    JSR CoverStuff
+    JSR CoverStuff               ; if this character is defended by Cover, swap btl_defender ID to the knight
     
 PlayerDefenderStats:
-    JSR PrepCharStatPointers        ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
+    LDA #<btlstats_defensestats
+    STA CharStatsPointer
+    LDA #>btlstats_defensestats
+    STA CharStatsPointer+1
 
-    LDX #20
+    LDX #6
+   @BattleStatsLoop: ; for this its stat * 4 + character ID 
+    TXA
+    ASL A
+    ASL A
+    CLC
+    ADC btl_defender_index
+    TAY
+    LDA (CharStatsPointer), Y
+    LDY PlayerDefenderBattleStats_LUT-1, X
+    STA btl_defender, Y
+    DEX
+    BNE @BattleStatsLoop    
+   
+    LDA btl_defender_index
+    JSR PrepCharStatPointers        ; get pointer to char stats
+
+    LDX #6
    @Loop: 
     LDY PlayerDefenderStats_LUT-1, X
     LDA (CharStatsPointer), Y
@@ -1859,18 +1906,8 @@ PlayerDefenderStats:
     
     STX btl_defender_category
     
-    LDA btl_defender_class
-    AND #$0F                         ;; cut off high bits to get class
-    STA btl_defender_class
-
     LDX btl_defender_index
-    LDA btl_charhidden, X
-    BEQ :+
-    LDA btl_defender_class
-    ORA #$10
-    STA btl_defender_class        ; high bit is used for player defenders in Bank C
-
-  : LDA btl_charguard, X          ; check battlestate for Guarding
+    LDA btl_charguard, X          ; check battlestate for Guarding
     BEQ @Done                     ; if not guarding, finish up
 
     LDA btl_defender_ailments
@@ -1903,86 +1940,6 @@ PlayerDefenderStats:
 
 
 
-
-;; this also sets hit multiplier for the party!
-Battle_SetPartyWeaponSpritePal:
-    LDX #8
-   @Clear: 
-    STA btl_charweaponpal-1, X
-    DEX
-    BNE @Clear
-
-    LDA #3
-    STA char_index
-   @Loop: 
-    LDA char_index
-    JSR ShiftLeft6
-    TAX
-    LDA ch_righthand, X
-    BEQ @CheckForFist
-    
-    JSR LongCall
-    .word GetWeaponDataPointer
-    .byte BANK_EQUIPSTATS
-    
-    LDX char_index
-    LDY #7
-    LDA (tmp), Y
-    STA btl_charweaponsprite, X
-    INY
-    LDA (tmp), Y
-   @SetWeaponPal:
-    STA btl_charweaponpal, X
-    LDA #01                    ; hit multiplier starts at 1
-    
-   @Next:
-    STA btl_charhitmult, X   
-    DEC char_index
-    BPL @Loop
-    RTS
-   
-   @Empty:   
-    LDX char_index
-    LDA #$20                   ; set the palette to white/grey
-    BNE @SetWeaponPal          ; jump to save palette
-    
-   @CheckForFist:
-    LDA ch_class, X
-    CMP #CLASS_BB
-    BEQ :+
-    CMP #CLASS_MA
-    BNE @Empty
-    
-  : TXA
-    TAY
-    LDX char_index
-    LDA #$AC
-    STA btl_charweaponsprite, X
-    LDA ch_sprite, Y
-    TAY
-    LDA lut_InBattleCharPaletteAssign, Y
-    STA btl_charweaponsprite, X
-    LDA #02                   ; hit multiplier is 2 for unarmed BB/Master
-    BNE @Next
-
-lut_InBattleCharPaletteAssign:
-  .BYTE $21 ; Fighter
-  .BYTE $22 ; Thief
-  .BYTE $20 ; BBelt
-  .BYTE $21 ; RMage
-  .BYTE $21 ; WMage
-  .BYTE $20 ; BMage
-  .BYTE $21 ; 
-  .BYTE $21 ; 
-  
-  .BYTE $21 ; Knight
-  .BYTE $22 ; Ninja
-  .BYTE $20 ; Master
-  .BYTE $21 ; RedWiz
-  .BYTE $21 ; W.Wiz
-  .BYTE $20 ; B.Wiz
-  .BYTE $21 ; 
-  .BYTE $21 ; 
     
     
     
@@ -2124,51 +2081,51 @@ data_ChaosTSA:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-LvlUp_AdjustBBSubStats:
-    LDY #ch_class - ch_stats        ; check to make sure this is a BB/Master
-    LDA (lvlup_chstats), Y
-    CMP #CLASS_BB
-    BEQ :+
-    CMP #CLASS_MA
-    BEQ :+                          ; if yes, jump ahead, otherwise just exit
-  @Exit:
-    RTS
-
-  : LDY #ch_righthand - ch_stats    ; see if they have any weapon equipped.
-    LDA (lvlup_chstats), Y          ; check all 4 weapon slots, if any of them have an
-    BEQ @Exit                       ; equipped weapon, exit
-    
-    LDY #ch_level - ch_stats        ; reaches here if no weapon equipped.  Get the level
-    LDA (lvlup_chstats), Y          ;  Add 1 to make it 1-based
-    CLC
-    ADC #$01
-    ASL A
-    LDY #ch_damage - ch_stats          ; Damage = 2*Level
-    STA (lvlup_chstats), Y
-    
-    ;JIGS - doing the armour thing properly?
-    
-    LDY #ch_head - ch_stats
-    LDA (lvlup_chstats), Y 
-    BEQ @Exit
-    LDY #ch_body - ch_stats
-    LDA (lvlup_chstats), Y 
-    BEQ @Exit
-    LDY #ch_hands - ch_stats
-    LDA (lvlup_chstats), Y 
-    BEQ @Exit
-    LDY #ch_accessory - ch_stats
-    LDA (lvlup_chstats), Y 
-    BEQ @Exit
-    
-    LDY #ch_level - ch_stats        ; reaches here if no armor equipped.  Get the level
-    LDA (lvlup_chstats), Y          ;  Add 1 to make it 1-based
-    CLC
-    ADC #$01
-    ASL A
-    LDY #ch_defense - ch_stats       
-    STA (lvlup_chstats), Y 
-    RTS
+;LvlUp_AdjustBBSubStats:
+;    LDY #ch_class - ch_stats        ; check to make sure this is a BB/Master
+;    LDA (lvlup_chstats), Y
+;    CMP #CLASS_BB
+;    BEQ :+
+;    CMP #CLASS_MA
+;    BEQ :+                          ; if yes, jump ahead, otherwise just exit
+;  @Exit:
+;    RTS
+;
+;  : LDY #ch_righthand - ch_stats    ; see if they have any weapon equipped.
+;    LDA (lvlup_chstats), Y          ; check all 4 weapon slots, if any of them have an
+;    BEQ @Exit                       ; equipped weapon, exit
+;    
+;    LDY #ch_level - ch_stats        ; reaches here if no weapon equipped.  Get the level
+;    LDA (lvlup_chstats), Y          ;  Add 1 to make it 1-based
+;    CLC
+;    ADC #$01
+;    ASL A
+;    LDY #ch_damage - ch_stats          ; Damage = 2*Level
+;    STA (lvlup_chstats), Y
+;    
+;    ;JIGS - doing the armour thing properly?
+;    
+;    LDY #ch_head - ch_stats
+;    LDA (lvlup_chstats), Y 
+;    BEQ @Exit
+;    LDY #ch_body - ch_stats
+;    LDA (lvlup_chstats), Y 
+;    BEQ @Exit
+;    LDY #ch_hands - ch_stats
+;    LDA (lvlup_chstats), Y 
+;    BEQ @Exit
+;    LDY #ch_accessory - ch_stats
+;    LDA (lvlup_chstats), Y 
+;    BEQ @Exit
+;    
+;    LDY #ch_level - ch_stats        ; reaches here if no armor equipped.  Get the level
+;    LDA (lvlup_chstats), Y          ;  Add 1 to make it 1-based
+;    CLC
+;    ADC #$01
+;    ASL A
+;    LDY #ch_defense - ch_stats       
+;    STA (lvlup_chstats), Y 
+;    RTS
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2379,9 +2336,6 @@ BattleOver_ProcessResult:
      DEC ch_level+$40
      DEC ch_level+$80
      DEC ch_level+$C0
-     
-     JSR RestoreCharacterBattleStats ;; put back the pre-battle stats that spells would have changed
-     ;; JIGS - the game used to convert a lot of stuff here, but it was stupid, and now it only changes level from 1 based to 0 based
     
     LDA btl_result              ; check the result
     CMP #$03
@@ -3078,35 +3032,35 @@ GiveRewardToParty:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-GiveHpBonusToChar:
-    JSR AddBattleRewardToVal    ; add reward (which is the HP bonus)
-    
-    LDA #<data_MaxHPPlusOne     ; copy HP cap to $82,83
-    STA LevelUp_Reward
-    LDA #>data_MaxHPPlusOne
-    STA LevelUp_Reward+1
-    
-    LDY #2 - 1                  ; compare 2 byte value (char max HP to HP cap)
-    JSR MultiByteCmp
-    BCC @Done                   ; if max HP < cap, jump ahead to @Done
-    
-    LDY #$00                    ; copy the cap over to the max HP
-    : LDA (LevelUp_Reward), Y
-      STA (LevelUp_Pointer), Y ; < HP max
-      INY
-      CPY #$02
-      BNE :-
-      
-    JSR SubtractOneFromVal      ; then subtract 1, because the cap is retardedly 1 over the maximum
- 
-  @Done:
-    LDY #$00                    ; finally, copy the new max HP to eobtext_print_hp so
-    LDA (LevelUp_Pointer), Y  ;   it can be printed to the user!
-    STA eobtext_print_hp
-    INY
-    LDA (LevelUp_Pointer), Y
-    STA eobtext_print_hp+1
-    RTS
+;GiveHpBonusToChar:
+;    JSR AddBattleRewardToVal    ; add reward (which is the HP bonus)
+;    
+;    LDA #<data_MaxHPPlusOne     ; copy HP cap to $82,83
+;    STA LevelUp_Reward
+;    LDA #>data_MaxHPPlusOne
+;    STA LevelUp_Reward+1
+;    
+;    LDY #2 - 1                  ; compare 2 byte value (char max HP to HP cap)
+;    JSR MultiByteCmp
+;    BCC @Done                   ; if max HP < cap, jump ahead to @Done
+;    
+;    LDY #$00                    ; copy the cap over to the max HP
+;    : LDA (LevelUp_Reward), Y
+;      STA (LevelUp_Pointer), Y ; < HP max
+;      INY
+;      CPY #$02
+;      BNE :-
+;      
+;    JSR SubtractOneFromVal      ; then subtract 1, because the cap is retardedly 1 over the maximum
+; 
+;  @Done:
+;    LDY #$00                    ; finally, copy the new max HP to eobtext_print_hp so
+;    LDA (LevelUp_Pointer), Y  ;   it can be printed to the user!
+;    STA eobtext_print_hp
+;    INY
+;    LDA (LevelUp_Pointer), Y
+;    STA eobtext_print_hp+1
+;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5262,115 +5216,14 @@ GetEnemyStatPtr:
     PLA
     RTS
     
-    
-    
-    
-    
-    
-    
-    
-    
-RestoreCharacterBattleStats:
-    LDA #$00                
-    JSR RestoreOneCharacterBattleStats
-    LDA #$01
-    JSR RestoreOneCharacterBattleStats
-    LDA #$02
-    JSR RestoreOneCharacterBattleStats
-    LDA #$03
-
-RestoreOneCharacterBattleStats:
-    JSR PrepCharStatPointers        ; prep stat pointers
-    
-    LDY #ch_intelligence_backup - ch_backupstats
-    LDA #ch_intelligence - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_speed_backup - ch_backupstats
-    LDA #ch_speed - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_damage_backup - ch_backupstats
-    LDA #ch_damage - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_hitrate_backup - ch_backupstats
-    LDA #ch_hitrate - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_defense_backup - ch_backupstats
-    LDA #ch_defense - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_evasion_backup - ch_backupstats
-    LDA #ch_evasion - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_magicdefense_backup - ch_backupstats
-    LDA #ch_magicdefense - ch_stats
-    JSR TransferByteBack
-    
-    LDA #ch_critrate - ch_stats
-    LDY #ch_critrate_backup - ch_backupstats
-    JSR TransferByteBack
-    
-    LDA #ch_weaponelement - ch_stats
-    LDY #ch_weaponelement_backup - ch_backupstats
-    JSR TransferByteBack
-    
-    LDA #ch_weaponcategory - ch_stats
-    LDY #ch_weaponcategory_backup - ch_backupstats
-    JSR TransferByteBack
-
-    LDA #ch_attackailment - ch_stats
-    LDY #ch_attackailment_backup - ch_backupstats
-    JSR TransferByteBack
-    
-    LDA #ch_attackailproc - ch_stats
-    LDY #ch_attackailproc_backup - ch_backupstats
-    JSR TransferByteBack
-
-    LDA #ch_elementweak - ch_stats
-    LDY #ch_elementweak_backup - ch_backupstats
-    JSR TransferByteBack
-    
-    LDY #ch_elementresist_backup - ch_backupstats
-    LDA #ch_elementresist - ch_stats
-    JSR TransferByteBack
-    
-    LDY #ch_statusresist_backup - ch_backupstats
-    LDA #ch_statusresist - ch_stats
-    
-  TransferByteBack:
-    PHA                             ; backup A
-    LDA (CharBackupStatsPointer), Y ; Load the source stat
-    TAX                             ; stick it in X
-    PLA                             ; restore A, put in Y
-    TAY
-    TXA                             ; get the source stat
-    STA (CharStatsPointer), Y       ; write it to the dest
-    RTS  
-    
 PrepCharStatPointers:
     ASL A                               ; 2* for pointer lut
     TAY
-    LDA lut_IBCharStatsPtrTable, Y      ; copy pointers from pointer luts
-    STA CharBackupStatsPointer
-    LDA lut_IBCharStatsPtrTable+1, Y
-    STA CharBackupStatsPointer+1
     LDA lut_CharStatsPtrTable, Y
     STA CharStatsPointer
     LDA lut_CharStatsPtrTable+1, Y
     STA CharStatsPointer+1
     RTS
-  
-lut_IBCharStatsPtrTable:
-  .WORD ch_backupstats
-  .WORD ch_backupstats + (1*$10)
-  .WORD ch_backupstats + (2*$10)
-  .WORD ch_backupstats + (3*$10)    
-    
-    
     
     
     

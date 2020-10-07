@@ -99,12 +99,12 @@ ch_class          = ch_stats + $00
 ch_sprite         = ch_stats + $01
 ch_skill1         = ch_stats + $02
 ch_skill2         = ch_stats + $03
-ch_jobexp         = ch_stats + $04
-ch_joblevel       = ch_stats + $05
-;                 = ch_stats + $06
-;                 = ch_stats + $07
-ch_damagebackup   = ch_stats + $08
-ch_defensebackup  = ch_stats + $09
+ch_skill3         = ch_stats + $04
+ch_skill4         = ch_stats + $05
+ch_perks          = ch_stats + $06
+ch_battleperks    = ch_stats + $07
+ch_armormastery   = ch_stats + $08
+ch_weaponmastery  = ch_stats + $09
 ch_basehp         = ch_stats + $0A ; 0B - 2 bytes
 ch_curhp          = ch_stats + $0C ; 0D - 2 bytes
 ch_maxhp          = ch_stats + $0E ; 0F - 2 bytes
@@ -117,13 +117,13 @@ ch_intelligence   = ch_stats + $13
 ch_vitality       = ch_stats + $14
 ch_speed          = ch_stats + $15
  ch_substats      = ch_stats + $16
-ch_damage         = ch_stats + $16
-ch_hitrate        = ch_stats + $17
-ch_defense        = ch_stats + $18
-ch_evasion        = ch_stats + $19
-ch_magicdefense   = ch_stats + $1A
-ch_critrate       = ch_stats + $1B ; effected by equipment, needs to refresh after battle
-ch_morale         = ch_stats + $1C
+ch_damage         = ch_stats + $16 ; unarmed damage
+ch_hitrate        = ch_stats + $17 ; unarmed hitrate
+ch_evasion        = ch_stats + $18 ; unarmed evasion
+ch_magicdefense   = ch_stats + $19 ; unarmed magic defense
+ch_morale         = ch_stats + $1A
+ch_joblevel       = ch_stats + $1B 
+ch_jobexp         = ch_stats + $1C
 ch_exp            = ch_stats + $1D ; 1E, 1F - 3 bytes
 
 ch_righthand      = ch_stats + $20
@@ -134,17 +134,17 @@ ch_hands          = ch_stats + $24
 ch_accessory      = ch_stats + $25
 ch_bag1           = ch_stats + $26  
 ch_bag2           = ch_stats + $27  
-ch_weaponelement  = ch_stats + $28 ; effected by equipment, needs to refresh after battle
-ch_weaponcategory = ch_stats + $29 ; effected by equipment, needs to refresh after battle
-ch_numhits        = ch_stats + $2A ; effected by equipment, needs to refresh after battle
-ch_attackailment  = ch_stats + $2B ; effected by equipment
-ch_attackailproc  = ch_stats + $2C ; effected by equipment
-ch_statusresist   = ch_stats + $2D 
-ch_elementresist  = ch_stats + $2E ; effected by equipment, needs to refresh after battle
-ch_elementweak    = ch_stats + $2F ; effected by equipment, needs to refresh after battle
+ch_mp             = ch_stats + $28 ; 29, 2A, 2B, 2C, 2D, 2E, 2F - 8 bytes
 
-ch_mp             = ch_stats + $30 ; 31, 32, 33, 34, 35, 36, 37 - 8 bytes
-ch_name           = ch_stats + $38 ; 39, 3A, 3B, 3C, 3D, 3E - 7 bytes 
+ch_name           = ch_stats + $30 ; 31, 32, 33, 34, 35, 36 - 7 bytes 
+;                 = ch_stats + $37
+;                 = ch_stats + $38
+;                 = ch_stats + $39
+;                 = ch_stats + $3A
+;                 = ch_stats + $3B
+;                 = ch_stats + $3C
+;                 = ch_stats + $3D
+;                 = ch_stats + $3E
 ch_ailments       = ch_stats + $3F
 
 ch_spells         = ch_stats + $100 ; $18 bytes
@@ -321,6 +321,9 @@ slotcheck               = $73
 equip_impossible        = $74 ; also used in equip menu
 shop_x_price            = $75
 shop_drawmarks          = $76
+DualWieldStats          = $77
+EquipPermissions        = $78 ; 79, 7A, 7B, 7C ; 5 bytes
+MenuStats               = $78 ; 79, 7A, 7B, 7C, 7D ; 6 bytes 
 
 ;; Battle Things - Shared
 
@@ -388,12 +391,11 @@ ZoomMapTilesetPtr       = $82
 MiniMap_DrawBuf         = $84 
 MiniMap_OWDrawBuf       = $86 
 
-EquipPermissions        = $8C ; 8D, 8E, 8F ; 4 bytes
-
 CharStatsPointer        = $80 
-CharBackupStatsPointer  = $82 ; these get loaded up at the same time
-EnemyRAMPointer         = $84 ; pointer to enemy's adjustable stats
-EnemyROMPointer         = $86 ; pointer to enemy's hard stats
+CharBackupStatsPointer  = $82 ; for changing party formation after battle
+EnemyRAMPointer         = $82 ; pointer to enemy's adjustable stats
+EnemyROMPointer         = $84 ; pointer to enemy's hard stats
+OneBitPointer           = $84 ; for adjusting compressed inventory
 BattleTmpPointer        = $86 
 WeaponPointer           = $86 ; pointer to weapon data
 BattleTmpPointer2       = $88 ; this pointer is often used by things 
@@ -595,6 +597,7 @@ explode_count           = $0384
 btl_spriteflash         = $0384
 attackblocked           = $0385 
 btl_retaliate           = $0386 
+DualAttack              = $0387 
 
 btltmp_smallslotpos     = $038A 
 btltmp_buildroster      = $038A 
@@ -715,8 +718,8 @@ btl_attacker_limbs           = btl_attacker + $0A ; the amount of limbs an enemy
 btl_attacker_graphic         = btl_attacker + $0A ; the graphic used for an attack
 btl_attacker_varplt          = btl_attacker + $0B ; The variable palette color used for an attack
 btl_attacker_sprite          = btl_attacker + $0C ; this is not used and I don't know why I made it
-btl_attacker_class           = btl_attacker + $0D ; high bit is "hidden" state
-btl_attacker_hidden          = btl_attacker + $0E ; not sure what to use this for
+btl_attacker_perks           = btl_attacker + $0D 
+btl_attacker_battleperks     = btl_attacker + $0E 
 btl_attacker_ailmentchance   = btl_attacker + $0F
 
 btlmag_spellconnected       = btl_attacker + $01
@@ -742,13 +745,13 @@ btl_defender_statusresist    = btl_defender + $09
 btl_defender_elementresist   = btl_defender + $0A
 btl_defender_elementweakness = btl_defender + $0B
 btl_defender_ailments        = btl_defender + $0C
-btl_defender_class           = btl_defender + $0D ; high bit is "hidden" state
+btl_defender_perks           = btl_defender + $0D
 btl_defender_hpmax           = btl_mathbuf + (MATHBUF_DEFENDERMAXHP*2)
 btl_defender_hp              = btl_mathbuf + (MATHBUF_DEFENDERHP*2)  ; $687C -- treated as part of math buffer by some code
 
 ;; these are all things that can be changed by magic! Except max HP and class
 btlmag_defender                 = btl_attacker 
-btlmag_defender_class           = btl_attacker + $0A
+btlmag_defender_sprite          = btl_attacker + $0A
 btlmag_defender_intelligence    = btl_attacker + $0B
 btlmag_defender_speed           = btl_attacker + $0C
 btlmag_defender_damage          = btl_attacker + $0D
@@ -827,26 +830,9 @@ indicator_index     = $607D ; tmp byte for flashing enemies if they're defender 
 battle_item         = $607F ; handles item box scrolling and item use
 btl_turnorderBackup = $6080 ; 13 bytes
 btl_turnorderSpeed  = $6090 ; 13 bytes
-    
-    
-;; the following stats are saved at the start of battle, and re-applied at the end of battle. Everything that can change in battle needs to be un-done.
-ch_backupstats            = $60C0 ;; $10 per character, so fills up to $60FF
-ch_slotindex_backup       = ch_backupstats
-ch_intelligence_backup    = ch_backupstats + $01
-ch_speed_backup           = ch_backupstats + $02
-ch_damage_backup          = ch_backupstats + $03
-ch_hitrate_backup         = ch_backupstats + $04
-ch_defense_backup         = ch_backupstats + $05
-ch_evasion_backup         = ch_backupstats + $06
-ch_magicdefense_backup    = ch_backupstats + $07
-ch_critrate_backup        = ch_backupstats + $08
-ch_weaponelement_backup   = ch_backupstats + $09 
-ch_weaponcategory_backup  = ch_backupstats + $0A 
-ch_attackailment_backup   = ch_backupstats + $0B 
-ch_attackailproc_backup   = ch_backupstats + $0C 
-ch_elementweak_backup     = ch_backupstats + $0D
-ch_elementresist_backup   = ch_backupstats + $0E
-ch_statusresist_backup    = ch_backupstats + $0F
+
+;; some free RAM here in  battle    
+
     
 btl_enemystats      = $6100  ; $1B bytes per enemy, 9 enemies = 243 bytes ($F3)
     en_hpmax        = $00 ; 2 bytes                             1 2 
@@ -939,21 +925,57 @@ btl_charcmdbuf          = $6800 ; 4 bytes per character
 btl_charcmditem         = $6810 ; 1 byte per character for the rest
 btl_charcmdconsumetype  = $6814 ; 
 btl_charcmdconsumeid    = $6818 ; 
-btl_charhitmult         = $681C ; Hit multiplyer
-btl_charparry           = $6820 ; BB/Master Parry skill
-btl_charcover           = $6824 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
-btl_charregen           = $682C ; Regeneration status
-btl_charguard           = $6830 ; Guard status
-btl_charhidden          = $6834 ; Hidden status
-btl_charpray            = $6838 ; White Pray skill
-btl_charfocus           = $683C ; Black Focus skill
-btl_charreflect         = $6840 ; Reflection status
+
+;; battle statuses 
+
+btl_charstone           = $681C ; Stone status
+btl_charregen           = $6820 ; Regeneration status
+btl_charreflect         = $6824 ; Reflect magic status
+
+;; actions 
+
+btl_charhidden          = $6828 ; Hidden status
+btl_charguard           = $682C ; Guard status
+btl_charcover           = $6830 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
+btl_charparry           = $6838 ; BB/Master Parry skill
+btl_charpray            = $683C ; White Pray skill
+btl_charfocus           = $6840 ; Black Focus skill
 btl_charrunic           = $6844 ; Red Runic skill
 btl_charrush            = $6848 ; Fighter Rush skill
-btl_charstone           = $684C ; Stone status
 
-btl_charweaponpal       = $68E0 ; weapon palette
-btl_charweaponsprite    = $68E4 ; weapon sprite
+;; stats
+;; if more stats are added, check PlayerMagDefenderStats_LUT in Bank C and PlayerAttackerStats_LUT in Bank B to adjust the routines
+
+btlstats_mainstats      = $687C
+
+;;  these 3 stats are used in battle calculations and can be changed by magic
+btl_charintelligence    = btlstats_mainstats + 0*4 
+btl_charspeed           = btlstats_mainstats + 1*4 
+btl_charhitmult         = btlstats_mainstats + 2*4
+
+btlstats_defensestats   = btlstats_mainstats + 3*4
+
+btl_charevasion         = btlstats_defensestats + 0*4 
+btl_chardefense         = btlstats_defensestats + 1*4 
+btl_charmagdefense      = btlstats_defensestats + 2*4 
+btl_charelementresist   = btlstats_defensestats + 3*4 
+btl_charelementweak     = btlstats_defensestats + 4*4 
+btl_charstatusresist    = btlstats_defensestats + 5*4 
+
+; all of these are 8 bytes: 2 weapons each!
+
+btlstats_weaponstats    = btlstats_defensestats + 6*4
+
+btl_charhitrate         = btlstats_weaponstats + 0*4 
+btl_chardamage          = btlstats_weaponstats + 1*8 
+btl_charweaponcritrate  = btlstats_weaponstats + 2*8 
+btl_charweaponailment   = btlstats_weaponstats + 3*8 
+btl_charweaponailproc   = btlstats_weaponstats + 4*8 
+btl_charweaponelement   = btlstats_weaponstats + 5*8 
+btl_charweaponcategory  = btlstats_weaponstats + 6*8 
+btl_charweaponsprite    = btlstats_weaponstats + 7*8 
+btl_charweaponpal       = btlstats_weaponstats + 8*8 
+btl_charnumhits         = btlstats_weaponstats + 9*8  ; $68E8 
 
 btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
     btl_chardraw_x      = btl_chardrawinfo+0

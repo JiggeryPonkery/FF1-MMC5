@@ -751,10 +751,20 @@ WEP61 = $3C
 WEP62 = $3D
 WEP63 = $3E
 WEP64 = $3F
-CHICKEN_KNIFE = WEP41
-BRAVE_BLADE = WEP42
 
+CHICKENKNIFE_DAMAGE = $FE
+BRAVEBLADE_DAMAGE   = $FF ; basically control codes for battle stat prep
 
+WEAPON_HIT         = $00
+WEAPON_DAMAGE      = $01
+WEAPON_CRIT        = $02
+WEAPON_AIL         = $03
+WEAPON_AILPROC     = $04
+WEAPON_ELEMENT     = $05
+WEAPON_CATEGORY    = $06
+WEAPON_GFX         = $07
+WEAPON_PAL         = $08
+WEAPON_PERMISSIONS = $09
 
 ARMORSTART = $40
 ARM1  = $40  ; Cloth T
@@ -822,7 +832,13 @@ ARM62 = $7D
 ARM63 = $7E  
 ARM64 = $7F  
 
-
+ARMOR_EVADE       = $00
+ARMOR_DEF         = $01
+ARMOR_MAGDEF      = $02
+ARMOR_ELEMDEF     = $03
+ARMOR_ELEMWEAK    = $04
+ARMOR_STATDEF     = $05
+ARMOR_PERMISSIONS = $06
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -954,6 +970,28 @@ CLASS_32        = $1F
 
 CLASS_START_MAX = $06 ; amount of starting classes to pick from
 CLASS_PROMOTION = $10 ; classes lower than this are starting classes
+
+;;;;;;;;;;;;;;;;;;
+;; Perks + Battle Perks
+
+UNARMED         = $01
+DUALWIELD       = $02
+STEALTHY        = $03
+
+
+;                       matches ailment: effect:
+CRIT_DEATH      = $01 ; death          ; kills enemy on critical hit
+CRIT_CRIT       = $02 ; stop           ; ups critical hit chance for self
+CRIT_POISON     = $04 ; poison         ; poisons enemy
+CRIT_DARK       = $08 ; dark           ; blinds enemy
+CRIT_STUN       = $10 ; stun           ; stuns enemy
+CRIT_STRENGTH   = $20 ; sleep          ; raises own damage stat
+CRIT_SLOW       = $40 ; mute           ; slows the enemy (-1 hit multiplier)
+CRIT_CONF       = $80 ; confuse        ; confuses enemy
+
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;
