@@ -77,7 +77,10 @@
 .import GetEquipPermissions
 .import SetCharStats
 .import GetExpToNext
-
+.import Set_Inv_KeyItem
+.import DOES_ITEM_EXIST_1BIT
+.import ADD_ITEM_1BIT
+.import REMOVE_ITEM_1BIT
 
 .segment "BANK_0E"
 
@@ -1395,12 +1398,10 @@ ClearNT_Color:   ;; JIGS - now this loads either 0 or FF depending what you want
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 EnterShop:
-    LDA #0
+    JSR ClearButtons
     STA $2001              ; turn off PPU
     STA $4015              ; silence audio
     STA $5015              ; and silence the MMC5 APU. (JIGS)
-    STA joy_b              ; erase joypad A and B buttons
-    STA joy_a
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
     STA shop_descriptionset ; zero shop_spell and shop_descriptionset (shared)
     
@@ -2167,10 +2168,7 @@ SelectAmount:
                          ;  and proceed to @ButtonDone
 
   @ButtonDone:           ; reached when the player has pressed B or A (exit this shop loop)
-    LDA #0
-    STA joy_a            ; zero joy_a and joy_b so further buttons will be detected
-    STA joy_b
-    RTS
+    JMP ClearButtons
 
   @A_Pressed:            ; if A pressed...
     CLC                  ; CLC to indicate player pressed A
@@ -2518,9 +2516,7 @@ EnterInn:
     JSR MenuFillPartyHP         ; refill the party's HP
     JSR MenuRecoverPartyMP      ;  and MP
     
-    LDA #0
-    STA joy_a                   ; clear A and B catchers
-    STA joy_b
+    JSR ClearButtons
 
     LDA #$22
     JSR DrawShopDialogueBox     ; "Remember to save" dialogue
@@ -2559,9 +2555,7 @@ EnterInn:
     JSR DrawShopDialogueBox     ; "Don't forget to save" dialogue 
     
 Clinic_Inn_Exit:
-    LDA #0
-    STA joy_a
-    STA joy_b                   ; clear A and B catchers
+    JSR ClearButtons
     
    @Loop: 
     JSR ShopFrameNoCursor       ; do a frame
@@ -2579,9 +2573,7 @@ Clinic_Inn_QuickExit:
 
 
 EnterClinic:
-    LDA #0
-    STA joy_a                  ; clear A and B button catchers
-    STA joy_b
+    JSR ClearButtons
 
     JSR ClinicBuildNameString  ; build the name string (also tells us if anyone is dead)
     BCC @NobodysDead           ; if nobody is dead... skip ahead
@@ -2617,10 +2609,9 @@ EnterClinic:
   ;  TAX                        ; put the char index in X.  This is the car we are to revive.
 
     LDX shop_curitem           ;; JIGS ^ the new price stuff did all this work
-    LDA #$00
+    JSR ClearButtons
     STA ch_ailments, X         ; erase this character's ailments (curing his "death" ailment)
-    STA joy_a
-    STA joy_b                  ; clear A and B catchers
+    
     LDA #$01
     STA ch_curhp, X            ; and give him 1 HP
 
@@ -2679,9 +2670,7 @@ InnClinic_CanAfford:
     LDA #$14
     JSR DrawShopDialogueBox    ; draw "you can't afford it" dialogue
 
-    LDA #0                     ; clear joy_a and joy_b markers
-    STA joy_a
-    STA joy_b
+    JSR ClearButtons
    @Loop:
       JSR ShopFrameNoCursor    ; then just keep looping frames
       LDA joy_a                ;  until either A or B pressed
@@ -3097,11 +3086,7 @@ ShopFrameNoCursor:
 
   @Exit:
   
-ClearABButtons:  
-    LDA #0
-    STA joy_a
-    STA joy_b
-    RTS
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3527,15 +3512,14 @@ ConvertInventoryToItemBox:
     
    @Weapons:  
     JSR Set_Inv_Weapon
-    LDY #64
-    BNE @DecompressInventory
+    BNE :+
    
    @Armor:
-    LDA #<inv_armor - unsram   ; exact pointers for armor aren't used as often 
-    STA tmp                    ; so no JSR to a special routine yet
+    LDA #<inv_armor - unsram
+    STA tmp
     LDA #>inv_armor - unsram
-    STA tmp+1
-    LDY #64
+    STA tmp+1    
+  : LDY #64
     
    @DecompressInventory:
     STY tmp+4                  ; max item amount
@@ -3786,9 +3770,7 @@ CommonShopLoop_List:
                          ;  and proceed to @ButtonDone
 
   @ButtonDone:           ; reached when the player has pressed B or A (exit this shop loop)
-    LDA #0
-    STA joy_a            ; zero joy_a and joy_b so further buttons will be detected
-    STA joy_b
+    JSR ClearButtons
     STA shop_descriptionset
     RTS
 
@@ -4442,6 +4424,9 @@ lutMenuPalettes:
 lutSpellMenuPalettes:
 .BYTE  $0F,$04,$01,$0F,  $0F,$2A,$01,$1A,  $0F,$24,$01,$13
 
+lutEquipPalettes:
+.BYTE  $0F,$00,$01,$2A
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Play SFX Menu Sel  [$AD84 :: 0x3AD94]
@@ -4581,6 +4566,7 @@ PlaySFX_CharSwap:
 ClearMenuOtherNametables:
 ;; JIGS - just a little thing for the menu, when you shut off SFX, it'll shake the screen for errors instead.
 ;; This stops it from showing a pixel's worth of garbage on the side.
+    LDA #$2002
     LDX #>$2400
     LDA #<$2400
     STX $2006   ; write X as high byte
@@ -4679,6 +4665,8 @@ ResumeMainMenu:
       BPL @Loop               ; loop until X wraps ($0C colors copied)
 
     JSR DrawMainMenu                ; draw the main menu
+    JSR ClearMenuOtherNametables
+    ;; JIGS ^ clear out the side nametables so screen shaking doesn't produce garbage pixels    
     LDA #BANK_THIS
     STA cur_bank
 	JSR MusicPlay_LoadingCHR
@@ -4728,12 +4716,8 @@ MainMenuLoop:
     JMP MainMenuResetCursorMax    ; not swapped - just reset the cursor
     
    @B_Pressed:
-    LDA #0            ; turn PPU off
+    JSR ClearButtons
     STA $2001
-    STA joy_a         ; flush A, B, and Start joypad recordings
-    STA joy_b
-    STA joy_start
-    STA joy_select
     JMP CallMusicPlay ; and exit the main menu (will RTS out of its loop)
 
     ; if A pressed, we need to move into the appropriate sub menu based on 'cursor' (selected menu item)
@@ -4803,6 +4787,7 @@ MainMenuLoop:
       STA char_index
       LDA #0
       STA equipoffset
+      STA DualWieldStats
     JSR EnterEquipMenu        ; and enter equip menu (Weapons menu)
     JMP ResumeMainMenu        ; then resume main menu
 
@@ -5082,15 +5067,15 @@ MagicMenu_Loop:
   : CMP #MG_CUR4
     BNE :+
       JMP UseMagic_CUR4
-  : CMP #MG_HEAL
+  : CMP #MG_REGN ; MG_HEAL
     BNE :+
       JMP UseMagic_HEAL
-  : CMP #MG_HEL3
-    BNE :+
-      JMP UseMagic_HEL3
-  : CMP #MG_HEL2
+  : CMP #MG_RGN2 ; MG_HEL2
     BNE :+
       JMP UseMagic_HEL2
+  : CMP #MG_RGN3 ; MG_HEL3
+    BNE :+
+      JMP UseMagic_HEL3
   : CMP #MG_PURE
     BNE :+
       JMP UseMagic_PURE
@@ -5183,8 +5168,9 @@ CureFamily_Loop:
         
    @DoCureSpell:     
     STA hp_recovery         ; store the HP to be recovered for future use
+    LDA #0
+    STA hp_recovery+1
     JSR Cursor_to_Index
-    LDA hp_recovery
     JSR MenuRecoverHP       ; will check if target is dead and set C if so
     BCS CureFamily_CantUse  ; for Cure 4, will do 256 HP, but cap it--and will copy max to current next anyway
     
@@ -5279,12 +5265,13 @@ UseMagic_HealFamily:
     BCC :+
         JSR Heal2SpellPotency
         BNE @DoHealSpell
-  : JSR Cure3SpellPotency
+  : JSR Heal3SpellPotency
 
    @DoHealSpell:
     STA hp_recovery         ; otherwise (pressed A), get HP recovery
+    LDA #0
+    STA hp_recovery+1
     JSR Cursor_to_Index
-    LDA hp_recovery
     JSR MenuRecoverHP       ; recover one 
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
@@ -5294,7 +5281,7 @@ UseMagic_HealFamily:
     BNE @HealLoop
     
     JSR PlayHealSFX
-    JSR UseMagic_SpendMP    ; JIGS 
+    JSR UseMagic_SpendMP    
     JMP @HealMenuLoop
 
  HealFamily_Exit:
@@ -6466,19 +6453,64 @@ MenuSaveConfirm:
 ;;
 ;;;;;;;;;;;;;;;;;;;;
 
-  ;; can't make these labels local because UseItem_Pure hijacks one of the labels ;_;
+
+Chemist_Check:
+    TXA
+    PHA
+
+    LDA #$00
+   @Loop: 
+    TAX
+    LDA ch_ailments, X
+    AND #AIL_DEAD
+    BNE @Next
+   
+    LDA ch_perks, X
+    AND #CHEMIST
+    BNE @Found
+    
+   @Next:
+    TXA
+    CLC
+    ADC #$40
+    BNE @Loop
+    
+    SEC
+    BCS @Nope
+
+   @Found:    
+    CLC
+
+   @Nope:
+    PLA
+    TAX
+    RTS
+    
+ ;; can't make these labels local because UseItem_Pure hijacks one of the labels ;_;
 
 UseItem_Heal:
+    LDX #0                     ; UseAilmentCuringItemLUT has the #HEAL item ID at slot 0
     LDA #HEAL_POTENCY
     STA hp_recovery
     BNE DrawHealMenu
 
 UseItem_XHeal:    
+    LDX #3                     ; and X_HEAL ID at slot 3
     LDA #XHEAL_POTENCY
     STA hp_recovery
     
 DrawHealMenu:
-    JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
+    STX tmp+9
+    LDA #0
+    STA hp_recovery+1
+    
+    JSR Chemist_Check          ; carry clear if a living chemist is in the party
+    BCS :+
+    
+    ASL hp_recovery
+    ROL hp_recovery+1
+
+  : JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
     LDA #44 
     JSR DrawItemDescBox        ; open up the description box with text ID $20
 
@@ -6497,19 +6529,15 @@ DrawHealMenu:
        CMP ch_maxhp+1, X
        BEQ @CantUse            ; if those are also equal, there's no point in using a potion
        
-  : LDA hp_recovery
-    CMP #HEAL_POTENCY
-    BNE :+ 
-        LDA item_heal
-        BEQ @UseItem_Exit
-        DEC item_heal          ; then remove a heal potion from the inventory
-        JMP @DoHeal
-  : LDA item_x_heal
-    BEQ @UseItem_Exit          ; stop if there's no more to use!
-    DEC item_x_heal
+  : LDX tmp+9
+    LDA UseAilmentCuringItemLUT, X
+    TAX
+    LDA items, X
+    BEQ @UseItem_Exit          ; don't have any!
+    DEC items, X
     
    @DoHeal: 
-    LDA hp_recovery            ; otherwise.. can use!
+    ;LDA hp_recovery            ; otherwise.. can use!
     JSR MenuRecoverHP_Abs      ; recover 30 HP for target (index is still in X). 
     JSR PlayHealSFX
     JSR SetStallAndWait
@@ -6650,34 +6678,30 @@ UseItem_Elixir:
 ;;;;;;;;;;;;;;;;;;;;
 
 UseItem_Pure:
-    LDA #AIL_POISON
-    STA hp_recovery
-    LDA #47 
-    PHA
-    BNE :+
+    LDX #47                  ; item description
+    LDA #AIL_POISON          ; ailment to cure
+    BNE UseAilmentCuringItem
 
 Useitem_Soft:
+    LDX #48 
     LDA #AIL_STOP
-    STA hp_recovery
-    LDA #48 
-    PHA
-    BNE :+
+    BNE UseAilmentCuringItem
 
 UseItem_PhoenixDown:
+    LDX #49
     LDA #AIL_DEAD
-    STA hp_recovery
-    LDA #49
-    PHA
-    BNE :+    
+    BNE UseAilmentCuringItem
 
 UseItem_Eyedrop:    
+    LDX #51
     LDA #AIL_DARK
-    STA hp_recovery            ; uses this as safe tmp storage
-    LDA #51
-    PHA
 
 UseAilmentCuringItem:    
-  : JSR DrawItemTargetMenu     ; draw target menu
+    STA hp_recovery
+    TXA
+    PHA
+    
+    JSR DrawItemTargetMenu     ; draw target menu
     PLA
     JSR DrawItemDescBox        
 
@@ -6698,18 +6722,32 @@ UseAilmentCuringItem:
     JSR PlayHealSFX
 
     LDX hp_recovery            ; do this little thing again
-    LDY UseAilmentCuringItemLUT, X
-    LDA items, Y
-    SEC
-    SBC #1
-    STA items, Y               ; and this time decrease the amount of the item
+    LDA UseAilmentCuringItemLUT, X
+    TAX
+    DEC items, X               ; and this time decrease the amount of the item
     CPY #PHOENIXDOWN           ; then check if it was a phoenix down
-    BNE :+                     ; if not, skip this
+    BNE @Continue              ; if not, skip this
       JSR Cursor_to_Index        
-      LDA #1      
-      STA ch_curhp, X          ; give the character 1 HP
-        
-  : JSR SetStallAndWait
+      JSR Chemist_Check        ; carry clear if a living chemist is in the party
+      BCS :+
+      
+      LDA ch_maxhp, X          ; if anyone in the party is a chemist, give them half their max HP
+      STA tmp+8
+      LDA ch_maxhp+1, X
+      
+      LSR A
+      ROR tmp+8
+      
+      LDA tmp+9
+      STA ch_maxhp+1, X
+      LDA tmp+8
+      BNE :++
+      
+    : LDA #1                   ; if no chemists... 
+    : STA ch_curhp, X          ; give the character 1 HP
+   
+   @Continue:   
+    JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
     JMP @Loop
     
@@ -6721,8 +6759,8 @@ UseAilmentCuringItem:
     JMP @Loop                  ;  and keep looping
 
 UseAilmentCuringItemLUT:
-    .byte 0, PHOENIXDOWN, SOFT, 0, PURE, 0, 0, 0, EYEDROPS
-    ;     0, 1,         , 2   , 3, 4,  , 5, 6, 7, 8
+    .byte HEAL, PHOENIXDOWN, SOFT, X_HEAL, PURE, ETHER, 0, 0, EYEDROPS
+    ;     0,    1,         , 2   , 3,      4,  , 5,     6, 7, 8
 
 
 Useitem_AlarmClock:
@@ -6743,11 +6781,20 @@ UseItem_Smokebomb:
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ; Get SM flag, and shift it into C
     BCC @CantUse            ; if set (on overworld), can't use smokebomb here
-        
+
     LDA #SMOKEBOMB_EFFECT   ; set in Constants for easier editing
     STA smokebomb_steps
     DEC item_smokebomb
     JSR PlayDoorSFX
+
+    JSR Chemist_Check       ; carry clear if a living chemist is in the party
+    BCS :+
+    
+    LDA smokebomb_steps
+    LSR A
+    CLC
+    ADC smokebomb_steps
+    STA smokebomb_steps
     
   : JMP EnterItemMenu
   
@@ -6816,9 +6863,7 @@ ItemTargetMenuLoop:
     STA cursor_max 
     
   @Loop:
-    LDA #0
-    STA joy_a       ; clear joy_a and joy_b so that a button press
-    STA joy_b       ;  will be recognized
+    JSR ClearButtons
 
     JSR ClearOAM               ; clear OAM
     LDA item_pageswap
@@ -6857,9 +6902,7 @@ ItemTargetMenuLoop:
 MPTargetMenuLoop:    
    
   @Loop:
-    LDA #0
-    STA joy_a       ; clear joy_a and joy_b so that a button press
-    STA joy_b       ;  will be recognized
+    JSR ClearButtons
 
     JSR ClearOAM               ; clear OAM
     JSR DrawMPTargetCursor   ; draw the cursor for this menu
@@ -7189,6 +7232,7 @@ StatusMenuAttributes:
 .byte $AA,$55
 
 EnterStatusMenu:
+    JSR WaitForVBlank_L
     LDA #0
     STA DualWieldStats
     STA $2001               ; turn off the PPU
@@ -7362,6 +7406,10 @@ EnterStatusMenu:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MenuRecoverPartyHP:
+    STA hp_recovery
+    LDA #0
+    STA hp_recovery+1
+
     LDX #$00
     JSR MenuRecoverHP        ; recover HP for each character
     LDX #$40
@@ -7402,12 +7450,12 @@ MenuRecoverHP:
   ;; JIGS - healing stone people with magic is allowed, since its allowed in battle
 
 MenuRecoverHP_Abs:
-    STA tmp                     ; back up HP to recover by stuffing it in tmp
+    LDA hp_recovery             ; back up HP to recover by stuffing it in tmp
     CLC
     ADC ch_curhp, X             ; add recover HP to low byte of HP
     STA ch_curhp, X
     LDA ch_curhp+1, X           ; add 0 to high byte of HP (to catch carry from low byte)
-    ADC #0
+    ADC hp_recovery+1
     STA ch_curhp+1, X
     CMP ch_maxhp+1, X           ; then compare against max HP to make sure we didn't go over
     BEQ _MenuRecoverHP_CheckLow ; if high byte of cur = high byte of max, we need to check the low byte
@@ -7430,7 +7478,7 @@ MenuRecoverHP_Abs:
     ;; JIGS - just use a neat little SFX with square2 instead:
     ;JSR PlayHealSFX
 
-    LDA tmp                     ; restore the HP recovery ammount in A, before exiting
+    ;LDA hp_recovery               ; restore the HP recovery ammount in A, before exiting
   _MenuRecoverHP_Exit:
     CLC
     RTS
@@ -7569,29 +7617,16 @@ MenuWaitForBtn:
     LDA joy_a
     ORA joy_b
     BEQ MenuWaitForBtn
+    ;JMP ClearButtons
+
+ClearButtons:  
     LDA #0
     STA joy_a
     STA joy_b
+    STA joy_select
+    STA joy_start    
     RTS
 
-;  : LDA joy
-;    AND #$0F
-;    CMP joy_prevdir
-;    BNE :+
-   
-;ShopWaitForBtn:
-;    JSR MenuFrame           ; exactly the same -- only no call to PlaySFX_MenuSel at the end
-;    LDA joy_a
-;    ORA joy_start
-;    ORA joy_select
-;    ORA joy_b
-;    BEQ :-
-;    LDA #0
-;    STA joy_a
-;    STA joy_b
-;    STA joy_start
-;    STA joy_select
-;  : RTS    
   
   
 
@@ -7693,11 +7728,7 @@ MainMenuFrame:
     STA cur_bank           ; then call the music play routine (keep music playing)
     JSR CallMusicPlay
 
-    LDA #0                 ; zero joy_a and joy_b so that an increment will bring to a
-    STA joy_a              ;   nonzero state
-    STA joy_b
-    STA joy_select
-    STA joy_start
+    JSR ClearButtons
     JMP UpdateJoy          ; update joypad info, then exit
 
 
@@ -8161,8 +8192,6 @@ TurnMenuScreenOn_ClearOAM:
                              ;  then just do the normal stuff
 
 TurnMenuScreenOn:
-    JSR ClearMenuOtherNametables
-    ;; JIGS ^ clear out the side nametables so screen shaking doesn't produce garbage pixels
     JSR WaitForVBlank_L      ; wait for VBlank (don't want to turn the screen on midway through the frame)
     LDA #>oam                ; do Sprite DMA
     STA $4014
@@ -9013,32 +9042,110 @@ DrawMagicMenuMainBox:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+EquipMenu_Attributes_Pos:
+.byte $C9,$D1 ; attribute position
+EquipMenu_Attributes_Val:
+.byte $0F,$F0 ; attribute value
 
 EnterEquipMenu:
     JSR WaitForVBlank_L
-    LDA #0
-    STA $2001             ; turn off the PPU
-    STA joy_a             ; clear joy_a and joy_b counters
-    STA joy_b
-    STA menustall         ; and turn off menu stalling (since the PPU is off)
+    JSR ClearButtons
+    STA $2001                 ; turn off the PPU   
+    STA menustall             ; and turn off menu stalling (since the PPU is off)        
+    STA WeaponOrArmorPage     ; default to weapon page
+    STA ItemOverflow
+
     LDA equipoffset
     STA cursor
-    STA ItemOverflow
+
+    JSR ClearNT               ; clear the NT
+
+    LDA #MBOX_EQUIP         
+    JSR DrawMainItemBox
+  
+    LDA CharacterEquipBackup
+    STA submenu_targ
+    LDA #$05
+    STA dest_x
+    LDA #11
+    JSR DrawCharMenuString    ; Name and Class
     
-    JSR DrawEquipMenu        ; Draws boxes, name, class, stats, and slots
-    JSR DrawEquipMenuStrings ; Draws item names, what is equipped
-    JSR TurnMenuScreenOn_ClearOAM
+    LDA #$06
+    STA dest_y
+    LDA #12
+    JSR DrawMenuString        ; Equipment
+    
+    JSR DrawEquipMenuStrings  ; Draws item names, what is equipped
+
+    LDX #$03
+   @PalLoop:                        
+      LDA lutEquipPalettes, X      
+      STA cur_pal, X               
+      DEX
+      BPL @PalLoop        
+
+    ;; this will color right or left hand green, to indicate which weapon is being shown
+
+   @DualWieldStuff:
+    LDX char_index         ; see if the character has a weapon
+    LDA ch_lefthand, X     ; in their left hand
+    BEQ @DrawStats         ; if they don't, do nothing
+    CMP #ARMORSTART+1
+    BCS @DrawStats         ; if its armor, do nothing
+    
+    LDA DualWieldStats
+    TAX
+    LDA #$23
+    STA $2006
+    LDA EquipMenu_Attributes_Pos, X
+    STA $2006
+    LDY #3
+    LDA EquipMenu_Attributes_Val, X
+   @AttLoop: 
+    STA $2007
+    DEY
+    BNE @AttLoop
+
+  @DrawStats:  
+    JSR ResetCharStats
+    LDA #$17
+    STA dest_y
+    LDA #$03
+    STA dest_x
+    LDA #13
+    JSR DrawCharMenuString   ; Draw Stats    
+    
+    LDX char_index
+    LDA ch_perks, X
+    AND #DUALWIELD
+    BEQ :+
+    
+    LDA #>$211B
+    STA $2006
+    LDA #<$211B
+    STA $2006
+    LDX #2
+   @IconLoop: 
+    LDA @DualWieldIcons, X
+    STA $2007
+    DEX
+    BPL @IconLoop
+    
+  : JSR TurnMenuScreenOn_ClearOAM
     
   @Loop:
     JSR ClearOAM              ; clear OAM
     JSR DrawEquipMenuCurs     ; draw the cursor
     JSR EquipMenuSprite
-    JSR MenuFrame        ; then do an Equip Menu Frame
+    JSR MenuFrame             ; then do an Equip Menu Frame
     
     LDA joy_a
     BNE @A_Pressed            ; check to see if A pressed
     LDA joy_b
     BNE @B_Pressed            ; or B
+    LDA joy_select
+    ORA joy_start
+    BNE @SelectPressed
 
     JSR MoveEquipMenuCurs     ; if neither A nor B pressed, move the mode cursor
     JMP @Loop                 ; and loop until one of them is pressed
@@ -9046,6 +9153,7 @@ EnterEquipMenu:
   @A_Pressed:
     JSR Set_Inv_Weapon
     LDA cursor                ; cursor = equip slot
+    STA equipoffset  
     CLC
     ADC char_index            ; add character index
     TAX
@@ -9055,25 +9163,30 @@ EnterEquipMenu:
     SEC
     SBC #1                    ; convert item to 0-based
     JSR ADD_ITEM              ; put the unequipped weapon in inventory
-    PLA                       
+    PLA     
     BCC :+
     INC ItemOverflow          ; inventory limit reached (over 15 of this item)
     
   : STA ItemToUnequip
-    CMP #ARMORSTART+1
-    BCC @SetWeaponBattleSlot
+    LDX equipoffset
+    BEQ @ViewInventory        ; its a weapon, start with weapon page
+    CPX #06
+    BCS @ViewInventory        ; its a battle item, start with weapon page
+    CPX #01
+    BNE @SetArmorBattleSlot   ; its NOT the shield slot, start with armor page
+    CMP #0
+    BEQ @SetArmorBattleSlot   ; it is the shield slot, but ItemToUnequip is 0: start with armor
+    CMP #ARMORSTART+1         
+    BCS @ViewInventory        ; ItemToUnequip is armor; start with armor
+    
+    LDA #01
+    STA DualWieldStats        ; else, unequipping a weapon, so start with weapon page 
+    BNE @ViewInventory        ; and set the trigger to view left hand weapon stats
     
    @SetArmorBattleSlot:
-    LDA #1
-    BNE @ViewInventory
-    
-   @SetWeaponBattleSlot:
-    LDA #0
+    INC WeaponOrArmorPage     ; set to 1 to view armor page
 
    @ViewInventory: 
-    STA battleitemslot        ; set to weapons for battle item slots
-    LDA cursor
-    STA equipoffset
     LDA #0
     STA cursor
     STA cursor_max
@@ -9083,6 +9196,22 @@ EnterEquipMenu:
     
   @B_Pressed:                 ; if B pressed....
     RTS
+
+  @SelectPressed:
+    LDX char_index         ; if it is, see if the character has a weapon
+    LDA ch_lefthand, X     ; in their left hand
+    BEQ @Loop
+    CMP #ARMORSTART+1
+    BCS @Loop              ; if they don't, do nothing
+    
+    LDA DualWieldStats
+    EOR #$01               ; if its 0, switch to 1; if its 1, switch to 0!
+    STA DualWieldStats
+    JMP EnterEquipMenu
+    
+   @DualWieldIcons:
+    .byte $D4, $C7, $DB   ; sword, >, shield -- printed in reverse
+   
 
 EquipMenuSprite:
     LDA #$78
@@ -9094,15 +9223,12 @@ EquipMenuSprite:
 
 EnterEquipInventory:
     JSR WaitForVBlank_L
-    LDA #0
+    JSR ClearButtons
     STA $2001             ; turn off the PPU
-    STA joy_a             ; clear joy_a and joy_b counters
-    STA joy_b             
-    STA joy_select
-    STA joy_start
     STA menustall         ; and turn off menu stalling (since the PPU is off)
     STA tmp+13            ; and make sure this is 0, to keep
     ;; the battle items description box from flickering when passing over empty slots!
+    
     LDA #1
     STA cursor_change
    
@@ -9129,10 +9255,9 @@ EnterEquipInventory:
 
     JSR MoveEquipInventoryCursor   ; if neither A nor B pressed, move the mode cursor
     JMP @Loop                      ; and loop until one of them is pressed
-    
+
   @B_Pressed:                 ; if B pressed....
     JSR PlaySFX_MenuSel  
-    ;JSR UnEquipStats
     JSR Set_Inv_Weapon
     LDA equipoffset
     CLC 
@@ -9148,19 +9273,28 @@ EnterEquipInventory:
     JSR REMOVE_ITEM          ; and if it was more than 0, take it out of inventory again
   : JMP ResetCharStats
 
-  @ResetSelectLoop:
-    LDA #0
-    STA joy_select
-    BEQ @Loop
-  
   @Select_Pressed:
     LDA equipoffset
-    CMP #6
-    BCC @ResetSelectLoop
+    CMP #1                   ; see if its the shield slot
+    BNE :+
+
+    LDX char_index           ; if it is, see if the character can dual-wield
+    LDA ch_perks, X
+    AND #DUALWIELD
+    BEQ @Loop                ; if they can't, do nothing
     
-    LDA battleitemslot
-    EOR #$01               ; if its 0, switch to 1; if its 1, switch to 0!
-    STA battleitemslot
+    LDA DualWieldStats
+    EOR #$01                 ; if its 0, switch to 1; if its 1, switch to 0!
+    STA DualWieldStats
+    BNE @SwitchScreen
+    
+  : CMP #6
+    BCC @Loop
+   
+  @SwitchScreen:   
+    LDA WeaponOrArmorPage
+    EOR #$01                ; if its 0, switch to 1; if its 1, switch to 0!
+    STA WeaponOrArmorPage
     JSR PlaySFX_MenuSel
     JMP EnterEquipInventory
     
@@ -9176,10 +9310,11 @@ EnterEquipInventory:
     ;; "Do you want to throw it away?"
     
   : JSR Set_Inv_Weapon
-    DEC ItemToEquip
+    DEC ItemToEquip          ; if ID is 0 (nothing chosen) and goes to $FF, skip removing the item
+    BMI :+
     LDA ItemToEquip          ; get the new weapon
     JSR REMOVE_ITEM          ; remove it from inventory
-    JMP PlaySFX_MenuSel
+  : JMP PlaySFX_MenuSel
     
    @Error: 
     JSR PlaySFX_Error        ; kr-kow if not equippable
@@ -9200,6 +9335,8 @@ ResetCharStats:
     .word SetCharStats
     .byte BANK_Z
     RTS
+    
+    
 
     
 UpdateEquipInventoryStats:    
@@ -9214,18 +9351,31 @@ UpdateEquipInventoryStats:
 ;; If there is 0 amount of an item, it will equip you with nothing
 ;; or else give an error if the item set cannot be equipped
 
+
+
     LDA #0
     STA equip_impossible
-    STA slotcheck
-    STA shop_type            ; for equip permissions, 0: weapon, 1: armor
+    STA tmp+8
+    LDA equipoffset          ; save equipoffset as the armor type 
+    STA slotcheck            ; to make sure you don't wear a glove on your head
+    
+   @WeaponOrArmorPage: 
+    LDA WeaponOrArmorPage    ; 1 when looking at armor, 0 when looking at weapons
+    STA shop_type            ; for equip permissions, 0: weapon, 1: armor    
+    BEQ :+                   ; so if its armor, put #ARMORSTART offset into tmp+8
+       LDA #ARMORSTART
+       STA tmp+8             
 
-    JSR Set_Inv_Weapon
+  : JSR Set_Inv_Weapon
     LDA cursor
     ASL A
     ASL A
     ASL A
+    CLC
     ADC cursor_max
-    STA ItemToEquip          ; this gets the 0-based item ID 
+    STA tmp+11               ; Used for slot checking for armor
+    ADC tmp+8                ; add 0 or armor offset
+    STA ItemToEquip          ; Currently 0-based item ID
     STA tmp+10               ; save the 0-based version for much later!
     JSR DOES_ITEM_EXIST      ; output is A = amount of item
     BCS @DoesNotExist        ; Carry set if it does not exist
@@ -9234,28 +9384,9 @@ UpdateEquipInventoryStats:
     ; And because IsEquipLegal subtracts 1 from A
     ; Also do it here, so that its primed for @FinishUpdate, if its a battle item slot
     
-    LDA equipoffset          
-    STA slotcheck
-    BEQ @CanEquip            ; see if its a weapon, and if so, jump to seeing if its equippable
-    CMP #06               
-    BCC @UpdateArmorID       ; see if its a battle item, and if so....
-
-    LDA battleitemslot       ; see if the battle item page is armor
-    BEQ @FinishUpdate     
-  
-   @UpdateArmorID:
-    LDA tmp+10
-    STA tmp+11               ; back it up for slot checking
-    CLC
-    ADC #ARMORSTART          
-    STA tmp+10               
-    ADC #1                   ; +1 to make it 1-based again 
-    STA ItemToEquip 
-    INC shop_type            ; set to 1 for armor  
-    
-    LDA equipoffset          ; check AGAIN if its a battle item slot
-    CMP #06
-    BCS @FinishUpdate
+    LDA equipoffset    
+    CMP #06                  ; see if its a battle slot item
+    BCS @FinishUpdate        ; If its 6 or 7, no need to check equip permissions
     
    @CanEquip:
     LDA ItemToEquip          ; 1-based ID
@@ -9263,44 +9394,37 @@ UpdateEquipInventoryStats:
     BEQ @NoEquip
     
     LDA equipoffset
-    BEQ @FinishUpdate
+    BEQ @FinishUpdate        ; skip checking armor slots if its a weapon
+    
+    LDX WeaponOrArmorPage    ; here we know: it is not a battle item slot, it is not the right hand weapon slot
+    BEQ @FinishUpdate        ; so it must be the shield/dual wield slot!
     
    @CheckArmorSlot:
     LDX tmp+11               ; check type LUT (head, body, hands, shield)
     CMP lut_ArmorTypes, X    ; against equip slot
     BEQ @FinishUpdate        ; if it equals, its in the right slot to continue
-    
+
    @WrongSlot:
     LDA #$FF                 ; mark the slot as FF
     STA slotcheck            ; so that EquipStatsDescBoxNumbers will show ! tiles to indicate 
     BNE @NoEquip             ; that the item IS equippable, but not on that part of the body    
-    
-   @FinishUpdate:  
-    LDA equipoffset
-    CLC 
-    ADC char_index           ; add character index
-    TAX
-    LDA ItemToEquip          ; is still 1-based from checking the legality of equipping it
-    STA ch_righthand, X      ; save item in that slot 
-    BNE @Continue            ; return
 
    @DoesNotExist:
     LDA #0                   ; only clear the ItemToEquip ID if you don't have one
     STA ItemToEquip          ; we want to keep this to be able to check the item's element stuff!
-    BEQ @ClearStats
+    BEQ @FinishUpdate
 
    @NoEquip:
     INC equip_impossible   
 
-   @ClearStats:      
+   @FinishUpdate:      
     LDA equipoffset   
     CLC 
     ADC char_index           ; add character index
     TAX
-    LDA #0
-    STA ch_righthand, X      ; clear slot
+    LDA ItemToEquip      
+    STA ch_righthand, X      ; save item in the slot    
 
-   @Continue:
     JSR ResetCharStats
     DEC cursor_change
 
@@ -9350,27 +9474,27 @@ EquipStatsDescBoxNumbers:
     
    @FetchStats:    
     LDX #$08       
-    LDY #$00; 16         ; damage
+    LDY #$16         ; damage
     JSR @TheThing
   
     LDX #$14
-    LDY #$03 ;18         ; defense
+    LDY #$18         ; defense
     JSR @TheThing
     
     LDX #$1F
-    LDY #$01 ;17         ; accuracy
+    LDY #$17         ; accuracy
     JSR @TheThing
    
     LDX #$2B
-    LDY #$04 ;19         ; evasion
+    LDY #$19         ; evasion
     JSR @TheThing
     
     LDX #$35
-    LDY #$02 ;1B         ; critical
+    LDY #$1B         ; critical
     JSR @TheThing
     
     LDX #$43
-    LDY #$05 ;1A         ; magic defense    
+    LDY #$1A         ; magic defense    
    
    @TheThing:
     LDA slotcheck
@@ -9435,7 +9559,7 @@ EquipStatsDescBoxString:
     LDA #10
     STA dest_x
     
-    LDA battleitemslot
+    LDA WeaponOrArmorPage
     BEQ @DrawWeapon
     
    @DrawArmor:    
@@ -9525,8 +9649,8 @@ DrawEquipInventoryCursor:
     JMP DrawCursor               ; then draw the cursor
 
 lut_EquipInventoryCursor_X:
-    .byte $10
-    .byte $88
+    .byte $08
+    .byte $80
     
 lut_EquipInventoryCursor_Y:
     .byte $28
@@ -9579,30 +9703,30 @@ DrawEquipInventory:
    ;; this would draw box connectors, if the string's data was also enabled
    
     ; tmp+4, 5, 6, 7, 8, 9 are safe to use jigs
+
+    LDY #0
+    STY tmp+5           ; item counter
+    STY tmp+6           ; left or right counter
   
     LDA item_pageswap   ; get the page number for the inventory screen list
     ASL A               ; there are $10 items per screen
     ASL A               ; which is 8 bytes of data to read
     ASL A               ; which is split into low/high, so back to $10
     ASL A
-    STA tmp+4           ; 
-    LDY #0
-    STY tmp+5           ; item counter
-    STY tmp+6           ; left or right counter
+   ; STA tmp+4           ; 
     
-    LDA equipoffset     ; get the item slot to check
-    BEQ @Loop           ; if its 0, its the weapon; jump ahead
-    CMP #6              ; else, see if its below 6 (armor slots) 
-    BCC @ArmorOffset    ; if equipoffset is 6 or 7, its a battle item
+   ; LDA equipoffset     ; get the item slot to check
+   ; BEQ @Loop           ; if its 0, its the weapon; jump ahead
+   ; CMP #6              ; else, see if its below 6 (armor slots) 
+   ; BCC @ArmorOffset    ; if equipoffset is 6 or 7, its a battle item
     
-    LDA battleitemslot  ; so then check this variable to see if weapon or armor battle item
-    BEQ @Loop           ; if 0, its weapon, skip ahead
+    LDX WeaponOrArmorPage  ; See if its the weapon or armor screen
+    BEQ :+                 ; if 0, its weapon, skip ahead
     
    @ArmorOffset:
-    LDA tmp+4
     CLC
     ADC #ARMORSTART     
-    STA tmp+4           ; tmp+4 is now the offset for where to look
+  : STA tmp+4           ; tmp+4 is now the offset for where to look
     
    @Loop: 
     JSR Set_Inv_Weapon
@@ -9613,27 +9737,54 @@ DrawEquipInventory:
     STA tmp             ; save for PrintNumber
     PLA
     TAY                 ; restore Y
-    BCS @SkipOne        
+    BCC @Exists
     
+   @Skip:
+    INC tmp+4
+    LDA #$0B
+    STA bigstr_buf, Y   ; stat code for drawing amount of tiles
+    LDA #$08              
+    STA bigstr_buf+1, Y ; number of tiles to draw
+    LDA #$C2
+    STA bigstr_buf+2, Y ; tile ID to draw
+    INY
+    BNE @Numbers
+    
+   @Exists: 
     INC tmp+4           ; check next item slot, as well as give +1 to item ID
     LDA tmp+4           ; 
     STA bigstr_buf+1, Y ; ID in 2nd slot
     LDA #07
     STA bigstr_buf, Y   ; weapon/armor name code in 1st slot
-    LDA #01
-    STA bigstr_buf+5, Y ; double line break
+    
+   @Numbers:
     LDA #$FF
     STA bigstr_buf+2, Y ; space
+    LDA #$F1
+    STA bigstr_buf+3, Y ; cute li'l x
     
     JSR PrintNumber_2Digit
-    LDA format_buf-1     ; numbers!
-    STA bigstr_buf+4, Y  ; tens 
-    LDA format_buf-2
-    STA bigstr_buf+3, Y  ; ones
+    LDA format_buf-2     
+    CMP #$FF
+    BNE @DoubleDigits
     
+   @SingleDigits: 
+    LDA format_buf-1
+    STA bigstr_buf+4, Y  
+    LDA #$FF
+    BNE :+
+
+   @DoubleDigits:
+    STA bigstr_buf+4, Y  ; tens 
+    LDA format_buf-1
+  : STA bigstr_buf+5, Y  ; ones
+
+    LDA #01
+    STA bigstr_buf+6, Y ; double line break
+
     TYA
     CLC
-    ADC #6
+    ADC #7
     TAY
    
    @ResumeLoop:
@@ -9656,35 +9807,20 @@ DrawEquipInventory:
     
    @DrawLeftSide:
     INC tmp+6              ; mark left side as drawn
-    LDA #04 
+    LDA #03
     STA dest_x 
     LDA #05
     STA dest_y
     JSR DrawComplexString  ; Draw all the item names
     
     LDY #0
-    BEQ @Loop
+    JMP @Loop
     
    @DrawRightSide:
-    LDA #19
+    LDA #18
     STA dest_x 
     JMP DrawComplexString  ; Draw all the item names
 
-   @SkipOne:
-    INC tmp+4              ; check next item id      
-    LDA #$C2               ; print _ tiles
-    LDX #$08               ; 8 times!
-    
-   @SkipOne_Loop: 
-    STA bigstr_buf, Y
-    INY
-    DEX
-    BNE @SkipOne_Loop
-    
-    LDA #01
-    STA bigstr_buf, Y
-    INY
-    JMP @ResumeLoop    
   
 
 
@@ -10062,41 +10198,7 @@ MoveEquipInventoryCursor:
     
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Equip Menu  [$BDF3 :: 0x3BE03]
-;;
-;;    Does not draw the names of the equipment -- only the boxes and other text
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-DrawEquipMenu:
-   JSR ClearNT             ; clear the NT
-   
-   LDA #MBOX_EQUIP         
-   JSR DrawMainItemBox
-
-   LDA CharacterEquipBackup
-   STA submenu_targ
- 
-   LDA #$05
-   STA dest_x
-   
-   LDA #11
-   JSR DrawCharMenuString   ; Name and Class
-   
-   LDA #$06
-   STA dest_y
-   LDA #12
-   JSR DrawMenuString       ; Equipment
-   
-   LDA #$17
-   STA dest_y
-   LDA #$03
-   STA dest_x
-   LDA #13
-   JMP DrawCharMenuString  ; Stats
 
 
 

@@ -91,6 +91,10 @@
 .export DOES_ITEM_EXIST
 .export Set_Inv_Magic
 .export Set_Inv_Weapon
+.export Set_Inv_KeyItem
+.export DOES_ITEM_EXIST_1BIT
+.export ADD_ITEM_1BIT
+.export REMOVE_ITEM_1BIT
 .export SwapPRG_L
 .export ItemDescriptions
 
@@ -12060,6 +12064,7 @@ CombatBoxStrings_LUT:
     .WORD CommandString     ; 04
     .WORD EnemyRosterString ; 05
     .WORD EtherBoxString    ; 06
+    .WORD SkillBoxString    ; 07
 
 DrawCombatBox_L:
 DrawCombatBox:
@@ -12475,8 +12480,15 @@ SetCReturnBank:
 CommandString:
 .BYTE $FF,$FF,$8F,$AC,$AA,$AB,$B7,$FF,$FF,$90,$B8,$A4,$B5,$A7,$01   ; "Fight__Guard"
 .BYTE $FF,$FF,$96,$A4,$AA,$AC,$A6,$FF,$FF,$92,$B7,$A8,$B0,$B6,$01   ; "Magic__Items"
-.BYTE $FF,$FF,$14,$FF,$FF,$FF,$91,$AC,$A7,$A8,$FF,$01               ; "(Skill_)__Hide_" 
+.BYTE $FF,$FF,$9C,$AE,$AC,$AF,$AF,$FF,$FF,$91,$AC,$A7,$A8,$FF,$01   ; "Skill__Hide_" 
 .BYTE $FF,$FF,$90,$A8,$A4,$B5,$D4,$FF,$FF,$8F,$AF,$A8,$A8,$00       ; "Gear(sword)__Flee"
+
+
+SkillBoxString:
+.BYTE $FF,$FF,$14,$00,$01,$01
+.BYTE $FF,$FF,$14,$01,$01,$01
+.BYTE $FF,$FF,$14,$02,$01,$01
+.BYTE $FF,$FF,$14,$03,$00
 
 ;; $9C, $AE, $AC, $AF, $AF ; "Skill" - for reference
   
@@ -12542,7 +12554,7 @@ ConfirmRunAway:
 ;;  11 xx yy = yyxx is a number to print
 ;;  12       = converts btl_defender_index to name
 ;;  13 xx yy = print character stat, xx = character ID, yy = stat
-;;  14       = print skill text based on battle_class variable
+;;  14 xx    = print skill text based on character, where xx = their skills
 ;;  15 xx    = print defender's MP stat, where xx = stat to print
 ;;  16       = force a VBlank wait before continuing
 ;;  17       = print battle turn
@@ -12566,9 +12578,7 @@ FormatBattleString:
     LDY #$00                ; copy the actual string data to a buffer in RAM
     : LDA (btldraw_src), Y  ;   (presumably so we can swap out banks without fear
       STA btl_stringbuf, Y  ;    of swapping out our source data)
-      INY
-      ;CPY #$20              ; no strings can be longer than $20 characters.
-      ;; $FF is new max!
+      INY                   ;  this allows a buffer of 255 bytes
       BNE :-
       
     LDA #<btl_stringbuf     ; Change source pointer to point to our buffered
@@ -12870,7 +12880,7 @@ DrawBattleString_ControlCode:
     CMP #$13
     BEQ @DrawPlayerHP             ; code:  13
     CMP #$14
-    BEQ @PrintClassSkill          ; code:  14
+    BEQ @PrintSkill               ; code:  14
     CMP #$15
     BEQ @DrawPlayerMP             ; code:  15
     CMP #$17
@@ -12882,13 +12892,22 @@ DrawBattleString_ControlCode:
     ;; and if its 16-47, do a VBlank.
     JMP DrawBox_WaitForVBlank
     
-   @PrintClassSkill:
-    LDA battle_class             ; get class ID
+   @PrintSkill:  
+    JSR DrawBattle_IncSrcPtr
+    LDA (btldraw_src), Y         ; load it - it should be 0, 1, 2, 3
     CLC
-    ADC #ITEM_SKILLSTART
-    INY
-    STA (btldraw_src), Y         ; replace the byte in the source
-    DEY
+    ADC char_index               ; add their index ($00, $40, $80, $C0)
+    TAX
+    LDA ch_skills, X             ; put in X, then load that skill byte, which is an ID
+    BNE @ContinueSkill
+    LDX #10
+    BNE @DrawString_SpaceRun_FromSkill
+    
+   @ContinueSkill: 
+    CLC
+    ADC #ITEM_SKILLSTART-1       ; then add the skill name offset
+    STA (btldraw_src), Y         ; replace the just-loaded byte in the source
+    DEC btldraw_src              ; then decrement it so the next increment will re-load this byte
     LDA #$0E                     ; then use the item name code
     JMP @PrintItemName           ; and print it as an item
     
@@ -12951,9 +12970,9 @@ DrawBattleString_ControlCode:
     JSR DrawBattle_IncSrcPtr    ; inc ptr
     LDA (btldraw_src), Y        ; get the run length
     TAX
+   @DrawString_SpaceRun_FromSkill:     
     LDA #$FF                    ; blank space tile
-    : ;LDY #$00
-      STA (btldraw_dst), Y      ; print top/bottom portions as empty space
+    : STA (btldraw_dst), Y    
       JSR DrawBattleString_IncDstPtr
       DEX
       BNE :-
@@ -14177,17 +14196,17 @@ JigsDrawBox_LUT:
 .byte $10,$09,$00,$00 ; 04, Command Box
 .byte $0F,$09,$00,$00 ; 05, Roster Box
 .byte $11,$09,$00,$00 ; 06, Ether Box
-.byte $09,$09,$17,$00 ; 07, Player HP
-.byte $0D,$03,$00,$00 ; 08, Attacker Box
-.byte $0D,$03,$0D,$00 ; 09, Attack Box
-.byte $0D,$03,$00,$03 ; 0A, Defender Box
-.byte $0D,$03,$0D,$03 ; 0B, Damage Box
-.byte $20,$03,$00,$06 ; 0C, Message Box
-.byte $20,$09,$00,$00 ; 0D, Magic Box
-.byte $0F,$09,$00,$00 ; 0E, Item Box
-.byte $17,$09,$00,$00 ; 0F, Gear Box
-.byte $20,$06,$00,$03 ; 10, Scan Box
-.byte $0F,$09,$00,$00 ; 11, Skill Box
+.byte $0F,$09,$00,$00 ; 07, Skill Box
+.byte $09,$09,$17,$00 ; 08, Player HP
+.byte $0D,$03,$00,$00 ; 09, Attacker Box
+.byte $0D,$03,$0D,$00 ; 0A, Attack Box
+.byte $0D,$03,$00,$03 ; 0B, Defender Box
+.byte $0D,$03,$0D,$03 ; 0C, Damage Box
+.byte $20,$03,$00,$06 ; 0D, Message Box
+.byte $20,$09,$00,$00 ; 0E, Magic Box
+.byte $0F,$09,$00,$00 ; 0F, Item Box
+.byte $17,$09,$00,$00 ; 11, Gear Box
+.byte $20,$06,$00,$03 ; 11, Scan Box
 
 
 ;; again note: box IDs 0 and 1 will not work. They are for variations of the "Ready?" box!
@@ -14200,19 +14219,19 @@ JigsDrawBoxAddress_LUT: ; read from -4
 .byte $77,$00 ; 04, Command Box
 .byte $77,$A0 ; 05, Roster Box
 .byte $7A,$40 ; 06, Ether Box  
-.byte $7F,$A0 ; 07, Player HP   
+.byte $77,$A0 ; 07, Skill Box    - shared with Roster
+.byte $7F,$A0 ; 08, Player HP   
 
-.byte $75,$00 ; 08, Attacker Box
-.byte $75,$40 ; 09, Attack Box
-.byte $75,$80 ; 0A, Defender Box
-.byte $75,$C0 ; 0B, Damage Box
-.byte $76,$00 ; 0C, Message Box
+.byte $75,$00 ; 09, Attacker Box
+.byte $75,$40 ; 0A, Attack Box
+.byte $75,$80 ; 0B, Defender Box
+.byte $75,$C0 ; 0C, Damage Box
+.byte $76,$00 ; 0D, Message Box
 
-.byte $78,$40 ; 0D, Magic Box
-.byte $77,$A0 ; 0E, Item Box    - shared with Roster
-.byte $79,$60 ; 0F, Gear Box
-.byte $7A,$E0 ; 10, Scan Box    
-;.byte $77,$A0 ; C, Skill Box  - should be shared with Roster if it existed
+.byte $78,$40 ; 0E, Magic Box
+.byte $77,$A0 ; 0F, Item Box    - shared with Roster
+.byte $79,$60 ; 10, Gear Box
+.byte $7A,$E0 ; 11, Scan Box    
 
 
 ;; They're ordered by a weird box ID system more than RAM location now.

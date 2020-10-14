@@ -97,10 +97,11 @@ inv_class       = unsram + $E8 ; 16 bytes compressed, 2 skills per byte
 ch_stats          = unsram + $0100 ; MUST be on page bound.  Each character allowed $40 bytes, so use 00,40,80,C0 to index ch_stats
 ch_class          = ch_stats + $00 
 ch_sprite         = ch_stats + $01
-ch_skill1         = ch_stats + $02
-ch_skill2         = ch_stats + $03
-ch_skill3         = ch_stats + $04
-ch_skill4         = ch_stats + $05
+ch_skills         = ch_stats + $02
+ch_skill1         = ch_skills        ; $02
+ch_skill2         = ch_skills + $01  ; $03
+ch_skill3         = ch_skills + $02  ; $04
+ch_skill4         = ch_skills + $03  ; $05
 ch_perks          = ch_stats + $06
 ch_battleperks    = ch_stats + $07
 ch_armormastery   = ch_stats + $08
@@ -210,7 +211,9 @@ wateraccess             = $35 ; for moving into water
 sm_player_x             = $36 ; player X/Y position on standard map.  Only used for NPC collision detection
 sm_player_y             = $37
 domappoison             = $38
-;; 39, 3A, 3B -- free to use
+leaderperks             = $39
+;                       = $3A
+;                       = $3B
 battlerate              = $3C ; X/256 chance of a random encounter occuring (SM only apparently)
 inroom                  = $3D ; bit 7 is the actual inroom flag.  $x2=entering room, $x1=entering locked room (different sprite vis), $x5=exiting room, $x6=exiting locked room
 doorppuaddr             = $3E ; 2 bytes, PPU address of door drawing work
@@ -284,10 +287,10 @@ treasure_offset         = $54 ; stores the chest's item name printing code (weap
 
 ;; Menu Things - Shared 
 equipoffset             = $59 ; menus
-hp_recovery             = $5A ; tmp byte for amount of HP to heal with potions and spells
+hp_recovery             = $59 ; +59 tmp bytes for amount of HP to heal with potions and spells
 mp_required             = $5B ; offset for spell level to decrease when casting (menus only)
 descboxopen             = $5C ; marks the description box is open
-battleitemslot          = $5D ; equip menu, swaps between weapons/armour
+WeaponOrArmorPage       = $5D ; equip menu, swaps between weapons/armour
 equipmenu_tmp           = $5E ; for unequip/reequipping
 weasels                 = $5F ; Important for saving/loading, and sound test menu
 
@@ -928,20 +931,27 @@ btl_charcmdconsumeid    = $6818 ;
 
 ;; battle statuses 
 
-btl_charstone           = $681C ; Stone status
+btl_charstatuses        = $681C ; see "ClearCharBuffers" in Bank C before changing this
+
+btl_charstone           = $681C ; Stone status - should always be first
 btl_charregen           = $6820 ; Regeneration status
 btl_charreflect         = $6824 ; Reflect magic status
 
+;; long-actions -- these last more than 1 turn
+
+btl_charparry           = $6828 ; BB/Master Parry skill
+btl_charfocus           = $682C ; Black Focus skill
+btl_charcover           = $6830 ; Knight Cover
+btl_charhidden          = $6834 ; Hidden status
+
 ;; actions 
 
-btl_charhidden          = $6828 ; Hidden status
-btl_charguard           = $682C ; Guard status
-btl_charcover           = $6830 ; Knight Cover, 8 bytes ; first 4 =  who is being covered, second 4 = by whom
-btl_charparry           = $6838 ; BB/Master Parry skill
+btl_charguard           = $6838 ; Guard status
 btl_charpray            = $683C ; White Pray skill
-btl_charfocus           = $6840 ; Black Focus skill
-btl_charrunic           = $6844 ; Red Runic skill
-btl_charrush            = $6848 ; Fighter Rush skill
+btl_charrunic           = $6840 ; Red Runic skill
+btl_charrush            = $6844 ; Fighter Rush skill
+
+btl_charstatuses_end    = $6844 
 
 ;; stats
 ;; if more stats are added, check PlayerMagDefenderStats_LUT in Bank C and PlayerAttackerStats_LUT in Bank B to adjust the routines

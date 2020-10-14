@@ -1447,8 +1447,10 @@ CoverStuff:
     LDA btl_charcover, X
     BEQ @NoCover
 
-    LDA btl_attacker
-    CMP btl_charcover+4, X         ; get the knight doing the covering
+    AND #$03
+    STA tmp                        ; backup for possible btl_defender_index
+    ORA #$80 
+    CMP btl_attacker               ; get the knight doing the covering
     BEQ @NoCover                   ; skip if the knight is confused and doing the attacking!
 
     JSR PrepCharStatPointers       ; get pointer to char stats in CharBackupStatsPointer and CharStatsPointer
@@ -1464,14 +1466,21 @@ CoverStuff:
         BEQ @NoCover               ; the knight is stunned, 50/50 chance to perform action
 
    @Cover:
+    LDA btl_charcover, X
+    SEC
+    SBC #$10
+    BPL :+                           
+      LDA #0                       ; if it wrapped to $Fx, set it to 0--no more cover for this character!    
+  : STA btl_charcover, X           ; subtract $10 from however many defending attempts are left
+
     INC attackblocked              ; set to 1
     LDA btl_defender_index         ; get the original target
     ORA #$80                       ; convert to ID
     STA btl_defender
     ;; important to note: this is used by the DefenderBox drawing thing, but not really used for players otherwise!
     ;; everything else uses btl_defender_index... so btl_defender is now the ORIGINAL target
-    LDA btl_charcover+4, X         ; get the knight doing the covering
-    AND #$03
+
+    LDA tmp                        ; get the knight doing the covering
     STA btl_defender_index         ; and set as the new defender
 
    @NoCover:

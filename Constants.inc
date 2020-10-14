@@ -294,17 +294,18 @@ BOX_PLAYER          = $03
 BOX_COMMAND         = $04
 BOX_ENEMYROSTER     = $05
 BOX_ETHER           = $06
-BOX_HPUPDATE        = $07 ; fairly important
+BOX_SKILL           = $07
+BOX_HPUPDATE        = $08 ; fairly important
 
-BOX_ATTACKER        = $08
-BOX_ATTACK          = $09
-BOX_DEFENDER        = $0A
-BOX_DAMAGE          = $0B
-BOX_MESSAGE         = $0C
-BOX_MAGIC           = $0D
-BOX_ITEM            = $0E
-BOX_GEAR            = $0F
-BOX_SCAN            = $10
+BOX_ATTACKER        = $09
+BOX_ATTACK          = $0A
+BOX_DEFENDER        = $0B
+BOX_DAMAGE          = $0C
+BOX_MESSAGE         = $0D
+BOX_MAGIC           = $0E
+BOX_ITEM            = $0F
+BOX_GEAR            = $10
+BOX_SCAN            = $11
 
 ;;;;;;;;;;;;;;;;;
 ;; menu box IDs
@@ -976,10 +977,14 @@ CLASS_PROMOTION = $10 ; classes lower than this are starting classes
 
 UNARMED         = $01
 DUALWIELD       = $02
-STEALTHY        = $03
+STEALTHY        = $04
+TWOHANDED       = $08
+CHEMIST         = $10
+LIGHTSTEP       = $20
+;               = $40
+ENDURE          = $80
 
-
-;                       matches ailment: effect:
+; on critical hits ...  matches ailment: effect:
 CRIT_DEATH      = $01 ; death          ; kills enemy on critical hit
 CRIT_CRIT       = $02 ; stop           ; ups critical hit chance for self
 CRIT_POISON     = $04 ; poison         ; poisons enemy
@@ -1406,7 +1411,7 @@ FAST_HITCAP              = $03 ; How many times the Fast spell can boost the hit
 STARTING_STATS           = $0E ; number of starting stats for each class ; 1 based
 HP_MAX_LOW               = $E7
 HP_MAX_HIGH              = $03 ; these two = 999
-
+COVER_HITS               = $80 ; high bits only (second number always 0). Amount of hits a knight can last covering someone.
 
 
 

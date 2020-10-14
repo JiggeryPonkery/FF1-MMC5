@@ -263,7 +263,7 @@ ClearCommandBuffer:
     RTS
 
 ClearCharBuffers:    
-    LDY #$28
+    LDY #btlstats_mainstats - btl_charstatuses + 4 ; +4 to ignore stone status
     LDA #$00
     : STA btl_charparry-1, Y       ; clear all battle states, but not Stone
       DEY
@@ -506,18 +506,13 @@ GetCharacterBattleCommand:
     STA CharacterIndexBackup        ; convert current command character 
     TAX
     LDA ch_class, X                 
-   
-    ;; JIGS - to use all 16 clases, just "STA battle_class" here
-    CMP #CLASS_PROMOTION            ; if its higher than the starting classes, subtract
-    BCC :+                          
-      SBC #CLASS_PROMOTION
-  : STA battle_class
+    STA battle_class
     
     LDA btlcmd_curchar    
     JSR PrepCharStatPointers        ; Prep the stat pointers (this persists through all the sub menus)
     
     LDX btlcmd_curchar
-    JSR ClearGuardBuffers           ; in case they guarded then chose to re-select their command, undo the guard state
+    JSR ClearActionBuffers          ; in case they guarded then chose to re-select their command, undo the guard state
     LDA btl_charparry, X
     BPL :+
     LDA #0
@@ -718,55 +713,112 @@ lut_BattleSubMenu2:
 
 BattleSubMenu_Skill:
     JSR UndrawOneBox
+
+BattleSubMenu_Skill_NoUndraw:    
+    LDA btlcmd_curchar
+    JSR ShiftLeft6
+    STA char_index    
+
+    LDA #BOX_SKILL
+    JSR DrawCombatBox
+    JSR MenuSelectionItem_LoadCursor  ; this menu shares the same cursor positions
+    JSR MenuSelection_2x4
+    JSR UndrawOneBox
+    CMP #02
+    BNE @GetSkillChoice               ; =2 if they bressed B
+   
+   @ReturnToCommand:
+    JMP CancelBattleAction_RedrawCommand   
+   
+   @GetSkillChoice: 
+    TYA                               ; Y = 0, 1, 2, or 3 ; the skill selected
+    CLC
+    ADC char_index                    ; add character index
+    TAX
+    LDA ch_skills, X
+    STA battle_class                  ; overwrite battle_class with the chosen skill
+    ASL A
+    TAX
+    LDA @DoSkill_LUT, X               
+    STA tmp
+    LDA @DoSkill_LUT+1, X
+    STA tmp+1
+    JMP (tmp)
     
-    LDA battle_class
-    BEQ @Cover                      ; if fighter/knight, do Cover
-    CMP #CLASS_TH
-    BEQ @Steal                      ; thief/ninja, do Steal
-    CMP #CLASS_BB
-    BEQ @Parry                      ; bb/master, parry
-    CMP #CLASS_RM
-    BEQ @Runic ;@Scan               ; red mage/wiz, scan
-    CMP #CLASS_WM
-    BEQ @Pray                       ; white mage/wiz, pray
-    BNE @SetSkill                   ; black mage/wiz, just set the skill
-  
-   @DoNothing:
+   @DoSkill_LUT:
+    .word @Nothing  ; 00 - really nothing
+    
+    .word @Rush     ; 01
+    .word @Steal    ; 02
+    .word @Parry    ; 03
+    .word @Runic    ; 04
+    .word @Pray     ; 05
+    .word @Focus    ; 06
+    .word @Cover    ; 07
+    .word @Scan     ; 08
+    .word @Nothing  ; 09
+    .word @Nothing  ; 0A
+    .word @Nothing  ; 0B
+    .word @Nothing  ; 0C
+    .word @Nothing  ; 0D
+    .word @Nothing  ; 0E
+    .word @Nothing  ; 0F
+    .word @Nothing  ; 10
+
+    .word @Nothing  ; 11 
+    .word @Nothing  ; 12
+    .word @Nothing  ; 13
+    .word @Nothing  ; 14
+    .word @Nothing  ; 15
+    .word @Nothing  ; 16
+    .word @Nothing  ; 17
+    .word @Nothing  ; 18
+    .word @Nothing  ; 19
+    .word @Nothing  ; 1A
+    .word @Nothing  ; 1B
+    .word @Nothing  ; 1C
+    .word @Nothing  ; 1D
+    .word @Nothing  ; 1E
+    .word @Nothing  ; 1F
+    .word @Nothing  ; 20
+    
+
+   @Nothing:
     JSR DoNothingMessageBox
-    JMP CancelBattleAction_RedrawCommand
+    JMP BattleSubMenu_Skill_NoUndraw
    
    @Pray: 
     LDX btlcmd_curchar
     INC btl_charpray, X
-    BNE @SetSkill
-    
-  ; @Scan:                           ; and red mage/wiz does Scan
-  ;  JSR SelectEnemyTarget           ; Pick a target
-  ;  CMP #$02
-  ;  BEQ @CancelSkill
-  ;  BNE @SetSkill
+    JMP @SetSkill
+   
+   @Rush:
+   @Steal:
+   @Scan:  
+    JSR SelectEnemyTarget           ; Pick a target
+    CMP #$02
+    BEQ @CancelSkill
+    JMP @SetSkill
   
    @Runic:
     LDX btlcmd_curchar
-    LDA btl_charweaponsprite, X
+    LDA btl_charweaponsprite, X     ; check main weapon only
     BNE :+
+       @NoRunic:
         LDA #BTLMSG_NOWEAPON
         JSR DrawMessageBoxDelay_ThenClearIt
-        JMP CancelBattleAction_RedrawCommand
+        JMP BattleSubMenu_Skill_NoUndraw
     
-  : STA btl_charrunic, X            ; weapon sprite is saved here
-    BNE @SetSkill
+  : CMP #$AC                        
+    BEQ @NoRunic                    ; fists are not appropriate to use
+    STA btl_charrunic, X            ; weapon sprite is saved here
+    JMP @SetSkill
     
    @Parry:
     LDX btlcmd_curchar
     LDA #$FF
     STA btl_charparry, X            ; STA with FF
-    BNE @SetSkill                   ; and can be DEC'd easily once it procs
-    
-   @Steal: 
-    JSR SelectEnemyTarget           
-    CMP #$02
-    BNE @SetSkill                   
+    JMP @SetSkill                   ; and can be DEC'd easily once it procs
     
    @CancelSkill:
     JMP CancelBattleAction_RedrawCommand  
@@ -775,28 +827,30 @@ BattleSubMenu_Skill:
     JSR SelectPlayerTarget   
     CMP #$02
     BEQ @CancelSkill
-    LDA btlcurs_y                   ; to get player target, get the Y position of cursor
-    AND #$03                        ; cut it down to 0-3
-    CMP btlcmd_curchar
+    CPY btlcmd_curchar              ; Y = target to defend... so if its themselves...
     BNE :+
       LDA #BTLMSG_CANNOTDEFEND
       JSR DrawMessageBoxDelay_ThenClearIt
       JMP @Cover                    ; if they try to defend themselves, reset the cursor
-  : TAX
-    INC btl_charcover, X            ; set target to be covered
+  : TYA                             ; otherwise, its okay
+    TAX
     LDA btlcmd_curchar
-    ORA #$80
-    STA btl_charcover+4, X          ; and put fighter/knight's index in the second half 
-    
+    ORA #COVER_HITS               ; high bits are # of hits the coverer can last
+    STA btl_charcover, X          ; and put fighter/knight's index in the second half 
+   
+   @Focus:   
    @SetSkill:
-    LDA #ACTION_SKILL
+    LDA #ACTION_SKILL               ; mark that a skill is being done
     JMP SetCharacterBattleCommand   
-    ;; For Cover, Y = character to defend, X = character doing the defending
-    ;; For Steal, Y = enemy to steal from
-    ;; For Parry, nothing needs to be set
-    ;; For Scan, Y = enemy to scan
-    ;; SetCharacterBattleCommand saves battle_class as the fourth byte of the command buffer
-  
+    ;; Rush: Y = enemy to attack
+    ;; Steal: Y = enemy to steal from
+    ;; Parry: nothing to set here
+    ;; Runic: nothing to set here 
+    ;; Pray: nothing to set here
+    ;; Focus: nothing to set here
+    ;; Scan: Y = enemy to scan
+    ;; Cover: Y = character to defend, X = character doing the defending
+    ;; SetCharacterBattleCommand saves battle_class (now skill ID) as the fourth byte of the command buffer
 
 BattleSubMenu_Run:  
     JSR UndrawOneBox
@@ -952,7 +1006,7 @@ BattleSubMenu_Magic:
     JSR UndrawOneBox                ; undraw the command box
 
 BattleSubMenu_Magic_NoUndraw:
-    LDA btlcmd_curchar              ; <- This is never used
+    ;LDA btlcmd_curchar              ; <- This is never used
     ;JSR Magic_ConvertBitsToBytes    ; JIGS is using it!
     
     LDA btlcmd_curchar
@@ -1188,7 +1242,7 @@ BattleSubMenu_Item_Select:
     LDA #$02
     STA btl_charcmdconsumetype, Y   ; store 02 as the consumable type (to indicate Item)
     LDA btlcmd_spellindex
-    STA btl_charcmdconsumeid, Y     ; store menu selection as consumed ID -- to indicate which potion  (00/01 for Heal/Pure potion)
+    STA btl_charcmdconsumeid, Y     ;
     
     PLA                     ; get last character selection
     TAY                     ; put in Y (for SetCharacterBattleCommand)
@@ -2485,20 +2539,26 @@ MenuSelection_Equipment:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-MenuSelection_Item:
+MenuSelectionItem_LoadCursor:
     LDY #$10
     : LDA lut_ItemCursorPos-1, Y   ; copy over the cursor positions for
       STA btlcurs_positions-1, Y    ;  the Item menu
       DEY
       BNE :-
+    RTS  
+
+MenuSelection_Item:
+
     ;JMP MenuSelection_2x4           ; and do the logic
+
+    JSR MenuSelectionItem_LoadCursor
     
-    LDA #0
-    STA item_pageswap
-    STA tmp
-    STA btlcurs_x
-    STA btlcurs_y
-    STA battle_item
+    ; Y = 0
+    STY item_pageswap
+    STY tmp
+    STY btlcurs_x
+    STY btlcurs_y
+    STY battle_item
     
    @RedrawList:  
     LDA item_pageswap
@@ -2936,6 +2996,27 @@ MenuSelection_2x4:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+ClearActionBuffers_Dead_Stone:
+    LDA #>btl_charstatuses_end
+    STA tmp
+    LDA #<btl_charstatuses_end
+    STA tmp+1
+
+   ;; Y = number of buffers to clear, starting from the end
+   ;; So #11 will clear out stone, but #10 will not
+   @Loop:
+    LDA #0
+    STA (tmp,X)
+    LDA tmp
+    SEC
+    SBC #4
+    STA tmp
+    DEY
+    BNE @Loop
+    RTS
+    
+    
+
 SetNaturalPose:
     TAX
     ASL A
@@ -2952,11 +3033,8 @@ SetNaturalPose:
     JSR @StoneBGTiles       ; if they're not stoned, fix the BG tiles
     BEQ :+ 
        STA ch_ailments, Y        ;; JIGS - same goes for stone! But leave their HP alone 
-       LDA #0
-       STA btl_charguard, X
-       STA btl_charcover, X
-       STA btl_charcover+4, X
-       STA btl_charhidden, X
+       LDY #10
+       JSR ClearActionBuffers_Dead_Stone
        LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
        LDA #LOADCHARPOSE_CHEER
        BNE @SetAndReturn
@@ -2970,12 +3048,10 @@ SetNaturalPose:
       STA ch_curhp, Y
       STA ch_curhp+1, Y
       STA ch_morale, Y          ;; and their spirit!
-      STA btl_charguard, X      ;; JIGS - and zero everything else...
-      STA btl_charregen, X
-      STA btl_charcover, X
-      STA btl_charcover+4, X
-      STA btl_charreflect, X
-      STA btl_charhidden, X
+
+      LDY #11
+      JSR ClearActionBuffers_Dead_Stone
+
       LDY #CHARPOSE_NORM ; #CHARPOSE_STAND
       LDA #LOADCHARPOSE_DEAD
       BNE @SetAndReturn
@@ -4844,7 +4920,7 @@ ApplyEndOfRoundEffects:
     TAX
     ORA #$80
     STA btl_attacker
-    JSR ClearGuardBuffers   ;; clear out everything that only lasts 1 turn
+    JSR ClearActionBuffers   ;; clear out everything that only lasts 1 turn
     
     ;; then do Focus stuff for black mages
     LDA btl_charfocus, X
@@ -4875,11 +4951,9 @@ ApplyEndOfRoundEffects:
     INC BattleTurn
     JMP CheckForBattleEnd       ; poison may have killed the party -- check for battle end.
     
-ClearGuardBuffers:
+ClearActionBuffers:
     LDA #0
     STA btl_charguard, X      
-    STA btl_charcover, X
-    STA btl_charcover+4, X
     STA btl_charrunic, X
     STA btl_charpray, X
     STA btl_charrush, X
@@ -5354,6 +5428,10 @@ Battle_DoPlayerTurn:
     ;;  Code reaches here if the player had no command, which would only happen if they are
     ;;  immobilized or dead.
 
+   @RushSkill:
+    LDX BattleCharID
+    INC btl_charrush, X
+
    @Attack: 
     LDX btl_charcmdbuf+2, Y           ; X = enemy target
     LDA BattleCharID                  ; A = attacker
@@ -5375,18 +5453,13 @@ Battle_DoPlayerTurn:
     JMP Battle_PlayerTryRun       ; try to run!
 
    @Magic:
-    TYA                         ; back up command index
-    PHA
-    
-    LDY BattleCharID
-    LDX btl_charcmdconsumeid, Y
+    LDX BattleCharID
+    LDA btl_charcmdconsumeid, X ; spell level to drain MP from
+    TAX
     LDA ch_stats, X
     SEC
     SBC #$10
     STA ch_stats, X ; JIGS - lower high bits by 1, leaving low bits (max mp) alone
-    
-    PLA                         ; restore command index
-    TAY
     
     LDA btl_charcmdbuf+1, Y     ; A = effect
     LDX btl_charcmdbuf+2, Y     ; X = target
@@ -5398,36 +5471,61 @@ Battle_DoPlayerTurn:
   
    @Skill:
     LDA btl_charcmdbuf+3, Y
-    STA battle_class
-    CMP #CLASS_TH
-    BEQ @Steal                      
-    ;CMP #CLASS_RM
-    ;BEQ @Scan
-    CMP #CLASS_WM
-    BEQ @Pray
-    CMP #CLASS_BM
-    BEQ @Focus
+    TAX
+    ASL A
+    LDA @DoSkill_ActionLUT-2, X   ; - 2 because skill is 1-based
+    STA tmp
+    LDA @DoSkill_ActionLUT-1, X
+    STA tmp+1
+    JMP (tmp)
+
+  @DoSkill_ActionLUT:
+  ;.word @Nothing  ; 00
    
+   .word @RushSkill    ; 01
+   .word StealSkill    ; 02
+   .word @Parry        ; 03
+   .word @Runic        ; 04
+   .word PraySkill     ; 05
+   .word FocusSkill    ; 06
+   .word @Cover        ; 07
+   .word ScanEnemy     ; 08
+   .word @Nothing      ; 09
+   .word @Nothing      ; 0A
+   .word @Nothing      ; 0B
+   .word @Nothing      ; 0C
+   .word @Nothing      ; 0D
+   .word @Nothing      ; 0E
+   .word @Nothing      ; 0F
+   .word @Nothing      ; 10
+
+   .word @Nothing      ; 11 
+   .word @Nothing      ; 12
+   .word @Nothing      ; 13
+   .word @Nothing      ; 14
+   .word @Nothing      ; 15
+   .word @Nothing      ; 16
+   .word @Nothing      ; 17
+   .word @Nothing      ; 18
+   .word @Nothing      ; 19
+   .word @Nothing      ; 1A
+   .word @Nothing      ; 1B
+   .word @Nothing      ; 1C
+   .word @Nothing      ; 1D
+   .word @Nothing      ; 1E
+   .word @Nothing      ; 1F
+   .word @Nothing      ; 20  
+
    @Cover:
    @Runic:
    @Parry:
+   @Nothing:
     RTS
     
-   @Focus:
-    JMP FocusSkill
-    
-   @Pray:
-    JMP PraySkill   
-    
-   ;@Scan:
-   ; LDX btl_charcmdbuf+2, Y         ; X = enemy target
-   ; LDA BattleCharID                ; A = attacker
-   ; JMP ScanEnemy
-    
-   @Steal:
+StealSkill:
     LDX btl_charcmdbuf+2, Y         ; X = enemy target
     LDA BattleCharID                ; A = attacker
-    STX btl_defender_index       ; set defender index
+    STX btl_defender_index          ; set defender index
     STX btl_defender
     STA btl_animatingchar
     ORA #$80
@@ -5490,7 +5588,8 @@ ScanEnemy:
 ;Type-Mending   Affect-@@
 ;Weak-@@@@@@@@  Defy-@@@@@@@@ 
 
-
+    LDX btl_charcmdbuf+2, Y         ; X = enemy target
+    LDA BattleCharID                ; A = attacker
     STX btl_defender_index
     STX btl_defender
     PHA
@@ -6234,7 +6333,7 @@ ConfusedPlayerAttackEnemy_Physical:
     PLA
     STA AutoTarget         ; and restore it
     RTS
-
+    
 PlayerAttackEnemy_Physical:
     JSR LongCall
     .word PlayerAttackEnemy_PhysicalZ

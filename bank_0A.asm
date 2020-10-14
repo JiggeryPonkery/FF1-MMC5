@@ -1480,17 +1480,17 @@ SKILL1:
 SKILL2:
 .byte $9C,$B7,$A8,$A4,$AF,$00    ; Steal
 SKILL3:
-.byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
+.byte $99,$A4,$B5,$B5,$BC,$00    ; Parry
 SKILL4:
-.byte $9C,$A6,$A4,$B1,$FF,$00    ; Scan
+.byte $9B,$B8,$B1,$AC,$A6,$00    ; Runic
 SKILL5:
 .byte $99,$B5,$A4,$BC,$FF,$00    ; Pray
 SKILL6:
 .byte $8F,$B2,$A6,$B8,$B6,$00    ; Focus
 SKILL7:
-.byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
+.byte $8C,$B2,$B9,$A8,$B5,$00    ; Cover
 SKILL8: 
-.byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
+.byte $9C,$A6,$A4,$B1,$FF,$00    ; Scan
 SKILL9: 
 .byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL10:
@@ -1508,13 +1508,13 @@ SKILL15:
 SKILL16:
 .byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL17:
-.byte $8C,$B2,$B9,$A8,$B5,$00    ; Cover
+.byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL18:
 .byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL19:
-.byte $99,$A4,$B5,$B5,$BC,$00    ; Parry
+.byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL20:
-.byte $9B,$B8,$B1,$AC,$A6,$00    ; Runic
+.byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL21:
 .byte $FF,$FF,$FF,$FF,$FF,$00    ; _____  
 SKILL22:
