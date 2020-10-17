@@ -6,6 +6,9 @@
 .segment "BANK_13"
 
 .export EnterMinimap
+.export lut_MapObjCHR
+.export lut_OWMapObjCHR
+.export LoadPlayerMapmanCHR_15
 
 .import MinimapDecompress
 .import ClearOAM
@@ -21,6 +24,90 @@
 
 
 BANK_THIS = $13
+
+
+lut_MapObjCHR:
+.incbin "chr/class/fighter_mapsprite.chr"
+.incbin "chr/class/thief_mapsprite.chr"
+.incbin "chr/class/blackbelt_mapsprite.chr"
+.incbin "chr/class/redmage_mapsprite.chr"
+.incbin "chr/class/whitemage_mapsprite.chr"
+.incbin "chr/class/blackmage_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+
+.incbin "chr/class/knight_mapsprite.chr"
+.incbin "chr/class/ninja_mapsprite.chr"
+.incbin "chr/class/master_mapsprite.chr"
+.incbin "chr/class/redwizard_mapsprite.chr"
+.incbin "chr/class/whitewizard_mapsprite.chr"
+.incbin "chr/class/blackwizard_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+.incbin "chr/class/unused_mapsprite.chr"
+
+lut_OWMapObjCHR:
+.incbin "chr/npc_sprites/shadow_bridge_canal_tiles.chr"
+.incbin "chr/npc_sprites/ship_sprite.chr"
+.incbin "chr/npc_sprites/airship_sprite.chr"
+.incbin "chr/npc_sprites/canoe_sprite.chr"
+
+
+LoadPlayerMapmanCHR_15:
+    LDA #0          ; #0 -> tmp
+    STA tmp
+    LDX lead_index
+    LDA ch_sprite, X; Get lead party member's sprite
+    
+    ORA #>lut_MapObjCHR ; ORA with #$90, and put in tmp+1
+    STA tmp+1       ; (tmp) is now $9x00 (where x=lead party member's class).
+                    ;    This points to mapman graphics for that class
+    LDX #1          ; X=1  (load 1 row of tiles)
+    LDA #$10        ; A=$10 (high byte of dest address:  $1000)
+    JSR CHRLoadToA  ; jump to CHR loader
+    
+    LDA mapflags
+    ASL A
+    BCC LoadOWObjectCHR
+    RTS
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Load OW Object CHR  [$E940 :: 0x3E950]
+;;
+;;   Loads CHR for all overworld objects and mapmans
+;;   This includes:  ship, canoe, airship, bridge, canal, etc
+;;   It is assumed the proper CHR bank is swapped in.
+;;
+;;  IN:   tmp  = assumed to contain 0  (this routine does not explicitly clear it)
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+LoadOWObjectCHR:
+    LDA #>lut_OWMapObjCHR         ; source address is $9C00 (note:  low byte not explicitly cleared)
+    STA tmp+1
+    LDX #$04         ; 6 rows to load
+    LDA #$11         ; dest address is $1100
+    JMP CHRLoadToA    
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

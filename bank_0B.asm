@@ -3541,29 +3541,31 @@ lut_EOBText:
   .WORD @eobtext_Npts           ; 8
   .WORD @eobtext_PartyPerished  ; 9
   
-  @MnstPrsh: .BYTE $0F,$3D,$0F,$3C,$00      ; "Enemies perished" 
-  @ExpUp:    .BYTE $0F,$49,$00              ; "Exp earned.."
-  @ExpVal:   .BYTE $0C
-             .WORD eob_exp_reward           ; "## Exp"  where ## is the experience reward
+  @MnstPrsh: .BYTE $0F,BTLMSG_MONSTERS
+             .BYTE $0F,BTLMSG_TERMINATED,$00 ; "Monsters Terminated"
+  @ExpUp:    .BYTE $0F,BTLMSG_EXPUP,$00      ; "Exp earned.."
+  @ExpVal:   .BYTE $18
+             .WORD eob_exp_reward            ; "## Exp"  where ## is the experience reward
              .BYTE $FF,$8E,$BB,$B3,$00      
-  @GoldVal:  .BYTE $0C
-             .WORD eob_gp_reward            ; "## Gold"   where ## is the GP reward
+  @GoldVal:  .BYTE $18
+             .WORD eob_gp_reward             ; "## Gold"   where ## is the GP reward
              .BYTE $FF,$90,$B2,$AF,$A7,$00  
-  @Gold:     .BYTE $0F,$5E,$00              ; "Gold found.."
-  @LevUp:    .BYTE $0F,$30,$00              ; "Lev. up!"
+  @Gold:     .BYTE $0F,BTLMSG_GOLDFOUND,$00  ; "Gold found.."
+  @LevUp:    .BYTE $0F,BTLMSG_LEVUP,$00      ; "Lev. up!"
 
   @eobtext_NameLN:
-  .BYTE $02, $FF, $95, $0C
+  .BYTE $02, $FF, $95, $18
   .WORD eobtext_print_level
   .BYTE $00                                 ; "<Name> L##", where <Name> is btl_attacker's name and ## is value at $687A
   @eobtext_HPMax:
-  .BYTE $0F, $31, $00                       ; "HP max"
+  .BYTE $0F, BTLMSG_HPMAX_2, $00            ; "HP max"
   @eobtext_Npts:
-  .BYTE $0C
+  .BYTE $18
   .WORD eobtext_print_hp
   .BYTE $0F, $32, $00                       ; "##pts." where ## is value at $687C
   @eobtext_PartyPerished:
-  .BYTE $04, $0F, $3E, $0F, $3C, $00        ; "<Name> party perished", where <Name> is the party leader's name
+  .BYTE $04, $0F, BTLMSG_PARTY 
+  .BYTE $0F, BTLMSG_PERISHED, $00           ; "<Name> party perished", where <Name> is the party leader's name
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;

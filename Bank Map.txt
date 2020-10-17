@@ -16,9 +16,9 @@
 0F : Title Screens logic, New Game/Party Gen data, Sound Test, Equipment adjusting, Battle stat Loading; Enemy and weapon data
 10 : Environmental dialogue, dialogue code
 11 : NPC dialogue
-12 : Small map tile attributes and properties, Character map palettes, Teleport coordinates, Small map NPC coordinates, 
-13 : MiniMap
-14 : Character and NPC map sprites
+12 : Small map tile attributes and properties, map & sprite palettes, Teleport coordinates
+13 : MiniMap, Character and Overworld map sprites and loading.
+14 : NPC map sprites, coordinates on maps
 15 : 
 16 : 
 17 : Standard Map Data 1

@@ -73,6 +73,7 @@
 .import UpdateJoy
 .import WaitForVBlank_L
 .import lutClassBatSprPalette
+.import lut_InBattleCharPaletteAssign
 
 
 
@@ -1113,8 +1114,6 @@ SetPartyStats_Loop:
 
    @NextCharacter:
     ;; finally, do sprite attributes
-    
-
     LDY ch_sprite, X
     LDA lut_InBattleCharPaletteAssign, Y
     LSR A
@@ -1123,7 +1122,7 @@ SetPartyStats_Loop:
     LSR A
     LSR A
     LSR A
-    ORA #$20               ; turn into proper palette
+    ORA #$20 ; $20 is set on all so sprites are behind the background. This is so when the screen shakes and some characters are turned to BG tiles while stoned, the 3d effect is mostly preserved.
     LDX submenu_targ
     STA btl_charattrib, X
    
@@ -1193,60 +1192,7 @@ CalcNumHits:
     RTS
 
 
-;; JIGS - this is a li'l complicated:
-;; The highest 4 bits are the original character palettes: 0, 1, 2 ... now 0, 40, 80
-;; The low 6 bits are for the unarmed fist sprite. 
-;; Because every variable palette uses a base of $20 (00100000), having a base of $10 (00010000)
-;; will then trigger the variable palette routine to use specific colors for the sprite
-;; These colors are pulled from the original character palettes.
-;; The fist sprite is 2 colors. Usually skin + the darker color. 
-;; So bits (000000xx) say if the first (skin) color is 1, 2, or 3. 
-;; And bits (0000xx00) say if the second (wristband) color is 1, 2, or 3. 
-;; And bits (00xx0000) say which of the 3 palettes to pull the color from.
 
-; 0 is the original thief/bb/black mage palette
-; 1 is the red/white palette
-; 2 is the new palette (used for thief and ninja in my edits)
-
-; so for the BBelt: 00, 00, 01, 11 = 
-;1st palette for the class   : palette address 3F10 (whole palette)
-;1st palette for the fist    : palette address 3F10 (whole palette)
-;1st color for the wristband : palette address 3F11 (single color)
-;3rd color for the skin      : palette address 3F13 (single color)
-
-lut_InBattleCharPaletteAssign:
-  .BYTE %01010111 ; 01 Fighter
-  .BYTE %10100111 ; 02 Thief
-  .BYTE %00000111 ; 03 BBelt
-  .BYTE %01010111 ; 04 RMage
-  .BYTE %01010111 ; 05 WMage
-  .BYTE %00000111 ; 06 BMage
-  .BYTE %00000000 ; 07 
-  .BYTE %00000000 ; 08 
-  .BYTE %00000000 ; 09 
-  .BYTE %00000000 ; 10 
-  .BYTE %00000000 ; 11 
-  .BYTE %00000000 ; 12 
-  .BYTE %00000000 ; 13  
-  .BYTE %00000000 ; 14 
-  .BYTE %00000000 ; 15 
-  .BYTE %00000000 ; 16 
-  .BYTE %01010111 ; 17 Knight
-  .BYTE %10100111 ; 18 Ninja
-  .BYTE %00000111 ; 19 Master
-  .BYTE %01010111 ; 20 RedWiz
-  .BYTE %01010111 ; 21 W.Wiz
-  .BYTE %00000111 ; 22 B.Wiz
-  .BYTE %00000000 ; 23
-  .BYTE %00000000 ; 24    
-  .BYTE %00000000 ; 25
-  .BYTE %00000000 ; 26
-  .BYTE %00000000 ; 27
-  .BYTE %00000000 ; 28
-  .BYTE %00000000 ; 29
-  .BYTE %00000000 ; 30
-  .BYTE %00000000 ; 31
-  .BYTE %00000000 ; 32  
 
 
 

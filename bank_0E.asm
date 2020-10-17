@@ -1224,10 +1224,10 @@ LineUp_InMenu:
     
       JSR PlaySFX_MenuSel         ; play the selection sound effect  
       LDA cursor                ; otherwise (A pressed), get the selected character
+      LSR A
       ROR A
       ROR A
-      ROR A
-      AND #$C0                  ; and shift it to a useable character index
+      ;AND #$C0                  ; and shift it to a useable character index
       STA MMC5_tmp              ; swap target
       TAX                       ; and put in X
 
@@ -2360,13 +2360,10 @@ MultiplyXA_Safe:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ShopPayPrice:
-    ShopThief:         ; JIGS - HEEHEE
-    LDX #0
-    LDA ch_class, X    ; check if thief is party leader.
-    CMP #CLASS_TH      ; IF thief, goto ShopSteal
-    BEQ @ShopSteal
-    CMP #CLASS_NJ
-    BNE @PayUp         ; otherwise, pay up
+    LDX lead_index
+    LDA ch_perks, X    ; check if party leader is naughty
+    AND #STEALTHY
+    BEQ @PayUp         ; if not, pay up
     
    @ShopSteal:
     LDA shop_amount_buy ; how many items are being bought?
@@ -3085,6 +3082,7 @@ ShopFrameNoCursor:
     JMP PlaySFX_MenuMove       ; otherwise, play the movement sound effec, and exit
 
   @Exit:
+    JMP ClearButtons
   
 
 
@@ -4665,6 +4663,8 @@ ResumeMainMenu:
       BPL @Loop               ; loop until X wraps ($0C colors copied)
 
     JSR DrawMainMenu                ; draw the main menu
+    LDA #$03                        ; draw the little dot that marks the party map character
+    JSR SetLeadIndexTile
     JSR ClearMenuOtherNametables
     ;; JIGS ^ clear out the side nametables so screen shaking doesn't produce garbage pixels    
     LDA #BANK_THIS
@@ -4706,6 +4706,8 @@ MainMenuLoop:
     BNE @B_Pressed
     LDA joy_select
     BNE @Select_Pressed
+    LDA joy_start
+    BNE @Start_Pressed
     
     JSR MoveCursorUpDown          ; then move the cursor up or down if up/down pressed
     JMP MainMenuLoop              ;  rinse, repeat
@@ -4714,7 +4716,22 @@ MainMenuLoop:
     JSR LineUp_InMenu
     BCC EnterMainMenu             ; characters swappwed ; redraw menu
     JMP MainMenuResetCursorMax    ; not swapped - just reset the cursor
+   
+   @Start_Pressed:
+    JSR WaitForVBlank_L
+    LDA #$FF
+    JSR SetLeadIndexTile
     
+    LDA lead_index
+    CLC
+    ADC #$40
+    STA lead_index
+    
+    LDA #03
+    JSR SetLeadIndexTile
+    JSR PlaySFX_CharSwap
+    JMP MainMenuLoop
+   
    @B_Pressed:
     JSR ClearButtons
     STA $2001
@@ -4836,7 +4853,7 @@ MainMenuSubTarget_NoClear:
     LDA #4
     STA cursor_max
 
-  @Loop:
+   @Loop:
     JSR ClearOAM                 ; clear OAM
     JSR DrawMainMenuSubCursor    ; draw the sub target cursor
     JSR DrawMainMenuCharSprites  ; draw the main menu battle sprite
@@ -4847,21 +4864,63 @@ MainMenuSubTarget_NoClear:
     BNE @A_Pressed               ; check if A pressed
     LDA joy_b
     BNE @B_Pressed               ; or B
+    LDA joy_start
+    ORA joy_select
+    BNE @Start_Pressed
 
     JSR MoveCursorUpDown ;MoveMainMenuSubCursor    ; if neither, move the cursor
     JMP @Loop                    ; and keep looping
 
-  @B_Pressed:
+   @B_Pressed:
     SEC            ; if B pressed, just SEC before exiting
     RTS            ;  to indicate failure / user escaped
 
-  @A_Pressed:
+   @A_Pressed:
     LDA cursor         ; if A pressed, record the submenu target
     STA submenu_targ
     CLC                ; then clear C to indicate a target has been selected
     RTS                ; and exit!
+  
+   @Start_Pressed:
+    JSR WaitForVBlank_L
+    LDA #$FF
+    JSR SetLeadIndexTile
+    
+    LDA cursor
+    LSR A
+    ROR A
+    ROR A
+    STA lead_index
+    LDA #$03
+    JSR SetLeadIndexTile
+    
+    JSR PlaySFX_CharSwap
+    JMP MainMenuSubTarget_NoClear
+    
+SetLeadIndexTile:
+    PHA
+    LDA $2002
+    LDA lead_index
+    CLC
+    ROL A
+    ROL A
+    ROL A
+    ASL A
+    TAY
+    LDA LeadIndicator_LUT, Y
+    LDX LeadIndicator_LUT+1, Y
+    JSR SetPPUAddr_XA
+    PLA
+    STA $2007
+    JMP ResetScroll
 
-
+LeadIndicator_LUT:
+    .word $2070
+    .word $2130
+    .word $21F0
+    .word $22B0
+   
+   
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7638,6 +7697,7 @@ ClearButtons:
 ;;  on the main menu
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 DrawMainMenuCharSprites:
 ;    LDA #$88           ; Draw char 0's OB Sprite at $88,$18

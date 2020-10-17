@@ -78,7 +78,7 @@ keyitems_4      = unsram + $33
 ; unused        = unsram + $38
 ; unused        = unsram + $39
 ; unused        = unsram + $3A
-; unused        = unsram + $3B
+lead_index      = unsram + $3B ; for the map sprite stuff
 orb_fire        = unsram + $3C
 orb_water       = unsram + $3D
 orb_air         = unsram + $3E
@@ -254,9 +254,10 @@ dest_ht                 = $43
 btldraw_max             = $44 ; maximum characters to draw
 dest_x                  = $44 ; NOT used in battle box drawing?
 dest_y                  = $45
-;spaceruns               = $46 ; unused, as it can use the X register!
+;                       = $46 ; this variable can be used outside of battle, but not in battle
 image_ptr               = $47 ; + 8 - for images
 text_ptr                = $47 ; + 8 - for text
+;                       = $49 ; 
 format_buf              = $50 ; 7 bytes, goes in reverse (4A-50) -- must not cross page bound
 ;; $50 must stay 0 to null-terminator the format_buf
 
@@ -330,6 +331,8 @@ MenuStats               = $78 ; 79, 7A, 7B, 7C, 7D ; 6 bytes
 
 ;; Battle Things - Shared
 
+btlcurs_rowshift        = $55
+;                       = $56 
 btlmag_movement         = $57
 ; submenu_targ - shared  ; $58
 btlformation            = $59 ; don't write over, is used to check for Chaos fight
@@ -388,6 +391,7 @@ battlereward            = $78 ; 3 bytes.  Note that while this var is 3 bytes, t
 ;                             ;  if rewards ever exceed the 2-byte boundary, since the game assumes you
 ;                             ;  will never receive more than 65535 XP/GP in any one battle.
 lvlup_chstats           = $80 ; 2 byte pointer to character's OB stats
+
 
 ZoomMapPointer          = $80 ; for mini map stuff
 ZoomMapTilesetPtr       = $82
@@ -480,10 +484,10 @@ ch_return               = $E  ; +F ; holds return address for SCORE_GOTO
 text_ptr_backup         = $010D ; + E, F
 stack                   = $0100 
 oam                     = $0200  ; 256 bytes -- must be on page bound
-oam_y                   = oam
-oam_t                   = oam+1
-oam_a                   = oam+2
-oam_x                   = oam+3
+oam_y                   = oam    ;; y position
+oam_t                   = oam+1  ;; tile
+oam_a                   = oam+2  ;; attribute
+oam_x                   = oam+3  ;; x position
 
 ;; Flags                
 startintrocheck         = $0300 ;
@@ -959,33 +963,33 @@ btl_charstatuses_end    = $6844
 btlstats_mainstats      = $687C
 
 ;;  these 3 stats are used in battle calculations and can be changed by magic
-btl_charintelligence    = btlstats_mainstats + 0*4 
-btl_charspeed           = btlstats_mainstats + 1*4 
-btl_charhitmult         = btlstats_mainstats + 2*4
+btl_charintelligence    = btlstats_mainstats + 0*4 ; $687C
+btl_charspeed           = btlstats_mainstats + 1*4 ; $6880
+btl_charhitmult         = btlstats_mainstats + 2*4 ; $6884
 
 btlstats_defensestats   = btlstats_mainstats + 3*4
 
-btl_charevasion         = btlstats_defensestats + 0*4 
-btl_chardefense         = btlstats_defensestats + 1*4 
-btl_charmagdefense      = btlstats_defensestats + 2*4 
-btl_charelementresist   = btlstats_defensestats + 3*4 
-btl_charelementweak     = btlstats_defensestats + 4*4 
-btl_charstatusresist    = btlstats_defensestats + 5*4 
+btl_charevasion         = btlstats_defensestats + 0*4 ; $6888
+btl_chardefense         = btlstats_defensestats + 1*4 ; $688C
+btl_charmagdefense      = btlstats_defensestats + 2*4 ; $6890
+btl_charelementresist   = btlstats_defensestats + 3*4 ; $6894
+btl_charelementweak     = btlstats_defensestats + 4*4 ; $6898
+btl_charstatusresist    = btlstats_defensestats + 5*4 ; $689C
 
 ; all of these are 8 bytes: 2 weapons each!
 
 btlstats_weaponstats    = btlstats_defensestats + 6*4
 
-btl_charhitrate         = btlstats_weaponstats + 0*4 
-btl_chardamage          = btlstats_weaponstats + 1*8 
-btl_charweaponcritrate  = btlstats_weaponstats + 2*8 
-btl_charweaponailment   = btlstats_weaponstats + 3*8 
-btl_charweaponailproc   = btlstats_weaponstats + 4*8 
-btl_charweaponelement   = btlstats_weaponstats + 5*8 
-btl_charweaponcategory  = btlstats_weaponstats + 6*8 
-btl_charweaponsprite    = btlstats_weaponstats + 7*8 
-btl_charweaponpal       = btlstats_weaponstats + 8*8 
-btl_charnumhits         = btlstats_weaponstats + 9*8  ; $68E8 
+btl_charhitrate         = btlstats_weaponstats + 0*4 ; $68A0
+btl_chardamage          = btlstats_weaponstats + 1*8 ; $68A8
+btl_charweaponcritrate  = btlstats_weaponstats + 2*8 ; $68B0
+btl_charweaponailment   = btlstats_weaponstats + 3*8 ; $68B8
+btl_charweaponailproc   = btlstats_weaponstats + 4*8 ; $68C0
+btl_charweaponelement   = btlstats_weaponstats + 5*8 ; $68C8
+btl_charweaponcategory  = btlstats_weaponstats + 6*8 ; $68D0
+btl_charweaponsprite    = btlstats_weaponstats + 7*8 ; $68D8
+btl_charweaponpal       = btlstats_weaponstats + 8*8 ; $68E0
+btl_charnumhits         = btlstats_weaponstats + 9*8 ; $68E8 
 
 btl_chardrawinfo        = $68F0 ; $10 bytes, 4 bytes for each character
     btl_chardraw_x      = btl_chardrawinfo+0

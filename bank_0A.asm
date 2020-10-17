@@ -42,7 +42,7 @@ BANK_THIS = $0A
 ;; JIGS - moved from Bank B.
 
 lut_BattleMessages_Low:
-.byte <BTL_MESSAGE1
+.byte <BTL_MESSAGE1   
 .byte <BTL_MESSAGE2
 .byte <BTL_MESSAGE3
 .byte <BTL_MESSAGE4

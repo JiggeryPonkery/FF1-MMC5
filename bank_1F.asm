@@ -97,6 +97,8 @@
 .export REMOVE_ITEM_1BIT
 .export SwapPRG_L
 .export ItemDescriptions
+.export lut_2x2MapObj_Down
+.export lut_InBattleCharPaletteAssign
 
 .import AssignMapTileDamage_Z
 .import BattleIcons
@@ -157,8 +159,6 @@
 .import lut_InitGameFlags
 .import lut_InitUnsramFirstPage
 .import lut_ItemPrices
-.import lut_MapObjGfx
-.import lut_MapObjects
 .import lut_MapmanPalettes
 .import lut_MapMusicTrack
 .import lut_MenuTextCHR
@@ -216,6 +216,9 @@
 .import lut_ItemDescStrings_Low
 .import lut_ItemDescStrings_High
 .import SetPartyStats
+.import LoadNPCSprites
+.import LoadPlayerMapmanCHR_15
+.import LoadMapObjects
 
 .segment "BANK_FIXED"
 
@@ -580,22 +583,22 @@ PauseGame:
     STA $5004   ;
   
    @PauseLoop:
-    LDA mapflags            ; check if on overworld or town/dungeon
+    LDA mapflags           ; check if on overworld or town/dungeon
     LSR A                    
     BCS @StandardMap
         JSR SetOWScroll    ; do overworld scroll if on overworld 
-        JMP :+
-        
-   @StandardMap:          ; else, do town/dungeon scroll
-    JSR WaitForVBlank     
-    LDA #>oam               ; and do Sprite DMA
+        JMP :+   
+   
+   @StandardMap:           ; else, do town/dungeon scroll
+    JSR WaitForVBlank
+    LDA #>oam              ; and do Sprite DMA
     STA $4014               
     JSR SetSMScroll
-    JSR ClearOAM            ; clear OAM
+    JSR ClearOAM           ; clear OAM
     LDY #1
     JSR DrawPlayerMapmanSprite ; why does SetOWScroll not need to do all this to draw the player?
     JSR DrawMapObjectsNoUpdate 
-        
+   
   : JSR UpdateJoy  ; keep checking if select is pressed again
     LDA joy_start
     BNE PauseSoundTest
@@ -608,9 +611,8 @@ PauseGame:
     STA joy_a      ; clear A so the game doesn't open a dialogue box after unpausing
     LDA #$1E       ; turn on screen/clear emphasis
     STA $2001
-    RTS
+    RTS   
     
-
     
     
     
@@ -4068,7 +4070,7 @@ SetDoorAddress:
     LDA doorppuaddr
     STA $2006              
     RTS    
-                           
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Play Door SFX  [$CF1E :: 0x3CF2E]
@@ -4120,6 +4122,8 @@ LoadStandardMapAndObjects:
     STA $2001             ; turn off PPU
 
     JSR LoadStandardMap   ; decompress the map
+    LDA #BANK_OBJINFO     ; swap to the bank containing map object information
+    JSR SwapPRG_L
     JMP LoadMapObjects    ; load up the objects for this map (townspeople/bats/etc)
 
 
@@ -6161,6 +6165,7 @@ ScreenWipeFrame_Prep:
 ; NOP
 ; NOP
 
+.ALIGN $100
 
 
 ScreenWipeFrame:
@@ -7998,10 +8003,6 @@ ComplexString_CharacterStatCode:
     ;;;;   ($10 is character 0, $11 is character 1, etc)
     ;;;; Which stat to draw is determined by the next byte in the string
 
-    ;ROR A          ; rotate low to 2 bits to the high 2 bits and mask them out
-    ;ROR A          ;  effectively giving you character * $40
-    ;ROR A          ;  this will be used to index character stats
-    ;AND #$C0
     JSR ShiftLeft6
     STA char_index ; store index
     TAX            ; and put in X as well
@@ -9981,148 +9982,7 @@ lut_2x2MapObj_Down:
  .BYTE $00,$02,$02,$03,$01,$02,$03,$03
  .BYTE $00,$02,$03,$43,$01,$02,$02,$43
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Map Objects  [$E7EB :: 0x3E7FB]
-;;
-;;    This loads all objects for the current standard map.
-;;
-;;    Each map has $30 bytes of object information.  $0F objects per map, 3 bytes
-;;  per object (last 3 bytes are padding and go unused):
-;;   byte 0 = object ID
-;;   byte 1 = object X coord and behavior flags
-;;   byte 2 = object Y coord
-;;
-;;    Objects get loaded to the 'mapobj' buffer.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-LoadMapObjects:
-    LDA #BANK_OBJINFO     ; swap to the bank containing map object information
-    JSR SwapPRG_L
-
-    LDA #<mapobj
-    STA tmp+14
-    LDA #>mapobj
-    STA tmp+15      ; set dest pointer to point to 'mapobj'
-
-    LDA #0          ; JIGS - first, clear out any previous data
-    TAY
-  @ClearLoop:
-    STA (tmp+14), Y
-    DEY
-    BNE @ClearLoop
-
-    LDX cur_map
-    LDA lut_MapObjectCount, X
-    BEQ @NoObjects
-    STA tmp+11      ; set loop counter to $0F ($0F objects to load per map)
-
-    LDA cur_map
-    ASL A
-    TAX 
-    LDA lut_MapObjects, X
-    STA tmp+12
-    LDA lut_MapObjects+1, X
-    STA tmp+13
-
-  @Loop:
-     LDY #0
-     LDA (tmp+12), Y          ; read the object ID from source buffer
-     JSR LoadSingleMapObject  ; load the object
-
-     LDA tmp+12           ; add 3 to the source pointer to look at the next map object
-     CLC
-     ADC #3
-     STA tmp+12
-     LDA tmp+13
-     ADC #0
-     STA tmp+13
-
-     DEC tmp+11           ; decrement loop counter
-     BNE @Loop            ; and loop until all $F objects have been loaded
-   @NoObjects:
-    RTS        ; then exit!
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Single Map Object [$E83B :: 0x3E84B]
-;;
-;;    Loads a single map object from given source buffer
-;;
-;;  IN:       A = ID of this map object
-;;       tmp+12 = pointer to source map data
-;;       tmp+14 = pointer to dest buffer (to load object data to).  Typically points somewhere in 'mapobj'
-;;
-;;    tmp+14 is incremented after this routine is called so that the next object will be
-;;  loaded into the next spot in RAM.  Source pointer is not incremented, however.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadSingleMapObject:
-    LDY #<mapobj_rawid
-    STA (tmp+14), Y         ; record this object's raw ID
-
-    LDY #0                  ; reset Y to zero so we can start copying the rest of the object info
-    TAX                     ; put object ID in X for indexing
-    LDA game_flags, X       ; get the object's visibility flag
-    AND #GMFLG_OBJVISIBLE   ; isolate it
-    BEQ :+                  ;   if the object is invisible, replace the ID with zero (no object)
-      TXA                   ;   otherwise, restore the raw ID into A (unchanged)
-  : STA (tmp+14), Y         ; record raw ID (or 0 if sprite is invisible) as the 'to-use' object ID
-
-    INY                     ; inc Y to look at next source byte
-    LDA (tmp+12), Y         ; get next source byte (X coord and behavior flags)
-    PHA                     ; back it up
-    AND #$C0                ; isolate the behavior flags
-    STA (tmp+14), Y         ; record them
-
-    INY                     ; inc Y to look at next source byte
-    LDA (tmp+12), Y         ; get next source byte (Y coord)
-    TAX                     ; back it up
-    PLA                     ; reload backed up X coord
-    AND #$3F                ; mask out the low bits (remove behavior flags, wrap to 64 tiles)
-    STA (tmp+14), Y         ; and record it as this object's physical X position
-    LDY #<mapobj_gfxX
-    STA (tmp+14), Y         ;  and as the object's graphical X position
-
-    TXA                     ; restore backed up Y coord
-    AND #$3F                ; isolate low bits (wrap to 64 tiles)
-    LDY #<mapobj_physY
-    STA (tmp+14), Y         ; record as physical Y coord
-    LDY #<mapobj_gfxY
-    STA (tmp+14), Y         ; and graphical Y coord
-
-   ; LDY #<mapobj_ctrX       ; zero movement counters and speed vars
-   ; LDA #0
-   ; STA (tmp+14), Y
-   ; INY
-   ; STA (tmp+14), Y
-   ; INY
-   ; STA (tmp+14), Y
-   ; INY
-   ; STA (tmp+14), Y
-   ;
-   ; LDY #<mapobj_movectr    ; zero some other stuff
-   ; STA (tmp+14), Y
-   ; INY
-   ; STA (tmp+14), Y
-   ; INY
-   ; STA (tmp+14), Y
-
-    LDY #<mapobj_tsaptr      ; set the object's TSA pointer so that they're facing downward
-    LDA #<lut_2x2MapObj_Down
-    STA (tmp+14), Y
-    INY
-    LDA #>lut_2x2MapObj_Down
-    STA (tmp+14), Y
-
-    LDA tmp+14              ; increment the dest pointer to point to the next object's space in RAM
-    CLC
-    ADC #$10
-    STA tmp+14
-
-    RTS                     ; and exit!
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10253,7 +10113,9 @@ LoadShopCHRPal:
 LoadSMCHR:                     ; standard map -- does not any palettes
     JSR LoadPlayerMapmanCHR
     JSR LoadTilesetAndMenuCHR
-    JMP LoadMapObjCHR
+    LDA #BANK_NPCSPRITES       ; swap to bank containing object info
+    JSR SwapPRG_L
+    JMP LoadNPCSprites
 
 LoadOWCHR:                     ; overworld map -- does not load any palettes
     JSR LoadCHR_MusicPlay
@@ -10270,8 +10132,10 @@ LoadCHR_MusicPlay_Always:
 	JSR WaitForVBlank_L
 	JMP CallMusicPlay_L
 
-    
-
+LoadPlayerMapmanCHR:
+    LDA #BANK_MAPSPRITES
+    JSR SwapPRG_L
+    JMP LoadPlayerMapmanCHR_15
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -10291,43 +10155,7 @@ ShiftSpriteHightoLow:
     LSR A
     RTS
 
-LoadPlayerMapmanCHR:
-    LDA #BANK_MAPSPRITES
-    JSR SwapPRG_L
-    LDA #0          ; #0 -> tmp
-    STA tmp
-    LDA ch_sprite   ; Get lead party member's sprite
-    
-    ORA #>lut_MapObjCHR ; ORA with #$90, and put in tmp+1
-    STA tmp+1       ; (tmp) is now $9x00 (where x=lead party member's class).
-                    ;    This points to mapman graphics for that class
-    LDX #1          ; X=1  (load 1 row of tiles)
-    LDA #$10        ; A=$10 (high byte of dest address:  $1000)
-    JSR CHRLoadToA  ; jump to CHR loader
-    LDA mapflags
-    LSR A
-    BCC LoadOWObjectCHR
-    RTS
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load OW Object CHR  [$E940 :: 0x3E950]
-;;
-;;   Loads CHR for all overworld objects and mapmans
-;;   This includes:  ship, canoe, airship, bridge, canal, etc
-;;   It is assumed the proper CHR bank is swapped in.
-;;
-;;  IN:   tmp  = assumed to contain 0  (this routine does not explicitly clear it)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadOWObjectCHR:
-    LDA #>lut_OWMapObjCHR         ; source address is $9C00 (note:  low byte not explicitly cleared)
-    STA tmp+1
-    LDX #$04         ; 6 rows to load
-    LDA #$11         ; dest address is $1100
-    BNE CHRLoadToA
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10445,67 +10273,9 @@ LoadTilesetAndMenuCHR:
 	JMP LoadMenuTextBGCHR
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Map Object CHR Loading  [$E99E :: 0x3E9AE]
-;;
-;;   Loads CHR for map objects (townspeople, etc)  For standard maps only
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-LoadMapObjCHR:
-    LDA $2002      ; reset PPU toggle
-    LDA #$11
-    STA $2006
-    LDA #$00
-    STA $2006      ; set PPU Addr to $1100 (start of map object CHR)
-
-    LDA #BANK_OBJINFO  ; swap to bank containing object info
-    JSR SwapPRG_L
-
-    LDA cur_map    ; get current map ID
-    ASL A
-    TAX
-    LDA lut_MapObjects, X
-    STA tmp+4
-    LDA lut_MapObjects+1, X
-    STA tmp+5
     
-    LDX cur_map
-    LDA lut_MapObjectCount, X
-    STA tmp+6
-    
-    LDY #0         ; zero out Y (our source index)
-  @ObjLoop:
-    LDA #BANK_OBJINFO  ; swap to bank containing object info
-    JSR SwapPRG_L
-    LDA (tmp+4), Y       ; get object ID
-    TAX                  ; put it in X
-    LDA lut_MapObjGfx, X ; index to get graphic ID based on object ID
-    CLC
-    ADC #>lut_SmallMapObjCHR  ; add to high byte of pointer
-    STA tmp+1
-    LDA #<lut_SmallMapObjCHR
-    STA tmp              ; CHR source pointer (tmp) now = lut_MapObjCHR + (graphic_id * $100)
 
-    LDA #BANK_MAPSPRITES
-    JSR SwapPRG_L    ; swap to bank containing mapman CHR
-    TYA              ; back up obj source index by pushing it to the stack
-    PHA
-    LDY #0           ; clear Y for upcoming CHR loading loop
-  @CHRLoop:
-      LDA (tmp), Y   ; load 256 bytes of CHR (16 tiles -- 1 row)
-      STA $2007
-      INY
-      BNE @CHRLoop
-    PLA              ; pull obj source index from stack
-    CLC
-    ADC #$03         ; increment it by 3
-    TAY              ; put it back in Y
-    DEC tmp+6        ; loop until proper amount of objects have been loaded
-    BNE @ObjLoop
-
-    RTS              ; then exit
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -14075,6 +13845,61 @@ BattleBackgroundColor_LUT:
 .byte $05,$06,$07,$08
 .byte $09,$0A,$0B,$0C
 .byte $2D,$0F,$14,$11    
+
+;; JIGS - this is a li'l complicated:
+;; The highest 4 bits are the original character palettes: 0, 1, 2 ... now 0, 40, 80
+;; The low 6 bits are for the unarmed fist sprite. 
+;; Because every variable palette uses a base of $20 (00100000), having a base of $10 (00010000)
+;; will then trigger the variable palette routine to use specific colors for the sprite
+;; These colors are pulled from the original character palettes.
+;; The fist sprite is 2 colors. Usually skin + the darker color. 
+;; So bits (000000xx) say if the first (skin) color is 1, 2, or 3. 
+;; And bits (0000xx00) say if the second (wristband) color is 1, 2, or 3. 
+;; And bits (00xx0000) say which of the 3 palettes to pull the color from.
+
+; 0 is the original thief/bb/black mage palette
+; 1 is the red/white palette
+; 2 is the new palette (used for thief and ninja in my edits)
+
+; so for the BBelt: 00, 00, 01, 11 = 
+;1st palette for the class   : palette address 3F10 (whole palette)
+;1st palette for the fist    : palette address 3F10 (whole palette)
+;1st color for the wristband : palette address 3F11 (single color)
+;3rd color for the skin      : palette address 3F13 (single color)
+
+lut_InBattleCharPaletteAssign:
+  .BYTE %01010111 ; 01 Fighter
+  .BYTE %10100111 ; 02 Thief
+  .BYTE %00000111 ; 03 BBelt
+  .BYTE %01010111 ; 04 RMage
+  .BYTE %01010111 ; 05 WMage
+  .BYTE %00000111 ; 06 BMage
+  .BYTE %00000000 ; 07 
+  .BYTE %00000000 ; 08 
+  .BYTE %00000000 ; 09 
+  .BYTE %00000000 ; 10 
+  .BYTE %00000000 ; 11 
+  .BYTE %00000000 ; 12 
+  .BYTE %00000000 ; 13  
+  .BYTE %00000000 ; 14 
+  .BYTE %00000000 ; 15 
+  .BYTE %00000000 ; 16 
+  .BYTE %01010111 ; 17 Knight
+  .BYTE %10100111 ; 18 Ninja
+  .BYTE %00000111 ; 19 Master
+  .BYTE %01010111 ; 20 RedWiz
+  .BYTE %01010111 ; 21 W.Wiz
+  .BYTE %00000111 ; 22 B.Wiz
+  .BYTE %00000000 ; 23
+  .BYTE %00000000 ; 24    
+  .BYTE %00000000 ; 25
+  .BYTE %00000000 ; 26
+  .BYTE %00000000 ; 27
+  .BYTE %00000000 ; 28
+  .BYTE %00000000 ; 29
+  .BYTE %00000000 ; 30
+  .BYTE %00000000 ; 31
+  .BYTE %00000000 ; 32  
     
     
 ;Magic_ConvertBitsToBytes:
