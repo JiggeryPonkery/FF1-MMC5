@@ -65,7 +65,6 @@
 .export PlaySFX_Error
 .export RandAX
 .export SaveScreenHelper
-.export SetBattlePPUAddr
 .export SetPPUAddr_XA
 .export ShiftLeft4
 .export ShiftLeft6
@@ -99,9 +98,11 @@
 .export ItemDescriptions
 .export lut_2x2MapObj_Down
 .export lut_InBattleCharPaletteAssign
+.export LoadBorderPalette_Grey
+.export JigsBox_Start
+.export LoadEnemyGraphicsFromBank
 
 .import AssignMapTileDamage_Z
-.import BattleIcons
 .import ClearNT
 .import EnterBridgeScene_L
 .import EnterEndingScene
@@ -114,7 +115,6 @@
 .import GetDialogueString
 .import JigsIntro
 .import LoadBattleSpritesForBank_Z
-.import LoadBattleTextChr
 .import LoadOWMapRow_1E
 .import LoadSprite_Bank03
 .import LoadStatusBoxScrollWork
@@ -122,7 +122,6 @@
 .import MapPoisonDamage_Z
 .import MinimapDecompress
 .import MusicPlay_L
-.import PrepBattleVarsAndEnterBattle_L
 .import PrintBattleTurn
 .import PrintCharStat
 .import PrintGold
@@ -219,6 +218,10 @@
 .import LoadNPCSprites
 .import LoadPlayerMapmanCHR_15
 .import LoadMapObjects
+.import BeginBattleSetup
+.import lut_EnemyCHR_Assignment
+.import BackupMapMusic
+.import FinishBattlePrepAndFadeIn
 
 .segment "BANK_FIXED"
 
@@ -494,17 +497,7 @@ DoOWTransitions:
 
   @Battle:
     JSR GetOWTile          ; Get overworld tile (needed for battle backdrop)
-    JSR BattleTransition   ; Do the flashy transition effect
-
-    LDA #$00
-    STA $2001              ; turn off the PPU
-    STA $4015              ; and APU
-    STA $5015              ; and MMC5 APU (JIGS)
-    
-  ;  JSR LoadBattleCHRPal   ; Load all necessary CHR for battles, and some palettes
-
-    LDA btlformation
-    JSR EnterBattle_L      ; start the battle!
+    JSR EnterBattle_L      ; Load everything up and start the battle!
     JMP EnterOW_NoWipe     ; then re-enter overworld
 
   @Teleport:
@@ -893,13 +886,13 @@ OverworldMovement:
     LDA move_speed        ; check movement speed
     BEQ SetOWScroll_PPUOn ; if zero (we're not moving), just set the scroll and exit
 
-    ; JSR OW_MovePlayer     ; otherwise... process party movement
+    ; JSR OW_MovePlayer    ; otherwise... process party movement
     
     LDA ow_slow           ; if non-zero...
     BEQ :+
     
     LDA framecounter      ; check framecounter
-    AND #$01               ; skip moving every other frame
+    AND #$01              ; skip moving every other frame
     BEQ @SlowMove
     
   : JSR SM_MovePlayer
@@ -1462,49 +1455,74 @@ OWCanMove:
    ;;  tmp+3 -- so it could just load those and not do any math.
 
   @RiverDomain:
-    ;LDA ow_scroll_y      ; get OW Y scroll
-    ;CLC
-    ;ADC #7               ; add 7 to get player position
+    LDA tmp+2            ; player X coord
+    AND #$80             ; and clear out all but high bit
+    LSR A
+    LSR A
+    LSR A
+    LSR A                ; shift high bits into low bits
+    STA tmp
+    
     LDA tmp+3
-
-    ASL A                ; rotate bit 7 ($80) into bit 0 ($01)
-    ROL A
-
-    AND #$01             ; isolate bit 1
-    ORA #$40             ; and add $40 to it  (ie:  domain $40 for upper half of map, $41 for lower half)
+    AND #$80             ; clear out all but high bit
+    LSR A
+    LSR A
+    LSR A                ; shift high bit into $10s slot
+    ADC tmp              ; add X coord
+    LDX #$08             ; set $08 to high bit
     BNE GetBattleFormation
 
   @SeaDomain:
-    LDA #$42                ; all of the world's sea uses the same domain:  $42
-    BNE GetBattleFormation  ; always branches
-
-
-   ;; For land domains... the entire map is divided into an 8x8 grid.  Each element in this
-   ;;  grid has it's own domain -- and consists of 32x32 map tiles
-  @LandDomain:
-    ;LDA ow_scroll_x    ; get X scroll
-    ;CLC
-    ;ADC #$07           ; add 7 to get player X coord
-    LDA tmp+2
-    ROL A              ; rotate left by 4
-    ROL A              ;   which ultimately is just a shorter way
-    ROL A              ;   of right-shifting by 5 (high 3 bits become the low 3 bits)
-    ROL A
-    AND #%00000111     ; mask out the low 3 bits
-    STA tmp            ; and write to tmp.  This is the column of the domain grid
-
-    ;LDA ow_scroll_y    ; get Y scroll
-    ;CLC
-    ;ADC #$07           ; add 7 to get player Y coord
-    LDA tmp+3
-    LSR A              ; right shift by 2
+    LDA tmp+2            ; Player X Coord  
+    AND #$C0
     LSR A
-    AND #%00111000     ; and mask out the high bits -- this is the row of the domain grid
-    ORA tmp            ; OR with column for the desired domain.
-                       ;  A is now the desired domain number
+    LSR A 
+    LSR A                ; divided by 8
+    STA tmp
+    
+    LDA tmp+3            ; Player Y Coord  
+    AND #$C0
+    LSR A                ; divided by 2
+    CLC
+    ADC tmp              ; + X / 8 
+    ADC #$20             ; + $20 to put it past the river formations
+    LDX #$08             ; set $08 to high bit
+    BNE GetBattleFormation 
 
-              ; no JMP or RTS -- flow seamlessly into GetBattleFormation
+    ; X = $00        ; Y = $00       ; + X = 00 
+    ; X = $40 >>> 8  ; Y = $00       ; + X = 08 
+    ; X = $80 >>> 10 ; Y = $00       ; + X = 10 
+    ; X = $C0 >>> 18 ; Y = $00       ; + X = 18 
+    ;
+    ; X = $00        ; Y = $40 > $20 ; + X = 20 
+    ; X = $40 >>> 8  ; Y = $40 > $20 ; + X = 28 
+    ; X = $80 >>> 10 ; Y = $40 > $20 ; + X = 30 
+    ; X = $C0 >>> 18 ; Y = $40 > $20 ; + X = 38 
+    ;
+    ; X = $00        ; Y = $80 > $40 ; + X = 40 
+    ; X = $40 >>> 8  ; Y = $80 > $40 ; + X = 48 
+    ; X = $80 >>> 10 ; Y = $80 > $40 ; + X = 50 
+    ; X = $C0 >>> 18 ; Y = $80 > $40 ; + X = 58 
+    ; 
+    ; X = $00        ; Y = $C0 > $60 ; + X = 60 
+    ; X = $40 >>> 8  ; Y = $C0 > $60 ; + X = 68 
+    ; X = $80 >>> 10 ; Y = $C0 > $60 ; + X = 70 
+    ; X = $C0 >>> 18 ; Y = $C0 > $60 ; + X = 78 
 
+  @LandDomain:
+    LDA tmp+3              
+    LSR A                ; Y coord / 2
+    LSR A                ; with the high bits moved into low bits
+    LSR A
+    LSR A
+    LSR A
+    TAX                  ; put in X
+    
+    LDA tmp+2            ; X coord / 2  
+    LSR A                ; cut off the low 3 bits
+    AND #$F8             ; this gets the low byte offset   
+    
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Get Battle Formation  [$C54A :: 0x3C55A]
@@ -1520,17 +1538,12 @@ OWCanMove:
 
 
 GetBattleFormation:
-    LDY #(>lut_Domains) >> 3 ; set high byte of pointer (right shifted by 3)
-    STY tmp+1                ;   because we'll be rotating in 3 bits
-
-    ASL A                ; multiply domain by 8 (8 formations per domain)
-    ROL tmp+1            ;   rotating carry into the high byte of our pointer
-    ASL A
-    ROL tmp+1
-    ASL A
-    ROL tmp+1
-    STA tmp              ; write low byte of pointer
-                         ; (tmp) now points to lut_Domains+(domain*8)
+    CLC
+    ADC #<lut_Domains
+    STA tmp
+    TXA
+    ADC #>lut_Domains
+    STA tmp+1
 
     LDA #BANK_DOMAINS
     JSR SwapPRG_L        ; swap to bank containing domain information
@@ -1550,7 +1563,12 @@ OWMoveSlow:
     LDA tileprop          ; get tile again
     AND #OWTP_SPEC_SLOW   ; cut off everything but the highest bit
     BEQ :+                ; if 0, finish up
-    STA ow_slow           ; otherwise, store $80 in ow_slow (only needs to be non-zero to work)
+    
+    LDX lead_index
+    LDA ch_miscperks, X
+    AND #LIGHTSTEP
+    BNE :+               ; if the lead has the Light Step support ability, don't do any tile damage        
+    INC ow_slow          ; otherwise, inc ow_slow (only needs to be non-zero to work)
   : CLC                  ; CLC (to indicate success for OWCanMove -- since it JMPs here)
     RTS                  ; and exit
 
@@ -2050,11 +2068,11 @@ PrepOverworld:
         STA music_track          
         STA dlgmusic_backup
 
-    @NoChange:
+   @NoChange:
     LDA #0
     STA MenuHush
-    LDA #BANK_BTLDATA     ; swap to battle rate bank and get the battle rate for the overworld
-    JSR SwapPRG_L         ;  (first entry in the table).  And record it to 'battlerate'.
+    ;LDA #BANK_BTLDATA     ; swap to battle rate bank and get the battle rate for the overworld
+    ;JSR SwapPRG_L         ;  (first entry in the table).  And record it to 'battlerate'.
     ;LDA lut_BattleRates   ; However, this value goes unused because the battle rate for overworld
     ;STA battlerate        ; is hardcoded... so this is effectively useless for OW (it's used for SM, though).
     
@@ -2075,62 +2093,6 @@ PrepOverworld:
 
 
 
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  NewGame_LoadStartingStats  [$C76D :: 0x3C77D]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
- 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Map Tile Damage  [$C7DE :: 0x3C7EE]
-;;
-;;    Flashes the screen, plays the "ksssshhh" sound effect, and assigns
-;;  map tile damage for when the player is walking over damage tiles like
-;;  lava/frost.
-;;
-;;    Note it does not check to see if the player is on such a damage tile -- it assumes
-;;  that check has been done already.  Therefore this routine must only be called when the
-;;  player is on such a tile.  Also, this routine must only be called when the player is moving,
-;;  otherwise HP would rapidly drain (1 HP per frame) from just the player standing stationary on
-;;  the tile.
-;;
-;;    This routine branches (not JMP!) to AssignMapTileDamage, so it must be somewhere near that routine.
-;;  Seems odd that it does that -- it's like it just lets this routine be interrupted by MapPoisonDamage
-;;  for whatever reason.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-MapTileDamage:
-    LDA framecounter      ; get the frame counter
-    AND #$01              ; isolate low bit and use as a quick monochrome toggle
-    ORA #%00111110        ; OR with typical PPU flags (JIGS - plus red emphasis! ow!)
-    STA $2001             
-    ; and write to PPU reg.  This results in a rapid toggle between
-    ;  normal/monochrome mode (toggles every frame).  This produces the flashy effect
-
-    LDA #$0F              ; set noise to slowest decay rate (starts full volume, decays slowly)
-    STA $400C
-    LDA #$0D
-    STA $400E             ; set noise freq to $0D (low)
-    LDA #$00
-    STA $400F             
-    ; set length counter to $0A (silence sound after 5 frames)
-    ; this gets the noise channel playing the "kssssh" sound effect
-    LDA move_speed            ; check move_speed (will be zero when the move is complete)
-    BEQ AssignMapTileDamage   ; if the move is complete, assign damage (a branch instead of a jump?  -_-)
-    RTS                       ; otherwise, just exit
-
-                  ; damage is only assigned at end of move because we only want to assign damage once per
-                  ; step, whereas this routine is called once per frame.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2199,8 +2161,7 @@ MapPoisonDamage:              ; first thing is to check if ANY characters are po
     
     LDA #BANK_Z
     JSR SwapPRG_L
-    JSR MapPoisonDamage_Z
-    JMP SwapPRG_L
+    JMP MapPoisonDamage_Z
     
     ;   This might take some explaining.  This seems contradictory to what I say in the routine
     ; description ("It is called only when the player is moving").  Due to the order in which
@@ -2211,103 +2172,6 @@ MapPoisonDamage:              ; first thing is to check if ANY characters are po
     ; (which would end up being -16 HP per step, since the player moves 1 pixel per frame).  With this check,
     ; damage is only dealt once the move is completed (so only once per step)
 
- ; @DoDamage:
- ;   LDA #1
- ;   LDX #5
- ;   JSR RandAX     ; get between 1-5 damage to deal out
- ;   STA tmp
- ;
- ;   LDY #0         ; X will be our loop counter and char index
- ; @DmgLoop:
- ;   LDA ch_ailments, Y    ; get this character's ailments
- ;   AND #AIL_POISON       ; see if they're poisoned
- ;   BEQ @DmgSkip          ; if not... skip this character
- ;
- ;   LDA ch_curhp+1, Y     ; check high byte of HP
- ;   BNE @DmgSubtract      ; if nonzero (> 255 HP), deal this character damage
- ;
- ;   LDA tmp               ; otherwise, check low byte of HP
- ;   CMP ch_curhp, Y       ; see if they have as much HP as there is damage 
- ;   BCS @DmgSkip          ; C set if they will die from it, so skip 
- ;
- ; @DmgSubtract:
- ;   LDA ch_curhp, Y       ; subtract 1 from HP
- ;   SEC
- ;   SBC tmp
- ;   STA ch_curhp, Y
- ;   LDA ch_curhp+1, Y
- ;   SBC #0
- ;   STA ch_curhp+1, Y
- ;
- ; @DmgSkip:
- ;   TYA                   ; add $40 char index
- ;   CLC
- ;   ADC #$40
- ;   TAY
- ;   BNE @DmgLoop          ; and loop until it wraps (4 iterations)
- ;   
- ;  @Random:               ; then figure out how many steps until the next poison
- ;   LDA #4
- ;   LDX #8
- ;   JSR RandAX
- ;   STA domappoison
- ;   LDA #$1E
- ;   STA btl_soft2001      ; and remove red emphasis (reset soft2001 to normal use)
- ;   RTS  
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Assign Map Tile Damage [$C861 :: 0x3C871]
-;;
-;;    Deals 1 damage to all party members (for standard map damaging tiles
-;;  -- Frost/Lava).
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-AssignMapTileDamage:
-    LDA #BANK_Z
-    JSR SwapPRG_L
-    JSR AssignMapTileDamage_Z
-    JMP SwapPRG_L
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Verify Checksum  [$C888 :: 0x3C898]
-;;
-;;    Verifies the SRAM Checksum, to ensure that SRAM hasn't become corrupted
-;;
-;;  Y is unchanged
-;;
-;;  OUT:  C = clear if checksum passed, set if checksum failed
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; JIGS - in Bank Z now, 3 different versions to check each save slot.
-
-;VerifyChecksum:
-;    LDA #$00      ; clear A
-;    LDX #$00      ; and X
-;    CLC           ; and C!
-;@Loop:
-;      ADC $6400, X   ; sum every byte between $6400-$67FF
-;      ADC $6500, X   ;  include carry in each addition
-;      ADC $6600, X
-;      ADC $6700, X
-;      INX
-;      BNE @Loop
-
-;    CMP #$FF         ; if result does not equal $FF, the checksum has failed
-;    BNE @Fail
-
-    ; success!
-;    CLC
-;    RTS
-
-;@Fail:
-;    SEC
-;    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2425,15 +2289,6 @@ StandardMapLoop:
    ; JSR GetSMTilePropNow    ; get 'now' tile properties (don't know why -- seems useless?)
     LDA #0
     STA tileprop            ; zero tile property byte to prevent unending battles from being triggered
-    JSR BattleTransition    ; do the battle transition effect
-
-    LDA #0                  ; then kill PPU, APU
-    STA $2001
-    STA $4015
-    STA $5015               ; MMC5 - JIGS
-
-  ;  JSR LoadBattleCHRPal    ; Load CHR and palettes for the battle
-    LDA btlformation
     JSR EnterBattle_L       ; start the battle!
     BCC :+                  ;  see if this battle was the end game battle
 
@@ -3276,9 +3131,72 @@ StandardMapMovement:
       LDA tileprop          ; get the properties for this tile
       AND #TP_SPEC_MASK     ; mask out the special bits
       CMP #TP_SPEC_DAMAGE   ; see if it's a damage tile (frost/lava)
-      BNE :+                ; if it is...
-        JMP MapTileDamage   ;  ... do map tile damage
-  :   RTS
+      BEQ MapTileDamage     ; if it is ... do map tile damage
+      RTS
+      
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Map Tile Damage  [$C7DE :: 0x3C7EE]
+;;
+;;    Flashes the screen, plays the "ksssshhh" sound effect, and assigns
+;;  map tile damage for when the player is walking over damage tiles like
+;;  lava/frost.
+;;
+;;    Note it does not check to see if the player is on such a damage tile -- it assumes
+;;  that check has been done already.  Therefore this routine must only be called when the
+;;  player is on such a tile.  Also, this routine must only be called when the player is moving,
+;;  otherwise HP would rapidly drain (1 HP per frame) from just the player standing stationary on
+;;  the tile.
+;;
+;;    This routine branches (not JMP!) to AssignMapTileDamage, so it must be somewhere near that routine.
+;;  Seems odd that it does that -- it's like it just lets this routine be interrupted by MapPoisonDamage
+;;  for whatever reason.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+MapTileDamage:
+    LDX lead_index
+    LDA ch_miscperks, X
+    AND #LIGHTSTEP
+    BNE @Nah              ; if the lead has the Light Step support ability, don't do any tile damage    
+
+    LDA framecounter      ; get the frame counter
+    AND #$01              ; isolate low bit and use as a quick monochrome toggle
+    ORA #%00111110        ; OR with typical PPU flags (JIGS - plus red emphasis! ow!)
+    STA $2001             
+    ; and write to PPU reg.  This results in a rapid toggle between
+    ;  normal/monochrome mode (toggles every frame).  This produces the flashy effect
+
+    LDA #$0F              ; set noise to slowest decay rate (starts full volume, decays slowly)
+    STA $400C
+    LDA #$0D
+    STA $400E             ; set noise freq to $0D (low)
+    LDA #$00
+    STA $400F             
+    ; set length counter to $0A (silence sound after 5 frames)
+    ; this gets the noise channel playing the "kssssh" sound effect
+    LDA move_speed            ; check move_speed (will be zero when the move is complete)
+    BNE @Nah                  ; if the move is complete, assign damage (a branch instead of a jump?  -_-)
+
+    ; damage is only assigned at end of move because we only want to assign damage once per
+    ; step, whereas this routine is called once per frame.
+
+    LDA #BANK_Z
+    JSR SwapPRG_L
+    JMP AssignMapTileDamage_Z
+    
+   @Nah: 
+    RTS                       ; otherwise, just exit
+
+
+  
+
+  
+  
+  
+  
+  
 
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3743,8 +3661,14 @@ SMMove_Battle:
     BCS @Done              ;  ... then there's no battle
 
       LDA cur_map             ; otherwise, begin a random encounter
-      CLC                     ;  get the current map, and add 8*8 to it to get past the
-      ADC #8*8                ;  overworld domains.
+      LDX #$8
+      JSR MultiplyXA
+      ADC #$A0                ; carry clear from CMP... add $A0 to skip Ocean formations
+      PHA
+      TXA
+      ADC #$08                ; add 8 to the high byte
+      TAX
+      PLA                     ; restore A
       JSR GetBattleFormation  ; Get the battle formation from this map's domain
       LDA #TP_BATTLEMARKER    ; then set the battle marker bit in the tileprop byte, so that a
       STA tileprop            ;   battle is triggered.
@@ -4244,6 +4168,11 @@ PrepStandardMap:
     JSR WaitForVBlank_L     ; wait for vblank
     JSR DrawMapPalette      ; so we can draw the palette
     JSR SetSMScroll         ; set the scroll
+    
+    ;; JIGS - battle rates are with map palettes
+    LDX cur_map                 ; use current map to index the rate LUT
+    LDA lut_BattleRates+1, X    ; get this map's rate (+1 because first entry is for overworld [unused])
+    STA battlerate              ; and record it    
 
     LDA MenuHush            ; JIGS - if its 1, then the map music is already playing! 
     BNE @NoChange
@@ -4274,12 +4203,6 @@ PrepStandardMap:
     ADC #7
     STA sm_player_y
     STA doorppuaddr+1      ;; JIGS - this fixes the phantom door bug
-
-    LDA #BANK_BTLDATA           ; swap to page containging battle rates
-    JSR SwapPRG_L
-    LDX cur_map                 ; use current map to index the rate LUT
-    LDA lut_BattleRates+1, X    ; get this map's rate (+1 because first entry is for overworld [unused])
-    STA battlerate              ; and record it
 
     JMP GetSMTilePropNow        ; then get the properties of the current tile, and exit
 
@@ -8003,7 +7926,9 @@ ComplexString_CharacterStatCode:
     ;;;;   ($10 is character 0, $11 is character 1, etc)
     ;;;; Which stat to draw is determined by the next byte in the string
 
-    JSR ShiftLeft6
+    LSR A
+    ROR A
+    ROR A
     STA char_index ; store index
     TAX            ; and put in X as well
     JSR ComplexString_GetNextByte
@@ -10311,115 +10236,6 @@ LoadMenuCHR:
     JSR CHRLoadToA     ; load them up  (loads all shop related CHR
 	JMP LoadBorderPalette_Blue
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LoadBattleBGCHRAndPalettes  [$EA28 :: 0x3EA38]
-;;
-;;   Loads all BG CHR (but not sprite CHR) for battle
-;;  Also loads palettes for backdrop and border, but not for sprites or enemies
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattleBGCHRAndPalettes:
-    ;; Load this up first, so it doesn't overwrite the stone sprites
-	LDA #BANK_BATTLEMAGIC
-    JSR SwapPRG_L
-    JSR LoadBattleTextChr		   ; also loads magic data and enemy AI into RAM
-
-    LDA #BANK_BATTLESPRITES
-    JSR SwapPRG_L
-    JSR LoadStoneSprites           ; this loads the player stone graphics to background tiles
-    ;; also loads character palettes
-
-    LDA #BANK_ATTACKSPRITES
-    JSR SwapPRG_L
-	LDA #0
-    STA MMC5_tmp
-    JSR LoadSprite_Bank03          ; this loads the player>enemy attack cloud sprites
-    ;; This will now also load up the backdrop palette AND the graphics.
-  
-    LDA btlformation ; get battle formation number
-    ;ASL A            ; multiply it by 16
-    ;ASL A
-    ;ASL A
-    ;ASL A
-    JSR ShiftLeft4
-    STA tmp+4        ; put low byte in tmp+4
-    LDA btlformation
-    AND #$7F         ; drop the "Formation B" bit
-    LSR A
-    LSR A
-    LSR A
-    LSR A
-    CLC
-    ADC #>lut_BattleFormations   ; add to high byte of pointer
-    STA tmp+5         ; and put it in $15.  (tmp+4) now points to lut_BattleFormations+(formation * 16)
-
-    LDA #BANK_BTLDATA ; swap to required bank
-    JSR SwapPRG_L
-
-    LDY #0
-    LDA (tmp+4), Y   ; load Enemy CHR page ID from Battle formation data
-    AND #$0F         ;  mask out lower bits (higher bits are different formation data)
-    LDY #$20         ; set Y to #$20, so that CHR loading will continue 2 tiles into the row
-    ;STA enCHRpage    ; put Enemy CHR page ID in enCHRpage (for future use?)
-
-    JSR LoadBattleBGCHRPointers    ; load pointers for Enemy CHR
-    INC tmp+1                      ; increment high byte of pointer (enemy CHR starts 1 row in, before that is battle backdrop)
-    LDX #$07                       ; load 7 rows
-    JSR CHRLoad_Cont               ; continue CHR loading from Y=$20
-	JMP LoadBorderPalette_Grey
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;   Load Battle BG CHR pointers   [$EA7A :: 0x3EA8A]
-;;
-;;
-;;   Takes given Battle BG (or Enemy group image) ID
-;;    Swaps in the bank containing that CHR
-;;    and points (tmp) to the CHR
-;;
-;;   Each Battle BG CHR set is $0800 bytes
-;;
-;;   X, Y are left unchanged
-;;
-;;   IN:   A       = Battle BG ID whose pointers to load
-;;
-;;   OUT:  (tmp)   = Pointer to start of CHR
-;;         *       = Desired bank swapped in
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattleBGCHRPointers:
-    AND #$0F     ; mask with $0F (there are only 16 battle BGs)
-    CMP #$08     ; if the BG is >= 8, then it's on the second bank of Battle BG CHR
-    BCS @SecondBank
-
-       ; otherwise it's on the first bank
-       ASL A          ; multiply index by 8
-       ASL A
-       ASL A
-       ORA #$80       ; and OR with $80 to get the high byte of the pointer
-       STA tmp+1
-       LDA #BANK_ENEMYCHR   ; and indicate first bank of Battle BG CHR
-       JMP @FinishUp
-
-@SecondBank:
-       AND #$07       ; subtract 8 by masking
-       ASL A
-       ASL A
-       ASL A          ; multiply by 8
-       ORA #$80       ; and OR to get high byte
-       STA tmp+1
-       LDA #BANK_ENEMYCHR+1 ; and indiate second bank of Battle BG CHR
-
-@FinishUp:
-    JSR SwapPRG_L     ; Swap in indicated bank
-    LDA #$00          ;  and set low byte of pointer to 0
-    STA tmp
-    RTS               ;  and exit!
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11123,20 +10939,7 @@ lut_RNG:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Set Battle PPU Addr  [$F233 :: 0x3F243]
-;;
-;;  Sets PPU addr to be whatever address is indicated by btltmp+6
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-SetBattlePPUAddr:
-    LDA btltmp+7
-    STA $2006
-    LDA btltmp+6
-    STA $2006
-    RTS
     
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11158,39 +10961,12 @@ SetBattlePPUAddr:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 JIGS_RefreshAttributes:
-    LDA #$0B
+    LDA #BANK_BTLDATA
     JSR SwapPRG_L
     JSR WriteAttributesToPPU
-    LDA #$0C
+    LDA battle_bank
     JMP SwapPRG_L
 
-;Battle_WritePPUData_L:
-;Battle_WritePPUData:
-;    LDA btltmp+9                ; swap in the desired bank
-;    JSR SwapPRG_L
-;    
-;    JSR WaitForVBlank_L
-;    JSR SetBattlePPUAddr        ; use btltmp+6,7 to set PPU addr
-;    
-;    LDY #$00                    ; Y is loop up-counter
-;    LDX btltmp+8                ; X is loop down-counter
-;    
-;  @Loop:
-;      LDA (btltmp+4), Y         ; copy source data to PPU
-;      STA $2007
-;      INY
-;      DEX
-;      BNE @Loop
-;      
-;    LDA battle_bank             ; swap battle_bank back in
-;    JSR SwapPRG_L
-;    
-;    LDA #$00                    ; reset scroll before exiting
-;    STA $2001
-;    STA $2005
-;    STA $2005
-;    RTS
-;    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11210,13 +10986,18 @@ JIGS_RefreshAttributes:
 Battle_ReadPPUData_L:    
 Battle_ReadPPUData:
     JSR WaitForVBlank_L         ; Wait for VBlank
-    JSR SetBattlePPUAddr        ; Set given PPU Address to read from
+    
+    LDA tmp+7
+    STA $2006
+    LDA tmp+6
+    STA $2006
+    
     LDA $2007                   ; Throw away buffered byte
     LDY #$00
-    LDX btltmp+8                ; btltmp+8 is number of bytes to read
+    LDX tmp+8                   ; btltmp+8 is number of bytes to read
   @Loop:
       LDA $2007
-      STA (btltmp+4), Y           ; write to (btltmp+4)
+      STA (tmp+4), Y            ; write to (btltmp+4)
       INY
       DEX
       BNE @Loop
@@ -11258,201 +11039,52 @@ BattleCrossPageJump:
 
 EnterBattle_L:
 EnterBattle:
+    JSR BattleTransition      ; Do the flashy transition effect
+
+    LDA #$00
+    STA $2001                 ; turn off the PPU
 
     LDA #BANK_Z               ;; and do pre-emptive battle prep for gear...
     JSR SwapPRG_L
     JSR SetPartyStats
-    ;JSR UnadjustEquipStats
-    ;JSR ReadjustEquipStats
-    
-      LDX #$00             ; reset all battle variables to 0           
-    : LDA #0             ; this is where map tileset data is kept in dungeons and such
-      STA $0400, X       ; but it re-loads after battle... so why not use it here
-      STA $0500, X       
-      STA $0600, X       
-      STA $0700, X
-      INX                
-      BNE :-
 
-  ;; Load formation data to buffer in RAM
+    LDA #BANK_MUSIC
+    JSR SwapPRG_L
+    JSR BackupMapMusic
+    
+    LDA #BANK_BATTLESPRITES
+    JSR SwapPRG_L              ; this loads the player stone graphics to background tiles
+    JSR LoadStoneSprites       ; and loads character palettes   
+
+    LDA #BANK_ATTACKSPRITES
+    JSR SwapPRG_L
+	LDA #0
+    STA MMC5_tmp              ; this loads the player>enemy attack cloud sprites
+    JSR LoadSprite_Bank03     ; + backdrop palette and graphics
+    
+    ;; Load formation data to buffer in RAM and literally everything else
 
     LDA #BANK_BTLDATA         ; here we load the battle formation data
     JSR SwapPRG_L             ; swap to the bank containing that data
-    LDA btlformation          ; get the formation ID
-    AND #$7F                  ; remove the 'Formation B' bit to get the raw formation ID
-    LDX #0                    ;  mulitply the formation ID by 16 (shift by 4) and rotate
-    STX btltmp+11             ;  bits into btltmp+11.  The end result is that (btltmp+10) will
-    ASL A                     ;  be formation*16
-    ROL btltmp+11
-    ASL A
-    ROL btltmp+11
-    ASL A
-    ROL btltmp+11
-    ASL A
-    ROL btltmp+11
-    STA btltmp+10
+    JSR BeginBattleSetup
 
-    CLC                       ; add to that the high byte of the formation data pointer
-    LDA btltmp+11             ;  and (btltmp+10) now points to our formation data.
-    ADC #>lut_BattleFormations
-    STA btltmp+11
-
-    LDX #$10                  ; $10 bytes of formation data (down counter)
-    LDY #0                    ; index  (seems pointless to use both X and Y here -- could've just used Y)
-  @FormationLoop:
-      LDA (btltmp+10), Y      ; copy a byte from the LUT in ROM
-      STA btl_formdata, Y     ;  to our formation data buffer in RAM
-      INY                     ; inc index
-      DEX                     ; dec loop counter
-      BNE @FormationLoop      ; and loop until all $10 bytes copied
-
-  ;; Turn off PPU and clear nametables
-
-    LDA #0
-    STA menustall             ; disable menu stalling
-    STA soft2000              ; clear soft2000
-    STA $2000                 ; disable NMIs
-    STA $2001                 ; and turn off PPU
-    LDA $2002                 ; reset PPU toggle
-    
-    JSR JigsBox_Start ; clear box buffers and draw empty boxes to RAM
-	JSR LoadBattleBGCHRAndPalettes    
-
-    LDX #>$2000
-    LDA #<$2000
-    JSR SetPPUAddr_XA         ; set PPU address to $2000 (start of nametable)
-
-    LDY #8                    ; loops to clear $0800 bytes of NT data (both nametables)
-  @ClearNT_OuterLoop:
-      LDX #0
-   @ClearNT_InnerLoop:        ; inner loop clears $100 bytes
-      STA $2007
-      DEX
-      BNE @ClearNT_InnerLoop
-    DEY                     ; outer loop runs inner loop 8 times
-    BNE @ClearNT_OuterLoop  ;  clearing $800 bytes total
-	  
-    LDX #>$2280
-    LDA #<$2280               ; now fill the lower half, where messaages are, with $F6
-    JSR SetPPUAddr_XA         ; which should be a blank sprite
-    JSR @FillMessageNTWith_F6
-	
-	LDX #>$2680
-    LDA #<$2680               ; and again for the other side
-    JSR SetPPUAddr_XA         
-    JSR @FillMessageNTWith_F6
-
-  ;; Draw Attribute Table
-
-    LDX #>$23C0
-    LDA #<$23C0
-    JSR SetPPUAddr_XA     ; set PPU Address to $23C0 (start of attribute table)
-    LDX #$28
-  @AttrLoop:
-      LDA lut_BtlAttrTbl-1, X   ; copy over attribute bytes
-      STA $2007
-      DEX
-      BNE @AttrLoop           ; loop until all $28 bytes copied
-    
-    LDX #$18  
-    LDA #$FF
-   @AttrLoop_2:
-      STA $2007
-      DEX
-      BNE @AttrLoop_2         ; the last 3 rows of the nametable are $FF
-
-  ;; Load palettes
-
-    LDX #0
-  @PalLoop:                   ; copy the loaded palettes (backdrop, menu, sprites)
-      LDA cur_pal, X          ;  to the battle palette buffer
-      STA btl_palettes, X
-      INX
-      CPX #$20
-      BNE @PalLoop            ; all $20 bytes
-
-    LDA #BANK_BTLPALETTES     ; then swap to the bank containing the battle palettes
-    JSR SwapPRG_L             ;   (for enemies)
-
-    LDA btlform_plts          ; use the formation data to get the ID of the palettes to load
-    LDY #4                    ;   load the first one into the 2nd palette slot ($xxx4)
-    JSR LoadBattlePalette
-    LDA btlform_plts+1        ;   and the second one into the 3rd slot ($xxx8)
-    LDY #8
-    JSR LoadBattlePalette
-
-  ;; Draw the battle backdrop
-
-    LDA #<$2020                 ; draw the first row of the backdrop
-    LDY #0<<2                   ;  to $2042
-    JSR DrawBattleBackdropRow
-    LDA #<$2040                 ; then at $2062
-    LDY #1<<2                   ;   draw the next row
-    JSR DrawBattleBackdropRow
-    LDA #<$2060                 ; originally 2082
-    LDY #2<<2
-    JSR DrawBattleBackdropRow
-    LDA #<$2080                 ; originally 20A2
-    LDY #3<<2
-    JSR DrawBattleBackdropRow   ; 4 rows total
-    
-    LDA #BANK_BATTLE           ; swap in the battle bank
-    STA battle_bank
+    LDA #BANK_DOBATTLE
+    STA battle_bank    
     JSR SwapPRG_L
-    JMP PrepBattleVarsAndEnterBattle_L ; and jump to battle routine!
-	
-  @FillMessageNTWith_F6:
-    LDA #$F6			 
-    LDY #10                    ; 10 tiles from the message box starting area
-  @ClearMessageNT_OuterLoop:
-      LDX #$20                 ; and $20 tiles across 
-   @ClearMessageNT_InnerLoop:   
-      STA $2007
-      DEX
-      BNE @ClearMessageNT_InnerLoop
-    DEY                 
-    BNE @ClearMessageNT_OuterLoop  	
-	RTS
+    JMP FinishBattlePrepAndFadeIn ; and jump to battle routine!
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Battle Backdrop Row  [$F385 :: 0x3F395]
-;;
-;;    Draws one row of NT data for the battle backdrop.  Does not
-;;  do any attribute updates.
-;;
-;;  IN:  A = low byte of target PPU Addr
-;;       Y = tile additive (added to each drawn tile)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+LoadEnemyGraphicsFromBank:
+    JSR SwapPRG_L             ; Swap in indicated bank
+    JSR CHRLoad       
+    LDA #BANK_BTLDATA
+    JMP SwapPRG_L
 
-DrawBattleBackdropRow:
-    LDX #$20
-    JSR SetPPUAddr_XA    ; set PPU address to $20nn where A=nn
 
-    STY btltmp+10        ; record tile additive for future use
-    LDY #32
-    STY btltmp+11        ; do 14 columns in the first section of the b
 
-  @Section:
-    LDX #0
-   @Loop:
-      LDA lut_BackdropLayout, X   ; get the tile to draw in this column
-      CLC
-      ADC btltmp+10                ; add to that our additive (to draw the right row)
-      STA $2007                    ; draw the tile
-      INX                          ; inc our loop counter
-      CPX btltmp+11                ; and loop until we've drawn the desired number of columns
-      BNE @Loop
-    RTS
 
-;; the layout of the battle backdrop -- the way the columns are arranged
-;; JIGS this is randomized in Bank 08 now!
-;@lut_BackdropLayout:
-;  .byte 3,4,3,4,1,2,3,4,1,2,3,4,1,2,3,4,3,4,1,2,1,2,3,4,1,2,3,4,1,2,1,2
-  
-  ;; JIGS ^ is a neat layout I guess!
-  ;.BYTE 1,2,3,4,3,4,1,2,1,2,3,4,3,4
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11469,36 +11101,7 @@ SetPPUAddr_XA:
     RTS
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Battle Screen Attribute table LUT  [$F400 :: 0x3F410]
-;;
-;;    A copy of the attribute table for the battle screen.  This is
-;;  further modified to set enemy attributes appropriately, but this is
-;;  the base for it.
-;;
-;;    This LUT is copied in full to the attribute table.
 
-
-lut_BtlAttrTbl:
-;  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-;  .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
-;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-  
-  ;; JIGS - this table better fits the new layout!
-  ;; But lets reverse it for loading with less bytes.
-  ;; and the last 3 lines will be done by code.
-
-.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
-.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
-.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
-.BYTE $F0,$F0,$00,$00,$00,$00,$00,$00  
-.BYTE $00,$00,$00,$00,$00,$00,$00,$00
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -11556,34 +11159,6 @@ BattleScreenShake:
     JSR WaitForVBlank_L
     JMP BattleUpdateAudio_FixedBank
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Load Battle Palette  [$F471 :: 0x3F481]
-;;
-;;    Loads a single (4-color) battle palette into 'btl_palettes' with the given
-;;  offset.
-;;
-;;  IN:  A = ID of battle palette (as stored in the battle formation data)
-;;       Y = offset from which to index btl_palettes
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-LoadBattlePalette:
-    ASL A             ; multiply the palette ID by 4 (4 colors per palette)
-    ASL A
-    TAX               ; throw in X
-    LDA #4
-    STA btltmp+10     ; set the loop down counter
-
-  @Loop:
-      LDA lut_BattlePalettes, X   ; get the color from the ROM
-      STA btl_palettes, Y         ; write it to our output buffer
-      INX             ; inc our indeces
-      INY
-      DEC btltmp+10   ; dec our loop counter
-      BNE @Loop       ; and loop until it expires (4 iterations)
-
-    RTS               ; then exit!
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11953,7 +11528,9 @@ DrawEquipBox_String:
     STA tmp+1               ; row counter
 
     LDA btlcmd_curchar
-    JSR ShiftLeft6          ; Get the char stat index in X (00,40,80,C0)
+    LSR A
+    ROR A
+    ROR A          ; Get the char stat index in X (00,40,80,C0)
     TAX                      ;  This will be the source index
    
   ;  Right, Left     ; FF, FF, 0D, item ID, FF, FF, FF, 0D, item ID, 01

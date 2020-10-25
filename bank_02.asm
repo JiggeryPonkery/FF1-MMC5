@@ -6,76 +6,10 @@
 
 BANK_THIS = $02
 
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/00_grasslands.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/imp.chr"
-.incbin "chr/enemies/wolf.chr"
-.incbin "chr/enemies/iguana.chr"
-.incbin "chr/enemies/giant.chr"
-.incbin "chr/battleicons.chr"
+.incbin "chr/enemies/kary.chr"              ; 00
+.incbin "chr/enemies/lich.chr"              ; 01
+.incbin "chr/enemies/kraken.chr"            ; 02
+.incbin "chr/enemies/tiamat.chr"            ; 03
+.incbin "chr/enemies/chaos.chr"             ; 04
 
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/01_cave.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/sahagin.chr"
-.incbin "chr/enemies/pirate.chr"
-.incbin "chr/enemies/shark.chr"
-.incbin "chr/enemies/bigeye.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/02_cave_2.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/skeleton.chr"
-.incbin "chr/enemies/creep.chr"
-.incbin "chr/enemies/hyena.chr"
-.incbin "chr/enemies/ogre.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/03_ocean.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/snake.chr"
-.incbin "chr/enemies/scorpion.chr"
-.incbin "chr/enemies/bull.chr"
-.incbin "chr/enemies/troll.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/04_forest.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/ghost.chr"
-.incbin "chr/enemies/zombie.chr"
-.incbin "chr/enemies/worm.chr"
-.incbin "chr/enemies/eye.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/05_temple.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/medusa.chr"
-.incbin "chr/enemies/catman.chr"
-.incbin "chr/enemies/pede.chr"
-.incbin "chr/enemies/tiger.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/06_desert.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/vampire.chr"
-.incbin "chr/enemies/gargoyle.chr"
-.incbin "chr/enemies/earth_elemental.chr"
-.incbin "chr/enemies/dragon_1.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/07_brambles.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/slime.chr"
-.incbin "chr/enemies/spider.chr"
-.incbin "chr/enemies/manticor.chr"
-.incbin "chr/enemies/ankylo.chr"
-.incbin "chr/battleicons.chr"
-
-; .byte "END OF BANK 02"
+.byte "END OF BANK 02"

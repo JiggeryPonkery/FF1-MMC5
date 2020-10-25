@@ -6,69 +6,32 @@
 
 BANK_THIS = $01
 
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/08_cave_3.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/mummy.chr"
-.incbin "chr/enemies/coctrice.chr"
-.incbin "chr/enemies/wyvern.chr"
-.incbin "chr/enemies/trex.chr"
-.incbin "chr/battleicons.chr"
+.incbin "chr/enemies/iguana.chr"            ; 00
+.incbin "chr/enemies/giant.chr"             ; 01
+.incbin "chr/enemies/shark.chr"             ; 02
+.incbin "chr/enemies/bigeye.chr"            ; 03
+.incbin "chr/enemies/hyena.chr"             ; 04
+.incbin "chr/enemies/ogre.chr"              ; 05
+.incbin "chr/enemies/bull.chr"              ; 06
+.incbin "chr/enemies/troll.chr"             ; 07
+.incbin "chr/enemies/worm.chr"              ; 08
+.incbin "chr/enemies/eye.chr"               ; 09
+.incbin "chr/enemies/pede.chr"              ; 0A
+.incbin "chr/enemies/tiger.chr"             ; 0B
+.incbin "chr/enemies/earth_elemental.chr"   ; 0C
+.incbin "chr/enemies/dragon_1.chr"          ; 0D
+.incbin "chr/enemies/manticor.chr"          ; 0E
+.incbin "chr/enemies/ankylo.chr"            ; 0F
+.incbin "chr/enemies/wyvern.chr"            ; 10
+.incbin "chr/enemies/trex.chr"              ; 11
+.incbin "chr/enemies/ocho.chr"              ; 12
+.incbin "chr/enemies/hydra.chr"             ; 13
+.incbin "chr/enemies/naga.chr"              ; 14
+.incbin "chr/enemies/chimera.chr"           ; 15
+.incbin "chr/enemies/dragon_2.chr"          ; 16
+.incbin "chr/enemies/golem.chr"             ; 17
+.incbin "chr/enemies/madpony.chr"           ; 18
+.incbin "chr/enemies/warmech.chr"           ; 19
 
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/09_castle.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/caribe.chr"
-.incbin "chr/enemies/gator.chr"
-.incbin "chr/enemies/ocho.chr"
-.incbin "chr/enemies/hydra.chr"
-.incbin "chr/battleicons.chr"
 
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/0A_river.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/sentry.chr"
-.incbin "chr/enemies/water_elemental.chr"
-.incbin "chr/enemies/naga.chr"
-.incbin "chr/enemies/chimera.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/0B_sky_castle.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/wizard.chr"
-.incbin "chr/enemies/garland.chr"
-.incbin "chr/enemies/dragon_2.chr"
-.incbin "chr/enemies/golem.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/0C_sea_shrine.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/badman.chr"
-.incbin "chr/enemies/astos.chr"
-.incbin "chr/enemies/madpony.chr"
-.incbin "chr/enemies/warmech.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/0D_cave_4.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/kary.chr"
-.incbin "chr/enemies/lich.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/0E_cave_5.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/kraken.chr"
-.incbin "chr/enemies/tiamat.chr"
-.incbin "chr/battleicons.chr"
-
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/backdrops/0F_waterfall.chr"
-.incbin "chr/battle_blankspace.chr"
-.incbin "chr/enemies/chaos.chr"
-.incbin "chr/battleicons.chr"
-
-; .byte "END OF BANK 01"
+.byte "END OF BANK 01"

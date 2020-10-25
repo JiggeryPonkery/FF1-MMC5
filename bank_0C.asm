@@ -6,6 +6,7 @@
 .export BankC_CrossBankJumpList
 .export PrepCharStatPointers
 .export RespondDelay
+.export FinishBattlePrepAndFadeIn
 
 .import BattleConfirmation
 .import BattleCrossPageJump_L
@@ -305,14 +306,26 @@ Battle_AfterFadeIn:
     ; if V >= 90, party strikes first
     ; otherwise, normal fight
 
-  : LDA ch_agility
+  : LDX lead_index
+    LDA ch_agility, X
     CLC
-    ADC ch_speed
+    ADC ch_speed, X
     LSR A
     LSR A
     LSR A
     STA btl_mathbuf     ; mathbuf0 = (agil+luck)/8   -- party leader's stats only
+    LDA ch_miscperks, X
+    AND #FIRSTSTRIKE
+    BEQ :+
+    
+    LDA ch_agility, X
+    LSR A
+    LSR A
+    CLC    
+    ADC btl_mathbuf
+    STA btl_mathbuf
 
+  : LDA btl_mathbuf
     LDX #100
     JSR RandAX          ; random value between that and 100
     TAX
@@ -322,12 +335,8 @@ Battle_AfterFadeIn:
     LDX btlform_surprise; get surprise rate
     LDA #$00
     JSR MathBuf_Sub     ; subtracts surprise rate from that value
-
-    LDY btl_mathbuf         ; put value in XY
-    LDX btl_mathbuf+1
-    JSR ZeroXYIfNegative    ; clip at 0 (pointless, because MathBuf_Sub already does this)
-
-    TYA                     ; drop high byte and check low byte
+    
+    LDA btl_mathbuf     ; drop high byte and check low byte
     CMP #11
 
     BCC @Surprised          ; if < 11, SURPRISED!
@@ -496,11 +505,10 @@ BacktrackBattleCommand:
 
 GetCharacterBattleCommand:
     STA btlcmd_curchar              ; record the character
-    CLC
+    ASL A
     ROR A
     ROR A
-    ROR A
-    STA CharacterIndexBackup        ; convert current command character
+    STA char_index                  ; convert current command character
     TAX
     LDA ch_class, X
     STA battle_class
@@ -676,7 +684,9 @@ BattleSubMenu_Skill:
 
 BattleSubMenu_Skill_NoUndraw:
     LDA btlcmd_curchar
-    JSR ShiftLeft6
+    LSR A
+    ROR A
+    ROR A
     STA char_index
 
     LDA #BOX_SKILL
@@ -970,7 +980,9 @@ BattleSubMenu_Magic_NoUndraw:
     ;JSR Magic_ConvertBitsToBytes    ; JIGS is using it!
 
     LDA btlcmd_curchar
-    JSR ShiftLeft6
+    LSR A
+    ROR A
+    ROR A
     STA char_index
 
     JSR DrawMagicBox_String
@@ -989,25 +1001,26 @@ BattleSubMenu_Magic_NoUndraw:
     JSR MultiplyXA
     CLC
     ADC btlcurs_x   ; spell (0-2)
+    ADC char_index
     TAY                             ; put that index in Y, and use it to get the chosen spell
-    LDA TempSpellList, Y            ;; JIGS - proper spell list
+    LDA ch_spells, Y 
     BNE :+                          ; if they selected an empty slot, do the @NothingBox -- otherwise skip over it
 
   @NothingBox:
-      JSR DoNothingMessageBox       ; Show the nothing box
+      JSR DoNothingMessageBox           ; Show the nothing box
       JMP BattleSubMenu_Magic_NoUndraw  ; and redo the magic selection submenu from the beginning
 
-  : STA btlcmd_spellindex                       ; store spell in 6B7D
+  : STA btlcmd_spellindex               ; store spell in 6B7D
 
     ;; JIGS - new part here too: MP index = Page * 4 + cursor_Y
 
-    LDA battle_item           ; spell level
-    CLC
-    ADC CharacterIndexBackup  ; +$0, $40, $80, or $C0
-    ADC #ch_mp - ch_stats     ; +$30
-    TAX
-    LDA ch_stats, X           ; stats plus all ^ those numbers
-    AND #$F0                  ; chop off low bits (max mp) to get current mp
+    LDA battle_item                 ; spell level
+    CLC                            
+    ADC char_index                  ; +$0, $40, $80, or $C0
+    ADC #ch_mp - ch_stats           ; +$30
+    TAX                            
+    LDA ch_stats, X                 ; stats plus all ^ those numbers
+    AND #$F0                        ; chop off low bits (max mp) to get current mp
 
     BEQ @NothingBox                 ; if no more MP for this level, cut to "nothing" box and repeat.
 
@@ -1167,7 +1180,9 @@ BattleSubMenu_Item_Select:
    ; JSR UndrawOneBox            ; undraw the item box
    @EtherManaMenu:
     LDA submenu_targ
-    JSR ShiftLeft6
+    LSR A
+    ROR A
+    ROR A
     STA char_index
 
     LDA #BOX_ETHER
@@ -1324,16 +1339,9 @@ BattleSubMenu_Equipment:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 GetPointerToMagicData:
-    LDX #$08                ; *8 (8 bytes per spell)
-    JSR MultiplyXA
-    CLC
-    ADC #<lut_MagicData     ; low byte
-    STA MagicPointer
-    TXA
-    ADC #>lut_MagicData     ; high byte in X
-    STA MagicPointer+1
-    RTS
-
+    JSR LongCall
+    .word LoadSpellForBattle
+    .byte BANK_BATTLEMAGIC
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1769,9 +1777,10 @@ LoadSprite:                       ; this is for weapons/magic
     PLA
     BNE LoadWeaponMagicSprite
 
-UpdateCharacterSprite: ; In: X = 00, 01, 02, 03
+UpdateCharacterSprite:            ; In: X = 00, 01, 02, 03
     STX char_index
-UpdateCharacterSprite_Preset: ; char_index was set already
+    
+UpdateCharacterSprite_Preset:     ; char_index was set already
     JSR BattleUpdateAudio         ; update audio early
     LDA btl_drawflagsA            ; then set the high bit on this
     ORA #$80
@@ -3073,7 +3082,7 @@ CharWalkAnimationRight:
     PHA         ; push char index
     LDA #2      ; positive directional value = move right
 
-:   STA btl_walkdirection       ; 68AB = walk direction
+  : STA btl_walkdirection       ; 68AB = walk direction
     PLA
     STA btl_animatingchar
     JSR CharacterWalkAnimation
@@ -3086,32 +3095,25 @@ CharWalkAnimationRight:
   : JMP UpdateSprites_TwoFrames ; update, then return
 
 UnhideCharacter:
+    JSR SaveAXY
     TAX
     LDA btl_charhidden, X
-    BEQ :+                  ; if 0 already, do nothing
+    BEQ HideCharacterEnd    ; if 0 already, do nothing
 UnhideCharacter_Confirmed:
     DEC btl_charhidden, X   ; set to 0
     INC Hidden              ; set to 1
-    TXA
-    PHA
-    JSR UpdateSprites_BattleFrame
-    PLA
-    TAX
-  : RTS
+    BNE :+
 
 HideCharacter:              ; assumes X is already set
-    PHA
+    JSR SaveAXY
     LDA Hidden              ; if general Hidden variable is 1, someone needs to rehide...
-    BEQ :+
+    BEQ HideCharacterEnd
     INC btl_charhidden, X         ; set to 1
     DEC Hidden                    ; set to 0
-    TXA
-    PHA
-    JSR UpdateSprites_BattleFrame ; necessary, because the 4th character won't re-hide before the turn starts until sprites are updated...
-    PLA
-    TAX
-  : PLA
-    RTS
+  : JSR UpdateSprites_BattleFrame ; necessary, because the 4th character won't re-hide before the turn starts until sprites are updated...
+    
+HideCharacterEnd:    
+    JMP RestoreAXY
 
 
 
@@ -4396,7 +4398,7 @@ DoBattleRound:
     JSR BattleTurnEnd_CheckForBattleEnd     ; wrap up / see if battle is over (will double-RTS if battle is over)
     LDA btl_retaliate
     BEQ @NextTurn
-        JSR Retaliate
+        JSR CounterStrike
         BEQ @DoTurn ; DEC btl_retaliate should set the Z flag
 
   @NextTurn:
@@ -4624,10 +4626,9 @@ ApplyRegenToPlayer:
     AND #$07                       ;        which means regenerating spells can't last more than 7 turns (that's a lot still!)
     BNE @GetRegenPotency           ; if regenerating, jump ahead
 
-    LDX char_index
-    LDA ch_head, X                 ; if not, check helmet
-    CMP #ARM31+1                   ; (Heal Helm)
-    BEQ @HealHelmPotency           ; if helmet doesn't = Heal Helm, jump to poison stuff
+    LDA btl_chararmorperks, X
+    AND #ARMOR_REGEN
+    BNE @ArmorPotency              ; if any piece of armor gives Regen, use the lowest potency
     JMP ApplyPoisonToPlayer
 
    @GetRegenPotency:
@@ -4650,7 +4651,7 @@ ApplyRegenToPlayer:
     LDA #6                         ; 6 = 16.6 ... or 16%
     BNE @Divide
 
-   @HealHelmPotency:
+   @ArmorPotency:
     LDA #20                        ; 5%
 
    @Divide:
@@ -5217,7 +5218,7 @@ ScanEnemy:
 
     JSR LongCall
     .word ScanEnemyString
-    .byte $0A
+    .byte $0B
 
     LDA #BOX_SCAN
     JSR DrawCombatBox
@@ -5786,7 +5787,10 @@ Player_Confused:
 
 PlayerRandomSpell:
     LDA BattleCharID
-    ;JSR Magic_ConvertBitsToBytes
+    LSR A
+    ROR A
+    ROR A
+    STA char_index
 
     LDA #7
     STA tmp
@@ -5805,39 +5809,31 @@ PlayerRandomSpell:
     JMP PlayerAttackPlayer_Physical ; couldn't find any mana, just attack
 
    @FindSpell:
-    TYA             ; Y = spell level
+    TYA                   ; Y = spell level + offset
     SEC
     SBC #ch_mp - ch_stats ; remove the offset from Y, to get spell level
-    LDX #3                ; multiply by 3 to read the temp spell list
-    JSR MultiplyXA
-    TAY
-
-    LDA TempSpellList, Y
-    ORA TempSpellList+1, Y
-    ORA TempSpellList+2, Y
+    LDX #3
+    JSR MultiplyXA        ; multiply by 3 to get offset for ch_spells (3 spells per level)
+    CLC
+    ADC char_index        ; add char_index
+    STA char_index        ; and back it up
+    TAX
+    LDA ch_spells, X      ; check all 3 spell slots for this level
+    ORA ch_spells+1, X
+    ORA ch_spells+2, X
     BNE @ChooseSpell
     JMP PlayerAttackPlayer_Physical ; no spells for this level, so attack
 
    @ChooseSpell:
     JSR BattleRNG_L
-    AND #03
-    BEQ @Spell1
-    LSR A
-    BCS @Spell2
-
-   @Spell3:
-    LDA TempSpellList+2, Y
-    BEQ @ChooseSpell
-    BNE @CastItAlready
-
-   @Spell2:
-    LDA TempSpellList+1, Y
-    BEQ @ChooseSpell
-    BNE @CastItAlready
-
-   @Spell1:
-    LDA TempSpellList, Y
-    BEQ @ChooseSpell
+    AND #03           
+    CMP #$03
+    BEQ @ChooseSpell ; needs to be 0, 1, or 2 - gets the spell slot of the chosen level
+    CLC
+    ADC char_index   ; reload char_index (altered with spell level position)
+    TAX
+    LDA ch_spells, X
+    BEQ @ChooseSpell ; keep looping until the spell is found
 
    @CastItAlready:
     STA btlcmd_spellindex
@@ -5993,10 +5989,10 @@ PlayerAttackEnemy_Physical:
   : RTS
 
 
-Retaliate:
+CounterStrike:
     LDA battle_totaldamage
     STA btl_parrydamage
-    LDA battle_totaldamage+1        ; save total damage in btl_parrydamage
+    LDA battle_totaldamage+1    ; save total damage in btl_parrydamage
     STA btl_parrydamage+1
     LDA btl_attacker
     BMI @PlayerWasAttacker
@@ -6006,8 +6002,19 @@ Retaliate:
     AND #$03
     STA BattleCharID
     TAX
+
+    LDA btl_retaliate
+    BPL @CounterCommand
+    
+    LDA #0
+    STA btl_parrydamage+1
+    STA btl_parrydamage         ; zero the parry damage, since its a plain counter
+    BEQ :+
+
+   @CounterCommand:
     DEC btl_charparry, X
-    PLA
+    
+  : PLA
     TAX
     JMP PlayerAttackEnemy_Physical
 
@@ -6084,7 +6091,8 @@ SavePlayerDefender:
 
     LDA btl_retaliate             ; see if this was a counter attack
     BEQ :+
-       DEC btl_retaliate          ; if so, just turn off the flag and exit
+       LDA #0
+       STA btl_retaliate          ; if so, just turn off the flag and exit
        RTS
 
     ;; JIGS - since X is btl_defender_index, and not btl_defender
@@ -6094,7 +6102,24 @@ SavePlayerDefender:
     BEQ :+
         LDA battle_hitsconnected
         BEQ :+
-        INC btl_retaliate
+        INC btl_retaliate            ; set to 1 to mark it as a command counter
+        
+  : LDA btl_defender_perks           ; if they have the Counter support perk...
+    AND #COUNTER
+    BEQ :+
+    
+        LDA btl_charspeed, X         ; then check speed + agility / 4 
+        LDY #ch_agility - ch_stats
+        CLC
+        ADC (CharStatsPointer), Y
+        LSR A
+        LSR A
+        LDX #200                     ; random between ^ that and 200
+        JSR RandAX
+        CMP #COUNTER_CHANCE          ; set in constants; minimum value to meet to counter
+        BCC :+
+        DEC btl_retaliate            ; make it $FF to mark it as a support ability counter
+  
   : LDA btl_attacker
     BMI @FinalEnd
 
@@ -6411,7 +6436,6 @@ DoPhysicalAttack_NoAttackerBox:
 
     LDA btl_defender_index      ; get character index
     JSR UnhideCharacter         ; unhide them
-    LDA btl_defender_index      ; get character index in X
     JSR FlashCharacterSprite    ; flash their character sprite (JIGS; even if dead)
     JSR RestoreCoverSprite
 
@@ -6437,7 +6461,6 @@ DoPhysicalAttack_NoAttackerBox:
     LDX #200
     JSR RandAX                  ; [0,200]
     STA math_randhit
-    LDA math_randhit
     CMP #200
     BNE :+
        JMP @NextHitIteration    ; skip if got 200 exactly (guaranteed miss)
@@ -6910,12 +6933,12 @@ DrawCharacterStatus:
     JSR UpdateSprites_BattleFrame
 
 DrawCharacterStatus_Fast:
-    LDA #$00
-    TAX
-    STA CharacterIndexBackup   ; temp var for character index/loop counter - not $00, $40, $80, $C0, but 0, 1, 2, 3
+    LDX #$00
+    LDA #3
+    STA char_index
 
 @CharacterLoop:
-    LDA #$00
+    LDA #$FF
     STA btl_unformattedstringbuf+$50, X ; start of first string, invisible tile
     STA btl_unformattedstringbuf+$53, X ; start of second string, invisible tile
     STA btl_unformattedstringbuf+$56, X ; start of third string, invisible tile
@@ -6923,7 +6946,7 @@ DrawCharacterStatus_Fast:
     STA btl_unformattedstringbuf+$51, X ; clear out heavy ailment
     STA btl_unformattedstringbuf+$54, X ; clear out light ailment
 
-    LDA CharacterIndexBackup
+    LDA char_index
     JSR PrepCharStatPointers
     LDY #ch_ailments - ch_stats
     LDA (CharStatsPointer), Y
@@ -6943,20 +6966,20 @@ DrawCharacterStatus_Fast:
 
     JSR @DoAilments
 
-    LDY CharacterIndexBackup
+    LDY char_index
     LDA btl_charhidden, Y
     BEQ :+
-        LDA #$7E
+        LDA #$F8
         STA btl_unformattedstringbuf+$56, X   ; start of third string
 
   : LDA btl_charguard, Y
     BEQ :+
-        LDA #$8A
+        LDA #$FA
         STA btl_unformattedstringbuf+$53, X   ; start of second string
 
   : LDA btl_charpray, Y
     BEQ :+
-        LDA #$8D
+        LDA #$FB
         STA btl_unformattedstringbuf+$53, X   ; start of second string
 
   : LDY #ch_head - ch_stats
@@ -6964,12 +6987,12 @@ DrawCharacterStatus_Fast:
     CMP #ARM31+1                            ; check for heal helm
     BEQ @Regen
 
-    LDY CharacterIndexBackup
+    LDY char_index
     LDA btl_charregen, Y
     AND #$07                                ; get current amount of regeneration turns
     BEQ @NoState
        @Regen:
-        LDA #$8B
+        LDA #$F9
         STA btl_unformattedstringbuf+$50, X   ; start of first string
 
    @NoState:
@@ -6983,10 +7006,8 @@ DrawCharacterStatus_Fast:
     ADC #8                            ; add 8 to X to move forward in the buffer
     TAX
 
-    INC CharacterIndexBackup          ; add 1 to character index to process next character
-    LDA CharacterIndexBackup
-    CMP #4                            ; when all 4 are done, finish
-    BNE @CharacterLoop
+    DEC char_index                    ; add 1 to character index to process next character
+    BPL @CharacterLoop
 
     ;; btl_unformattedstringbuf should now be $1C bytes long, with two $00s at the end.
 
@@ -7074,7 +7095,7 @@ DrawCharacterStatus_Fast:
 .byte AIL_STUN   ; but if they're stunned they can't act, so show that instead
 
 @AilmentIconLUT:
-.byte $7D, $F0, $7B, $96, $97, $94, $98, $95 ; poison, stone, dead, sleep, mute, dark, confuse, stun!
+.byte $F5, $F6, $F7, $F2, $F1, $F4, $F0, $F3 ; poison, stone, dead, sleep, mute, dark, confuse, stun!
 
 
 
@@ -7330,7 +7351,9 @@ ReSortPartyByAilment:
     LDX #$00                    ; X is character index and loop up counter
   @WeightLoop:
       TXA                       ; shift left 6 to get character stat index
-      JSR ShiftLeft6
+      LSR A
+      ROR A
+      ROR A
       TAY                       ; char index in Y
 
       LDA ch_ailments, Y        ; get their ailments
@@ -8565,8 +8588,19 @@ UseItem_AlarmClock:
     CLC
     ADC #$40
     BNE @Loop
+    
+    JSR ChemistCheck
+    BEQ :+    
+       
+       LDX #3
+      @ChemistLoop:
+       LDA btl_charstatusresist, X
+       ORA #AIL_SLEEP
+       STA btl_charstatusresist, X
+       DEX
+       BPL @ChemistLoop
 
-    LDA #BTLMSG_ALARMCLOCK ; print "The bell rings loudly.."
+  : LDA #BTLMSG_ALARMCLOCK ; print "The bell rings loudly.."
     LDX #ALARMCLOCK
     JMP UseItem_End_RemoveItem
 
@@ -8584,7 +8618,15 @@ UseItem_XHeal:
     JSR Battle_PlMag_IsPlayerValid
     BNE UseItem_Heal_Ineffective
 
-    JSR BtlMag_Effect_RecoverHP
+    JSR ChemistCheck
+    BEQ :+
+        LDA btlmag_effectivity         ; *1.5 effectivity if they're chemist
+        LSR A
+        CLC
+        ADC btlmag_effectivity
+        STA btlmag_effectivity
+        
+  : JSR BtlMag_Effect_RecoverHP
     PLA
     TAX                                ; Heal or X Heal is in X
     LDA #BTLMSG_HPUP                   ; print "HP up!"
@@ -8601,7 +8643,9 @@ UseItem_Elixir:
    JSR BtlMag_SetHPToMax
 
     LDA btl_defender
-    JSR ShiftLeft6
+    LSR A
+    ROR A
+    ROR A
     CLC
     ADC #ch_mp - ch_stats    ; $0, $40, $80, or $C0 + $30
     TAX
@@ -8643,10 +8687,27 @@ UseItem_Soft:
 
     JSR BtlMag_Effect_CureStone
     BCC UseItem_Ineffective
+    
+    JSR ChemistCheck
+    BEQ :+
+        LDA btlmag_defender_statusresist
+        ORA #AIL_STOP
+        STA btlmag_defender_statusresist
 
-    LDX #SOFT
+  : LDX #SOFT
     LDA #BTLMSG_STONECURED
     JMP UseItem_CommonCode
+
+UseItem_CureAilment:
+    STA btlmag_effectivity
+    JSR BtlMag_Effect_CureAilment
+    BCC UseItem_CureAilment_Fail
+    JSR ChemistCheck
+    BEQ :+
+        LDA btlmag_defender_statusresist
+        ORA btlmag_effectivity
+        STA btlmag_defender_statusresist
+  : RTS
 
 UseItem_CureAilment_Fail:
     PLA
@@ -8655,19 +8716,24 @@ UseItem_Ineffective:
     LDA #BTLMSG_INEFFECTIVENOW
     JMP UseItem_End
 
-UseItem_CureAilment:
-    STA btlmag_effectivity
-    JSR BtlMag_Effect_CureAilment
-    BCC UseItem_CureAilment_Fail
-    RTS
-
 UseItem_PhoenixDown:
     LDA #AIL_DEAD
     JSR UseItem_CureAilment
 
     LDA #25                            ; give them 25 HP
     STA btlmag_defender_hp
-    LDA #BTLMSG_LIFE
+    JSR ChemistCheck
+    BEQ :+
+        LDA btlmag_defender_hpmax
+        STA tmp
+        LDA btlmag_defender_hpmax+1
+        LSR A
+        ROR tmp
+        STA btlmag_defender_hp+1
+        LDA tmp
+        STA btlmag_defender_hp
+
+  : LDA #BTLMSG_LIFE
     LDX #PHOENIXDOWN
     JMP UseItem_CommonCode
 
@@ -8711,7 +8777,9 @@ UseItem_Ether:
 
     LDA btl_defender
     AND #$03
-    JSR ShiftLeft6
+    LSR A
+    ROR A
+    ROR A
     TAX
 
     LDA ch_ailments, X
@@ -8759,7 +8827,6 @@ UseItem_CommonCode:
    ; AND #$03
     LDA tmp+9
     JSR UnhideCharacter
-    LDA tmp+9
     JSR FlashCharacterSprite
     JSR BtlMag_SavePlayerDefenderStats ; save the cured ailment
     JSR RestoreColor                   ; fix the color if they were stoned
@@ -8786,6 +8853,19 @@ RestoreColor:
     ORA #$20 ; $20 is set on all so sprites are behind the background. This is so when the screen shakes and some characters are turned to BG tiles while stoned, the 3d effect is mostly preserved.
     STA btl_charattrib, X
     JMP UpdateSprites_BattleFrame
+    
+    
+ChemistCheck:
+    LDA btl_attacker    
+    AND #03
+    LSR A
+    ROR A
+    ROR A
+    TAY
+    LDA ch_miscperks, Y
+    AND #CHEMIST
+    RTS
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9355,48 +9435,29 @@ Battle_CastMagicOnAllPlayers:
 
 
 
-Set_RAM_stats:
-    CLC
-    ADC tmp+9
-    TAY
-    LDA (CharStatsPointer), Y
-    LDY PlayerMagDefenderBattleStats_LUT-1, X
-    STA btlmag_defender, Y
-    RTS
-
-BtlMagPlayerStats_Shared:
-    LDA btl_defender
-    AND #$03
-    STA tmp+9                 ; backup index for items and stone curing + these loops
-    TAX
-
-    LDA #<btlstats_mainstats
-    STA CharStatsPointer
-    LDA #>btlstats_mainstats
-    STA CharStatsPointer+1
-    RTS
 
 BtlMag_LoadPlayerDefenderStats:
     JSR BtlMagPlayerStats_Shared
-
-    LDX #9+7
-   @WeaponStatsLoop: ; for this its stat * 8 + character ID
+    
+    LDX #15
+   @StatsLoop: 
     TXA
     ASL A
     ASL A
-    ASL A
-    JSR Set_RAM_stats
-    DEX
-    CPX #7
-    BNE @WeaponStatsLoop
-
-   @BattleStatsLoop:  ; for this, its stat * 4 + character ID
-    TXA
-    ASL A
-    ASL A
-    JSR Set_RAM_stats
-    DEX
-    BPL @BattleStatsLoop
+    LDY tmp+8          ; when tmp+8 = 0, then stats are * 4
+    BNE :+
+     ASL A             ; for the first 10 stats are * 8
+  : ;CLC
+    ADC tmp+9          ; + character ID
+    TAY
+    LDA (CharStatsPointer), Y ; load the stat from btlstats_mainstats
+    LDY PlayerMagDefenderBattleStats_LUT, X ; get the offset from the table
+    STA btlmag_defender, Y ; and save in the defender's stat slot
+    CPX #8             ; at 8 stats left, decrement tmp+8
+    BNE :+
+      DEC tmp+8
+  : DEX
+    BPL @StatsLoop
 
     LDA tmp+9
     TAX
@@ -9409,6 +9470,8 @@ BtlMag_LoadPlayerDefenderStats:
     LDA #$0
     STA btlmag_defender_category    ; This only matters for HARM spells, which check the Undead bit.
 
+    ; now get the stats that are in save RAM - things that can persist out of battle
+
     LDX #7*2
    @Loop:
     LDY PlayerMagDefenderStats_LUT-1, X
@@ -9420,7 +9483,20 @@ BtlMag_LoadPlayerDefenderStats:
     BPL @Loop
     RTS
 
+BtlMagPlayerStats_Shared:
+    LDA btl_defender
+    AND #$03
+    STA tmp+9                 ; backup index for items and stone curing + these loops
+    TAX
 
+    LDA #<btlstats_mainstats
+    STA CharStatsPointer
+    LDA #>btlstats_mainstats
+    STA CharStatsPointer+1
+    
+    LDA #1
+    STA tmp+8    
+    RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9430,40 +9506,31 @@ BtlMag_LoadPlayerDefenderStats:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Save_RAM_stats:
-    CLC
-    ADC tmp+9
-    STA tmp+10
-
-    LDY PlayerMagDefenderBattleStats_LUT-1, X
-    LDA btlmag_defender, Y
-    LDY tmp+10
-    STA (CharStatsPointer), Y
-    RTS
-
 
 BtlMag_SavePlayerDefenderStats:
     JSR BtlMagPlayerStats_Shared
     JSR HideCharacter
-
-    LDX #9+7
-   @WeaponStatsLoop: ; for this its stat * 8 + character ID
+    
+    LDX #15
+   @StatsLoop: 
     TXA
     ASL A
     ASL A
-    ASL A
-    JSR Set_RAM_stats
-    DEX
-    CPX #7
-    BNE @WeaponStatsLoop
-
-   @BattleStatsLoop:  ; for this, its stat * 4 + character ID
-    TXA
-    ASL A
-    ASL A
-    JSR Set_RAM_stats
-    DEX
-    BPL @BattleStatsLoop
+    LDY tmp+8          ; when tmp+8 = 0, then stats are * 4
+    BNE :+
+     ASL A             ; for the first 10 stats are * 8
+  : ;CLC
+    ADC tmp+9          ; + character ID
+    STA tmp+10
+    LDY PlayerMagDefenderBattleStats_LUT, X ; get stat index from table
+    LDA btlmag_defender, Y                  ; use to get stat value 
+    LDY tmp+10                              ; load the offset
+    STA (CharStatsPointer), Y               ; save to btlstats_mainstats
+    CPX #8             ; at 8 stats left, decrement tmp+8
+    BNE :+
+      DEC tmp+8
+  : DEX
+    BPL @StatsLoop
 
     LDA tmp+9
     TAX
@@ -9863,36 +9930,46 @@ PutEffectivityInDamageMathBuf:
     LDA btl_attacker
     BPL @Enemy                      ; high bit set if its a player
 
-    LDA btlmag_magicsource
-    BNE @Enemy                      ; 0 if magic... if not 0, then its an item's spell
+    LDY btlmag_magicsource
+    BNE @ChemistCheck               ; 0 if magic... if not 0, then its an item's spell, or an item
 
-    LDY #ch_intelligence - ch_stats
-    LDA (CharStatsPointer), Y
+    LDA btl_attacker
+    AND #03
+    TAY
+    
+    LDA btl_charintelligence, Y     ; get intelligence and push it
+    PHA                             ; don't want to disturb X or Y
 
-    LDY ConfusedMagic
+    LDA ConfusedMagic
     BEQ @NotConfused
 
+       PLA
        LSR A
        LSR A                        ; divide by 4
        STA tmp
        SEC
        LDA btlmag_effectivity
        SBC tmp                      ; subtract intelligence/4 from spell effectivity
-       BCC @CapAt5                  ; Carry set if subtraction result remains 0 or over
-       BEQ @CapAt5
+       BCC @CapAtX                  ; Carry set if subtraction result remains 0 or over
+       BEQ @CapAtX
+       CMP #MIN_CONFUSED_MAGDAMAGE
        BCS @Save
 
-   @CapAt5:                         ; choosing 5, since the base damage for FIRE 1 is #10
-    LDA #5
+   @CapAtX:                         ; choosing 5, since the base damage for FIRE 1 is #10
+    LDA #MIN_CONFUSED_MAGDAMAGE     ; but its editable
     BNE @Save
+    
+   @ChemistCheck:
+    JSR ChemistCheck   
+    BEQ @Enemy
+    
+    LDA btl_charintelligence, Y      
+    PHA                             ; chemists use intelligence to boost the item
 
    @NotConfused:
-    LDA btl_attacker
-    AND #03
-    TAX
-    LDA btl_charfocus, X
+    PLA 
     CLC
-    ADC tmp                         ; add focus to intelligence
+    ADC btl_charfocus, Y            ; add focus value to intelligence
 
     LSR A                           ; divide by 2
     LSR A                           ; divide by 4
@@ -10978,7 +11055,7 @@ EraseSmallEnemy:
     LDA #$04                        ; loop counter (clearing 4 rows)
     STA btltmp
     : JSR VBlank_SetPPUAddr         ; set the PPU addr
-      LDA #$00
+      LDA #$FF
       JSR WriteAToPPU4Times         ; clear 4 tiles
       JSR MoveDown1Row_UpdateAudio  ; finish the frame and prep for next row
       DEC btltmp
@@ -12128,11 +12205,10 @@ PlayerMagDefenderBattleStats_LUT: ; 9 bytes
 .byte btlmag_defender_evasion - btlmag_defender
 .byte btlmag_defender_defense - btlmag_defender
 .byte btlmag_defender_magicdefense - btlmag_defender
-.byte btlmag_defender_statusresist - btlmag_defender
 .byte btlmag_defender_elementresist - btlmag_defender
 .byte btlmag_defender_elementweakness - btlmag_defender
+.byte btlmag_defender_statusresist - btlmag_defender
 
-PlayerMagDefenderWeaponStats_LUT: ; 7 bytes
 .byte btlmag_defender_hitrate - btlmag_defender
 .byte btlmag_defender_damage - btlmag_defender
 .byte btlmag_defender_critrate - btlmag_defender

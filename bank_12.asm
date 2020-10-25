@@ -21,6 +21,7 @@
 .export LoadSmallMapPalettes
 .export DecompressSMAttributes
 .export LoadPlayerMapPalette
+.export lut_BattleRates
 
 .segment "BANK_12"
 
@@ -2696,6 +2697,26 @@ TempleTSA:
 ;.byte $3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B
 ;.byte $3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B
 ;.byte $3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$3B,$00
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  LUT for battle encounter rates per map  [$8C00 :: 0x2CC10]
+
+lut_BattleRates:
+  
+.byte $0A,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
+.byte $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
+.byte $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
+.byte $08,$08,$08,$08,$18,$08,$08,$08,$09,$0A,$0B,$0C,$01,$08,$08,$08
+
+
+
+
 
 
 

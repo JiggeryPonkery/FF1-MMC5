@@ -81,6 +81,7 @@
 .import DOES_ITEM_EXIST_1BIT
 .import ADD_ITEM_1BIT
 .import REMOVE_ITEM_1BIT
+.import SetPartyStats
 
 .segment "BANK_0E"
 
@@ -235,9 +236,9 @@ ShopTooBadWhatElse:
 ;.byte $FF,$24,$A6,$4D,$4E,$1E,$60,$4E,$C0,$00 ; I will surely care for your scrolls well.
 
 ShopArmorDescription:
-.byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01          ; __Defense:_______|   
-.byte $FF,$FF,$A0,$A8,$AC,$AA,$AB,$B7,$E4,$09,$08,$01      ; __Weight:________|
-.byte $FF,$FF,$96,$C0,$8E,$B9,$A4,$A7,$A8,$E4,$00          ; __M.Evade:       |
+.byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01         ; __Defense:_______|   
+.byte $FF,$FF,$8E,$B9,$3F,$AC,$3C,$E4,$09,$07,$01         ; __Evasion:_______|
+.byte $FF,$FF,$96,$C0,$9B,$2C,$30,$B7,$E4,$00             ; __M.Resist:
 
 ShopWeaponDescription:
 .byte $09,$03,$8D,$A4,$B0,$A4,$66,$E4,$09,$07,$01         ; ___Damage:_______|
@@ -2361,9 +2362,9 @@ MultiplyXA_Safe:
 
 ShopPayPrice:
     LDX lead_index
-    LDA ch_perks, X    ; check if party leader is naughty
+    LDA ch_attackperks, X ; check if party leader is naughty
     AND #STEALTHY
-    BEQ @PayUp         ; if not, pay up
+    BEQ @PayUp            ; if not, pay up
     
    @ShopSteal:
     LDA shop_amount_buy ; how many items are being bought?
@@ -3877,7 +3878,26 @@ DisplayDescription:
  ; Stat2Digit1, Stat2Digit2, Stat2Digit3, #01
  ; Stat3Digit1, Stat3Digit2, Stat3Digit3, #00
  
-    LDA #<bigstr_buf
+    LDA shop_type
+    BEQ :+
+    
+    ;; if in armor shop... replace the space before the evade penalty with a minus sign
+    
+    LDX #5
+   @MiniMinusLoop: 
+    LDA bigstr_buf, X
+    CMP #$FF
+    BEQ @MinusSign
+    DEX
+    CPX #3
+    BNE @MiniMinusLoop
+    BEQ :+ 
+    
+   @MinusSign:
+    LDA #$C2
+    STA bigstr_buf, X
+ 
+  : LDA #<bigstr_buf
     STA text_ptr
     LDA #>bigstr_buf
     STA text_ptr+1
@@ -4662,6 +4682,10 @@ ResumeMainMenu:
       DEX
       BPL @Loop               ; loop until X wraps ($0C colors copied)
 
+    JSR LongCall              ; do this to update max HP for drawing
+    .word SetPartyStats
+    .byte BANK_Z    
+    
     JSR DrawMainMenu                ; draw the main menu
     LDA #$03                        ; draw the little dot that marks the party map character
     JSR SetLeadIndexTile
@@ -4714,7 +4738,7 @@ MainMenuLoop:
   
    @Select_Pressed:
     JSR LineUp_InMenu
-    BCC EnterMainMenu             ; characters swappwed ; redraw menu
+    BCC ResumeMainMenu            ; characters swappwed ; redraw menu
     JMP MainMenuResetCursorMax    ; not swapped - just reset the cursor
    
    @Start_Pressed:
@@ -4796,11 +4820,11 @@ MainMenuLoop:
     JSR MainMenuSubTarget
     BCS @ReturnToMainMenu
      LDA submenu_targ
-     STA CharacterEquipBackup ; get target character ID
+     STA char_id              ; get target character ID
       LSR A
       ROR A
       ROR A
-      ;AND #$C0                 ; shift to make ID a usable index
+      ;AND #$C0               ; shift to make ID a usable index
       STA char_index
       LDA #0
       STA equipoffset
@@ -4830,6 +4854,29 @@ MainMenuLoop:
     JSR SaveGame
     JMP EnterMainMenu ; uses Enter instead of Resume, to re-load the appropriate character sprites
 
+   
+SetLeadIndexTile:
+    PHA
+    LDA $2002
+    LDA lead_index
+    CLC
+    ROL A
+    ROL A
+    ROL A
+    ASL A
+    TAY
+    LDA LeadIndicator_LUT, Y
+    LDX LeadIndicator_LUT+1, Y
+    JSR SetPPUAddr_XA
+    PLA
+    STA $2007
+    JMP ResetScroll
+
+LeadIndicator_LUT:
+    .word $2070
+    .word $2130
+    .word $21F0
+    .word $22B0
 
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4864,9 +4911,6 @@ MainMenuSubTarget_NoClear:
     BNE @A_Pressed               ; check if A pressed
     LDA joy_b
     BNE @B_Pressed               ; or B
-    LDA joy_start
-    ORA joy_select
-    BNE @Start_Pressed
 
     JSR MoveCursorUpDown ;MoveMainMenuSubCursor    ; if neither, move the cursor
     JMP @Loop                    ; and keep looping
@@ -4881,44 +4925,7 @@ MainMenuSubTarget_NoClear:
     CLC                ; then clear C to indicate a target has been selected
     RTS                ; and exit!
   
-   @Start_Pressed:
-    JSR WaitForVBlank_L
-    LDA #$FF
-    JSR SetLeadIndexTile
-    
-    LDA cursor
-    LSR A
-    ROR A
-    ROR A
-    STA lead_index
-    LDA #$03
-    JSR SetLeadIndexTile
-    
-    JSR PlaySFX_CharSwap
-    JMP MainMenuSubTarget_NoClear
-    
-SetLeadIndexTile:
-    PHA
-    LDA $2002
-    LDA lead_index
-    CLC
-    ROL A
-    ROL A
-    ROL A
-    ASL A
-    TAY
-    LDA LeadIndicator_LUT, Y
-    LDX LeadIndicator_LUT+1, Y
-    JSR SetPPUAddr_XA
-    PLA
-    STA $2007
-    JMP ResetScroll
 
-LeadIndicator_LUT:
-    .word $2070
-    .word $2130
-    .word $21F0
-    .word $22B0
    
    
 
@@ -6521,10 +6528,10 @@ Chemist_Check:
    @Loop: 
     TAX
     LDA ch_ailments, X
-    AND #AIL_DEAD
+    AND #AIL_DEAD | AIL_STOP
     BNE @Next
    
-    LDA ch_perks, X
+    LDA ch_miscperks, X
     AND #CHEMIST
     BNE @Found
     
@@ -6797,8 +6804,7 @@ UseAilmentCuringItem:
       LSR A
       ROR tmp+8
       
-      LDA tmp+9
-      STA ch_maxhp+1, X
+      STA ch_curhp+1, X
       LDA tmp+8
       BNE :++
       
@@ -9123,7 +9129,7 @@ EnterEquipMenu:
     LDA #MBOX_EQUIP         
     JSR DrawMainItemBox
   
-    LDA CharacterEquipBackup
+    LDA char_id
     STA submenu_targ
     LDA #$05
     STA dest_x
@@ -9176,7 +9182,7 @@ EnterEquipMenu:
     JSR DrawCharMenuString   ; Draw Stats    
     
     LDX char_index
-    LDA ch_perks, X
+    LDA ch_attackperks, X
     AND #DUALWIELD
     BEQ :+
     
@@ -9286,6 +9292,7 @@ EnterEquipInventory:
     JSR ClearButtons
     STA $2001             ; turn off the PPU
     STA menustall         ; and turn off menu stalling (since the PPU is off)
+    STA tmp+15            ; toggle for special description
     STA tmp+13            ; and make sure this is 0, to keep
     ;; the battle items description box from flickering when passing over empty slots!
     
@@ -9339,7 +9346,7 @@ EnterEquipInventory:
     BNE :+
 
     LDX char_index           ; if it is, see if the character can dual-wield
-    LDA ch_perks, X
+    LDA ch_attackperks, X
     AND #DUALWIELD
     BEQ @Loop                ; if they can't, do nothing
     
@@ -9384,9 +9391,16 @@ EnterEquipInventory:
     LDA equipoffset
     CMP #06 
     BCS @Select_Pressed
-   
-    JSR PlaySFX_MenuSel
-    JSR EquipStatsDescBoxString_Special
+
+    JSR PlaySFX_MenuSel   
+    LDA tmp+15
+    EOR #$01
+    STA tmp+15
+    BNE :+
+        INC cursor_change
+        JMP @Loop
+    
+  : JSR EquipStatsDescBoxString_Special
     JMP @Loop
 
 
@@ -9518,7 +9532,7 @@ EquipStatsDescBoxString_Special:
     JMP EquipStatsDescBoxString   
     
 EquipStatsDescBoxNumbers:
-    LDA char_index
+;    LDA char_index
     JSR @FetchStats
     
     LDA #3
@@ -9553,7 +9567,7 @@ EquipStatsDescBoxNumbers:
     LDY #$1B         ; critical
     JSR @TheThing
     
-    LDX #$43
+    LDX #$41
     LDY #$1A         ; magic defense    
    
    @TheThing:
@@ -9648,7 +9662,7 @@ EquipStatsDescBoxString:
     LDA #>EquipStats_Blank    
     STA text_ptr+1
  
-    LDY #0                  ; copy it to str_buf for some reason, instead of just printing it normally
+    LDY #0                  ; copy it to str_buf, instead of just printing it normally
     LDX #0
    @Loop:                   
     LDA (text_ptr), Y
@@ -9662,7 +9676,7 @@ EquipStatsDescBoxString:
     INX
    @Resume: 
     INY 
-    CPY #42
+    CPY #41
     BNE @Loop
     
     INC dest_x
@@ -9693,7 +9707,7 @@ EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
 .byte $8A,$A6,$A6,$55,$5E,$BC,$06             ; Accuracy_###__
 .byte $8E,$B9,$3F,$AC,$3C,$05,$01             ; Evasion__###
 .byte $8C,$5C,$57,$51,$AF,$06                 ; Critical_###__
-.byte $96,$C0,$8E,$B9,$A4,$A7,$A8,$05,$00     ; M.Evade__###
+.byte $96,$C0,$9B,$2C,$30,$B7,$04,$00         ; M.Resist_###
   
 
 DrawEquipInventoryCursor:
@@ -9926,12 +9940,22 @@ IsEquipLegal:
     
    @Armor:
     LDA ch_armormastery, X
-    JMP :+
+    AND EquipPermissions   
+    BNE @CanEquip          ; if their mastery stat has 1 bit that matches the equipment's type, they can equip it
+    
+    LDA ch_armormastery+1, X
+    JMP :+                 ; if not, check the next byte
     
    @Weapon:
-    LDA ch_weaponmastery, X   ; if their mastery stat has 1 bit that matches the equipment's type, they can equip it
-  : AND EquipPermissions
+    LDA ch_weaponmastery, X   
+    AND EquipPermissions
+    BNE @CanEquip
+    
+    LDA ch_weaponmastery+1, X
+  : AND EquipPermissions+1
     BEQ @NormalPermissions
+    
+   @CanEquip: 
     RTS    
     
    @NormalPermissions:
@@ -9960,18 +9984,18 @@ IsEquipLegal:
     ;;  01234567   89ABCDEF  +1 01234567   89ABCDEF
     ;; which is the same value that doing this v would have gotten
 
-    LDA EquipPermissions+1         ; Check first byte of permissions
+    LDA EquipPermissions+2         ; Check first byte of permissions
     AND tmp                        ; mask with low byte of class permissions
-    STA EquipPermissions+1         ;  temporarily store result
-    LDA EquipPermissions+2         ; then do the same with the next byte of the permissions 
+    STA EquipPermissions           ;  temporarily store result
+    LDA EquipPermissions+3         ; then do the same with the next byte of the permissions 
     AND tmp+1                      ;  mask with next byte of class permissions
-    ORA EquipPermissions+1         ; then combine with results of the first
-    LDA EquipPermissions+3
-    AND tmp+2
-    ORA EquipPermissions+1
+    ORA EquipPermissions           ; then combine with results of the first
     LDA EquipPermissions+4
+    AND tmp+2
+    ORA EquipPermissions
+    LDA EquipPermissions+5
     AND tmp+3
-    ORA EquipPermissions+1
+    ORA EquipPermissions
     ;CMP #$01                       ;  here... any nonzero value will indicate that the item CAN be equipped
     RTS
 
@@ -10097,9 +10121,7 @@ MoveEquipMenuCurs:
     CLC
     ADC #$40
     STA char_index
-    LDA CharacterEquipBackup
-    CLC
-    ADC #$01
+    INC char_id
     BNE :+
 
   @Left:
@@ -10107,11 +10129,10 @@ MoveEquipMenuCurs:
     SEC
     SBC #$40
     STA char_index
-    LDA CharacterEquipBackup
-    SEC
-    SBC #$01
-  : AND #$03
-    STA CharacterEquipBackup
+    DEC char_id
+  : LDA char_id
+    AND #$03
+    STA char_id
     LDA cursor
     STA equipoffset
     JSR PlaySFX_MenuMove

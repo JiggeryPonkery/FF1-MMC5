@@ -3,7 +3,6 @@
 .include "macros.inc"
 .feature force_range
 
-.export BattleIcons
 .export lut_ShopCHR
 .export lut_MenuTextCHR
 .export LoadShopCHRForBank_Z
@@ -58,9 +57,6 @@ lut_MenuTextCHR:
 
 lut_OrbCHR: 
  .INCBIN "chr/new_menuorbs.chr"
-
-BattleIcons:
-.incbin "chr/battleicons.chr"
 
 
 ScrollworkImageTable:
@@ -355,11 +351,11 @@ LoadBattleBackdrop_AndPalette:
     STA $2006                ; set address to $0000
     STA $2006           
     STA tmp
+    TAX
 
-    JSR FillBlackTile
     INX
-    JSR CHRLoad
-    JMP FillBlackTile
+    JMP CHRLoad
+    ;JMP FillBlackTile
 
 CHRLoadToAX:
     LDY InBattle

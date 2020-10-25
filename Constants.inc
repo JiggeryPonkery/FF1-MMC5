@@ -200,6 +200,11 @@ BANK_OWMAPTILESET  = $05
 
 BANK_MAPTILESETS   = $06
 
+BANK_DOMAINS      = $08
+BANK_BATTLETEXT   = $08
+BANK_BTLDATA      = $08
+BANK_BTLPALETTES  = $08
+
 BANK_MINIGAME     = $09
 BANK_BRIDGESCENE  = $09
 BANK_ENDINGSCENE  = $09
@@ -215,9 +220,6 @@ BANK_MENUSTRINGS  = $0A
 BANK_TREASURE     = $0A
 
 BANK_BATTLE       = $0B
-BANK_BTLDATA      = $0B
-BANK_DOMAINS      = $0B
-BANK_BTLPALETTES  = $0B
 BANK_ENEMYSTATS   = $0B
 
 BANK_DOBATTLE     = $0C
@@ -232,7 +234,7 @@ BANK_TITLE        = $0F
 BANK_INTRO        = $0F
 BANK_Z            = $0F
 BANK_EQUIPSTATS   = $0F
-BANK_BATTLEMAGIC  = $08 
+BANK_BATTLEMAGIC  = $0F 
 
 BANK_DIALOGUE     = $10 
 BANK_TALKTOOBJ    = $10
@@ -756,6 +758,8 @@ WEP64 = $3F
 
 CHICKENKNIFE_DAMAGE = $FE
 BRAVEBLADE_DAMAGE   = $FF ; basically control codes for battle stat prep
+CKD = CHICKENKNIFE_DAMAGE
+BBD = BRAVEBLADE_DAMAGE   ; shorthand, for data table alignment
 
 WEAPON_HIT         = $00
 WEAPON_DAMAGE      = $01
@@ -766,7 +770,9 @@ WEAPON_ELEMENT     = $05
 WEAPON_CATEGORY    = $06
 WEAPON_GFX         = $07
 WEAPON_PAL         = $08
-WEAPON_PERMISSIONS = $09
+WEAPON_TYPE_1      = $09
+WEAPON_TYPE_2      = $0A
+WEAPON_PERMISSIONS = $0B ; 0C, 0D, 0E - 4 bytes
 
 ARMORSTART = $40
 ARM1  = $40  ; Cloth T
@@ -840,7 +846,11 @@ ARMOR_MAGDEF      = $02
 ARMOR_ELEMDEF     = $03
 ARMOR_ELEMWEAK    = $04
 ARMOR_STATDEF     = $05
-ARMOR_PERMISSIONS = $06
+ARMOR_HPBONUS     = $06
+ARMOR_TYPE_1      = $07
+ARMOR_TYPE_2      = $08
+ARMOR_PERMISSIONS = $09 ; 0A, 0B, 0C - 4 bytes
+
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -974,16 +984,27 @@ CLASS_START_MAX = $06 ; amount of starting classes to pick from
 CLASS_PROMOTION = $10 ; classes lower than this are starting classes
 
 ;;;;;;;;;;;;;;;;;;
-;; Perks + Battle Perks
+;; Perks + Crit Perks
 
-UNARMED         = $01
-DUALWIELD       = $02
-STEALTHY        = $04
-TWOHANDED       = $08
-CHEMIST         = $10
-LIGHTSTEP       = $20
-;               = $40
-ENDURE          = $80
+;; Attacker Perks
+
+UNARMED         = $01 ; Standard FF1 BlackBelt/Master stuff.
+DUALWIELD       = $02 ; Allows using a second weapon in the left hand, with a hit% penalty
+TWOHANDED       = $04 ; Boosts damage when not using a shield
+STEALTHY        = $08 ; Hidden damage and crit rate, steal from shops
+AIM             = $02 ; 100% Aim rate
+RAGE            = $01 ; Doubles attack power, lowers hit %, cannot control character
+
+;; Defender Perks
+
+COUNTER         = $01 ; Random chance (based on speed + agility) to counter a physical attack
+ENDURE          = $02 ; If over 1 HP, survive any physical hit that would kill them
+
+;; Misc Perks
+
+LIGHTSTEP       = $01 ; Ignore damage floor tiles
+CHEMIST         = $02 ; Increases potion effects by x2, other items more potent
+FIRSTSTRIKE     = $04 ; Increase first strike rate
 
 ; on critical hits ...  matches ailment: effect:
 CRIT_DEATH      = $01 ; death          ; kills enemy on critical hit
@@ -995,8 +1016,28 @@ CRIT_STRENGTH   = $20 ; sleep          ; raises own damage stat
 CRIT_SLOW       = $40 ; mute           ; slows the enemy (-1 hit multiplier)
 CRIT_CONF       = $80 ; confuse        ; confuses enemy
 
+;; Armor perks
+ARMOR_REGEN      = $80 ; Restore 5% HP per turn
+ARMOR_COUNTER    = $40 ; Random chance (based on speed + agility) to counter a physical attack
+ARMOR_REFLECT    = $20 ; Gives Reflect status
+ARMOR_SPEED      = $10 ; Boosts Speed stat
+ARMOR_ABSORB_HP  = $08 ; Absorbs % of physical damage dealt as HP (if I can code that)
+ARMOR_DODGE      = $04 ; 33% chance to dodge a physical hit
+ARMOR_AIM        = $02 ; 100% Aim rate
+ARMOR_RAGE       = $01 ; Doubles attack power, lowers hit %, cannot control character
 
 
+
+
+; Armour Perks:
+;*------- > Regenerate
+;-*------ > Counter
+;--*----- > Reflect
+;---*---- > Speed Boost
+;----*--- > Absorb HP
+;-----*-- > Random Dodge
+;------*- > Focus Aim
+;-------* > Rage
 
 
 
@@ -1413,8 +1454,8 @@ STARTING_STATS           = $0E ; number of starting stats for each class ; 1 bas
 HP_MAX_LOW               = $E7
 HP_MAX_HIGH              = $03 ; these two = 999
 COVER_HITS               = $80 ; high bits only (second number always 0). Amount of hits a knight can last covering someone.
-
-
+COUNTER_CHANCE           = 150 ; must exceed this value to counter
+MIN_CONFUSED_MAGDAMAGE   = $05 ; minimum 
 
 
 

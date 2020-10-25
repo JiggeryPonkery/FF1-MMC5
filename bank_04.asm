@@ -39,9 +39,25 @@ WhiteMageSprites:
 .INCBIN "chr/class/WhiteMage.Chr"
 BlackMageSprites: 
 .INCBIN "chr/class/BlackMage.chr"
-UnusedSprites1:
+Sprite_7:
 .INCBIN "chr/class/Unused.chr"
-UnusedSprites2:
+Sprite_8:
+.INCBIN "chr/class/Unused.chr"
+Sprite_9:
+.INCBIN "chr/class/Unused.chr"
+Sprite_10:
+.INCBIN "chr/class/Unused.chr"
+Sprite_11:
+.INCBIN "chr/class/Unused.chr"
+Sprite_12:
+.INCBIN "chr/class/Unused.chr"
+Sprite_13:
+.INCBIN "chr/class/Unused.chr"
+Sprite_14:
+.INCBIN "chr/class/Unused.chr"
+Sprite_15:
+.INCBIN "chr/class/Unused.chr"
+Sprite_16:
 .INCBIN "chr/class/Unused.chr"
 KnightSprites: 
 .INCBIN "chr/class/Knight.Chr"
@@ -55,39 +71,27 @@ WhiteWizSprites:
 .INCBIN "chr/class/WhiteWiz.Chr"
 BlackWizSprites: 
 .INCBIN "chr/class/BlackWiz.Chr"
-UnusedSprites3:
+Sprite_23:
 .INCBIN "chr/class/Unused.chr"
-UnusedSprites4:
+Sprite_24:
 .INCBIN "chr/class/Unused.chr"
-
-ExtraSprites1:
+Sprite_25:
 .INCBIN "chr/class/Unused.chr"
-ExtraSprites2:
+Sprite_26:
 .INCBIN "chr/class/Unused.chr"
-ExtraSprites3:
+Sprite_27:
 .INCBIN "chr/class/Unused.chr"
-ExtraSprites4:
+Sprite_28:
 .INCBIN "chr/class/Unused.chr"
-ExtraSprites5:
+Sprite_29:
 .INCBIN "chr/class/Unused.chr"
-ExtraSprites6:
+Sprite_30:
 .INCBIN "chr/class/Unused.chr"
-ExtraSprites7:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites8:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites9:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites10:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites11:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites12:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites13:
-.INCBIN "chr/class/Unused.chr"
-ExtraSprites14:
-.INCBIN "chr/class/Unused.chr"
+;Sprite_31:
+;.INCBIN "chr/class/Unused.chr"
+;Sprite_32:
+;.INCBIN "chr/class/Unused.chr"
+;; no room
 
 CursorCHR:
 .INCBIN "chr/cursor.chr"
@@ -168,54 +172,54 @@ LoadBattleSpritesLUT_1:
    .byte $11,$E0
    .word BlackMageSprites
    .byte $12,$40
-   .word UnusedSprites1
+   .word Sprite_7
    .byte $12,$A0
-   .word UnusedSprites2
+   .word Sprite_8
    .byte $13,$00
-   .word KnightSprites
+   .word Sprite_9
    .byte $13,$60
-   .word NinjaSprites
+   .word Sprite_10
    .byte $13,$C0
-   .word MasterSprites
+   .word Sprite_11
    .byte $14,$20
-   .word RedWizSprites
+   .word Sprite_12
    .byte $14,$80
-   .word WhiteWizSprites
+   .word Sprite_13
    .byte $14,$E0
-   .word BlackWizSprites    
+   .word Sprite_14
    .byte $15,$40
-   .word UnusedSprites3
+   .word Sprite_15
    .byte $15,$A0
-   .word UnusedSprites4
+   .word Sprite_16
    
    .byte $16,$00
-   .word ExtraSprites1
+   .word KnightSprites
    .byte $16,$60
-   .word ExtraSprites2
+   .word NinjaSprites
    .byte $16,$C0
-   .word ExtraSprites3
+   .word MasterSprites
    .byte $17,$20
-   .word ExtraSprites4
+   .word RedWizSprites
    .byte $17,$80
-   .word ExtraSprites5
+   .word WhiteWizSprites
    .byte $17,$E0
-   .word ExtraSprites6
+   .word BlackWizSprites
    .byte $18,$40
-   .word ExtraSprites7
+   .word Sprite_23
    .byte $18,$A0
-   .word ExtraSprites8
+   .word Sprite_24
    .byte $19,$00
-   .word ExtraSprites9
+   .word Sprite_25
    .byte $19,$60
-   .word ExtraSprites10
+   .word Sprite_26
    .byte $19,$C0
-   .word ExtraSprites11
+   .word Sprite_27
    .byte $1A,$20
-   .word ExtraSprites12
+   .word Sprite_28
    .byte $1A,$80
-   .word ExtraSprites13
+   .word Sprite_29
    .byte $1A,$E0
-   .word ExtraSprites14
+   .word Sprite_30
 
 
 ShiftTile:
@@ -329,6 +333,8 @@ CHRLoadToAX_Shift:
   
 
 LoadStoneSprites:
+    LDA $2002                 ; reset PPU toggle
+
     LDA #$00
     STA char_index
    @CharLoop:
@@ -377,8 +383,7 @@ LoadAllBattleSprites_Menu:
     STA char_index
   : LDA char_index
     TAY
-    CLC
-    ROR A
+    LSR A
     ROR A
     ROR A
     TAX
@@ -422,8 +427,7 @@ LoadAllBattleSprites:
 
 LoadBattleSprite:   
     LDA char_index
-    CLC      
-    ROR A    
+    LSR A    
     ROR A    
     ROR A    
     TAX
@@ -471,14 +475,16 @@ StackLoader:
     PHA       ; backup A
     TXA       ; backup X
     PHA
-
-    LDY #0
+ 
+    LDY tmp+2
+    LDX #0
+    DEY
    @StackLoad_Loop:
     LDA (tmp), Y                  ; read a byte from source pointer
-    STA TempSpriteLoading, Y      ; save to the top of the stack
-    INY
-    CPY tmp+2                     ; and stop when all the bytes are loaded
-    BNE @StackLoad_Loop
+    STA TempSpriteLoading, X      ; save to the top of the stack
+    INX
+    DEY                           ; and stop when all the bytes are loaded  
+    BPL @StackLoad_Loop
     
     JSR WaitForVBlank_L
     
@@ -488,12 +494,12 @@ StackLoader:
     LDY $2002
     STA $2006         ; write high byte of dest address
     STX $2006         ; write low byte
-
+ 
     LDX tmp+2 ; get amount of bytes to write    
    @PullStackLoop:
-    LDA TempSpriteLoading, X
+    LDA TempSpriteLoading-1, X
     STA $2007
-    DEX
+    DEX    
     BNE @PullStackLoop
     RTS
     
