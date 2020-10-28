@@ -134,9 +134,6 @@ FinishBattlePrepAndFadeIn:
 
     JSR ClearBattleMessageBuffer_L
     JSR ClearCharBuffers
-    JSR LongCall
-    .word SetPartyStats
-    .byte BANK_EQUIPSTATS
     JSR EnterBattlePrepareSprites
     ;; this clears shadow OAM, sets the buffers for location, then loads the sprites up.
     JSR DrawCharacterStatus
@@ -317,11 +314,11 @@ Battle_AfterFadeIn:
     LDA ch_miscperks, X
     AND #FIRSTSTRIKE
     BEQ :+
-    
+
     LDA ch_agility, X
     LSR A
     LSR A
-    CLC    
+    CLC
     ADC btl_mathbuf
     STA btl_mathbuf
 
@@ -335,7 +332,7 @@ Battle_AfterFadeIn:
     LDX btlform_surprise; get surprise rate
     LDA #$00
     JSR MathBuf_Sub     ; subtracts surprise rate from that value
-    
+
     LDA btl_mathbuf     ; drop high byte and check low byte
     CMP #11
 
@@ -1003,7 +1000,7 @@ BattleSubMenu_Magic_NoUndraw:
     ADC btlcurs_x   ; spell (0-2)
     ADC char_index
     TAY                             ; put that index in Y, and use it to get the chosen spell
-    LDA ch_spells, Y 
+    LDA ch_spells, Y
     BNE :+                          ; if they selected an empty slot, do the @NothingBox -- otherwise skip over it
 
   @NothingBox:
@@ -1015,10 +1012,10 @@ BattleSubMenu_Magic_NoUndraw:
     ;; JIGS - new part here too: MP index = Page * 4 + cursor_Y
 
     LDA battle_item                 ; spell level
-    CLC                            
+    CLC
     ADC char_index                  ; +$0, $40, $80, or $C0
     ADC #ch_mp - ch_stats           ; +$30
-    TAX                            
+    TAX
     LDA ch_stats, X                 ; stats plus all ^ those numbers
     AND #$F0                        ; chop off low bits (max mp) to get current mp
 
@@ -1779,7 +1776,7 @@ LoadSprite:                       ; this is for weapons/magic
 
 UpdateCharacterSprite:            ; In: X = 00, 01, 02, 03
     STX char_index
-    
+
 UpdateCharacterSprite_Preset:     ; char_index was set already
     JSR BattleUpdateAudio         ; update audio early
     LDA btl_drawflagsA            ; then set the high bit on this
@@ -2083,22 +2080,22 @@ DoMenu_2x4:
     JSR SetCursorPositions
     JMP MenuSelection_2x4
 
-SetCursorPositions: 
+SetCursorPositions:
     LDA CursorPosition_LUT_Low, X ; this LUT has the low byte of the address as -1
     STA tmp
     LDA CursorPosition_LUT_High, X
     STA tmp+1
-    LDA CursorPosition_LUT_Max, X 
+    LDA CursorPosition_LUT_Max, X
     STA btlcurs_max
     DEC btlcurs_max            ; max is +1 more than needed so that shifting it works right
     ASL A
     TAY
-    
+
   : LDA (tmp), Y               ; this should be -1 byte from the actual start of the LUT
-    STA btlcurs_positions-1, Y ; because Y is +1 
+    STA btlcurs_positions-1, Y ; because Y is +1
     DEY                        ; so that this loop will end with Y = 0
     BNE :-                     ; and still put the bytes in the right RAM address
-    
+
     STY btlcurs
     STY btlcurs_x
     STY btlcurs_y
@@ -2853,7 +2850,7 @@ MenuSelection_2x4:
     RTS
   @Cursor_Right:
     INC btlcurs_x
-   @Exit: 
+   @Exit:
     RTS
 
 
@@ -3111,8 +3108,8 @@ HideCharacter:              ; assumes X is already set
     INC btl_charhidden, X         ; set to 1
     DEC Hidden                    ; set to 0
   : JSR UpdateSprites_BattleFrame ; necessary, because the 4th character won't re-hide before the turn starts until sprites are updated...
-    
-HideCharacterEnd:    
+
+HideCharacterEnd:
     JMP RestoreAXY
 
 
@@ -5826,7 +5823,7 @@ PlayerRandomSpell:
 
    @ChooseSpell:
     JSR BattleRNG_L
-    AND #03           
+    AND #03
     CMP #$03
     BEQ @ChooseSpell ; needs to be 0, 1, or 2 - gets the spell slot of the chosen level
     CLC
@@ -6005,7 +6002,7 @@ CounterStrike:
 
     LDA btl_retaliate
     BPL @CounterCommand
-    
+
     LDA #0
     STA btl_parrydamage+1
     STA btl_parrydamage         ; zero the parry damage, since its a plain counter
@@ -6013,7 +6010,7 @@ CounterStrike:
 
    @CounterCommand:
     DEC btl_charparry, X
-    
+
   : PLA
     TAX
     JMP PlayerAttackEnemy_Physical
@@ -6103,12 +6100,12 @@ SavePlayerDefender:
         LDA battle_hitsconnected
         BEQ :+
         INC btl_retaliate            ; set to 1 to mark it as a command counter
-        
+
   : LDA btl_defender_perks           ; if they have the Counter support perk...
     AND #COUNTER
     BEQ :+
-    
-        LDA btl_charspeed, X         ; then check speed + agility / 4 
+
+        LDA btl_charspeed, X         ; then check speed + agility / 4
         LDY #ch_agility - ch_stats
         CLC
         ADC (CharStatsPointer), Y
@@ -6119,7 +6116,7 @@ SavePlayerDefender:
         CMP #COUNTER_CHANCE          ; set in constants; minimum value to meet to counter
         BCC :+
         DEC btl_retaliate            ; make it $FF to mark it as a support ability counter
-  
+
   : LDA btl_attacker
     BMI @FinalEnd
 
@@ -6713,7 +6710,7 @@ DoPhysicalAttack_Exit:
     JSR HideCharacter
     JSR LongCall
     .word SpiritCalculations
-    .byte BANK_BTLDATA
+    .byte BANK_BATTLESTATS
     JSR RespondDelay
     JMP UndrawAllKnownBoxes
 
@@ -8588,10 +8585,10 @@ UseItem_AlarmClock:
     CLC
     ADC #$40
     BNE @Loop
-    
+
     JSR ChemistCheck
-    BEQ :+    
-       
+    BEQ :+
+
        LDX #3
       @ChemistLoop:
        LDA btl_charstatusresist, X
@@ -8625,7 +8622,7 @@ UseItem_XHeal:
         CLC
         ADC btlmag_effectivity
         STA btlmag_effectivity
-        
+
   : JSR BtlMag_Effect_RecoverHP
     PLA
     TAX                                ; Heal or X Heal is in X
@@ -8687,7 +8684,7 @@ UseItem_Soft:
 
     JSR BtlMag_Effect_CureStone
     BCC UseItem_Ineffective
-    
+
     JSR ChemistCheck
     BEQ :+
         LDA btlmag_defender_statusresist
@@ -8853,10 +8850,10 @@ RestoreColor:
     ORA #$20 ; $20 is set on all so sprites are behind the background. This is so when the screen shakes and some characters are turned to BG tiles while stoned, the 3d effect is mostly preserved.
     STA btl_charattrib, X
     JMP UpdateSprites_BattleFrame
-    
-    
+
+
 ChemistCheck:
-    LDA btl_attacker    
+    LDA btl_attacker
     AND #03
     LSR A
     ROR A
@@ -8865,7 +8862,7 @@ ChemistCheck:
     LDA ch_miscperks, Y
     AND #CHEMIST
     RTS
-    
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -9438,9 +9435,9 @@ Battle_CastMagicOnAllPlayers:
 
 BtlMag_LoadPlayerDefenderStats:
     JSR BtlMagPlayerStats_Shared
-    
+
     LDX #15
-   @StatsLoop: 
+   @StatsLoop:
     TXA
     ASL A
     ASL A
@@ -9493,9 +9490,9 @@ BtlMagPlayerStats_Shared:
     STA CharStatsPointer
     LDA #>btlstats_mainstats
     STA CharStatsPointer+1
-    
+
     LDA #1
-    STA tmp+8    
+    STA tmp+8
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -9510,9 +9507,9 @@ BtlMagPlayerStats_Shared:
 BtlMag_SavePlayerDefenderStats:
     JSR BtlMagPlayerStats_Shared
     JSR HideCharacter
-    
+
     LDX #15
-   @StatsLoop: 
+   @StatsLoop:
     TXA
     ASL A
     ASL A
@@ -9523,7 +9520,7 @@ BtlMag_SavePlayerDefenderStats:
     ADC tmp+9          ; + character ID
     STA tmp+10
     LDY PlayerMagDefenderBattleStats_LUT, X ; get stat index from table
-    LDA btlmag_defender, Y                  ; use to get stat value 
+    LDA btlmag_defender, Y                  ; use to get stat value
     LDY tmp+10                              ; load the offset
     STA (CharStatsPointer), Y               ; save to btlstats_mainstats
     CPX #8             ; at 8 stats left, decrement tmp+8
@@ -9936,7 +9933,7 @@ PutEffectivityInDamageMathBuf:
     LDA btl_attacker
     AND #03
     TAY
-    
+
     LDA btl_charintelligence, Y     ; get intelligence and push it
     PHA                             ; don't want to disturb X or Y
 
@@ -9958,16 +9955,16 @@ PutEffectivityInDamageMathBuf:
    @CapAtX:                         ; choosing 5, since the base damage for FIRE 1 is #10
     LDA #MIN_CONFUSED_MAGDAMAGE     ; but its editable
     BNE @Save
-    
+
    @ChemistCheck:
-    JSR ChemistCheck   
+    JSR ChemistCheck
     BEQ @Enemy
-    
-    LDA btl_charintelligence, Y      
+
+    LDA btl_charintelligence, Y
     PHA                             ; chemists use intelligence to boost the item
 
    @NotConfused:
-    PLA 
+    PLA
     CLC
     ADC btl_charfocus, Y            ; add focus value to intelligence
 
@@ -10894,19 +10891,21 @@ DrawEnemyEffect:
     JSR SwapBtlTmpBytes_L
     LDA btl_defender
     PHA
+
     LDX btl_battletype
     BNE :+
-      JMP DrawEnemyEffect_9Small          ; 9small formation
+      JMP DrawEnemyEffect_9Small
   : DEX
     BNE :+
-      JMP DrawEnemyEffect_4Large          ; 4large formation
-  :   DEX
+      JMP DrawEnemyEffect_4Large
+  : DEX
     BNE :+
-      JMP DrawEnemyEffect_Mix          ; mix formation
-
+    JMP DrawEnemyEffect_Mix
+   
     ;; The rest of this is for Fiends/Chaos -- but is the same
     ;;  idea as DrawEnemyEffect_9Small.  See that routine for
     ;;  details -- comments here are sparese.
+  
   : PLA                     ; throw the enemy slot away -- we don't need it since there's only 1 enemy
 
     LDA #$20
@@ -10923,8 +10922,8 @@ DrawEnemyEffect:
 
     LDA btl_enemyeffect
     BEQ @Exit               ; exit if we don't want to erase the enemy
-    LDA btl_battletype
-    CMP #$04
+    LDA dlgmusic_backup ; btl_battletype -- this has the full 3 bits instead of only 2 bits
+    CMP #$07
     BEQ @Exit               ; exit if this is a Chaos fight -- we don't erase Chaos normally -- he has a fancy
                             ;  dissolve effect
 
@@ -11380,101 +11379,100 @@ IncYBy4_WriteToOam:
 
 
 DisplayAttackIndicator:  ; in: A = amount of times to flash the enemy (each flash is 3 frames lit, 3 normal)
-  STA tmp+6
-  LDA btl_attacker
-  STA indicator_index
+    STA tmp+6
+    LDA btl_attacker
+    STA indicator_index
 
-  LDA ConfusedMagic
-  BEQ :+
+    LDA ConfusedMagic
+    BEQ :+
 DisplayAttackIndicator_Scan:
     LDA btl_defender
     STA indicator_index
 
-: LDX btl_battletype
-  BEQ @Indicator_9Small          ; 9small formation
-  DEX
-  BEQ @Indicator_4Large          ; 4large formation
-  DEX
-  BEQ @Indicator_Mix             ; mix formation
+  : LDA btl_battletype
+    BEQ @Indicator_9Small          ; 9small formation
+    CMP #$03
+    BEQ @Indicator_Fiend
+    LSR A
+    BCS @Indicator_4Large          ; 4large formation
 
- @Indicator_Fiend:
-  LDA #<FiendChaosAttributes
-  STA tmp+4
-  LDA #>FiendChaosAttributes
-  LDX #0
-  BEQ @PrepLoop
+   @Indicator_Mix:
+    LDA indicator_index
+    CMP #2
+    BCC @Indicator_4Large
 
- @Indicator_9Small:
-  LDA #<SmallEnemyAttributes
-  STA tmp+4
-  LDA #>SmallEnemyAttributes
-  LDX #9
-  BNE @PrepLoop
+    LDA #<MixedEnemyAttributes
+    STA tmp+4
+    LDA #>MixedEnemyAttributes
+    LDX #9
 
- @Indicator_4Large:
-  LDA #<LargeEnemyAttributes
-  STA tmp+4
-  LDA #>LargeEnemyAttributes
-  LDX #13
-  BNE @PrepLoop
+   @Indicator_Fiend:
+    LDA #<FiendChaosAttributes
+    STA tmp+4
+    LDA #>FiendChaosAttributes
+    LDX #0
+    BEQ @PrepLoop
 
- @Indicator_Mix:
-  LDA indicator_index
-  CMP #2
-  BCC @Indicator_4Large
+   @Indicator_9Small:
+    LDA #<SmallEnemyAttributes
+    STA tmp+4
+    LDA #>SmallEnemyAttributes
+    LDX #9
+    BNE @PrepLoop
 
-  LDA #<MixedEnemyAttributes
-  STA tmp+4
-  LDA #>MixedEnemyAttributes
-  LDX #9
+   @Indicator_4Large:
+    LDA #<LargeEnemyAttributes
+    STA tmp+4
+    LDA #>LargeEnemyAttributes
+    LDX #13
 
- @PrepLoop:
-  STA tmp+5
-  LDA indicator_index
-  JSR MultiplyXA
-  STA tmp+7
- ; LDA #02                ; frame loop = do this many frames
- ; STA tmp+6
+   @PrepLoop:
+    STA tmp+5
+    LDA indicator_index
+    JSR MultiplyXA
+    STA tmp+7
+   ; LDA #02                ; frame loop = do this many frames
+   ; STA tmp+6
 
- @Begin:
-  JSR WaitForVBlank_L
-  LDY tmp+7
- @Loop:
-  JSR @SetAddress
-  LDA $2007          ; throw away buffered byte ?
-  LDA $2007          ; get actual attribute byte
-  STA tmp+8          ; save
-  JSR @SetAddress    ; re-do the address
-  INY
-  LDA (tmp+4), Y     ; get next byte in lut
-  ORA tmp+8          ; add in any other bits
-  STA $2007          ; then save it
-  INY
-  BNE @Loop
+   @Begin:
+    JSR WaitForVBlank_L
+    LDY tmp+7
+   @Loop:
+    JSR @SetAddress
+    LDA $2007          ; throw away buffered byte ?
+    LDA $2007          ; get actual attribute byte
+    STA tmp+8          ; save
+    JSR @SetAddress    ; re-do the address
+    INY
+    LDA (tmp+4), Y     ; get next byte in lut
+    ORA tmp+8          ; add in any other bits
+    STA $2007          ; then save it
+    INY
+    BNE @Loop
 
- @ExitLoop:
-  PLA
-  PLA                         ; undo JSR... but still saved some space!
-  JSR @MiniFrame
-  JSR JIGS_RefreshAttributes
-  JSR @MiniFrame
-  DEC tmp+6
-  BNE @Begin
-  RTS
+   @ExitLoop:
+    PLA
+    PLA                         ; undo JSR... but still saved some space!
+    JSR @MiniFrame
+    JSR JIGS_RefreshAttributes
+    JSR @MiniFrame
+    DEC tmp+6
+    BNE @Begin
+    RTS
 
- @SetAddress:
-  LDX #$23
-  LDA (tmp+4), Y
-  BEQ @ExitLoop
-  STX $2006
-  STA $2006
-  RTS
+   @SetAddress:
+    LDX #$23
+    LDA (tmp+4), Y
+    BEQ @ExitLoop
+    STX $2006
+    STA $2006
+    RTS
 
- @MiniFrame:
-  JSR BattleUpdatePPU         ; set scroll
-  JSR BattleUpdateAudio       ; update audio (frame 1)
-  JSR BattleFrame
-  JMP BattleFrame             ; wait for vblank/then do audio (2 more frames)
+   @MiniFrame:
+    JSR BattleUpdatePPU         ; set scroll
+    JSR BattleUpdateAudio       ; update audio (frame 1)
+    JSR BattleFrame
+    JMP BattleFrame             ; wait for vblank/then do audio (2 more frames)
 
 
 
@@ -11494,9 +11492,9 @@ TargetAllCursors:
    @FetchAddress:
     JSR SetCursorPositions
 
-    ;; Y = 0 
+    ;; Y = 0
     STY btl8x8spr_i         ; zero the OAM index
-    
+
     LDA btlcurs_max         ; amount of cursors to draw
     TAX                     ; put in X for a loop counter
     ASL A
@@ -11878,7 +11876,7 @@ CursorPosition_LUT_High:
 .byte >lut_ItemCursorPos
 .byte >lut_EtherCursorPos
 
-CursorPosition_LUT_Max: 
+CursorPosition_LUT_Max:
 .byte $08 ; 00 commands
 .byte $02 ; 01 ready?
 .byte $04 ; 02 players
@@ -11903,13 +11901,13 @@ lut_MainCombatBoxCursorPos:
   .BYTE $40, $D6    ; FLEE
 
 lut_ReadyCursorPos:
-  .BYTE $08, $CE   
+  .BYTE $08, $CE
   .BYTE $40, $CE
   .BYTE $08, $CE   ; stupid mirrors...
   .BYTE $40, $CE
-  .BYTE $08, $CE   
+  .BYTE $08, $CE
   .BYTE $40, $CE
-  .BYTE $08, $CE   
+  .BYTE $08, $CE
   .BYTE $40, $CE
 
 lut_PlayerTargetCursorPos: ; uses 2x4 menu
@@ -11917,10 +11915,10 @@ lut_PlayerTargetCursorPos: ; uses 2x4 menu
   .BYTE $C4, $4D    ; char 1
   .BYTE $C8, $66    ; char 2
   .BYTE $CC, $7F    ; char 3
-  .BYTE $C0, $34    ; 
-  .BYTE $C4, $4D    ; 
-  .BYTE $C8, $66    ; 
-  .BYTE $CC, $7F    ; 
+  .BYTE $C0, $34    ;
+  .BYTE $C4, $4D    ;
+  .BYTE $C8, $66    ;
+  .BYTE $CC, $7F    ;
 
 lut_Target9SmallCursorPos:
   .BYTE $10, $30
@@ -11964,7 +11962,7 @@ lut_MagicCursorPos:
   .BYTE $90, $D6
 
 lut_EquipmentCursorPos:
-  .BYTE $08, $A6 
+  .BYTE $08, $A6
   .BYTE $08, $B6
   .BYTE $08, $C6
   .BYTE $08, $D6
@@ -11981,7 +11979,7 @@ lut_ItemCursorPos:
   .BYTE $08, $A6 ; stupid mirrors
   .BYTE $08, $B6
   .BYTE $08, $C6
-  .BYTE $08, $D6  
+  .BYTE $08, $D6
 
 lut_EtherCursorPos:
   .BYTE $18, $A6 ; level 1

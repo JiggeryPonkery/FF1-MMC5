@@ -8985,68 +8985,38 @@ DrawMainMenuCharBoxBody:
     ASL A       ;  convert it from $40 base to $1 base (ie:  $03 is character 3 instead of $C0)
     ROL A
     ROL A
-    AND #$03    ; mask out low 2 bits (precautionary -- isn't really necessary)
-    ORA #$10    ; or with $10 (creates the 'draw stat' control code)
+    STA tmp
     
-    STA str_buf+1
-    STA str_buf+6
-    STA str_buf+10
-    STA str_buf+16
-    STA str_buf+19
-            
-    LDA #0
-    STA str_buf+2  ; Name Code
-    STA str_buf+21 ; Terminator
-    
-    LDA #$FF
-    STA str_buf    ; stupid
-    STA str_buf+3
-    STA str_buf+4    
-    STA str_buf+9  ; stupid
-    STA str_buf+12
-    STA str_buf+15 ; spaces
-    
-    ;; why stupid? Because the ailment icon won't display after a line break
-    ;; unless another tile is drawn first... I don't know why.
-    ;; Update: Actually, fixed that problem, but I am not going to fiddle with this unless I have to.
-    
-    LDA #$95       ; L 
-    STA str_buf+5
-    
-    LDA #$03       ; draw stat 3 (Level)
-    STA str_buf+7
-    
-    LDA #$01       ; double line break
-    STA str_buf+8
-    
-    LDA #$02       ; draw stat 2 (Ailment icon)
-    STA str_buf+11  ; 9  
+    LDX #21
+   @MainStringLoop:
+    LDA CharBoxString, X
+    CMP #$10                ; if its a control code...
+    BNE :+
+        ORA tmp             ; add in the character's ID
+  : STA str_buf, X
+    DEX
+    BPL @MainStringLoop   
 
-    LDA #$91       ; H
-    STA str_buf+13
-    LDA #$99       ; P
-    STA str_buf+14    
-    LDA #$FF
-    
-    LDA #$05       ; draw stat 5 (Cur HP)
-    STA str_buf+17
-    LDA #$7A       ; '/' character
-    STA str_buf+18
-    LDA #$06       ; stat 6 (Max HP)
-    STA str_buf+20
-    
     LDA dest_x
     CLC
     ADC #4
     STA dest_x    
-    
-    ;   0 1  2    3 4 5 6  7     8       9 10 11      12 13 14 15 16 17    18 19 20    21
-    ;   _ 00 Name _ _ L 00 Level -break- _ 00 Ailment _  H  P  _  00 CurHP /  00 MaxHP -end-
-    
+
     LDA #<str_buf  ; set low byte of string pointer (start drawing the string from $0300)
     STA text_ptr
  
     JMP DrawComplexString    ; Draw it, then exit!
+
+CharBoxString:
+.byte $FF,$10,$00,$FF,$FF,$95,$10,$03,$01
+.byte $FF,$10,$02,$FF,$91,$99,$FF,$10,$05,$7A,$10,$06,$00
+
+;   0 1  2    3 4 5 6  7     8       9 10 11      12 13 14 15 16 17    18 19 20    21
+;   _ 00 Name _ _ L 00 Level -break- _ 00 Ailment _  H  P  _  00 CurHP /  00 MaxHP -end-
+
+; space, char stat; name, space, space, L, char stat; level, line break
+; space, char stat: ailment icon, space, H, P, space, char stat: current HP, /, char stat: max HP, end
+
 
 
 

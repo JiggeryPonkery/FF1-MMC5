@@ -7926,9 +7926,7 @@ ComplexString_CharacterStatCode:
     ;;;;   ($10 is character 0, $11 is character 1, etc)
     ;;;; Which stat to draw is determined by the next byte in the string
 
-    LSR A
-    ROR A
-    ROR A
+    JSR ShiftLeft6
     STA char_index ; store index
     TAX            ; and put in X as well
     JSR ComplexString_GetNextByte
