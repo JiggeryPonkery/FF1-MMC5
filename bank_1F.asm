@@ -10029,7 +10029,9 @@ LoadMenuCHRPal:                ; does not load 'lit orb' palette, or the two mid
     JSR SwapPRG_L              ; Swap to Bank D
     JSR LoadMenuOrbs
     JSR LoadBatSprCHRPalettes
-	JMP LoadMenuTextBGCHR
+	JSR LoadMenuTextBGCHR
+    LDA #BANK_MENUS
+    JMP SwapPRG_L
 
 LoadShopCHRPal:
     JSR LoadShopBGCHRPalettes
