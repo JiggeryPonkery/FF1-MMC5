@@ -1409,7 +1409,7 @@ OWCanMove:
     ;LDA #$01             ; otherwise, we need to indicate the player is entering the caravan
     ;STA entering_shop    ; set entering_shop to nonzero
     INC entering_shop
-    LDA #SHOP_CARAVAN_ID ; 90
+    LDA #SHOP_CARAVAN_ID+$30 ; = $AF
     STA shop_id          ; shop ID=70 ($46) = caravan's shop ID
 
     @Success_2:
@@ -7142,19 +7142,24 @@ DrawDialogueString:
       JSR SwapPRG_L        
       ;; 
       
+      LDX dlg_itemid       ; get the item ID whose name we're to print
       LDA treasure_offset
       BEQ @PrintItem
+      CMP #2
+      BEQ :+
+
+      LDA lut_MagicNames_Low, X
+      STA text_ptr
+      LDA lut_MagicNames_High, X
+      JMP @ItemPtrLoaded
       
       ;; print weapon or armor name instead
-      LDX dlg_itemid
-      DEX
-      LDA lut_EquipmentNames_Low, X 
+    : LDA lut_EquipmentNames_Low, X 
       STA text_ptr
       LDA lut_EquipmentNames_High, X
       JMP @ItemPtrLoaded  
       
      @PrintItem:
-      LDX dlg_itemid       ; get the item ID whose name we're to print
       LDA lut_ItemNames_Low, X   ; or from 2nd half if ID >= $80
       STA text_ptr
       LDA lut_ItemNames_High, X
@@ -7414,9 +7419,10 @@ OpenTreasureChest:
     LDA shop_type
     CMP #SHOP_ARMOR          ; 0-1 = equipment
     BCC @Equipment
-    CMP #SHOP_ITEM           ; 2-5 = magic
+    CMP #SHOP_SKILLS         ; 2-5 = magic
     BCC @Magic
-    BEQ @Items               ; 6 = item
+    CMP #SHOP_CLINIC         ; 6-7 = skill or item
+    BCC @Items               ; 8+  = gold
   
    ;; if it didn't branch to magic or items, its gotta be gold!
     LDA dlg_itemid
@@ -7431,7 +7437,8 @@ OpenTreasureChest:
     
    @Magic:
     JSR Set_Inv_Magic
-  : LDA dlg_itemid
+  : INC treasure_offset      ; 2 = equipment, 1 = magic
+    LDA dlg_itemid
     JSR ADD_ITEM
     BCS @TooFull
     BCC @OpenChest    
@@ -7456,10 +7463,9 @@ OpenTreasureChest:
     
    @KeyItem:
     PHA
-    LDA #BANK_KEYITEMS
-    JSR SwapPRG_L
+    JSR Set_Inv_KeyItem
     PLA
-    JSR KeyItem_Add
+    JSR ADD_ITEM_1BIT
     INC dlgsfx               ; turn on key-item jingle 
 
    @OpenChest:

@@ -307,7 +307,7 @@ lut_MapObjGfx:
 ;; JIGS - this table is how many NPC sprites appear on each map
 
 lut_MapObjectCount:
-.byte 7  ; Coneria
+.byte 8  ; Coneria
 .byte 8  ; Pravoka
 .byte 8  ; Elfland
 .byte 14 ; Melmond
@@ -517,6 +517,14 @@ lut_MapObjects:
 ;3C ; 60 ;  23  20 ; Titan's Tunnel
 
 
+
+
+
+
+
+;; JIGS - to make these easier to count, I've aligned them to Notepad++'s lines thingy.
+;; So Coneria starts at line 530... Pravoka at 550... and so on
+
 ; 00 ; Coneria
 ;     ID   X      Y
 MAPOBJ_LIST_0:
@@ -529,6 +537,15 @@ MAPOBJ_LIST_0:
 .byte $38,$1B+16,$05+20
 .byte $39,$1E+16,$0B+20
 
+
+
+
+
+
+
+
+
+
 ; 01 ; Pravoka
 MAPOBJ_LIST_1:
 .byte $04,$45+12,$07+15 ; Bikke
@@ -540,6 +557,15 @@ MAPOBJ_LIST_1:
 .byte $42,$13+12,$0B+15
 .byte $43,$14+12,$19+15
 
+
+
+
+
+
+
+
+
+
 ; 02 ; Elfland
 MAPOBJ_LIST_2:
 .byte $4D,$25+11,$17+17 ; Elves
@@ -550,6 +576,15 @@ MAPOBJ_LIST_2:
 .byte $52,$0A+11,$06+17
 .byte $53,$44+11,$05+17
 .byte $54,$4F+11,$1B+17
+
+
+
+
+
+
+
+
+
 
 ; 03 ; Melmond
 MAPOBJ_LIST_3:
@@ -568,6 +603,9 @@ MAPOBJ_LIST_3:
 .byte $73,$16+15,$0C+18
 .byte $74,$19+15,$0D+18
 
+
+
+
 ; 04 ; Crescent Lake
 MAPOBJ_LIST_4:
 .byte $15,$6A+6,$0A+19 ; Dr. Canoe
@@ -585,6 +623,9 @@ MAPOBJ_LIST_4:
 .byte $82,$68+6,$0B+19
 .byte $83,$10+6,$07+19 ; one of these is a lady and not a sage, maybe this one?
 
+
+
+
 ; 05 ; Gaia
 MAPOBJ_LIST_5:
 .byte $13,$71-3,$13-3 ; Fairy
@@ -601,6 +642,9 @@ MAPOBJ_LIST_5:
 .byte $B8,$29-3,$33-3
 .byte $B9,$69-3,$31-3
 .byte $BA,$17-3,$36-3
+
+
+
 
 ; 06 ; Onrac
 MAPOBJ_LIST_6:
@@ -620,6 +664,8 @@ MAPOBJ_LIST_6:
 .byte $9F,$29+6,$1B+12
 .byte $A0,$1C+6,$04+12
 
+
+
 ; 07 ; Leifen
 MAPOBJ_LIST_7:
 .byte $BB,$58+4,$15+20 ; Chime-giver
@@ -637,6 +683,9 @@ MAPOBJ_LIST_7:
 .byte $C8,$0E+4,$14+20
 .byte $C9,$07+4,$0D+20
 
+
+
+
 ; 08 ; Coneria Castle 1F
 MAPOBJ_LIST_8:
 .byte $20,$4E+19,$1C+12 ; Guard near lower pillar
@@ -650,6 +699,13 @@ MAPOBJ_LIST_8:
 .byte $2C,$56+19,$09+12
 .byte $2E,$4E+19,$0F+12
 
+
+
+
+
+
+
+
 ; 09 ; Elfland Castle
 MAPOBJ_LIST_9:
 .byte $05,$C9+18,$05+16 ; Elf Doctor
@@ -660,6 +716,15 @@ MAPOBJ_LIST_9:
 .byte $48,$13+18,$04+16
 .byte $49,$4F+18,$14+16
 .byte $4A,$51+18,$14+16
+
+
+
+
+
+
+
+
+
 
 ; 0A ; Northwest Castle
 MAPOBJ_LIST_10:
@@ -675,6 +740,12 @@ MAPOBJ_LIST_10:
 MAPOBJ_LIST_11:
 .byte $84,$4C+19,$0D+19 ; Creepy vanishing sage
 
+
+
+
+
+
+
 ; 0C ; Temple of Fiends (Present)
 MAPOBJ_LIST_12:
 .byte $02,$D4+11,$15+13 ; Garland
@@ -685,6 +756,8 @@ MAPOBJ_LIST_12:
 .byte $3D,$97+11,$13+13
 .byte $3E,$96+11,$13+13
 .byte $CA,$D4+11,$11+13 ; Black orb
+
+
 
 ; 0D ; Earth Cave B1
 MAPOBJ_LIST_13:
@@ -699,6 +772,10 @@ MAPOBJ_LIST_15:
 ;.byte $13,$6F,$1E ; surprise fairy!
 ;.byte $00,$00,$00 ; fixed ^
 
+
+
+
+
 ; 10 ; Cardia
 MAPOBJ_LIST_16:
 .byte $85,$1C,$09 ; Dragons
@@ -711,9 +788,23 @@ MAPOBJ_LIST_16:
 .byte $8D,$0D,$06
 .byte $8E,$95,$25
 
+
+
+
+
+
+
+
+
 ; 11 ; Bahamut's Room B1
 MAPOBJ_LIST_17:
 ;.byte $00,$00,$00
+
+
+
+
+
+
 
 ; 12 ; Waterfall
 MAPOBJ_LIST_18:
@@ -728,6 +819,12 @@ MAPOBJ_LIST_18:
 .byte $57,$32+0,$23+1
 .byte $57,$2B+0,$29+1
 .byte $57,$3A+0,$2C+1
+
+
+
+
+
+
 
 ; 13 ; Dwarf Cave
 MAPOBJ_LIST_19:
@@ -745,6 +842,10 @@ MAPOBJ_LIST_19:
 .byte $61,$0D+19,$02+4
 .byte $63,$12+19,$0A+4
 
+
+
+
+
 ; 14 ; Matoya's Cave
 MAPOBJ_LIST_20:
 .byte $0A,$C8+23,$01+24 ; Matoya
@@ -753,9 +854,17 @@ MAPOBJ_LIST_20:
 .byte $66,$83+23,$07+24
 .byte $67,$CD+23,$03+24
 
+
+
 ; 15 ; Sarda's Cave
 MAPOBJ_LIST_21:
 .byte $0D,$C2+18,$02+23 ;; Its Sarda!
+
+
+
+
+
+
 
 ; 16 ; Marsh Cave B1
 MAPOBJ_LIST_22:
@@ -765,9 +874,17 @@ MAPOBJ_LIST_22:
 .byte $57,$34+8,$16+3
 .byte $57,$18+8,$1C+3
 
+
+
 ; 17 ; Mirage Tower 1F
 MAPOBJ_LIST_23:
 .byte $CE,$D4+16,$05+15 ; Robot
+
+
+
+
+
+
 
 ; 18 ; Coneria Castle 2F
 MAPOBJ_LIST_24:
@@ -783,6 +900,11 @@ MAPOBJ_LIST_25:
 ; 1A ; Castle of Ordeals 3F
 MAPOBJ_LIST_26:
 ;.byte $00,$00,$00
+
+
+
+
+
 
 ; 1B ; Marsh Cave B2
 MAPOBJ_LIST_27:
@@ -800,6 +922,9 @@ MAPOBJ_LIST_27:
 .byte $57,$2F+1,$28+1
 .byte $57,$2E+1,$33+1
 .byte $57,$3A+1,$38+1
+
+
+
 
 ; 1C ; Marsh Cave B3
 MAPOBJ_LIST_28:
@@ -820,6 +945,7 @@ MAPOBJ_LIST_28:
 .byte $57,$1E+1,$36+2
 .byte $57,$1F+1,$2F+2
 
+
 ; 1D ; Earth Cave B2
 MAPOBJ_LIST_29:
 .byte $57,$0A+6,$0B+2 ; bats
@@ -836,6 +962,9 @@ MAPOBJ_LIST_29:
 .byte $57,$A8+6,$10+2
 .byte $57,$26+6,$29+2
 .byte $00,$00+6,$00+2
+
+
+
 
 ; 1E ; Earth Cave B3
 MAPOBJ_LIST_30:
@@ -856,6 +985,7 @@ MAPOBJ_LIST_30:
 .byte $57,$2C+1,$0C+4
 .byte $57,$2F+1,$0E+4
 
+
 ; 1F ; Earth Cave B4
 MAPOBJ_LIST_31:
 .byte $57,$93-3,$28+3 ; baaats
@@ -874,6 +1004,7 @@ MAPOBJ_LIST_31:
 .byte $57,$21-3,$18+3
 .byte $57,$24-3,$17+3
 .byte $57,$21-3,$18+3
+
 
 ; 20 ; Earth Cave B5
 MAPOBJ_LIST_32:
@@ -913,19 +1044,37 @@ MAPOBJ_LIST_37:
 MAPOBJ_LIST_38:
 ;.byte $00,$00,$00
 
+
+
 ; 27 ; Bahamut's Room B2
 MAPOBJ_LIST_39:
 .byte $0E,$D5+10,$03+3 ; Bahamut
 .byte $8F,$D3+10,$07+3 ; Dragons
 .byte $90,$D7+10,$07+3
 
+
+
+
+
 ; 28 ; Mirage Tower 2F
 MAPOBJ_LIST_40:
 .byte $CC,$13+16,$04+15 ; Robot
 
+
+
+
+
+
+
 ; 29 ; Mirage Tower 3F
 MAPOBJ_LIST_41:
 .byte $CD,$C9+23,$0A+23 ; Transporter
+
+
+
+
+
+
 
 ; 2A ; Sea Shrine B5
 MAPOBJ_LIST_42:
@@ -942,6 +1091,10 @@ MAPOBJ_LIST_44:
 ; 2D ; Sea Shrine B2
 MAPOBJ_LIST_45:
 ;.byte $00,$00,$00
+
+
+
+
 
 ; 2E ; Sea Shrine B1
 MAPOBJ_LIST_46:
@@ -960,9 +1113,18 @@ MAPOBJ_LIST_46:
 MAPOBJ_LIST_47:
 ;.byte $00,$00,$00
 
+
+
+
 ; 30 ; Sky Palace 2F
 MAPOBJ_LIST_48:
 .byte $16,$DA+12,$1B+10 ; Earth plate? ???
+
+
+
+
+
+
 
 ; 31 ; Sky Palace 3F
 MAPOBJ_LIST_49:
@@ -971,6 +1133,8 @@ MAPOBJ_LIST_49:
 ; 32 ; Sky Palace 4F
 MAPOBJ_LIST_50:
 ;.byte $00,$00,$00
+
+
 
 ; 33 ; Sky Palace 5F
 MAPOBJ_LIST_51:
@@ -983,6 +1147,14 @@ MAPOBJ_LIST_52:
 ; 35 ; Temple of Fiends 2F
 MAPOBJ_LIST_53:
 ;.byte $00,$00,$00
+
+
+
+
+
+
+
+
 
 ; 36 ; Temple of Fiends 3F
 MAPOBJ_LIST_54:
@@ -1009,6 +1181,10 @@ MAPOBJ_LIST_59:
 .byte $18,$CF+16,$13+15 ; Garland's speech
 .byte $19,$CF+16,$12+15 ; Garland's speech
 .byte $1A,$CF+16,$11+15 ; Chaos fight!
+
+
+
+
 
 ; 3C ; Titan's Tunnel
 MAPOBJ_LIST_60:

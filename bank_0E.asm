@@ -127,6 +127,7 @@ lut_ShopStrings:
 .word ShopArmorDescription  ;1B
 .word ShopWeaponDescription ;1C
 
+;; these 4 unused
 .word ShopEquipNow         ;1D do you want to equip it
 .word ShopWhoWillTake      ;1E who is it for
 .word ShopCannotEquip      ;1F can't equip it
@@ -246,21 +247,21 @@ ShopWeaponDescription:
 .byte $FF,$FF,$8C,$5C,$57,$51,$AF,$E4,$00                 ; __Critical:      |
 
 ShopEquipNow:
-.byte $FF,$8D,$2E,$56,$64,$5D,$B1,$21,$28,$01
-.byte $FF,$FF,$A8,$B4,$B8,$AC,$B3,$2D,$21,$B1,$46,$C5,$00 ; Do you want to equip it now?
-
+;.byte $FF,$8D,$2E,$56,$64,$5D,$B1,$21,$28,$01
+;.byte $FF,$FF,$A8,$B4,$B8,$AC,$B3,$2D,$21,$B1,$46,$C5,$00 ; Do you want to equip it now?
+;
 ShopWhoWillTake:
-.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00 ; Who is it for?
-
+;.byte $FF,$A0,$AB,$2E,$30,$2D,$21,$A9,$35,$C5,$00 ; Who is it for?
+;
 ShopCannotEquip:
-.byte $FF,$FF,$91,$B2,$AF,$27,$3C,$FF,$B1,$46,$69,$05
-.byte $FF,$A2,$26,$BE,$23,$FF,$B1,$B2,$21,$A4,$A5,$45,$05
-.byte $FF,$1B,$2E,$A8,$B4,$B8,$AC,$B3,$1B,$41,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
-
+;.byte $FF,$FF,$91,$B2,$AF,$27,$3C,$FF,$B1,$46,$69,$05
+;.byte $FF,$A2,$26,$BE,$23,$FF,$B1,$B2,$21,$A4,$A5,$45,$05
+;.byte $FF,$1B,$2E,$A8,$B4,$B8,$AC,$B3,$1B,$41,$B7,$C4,$00 ; Hold on now... You're not able to equip that!
+;
 ShopItemStowed:
-.byte $FF,$91,$A4,$B9,$1F,$47,$B7,$4D,$B8,$A5,$45,$C5,$01
-.byte $92,$BE,$4E,$FF,$AD,$B8,$37,$4F,$B8,$21,$5B,$01
-.byte $FF,$2D,$29,$56,$55,$31,$A4,$AA,$B6,$C0,$00 ; Having trouble? I'll just put it in your bags.
+;.byte $FF,$91,$A4,$B9,$1F,$47,$B7,$4D,$B8,$A5,$45,$C5,$01
+;.byte $92,$BE,$4E,$FF,$AD,$B8,$37,$4F,$B8,$21,$5B,$01
+;.byte $FF,$2D,$29,$56,$55,$31,$A4,$AA,$B6,$C0,$00 ; Having trouble? I'll just put it in your bags.
 
 ShopInnWelcome:
 .byte $FF,$A0,$A8,$AF,$A6,$49,$A8,$BF,$33,$2B,$B5,$BC,$01
@@ -1520,10 +1521,8 @@ CheckMagicInventory:
    @End: 
     RTS
     
-
 CheckEquipmentInventory:
-    JSR Set_Inv_Weapon
-
+    JSR Set_Inv_Weapon     ; first set it to weapons
     LDX str_buf+$42, Y
     STX shop_curitem       ; backup item ID
     DEX                    ; convert item ID to 0-based
@@ -1579,6 +1578,7 @@ CheckEquipmentInventory:
 
 EnterNormalShop:
     LDX shop_type
+    STX tmp+$13                 ; backup shop type
     LDA lut_ShopWelcome, X
     JSR DrawShopDialogueBox     ; draw the "welcome" dialogue
     LDA shop_id
@@ -1609,6 +1609,9 @@ RestartShopLoop:
     BEQ EnterCaravan
     
 MainShopLoop:
+   ; LDA tmp+$13                   ; left/right in sell mode will change shop_type, so...
+   ; STA shop_type                 ; reset shop_type from backup
+
     LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
     BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
     JSR Shop_CharacterStopDancing 
@@ -1640,7 +1643,6 @@ ReturnToMap:                ; this should fix the weird flicker when leaving a s
     STA $4015
     STA $5015               ; MMC5 - JIGS
     JMP WaitForVBlank_L
-   
 
 ShopBuy:
     LDA #SHOPBOX_COMMAND
@@ -1748,17 +1750,17 @@ ShopSelectAmount:
     BNE FinishPurchase 
     
    @AddEquipment:
-    LDA shop_amount_buy
-    CMP #1
-    BNE :+                      ; if buying more than one, skip equip offer
-
-    JSR EquipShop_EquipNow
+    ;LDA shop_amount_buy
+    ;CMP #1
+    ;BNE :+                      ; if buying more than one, skip equip offer
+    ;
+    ;JSR EquipShop_EquipNow
     ;; ^ checks if you want to give it to a character
     ;; If you are able to, it will pull the return address and jump to FinishPurchase
     ;; At this point, its either equip it or store it in inventory, it will not undo the purchase
 
-
-  : JSR Set_Inv_Weapon
+    ; :
+    JSR Set_Inv_Weapon
     JMP :+
     
    @AddMagic: 
@@ -1806,7 +1808,7 @@ ShopSell:
     JMP NothingToSell 
     
   : LDA #SHOPBOX_COMMAND
-    JSR EraseMainItemBox         ; erase shop box #3 (command box)
+    JSR EraseMainItemBox        ; erase shop box #3 (command box)
     JSR ResetShopListAttributes
     JSR ResetScroll_PlayMusic
 
@@ -1814,7 +1816,7 @@ ShopSell_Loop:
     LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
     BNE :+
     LDA #SHOPBOX_INV
-    JSR DrawMainItemBox             ; draw shop box #2 (inv list box)    
+    JSR DrawMainItemBox         ; draw shop box #2 (inv list box)    
     INC shop_listdrawn
 
   : JSR ShopCursor_Slot1
@@ -1979,89 +1981,92 @@ ShopXGoldOkay:
     JMP DrawShopComplexString     
 
 ;;;;;;;;;;;;;;;;;;;;;
-    
-EquipShop_EquipNow:
-    LDA #$1D                     ; "Do you want to equip it now?"
-    JSR DrawShopDialogueBox       
-    JSR ShopLoop_YesNo
-    BCS EquipOnCharacter_Exit
-    LDA cursor
-    BNE EquipOnCharacter_Exit
-  
-EquipOnCharacter:
-    LDA #$1E             
-    JSR DrawShopDialogueBox      ; "who is it for?"
-    JSR ShopLoop_CharNames       ; have the player select a character
-    BCS @TroubleExit             ; if they press B, do this
-    
-    JSR EquipShop_GiveItemToChar ; give the item to the character
-    BCS @TroubleExit             ; carry was set because you have too many of the old item! 
-    
-    PLA
-    PLA
-    JMP FinishPurchase
 
-   @TroubleExit:
-    LDA #$20             
-    JSR DrawShopDialogueBox      ; "I'll put it in your bags"
-    JSR MenuWaitForBtn
-  
-EquipOnCharacter_Exit:           ; store in inventory
-    RTS  
-  
-EquipShop_GiveItemToChar:
-    LDA cursor          ; get the char ID
-    ROR A
-    ROR A
-    ROR A
-    AND #$C0            ; shift and mask to get the char index
-    STA char_index
-
-    LDA shop_curitem
-    STA ItemToEquip
-    JSR IsEquipLegal
-    BEQ CannotEquip
+;; JIGS - this is broken and breaks the flow of purchasing things
+;; since the equip screen is better used to compare new gear vs. old, most people will prefer that anyway
     
-    LDA #0
-    LDX ItemToEquip
-    CPX #ARMORSTART
-    BCC @Unequip
-
-    LDA lut_ArmorTypes, X
-    
-   @Unequip:
-    CLC
-    ADC #ch_righthand - ch_stats
-    ADC char_index
-    STA char_index
-    TAX
-    LDA ch_stats, X
-    BEQ @NoSwap
-    
-    TAX
-    DEX
-    TXA              ; set it to a 0-based item
-    JSR ADD_ITEM     ; put previously equipped item back into inventory
-    BCC @NoSwap
-    
-    ;; THIS PART HERE HAPPENS IF YOU CAN'T STOW YOUR EQUIPPED WEAPON BECAUSE YOU HAVE TOO MANY
-    RTS
-    
-   @NoSwap: 
-    ;JSR UnEquipStats          ; does not use char_index
-    LDX char_index 
-    LDA ItemToEquip
-    STA ch_stats, X
-    RTS
-    ;JMP ReEquipStats
-    
-CannotEquip:
-    LDA #$1F                  
-    JSR DrawShopDialogueBox    ; "You can't equip that"
-    JSR MenuWaitForBtn
-    PLA
-    PLA
-    JMP EquipOnCharacter
+;EquipShop_EquipNow:
+;    LDA #$1D                     ; "Do you want to equip it now?"
+;    JSR DrawShopDialogueBox       
+;    JSR ShopLoop_YesNo
+;    BCS EquipOnCharacter_Exit
+;    LDA cursor
+;    BNE EquipOnCharacter_Exit
+;  
+;EquipOnCharacter:
+;    LDA #$1E             
+;    JSR DrawShopDialogueBox      ; "who is it for?"
+;    JSR ShopLoop_CharNames       ; have the player select a character
+;    BCS @TroubleExit             ; if they press B, do this
+;    
+;    JSR EquipShop_GiveItemToChar ; give the item to the character
+;    BCS @TroubleExit             ; carry was set because you have too many of the old item! 
+;    
+;    PLA
+;    PLA
+;    JMP FinishPurchase
+;
+;   @TroubleExit:
+;    LDA #$20             
+;    JSR DrawShopDialogueBox      ; "I'll put it in your bags"
+;    JSR MenuWaitForBtn
+;  
+;EquipOnCharacter_Exit:           ; store in inventory
+;    RTS  
+;  
+;EquipShop_GiveItemToChar:
+;    LDA cursor          ; get the char ID
+;    ROR A
+;    ROR A
+;    ROR A
+;    AND #$C0            ; shift and mask to get the char index
+;    STA char_index
+;
+;    LDA shop_curitem
+;    STA ItemToEquip
+;    JSR IsEquipLegal
+;    BEQ CannotEquip
+;    
+;    LDA #0
+;    LDX ItemToEquip
+;    CPX #ARMORSTART
+;    BCC @Unequip
+;
+;    LDA lut_ArmorTypes, X
+;    
+;   @Unequip:
+;    CLC
+;    ADC #ch_righthand - ch_stats
+;    ADC char_index
+;    STA char_index
+;    TAX
+;    LDA ch_stats, X
+;    BEQ @NoSwap
+;    
+;    TAX
+;    DEX
+;    TXA              ; set it to a 0-based item
+;    JSR ADD_ITEM     ; put previously equipped item back into inventory
+;    BCC @NoSwap
+;    
+;    ;; THIS PART HERE HAPPENS IF YOU CAN'T STOW YOUR EQUIPPED WEAPON BECAUSE YOU HAVE TOO MANY
+;    RTS
+;    
+;   @NoSwap: 
+;    ;JSR UnEquipStats          ; does not use char_index
+;    LDX char_index 
+;    LDA ItemToEquip
+;    STA ch_stats, X
+;    RTS
+;    ;JMP ReEquipStats
+;    
+;CannotEquip:
+;    LDA #$1F                  
+;    JSR DrawShopDialogueBox    ; "You can't equip that"
+;    JSR MenuWaitForBtn
+;    PLA
+;    PLA
+;    JMP EquipOnCharacter
 
 ;ReEquipStats:
 ;    JSR LongCall
@@ -2138,25 +2143,53 @@ SelectAmount:
     BEQ @Less
     
     CMP #$08             ; if up was pressed
-    BEQ @More
+    BEQ @TenMore
 
-   @Less:                ; otherwise, it was down
+   @TenLess:             ; otherwise, it was down
+    LDA shop_amount_buy
+    CMP #1               ; if its at the minimum, wrap it to the limit
+    BEQ @WrapToLimit
+    SEC                  ; otherwise, subtract 10...
+    SBC #10
+    BEQ @WrapToMinimum   ; if that hit 0, wrap to minimum
+    BCS @MoveDone        ; if there's any left over, its ok
+    BCC @WrapToMinimum   ; if it went minus, wrap to minimum first
+    
+   @TenMore:
+    LDX shop_amount_max
+    DEX
+    LDA shop_amount_buy 
+    CPX shop_amount_buy  ; if its at max, wrap to minimum
+    BEQ @WrapToMinimum
+    CMP #1               ; if you start with 1, switch to 10
+    BNE :+               ; this is weird, but it bugs me going from 1 to 11...
+      LDA #0             
+  : CLC
+    ADC #10
+    CMP shop_amount_max
+    BCC @MoveDone
+    BCS @WrapToLimit
+    
+   @Less:
     DEC shop_amount_buy  
     LDA shop_amount_buy
-    CMP #0
-    BNE @MoveDone        ; if it hasn't gone below 1, that's all -- continue loop
+    BNE @MoveDone        ; if it hits 0, wrap to limit, otherwise its fine
     
+   @WrapToLimit: 
     LDA shop_amount_max  ; otherwise (below 1), wrap to our item limit
     SEC
     SBC #$01             ; minus one
     JMP @MoveDone        ; desired cursor is in A, jump ahead to @MoveDone to write it back
 
    @More:
+    INC shop_amount_buy
     LDA shop_amount_buy  ; if Up or Right pressed, increase amount 
-    CLC
-    ADC #$01             ; increment it by 1
+    
+   @CompareToMax: 
     CMP shop_amount_max  ; check to see if we've gone over the amount we can buy
     BCC @MoveDone        ; if not, jump ahead to @MoveDone
+    
+  @WrapToMinimum:  
     LDA #1               ; if yes, wrap limit to 1
 
   @MoveDone:             ; code reaches here when A is to be the new amount to buy
@@ -2205,7 +2238,7 @@ ShopLoadPrice_Complex:
     JSR LoadPrice          ; gets the base price of the item you're trying to buy
     
     LDA shop_selling
-    AND #$01
+    ;AND #$01
     BEQ :+
     
     LSR tmp+2              ; if selling, divide the base price by 2
@@ -3151,7 +3184,7 @@ DrawShop:
     LDA shop_type                ; get the shop type
     CMP #SHOP_CARAVAN
     BNE :+
-        LDA #SHOP_CARAVAN_ID-$30 ; -$30 so it becomes $7F, the last item shop
+        LDA #SHOP_CARAVAN_ID     ; -$30 so it becomes $7F, the last item shop
         STA shop_id
         LDA #SHOP_ITEM
         STA shop_type
@@ -3507,23 +3540,28 @@ ConvertInventoryToItemBox:
    @Magic:
     JSR Set_Inv_Magic
     LDY #128
+    LDA #0
     BNE @DecompressInventory
     
    @Weapons:  
     JSR Set_Inv_Weapon
-    BNE :+
+    LDA #0
+    BEQ :+
    
    @Armor:
-    LDA #<inv_armor - unsram
-    STA tmp
-    LDA #>inv_armor - unsram
-    STA tmp+1    
+    ;LDA #<inv_armor - unsram
+    ;STA tmp
+    ;LDA #>inv_armor - unsram
+    ;STA tmp+1    
+    JSR Set_Inv_Weapon
+    LDA #ARMORSTART    
   : LDY #64
     
    @DecompressInventory:
     STY tmp+4                  ; max item amount
     LDX #0
     STX tmp+3                  ; counter for item box
+    TAX                        ; offset for where to begin counting items from (+$40 for armor)
    
    @Loop: 
     TXA
@@ -3640,7 +3678,7 @@ ShopLoop_CharNames:
     LDA #0
     STA cursor
 
-    JMP CommonShopLoop_Cmd     ; then run the common loop
+    ;JMP CommonShopLoop_Cmd     ; then run the common loop
 
 ;  @NamesString:
 ;  .BYTE $10,$00,$01   ; char 0's name, double line break
@@ -3675,12 +3713,19 @@ ShopLoop_CharNames:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+
+
 CommonShopLoop_Cmd:
     LDA #<lut_ShopCurs_Cmd     ; get the pointer to the desired cursor position LUT
     STA shop_cursor_ptr        ;  
     LDA #>lut_ShopCurs_Cmd     ;  
     STA shop_cursor_ptr+1
     JMP _CommonShopLoop_Main   ; then jump ahead to the main entry for these routines
+
+;ShopType_SellLUT:
+;    .byte $0, $01, $02, $07
+
+;; JIGS - the @ local labels in this are packed in tight! Be careful of changes with BNE/BEQ/BPL/BMI
 
 CommonShopLoop_List:
     LDA #<lut_ShopCurs_List    ; exactly the same as _Cmd version of the routine
@@ -3721,7 +3766,7 @@ CommonShopLoop_List:
     
                          ; if neither pressed.. see if the cursor has been moved
     LDA joy              ; get joy
-    AND #$0C             ; isolate up/down buttons
+    AND #$0C ; F         ; F to isolate up/down/left/right buttons, C for up/down only
     CMP joy_prevdir      ; compare to previous buttons to see if button state has changed
     BEQ @Loop            ; if no change.. do nothing, and continue loop
 
@@ -3729,6 +3774,12 @@ CommonShopLoop_List:
 
     CMP #0               ; then check to see if buttons have been pressed or not
     BEQ @Loop            ; if not.. do thing, and continue loop
+
+   ; CMP #$01             ; if right was pressed
+   ; BEQ @Right
+   ; 
+   ; CMP #$02             ; if left was pressed
+   ; BEQ @Left
 
     INC shop_cursorchange
     CMP #$08             ; see if the button pressed was up or down
@@ -3776,15 +3827,41 @@ CommonShopLoop_List:
   @A_Pressed:            ; if A pressed...
     CLC                  ; CLC to indicate player pressed A
     BCC @ButtonDone      ;  and jump to @ButtonDone (always branches)
- 
+
+;; JIGS - this wasn't working, requires too much extra work
+    
+;  @Left:
+;    LDA shop_selling
+;    BNE :+
+;      BEQ @Loop
+;
+;  : DEC shop_type
+;    JMP @ChangeSellType
+;
+;    ;; left / right swaps shop_type between 0-7 so you can sell different inventories
+;
+;  @Right:  
+;    LDA shop_selling
+;    BNE :+
+;      BEQ @Loop
+;      
+;  : INC shop_type
+;  
+;  @ChangeSellType:
+;    LDA shop_type
+;    AND #$03
+;    TAX
+;    LDA ShopType_SellLUT, X
+;    STA shop_type
+;    JMP ShopSell
 
 @ScrollListDown:
     LDX item_box_offset
     CPX #$3C            ; if item box scrolls beyond this point, no more scrolling
-    BCC :+
-    JMP @DownReturn
+    ;BCC :+
+    BCS @DownReturn
     
-  : LDY #0
+    LDY #0
  @ScrollDownLoop:  
     LDA item_box, X
     BEQ @DownReturn
@@ -3800,7 +3877,6 @@ CommonShopLoop_List:
     LDA #0
     STA cursor           
     JMP ShopSelectItem
-
 
 @ScrollListUp:
     LDA item_box_offset

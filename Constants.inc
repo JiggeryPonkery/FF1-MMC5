@@ -873,12 +873,6 @@ ALARMCLOCK     = $0D
 SHOP_BOTTLE    = $0E
 SHOP_LEWDS     = $0F
 
-SMOKEBOMB_EFFECT  = $32 ; 50 steps
-BTL_HEAL_POTENCY  = $10 ; 16
-BTL_XHEAL_POTENCY = $60 ; 96
-HEAL_POTENCY      = $1E ; 30
-XHEAL_POTENCY     = $B4 ; 180
-
 ITEM_KEYITEMSTART = $10
 LUTE           = $10
 CROWN          = $11
@@ -1296,7 +1290,7 @@ SHOP_ITEM       = $07
 SHOP_CLINIC     = $08
 SHOP_INN        = $09
 SHOP_CARAVAN    = $0A
-SHOP_CARAVAN_ID = $AF
+SHOP_CARAVAN_ID = $7F ;AF
 
   
 ;;;;;;;;;;;;;;;;;;
@@ -1309,7 +1303,7 @@ MAP_03  = $03 ; MELMOND
 MAP_04  = $04 ; CRESCENT_LAKE
 MAP_05  = $05 ; GAIA
 MAP_06  = $06 ; ONRAC
-MAP_07  = $07 ; LEIFEN
+MAP_07  = $07 ; LEIFENf
 MAP_08  = $08 ; Coneria_CASTLE_1F
 MAP_09  = $09 ; ELFLAND_CASTLE
 MAP_0A  = $0A ; NORTHWEST_CASTLE
@@ -1456,8 +1450,12 @@ HP_MAX_LOW               = $E7
 HP_MAX_HIGH              = $03 ; these two = 999
 COVER_HITS               = $80 ; high bits only (second number always 0). Amount of hits a knight can last covering someone.
 COUNTER_CHANCE           = 150 ; must exceed this value to counter
-MIN_CONFUSED_MAGDAMAGE   = $05 ; minimum 
-
+MIN_CONFUSED_MAGDAMAGE   = $05 ; minimum magic damage for confused characters 
+SMOKEBOMB_EFFECT         = 50  ; steps without battles - double for chemists 
+BTL_HEAL_POTENCY         = 16  ; HP restored in battle - double for chemists
+BTL_XHEAL_POTENCY        = 96  ; HP restored in battle - double for chemists
+HEAL_POTENCY             = 30  ; HP restored - double for chemists
+XHEAL_POTENCY            = 180 ; HP restored - double for chemists
 
 
 
