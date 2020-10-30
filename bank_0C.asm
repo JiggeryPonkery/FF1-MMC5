@@ -1367,22 +1367,22 @@ EnterBattlePrepareSprites:
 
     ;; JIGS - since battle screen shifted, shifting positions!
 
-    LDA #208
-    STA btl_chardraw_x + $0     ; offset characters by 4 pixels each
     LDA #212
-    STA btl_chardraw_x + $4
+    STA btl_chardraw_x + $0     ; offset characters by 4 pixels each
     LDA #216
-    STA btl_chardraw_x + $8
+    STA btl_chardraw_x + $4
     LDA #220
+    STA btl_chardraw_x + $8
+    LDA #224
     STA btl_chardraw_x + $C
 
-    LDA #48-1                    ; set Y coords, starting at $30, and increasing by $18
+    LDA #48-1                    ; set Y coords, starting at $30, and increasing by $1C
     STA btl_chardraw_y + $0
-    LDA #72-1
+    LDA #76-1
     STA btl_chardraw_y + $4
-    LDA #96-1
+    LDA #104-1
     STA btl_chardraw_y + $8
-    LDA #120-1
+    LDA #132-1
     STA btl_chardraw_y + $C
 
     LDA #$10 ;00                    ; Character sprites are spaced 8 tiles apart now
@@ -3003,7 +3003,8 @@ SetNaturalPose:
     LDA #0
     STA btl_charstone, X  ; clear stone info; they're not stoned, we're undrawing it!
     JSR @Load
-    LDA StoneBGTiles_LUT+4, X ; then reset tile offset for blank BG
+    ;LDA StoneBGTiles_LUT+4, X ; then reset tile offset for blank BG
+    LDA #$22
 
    @Draw:
     STA tmp+2             ; tile offset for drawing sprite
@@ -3023,15 +3024,15 @@ SetNaturalPose:
     STA image_ptr
     LDA #>StoneBGTiles_Structure
     STA image_ptr+1
-    LDA #03
-    STA dest_ht
     LDA StoneBGTiles_LUT, X
     STA dest_wd
     LDA StoneBGTiles_LUT+1, X
-    STA dest_x
+    STA dest_ht
     LDA StoneBGTiles_LUT+2, X
-    STA dest_y
+    STA dest_x
     LDA StoneBGTiles_LUT+3, X
+    STA dest_y
+    LDA StoneBGTiles_LUT+4, X
     RTS
 
 
@@ -11911,14 +11912,14 @@ lut_ReadyCursorPos:
   .BYTE $40, $CE
 
 lut_PlayerTargetCursorPos: ; uses 2x4 menu
-  .BYTE $C0, $34    ; char 0
-  .BYTE $C4, $4D    ; char 1
-  .BYTE $C8, $66    ; char 2
-  .BYTE $CC, $7F    ; char 3
-  .BYTE $C0, $34    ;
-  .BYTE $C4, $4D    ;
-  .BYTE $C8, $66    ;
-  .BYTE $CC, $7F    ;
+  .BYTE $C2, 51      ; char 0
+  .BYTE $C6, 79      ; char 1
+  .BYTE $CA, 107     ; char 2
+  .BYTE $CE, 135     ; char 3
+  .BYTE $C2, 51      ;
+  .BYTE $C6, 79      ;
+  .BYTE $CA, 107     ;
+  .BYTE $CE, 135     ;
 
 lut_Target9SmallCursorPos:
   .BYTE $10, $30
@@ -12277,12 +12278,12 @@ lut_BattleSubMenu:
 
 
 StoneBGTiles_LUT:
-;; width, dest_x, dest_y, tile offset for drawing sprite, tile offset for blank BG
+;; width, height, dest_x, dest_y, tile offset for drawing sprite, tile offset for blank BG
 
-.byte $02,$1A,$06,$00,$20  ;Character 1
-.byte $03,$1A,$09,$07,$26  ;Character 2
-.byte $02,$1B,$0C,$10,$20  ;Character 3
-.byte $03,$1B,$0F,$17,$26  ;Character 4
+.byte $03,$03,26,06,$10 ; ,$22  ;Character 1
+.byte $02,$04,27,09,$00 ; ,$22  ;Character 2
+.byte $03,$03,27,13,$19 ; ,$22  ;Character 3
+.byte $02,$04,28,16,$08 ; ,$22  ;Character 4
 
 StoneBGTiles_Structure:
 .byte $D0,$D1,$D2,$D3,$D4,$D5,$D6,$D7,$D8,$D9

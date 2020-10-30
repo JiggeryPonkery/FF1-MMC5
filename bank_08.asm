@@ -1175,19 +1175,7 @@ BeginBattleSetup:
     STA $2007
     DEX
     BNE @SillyDumbThing
-    STX $2000                 ; swap drawing mode back to horizontal
-
-   ;; use this little thing to fill a row of background tiles with nothing
-   ;; at least $0F70, 80, and 90 must be blank. They mirror the top of the message box
-   ;; and will show up in the background above the message box when the screen shakes
-    
-	LDX #>$0F00
-    LDA #<$0F00               ; and again for the other side
-    JSR SetPPUAddr_XA
-    LDA #$00                  ; fill with tile
-    LDY #$10                  ; do $10 tiles
-    LDX #$10                  ; do $10 bytes per tile 
-    JSR ClearNT_Loop
+    STX $2000                 ; swap drawing mode back to horizontal: X = 0
 
   ;; Draw Attribute Table to RAM first...
 

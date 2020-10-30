@@ -234,7 +234,8 @@ ShiftTile:
     ROR tmp+3        
     RTS
 
-CHRLoadToAX_Shift:
+
+CHRLoadToAX_ShiftSide:; this version takes up 9 tiles
     LDY $2002         ; reset PPU Addr toggle
     STA $2006         ; write high byte of dest address
     STX $2006         ; write low byte
@@ -244,14 +245,14 @@ CHRLoadToAX_Shift:
     LDA #>TileShiftBuffer
     STA tmp+5
     
-    LDY #$FF
     LDA #0
+    TAY
   : STA (tmp+4), Y ; clear this out for safety
     DEY
     BNE :-
    
     LDA #3
-    STA tmp+2
+    STA tmp+2 ; loop counter
 
     LDA #$10 
     STA tmp+6 ; for the other Y
@@ -318,7 +319,6 @@ CHRLoadToAX_Shift:
     BNE @ThirdTile
     
     DEC tmp+2
-    LDA tmp+2
     BEQ :+ 
       JMP @Restart
     
@@ -330,10 +330,115 @@ CHRLoadToAX_Shift:
     LDX #$90
     LDY #0
     JMP CHRLoad_Loop
+
+
+
+
+
+;; for this, I need to skip 4 bytes at the start, then write 4, skip 4, write the SECOND HALF ???
+
+;; JIGS - no its 5:30 AM and I am wrong, but I'm on the right track...
+
+;sprite data:   00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+;               10 11 12 31 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F
+;
+;location data: x  x  x  x  00 01 02 03 x  x  x  x  08 09 0A 0B
+;               04 05 06 07 10 11 12 13 0C 0D 0E 0F 18 19 1A 1B
+;               14 15 16 17 20 21 22 23 1C 1D 1E 1F 28 29 2A 2B ...  
+
+; write blank 4, write 4, write blank 4, forward Y 4, write 4
+; real loop:
+; backup Y 8 ($04), write 4 ($08), forward Y 8 ($10), write 4 ($14), backup Y 8 ($0C), write 4 ($10), forward Y 8 ($18), write 4
+
+
+
+CHRLoadToAX_ShiftUpDown: ; this version takes up 8 tiles
+    LDY $2002            ; reset PPU Addr toggle
+    STA $2006            ; write high byte of dest address
+    STX $2006            ; write low byte
+    
+    LDY #0 ; doing this is very important
+    
+    ;4 blank bytes to start with...
+    JSR ShiftyYThing
+    JSR ShiftyYThing    
+    JSR ShiftyYThing
+    
+    JSR ShiftUpDown_Write4        
+    
+    ;; JIGS - I did this my tried and true way of... doing semi-random things until it worked.
+    ;; I honestly can't explain it.
+    ;; anyway this shifts the stone sprite down 4 pixels
+    
+    LDA #12
+    STA tmp+2
+ShiftUpDown_RealLoop:    
+    TYA
+    SEC
+    SBC #$18
+    TAY
+    JSR ShiftUpDown_Write4
+    TYA
+    CLC
+    ADC #$18
+    TAY
+    JSR ShiftUpDown_Write4
+    DEC tmp+2
+    BNE ShiftUpDown_RealLoop
+    RTS
+
+ShiftyYThing:
+    JSR ShiftUpDown_Write4    
+    
+    LDX #$04
+    LDA #$00
+ShiftUpDown_WriteLoopBlank:
+    STA $2007
+    DEX
+    BNE ShiftUpDown_WriteLoopBlank
+
+ShiftY4:
+    INY
+    INY
+    INY
+    INY
+    RTS
+   
+ShiftUpDown_Write4:
+    LDX #4
+ShiftUpDown_WriteLoop:
+    LDA (tmp), Y      ; read a byte from source pointer
+    STA $2007
+    INY               ; inc our source index
+    DEX
+    BNE ShiftUpDown_WriteLoop
+    RTS   
+   
+   
   
 
 LoadStoneSprites:
     LDA $2002                 ; reset PPU toggle
+    
+    LDA #>$0D00    
+    STA $2006
+    LDA #<$0D00    
+    STA $2006
+    
+    LDA #0
+    LDY #3
+   @ClearLoop_Outer: 
+    LDX #0
+   @ClearLoop_Inner:
+    STA $2007
+    DEX
+    BNE @ClearLoop_Inner
+    DEY
+    BNE @ClearLoop_Outer
+    
+    ;; clear 3 rows of sprites -- this is part of battle setup as well,  
+    ;; as at least $0F70, 80, and 90 must be blank. They mirror the top of the message box
+    ;; and will show up in the background above the message box when the screen shakes    
 
     LDA #$00
     STA char_index
@@ -347,8 +452,6 @@ LoadStoneSprites:
     STA tmp+1
     LDA #$E0                       ; first byte of cheer pose from the CharPose_LUT
     STA tmp
-    LDA #$60                       ; amount of tiles to draw (6)
-    STA tmp+2
     LDA char_index                 ; then get the destination address to draw the tiles to
     LSR A
     LSR A
@@ -360,15 +463,16 @@ LoadStoneSprites:
     TAX
     LDA BattleCharStonePositions_LUT, Y    
     PHA
-    LDA char_index ; every second character, do this instead:
+    LDA char_index ; for first and third character, do this instead:
     AND #$40
     BEQ :+
       PLA
-      JSR CHRLoadToAX_Shift
+      JSR CHRLoadToAX_ShiftUpDown  ; makes 2x4 square
       JMP :++
     
   : PLA
-    JSR CHRLoadToAX                ; draw the cheer pose to background tiles
+    JSR CHRLoadToAX_ShiftSide      ; makes 3x3 square
+    
   : LDA char_index
     CLC
     ADC #$40
@@ -547,10 +651,10 @@ StackLoader:
 
 
 BattleCharStonePositions_LUT:
-   .byte $0D,$00    ; character 0 
-   .byte $0D,$70    ; character 1 
-   .byte $0E,$00    ; character 2 
-   .byte $0E,$70    ; character 3 
+   .byte $0E,$00    ; character 0 
+   .byte $0D,$04    ; character 1 
+   .byte $0E,$90    ; character 2 
+   .byte $0D,$84    ; character 3 
    
 MenuCharPositions_LUT:
    .byte $10        ; character 0 
