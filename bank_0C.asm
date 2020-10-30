@@ -6966,17 +6966,17 @@ DrawCharacterStatus_Fast:
     LDY char_index
     LDA btl_charhidden, Y
     BEQ :+
-        LDA #$F8
+        LDA #$C8
         STA btl_unformattedstringbuf+$56, X   ; start of third string
 
   : LDA btl_charguard, Y
     BEQ :+
-        LDA #$FA
+        LDA #$CA
         STA btl_unformattedstringbuf+$53, X   ; start of second string
 
   : LDA btl_charpray, Y
     BEQ :+
-        LDA #$FB
+        LDA #$CB
         STA btl_unformattedstringbuf+$53, X   ; start of second string
 
   : LDY #ch_head - ch_stats
@@ -6989,7 +6989,7 @@ DrawCharacterStatus_Fast:
     AND #$07                                ; get current amount of regeneration turns
     BEQ @NoState
        @Regen:
-        LDA #$F9
+        LDA #$C9
         STA btl_unformattedstringbuf+$50, X   ; start of first string
 
    @NoState:
@@ -7092,7 +7092,7 @@ DrawCharacterStatus_Fast:
 .byte AIL_STUN   ; but if they're stunned they can't act, so show that instead
 
 @AilmentIconLUT:
-.byte $F5, $F6, $F7, $F2, $F1, $F4, $F0, $F3 ; poison, stone, dead, sleep, mute, dark, confuse, stun!
+.byte $C5, $C6, $C7, $C2, $C1, $C4, $C0, $C3 ; poison, stone, dead, sleep, mute, dark, confuse, stun!
 
 
 
@@ -10972,13 +10972,13 @@ DrawEnemyEffect:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 VBlank_SetPPUAddr:
-    PHA                         ; backup A
+    ;PHA                         ; backup A
     JSR WaitForVBlank_L   ; VBlank
     LDA btltmp+$B               ; set ppu addr
     STA $2006
     LDA btltmp+$A
     STA $2006
-    PLA                         ; restore A
+    ;PLA                         ; restore A
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -11146,7 +11146,7 @@ DrawEnemyEffect_4Large:
     LDA #$06                        ; 6 rows for large enemies
     STA btltmp
     : JSR VBlank_SetPPUAddr
-      LDA #$00
+      LDA #$FF
       JSR WriteAToPPU6Times
       JSR MoveDown1Row_UpdateAudio
       DEC btltmp
@@ -11379,7 +11379,7 @@ IncYBy4_WriteToOam:
 
 
 DisplayAttackIndicator:  ; in: A = amount of times to flash the enemy (each flash is 3 frames lit, 3 normal)
-    STA tmp+6
+    STA tmp+12
     LDA btl_attacker
     STA indicator_index
 
@@ -11402,50 +11402,50 @@ DisplayAttackIndicator_Scan:
     BCC @Indicator_4Large
 
     LDA #<MixedEnemyAttributes
-    STA tmp+4
+    STA tmp+9
     LDA #>MixedEnemyAttributes
     LDX #9
 
    @Indicator_Fiend:
     LDA #<FiendChaosAttributes
-    STA tmp+4
+    STA tmp+9
     LDA #>FiendChaosAttributes
     LDX #0
     BEQ @PrepLoop
 
    @Indicator_9Small:
     LDA #<SmallEnemyAttributes
-    STA tmp+4
+    STA tmp+9
     LDA #>SmallEnemyAttributes
     LDX #9
     BNE @PrepLoop
 
    @Indicator_4Large:
     LDA #<LargeEnemyAttributes
-    STA tmp+4
+    STA tmp+9
     LDA #>LargeEnemyAttributes
     LDX #13
 
    @PrepLoop:
-    STA tmp+5
+    STA tmp+10
     LDA indicator_index
     JSR MultiplyXA
-    STA tmp+7
+    STA tmp+11
    ; LDA #02                ; frame loop = do this many frames
    ; STA tmp+6
 
    @Begin:
     JSR WaitForVBlank_L
-    LDY tmp+7
+    LDY tmp+11
    @Loop:
     JSR @SetAddress
     LDA $2007          ; throw away buffered byte ?
     LDA $2007          ; get actual attribute byte
-    STA tmp+8          ; save
+    PHA
     JSR @SetAddress    ; re-do the address
-    INY
-    LDA (tmp+4), Y     ; get next byte in lut
-    ORA tmp+8          ; add in any other bits
+    INY                ; get next byte in lut
+    PLA
+    ORA (tmp+9), Y     ; add in any other bits
     STA $2007          ; then save it
     INY
     BNE @Loop
@@ -11456,13 +11456,13 @@ DisplayAttackIndicator_Scan:
     JSR @MiniFrame
     JSR JIGS_RefreshAttributes
     JSR @MiniFrame
-    DEC tmp+6
+    DEC tmp+12
     BNE @Begin
     RTS
 
    @SetAddress:
     LDX #$23
-    LDA (tmp+4), Y
+    LDA (tmp+9), Y
     BEQ @ExitLoop
     STX $2006
     STA $2006

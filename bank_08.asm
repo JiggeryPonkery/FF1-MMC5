@@ -1102,18 +1102,21 @@ DrawBattleBackdropRow:
       BNE @Loop
     RTS
 
+SpriteMessageBoxFix:
+    LDA #$F6                  ; fill with tile
+    LDY #$0A                  ; do $0A rows 
+    LDX #$20                  ; do $20 tiles across
 
-FillMessageNTWith_F6:
-    LDA #$F6
-    LDY #10                    ; 10 tiles from the message box starting area
-  @ClearMessageNT_OuterLoop:
-      LDX #$20                 ; and $20 tiles across
-   @ClearMessageNT_InnerLoop:
+ClearNT_Loop:
+    STX tmp
+  @ClearNT_Row:
+      LDX tmp
+   @ClearNT_Tiles:
       STA $2007
       DEX
-      BNE @ClearMessageNT_InnerLoop
+      BNE @ClearNT_Tiles
     DEY
-    BNE @ClearMessageNT_OuterLoop
+    BNE @ClearNT_Row
 	RTS
     
 
@@ -1148,54 +1151,70 @@ BeginBattleSetup:
     LDX #>$2000
     LDA #<$2000
     JSR SetPPUAddr_XA         ; set PPU address to $2000 (start of nametable)
-
     LDA #$FF
-    LDY #8                    ; loops to clear $0800 bytes of NT data (both nametables)
-  @ClearNT_OuterLoop:
-      LDX #0
-   @ClearNT_InnerLoop:        ; inner loop clears $100 bytes
-      STA $2007
-      DEX
-      BNE @ClearNT_InnerLoop
-    DEY                     ; outer loop runs inner loop 8 times
-    BNE @ClearNT_OuterLoop  ;  clearing $800 bytes total
+    LDY #8
+    LDX #0
+    JSR ClearNT_Loop
 
     LDX #>$2280
     LDA #<$2280               ; now fill the lower half, where messaages are, with $F6
     JSR SetPPUAddr_XA         ; which should be a blank sprite
-    JSR FillMessageNTWith_F6
+    JSR SpriteMessageBoxFix
 
 	LDX #>$2680
     LDA #<$2680               ; and again for the other side
     JSR SetPPUAddr_XA
-    JSR FillMessageNTWith_F6
+    ;JSR SpriteMessageBoxFix  ;; JIGS - I could just do this... but lets be fancy
 
-  ;; Draw Attribute Table
+    LDA #$04
+    STA $2000                 ; change the drawing mode to vertical...
+    
+    LDA #$F6                  ; fill with tile
+    LDX #$0A                  ; do $0A tiles down
+   @SillyDumbThing: 
+    STA $2007
+    DEX
+    BNE @SillyDumbThing
+    STX $2000                 ; swap drawing mode back to horizontal
 
-    LDX #>$23C0
-    LDA #<$23C0
-    JSR SetPPUAddr_XA     ; set PPU Address to $23C0 (start of attribute table)
-    LDX #$28
-  @AttrLoop:
-      LDA lut_BtlAttrTbl-1, X   ; copy over attribute bytes
-      STA $2007
-      DEX
-      BNE @AttrLoop           ; loop until all $28 bytes copied
+   ;; use this little thing to fill a row of background tiles with nothing
+   ;; at least $0F70, 80, and 90 must be blank. They mirror the top of the message box
+   ;; and will show up in the background above the message box when the screen shakes
+    
+	LDX #>$0F00
+    LDA #<$0F00               ; and again for the other side
+    JSR SetPPUAddr_XA
+    LDA #$00                  ; fill with tile
+    LDY #$10                  ; do $10 tiles
+    LDX #$10                  ; do $10 bytes per tile 
+    JSR ClearNT_Loop
 
-    LDX #$18
+  ;; Draw Attribute Table to RAM first...
+
+    LDX #$40
     LDA #$FF
-   @AttrLoop_2:
-      STA $2007
+   @AttrLoop:
+      STA btltmp_attr-1, X
       DEX
-      BNE @AttrLoop_2         ; the last 3 rows of the nametable are $FF
+      CPX #$28-2
+      BNE @AttrLoop         ; the last 3 rows of the nametable are $FF
+
+    ;; first draw 3 rows of $FF, followed by 2 more $FF
+    ;; then start drawing from this pre-made table
+
+  @AttrLoop_2:
+      LDA lut_BtlAttrTbl-1, X ; copy over attribute bytes
+      STA btltmp_attr-1, X
+      DEX
+      BNE @AttrLoop_2       
     
     JSR LoadBorderPalette_Grey
 
 ;; load the battle text and sprites
     LDA $2002
-    LDA #>$0F00
+    LDA #>$0C00
     STA $2006
-    LDA #<$0F00
+    LDA #<$0C00
     STA $2006
     LDA #>BattleTextChr
     STA tmp+1
@@ -1790,35 +1809,7 @@ lut_FormationPlacement_Mix:
   .WORD $216F, $20D0, $220E     ; right column
   .WORD 0                       ; terminator
 
-BattleFormation_PrepAttributeLutsToXA:
-    ; in:   XA = pointer to FormationAttributesTable (ie:  FormationAttributes_9Small)
-    ; out:  btltmp+2 through btltmp+5 set appropriately for BattleFormation_GetAttributeByte
-    STA tmp+2
-    STX tmp+3
-    CLC
-    ADC #8*4 ;$20
-    STA tmp+4
-    TXA
-    ADC #0
-    STA tmp+5
-    RTS
 
-BattleFormation_GetAttributeByte:
-    ; in:   Y = index of attribute byte to get
-    ;       btltmp+2, btltmp+3 = should point to "tops" FormationAttributes table
-    ;       btltmp+4, btltmp+5 = should point to "bottoms" FormationaAttributes table
-    ; out:  A = attribute byte
-    LDA (tmp+4),Y        ; load the "bottoms"
-    JSR BattleFormation_GetAttributeNybble
-    ASL A
-    ASL A
-    ASL A
-    ASL A
-    STA tmp+15
-    LDA (tmp+2),Y        ; load the "tops"
-    JSR BattleFormation_GetAttributeNybble
-    ORA tmp+15
-    RTS
 
 
 ;; JIGS - so this worked originally by getting a byte from the lut_FormationAttributes things, 
@@ -1867,26 +1858,43 @@ BattleFormation_GetAttributeNybble:
     RTS
 
 BattleFormation_DrawAttributes:
-    ; in:  XA should point to the formation attributes lut (see BattleFormation_PrepAttributeLutsToXA)
-    PHA
+    ; in:   XA = pointer to FormationAttributesTable (ie:  FormationAttributes_9Small)
+    ; out:  btltmp+2 through btltmp+5 set appropriately for BattleFormation_GetAttributeByte
+    STA tmp+2
+    STX tmp+3
+    CLC
+    ADC #8*4 ;$20
+    STA tmp+4
     TXA
-    PHA
-    JSR ReadAttributesFromPPU
-    PLA
-    TAX
-    PLA
-    JSR BattleFormation_PrepAttributeLutsToXA
+    ADC #0
+    STA tmp+5
+    
     LDY #(8*4)-1
    @loop:
-        TYA
-        AND #7              ; skip the 2 right-most attribute columns.
-        CMP #5              ;   this is kind of hacky, but whatever
-        BCS @continue
-            JSR BattleFormation_GetAttributeByte
-            STA btltmp_attr+8, Y
-      @continue:
-        DEY
-        BPL @loop
+    TYA
+    AND #7              ; skip the 2 right-most attribute columns.
+    CMP #5              ;   this is kind of hacky, but whatever
+    BCS @continue
+
+    ; in:   Y = index of attribute byte to get
+    ;       btltmp+2, btltmp+3 = should point to "tops" FormationAttributes table
+    ;       btltmp+4, btltmp+5 = should point to "bottoms" FormationaAttributes table
+    ; out:  A = attribute byte
+    
+    LDA (tmp+4),Y        ; load the "bottoms"
+    JSR BattleFormation_GetAttributeNybble
+    ASL A
+    ASL A
+    ASL A
+    ASL A
+    STA tmp+15
+    LDA (tmp+2),Y        ; load the "tops"
+    JSR BattleFormation_GetAttributeNybble
+    ORA tmp+15
+    STA btltmp_attr+8, Y
+   @continue:
+    DEY
+    BPL @loop
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1916,6 +1924,18 @@ SharedAttributeThings:
     LDA #$40                ; read $40 bytes
     STA tmp+8
     RTS
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  WriteAttributesToPPU [$A702 :: 0x2E712]
+;;
+;;  Reads the data from btltmp_attr
+;;  Write to the attribute table in PPU memory
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+WriteAttributesToPPU:
+    JSR SharedAttributeThings
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1956,29 +1976,8 @@ Battle_WritePPUData_BankB:
     RTS
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  WriteAttributesToPPU [$A702 :: 0x2E712]
-;;
-;;  Reads the data from btltmp_attr
-;;  Write to the attribute table in PPU memory
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-WriteAttributesToPPU:
-    JSR SharedAttributeThings
-    JSR Battle_WritePPUData_BankB
-    LDA cur_bank
-    CMP #$0C
-    BEQ :+
     
-TurnOffScreen_SetScroll:
-    LDA #$00                    ; reset scroll before exiting
-    STA $2001
-    STA $2005
-    STA $2005
-  : RTS    
-
 
 ;;  Support routine to generate an enemy group  [A202 :: 0x2E212]
 ;;
@@ -2486,24 +2485,17 @@ data_ChaosTSA:
 
 
 lut_BtlAttrTbl:
-;  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
-;  .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
-;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-;  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE $00,$00,$00,$00,$00,$00,$F0,$F0
+  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
+  .BYTE $00,$00,$00,$00,$00,$00,$FF,$FF
+  .BYTE $00,$00,$00,$00,$00,$00;,$FF,$FF
+  ;.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+  ;.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+  ;.BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
   ;; JIGS - this table better fits the new layout!
-  ;; But lets reverse it for loading with less bytes.
-  ;; and the last 3 lines will be done by code.
-
-.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
-.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
-.BYTE $FF,$FF,$00,$00,$00,$00,$00,$00
-.BYTE $F0,$F0,$00,$00,$00,$00,$00,$00
-.BYTE $00,$00,$00,$00,$00,$00,$00,$00    
+  ;; the $FFs are drawn by a straight up loop at first
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
