@@ -74,6 +74,7 @@
 .import WaitForVBlank_L
 .import lutClassBatSprPalette
 .import lut_InBattleCharPaletteAssign
+.import LoadSprite_Bank03
 
 
 
@@ -6014,6 +6015,7 @@ SoundTestClearNT:
     STA $2007
     DEX
     BNE @Loop3
+    RTS
 
 ;; that should set the attributes to look like this:
 ;  .BYTE $00,$00,$00,$00,$00,$00,$00,$00
@@ -6025,30 +6027,13 @@ SoundTestClearNT:
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 ;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
 
-    LDA $2002              ; Set address to $1000
-    LDA #>$1000
-    STA $2006
-    LDA #<$1000
-    STA $2006
-
-    LDA #>WeaselChr
-    STA tmp+1
-    LDA #<WeaselChr
-    STA tmp
-
-    LDY #0
-    LDX #$40
-  @LoadWeaselLoop:
-    LDA (tmp), Y      ; read a byte from source pointer
-    STA $2007         ; and write it to CHR-RAM
-    INY               ; inc our source index
-    DEX
-    BNE @LoadWeaselLoop
-    RTS
 
 
 
-
+SoundTestPalette:
+    .byte $0F, $38, $36, $17
+    .byte $0F, $07, $17, $0F
+    .byte $0F, $00, $10, $30
 
 SoundTestZ:
     LDA #BANK_THIS           ; record current bank and CallMusicPlay
@@ -6060,9 +6045,17 @@ SoundTestZ:
     STA weasels
     STA joy
     STA joy_prevdir
+    STA btlattackspr_gfx     ; to load up the weasel and hole
 
     JSR SoundTestClearNT     ; clear the nametable, set the attributes, load weasel sprite
     STX menustall            ; X = 0
+
+    LDA #$02
+    STA MMC5_tmp             ; set to load 8 tiles of magic attack sprites
+
+    JSR LongCall
+    .word LoadSprite_Bank03
+    .byte $03
 
     LDA #$02
     STA box_x
@@ -6089,18 +6082,12 @@ SoundTestZ:
     JSR DrawZ_MenuString            ; draw the instructions
 
    ; Weasel colours!
-    LDA #$38
-    STA cur_pal+17
-    LDA #$36
-    STA cur_pal+18
-    LDA #$17
-    STA cur_pal+19
-    STA cur_pal+22
+    LDX #12
+  : LDA SoundTestPalette, X
+    STA cur_pal+$14, X
+    DEX
+    BPL :-
 
-    LDA #$07
-    STA cur_pal+21
-    LDA #$0F
-    STA cur_pal+23
     STA cur_pal+2
     LDA #$20
     STA cur_pal+3
@@ -6265,7 +6252,7 @@ DrawSoundTestHole:
     STA tmp                ; arrangement
     LDA #>lutHole          ; and store that pointer in (tmp)
     STA tmp+1
-    LDA #$DC               ; hole tiles start at $DC
+    LDA #$34               ; hole tiles start at $DC
     STA tmp+2
     JMP Draw2x2Sprite
 
@@ -6303,21 +6290,21 @@ WeaselSpriteZoom:
     STA tmp           ; arrangement
     LDA #>lutWeasel   ; and store that pointer in (tmp)
     STA tmp+1
-    LDA #$00          ; weasel tiles start at $00
+    LDA #$30          ; weasel tiles start at $00
     STA tmp+2
     JMP Draw2x2Sprite
 
 lutWeasel:
-   .BYTE $00, $04      ; UL sprite = tile 0, palette 3
-   .BYTE $02, $04      ; DL sprite = tile 2, palette 3
-   .BYTE $01, $04      ; UR sprite = tile 1, palette 3
-   .BYTE $03, $04      ; DR sprite = tile 3, palette 3
+   .BYTE $00, $01      ; UL sprite = tile 0, palette 3
+   .BYTE $02, $01      ; DL sprite = tile 2, palette 3
+   .BYTE $01, $01      ; UR sprite = tile 1, palette 3
+   .BYTE $03, $01      ; DR sprite = tile 3, palette 3
 
 lutHole:
-   .BYTE $00, $05      ; UL sprite = tile 0, palette 3
-   .BYTE $02, $05      ; DL sprite = tile 2, palette 3
-   .BYTE $01, $05      ; UR sprite = tile 1, palette 3
-   .BYTE $03, $05      ; DR sprite = tile 3, palette 3
+   .BYTE $00, $02      ; UL sprite = tile 0, palette 3
+   .BYTE $02, $02      ; DL sprite = tile 2, palette 3
+   .BYTE $01, $02      ; UR sprite = tile 1, palette 3
+   .BYTE $03, $02      ; DR sprite = tile 3, palette 3
 
 
 WeaselZoomStart:
@@ -7303,6 +7290,7 @@ lut_ZMenuText:
 .word Song25                 ; 28
 .word Song26                 ; 29
 .word Song27                 ; 2A
+.word Song28                 ; 2B
 
 
 BLANK:
@@ -7419,7 +7407,8 @@ Song26:
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$09,$09,$00                 ; Fiend Battle 2
 Song27:
 .byte $9B,$B8,$AC,$B1,$A8,$A7,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$09,$0A,$00                     ; Ruined Castle
-
+Song28:
+.byte $93,$AC,$AA,$AA,$25,$B6,$FF,$C2,$FF,$8F,$25,$5F,$FF,$8E,$45,$34,$B1,$B7,$B6,$00     ; Jiggers - Feral Elements
 
 
 lut_CharStatsPtrTable:

@@ -10028,11 +10028,8 @@ LoadMenuCHRPal:                ; does not load 'lit orb' palette, or the two mid
     LDA #BANK_MENUCHR          ; This is mainly for menu related CHR and palettes
     JSR SwapPRG_L              ; Swap to Bank D
     JSR LoadMenuOrbs
-    
-LoadMenuCHRPal_TextOnly:
-	JSR LoadMenuTextBGCHR
-	JSR LoadCHR_MusicPlay
-    JMP LoadBatSprCHRPalettes
+    JSR LoadBatSprCHRPalettes
+	JMP LoadMenuTextBGCHR
 
 LoadShopCHRPal:
     JSR LoadShopBGCHRPalettes
@@ -10262,7 +10259,7 @@ LoadBatSprCHRPalettes:
     LDA #BANK_BATTLESPRITES
     JSR SwapPRG_L       
     
-    JSR LoadAllBattleSprites_Menu
+    JSR LoadAllBattleSprites_Menu ; loads the 4 characters entire graphics - every pose
 	JSR LoadCHR_MusicPlay
 
     LDA #BANK_MENUS
@@ -13333,10 +13330,10 @@ LongCall:
 
 SoundTestMenu:         
     LDA #0
-    STA $2001           ; turn off the PPU (we need to do some drawing)     
-    STA $4015           ; and silence the APU.  Music sill start next time MusicPlay is called.
-    STA $5015           ; and silence the MMC5 APU.
-    JSR LoadMenuCHRPal_TextOnly ; load menu related CHR and palettes
+    STA $2001             ; turn off the PPU (we need to do some drawing)     
+    STA $4015             ; and silence the APU.  Music sill start next time MusicPlay is called.
+    STA $5015             ; and silence the MMC5 APU.
+    JSR LoadMenuTextBGCHR ; load menu related CHR and palettes
     LDA #BANK_Z
     JSR SwapPRG
     JMP SoundTestZ
