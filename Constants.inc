@@ -1436,6 +1436,59 @@ END_SONG     = $FF
 
 
   
+;;;;;;;;;;;;;;;;;;;;
+;;
+;; Weapon Graphics
+;; 
+;;
+  
+WEASEL_PLUSH      = $50
+BIG_HOLE          = $54
+DRINK_ITEM        = $58
+SPEAR             = $60
+TRIDENT           = $64
+BELL_ITEM         = $68
+CURSOR_1          = $70 ; best not to change it even if its doubled up, for now
+CLAW              = $74
+EXPLODE_MAGIC     = $78
+HEAVY_SWORD       = $80
+KATANA            = $84
+SABRE             = $88
+LONG_SWORD        = $8C
+SHORT_SWORD       = $90
+HAMMER            = $94
+KNIFE             = $98
+AXE               = $9C
+CANE              = $A0
+ROD_WEAPON        = $A4
+NUNCHUCKS         = $A8
+FIST              = $AC
+WALL_MAGIC        = $B0
+SPARKLE_MAGIC     = $B8
+STARS_MAGIC       = $C0
+LIGHTNING_MAGIC   = $C8
+LONGFIRE_MAGIC    = $D0
+GLOWBALL_MAGIC    = $D8
+DUSTBALL_MAGIC    = $E0
+SHORTFIRE_MAGIC   = $E8
+CURSOR_2          = $F0
+ENEMY_EXPLOSIONS  = $F4
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;

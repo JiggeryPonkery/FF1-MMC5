@@ -6045,10 +6045,13 @@ SoundTestZ:
     STA weasels
     STA joy
     STA joy_prevdir
-    STA btlattackspr_gfx     ; to load up the weasel and hole
 
     JSR SoundTestClearNT     ; clear the nametable, set the attributes, load weasel sprite
     STX menustall            ; X = 0
+
+    
+    LDA #$50
+    STA btlattackspr_gfx     ; to load up the weasel and hole
 
     LDA #$02
     STA MMC5_tmp             ; set to load 8 tiles of magic attack sprites
