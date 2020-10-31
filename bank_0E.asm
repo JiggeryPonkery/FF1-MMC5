@@ -1471,7 +1471,7 @@ lut_ShopMaxAmount: ; maximum amount of this shop's item you can hold in your inv
     
     
 CheckMagicInventory:
-    LDA item_box, X
+    LDA shop_curitem
     SEC
     SBC #1; ITEM_MAGICSTART   ; convert item ID to spell ID
     STA shop_spell 
@@ -1482,7 +1482,7 @@ CheckMagicInventory:
     LSR A                  ; shift to get the spell level
     CLC
     ADC #$81               ; convert it to a printable number
-    STA str_buf+$49, Y     ; put this spell's level in the string buffer
+    STA str_buf+$3B, Y     ; put this spell's level in the string buffer
     
     JSR Set_Inv_Magic
     
@@ -1523,8 +1523,7 @@ CheckMagicInventory:
     
 CheckEquipmentInventory:
     JSR Set_Inv_Weapon     ; first set it to weapons
-    LDX str_buf+$42, Y
-    STX shop_curitem       ; backup item ID
+    LDX shop_curitem
     DEX                    ; convert item ID to 0-based
     TXA
     JSR DOES_ITEM_EXIST    ; checks if you have it in your inventory, and puts the amount in A    
@@ -1704,12 +1703,18 @@ ShopBuy_Loop:
     LDA shop_amount_buy         ; set the amount_max to the amount possible to buy
     STA shop_amount_max
     INC shop_amount_max         ; increase it for SelectAmount_Buy to work right
+    LDA #1
+    STA shop_amount_buy         ; reset amount_buy to 1
     
 ShopSelectAmount:    
-    LDA shop_curitem            
-    CMP #BOTTLE
-    BNE :+
-        JMP @BuyConfirm
+    LDA shop_type
+    CMP #SHOP_ITEM
+    BCC :+                      ; if its not an item shop, skip this check
+
+    LDA shop_curitem            ; if it is an item shop, see if its a key item 
+    CMP #ITEM_KEYITEMSTART
+    BCC :+
+       JMP @BuyConfirm          ; if its is, you can only buy one
 
   : JSR SelectAmount            ; choose how many of an item to buy
     BCS @ShopBuy_Return         ; if B was pressed, go back to choosing an item
@@ -1731,10 +1736,9 @@ ShopSelectAmount:
     
    @AddItem:    
     LDX shop_curitem
-    CPX #BOTTLE
-    BEQ BuyingBottle
-    CPX #LEWDS
-    BEQ BuyingBottle
+    CPX #ITEM_KEYITEMSTART
+    BCS BuyKeyItem
+    
     LDA items, X                ; load the current amount
     CLC
     ADC shop_amount_buy         ; add in the amount to buy
@@ -1769,10 +1773,15 @@ ShopSelectAmount:
     ;; JIGS - just loop this until the amount purchased is converted! 
     BEQ FinishPurchase
 
-BuyingBottle:
-    JSR LongCall
-    .word KeyItem_LongCall_Add
-    .byte BANK_KEYITEMS    
+BuyKeyItem:
+    JSR Set_Inv_KeyItem
+    TXA
+    JSR ADD_ITEM_1BIT
+
+    LDA shop_listdrawn
+    AND #01
+    STA shop_listdrawn 
+    ;; mark that the text should be re-drawn to show that the single-purhcase items aren't there!
     
 FinishPurchase: 
     JSR ShopPayPrice            ; subtract the price from your gold amount
@@ -1905,12 +1914,17 @@ ShopCheckInventory:
     LDX cursor
     LDA item_box, X             ; get chosen item ID
     STA shop_curitem            ; save it
-    CMP #BOTTLE
-    BNE :+
     
-    LDA #1
+    LDX shop_type
+    CPX #SHOP_ITEM
+    BCC :+                      ; if not an item shop, jump ahead
+
+    CMP #ITEM_KEYITEMSTART      
+    BCC :+                      ; if not a key item, jump ahead
+    
+    LDA #1                      ; otherwise, its a key item--and you don't have it, or it wouldn't be in the list
     STA shop_amount_buy
-    JSR ShopLoadPrice_Complex_Print
+    JSR ShopLoadPrice_Complex   ;; JIGS - something might break here...
     PLA
     PLA
     JMP ShopSelectAmount
@@ -2075,8 +2089,6 @@ SelectAmount:
        LDA #$27             ; display selling text
 
   : JSR DrawShopDialogueBox
-    LDA #1
-    STA shop_amount_buy    
     JSR PrintShopAmount     ; fill the spaces in the "how many?" text with numbers
     
     LDA #$B0
@@ -2236,12 +2248,7 @@ ShopLoadPrice_Complex_Print:
     LDA format_buf-1
     STA str_buf+$BE
     
-    LDA shop_curitem       ; if bottle, don't print
-    CMP #BOTTLE
-    BNE :+
-        RTS 
-    
-  : LDA #24
+    LDA #24
     STA dest_y
     LDA #06
     STA dest_x
@@ -2257,7 +2264,6 @@ ShopLoadPrice_Complex:
     JSR LoadPrice          ; gets the base price of the item you're trying to buy
     
     LDA shop_selling
-    ;AND #$01
     BEQ :+
     
     LSR tmp+2              ; if selling, divide the base price by 2
@@ -3197,7 +3203,7 @@ LoadShopInventory:
     ASL A                ; double it
     TAX                  ; put it in X for indexing
 
-    LDA lut_ShopData, X      ; load up the pointer to shop's inventory
+    LDA lut_ShopData, X  ; load up the pointer to shop's inventory
     STA tmp
     LDA lut_ShopData+1, X
     STA tmp+1
@@ -3212,7 +3218,48 @@ LoadShopInventory:
      BNE @Loop           ; and loop until max amount is loaded
 
    @NothingLeft:
-    JSR Set_Inv_KeyItem  ; does player have the Bottle?
+    ;; check if this is an item shop
+    ;; check to see if anything in the box is a key item
+    ;; check if the player has it
+    ;; if they do, remove it
+    
+    LDA shop_type
+    CMP #SHOP_ITEM
+    BCC @End
+
+    JSR Set_Inv_KeyItem  
+    
+ ;  @KeyItemCheck: 
+ ;   LDA item_box, Y
+ ;   CMP #ITEM_KEYITEMSTART
+ ;   BCC @NextKeyItem
+ ;   
+ ;   TAX
+ ;   TYA
+ ;   PHA
+ ;   TXA
+ ;   JSR DOES_ITEM_EXIST_1BIT
+ ;   BEQ @DoesNotExist
+ ;   
+ ;   ;; the player has the item...
+ ;   PLA
+ ;   TAY
+ ;   LDA #0
+ ;   STA item_box, Y
+ ;   BEQ @End          ;; must assume that the shop only has one key item
+ ;   ;; because if clear it means this is the end of the shop's inventory, and things will get breaky
+ ;   
+ ;  @DoesNotExist:
+ ;   PLA
+ ;   TAY
+ ;   
+ ;  @NextKeyItem:
+ ;   DEY
+ ;   BPL @KeyItemCheck
+
+    ;; JIGS - for a shop that sells one key item at a time, the above code will be fine
+    ;; for my Caravan, I have a surprise new item show up... so using thise code for now:
+    
     LDA #BOTTLE
     JSR DOES_ITEM_EXIST_1BIT    
     BEQ @End             ; if not, exit
@@ -3282,6 +3329,7 @@ DrawShopGoldBox:
 
 
 Fillblank_item:         
+    LDX #9
     LDA cursor_max      ; if cursor_max didn't increase yet, this is the first item...
     BNE :+              ; if this is the first item, there are no items! 
        LDA item_box_offset
@@ -3290,25 +3338,13 @@ Fillblank_item:
        STA item_box_offset ; subtract 5 from this, and re-do from scratch
        JMP ShopSelectItem    
     
- :  LDA #$09            ; fill 3 rows with 8 blank spaces (09 is control code for print spaces, followed by 08)
-    STA str_buf+$41, Y  
-    STA str_buf+$44, Y  
-    STA str_buf+$47, Y  
-    LDA #8              
-    STA str_buf+$42, Y  
-    STA str_buf+$45, Y  
-    STA str_buf+$48, Y  
-    LDA #$05
-    STA str_buf+$43, Y  
-    STA str_buf+$46, Y  
-    LDA #$01            
-    STA str_buf+$49, Y     
+  : LDA ShopListBlankItemCodes_LUT, X 
+    STA str_buf+$41, Y
+    INY
+    DEX
+    BNE :-
+ 
     INC blank_item
-    
-    TYA
-    CLC
-    ADC #9
-    TAY
     
     INC cursor_max       ; increment cursor_max, our item counter
     LDA cursor_max
@@ -3320,10 +3356,20 @@ ItemTypeLUT:
     .byte $07,$07,$06,$06,$06,$06,$02,$02
     ;; ComplexString control codes for equipment, magic, and items, based on shop type
 
+ShopListBlankItemCodes_LUT:
+;      9   8   7   6   5  4   3   2   1   
+.byte $01,$08,$09,$05,$08,$09,$05,$08,$09
+    
+ShopListItemCodes_LUT:
+;      C   B   A   9   8   7   6   5   4   3   2   1
+.byte $01,$44,$03,$FF,$FF,$FF,$05,$FF,$FF,$F1,$05,$44
+
+
 UpdateShopList:
     LDY #0            ; zero Y... this will be our string building index
     STY cursor_max    ; up counter
     STY blank_item
+    INY
     
 UpdateShopList_Loop:
     LDA item_box_offset ; 0 always, except when selling items, then it moves to scroll the list!
@@ -3336,29 +3382,28 @@ UpdateShopList_Loop:
     BEQ Fillblank_item
     
    @ItemExists:
-    STA str_buf+$42, Y   ; put item ID
-    STA str_buf+$4C, Y   ; 
+    STA shop_curitem     ; save item ID
     
-    TXA
-    PHA
     LDX shop_type
     LDA ItemTypeLUT, X
-    STA str_buf+$41, Y   ; Item Name control code
-    LDA #$03
-    STA str_buf+$4B, Y   ; Item Price control code
-    LDA #$05
-    STA str_buf+$43, Y   ; single line break
-    STA str_buf+$47, Y   ; single line break
-    LDA #$01
-    STA str_buf+$4D, Y   ; double line break
-    LDA #$FF
-    STA str_buf+$48, Y
-    STA str_buf+$49, Y
-    STA str_buf+$4A, Y
-    LDA #$F1              ; x
-    STA str_buf+$44, Y
-    PLA
-    TAX
+    STA str_buf+$40, Y   ; Item Name control code
+    INY
+    
+    LDX #$0C
+   @WriteLoop: 
+    LDA ShopListItemCodes_LUT-1, X
+    CMP #$44             ; convert $44 to item ID
+    BNE :+
+        LDA shop_curitem
+  : STA str_buf+$40, Y
+    INY
+    DEX
+    BNE @WriteLoop
+
+;;  The item string should now look like this:    (05 is single line break)
+;;  Name Code, Item ID, 05, x , Inventory QTY, 05 | FF, FF          | FF, 03, Item ID, 01
+;;  01         02       03, 04, 05-06        , 07 | 08, 09          | 0A, 0B, 0C     , 0D 
+;;                                      if magic: | L , Spell Level |
 
     LDA shop_type
     CMP #SHOP_WHITEMAGIC
@@ -3367,7 +3412,7 @@ UpdateShopList_Loop:
     BCC @MagicQTY
     
    @ItemQTY:
-    LDX str_buf+$42, Y   ; get item ID
+    LDX shop_curitem     ; get item ID
     LDA items, X           
     JMP @PrintQuantity
    
@@ -3386,42 +3431,38 @@ UpdateShopList_Loop:
     PLA                     ; this also puts spell level in str_buf+$49, Y! 
     TAY                     ; it does this before Y is re-used for another loop and restored here
     LDA #$95                ; L
-    STA str_buf+$48, Y      ; overwrite the #$FF in this slot
+    STA str_buf+$3A, Y      ; overwrite the #$FF in this slot
   : LDA #1
-    STA inv_canequipinshop ; turn on the switch for characters posing      
+    STA inv_canequipinshop  ; turn on the switch for characters posing      
     LDA shop_amount
     
    @PrintQuantity: 
     STA tmp
     JSR PrintNumber_2Digit ; print quantity
     LDA format_buf-1       ; tens   
-    STA str_buf+$46, Y    
+    STA str_buf+$38, Y    
     LDA format_buf-2       ; ones 
     CMP #$FF
     BNE @TwoDigit
     
    @Singledigit:
-    STA str_buf+$46, Y
+    STA str_buf+$38, Y
     LDA format_buf-1
 
    @TwoDigit:
-    STA str_buf+$45, Y   
+    STA str_buf+$37, Y   
     
 ;;  The item string should now look like this:    
 ;;  02/07 Item ID 05 x  Inventory QTY 05 | _  _           | _  03 Item ID 01
 ;;  41    42      43 44 45-46         47 | 48 49          | 4A 4B 4C      4D 
 ;;                             if magic: | L  Spell Level |
-
-    TYA
-    CLC                  ; add 13 to our string index so the next item is drawn after this item
-    ADC #13              ; JIGS - the box is longer than original game
-    TAY
   
     INC cursor_max           ; increment cursor_max, our item counter
     LDA cursor_max
     CMP #5                   ; ensure we don't exceed 5 items (max the shop space will allow)
-    BEQ UpdateShopList_Done  ; if we haven't reached 5 items yet, keep looping
-    JMP UpdateShopList_Loop
+    BNE UpdateShopList_Loop
+    ;BEQ UpdateShopList_Done  ; if we haven't reached 5 items yet, keep looping
+    ;JMP UpdateShopList_Loop
 
 UpdateShopList_Done:
     SEC
@@ -3430,24 +3471,8 @@ UpdateShopList_Done:
    
     DEY
     LDA #0
-    STA str_buf+$41, Y     ; slap a null terminator at the end of our string
-    STA str_buf+$40        ; slap a null terminator at the end of equipment list
-    STA str_buf+$94
-    STA str_buf+$96        ; and two on the end of the "Character has this item Equipped" short little things
-
-    LDA #WEP64+1
-    STA str_buf+$91         ; JIGS - weapon dance reset byte!
-    LDA #ARM64+1
-    STA str_buf+$92         ; Armor dance reset byte!
-    
-    ;; SO since the string buffer ends at $3D when a shop has 5 items, these two bytes are unused, but need to be filled...
-    ;; By setting cursor to $3E and $3F, depending on weapon or armor shops, the routine that makes them pose to show they can equip weapons
-    ;; Will try to make them equip a 41st item, which in the permissions LUT, is filled with "cannot equip" bits...
-
-    LDA #$7F
-    STA str_buf+$93         ; ! icon on black background
-    LDA #$7E
-    STA str_buf+$95         ; just an empty, black background 
+    STA str_buf+$40, Y     ; slap a null terminator at the end of our string
+    STA str_buf+$40        ; slap a null terminator at the end of equipment list ???
     
     LDA #22
     STA dest_x
@@ -4338,51 +4363,6 @@ lut_BIT:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Shopkeep additive LUT  [$AC54 :: 0x3AC64]
-;;
-;;    Shopkeeper graphics all use the same image when drawn.  The thing that makes them
-;;  different is that the tiles used in the drawing are offset by a specific amount, so that
-;;  different tiles are drawn for different shops.  This LUT is the offset/additive to use
-;;  for each shop type.  Each shopkeep's graphics consist of 14 tiles, so this LUT is basically
-;;  just a multiplication by 14
-
-;lut_ShopkeepAdditive:
-;  .BYTE (0*14) ; weapons
-;  .BYTE (1*14) ; armor
-;  .BYTE (2*14) ; white magic
-;  .BYTE (3*14) ; black magic
-;  .BYTE (4*14) ; items
-;  .BYTE (5*14) ; clinic
-;  .BYTE (6*14) ; inn
-;  .BYTE (7*14) ; caravan
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Shop Attribute Table LUT  [$AC5C :: 0x3AC6C]
-;;
-;;    This is a copy of the attribute table to be used for the shop screen.
-;;  This is a full $40 bytes that is copied IN FULL to the attribute table
-;;  for the shop.
-
-lut_ShopAttributes:
-;; JIGS - not the original version, but an older version
-;; purple text for title, green text for gold box
-
-;  .BYTE $55,$55,$55,$55,$55,$FF,$FF,$FF
-;  .BYTE $F5,$F5,$F5,$F5,$F5,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$00,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$00,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$AA,$AA,$AA
-;  .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
-
-  
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Shopkeeper image LUT  [$AC9C :: 0x3ACAC]
@@ -4391,20 +4371,6 @@ lut_ShopAttributes:
 ;;  in all shops.
 
 lut_ShopkeepImage:
-
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$00,$00,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$01,$01,$00,$00,$00,$00
-; .BYTE $04,$05,$00,$00,$01,$01,$00,$00,$00,$00
-; .BYTE $06,$07,$08,$09,$01,$01,$00,$00,$00,$00
-; .BYTE $04,$05,$0A,$0B,$01,$01,$00,$00,$00,$00
-; .BYTE $06,$07,$0C,$0D,$01,$01,$00,$00,$00,$00
-; .BYTE $04,$05,$00,$00,$01,$01,$00,$00,$00,$00
-; .BYTE $06,$07,$00,$00,$01,$01,$00,$00,$00,$00
-; .BYTE $00,$00,$00,$00,$02,$03,$00,$00,$00,$00
-
-;; JIGS - with bigger boxes we need smaller graphics... lookit all those 0s! 
-
  .BYTE $74,$75,$71,$71
  .BYTE $76,$77,$71,$71
  .BYTE $70,$70,$71,$71
