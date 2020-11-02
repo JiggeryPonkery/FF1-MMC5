@@ -850,7 +850,8 @@ ARMOR_STATDEF     = $05
 ARMOR_HPBONUS     = $06
 ARMOR_TYPE_1      = $07
 ARMOR_TYPE_2      = $08
-ARMOR_PERMISSIONS = $09 ; 0A, 0B, 0C - 4 bytes
+ARMOR_SLOT        = $09
+ARMOR_PERMISSIONS = $0A ; 0B, 0C, 0D - 4 bytes
 
 
 

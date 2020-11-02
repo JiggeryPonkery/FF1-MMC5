@@ -127,8 +127,9 @@ lut_ShopStrings:
 .word ShopArmorDescription  ;1B
 .word ShopWeaponDescription ;1C
 
+.word ShopNothingElse      ;1D
 ;; these 4 unused
-.word ShopEquipNow         ;1D do you want to equip it
+;.word ShopEquipNow         ;xx do you want to equip it
 .word ShopWhoWillTake      ;1E who is it for
 .word ShopCannotEquip      ;1F can't equip it
 .word ShopItemStowed       ;20 inventory full of character's other item, new item put in inventory
@@ -245,6 +246,11 @@ ShopWeaponDescription:
 .byte $09,$03,$8D,$A4,$B0,$A4,$66,$E4,$09,$07,$01         ; ___Damage:_______|
 .byte $FF,$FF,$8A,$A6,$A6,$55,$5E,$BC,$E4,$09,$06,$01     ; __Accuracy:______|
 .byte $FF,$FF,$8C,$5C,$57,$51,$AF,$E4,$09,$06,$00         ; __Critical:______|
+
+ShopNothingElse:
+.byte $FF,$8A,$AB,$BF,$65,$B2,$B2,$AE,$1E,$68,$AE,$A8,$01
+.byte $FF,$1B,$41,$21,$5D,$1E,$1C,$A8,$01
+.byte $FF,$FF,$65,$3F,$21,$4C,$2D,$B7,$C0,$00 ; Ah, looks like that was the last of it.
 
 ShopEquipNow:
 ;.byte $FF,$8D,$2E,$56,$64,$5D,$B1,$21,$28,$01
@@ -1432,6 +1438,8 @@ EnterShop:
     LDA #$4F
     STA music_track        ; set the music track to $4F (shop music)
     STA dlgmusic_backup
+    LDX shop_type
+    STX tmp+$13            ; backup shop type
     JMP EnterNormalShop
     
    @EnterClinic:
@@ -1576,8 +1584,6 @@ CheckEquipmentInventory:
 
 
 EnterNormalShop:
-    LDX shop_type
-    STX tmp+$13                 ; backup shop type
     LDA lut_ShopWelcome, X
     JSR DrawShopDialogueBox     ; draw the "welcome" dialogue
     LDA shop_id
@@ -1777,12 +1783,7 @@ BuyKeyItem:
     JSR Set_Inv_KeyItem
     TXA
     JSR ADD_ITEM_1BIT
-
-    LDA shop_listdrawn
-    AND #01
-    STA shop_listdrawn 
-    ;; mark that the text should be re-drawn to show that the single-purhcase items aren't there!
-    
+   
 FinishPurchase: 
     JSR ShopPayPrice            ; subtract the price from your gold amount
     LDA #$19
@@ -1796,12 +1797,17 @@ DrawShopInventoryBox:
     STA cursor
     STA shop_selling
 
-    LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
-    BNE :+
+    ;; JIGS - while I like not re-drawing the box every single time...
+    ;; it does make the game feel laggy when you don't see a change for 1-2 seconds.
+    ;; so this "feels" better...
+
+    ;LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
+    ;BNE :+
     LDA #SHOPBOX_INV
     JSR DrawMainItemBox             ; draw shop box #2 (inv list box)    
-    INC shop_listdrawn
-  : RTS
+    ;INC shop_listdrawn
+  ;: RTS
+    RTS
 
 
 ShopSell:
@@ -1824,9 +1830,11 @@ ShopSell_Loop:
     DEC shop_selling
     JMP RestartShopLoop
     
-  : JSR ShopCheckInventory
+  : JSR ShopCheckInventory     ; see how many of this item you have
     STA shop_amount_max
     INC shop_amount_max        ; needs to be 1 over max for the SelectAmount stuff to work
+    LDA #1
+    STA shop_amount_buy
 
 ShopSelectAmount_Sell:    
     JSR SelectAmount
@@ -1877,26 +1885,36 @@ ShopSelectAmount_Sell:
 
 FinishSale: 
     JSR ShopEarnGold            ; add the price to your gold amount
+    JSR ConvertInventoryToItemBox
+    BNE ContinueSelling
+
+ ;; nothing left...
+
+    LDA #$1D 
+    JSR DrawShopDialogueBox     ; "that was the last of it."
+    JSR MenuWaitForBtn          ; wait for player to confirm seeing this    
+    JMP NothingLeftToSell
+
+ContinueSelling:
+    JSR UpdateShopList
     LDA #$19
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
+  
     JSR ShopLoop_YesNo
     BCS StopSelling             ; if B was pressed... 
     LDA cursor
     BNE StopSelling
-    
-    JSR ConvertInventoryToItemBox
-    BEQ @NothingLeft            ; 
-    JMP ShopSell_Loop           ; else continue loop    
-    
-   @NothingLeft: 
-    LDA #SHOPBOX_INV
-    JSR EraseMainItemBox        ; erase shop box 2 (inventory)    
-    JMP :+                      ; and jump to stop selling
-    
+    JMP ShopSell_Loop           ; else continue loop
+
 StopSelling:
     LDA #$1A 
     JSR DrawShopDialogueBox     ; "eh, alright then, what else?"    
-    JMP :+
+
+NothingLeftToSell:     
+    LDA #SHOPBOX_INV
+    JSR EraseMainItemBox        ; erase shop box 2 (inventory)    
+    JSR ResetShopList_Extras    
+    JMP :+                      ; and jump to stop selling
     
 NothingToSell:    
     LDA #$15                    ; "You haven't got anything!"
@@ -1905,8 +1923,10 @@ NothingToSell:
     
   : LDA #0
     STA shop_selling            
-    STA shop_listdrawn
-    JMP MainShopLoop    
+    ;STA shop_listdrawn
+    JMP MainShopLoop      
+  
+
     
 ;;;;;;;;;;;;;;;;;;;;;
 
@@ -1915,8 +1935,8 @@ ShopCheckInventory:
     LDA item_box, X             ; get chosen item ID
     STA shop_curitem            ; save it
     
-    LDX shop_type
-    CPX #SHOP_ITEM
+    LDY shop_type
+    CPY #SHOP_ITEM
     BCC :+                      ; if not an item shop, jump ahead
 
     CMP #ITEM_KEYITEMSTART      
@@ -1933,8 +1953,8 @@ ShopCheckInventory:
     JSR MultiplyXA              ; multiply cursor position by each item's str_buf length
     TAY
     
-    LDA str_buf+$42, Y          ; item ID
-    STA shop_curitem
+    ;LDA str_buf+$42, Y          ; item ID
+    ;STA shop_curitem
     
     LDA str_buf+$46, Y   
     CMP #$FF
@@ -2086,7 +2106,7 @@ SelectAmount:
     LDA #$0D                ; display buying text; "How many?" 
     LDX shop_selling        ; BUT if selling...
     BEQ :+
-       LDA #$27             ; display selling text
+       LDA #$27             ; display selling text ("will get ya" instead of "Will cost ya")
 
   : JSR DrawShopDialogueBox
     JSR PrintShopAmount     ; fill the spaces in the "how many?" text with numbers
@@ -3338,8 +3358,8 @@ Fillblank_item:
        STA item_box_offset ; subtract 5 from this, and re-do from scratch
        JMP ShopSelectItem    
     
-  : LDA ShopListBlankItemCodes_LUT, X 
-    STA str_buf+$41, Y
+  : LDA ShopListBlankItemCodes_LUT-1, X 
+    STA str_buf+$40, Y
     INY
     DEX
     BNE :-
@@ -3349,12 +3369,12 @@ Fillblank_item:
     INC cursor_max       ; increment cursor_max, our item counter
     LDA cursor_max
     CMP #5               ; ensure we don't exceed 5 items (max the shop space will allow)
-    BNE :-               ; if we haven't reached 5 items yet, keep looping
+    BNE Fillblank_item   ; if we haven't reached 5 items yet, keep looping
     JMP UpdateShopList_Done
 
 ItemTypeLUT:
-    .byte $07,$07,$06,$06,$06,$06,$02,$02
-    ;; ComplexString control codes for equipment, magic, and items, based on shop type
+.byte $07,$07,$06,$06,$06,$06,$02,$02
+; ComplexString control codes for equipment, magic, and items, based on shop type
 
 ShopListBlankItemCodes_LUT:
 ;      9   8   7   6   5  4   3   2   1   
@@ -3519,25 +3539,27 @@ ConvertInventoryToItemBox:
     
    @Magic:
     JSR Set_Inv_Magic
+    LDX #0
     LDY #128
-    LDA #0
     BNE @DecompressInventory
     
    @Weapons:  
     JSR Set_Inv_Weapon
-    LDA #0
-    BEQ :+
+    LDX #0
+    LDY #64
+    BNE @DecompressInventory
    
    @Armor:
     JSR Set_Inv_Weapon
-    LDA #ARMORSTART    
-  : LDY #64
+    LDX #ARMORSTART            ; X and Y basically act as start and stop locations
+    LDY #64+ARMORSTART         ; so for armor, its start at 64, end at 128
     
    @DecompressInventory:
     STY tmp+4                  ; max item amount
-    LDX #0
-    STX tmp+3                  ; counter for item box
-    TAX                        ; offset for where to begin counting items from (+$40 for armor)
+    LDA #0
+    STA tmp+3                  ; counter for item box
+    
+    ; X = offset for where to begin counting items from (+$40 for armor)
    
    @Loop: 
     TXA
@@ -3959,26 +3981,6 @@ Shop_SpellDescription: ;; also used by the learning magic menu
 
    
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Shop cursor position luts  [$A977 :: 0x3A987]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; JIGS - reorganized:
-
-lut_ShopCurs_Cmd:    ; cursor positions for the command box
-  .BYTE $08,$40
-  .BYTE $08,$50
-  .BYTE $08,$60
-  .BYTE $08,$70
-
-lut_ShopCurs_List:   ; cursor positions for the inventory list box
-  .BYTE $A0,$20
-  .BYTE $A0,$40
-  .BYTE $A0,$60
-  .BYTE $A0,$80
-  .BYTE $A0,$A0
 
 
 
@@ -4172,58 +4174,6 @@ DrawInnClinicConfirm:
     
     
 
-    
-    
-
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Shop Sell Item Confirm  [$AAB4 :: 0x3AAC4]
-;;
-;;    This routine draws the 'are you sure you want to sell this' confirmation
-;;  dialogue text for the shopkeeper after you select an item to sell.  It also
-;;  calculates the sale price before printing it, and stores the price in shop_curprice
-;;
-;;  IN:           cursor = selected menu item
-;;        shop_charindex = index to start of character's equipment list
-;;
-;;  OUT:  shop_charindex = index to precise slot of item being sold (cursor is added to it)
-;;         shop_curprice = sale price of item
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;DrawShopSellItemConfirm:
-;    LDA #$0E
-;    JSR DrawShopDialogueBox  ; draw " Gold OK?" dialogue -- all the text except the actual price
-;
-;    LDA shop_curitem
-;   
-;    JSR LoadPrice            ; load the price of this item
-;    LSR tmp+1                ; then divide that price by 2 to get the sale price
-;    ROR tmp
-;
-;    LDA tmp
-;    STA shop_curprice
-;    LDA tmp+1
-;    STA shop_curprice+1      ; copy the price to shop_curprice
-;    LDA #0
-;    STA shop_curprice+2
-;
-;    INC dest_y
-;    INC dest_y
-;    LDA #04
-;    STA dest_x
-;    
-;    ;; JIGS - movin' numbers on the screen
-;    
-;    JSR PrintNumber_5Digit    ; print the sale price as 5 digits
-;    JMP DrawShopComplexString ; then draw it, and exit
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4340,67 +4290,6 @@ MenuRecoverSingleMP:
     RTS    
     
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Bit position LUT  [$AC38 :: 0x3AC48]
-;;
-;;    This LUT simply contains bytes with 1 bit in each
-;;  position set.  The game uses this table for magic permissions
-;;  checking.
-;;
-;;    The basic formula for entries in this table is ($80 >> X)
-;;  High bit is the first entry
-
-lut_BIT:
-  .BYTE %10000000
-  .BYTE %01000000
-  .BYTE %00100000
-  .BYTE %00010000
-  .BYTE %00001000
-  .BYTE %00000100
-  .BYTE %00000010
-  .BYTE %00000001
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Shopkeeper image LUT  [$AC9C :: 0x3ACAC]
-;;
-;;    this is the 10x10 image that is drawn for the shopkeeper graphics
-;;  in all shops.
-
-lut_ShopkeepImage:
- .BYTE $74,$75,$71,$71
- .BYTE $76,$77,$71,$71
- .BYTE $70,$70,$71,$71
- .BYTE $78,$79,$71,$71
- .BYTE $7A,$7B,$71,$71
- .BYTE $7C,$7D,$71,$71
- .BYTE $70,$70,$71,$71
- .BYTE $74,$75,$71,$71
- .BYTE $76,$77,$72,$73
-
-
- 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  LUT for Menu palettes  [$AD78 :: 0x3AD88]
-;;
-;;    This is only for the 3 BG palettes that aren't loaded by LoadMenuCHRPal
-;;  IE:  the 'lit orb' palette, and the two middles ones that are mirrors of the 4th
-;;  palette.  The middle palettes are coded to be used by the Equip Menu in order to
-;;  highlight some text, but due to some problems (not highlighting all the letters in the
-;;  string) that functionality is removed by having those palettes unchanged.
-
-lutMenuPalettes:
-.BYTE  $0F,$30,$01,$22,  $0F,$00,$0F,$30,  $0F,$35,$01,$15
-
-lutSpellMenuPalettes:
-.BYTE  $0F,$04,$01,$0F,  $0F,$2A,$01,$1A,  $0F,$24,$01,$13
-
-lutEquipPalettes:
-.BYTE  $0F,$00,$01,$2A
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4895,6 +4784,14 @@ MainMenuSubTarget_NoClear:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+DrawTitleTargetName:
+    LDA #MBOX_TITLE
+    JSR DrawMainItemBox             
+    DEC dest_y
+    LDA #7
+    JMP DrawCharMenuString         ; draw the character's name
+
+
 
 DrawMagicMenu:
     LDA #0
@@ -4905,13 +4802,7 @@ DrawMagicMenu:
     JSR ClearNT                    ; clear the nametable
     JSR DrawMagicMenuMainBox       ; draw the big box containing all the spells
     ;; item_pageswap is set to 0 if no spells are found
-    
-    LDA #MBOX_TITLE
-    JSR DrawMainItemBox             
-    DEC dest_y
-    LDA #7
-    JSR DrawCharMenuString         ; draw the character's name
-   
+    JSR DrawTitleTargetName   
     LDA #MBOX_SUBMENU
     JSR DrawMainItemBox            ; sub menu box
 
@@ -7070,55 +6961,7 @@ SetStallAndWait:
     STA submenu_targ
     RTS
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Item Target Cursor  [$B3EE :: 0x3B3FE]
-;;
-;;     Draws the cursor for the item target menu
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-DrawItemTargetCursor:
-    LDX cursor           ; put the cursor in X
-    LDA @lut, X          ; use it to index our LUT
-    STA spr_y            ; that lut is the X coord for cursor
-    LDA #$30
-    STA spr_x            ; Y coord is always $68
-    JMP DrawCursor       ; draw it, and exit
-
-  @lut:
-    .BYTE $40,$58,$70,$88
-    
-    
-    
-DrawElixirTargetCursor:
-    LDX cursor           ; put the cursor in X
-    LDA @lut, X          ; use it to index our LUT
-    STA spr_y            ; that lut is the X coord for cursor
-    LDA #$2C
-    STA spr_x            ; Y coord is always $68
-    JMP DrawCursor       ; draw it, and exit
-
-  @lut:
-    .BYTE $26,$46,$66,$86    
-    
-    
-DrawMPTargetCursor:
-
-    LDX cursor2           ; put the cursor in X
-    LDA @Y_lut, X          ; use it to index our LUT
-    STA spr_y            ; that lut is the X coord for cursor
-    LDX cursor
-    LDA @X_lut, X
-    STA spr_x            ; Y coord is always $68
-    JMP DrawCursor       ; draw it, and exit
-
-  @Y_lut:
-    .BYTE $28,$38,$48,$58,$68,$78,$88,$98
-  
-  @X_lut:
-    .BYTE $38,$60,$88,$B0  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7932,10 +7775,6 @@ MoveMagicLearnMenuCursor:
     .byte $02, $01, $00, $01, $00, $01, $00, $01
     .byte $00, $01, $00, $01, $00, $01, $00, $01, $FF    
  
- 
- 
- 
- 
     
 
 MoveMagicSubMenuCursor:
@@ -8235,193 +8074,7 @@ TurnMenuScreenOn:
     JMP CallMusicPlay
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Main Menu Sub Cursor  [$B7A9 :: 0x3B7B9]
-;;
-;;    Draws the cursor for the main menu sub target (ie:  when you select
-;;  a character for a sub menu -- like for magic or status)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawMainMenuSubCursor:
-    LDA cursor                      ; get cursor
-    ASL A                           ; double it (2 bytes per coord)
-    TAX                             ; and stuff it in X
-    LDA lut_MainMenuSubCursor, X    ; load up the coords from our LUT
-    STA spr_x
-    LDA lut_MainMenuSubCursor+1, X
-    STA spr_y
-    JMP DrawCursor                  ; then draw the cursor and exit
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawMainMenuCursor  [$B7BA :: 0x3B7CA]
-;;
-;;    Loads the coords for the main menu cursor, and draw the cursor sprite
-;;  at those coords.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawMainMenuCursor:
-    LDY cursor                    ; get current cursor selection
-    LDA lut_MainMenuCursor_Y, Y   ;  use cursor as an index to get the desired Y coord
-    STA spr_y                     ;  write the Y coord
-    LDA #$10                      ; X coord for main menu cursor is always $10
-    STA spr_x
-    JMP DrawCursor                ; draw it!  and exit
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawItemMenuCursor  [$B7C8 :: 0x3B7D8]
-;;
-;;   Loads the coords for the item menu cursor, and draws the cursor sprite there
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawItemMenuCursor:
-    LDA cursor                   ; get current cursor and double it (loading X,Y pair)
-    ASL A
-    TAX                          ;  put it in X
-
-    LDA lut_ItemMenuCursor, X    ; load X,Y pair into spr_x and spr_y
-    STA spr_x
-    LDA lut_ItemMenuCursor+1, X
-    STA spr_y
-
-    JMP DrawCursor               ; then draw the cursor
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Main and item menu cursor position LUTs  [$B7D9 :: 0x3B7E9]
-;;
-;;    X/Y Coords for cursor placement for main and item menus
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; JIGS -- all these got changed around
-
-lut_MainMenuSubCursor:
-  .BYTE $58,$18,      $58,$48
-  .BYTE $58,$78,      $58,$A8
-
-lut_MainMenuCursor_Y:           ; Y coord only... X coord is hardcoded
-   .BYTE   $70,$80,$90,$A0,$B0,$C0,$D0
-
-lut_ItemMenuCursor:
-  .BYTE   $50,$10,   $80,$10
-  .BYTE   $08,$28,   $80,$28
-  .BYTE   $08,$38,   $80,$38
-  .BYTE   $08,$48,   $80,$48
-  .BYTE   $08,$58,   $80,$58
-  .BYTE   $08,$68,   $80,$68
-  .BYTE   $08,$78,   $80,$78
-  .BYTE   $08,$88,   $80,$88
-  .BYTE   $08,$98,   $80,$98
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Magic Menu Cursor [$B816 :: 0x3B826]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawMagicMenuCursor:
-;    LDA cursor            ; get the cursor
-;    STA tmp               ; back it up (dumb -- since we can just look at 'cursor' any time >_>)
-
-;    AND #$03              ; mask out the low bits (column)
-;    ASL A                 ;   *2
-;    STA tmp+1             ;  store in tmp+1
-;    CLC
-;    ADC tmp+1             ; add it again (*4)
-;    ADC tmp+1             ; and again (*6)
-;    ADC tmp+1             ; JIGS - AGAIN! (*8 ... jump 8 spaces per spell? (7 letters, 1 space)...wow that worked.
-;    ASL A
-;    ASL A
-;    ASL A                 ; then multiply by 8 (*48)
-;    CLC
-    ;;ADC #$50              ; and add $50  (col*48 + $50)
-;        ADC #$30              ; JIGS - longer spell names! ...means a lesser number here.
-;    STA spr_x             ; this is our X coord for the cursor
-        
-;    LDA tmp               ; get the cursor (row*4)
-;    LDA cursor
-;    ASL A                 ; multiply by 4  (*16)
-;    ASL A
-;    AND #$F0              ; mask to remove the column bits (now a clean *16)
-;    CLC
-;    ADC #$28              ; add $28  (row*16 + $28)
-;    STA spr_y             ; this is our Y coord
-;    JMP DrawCursor        ; Draw it!  and exit
-
-
-;; JIGS - screw all that... using a LUT.
-
-    LDA cursor                   ; get current cursor and double it (loading X,Y pair)
-    ASL A
-    TAX                          ;  put it in X
-
-    LDA lut_MagicMenuCursor, X    ; load X,Y pair into spr_x and spr_y
-    STA spr_x
-    LDA lut_MagicMenuCursor+1, X
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-
-lut_MagicMenuCursor:
-  .BYTE   $18,$28,   $60,$28,   $A8,$28
-  .BYTE   $18,$38,   $60,$38,   $A8,$38
-  .BYTE   $18,$48,   $60,$48,   $A8,$48
-  .BYTE   $18,$58,   $60,$58,   $A8,$58
-  .BYTE   $18,$68,   $60,$68,   $A8,$68
-  .BYTE   $18,$78,   $60,$78,   $A8,$78
-  .BYTE   $18,$88,   $60,$88,   $A8,$88
-  .BYTE   $18,$98,   $60,$98,   $A8,$98
-
-  
-
-DrawMagicSubMenuCursor:
-    LDX cursor                   ; get current cursor and double it (loading X,Y pair)
-    LDA lut_MagicSubMenuCursor, X    ; load X,Y pair into spr_x and spr_y
-    STA spr_x
-    LDA #$10
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-lut_MagicSubMenuCursor:
-  .BYTE   $50, $80, $B8
-  
-  
-DrawMagicLearnMenuCursor:
-    LDA cursor                 
-    AND #$01
-    TAX
-    LDA lut_MagicLearnCursor_X, X  
-    STA spr_x
-
-    LDX cursor_max
-    LDA lut_MagicLearnCursor_Y, X
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-lut_MagicLearnCursor_X:
-  .BYTE   $00
-  .BYTE   $80
-    
-lut_MagicLearnCursor_Y:
-  .BYTE   $28
-  .BYTE   $38
-  .BYTE   $48
-  .BYTE   $58
-  .BYTE   $68
-  .BYTE   $78
-  .BYTE   $88
-  .BYTE   $98
-  
   
   
 
@@ -8665,39 +8318,7 @@ LoadMainItemBoxDims:
     RTS
 
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Boxes for Main/Item menus  [$BAA2 :: 0x3BAB2]
-;;
-;;     in groups of 4:  X, Y, width, height
-;;
-;;  Item menu boxes are also used for the magic menu.
 
-lut_MainItemBoxes:
- 
-    ;        X   Y   wid height
-    .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb/option box
-    .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
-    .BYTE   $00,$0D,$20,$0F ; 02 ; Status Menu 
-    .BYTE   $00,$01,$09,$03 ; 03 ; Item title box (character name for magic screen)
-	.BYTE   $09,$01,$17,$03 ; 04 ; Magic/Item title submenu
-    .BYTE   $00,$03,$20,$13 ; 05 ; Inventory box
-	.BYTE   $00,$16,$20,$07 ; 06 ; Item description box
-    .BYTE   $05,$06,$16,$0E ; 07 ; Item Target Menu (HP)
-    .BYTE   $03,$01,$1A,$15 ; 08 ; Item Target Menu (MP)
-    .BYTE   $04,$03,$18,$13 ; 09 ; Item Target Menu (HP/MP)
-	.BYTE   $01,$01,$1E,$1C ; 0A ; Equip Menu
-    .BYTE   $00,$16,$20,$07 ; 0B ; Equip Stats Box
-    .BYTE   $00,$03,$10,$13 ; 0C ; Magic Learning menu left side
-    .BYTE   $10,$03,$10,$13 ; 0D ; Magic Learning menu right side
-    
-    ;; Shop boxes
-    .BYTE   $01,$12,$13,$09 ; 0E ; Shopkeeper dialogue
-    .BYTE   $01,$02,$13,$03 ; 0F ; Title box
-    .BYTE   $15,$02,$0A,$16 ; 10 ; Inventory list
-    .BYTE   $02,$06,$09,$0B ; 11 ; Command box
-    .BYTE   $15,$18,$0A,$03 ; 12 ; Gold box
-    
 
     
 
@@ -9048,28 +8669,6 @@ EnterEquipMenu:
     STA WeaponOrArmorPage     ; default to weapon page
     STA ItemOverflow
 
-    LDA equipoffset
-    STA cursor
-
-    JSR ClearNT               ; clear the NT
-
-    LDA #MBOX_EQUIP         
-    JSR DrawMainItemBox
-  
-    LDA char_id
-    STA submenu_targ
-    LDA #$05
-    STA dest_x
-    LDA #11
-    JSR DrawCharMenuString    ; Name and Class
-    
-    LDA #$06
-    STA dest_y
-    LDA #12
-    JSR DrawMenuString        ; Equipment
-    
-    JSR DrawEquipMenuStrings  ; Draws item names, what is equipped
-
     LDX #$03
    @PalLoop:                        
       LDA lutEquipPalettes, X      
@@ -9078,6 +8677,40 @@ EnterEquipMenu:
       BPL @PalLoop        
 
     ;; this will color right or left hand green, to indicate which weapon is being shown
+
+    ;JSR ClearNT               ; clear the NT
+
+    LDA #MBOX_EQUIPSTATS
+    JSR DrawMainItemBox
+
+    ;; draw description box first, because inventory overlaps it
+
+    LDA #MBOX_INV ; #MBOX_EQUIP         
+    JSR DrawMainItemBox
+   
+    LDA #$05
+    STA dest_y
+    STA dest_x
+    LDA #12
+    JSR DrawMenuString        ; Equipment
+    JSR DrawEquipMenuStrings  ; Draws item names, what is equipped
+
+    LDA #MBOX_SUBMENU
+    JSR DrawMainItemBox
+
+DrawEquipSubMenuString:
+    JSR DrawTitleTargetName   ; draw name in title box
+
+    LDA #10
+    STA dest_x
+    LDA #02
+    STA dest_y
+    LDA #79
+    JSR DrawMenuString        ; "Equip / Remove / Empty"
+
+    LDA equipoffset
+    STA cursor
+
 
    @DualWieldStuff:
     LDX char_index         ; see if the character has a weapon
@@ -9129,7 +8762,7 @@ EnterEquipMenu:
   @Loop:
     JSR ClearOAM              ; clear OAM
     JSR DrawEquipMenuCurs     ; draw the cursor
-    JSR EquipMenuSprite
+    ;JSR EquipMenuSprite
     JSR MenuFrame             ; then do an Equip Menu Frame
     
     LDA joy_a
@@ -9206,13 +8839,13 @@ EnterEquipMenu:
     .byte $D4, $C7, $DB   ; sword, >, shield -- printed in reverse
    
 
-EquipMenuSprite:
-    LDA #$78
-    STA spr_x
-    LDA #$10
-    STA spr_y
-    LDA char_index
-    JMP DrawOBSprite        ; then draw this character's OB sprite    
+;EquipMenuSprite:
+;    LDA #$78
+;    STA spr_x
+;    LDA #$10
+;    STA spr_y
+;    LDA char_index
+;    JMP DrawOBSprite        ; then draw this character's OB sprite    
 
 EnterEquipInventory:
     JSR WaitForVBlank_L
@@ -9402,7 +9035,7 @@ UpdateEquipInventoryStats:
     
    @CheckArmorSlot:
     LDX tmp+11               ; check type LUT (head, body, hands, shield)
-    CMP lut_ArmorTypes, X    ; against equip slot
+    CMP ArmorSlot            ; against equip slot
     BEQ @FinishUpdate        ; if it equals, its in the right slot to continue
 
    @WrongSlot:
@@ -9637,31 +9270,7 @@ EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
 .byte $96,$C0,$9B,$2C,$30,$B7,$04,$00         ; M.Resist_###
   
 
-DrawEquipInventoryCursor:
-    LDA cursor                 
-    AND #$01
-    TAX
-    LDA lut_EquipInventoryCursor_X, X  
-    STA spr_x
 
-    LDX cursor_max
-    LDA lut_EquipInventoryCursor_Y, X
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-lut_EquipInventoryCursor_X:
-    .byte $08
-    .byte $80
-    
-lut_EquipInventoryCursor_Y:
-    .byte $28
-    .byte $38
-    .byte $48
-    .byte $58
-    .byte $68
-    .byte $78
-    .byte $88
-    .byte $98
 
 lut_EquipInventoryPageTitle:
 .byte $04, $05, $06, $4E 
@@ -9929,96 +9538,6 @@ IsEquipLegal:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;   Armor Type LUT  [$BCD1 :: 0x3BCE1]
-;;
-;;   This LUT determines which type of armor each armor piece is.  The 4 basic types are:
-;;
-;;  JIGS - fixing...
-;;  0 = weapon
-;;  1 = shield
-;;  2 = helmet
-;;  3 = body armor
-;;  4 = gloves
-;;  5 = ring
-;;
-;;   Note the numbers themselves really don't signify anything.  They're only there to
-;;  prevent a player from equipping multiple pieces of armor of the same type.  So you could
-;;  have 256 different types of armor if you wanted (even though there are only 40 pieces of
-;;  armor  ;P).
-;;
-
-lut_ArmorTypes:
-  .byte 3 ; Cloth T
-  .byte 3 ; Wooden
-  .byte 3 ; Chain
-  .byte 3 ; Iron
-  .byte 3 ; Steel
-  .byte 3 ; Silver  
-  .byte 3 ; Flame
-  .byte 3 ; Ice
-  .byte 3 ; Opal
-  .byte 3 ; Dragon
-  .byte 5 ; Copper Q
-  .byte 5 ; Silver Q
-  .byte 5 ; Gold Q
-  .byte 5 ; Opal Q
-  .byte 3 ; White T
-  .byte 3 ; Black T
-  
-  .byte 1 ; Wooden
-  .byte 1 ; Iron
-  .byte 1 ; Silver
-  .byte 1 ; Flame
-  .byte 1 ; Ice
-  .byte 1 ; Opal
-  .byte 1 ; Aegis
-  .byte 1 ; Buckler
-  .byte 1 ; ProCape
-  
-  .byte 2 ; Cap
-  .byte 2 ; Wooden
-  .byte 2 ; Iron
-  .byte 2 ; Silver
-  .byte 2 ; Opal
-  .byte 2 ; Heal
-  .byte 2 ; Ribbon
-  
-  .byte 4 ; Gloves
-  .byte 4 ; Copper
-  .byte 4 ; Iron
-  .byte 4 ; Silver
-  .byte 4 ; Zeus
-  .byte 4 ; Power
-  .byte 4 ; Opal
-  .byte 4 ; ProRing
-  
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused 
-  .byte 1 ; unused
-  .byte 1 ; unused
-  .byte 1 ; unused
-  .byte 1 ; unused
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Move Equip Menu Cursor [$BD6E :: 0x3BD7E]
@@ -10093,24 +9612,7 @@ MoveEquipMenuCurs:
    @Done:
     JMP PlaySFX_MenuMove
 
-DrawEquipMenuCurs:
-    LDA #$18                   ; all slots are on same X coordinate
-    STA spr_x                  ; 
-    LDX cursor                 ; get primary cursor
-    LDA @lut_EquipMenuCurs, X  ; then fetch
-    STA spr_y                  ; and record Y coord
-    JMP DrawCursor             ; draw the cursor, and exit
 
-  @lut_EquipMenuCurs:
-  .BYTE $30
-  .BYTE $40    
-  .BYTE $50
-  .BYTE $60
-  .BYTE $70
-  .BYTE $80
-  .BYTE $90
-  .BYTE $A0
-  
   
 
 MoveEquipInventoryCursor:
@@ -10208,6 +9710,364 @@ MoveEquipInventoryCursor:
 
 
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Draw Main Menu Sub Cursor  [$B7A9 :: 0x3B7B9]
+;;
+;;    Draws the cursor for the main menu sub target (ie:  when you select
+;;  a character for a sub menu -- like for magic or status)
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DrawMainMenuSubCursor:
+    LDA cursor                      ; get cursor
+    ASL A                           ; double it (2 bytes per coord)
+    TAX                             ; and stuff it in X
+    LDA lut_MainMenuSubCursor, X    ; load up the coords from our LUT
+    STA spr_x
+    LDA lut_MainMenuSubCursor+1, X
+    STA spr_y
+    JMP DrawCursor                  ; then draw the cursor and exit
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  DrawMainMenuCursor  [$B7BA :: 0x3B7CA]
+;;
+;;    Loads the coords for the main menu cursor, and draw the cursor sprite
+;;  at those coords.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DrawMainMenuCursor:
+    LDY cursor                    ; get current cursor selection
+    LDA lut_MainMenuCursor_Y, Y   ;  use cursor as an index to get the desired Y coord
+    STA spr_y                     ;  write the Y coord
+    LDA #$10                      ; X coord for main menu cursor is always $10
+    STA spr_x
+    JMP DrawCursor                ; draw it!  and exit
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  DrawItemMenuCursor  [$B7C8 :: 0x3B7D8]
+;;
+;;   Loads the coords for the item menu cursor, and draws the cursor sprite there
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DrawItemMenuCursor:
+    LDA cursor                   ; get current cursor and double it (loading X,Y pair)
+    ASL A
+    TAX                          ;  put it in X
+
+    LDA lut_ItemMenuCursor, X    ; load X,Y pair into spr_x and spr_y
+    STA spr_x
+    LDA lut_ItemMenuCursor+1, X
+    STA spr_y
+
+    JMP DrawCursor               ; then draw the cursor
+
+
+
+DrawEquipInventoryCursor:
+    LDA cursor                 
+    AND #$01
+    TAX
+    LDA lut_EquipInventoryCursor_X, X  
+    STA spr_x
+
+    LDX cursor_max
+    LDA lut_EquipInventoryCursor_Y, X
+    STA spr_y
+    JMP DrawCursor               ; then draw the cursor
+
+lut_EquipInventoryCursor_X:
+    .byte $08
+    .byte $80
+    
+lut_EquipInventoryCursor_Y:
+    .byte $28
+    .byte $38
+    .byte $48
+    .byte $58
+    .byte $68
+    .byte $78
+    .byte $88
+    .byte $98
+
+
+DrawEquipMenuCurs:
+    LDA #$18                           ; all slots are on same X coordinate
+    STA spr_x                          ; 
+    LDX cursor                         ; get primary cursor
+    LDA lut_EquipInventoryCursor_Y, X  ; then fetch
+    STA spr_y                          ; and record Y coord
+    JMP DrawCursor                     ; draw the cursor, and exit
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Draw Item Target Cursor  [$B3EE :: 0x3B3FE]
+;;
+;;     Draws the cursor for the item target menu
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+DrawItemTargetCursor:
+    LDX cursor           ; put the cursor in X
+    LDA @lut, X          ; use it to index our LUT
+    STA spr_y            ; that lut is the X coord for cursor
+    LDA #$30
+    STA spr_x            ; Y coord is always $68
+    JMP DrawCursor       ; draw it, and exit
+
+  @lut:
+    .BYTE $40,$58,$70,$88
+    
+    
+    
+DrawElixirTargetCursor:
+    LDX cursor           ; put the cursor in X
+    LDA @lut, X          ; use it to index our LUT
+    STA spr_y            ; that lut is the X coord for cursor
+    LDA #$2C
+    STA spr_x            ; Y coord is always $68
+    JMP DrawCursor       ; draw it, and exit
+
+  @lut:
+    .BYTE $26,$46,$66,$86    
+    
+    
+DrawMPTargetCursor:
+
+    LDX cursor2           ; put the cursor in X
+    LDA @Y_lut, X          ; use it to index our LUT
+    STA spr_y            ; that lut is the X coord for cursor
+    LDX cursor
+    LDA @X_lut, X
+    STA spr_x            ; Y coord is always $68
+    JMP DrawCursor       ; draw it, and exit
+
+  @Y_lut:
+    .BYTE $28,$38,$48,$58,$68,$78,$88,$98
+  
+  @X_lut:
+    .BYTE $38,$60,$88,$B0  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Main and item menu cursor position LUTs  [$B7D9 :: 0x3B7E9]
+;;
+;;    X/Y Coords for cursor placement for main and item menus
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; JIGS -- all these got changed around
+
+lut_MainMenuSubCursor:
+  .BYTE $58,$18,      $58,$48
+  .BYTE $58,$78,      $58,$A8
+
+lut_MainMenuCursor_Y:           ; Y coord only... X coord is hardcoded
+   .BYTE   $70,$80,$90,$A0,$B0,$C0,$D0
+
+lut_ItemMenuCursor:
+  .BYTE   $50,$10,   $80,$10
+  .BYTE   $08,$28,   $80,$28
+  .BYTE   $08,$38,   $80,$38
+  .BYTE   $08,$48,   $80,$48
+  .BYTE   $08,$58,   $80,$58
+  .BYTE   $08,$68,   $80,$68
+  .BYTE   $08,$78,   $80,$78
+  .BYTE   $08,$88,   $80,$88
+  .BYTE   $08,$98,   $80,$98
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Draw Magic Menu Cursor [$B816 :: 0x3B826]
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DrawMagicMenuCursor:
+    LDA cursor                   ; get current cursor and double it (loading X,Y pair)
+    ASL A
+    TAX                          ;  put it in X
+
+    LDA lut_MagicMenuCursor, X    ; load X,Y pair into spr_x and spr_y
+    STA spr_x
+    LDA lut_MagicMenuCursor+1, X
+    STA spr_y
+    JMP DrawCursor               ; then draw the cursor
+
+
+DrawMagicSubMenuCursor:
+    LDX cursor                   ; get current cursor and double it (loading X,Y pair)
+    LDA lut_MagicSubMenuCursor, X    ; load X,Y pair into spr_x and spr_y
+    STA spr_x
+    LDA #$10
+    STA spr_y
+    JMP DrawCursor               ; then draw the cursor
+
+lut_MagicSubMenuCursor:
+  .BYTE   $50, $80, $B8
+  
+  
+DrawMagicLearnMenuCursor:
+    LDA cursor                 
+    AND #$01
+    TAX
+    LDA lut_MagicLearnCursor_X, X  
+    STA spr_x
+
+    LDX cursor_max
+    LDA lut_MagicLearnCursor_Y, X
+    STA spr_y
+    JMP DrawCursor               ; then draw the cursor
+
+
+lut_MagicMenuCursor:
+  .BYTE   $18,$28,   $60,$28,   $A8,$28
+  .BYTE   $18,$38,   $60,$38,   $A8,$38
+  .BYTE   $18,$48,   $60,$48,   $A8,$48
+  .BYTE   $18,$58,   $60,$58,   $A8,$58
+  .BYTE   $18,$68,   $60,$68,   $A8,$68
+  .BYTE   $18,$78,   $60,$78,   $A8,$78
+  .BYTE   $18,$88,   $60,$88,   $A8,$88
+  .BYTE   $18,$98,   $60,$98,   $A8,$98
+
+  
+lut_MagicLearnCursor_X:
+  .BYTE   $00
+  .BYTE   $80
+    
+lut_MagicLearnCursor_Y:
+  .BYTE   $28
+  .BYTE   $38
+  .BYTE   $48
+  .BYTE   $58
+  .BYTE   $68
+  .BYTE   $78
+  .BYTE   $88
+  .BYTE   $98
+  
+
+lut_ShopCurs_Cmd:    ; cursor positions for the command box
+  .BYTE $08,$40
+  .BYTE $08,$50
+  .BYTE $08,$60
+  .BYTE $08,$70
+
+lut_ShopCurs_List:   ; cursor positions for the inventory list box
+  .BYTE $A0,$20
+  .BYTE $A0,$40
+  .BYTE $A0,$60
+  .BYTE $A0,$80
+  .BYTE $A0,$A0
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Bit position LUT  [$AC38 :: 0x3AC48]
+;;
+;;    This LUT simply contains bytes with 1 bit in each
+;;  position set.  The game uses this table for magic permissions
+;;  checking.
+;;
+;;    The basic formula for entries in this table is ($80 >> X)
+;;  High bit is the first entry
+
+lut_BIT:
+  .BYTE %10000000
+  .BYTE %01000000
+  .BYTE %00100000
+  .BYTE %00010000
+  .BYTE %00001000
+  .BYTE %00000100
+  .BYTE %00000010
+  .BYTE %00000001
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Shopkeeper image LUT  [$AC9C :: 0x3ACAC]
+;;
+;;    this is the 10x10 image that is drawn for the shopkeeper graphics
+;;  in all shops.
+
+lut_ShopkeepImage:
+ .BYTE $74,$75,$71,$71
+ .BYTE $76,$77,$71,$71
+ .BYTE $70,$70,$71,$71
+ .BYTE $78,$79,$71,$71
+ .BYTE $7A,$7B,$71,$71
+ .BYTE $7C,$7D,$71,$71
+ .BYTE $70,$70,$71,$71
+ .BYTE $74,$75,$71,$71
+ .BYTE $76,$77,$72,$73
+
+
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  LUT for Menu palettes  [$AD78 :: 0x3AD88]
+;;
+;;    This is only for the 3 BG palettes that aren't loaded by LoadMenuCHRPal
+;;  IE:  the 'lit orb' palette, and the two middles ones that are mirrors of the 4th
+;;  palette.  The middle palettes are coded to be used by the Equip Menu in order to
+;;  highlight some text, but due to some problems (not highlighting all the letters in the
+;;  string) that functionality is removed by having those palettes unchanged.
+
+lutMenuPalettes:
+.BYTE  $0F,$30,$01,$22,  $0F,$00,$0F,$30,  $0F,$35,$01,$15
+
+lutSpellMenuPalettes:
+.BYTE  $0F,$04,$01,$0F,  $0F,$2A,$01,$1A,  $0F,$24,$01,$13
+
+lutEquipPalettes:
+.BYTE  $0F,$00,$01,$2A
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Boxes for Main/Item menus  [$BAA2 :: 0x3BAB2]
+;;
+;;     in groups of 4:  X, Y, width, height
+;;
+;;  Item menu boxes are also used for the magic menu.
+
+lut_MainItemBoxes:
+ 
+    ;        X   Y   wid height
+    .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb/option box
+    .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
+    .BYTE   $00,$0D,$20,$0F ; 02 ; Status Menu 
+    .BYTE   $00,$01,$09,$03 ; 03 ; Item title box (character name for magic/equip screens)
+	.BYTE   $09,$01,$17,$03 ; 04 ; Title submenu
+    .BYTE   $00,$03,$20,$13 ; 05 ; Inventory box
+	.BYTE   $00,$16,$20,$07 ; 06 ; Item description box
+    .BYTE   $05,$06,$16,$0E ; 07 ; Item Target Menu (HP)
+    .BYTE   $03,$01,$1A,$15 ; 08 ; Item Target Menu (MP)
+    .BYTE   $04,$03,$18,$13 ; 09 ; Item Target Menu (HP/MP)
+	.BYTE   $01,$01,$1E,$1C ; 0A ; unused 
+    .BYTE   $00,$15,$20,$08 ; 0B ; Equip Stats
+    .BYTE   $00,$03,$10,$13 ; 0C ; Magic Learning menu left side
+    .BYTE   $10,$03,$10,$13 ; 0D ; Magic Learning menu right side
+    
+    ;; Shop boxes
+    .BYTE   $01,$12,$13,$09 ; 0E ; Shopkeeper dialogue
+    .BYTE   $01,$02,$13,$03 ; 0F ; Title box
+    .BYTE   $15,$02,$0A,$16 ; 10 ; Inventory list
+    .BYTE   $02,$06,$09,$0B ; 11 ; Command box
+    .BYTE   $15,$18,$0A,$03 ; 12 ; Gold box
+    
 
 
 

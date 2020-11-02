@@ -321,16 +321,17 @@ shop_listdrawn          = $6D
 shop_listactive         = $6E
 char_index              = $6F ; for printing character stats in menus and sprites in battle
 
-ItemToUnequip           = $70 ; also used in equip menu
-ItemToEquip             = $71 ; also used in equip menu
-ItemOverflow            = $72 ; also used in equip menu
+ItemToUnequip           = $70 ; used in equip menu
+ItemToEquip             = $71 ; used in equip menu
+ItemOverflow            = $72 ; used in equip menu
 slotcheck               = $73
 equip_impossible        = $74 ; also used in equip menu
 shop_x_price            = $75
 shop_drawmarks          = $76
 DualWieldStats          = $77
-EquipPermissions        = $78 ; 79, 7A, 7B, 7C, 7D ; 6 bytes
-MenuStats               = $78 ; 79, 7A, 7B, 7C, 7D ; 6 bytes 
+ArmorSlot               = $78
+EquipPermissions        = $7A ; 7B, 7C, 7D, 7E, 7F ; 6 bytes
+MenuStats               = $7A ; 7B, 7C, 7D, 7E, 7F ; 6 bytes 
 
 ;; Battle Things - Shared
 

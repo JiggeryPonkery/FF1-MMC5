@@ -10487,10 +10487,10 @@ DrawCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 lutClassBatSprPalette:
-  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; unpromoted classes
-  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; promoted classes
-  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; extra classes
-  .BYTE $01,$02,$00,$01,$01,$00            ; 30 in total
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; 
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; 
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; 
+  .BYTE $01,$02,$00,$01,$01,$00,$00,$00    ; 
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -10608,18 +10608,17 @@ DrawEquipMenuStrings:
     ADC MMC5_tmp                 ; X is now Character Index + start of equipment + loop counter
     TAX                          ; then move it to X
     PLA                          ; restore loop counter
-    ;ASL A
     TAY                          ; and move it*2 to Y
     
-    LDA #$12 ; lut_EquipStringPositions, Y     ; use Y to index a positioning LUT
-    STA dest_x                          ;  load up x,y coords for this string
+    LDA #$12
+    STA dest_x                   ;  load up x,y coords for this string
     LDA lut_EquipStringPositions, Y
     STA dest_y
 
-    LDA #>(str_buf+$40)      ; 
-    STA text_ptr+1           ; 
-    LDA #<(str_buf+$40)      ; 
-    STA text_ptr             ;
+    LDA #>(str_buf+$40)   
+    STA text_ptr+1        
+    LDA #<(str_buf+$40)   
+    STA text_ptr          
     
     LDA #BANK_ITEMS
     JSR SwapPRG_L                ; swap to the bank containing the item strings
@@ -10684,14 +10683,14 @@ DrawEquipMenuStrings:
 ;;   X,Y positions for equipment text to be printed in equip menus
 
 lut_EquipStringPositions:
-.byte $06
-.byte $08
-.byte $0A
-.byte $0C
-.byte $0E
-.byte $10
-.byte $12
-.byte $14
+.byte $05
+.byte $07
+.byte $09
+.byte $0B
+.byte $0D
+.byte $0F
+.byte $11
+.byte $13
 
 
 

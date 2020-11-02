@@ -5181,7 +5181,7 @@ lut_MenuText:
 .word M_MagicMenuOrbs                 ; 4C ; 76 ; unused
 .word M_MagicNameLearned              ; 4D ; 77
 .word M_EquipPage4                    ; 4E ; 78 ; don't feel like re-formatting all the codes again... New stuff is unorganized here.
-.word M_FixInventoryWindow            ; 4F ; 79 ; 
+.word M_EquipSubMenu                  ; 4F ; 79 ; 
 .word M_MagicMenuMPTitle              ; 50 ; 80 ; MP in magic menu title
 .word M_EquipStats_Blank              ; 51 ; 81 ; 
 .word M_EquipInventoryWeapon          ; 52 ; 82 ; 
@@ -5536,10 +5536,9 @@ M_MagicMenuOrbs:
 M_MagicNameLearned:
 .byte $FF,$10,$60,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
 
-M_FixInventoryWindow:
-;.byte $7B,$0B,$07,$7E,$6A,$6B,$0B,$15,$7E,$7C    ; connect name and submenu title boxes
-;.byte $01,$01,$01,$01,$01,$01,$01,$01,$05        ; line break to the bottom...
-;.byte $7B,$0B,$1E,$7E,$7C,$00                    ; and connect the stat window
+M_EquipSubMenu:
+.byte $FF,$8E,$B4,$B8,$AC,$B3,$FF,$FF,$9B,$A8,$B0,$B2,$B9,$1A,$FF,$8E,$B0,$B3,$B7,$BC,$00
+
 
 M_MagicMenuMPTitle:
 ;      0    1   2   3   4   5   6   7   8   9   A   B   C   D   E   F  10  11  12  13
