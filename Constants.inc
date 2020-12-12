@@ -316,24 +316,27 @@ BOX_SCAN            = $11
 ;; menu box IDs
 MBOX_OPTION         = $00
 MBOX_CHARACTERS     = $01
-MBOX_STATUS         = $02
-MBOX_TITLE          = $03
-MBOX_SUBMENU        = $04
-MBOX_INV            = $05
-MBOX_ITEMDESC       = $06
-MBOX_HP             = $07
-MBOX_MP             = $08
-MBOX_HPMP           = $09
-MBOX_EQUIP          = $0A
-MBOX_EQUIPSTATS     = $0B
-MBOX_MAGIC_L        = $0C
-MBOX_MAGIC_R        = $0D
+MBOX_STATUS_CHAR    = $02
+MBOX_STATUS_OPTION  = $03 
+MBOX_STATUS         = $04
+MBOX_TITLE          = $05
+MBOX_SUBMENU        = $06
+MBOX_INV            = $07
+MBOX_ITEMDESC       = $08
+MBOX_HP             = $09
+MBOX_MP             = $0A
+MBOX_HPMP           = $0B
+MBOX_EQUIPSTATS     = $0C
+MBOX_MAGIC_L        = $0D
+MBOX_MAGIC_R        = $0E
 
-SHOPBOX_SHOPKEEP    = $0E
-SHOPBOX_TITLE       = $0F
-SHOPBOX_INV         = $10
-SHOPBOX_COMMAND     = $11
-SHOPBOX_GOLD        = $12
+SHOPBOX_SHOPKEEP    = $0F
+SHOPBOX_TITLE       = $10
+SHOPBOX_INV         = $11
+SHOPBOX_COMMAND     = $12
+SHOPBOX_GOLD        = $13
+
+
 
 
 ;;;;;;;;;;;;;;;;;;
@@ -1502,7 +1505,7 @@ FAST_HITCAP              = $03 ; How many times the Fast spell can boost the hit
 STARTING_STATS           = $0E ; number of starting stats for each class ; 1 based
 HP_MAX_LOW               = $E7
 HP_MAX_HIGH              = $03 ; these two = 999
-COVER_HITS               = $80 ; high bits only (second number always 0). Amount of hits a knight can last covering someone.
+COVER_HITS               = $F0 ; high bits only (second number always 0). Amount of hits a knight can last covering someone.
 COUNTER_CHANCE           = 150 ; must exceed this value to counter
 MIN_CONFUSED_MAGDAMAGE   = $05 ; minimum magic damage for confused characters 
 SMOKEBOMB_EFFECT         = 50  ; steps without battles - double for chemists 
@@ -1510,7 +1513,9 @@ BTL_HEAL_POTENCY         = 16  ; HP restored in battle - double for chemists
 BTL_XHEAL_POTENCY        = 96  ; HP restored in battle - double for chemists
 HEAL_POTENCY             = 30  ; HP restored - double for chemists
 XHEAL_POTENCY            = 180 ; HP restored - double for chemists
-
+TENT_HP                  = 45  ; HP restored by sleeping
+CABIN_HP                 = 90  ; HP restored by sleeping
+HOUSE_HP                 = 180 ; HP restored by sleeping
 
 
 

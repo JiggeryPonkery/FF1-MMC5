@@ -7678,7 +7678,6 @@ ItemDescriptions: ; called from Bank E, swaps to bank A
 ;;
 ;;   stat codes (for use with control codes $10-13) are as follows:
 ;;
-;;  00    = name (fixed width)
 ;;  01    = class
 ;;  02    = out of battle stat icon (ailments)
 ;;  03    = Level
@@ -7704,7 +7703,8 @@ ItemDescriptions: ; called from Bank E, swaps to bank A
 ;;  20-27 = Cur MP
 ;;  30-37 = Max MP
 ;;  40-57 = Magic Spells
-;;  everything above 58 defaults to: name (variable width)
+;;  60    = name (fixed width)
+;;  everything above 58 and not 60 defaults to: name (variable width)
 ;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -7936,9 +7936,7 @@ ComplexString_CharacterStatCode:
     STA char_index ; store index
     TAX            ; and put in X as well
     JSR ComplexString_GetNextByte
-    
-    CMP #$00
-    BEQ ComplexString_CharCode_Name
+
     CMP #$01
     BEQ ComplexString_CharCode_Class
     CMP #$02
@@ -7950,6 +7948,9 @@ ComplexString_CharacterStatCode:
     BCC ComplexString_CharCode_MagicName
     ;; if its still below $2B, draw the name of the spell they know!
     ;; otherwise, do the variable width name:
+    
+    CMP #$60
+    BEQ ComplexString_CharCode_Name
     
 ComplexString_CharCode_Name_VariableWidth:
     JSR DrawPlayerName
@@ -10717,35 +10718,30 @@ lut_EquipStringPositions:
 
 
 DecompressKeyItems:
-    LDA #keyitems - items - 1      ; set tmp to start of key items, -1
-    STA tmp
+    JSR Set_Inv_KeyItem
 
-    LDA keyitems_1                 ; load up the compressed key item byte
-    JSR Do_DecompressKeyItems      ; do the compression on it
-    LDA keyitems_2
-    JSR Do_DecompressKeyItems
-    LDA keyitems_3
-    JSR Do_DecompressKeyItems
-    LDA keyitems_4
+    LDX #0
+    STA tmp+1
+    LDA #keyitems - items      ; set to start of key items
+    STA tmp
+   
+   @Decompress_Loop:
+    JSR DOES_ITEM_EXIST_1BIT  ; A = item ID
+    BEQ @DoesNotExist
+   
+    LDX tmp+1                 ; X is item box position
+    LDA tmp                   ; get item ID and put in item_box
+    STA item_box, X
+    INC tmp+1                 
     
-   Do_DecompressKeyItems: 
-    LDY #9               ; start with 9, because the loop starts with decrementing Y
-  : INC tmp              ; increment tmp--the item ID--for each bit that is checked 
-    DEY                  ; Y is the loop counter, so now it starts at 8
-    BEQ @RTS             ; when it hits 0, the byte has been decompressed 
+   @DoesNotExist: 
+    INC tmp                   ; increment item ID 
+    LDA tmp
+    CMP #ITEM_SKILLSTART      ; see if its gone past key items
+    BNE @Decompress_Loop      
     
-    ASL A                ; shift the high bit into carry
-    BCC :-               ; if its clear, do the loop again
-    PHA                  ; if its not, the item exists: push the compressed byte to the stack  
-    LDA tmp              ; load up the item ID
-    STA item_box, X      ; and save it in the item box
-    INX                  ; increment the item box destination index
-    PLA                  ; restore the compressed key items byte
-    JMP :-               ; and return to the loop
-    
-   @RTS:
-    DEC tmp              ; the loop incremented the item ID too far on the last one, so fix it
-    RTS
+    LDX tmp+1                 ; put item box position in X in case it wasn't
+    JMP ItemBoxFilled    
 
 
 FillItemBox:
@@ -10753,11 +10749,8 @@ FillItemBox:
     STX tmp+2            ; loop counter
     LDY #1               ; Y is our source index -- start it at 1 (first byte in the 'items' buffer is unused)
     
-    LDA item_pageswap    ; if item_pageswap is 1, do key items
-    BEQ @ItemFillLoop
-
-    JSR DecompressKeyItems
-    JMP ItemBoxFilled
+    LDA submenu_cursor   ; if 1, do key items
+    BNE DecompressKeyItems
    
   @ItemFillLoop:
       LDA items, Y       ; check our item qty
@@ -13984,20 +13977,19 @@ Set_Inv_KeyItem:
     STA OneBitPointer+1
     RTS
     
-    
 DOES_ITEM_EXIST_1BIT:
     JSR Inv_Setup_1BIT
-    AND tmp, Y
-    RTS              ; Zero flag set if it does not exist
+    AND item_bit_ram, Y
+    RTS                     ; Zero flag set if it does not exist
 
 ADD_ITEM_1BIT:
     JSR Inv_Setup_1BIT
-    ORA tmp, Y       ; add the bit!
+    ORA item_bit_ram, Y     ; add the bit!
     BNE :+   
     
 REMOVE_ITEM_1BIT:
     JSR Inv_Setup_1BIT
-    EOR tmp, Y              ; remove the bit while keeping the rest the same?
+    EOR item_bit_ram, Y     ; remove the bit while keeping the rest the same?
   : STA (OneBitPointer), Y  ; save and exit
     RTS
 
@@ -14006,7 +13998,7 @@ Inv_Setup_1BIT:
     LDX #$10         ; clear $10 bytes of temp RAM
     LDA #0
    @Loop:
-    STA tmp, X
+    STA item_bit_ram, X
     DEX
     BNE @Loop
     PLA              ; restore item ID 
@@ -14020,11 +14012,11 @@ Inv_Setup_1BIT:
    @ShiftLoop_X: 
     LDY #0
    @ShiftLoop_Y:
-    LDA tmp, Y
+    LDA item_bit_ram, Y
     ROR A
-    STA tmp, Y       ; and shift C into the correct bit
+    STA item_bit_ram, Y  ; and shift C into the correct bit
     INY
-    CPY #$10         ; when Y = $10, its done one shift of each byte of tmp RAM
+    CPY #$10             ; when Y = $10, its done one shift of each byte of tmp RAM
     BNE @ShiftLoop_Y
     DEX              
     BNE @ShiftLoop_X

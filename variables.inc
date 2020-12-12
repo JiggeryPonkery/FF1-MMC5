@@ -242,6 +242,9 @@ minimap_ptr             = $39 ; + A
 mg_slidespr             = $35 ; + 6, 7 
 mg_slidedir             = $38 
 
+;; 1-bit item decompression
+item_bit_ram            = $40
+
 ;; Box Drawing Things   
 btldraw_box_id          = $40
 btldraw_width           = $41
@@ -266,19 +269,12 @@ format_buf              = $50 ; 7 bytes, goes in reverse (4A-50) -- must not cro
 ;; Cursor               
 cursor                  = $51
 cursor_max              = $52
-cursor2                 = $52 ; shared (ether menu/ old equip menu secondary cursor)
-shopcurs_x              = $53 ; shared
-shopcurs_y              = $54 ; shared
-namecurs_x              = $53 ; for naming characters at game start
-namecurs_y              = $54 
-btlcurs                 = $51
-btlcurs_max             = $52 ; highest value for the cursor
-btlcurs_x               = $53 ; battle cursor X position (menu position, not pixel position)
-btlcurs_y               = $54 ; battle cursor Y position (menu position, not pixel position)
+cursor_x                = $53 
+cursor_y                = $54 
 cursoradd               = $55 ; naming characters
 cursor_change           = $55 ; magic menu 
 backup_cursor           = $56 ; shops, menus
-backup_cursor_targ      = $57 ; for item menus, to not reset the cursor when exiting a sub-menu
+submenu_cursor          = $57 ; for item menus, to not reset the cursor when exiting a sub-menu
 shop_cursor_ptr         = $56 ; + 7 ; used in shops only
 submenu_targ            = $58 ; also used in battle for the ether menu
 
@@ -290,7 +286,8 @@ treasure_offset         = $54 ; stores the chest's item name printing code (weap
 
 ;; Menu Things - Shared 
 equipoffset             = $59 ; menus
-hp_recovery             = $59 ; +59 tmp bytes for amount of HP to heal with potions and spells
+hp_recovery             = $59 ; +5A tmp bytes for amount of HP to heal with potions and spells
+using_item              = $5B ; item ID for item menu use
 mp_required             = $5B ; offset for spell level to decrease when casting (menus only)
 descboxopen             = $5C ; marks the description box is open
 WeaponOrArmorPage       = $5D ; equip menu, swaps between weapons/armour
@@ -561,8 +558,8 @@ btl_animatingchar       = $035C ; the character currently being animated (0-3)
 btl_flashsprite1        = $035D 
 MagicMessage            = $035E 
 btl_respondrate_tmp     = $035F                                
-btlcursspr_x            = $0360 
-btlcursspr_y            = $0361 
+cursorspr_x             = $0360 
+cursorspr_y             = $0361 
 btlattackspr_x          = $0362 
 btlattackspr_y          = $0363 
 btlattackspr_t          = $0364 ; indicate which tile to draw for the weapon graphic
@@ -1023,7 +1020,7 @@ btl_charactivepose      = $6938 ;
 btl_coverspritebackup   = $693C ; 
 btl_palettes            = $6940 ; $20 bytes
 btltmp_attr             = $6960 ; $40 bytes of attribute data for the battle setup ; NOT temporary! Needed for flashing enemies. 
-btlcurs_positions       = $69A0 ; $18 bytes, 2 bytes per entry, each entry is the pixel coord of where the
+cursor_positions        = $69A0 ; $18 bytes, 2 bytes per entry, each entry is the pixel coord of where the
 ;                               ; cursor should be drawn when its item is selected. lut_MagicCursorPos has the most
 
 btltmp_backseat         = $69F0 ; $10 byte buffer -- backup of btltmp

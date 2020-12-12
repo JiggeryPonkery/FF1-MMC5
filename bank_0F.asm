@@ -23,6 +23,7 @@
 .export SetCharStats
 .export SetPartyStats
 .export GetExpToNext
+.export GetNekked
 
 .import ADD_ITEM
 .import AddGPToParty
@@ -505,7 +506,7 @@ LoadSpellForBattle:
 
    @Permissions:             
     LDA (MagicPointer), Y
-    STA EquipPermissions-8, Y ; -8 since Y is 8, but want to write to EquipPermissions 0
+    STA EquipPermissions-6, Y ; -8 since Y is 8, but want to write to EquipPermissions 0
    @Permissions_Start:        ; Y = 7, so start by incrementing it! 
     INY
     CPY #8+4                  ; 4 bytes of permission data
@@ -843,6 +844,34 @@ SetEquipPermissions:
 ;; this also sets hit multiplier for the party!
 ;; this is pretty big, but it replaces the old equipment adjustment routines
 
+
+
+GetNekked:
+    JSR Set_Inv_Weapon
+
+    LDX submenu_targ
+    LDY #$8
+   @Loop: 
+    LDA ch_righthand, X
+    BEQ :+               ; skip if empty
+    PHA                  ; backup item in slot
+    LDA #0
+    STA ch_righthand, X  ; replace with 0
+    PLA
+    STY tmp+7            ; backup X, Y
+    STX tmp+8
+    SEC                  ; set item ID to 0-based
+    SBC #1
+    JSR ADD_ITEM         ; add item back into inventory
+    LDX tmp+8
+    LDY tmp+7            ; restore X, Y
+  : INX                  ; INX to check next slot
+    DEY                  ; Decrement loop counter
+    BNE @Loop
+    RTS
+
+
+
 SetCharStats:
     JSR ClearPartyStats
     STA tmp+5             ; set to 0
@@ -1094,6 +1123,7 @@ SetPartyStats_Loop:
     JSR MultiplyXA 
     TXA
     STA btl_charhitrate, Y   ; save high byte of the multiplication
+    JSR CalcNumHits
     DEY
     DEY
     DEY
@@ -1240,14 +1270,12 @@ CalcNumHits:
     LSR A
     CLC
     ADC #1
-    LDY tmp+4
+    LDX tmp+4
     BNE :+
      ASL A                    ; double number of hits if they're unarmed with proficiency!    
-  : STA btl_charnumhits, X    ; number of hits for this weapon
+  : LDX submenu_targ
+    STA btl_charnumhits, X    ; number of hits for this weapon
     RTS
-
-
-
 
 
 
@@ -4767,8 +4795,8 @@ DoNameInput:
     STA joy_prevdir
 
    ; STA cursor              ; letter of the name we're inputting (0-3)
-    STA namecurs_x          ; X position of letter selection cursor (0-9)
-    STA namecurs_y          ; Y position (0-6)
+    STA cursor_x          ; X position of letter selection cursor (0-9)
+    STA cursor_y          ; Y position (0-6)
 
     ; Some local temp vars
     @selectedtile   = tmp
@@ -4843,19 +4871,19 @@ DoNameInput:
     BNE @Down               ; otherwise, if != 8, Down pressed
 
    @Up:
-    DEC namecurs_y          ; DEC cursor Y position
+    DEC cursor_y          ; DEC cursor Y position
     BPL @MainLoop
     LDA #$06                ; wrap 0->6
-    STA namecurs_y
+    STA cursor_y
     JMP @MainLoop
 
    @Down:
-    INC namecurs_y          ; INC cursor Y position
-    LDA namecurs_y
+    INC cursor_y          ; INC cursor Y position
+    LDA cursor_y
     CMP #$07                ; wrap 6->0
     BCC @MainLoop
     LDA #$00
-    STA namecurs_y
+    STA cursor_y
     JMP @MainLoop
 
    @Left_Or_Right:
@@ -4863,19 +4891,19 @@ DoNameInput:
     BNE @Right              ; else, Right pressed
 
    @Left:
-    DEC namecurs_x          ; DEC cursor X position
+    DEC cursor_x          ; DEC cursor X position
     BPL @MainLoop
     LDA #$09                ; wrap 0->9
-    STA namecurs_x
+    STA cursor_x
     JMP @MainLoop
 
    @Right:
-    INC namecurs_x          ; INC cursor X position
-    LDA namecurs_x
+    INC cursor_x          ; INC cursor X position
+    LDA cursor_x
     CMP #$0A                ; wrap 9->0
     BCC @MainLoop
     LDA #$00
-    STA namecurs_x
+    STA cursor_x
     JMP @MainLoop
 
    @B_Pressed:
@@ -4899,12 +4927,12 @@ DoNameInput:
 
     ;;;;;;;;;;;;;;;;;;
    @A_Pressed:
-    LDX namecurs_y                  ; when A is pressed, clear joy_a
+    LDX cursor_y                  ; when A is pressed, clear joy_a
     LDA #$00
     STA joy_a                       ; Then get the tile they selected by first
     LDA lut_NameInputRowStart, X    ;  running the Y cursor through a row lut
     CLC
-    ADC namecurs_x                  ; add X cursor
+    ADC cursor_x                  ; add X cursor
     ASL A                           ; and multiply by 2 -- since there are spaces between tiles
     TAX                             ; use that value as an index to the lut_NameInput
     LDA lut_NameInput, X
@@ -5226,7 +5254,7 @@ PtyGen_DrawCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 CharName_DrawCursor:
-    LDA namecurs_x      ; X position = (cursx * 16) + $20
+    LDA cursor_x      ; X position = (cursx * 16) + $20
     ASL A
     ASL A
     ASL A
@@ -5235,7 +5263,7 @@ CharName_DrawCursor:
     ADC #$20
     STA spr_x
 
-    LDA namecurs_y      ; Y position = (cursy * 16) + $50
+    LDA cursor_y      ; Y position = (cursy * 16) + $50
     ASL A
     ASL A
     ASL A

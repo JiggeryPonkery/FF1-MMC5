@@ -431,7 +431,7 @@ ReadyToFight:
     JSR DoMenu_2x4
     CMP #02
     BEQ BacktrackBattleCommand  ;; bit 2 set if B pressed, so undraw the ready? box
-    LDA btlcurs_x               ;; otherwise, A was pressed on either Yes or No
+    LDA cursor_x               ;; otherwise, A was pressed on either Yes or No
     BNE BacktrackBattleCommand  ;; < no was chosen
 
     ;; ----
@@ -666,7 +666,7 @@ Battle_MainMenu_APressed:
     STA gettingcommand
     TYA
     ASL A
-    ADC btlcurs_x
+    ADC cursor_x
     ASL A
     TAY
     LDA lut_BattleSubMenu, Y
@@ -997,7 +997,7 @@ BattleSubMenu_Magic_NoUndraw:
     LDX #3          ; amount of spells per level
     JSR MultiplyXA
     CLC
-    ADC btlcurs_x   ; spell (0-2)
+    ADC cursor_x   ; spell (0-2)
     ADC char_index
     TAY                             ; put that index in Y, and use it to get the chosen spell
     LDA ch_spells, Y
@@ -1193,10 +1193,10 @@ BattleSubMenu_Item_Select:
       PLA                       ; pull previous target from stack
       JMP BattleSubMenu_Item_NoUndraw ; ... return to the target selection
 
-  : LDA btlcurs_x
+  : LDA cursor_x
     ASL A
     ASL A                       ; x = 0 or 1, times 4
-    ADC btlcurs_y               ;   + 0, 1, 2, or 3
+    ADC cursor_y               ;   + 0, 1, 2, or 3
     STA battle_class            ; = spell level chosen; will be saved in SetCharacterBattleCommand for later
     CLC
     ADC char_index              ; add index ($0, $40, $80, $C0)
@@ -1279,7 +1279,7 @@ BattleSubMenu_Equipment:
   : TYA                         ;  + Selected row
     ASL A
     ;CLC
-    ADC btlcurs_x               ;  + selected column = equip slot of selected item
+    ADC cursor_x               ;  + selected column = equip slot of selected item
 
     ;; A is now Column (0 - 1) + Row*2 (0, 2, 4, 6)
     ;; Since the equipment is listed in this order:
@@ -1641,10 +1641,10 @@ UpdateSprites_BattleFrame:
     BEQ @DrawChars      ; if not, skip drawing the cursor, and jump ahead to drawing characters
 
       ; Draw the battle cursor
-      LDX btlcursspr_x  ; apply X coord
+      LDX cursorspr_x  ; apply X coord
       STX btl8x8spr_x
       STX btl8x8spr_x+1
-      LDY btlcursspr_y  ; apply Y coord
+      LDY cursorspr_y  ; apply Y coord
       STY btl8x8spr_y
       STY btl8x8spr_y+1
       LDA #$00          ; put cursor in highest-priority slot
@@ -2086,19 +2086,19 @@ SetCursorPositions:
     LDA CursorPosition_LUT_High, X
     STA tmp+1
     LDA CursorPosition_LUT_Max, X
-    STA btlcurs_max
-    DEC btlcurs_max            ; max is +1 more than needed so that shifting it works right
+    STA cursor_max
+    DEC cursor_max            ; max is +1 more than needed so that shifting it works right
     ASL A
     TAY
 
   : LDA (tmp), Y               ; this should be -1 byte from the actual start of the LUT
-    STA btlcurs_positions-1, Y ; because Y is +1
+    STA cursor_positions-1, Y ; because Y is +1
     DEY                        ; so that this loop will end with Y = 0
     BNE :-                     ; and still put the bytes in the right RAM address
 
-    STY btlcurs
-    STY btlcurs_x
-    STY btlcurs_y
+    STY cursor
+    STY cursor_x
+    STY cursor_y
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2130,11 +2130,11 @@ SelectPlayerTarget:
     TAY
 
 PushCharCursorLeft:
-    LDA btlcurs_positions, Y    ; Get original X position
+    LDA cursor_positions, Y    ; Get original X position
     SEC
     SBC tmp                     ; Subtract the 'push' amount
-    STA btlcurs_positions, Y    ; Store to this X position
-    STA btlcurs_positions+8, Y  ;   and the mirrored X position
+    STA cursor_positions, Y    ; Store to this X position
+    STA cursor_positions+8, Y  ;   and the mirrored X position
 
 _PushChar_Return:
     RTS
@@ -2201,7 +2201,7 @@ SelectEnemyTarget:
     JSR DrawCombatBox         ; and show enemy names instead
 
    ; LDA #$00                    ; initialize/clear the cursor position
-   ; STA btlcurs
+   ; STA cursor
 
     LDA btl_battletype          ; get the formation type and use it as an index to the jump table
     ASL A
@@ -2305,9 +2305,9 @@ EnemyTargetMenu_Mix:
 ;;
 ;;  Do the menu logic for selecting an enemy target.
 ;;
-;;  input:  btlcurs_max
-;;          btlcurs             (assumed to be initalized to zero)
-;;          btlcurs_positions   (assumed to be filled with cursor positions)
+;;  input:  cursor_max
+;;          cursor             (assumed to be initalized to zero)
+;;          cursor_positions   (assumed to be filled with cursor positions)
 ;;
 ;;  output: Y and btlcmd_target (enemy slot being targetted)
 ;;          A                   (01 if A pressed to exit, or 02 if B pressed)
@@ -2323,7 +2323,7 @@ EnemyTargetMenu:
     ORA #$10
     STA btl_drawflagsA
 
-    LDA btlcurs                     ; set the X,Y coord for the cursor
+    LDA cursor                     ; set the X,Y coord for the cursor
     ASL A
     JSR SharedMenuCode_B_CursorPositions
 
@@ -2382,15 +2382,15 @@ EnemyTargetMenu:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleTarget_Down:
-    LDA btlcurs             ; see if the cursor is at our max
-    CMP btlcurs_max
+    LDA cursor             ; see if the cursor is at our max
+    CMP cursor_max
     BNE :+                  ; if it's at the max, replace with -1 (so we INC it to zero)
       LDA #-1
-      STA btlcurs
-  : INC btlcurs             ; inc to next slot
+      STA cursor
+  : INC cursor             ; inc to next slot
 
 BattleTarget_DownSub:
-    LDY btlcurs                 ; put the cursor in Y
+    LDY cursor                 ; put the cursor in Y
     LDA btltmp_targetlist, Y    ; get the target slot
     CMP #$FF
     BEQ BattleTarget_Down       ; if it's empty, keep moving down until we find a non-empty slot
@@ -2410,14 +2410,14 @@ BattleTarget_DownSub:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 BattleTarget_Up:
-    LDA btlcurs             ; see if the cursor is at zero
+    LDA cursor             ; see if the cursor is at zero
     BNE :+
-      LDA btlcurs_max       ; if it is, set it to max+1
-      STA btlcurs           ;  (+1 because we'll be DEC'ing it in a second)
-      INC btlcurs
+      LDA cursor_max       ; if it is, set it to max+1
+      STA cursor           ;  (+1 because we'll be DEC'ing it in a second)
+      INC cursor
 
-  : DEC btlcurs             ; DEC to move to previous slot
-    LDY btlcurs
+  : DEC cursor             ; DEC to move to previous slot
+    LDY cursor
     LDA btltmp_targetlist, Y; Check the enemy slot, see if it's empty
     CMP #$FF
     BEQ BattleTarget_Up     ; if it is, keep moving up
@@ -2508,7 +2508,7 @@ MenuSelection_Item:
     BCS :+
       INC battle_item
 
-  : LDA btlcurs_y            ; if cursor_y is over 3, stop increasing it, so it stays at the bottom of the list
+  : LDA cursor_y            ; if cursor_y is over 3, stop increasing it, so it stays at the bottom of the list
     CMP #3
     BCC :+
         LDA item_pageswap    ; check item_pageswap, and if its over 6, stop increasing it
@@ -2519,13 +2519,13 @@ MenuSelection_Item:
         PLA
         JMP @RedrawList      ; re-draw the whole thing
 
-  : INC btlcurs_y
+  : INC cursor_y
     RTS
   @Cursor_Up:
     LDA battle_item
     BEQ :+
         DEC battle_item
-  : LDA btlcurs_y
+  : LDA cursor_y
     BNE :+
         LDA item_pageswap
         BEQ @Return
@@ -2534,7 +2534,7 @@ MenuSelection_Item:
         PLA
         JMP @RedrawList
 
-  : DEC btlcurs_y
+  : DEC cursor_y
   @Return:
     RTS
 
@@ -2560,14 +2560,14 @@ SharedMenuCode_A:
     ORA #$10
     STA btl_drawflagsA
 
-    LDA btlcurs_y
+    LDA cursor_y
     AND #$03
-    STA btlcurs_y
+    STA cursor_y
     ASL A
     STA tmp
-    LDA btlcurs_x
+    LDA cursor_x
     AND #01
-    STA btlcurs_x
+    STA cursor_x
     ASL A
     ASL A
     ASL A
@@ -2576,10 +2576,10 @@ SharedMenuCode_A:
 
 SharedMenuCode_B_CursorPositions:
     TAY
-    LDA btlcurs_positions, Y
-    STA btlcursspr_x
-    LDA btlcurs_positions+1, Y
-    STA btlcursspr_y
+    LDA cursor_positions, Y
+    STA cursorspr_x
+    LDA cursor_positions+1, Y
+    STA cursorspr_y
     RTS
 
 
@@ -2627,10 +2627,10 @@ MenuSelection_Magic:
     ORA #$10
     STA btl_drawflagsA
 
-    LDA btlcurs_y
+    LDA cursor_y
     ASL A
     STA tmp
-    LDA btlcurs_x
+    LDA cursor_x
     ASL A
     ASL A
     ASL A
@@ -2661,12 +2661,12 @@ MenuSelection_Magic:
     BEQ :+                          ; if yes....
       PHA                           ; push A/B state
 
-     ;LDA btlcurs_y                 ; clip X,Y cursor positions
+     ;LDA cursor_y                 ; clip X,Y cursor positions
      ;AND #$03
-     ;STA btlcurs_y
-     ;LDA btlcurs_x
+     ;STA cursor_y
+     ;LDA cursor_x
      ;AND #$03
-     ;STA btlcurs_x
+     ;STA cursor_x
      ;; JIGS - pretty sure the logic doesn't let them move beyond this
 
       JSR BattleClearVariableSprite ; hide the cursor sprite
@@ -2696,7 +2696,7 @@ MenuSelection_Magic:
     CMP #7
     BCS :+
         INC battle_item
-  : LDA btlcurs_y
+  : LDA cursor_y
     CMP #$03                    ; see if it's at the bottom of the page
     BCC :+
         LDA item_pageswap
@@ -2706,14 +2706,14 @@ MenuSelection_Magic:
         PLA
         PLA
         JMP @RedrawList
-  : INC btlcurs_y
+  : INC cursor_y
     RTS
 
   @Cursor_Up:
     LDA battle_item
     BEQ :+
         DEC battle_item
-  : LDA btlcurs_y
+  : LDA cursor_y
     BNE :+
         LDA item_pageswap
         BEQ @Return
@@ -2722,25 +2722,25 @@ MenuSelection_Magic:
         PLA
         JMP @RedrawList
 
-  : DEC btlcurs_y
+  : DEC cursor_y
   @Return:
     RTS
 
   @Cursor_Left:
-    LDA btlcurs_x
+    LDA cursor_x
     BNE :+                  ; are we in the left column?  If yes..
       LDA #$03              ; change to 3, so we'll DEC it to 2 (right column)
-      STA btlcurs_x
-  : DEC btlcurs_x
+      STA cursor_x
+  : DEC cursor_x
     RTS
 
   @Cursor_Right:
-    LDA btlcurs_x
+    LDA cursor_x
     CMP #$02
     BNE :+              ; if in right column
       LDA #-1           ; change to -1 (so we INC to zero)
-      STA btlcurs_x
-  : INC btlcurs_x
+      STA cursor_x
+  : INC cursor_x
     RTS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2754,19 +2754,19 @@ MenuSelection_Magic:
 ;;    Menus can use fewer than 2x4 items as long as the cursor entries exist
 ;;  (for smaller menus some entries will be mirrored).
 ;;
-;;  input:   btlcurs_positions should be filled with 8 entries (in col major order)
+;;  input:   cursor_positions should be filled with 8 entries (in col major order)
 ;;
 ;;  output:
 ;;                    A = A/B button state (bit 0=A pressed... bit 1=B pressed)
-;;      Y and btlcurs_y = row of item selected (0-3)
-;;            btlcurs_x = column of item selected (0=left column, 1="Run" column)
+;;      Y and cursor_y = row of item selected (0-3)
+;;            cursor_x = column of item selected (0=left column, 1="Run" column)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 MenuSelection_2x4:
     ;LDA #$00
-    ;STA btlcurs_x
-    ;STA btlcurs_y
+    ;STA cursor_x
+    ;STA cursor_y
 
   @MainLoop:
     JSR SharedMenuCode_A
@@ -2791,18 +2791,18 @@ MenuSelection_2x4:
     BEQ :+                          ; see if A or B are pressed.  If they are...
       PHA                           ; push A/B state
 
-     ; LDA btlcurs_y                 ; clip/wrap the cursor so it's within valid range.
+     ; LDA cursor_y                 ; clip/wrap the cursor so it's within valid range.
      ; AND #$03
-     ; STA btlcurs_y
-     ; LDA btlcurs_x
+     ; STA cursor_y
+     ; LDA cursor_x
      ; AND #$01
-     ; STA btlcurs_x
+     ; STA cursor_x
       ;; done by SharedMenuCode_A
 
       JSR BattleClearVariableSprite ; erase the cursor sprite (in shadow oam)
       JSR BattleFrame               ; redraw the screen (to erase it in the PPU)
 
-      LDY btlcurs_y                 ; put cursor selection in Y (though Fight/Run column selection is still in btlcurs_x
+      LDY cursor_y                 ; put cursor selection in Y (though Fight/Run column selection is still in cursor_x
       PLA                           ; put A/B button state in A
       RTS                           ; exit!
 
@@ -2840,16 +2840,16 @@ MenuSelection_2x4:
 
     ; leaving it to be $10, therefore up
   @Cursor_Up:
-    DEC btlcurs_y
+    DEC cursor_y
     RTS
   @Cursor_Down:                     ; these are all pretty self explanitory
-    INC btlcurs_y
+    INC cursor_y
     RTS
   @Cursor_Left:
-    DEC btlcurs_x
+    DEC cursor_x
     RTS
   @Cursor_Right:
-    INC btlcurs_x
+    INC cursor_x
    @Exit:
     RTS
 
@@ -11496,10 +11496,10 @@ TargetAllCursors:
     ;; Y = 0
     STY btl8x8spr_i         ; zero the OAM index
 
-    LDA btlcurs_max         ; amount of cursors to draw
+    LDA cursor_max         ; amount of cursors to draw
     TAX                     ; put in X for a loop counter
     ASL A
-    TAY                     ; and double it for reading from btlcurs_positions
+    TAY                     ; and double it for reading from cursor_positions
 
    ;; this loop starts from the bottom of each CursorPos lut, and works backwards
    @Loop:
@@ -11521,10 +11521,10 @@ TargetAllCursors:
    @DoCursor:
     LDA #$F0
     STA btl8x8spr_t             ; tile ID
-    LDA btlcurs_positions-1, Y  ; get Y position
+    LDA cursor_positions-1, Y  ; get Y position
     STA btl8x8spr_y
     DEY
-    LDA btlcurs_positions-1, Y  ; get X position
+    LDA cursor_positions-1, Y  ; get X position
     STA btl8x8spr_x+1           ; backup X position
     DEY
     LDA #03

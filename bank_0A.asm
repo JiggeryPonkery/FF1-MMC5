@@ -5221,19 +5221,19 @@ M_EquipPage4:
 .byte $C1,$FF,$8E,$B4,$B8,$AC,$B3,$34,$B1,$21,$8B,$A4,$47,$84,$00
 
 M_Char1Name:   
-.byte $10,$00,$00 ; Character 1's name
+.byte $10,$60,$00 ; Character 1's name
 
 M_Char2Name:   
-.byte $11,$00,$00 ; Character 2's name
+.byte $11,$60,$00 ; Character 2's name
 
 M_Char3Name:  
-.byte $12,$00,$00 ; Character 3's name
+.byte $12,$60,$00 ; Character 3's name
 
 M_Char4Name:   
-.byte $13,$00,$00 ; Character 4's name
+.byte $13,$60,$00 ; Character 4's name
 
 M_EquipNameClass:  
-.byte $10,$00,$09,$08,$10,$01,$00 ; name, 8 spaces, then class
+.byte $10,$60,$09,$08,$10,$01,$00 ; name, 8 spaces, then class
 
 M_EquipmentSlots:
 .byte $9B,$AC,$AA,$AB,$21,$91,$22,$A7,$FF,$FF,$C8,$09,$08,$C9,$FF,$D4,$01   ; RIGHT_HAND__[________]_*
@@ -5277,7 +5277,7 @@ M_Elixir_List_MP: ; lists current MP / current MP / etc, horizontally
 .byte $96,$99,$FF,$FF,$10,$20,$7A,$10,$21,$7A,$10,$22,$7A,$10,$23,$7A,$10,$24,$7A,$10,$25,$7A,$10,$26,$7A,$10,$27,$00
 
 M_HP_List: 
-.byte $10,$00,$FF,$10,$02,$FF,$10,$05,$7A,$10,$06,$00 ; lists name, ailment, and current HP horizontally
+.byte $10,$60,$FF,$10,$02,$FF,$10,$05,$7A,$10,$06,$00 ; lists name, ailment, and current HP horizontally
 
 M_MagicList: 
 .byte $95,$81,$FF,$FF,$10,$40,$FF,$FF,$10,$41,$FF,$FF,$10,$42,$01
@@ -5300,7 +5300,7 @@ M_MagicList:
 ;.byte $7E,$88,$FF,$10,$33,$7A,$10,$3B,$FF,$FF,$10,$29,$FF,$10,$2A,$FF,$10,$2B,$00
 
 M_CharLevelStats: 
-.byte $10,$00,$01                                     ; NAME
+.byte $10,$60,$01                                     ; NAME
 .byte $10,$01,$01                                     ; Class
 .byte $95,$A8,$32,$AF,$09,$05,$10,$03,$01             ; Level ##
 .byte $8E,$BB,$B3,$C0,$FF,$FF,$10,$04,$01             ; Exp.  ## 
@@ -5503,7 +5503,7 @@ M_OrbGoldBoxLink: ; JIGS - to smooth out the weird orb box shape and timer box..
 .byte $6C,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$7D,$6D,$00
 
 M_ItemSubmenu:
-.byte $FF,$FF,$9E,$3E,$09,$03,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Use ___ Quest Items
+.byte $FF,$FF,$92,$B7,$A8,$B0,$B6,$FF,$FF,$9A,$B8,$2C,$B7,$FF,$92,$B7,$A8,$B0,$B6,$00 ; __ Items __ Quest Items
 
 M_MagicSubmenu: 
 .byte $FF,$FF,$8C,$3F,$21,$FF,$95,$2B,$B5,$29,$FF,$8F,$35,$66,$B7,$00 ; Cast __ Learn __ Forget
@@ -5534,7 +5534,7 @@ M_MagicMenuOrbs:
 .byte $E5,$01,$E5,$01,$E5,$01,$E5,$01,$E6,$01,$E6,$01,$E6,$01,$E6,$00
 
 M_MagicNameLearned:
-.byte $FF,$10,$60,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
+.byte $FF,$10,$61,$65,$2B,$B5,$5A,$27,$1C,$1A,$B6,$B3,$A8,$4E,$C4,$00 ; [name] learned the spell! (uses variable width name stat code!)
 
 M_EquipSubMenu:
 .byte $FF,$8E,$B4,$B8,$AC,$B3,$FF,$FF,$9B,$A8,$B0,$B2,$B9,$1A,$FF,$8E,$B0,$B3,$B7,$BC,$00
@@ -5578,16 +5578,16 @@ DrawMenuString_CharCodes_A:
     LDA lut_MenuText+1, X
     STA tmp+1
     
-    LDY LongCall_Y
+    LDY #$FF
   @Loop:                    ; now step through each byte of the string....
+    INY                     ; increment Y to 0
     LDA (tmp), Y            ; get the byte
+    BEQ :+
     CMP #$10                ; compare it to $10 (charater stat control code)
     BNE :+                  ;   if it equals...
       ORA submenu_targ      ;   OR with desired character ID to draw desired character's stats
   : STA bigstr_buf, Y       ; copy the byte to the big string buffer
-    DEY                     ; then decrement Y
-    CPY #$FF                ; check to see if it wrapped
-    BNE @Loop               ; and keep looping until it has
+    BNE @Loop               ; loop if its not 0
 
    ; once the loop is complete and our big string buffer has been filled...
 
