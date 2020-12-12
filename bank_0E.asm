@@ -82,6 +82,7 @@
 .import ADD_ITEM_1BIT
 .import REMOVE_ITEM_1BIT
 .import SetPartyStats
+.import GetNekked
 
 .segment "BANK_0E"
 
@@ -93,35 +94,35 @@ BANK_THIS = $0E
 ;;  LUT containing stock shop text  [$8000 :: 0x38010]
 
 lut_ShopStrings:
-.word ShopWeapon           ;00   
-.word ShopArmor            ;01 
-.word ShopWhiteMagic       ;02   
-.word ShopBlackMagic       ;03   
-.word ShopGreenMagic       ;04   
-.word ShopTimeMagic        ;05   
+.word ShopWeapon           ;00
+.word ShopArmor            ;01
+.word ShopWhiteMagic       ;02
+.word ShopBlackMagic       ;03
+.word ShopGreenMagic       ;04
+.word ShopTimeMagic        ;05
 .word ShopSkills           ;06
-.word ShopItem             ;07   
-.word ShopTemple           ;08   
-.word ShopInn              ;09   
-.word ShopOasis            ;0A   
+.word ShopItem             ;07
+.word ShopTemple           ;08
+.word ShopInn              ;09
+.word ShopOasis            ;0A
 
-.word ShopGold             ;0B   
+.word ShopGold             ;0B
 .word ShopXGoldOK          ;0C
 .word ShopHowMany          ;0D
-.word ShopBuyExit          ;0E   
-.word ShopBuySellExit      ;0F   
+.word ShopBuyExit          ;0E
+.word ShopBuySellExit      ;0F
 .word ShopYesNo            ;10
 .word ShopCharNames        ;11
 
-.word ShopWelcome          ;12 item and equipment welcome    
+.word ShopWelcome          ;12 item and equipment welcome
 .word ShopMagicWelcome     ;13 magic welcome
 
-.word ShopCantAfford       ;14 you don't have enough money 
+.word ShopCantAfford       ;14 you don't have enough money
 .word ShopNothingToSell    ;15 you have no inventory to sell
 .word ShopCannotCarry      ;16 your inventory is too full (items, equip)
 .word ShopOutofStock       ;17 your inventory is too full (magic)
-.word ShopCantSell         ;18 you have too much money 
-.word ShopThankYouWhatElse ;19 confirmed transaction    
+.word ShopCantSell         ;18 you have too much money
+.word ShopThankYouWhatElse ;19 confirmed transaction
 .word ShopTooBadWhatElse   ;1A canceled transaction
 
 .word ShopArmorDescription  ;1B
@@ -142,7 +143,7 @@ lut_ShopStrings:
 .word ShopWhoToRevive      ;25 clinic welcome/someone's dead
 .word ShopReturnToLife     ;26 character revived
 
-.word ShopHowMany_Sell     ;27 
+.word ShopHowMany_Sell     ;27
 
 
 ;; note these are NOT the original game's strings. I have edited them to better fit within the new shop screen and add some character to the shops.
@@ -167,7 +168,7 @@ ShopInn:
 .byte $FF,$9D,$B5,$A4,$32,$45,$B5,$BE,$1E,$92,$B1,$B1,$00 ; _Traveler's Inn
 ShopItem:
 .byte $FF,$FF,$90,$3A,$25,$5F,$FF,$9C,$28,$23,$00         ; __General Store
-ShopOasis: 
+ShopOasis:
 .byte $FF,$8C,$AF,$B2,$3E,$FF,$98,$B8,$21,$9C,$5F,$A8,$00 ; Close Out Sale
 ShopGold:
 .byte $FF,$90,$00 ; _G
@@ -238,7 +239,7 @@ ShopTooBadWhatElse:
 ;.byte $FF,$24,$A6,$4D,$4E,$1E,$60,$4E,$C0,$00 ; I will surely care for your scrolls well.
 
 ShopArmorDescription:
-.byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01         ; __Defense:_______|   
+.byte $FF,$FF,$8D,$A8,$A9,$3A,$3E,$E4,$09,$07,$01         ; __Defense:_______|
 .byte $FF,$FF,$8E,$B9,$3F,$AC,$3C,$E4,$09,$07,$01         ; __Evasion:_______|
 .byte $FF,$FF,$96,$C0,$9B,$2C,$30,$B7,$E4,$09,$06,$00     ; __M.Resist:______|
 
@@ -279,7 +280,7 @@ ShopDontForget:
 .byte $FF,$42,$A4,$AE,$1A,$A4,$65,$B2,$47,$4C,$01
 .byte $FF,$50,$26,$44,$B7,$B5,$A4,$32,$AF,$B6,$C4,$00 ; Don't forget to make a log of your travels!
 
-ShopInnSaved: 
+ShopInnSaved:
 .byte $8D,$3C,$BE,$21,$56,$64,$A9,$A8,$A8,$58,$B6,$B2,$01
 .byte $42,$B8,$A6,$AB,$31,$A8,$B7,$53,$44,$B1,$46,$C5,$01
 .byte $C8,$91,$99,$F2,$96,$99,$FF,$9B,$2C,$28,$23,$A7,$C4,$C9,$00 ; Don't you feel so much better now? [HP/MP Restored!]
@@ -321,40 +322,40 @@ ShopHowMany_Sell:
 ;; and skip this pointer table in favor of just converting the shop ID to a pointer.
 
 lut_ShopData:
-.word UnusedShop        ; 00 
-.word ConeriaWeapon     ; 01 
-.word ProvokaWeapon     ; 02 
-.word ElflandWeapon     ; 03 
-.word MelmondWeapon     ; 04 
-.word LakeWeapon        ; 05 
-.word GaiaWeapon        ; 06 
-.word UnusedShop        ; 07 
-.word UnusedShop        ; 08 
-.word UnusedShop        ; 09 
-.word UnusedShop        ; 0A 
-.word UnusedShop        ; 0B 
-.word UnusedShop        ; 0C 
-.word UnusedShop        ; 0D 
+.word UnusedShop        ; 00
+.word ConeriaWeapon     ; 01
+.word ProvokaWeapon     ; 02
+.word ElflandWeapon     ; 03
+.word MelmondWeapon     ; 04
+.word LakeWeapon        ; 05
+.word GaiaWeapon        ; 06
+.word UnusedShop        ; 07
+.word UnusedShop        ; 08
+.word UnusedShop        ; 09
+.word UnusedShop        ; 0A
+.word UnusedShop        ; 0B
+.word UnusedShop        ; 0C
+.word UnusedShop        ; 0D
 .word UnusedShop        ; 0E
-.word UnusedShop        ; 0F  
+.word UnusedShop        ; 0F
 
 ;; armor
-.word ConeriaArmor      ; 10 
-.word ProvokaArmor      ; 11 
-.word ElflandArmor      ; 12 
-.word MelmondArmor      ; 13 
-.word LakeArmor         ; 14 
+.word ConeriaArmor      ; 10
+.word ProvokaArmor      ; 11
+.word ElflandArmor      ; 12
+.word MelmondArmor      ; 13
+.word LakeArmor         ; 14
 .word GaiaArmor         ; 15
 .word UnusedShop        ; 16
 .word UnusedShop        ; 17
 .word UnusedShop        ; 18
 .word UnusedShop        ; 19
-.word UnusedShop        ; 1A 
-.word UnusedShop        ; 1B 
-.word UnusedShop        ; 1C 
-.word UnusedShop        ; 1D 
+.word UnusedShop        ; 1A
+.word UnusedShop        ; 1B
+.word UnusedShop        ; 1C
+.word UnusedShop        ; 1D
 .word UnusedShop        ; 1E
-.word UnusedShop        ; 1F 
+.word UnusedShop        ; 1F
 
 ;; white magic
 .word ConeriaWMagic     ; 20
@@ -367,12 +368,12 @@ lut_ShopData:
 .word GaiaWMagic2       ; 27
 .word OnracWMagic       ; 28
 .word LeifenWMagic      ; 29
-.word UnusedShop        ; 2A 
-.word UnusedShop        ; 2B 
-.word UnusedShop        ; 2C 
-.word UnusedShop        ; 2D 
+.word UnusedShop        ; 2A
+.word UnusedShop        ; 2B
+.word UnusedShop        ; 2C
+.word UnusedShop        ; 2D
 .word UnusedShop        ; 2E
-.word UnusedShop        ; 2F 
+.word UnusedShop        ; 2F
 
 ;; black magic
 .word ConeriaBMagic     ; 30
@@ -385,12 +386,12 @@ lut_ShopData:
 .word GaiaBMagic2       ; 37
 .word OnracBMagic       ; 38
 .word LeifenBMagic      ; 39
-.word UnusedShop        ; 3A 
-.word UnusedShop        ; 3B 
-.word UnusedShop        ; 3C 
-.word UnusedShop        ; 3D 
+.word UnusedShop        ; 3A
+.word UnusedShop        ; 3B
+.word UnusedShop        ; 3C
+.word UnusedShop        ; 3D
 .word UnusedShop        ; 3E
-.word UnusedShop        ; 3F 
+.word UnusedShop        ; 3F
 
 ;; green magic
 .word UnusedShop        ; 40
@@ -402,13 +403,13 @@ lut_ShopData:
 .word UnusedShop        ; 46
 .word UnusedShop        ; 47
 .word UnusedShop        ; 48
-.word UnusedShop        ; 49 
-.word UnusedShop        ; 4A 
-.word UnusedShop        ; 4B 
-.word UnusedShop        ; 4C 
+.word UnusedShop        ; 49
+.word UnusedShop        ; 4A
+.word UnusedShop        ; 4B
+.word UnusedShop        ; 4C
 .word UnusedShop        ; 4D
-.word UnusedShop        ; 4E 
-.word UnusedShop        ; 4F 
+.word UnusedShop        ; 4E
+.word UnusedShop        ; 4F
 
 ;; time magic
 .word UnusedShop        ; 50
@@ -420,13 +421,13 @@ lut_ShopData:
 .word UnusedShop        ; 56
 .word UnusedShop        ; 57
 .word UnusedShop        ; 58
-.word UnusedShop        ; 59 
-.word UnusedShop        ; 5A 
-.word UnusedShop        ; 5B 
-.word UnusedShop        ; 5C 
+.word UnusedShop        ; 59
+.word UnusedShop        ; 5A
+.word UnusedShop        ; 5B
+.word UnusedShop        ; 5C
 .word UnusedShop        ; 5D
-.word UnusedShop        ; 5E 
-.word UnusedShop        ; 5F 
+.word UnusedShop        ; 5E
+.word UnusedShop        ; 5F
 
 ;; skills
 .word UnusedShop        ; 60
@@ -438,13 +439,13 @@ lut_ShopData:
 .word UnusedShop        ; 66
 .word UnusedShop        ; 67
 .word UnusedShop        ; 68
-.word UnusedShop        ; 69 
-.word UnusedShop        ; 6A 
-.word UnusedShop        ; 6B 
-.word UnusedShop        ; 6C 
+.word UnusedShop        ; 69
+.word UnusedShop        ; 6A
+.word UnusedShop        ; 6B
+.word UnusedShop        ; 6C
 .word UnusedShop        ; 6D
-.word UnusedShop        ; 6E 
-.word UnusedShop        ; 6F 
+.word UnusedShop        ; 6E
+.word UnusedShop        ; 6F
 
 ;; items
 .word ConeriaItem       ; 70
@@ -456,15 +457,15 @@ lut_ShopData:
 .word UnusedShop        ; 76
 .word UnusedShop        ; 77
 .word UnusedShop        ; 78
-.word UnusedShop        ; 79 
-.word UnusedShop        ; 7A 
-.word UnusedShop        ; 7B 
-.word UnusedShop        ; 7C 
+.word UnusedShop        ; 79
+.word UnusedShop        ; 7A
+.word UnusedShop        ; 7B
+.word UnusedShop        ; 7C
 .word UnusedShop        ; 7D
-.word UnusedShop        ; 7E 
+.word UnusedShop        ; 7E
 .word CaravanShop       ; 7F
 
-;; The following data was organized by 	Dienyddiwr Da - http://www.romhacking.net/documents/81/ ! 
+;; The following data was organized by 	Dienyddiwr Da - http://www.romhacking.net/documents/81/ !
 
 ;; JIGS - for weapons and armor shops, add +1 because the constants are in 0-based format
 ;
@@ -483,92 +484,92 @@ ConeriaWMagic:
 .byte MG_CURE, MG_HARM, MG_FOG, MG_RUSE, $00  ;(Coneria) CURE, HARM, FOG, RUSE
 ConeriaBMagic:
 .byte MG_FIRE, MG_SLEP, MG_LOCK, MG_LIT, $00  ;(Coneria) FIRE, SLEP, LOCK, LIT
-ConeriaItem:                               
+ConeriaItem:
 .byte HEAL, PURE, TENT, $00                   ;(Coneria) Heal, Pure, Tent
 
-ProvokaWeapon:                              
+ProvokaWeapon:
 .byte WEP5+1, WEP6+1, WEP7+1, WEP8+1, $00     ;(Provoka) Iron Hammer, Short Sword, Hand Axe, Scimtar
-ProvokaArmor:                              
+ProvokaArmor:
 .byte ARM2+1, ARM3+1, ARM4+1, ARM17+1, ARM33+1;(Provoka) Wooden Armor, Chain Armor, Iron Armor, Wooden Shield, Gloves
-ProvokaWMagic:                              
+ProvokaWMagic:
 .byte MG_LAMP, MG_MUTE, MG_ALIT, MG_INVS, $00 ;(Provoka) LAMP, MUTE, ALIT, INVS
-ProvokaBMagic:                              
+ProvokaBMagic:
 .byte MG_ICE, MG_DARK, MG_TMPR, MG_SLOW, $00  ;(Provoka) ICE, DARK, TMPR, SLOW
-ProvokaItem:                                  
+ProvokaItem:
 .byte HEAL, PURE, EYEDROPS, TENT, CABIN       ;(Provoka) Heal, Pure, Tent, Cabin
 
-ElflandWeapon:                                
-.byte WEP9+1, WEP10+1, WEP11+1, WEP12+1, WEP17+1;(Elfland) Iron Nunchuku, Large Knife, Iron Staff, Sabre, Silver Sword 
-ElflandArmor:                                
+ElflandWeapon:
+.byte WEP9+1, WEP10+1, WEP11+1, WEP12+1, WEP17+1;(Elfland) Iron Nunchuku, Large Knife, Iron Staff, Sabre, Silver Sword
+ElflandArmor:
 .byte ARM4+1, ARM11+1, ARM18+1, ARM26+1, ARM27+1;(Elfland) Iron Armor, Copper Bracelet, Iron Shield, Cap, Wooden Helmet
-ElflandWMagic:                                
+ElflandWMagic:
 .byte MG_CUR2, MG_HRM2, MG_AFIR, MG_REGN, $00 ;(Elfland) CUR2, HRM2, AFIR, HEAL
-ElflandBMagic:                                
+ElflandBMagic:
 .byte MG_FIR2, MG_HOLD, MG_LIT2, MG_LOK2, $00 ;(Elfland) FIR2, HOLD, LIT2, LOK2
-ElflandWMagic2:                               
+ElflandWMagic2:
 .byte MG_PURE, MG_FEAR, MG_AICE, MG_AMUT, $00 ;(Elfland) PURE, FEAR, AICE, AMUT
-ElflandBMagic2:                               
+ElflandBMagic2:
 .byte MG_SLP2, MG_FAST, MG_CONF, MG_ICE2, $00 ;(Elfland) SLP2, FAST, CONF, ICE2
 
-ElflandItem:                                  
+ElflandItem:
 .byte HEAL, PURE, TENT, CABIN, SOFT            ;(Elfland) Heal, Pure, Tent, Cabin, Soft
-MelmondWeapon:                                
+MelmondWeapon:
 .byte WEP11+1, WEP12+1, WEP13+1, WEP15+1, $00 ;(Melmond) Iron Staff, Sabre, Long Sword, Falchion
-MelmondArmor:                                
+MelmondArmor:
 .byte ARM5+1, ARM12+1, ARM28+1, ARM34+1, ARM35+1;(Melmond) Steel Armor, Silver Bracelet, Iron Helmet, Copper Gauntlet, Iron Gauntlet
-MelmondWMagic:                                
+MelmondWMagic:
 .byte MG_CUR3, MG_LIFE, MG_HRM3, MG_RGN2, $00 ;(Melmond) CUR3, LIFE, HRM3, HEL2
-MelmondBMagic:                                
+MelmondBMagic:
 .byte MG_FIR3, MG_BANE, MG_WARP, MG_SLO2, $00 ;(Melmond) FIR3, BANE, WARP, SLO2
 
-LakeWeapon:                                   
+LakeWeapon:
 .byte WEP16+1, WEP17+1, WEP18+1, WEP19+1, $00 ;(Cresent Lake) Silver Knife, Silver Sword, Silver Hammer, Silver Axe
-LakeArmor:                                   
+LakeArmor:
 .byte ARM6+1, ARM19+1, ARM24+1, ARM29+1, ARM36+1 ;(Cresent Lake) Silver Armor, Silver Shield, Buckler, Silver Helmet, Silver Gauntlet
-LakeWMagic:                                   
+LakeWMagic:
 .byte MG_SOFT, MG_EXIT, MG_FOG2, MG_INV2, $00 ;(Cresent Lake) SOFT, EXIT, FOG2, INV2
-LakeBMagic:                                   
+LakeBMagic:
 .byte MG_LIT3, MG_RUB, MG_QAKE, MG_STUN, $00  ;(Cresent Lake) LIT3, RUB, QAKE, STUN
 
-LakeItem:                                     
+LakeItem:
 .byte HEAL, PURE, TENT, CABIN, ALARMCLOCK     ;(Cresent Lake) Heal, Pure, Tent, Cabin
-GaiaWeapon:                                   
+GaiaWeapon:
 .byte WEP35+1, $00                            ;(Gaia) CatClaw
-GaiaArmor:                                   
+GaiaArmor:
 .byte ARM13+1, ARM40+1, $00                   ;(Gaia) Gold Bracelet, ProRing
-GaiaWMagic:                                   
+GaiaWMagic:
 .byte MG_CUR4, MG_HRM4, $00                   ;(Gaia) CUR4, HRM4
-GaiaBMagic:                                   
+GaiaBMagic:
 .byte MG_ICE3, MG_BRAK, $00                   ;(Gaia) ICE3, BRAK
-GaiaWMagic2:                                  
+GaiaWMagic2:
 .byte MG_FADE, MG_WALL, MG_XFER, $00          ;(Gaia) FADE, WALL, XFER
-GaiaBMagic2:                                  
+GaiaBMagic2:
 .byte MG_STOP, MG_ZAP, MG_XXXX, $00           ;(Gaia) STOP, ZAP!, XXXX
-GaiaItem:                                     
+GaiaItem:
 .byte CABIN, HOUSE, HEAL, PURE, PHOENIXDOWN   ;(Gaia) Cabin, House, Heal, Pure
 
-OnracWMagic:                                  
+OnracWMagic:
 .byte MG_ARUB, MG_RGN3, $00                   ;(Onrac) ARUB, HEL3
-OnracBMagic:                                  
+OnracBMagic:
 .byte MG_SABR, MG_BLND, $00                   ;(Onrac) SABR, BLND
-OnracItem:                                    
+OnracItem:
 .byte TENT, CABIN, HOUSE, PURE, SOFT          ;(Onrac) Tent, Cabin, House, Pure, Soft
 
-CaravanShop:                                  
+CaravanShop:
 .byte X_HEAL, ETHER, ELIXIR, SMOKEBOMB, BOTTLE;(Caravan) Bottle
 
-LeifenWMagic:                                 
+LeifenWMagic:
 .byte MG_LIF2, $00                            ;(Leifen) LIF2
-LeifenBMagic:                                 
+LeifenBMagic:
 .byte MG_NUKE ,$00                            ;(Leifen) NUKE
 
-UnusedShop:                                   
-.byte HEAL,$00                                 
+UnusedShop:
+.byte HEAL,$00
 
 ;; Coneraia      - 40
 ;; Pravoka       - 80
 ;; Elfland       - 200
-;; Crescent Lake - 400 
+;; Crescent Lake - 400
 ;; Onrac / Gaia  - 750 g
 
 
@@ -596,13 +597,13 @@ PrintCharStat:
     CMP #$16
     BCC @MainStat  ; if under $16, do main stats
     CMP #$1E
-    BCC @SubStats  ; if under $1E, do sub stats  
+    BCC @SubStats  ; if under $1E, do sub stats
     CMP #$20
     BCC @ExpToNext ; if under $20, do Exp to next level
     CMP #$28
-    BCC @CurMP     ; if under $28, do current MP 
+    BCC @CurMP     ; if under $28, do current MP
     ; else, its max MP
-    
+
    @MaxMP:
     ;; A = 30-37
     CLC
@@ -611,23 +612,23 @@ PrintCharStat:
     LDA ch_stats, X  ; get MP
     AND #$0F         ;; JIGS - clear out current MP for max MP only
     STA tmp          ;  and print it as 1 Digit
-    JMP PrintNumber_1Digit   
-  
-   @CurMP: 
+    JMP PrintNumber_1Digit
+
+   @CurMP:
     ;; A = 20-27
     ; Carry is clear from the branch
     ADC #$10         ; mp is +$10 from $20 in ch_stats
     ADC char_index   ; add character index
     TAX
-    LDA ch_stats, X  ; get MP 
+    LDA ch_stats, X  ; get MP
     AND #$F0         ;; JIGS - cut off max MP to get only current MP
     LSR A            ; and move it to low bits
-    LSR A 
-    LSR A 
-    LSR A 
+    LSR A
+    LSR A
+    LSR A
     STA tmp          ;  and print it as 1 Digit
     JMP PrintNumber_1Digit
-   
+
    ;;  Stat Code = $03 -- character level
    @Level:
     LDX char_index   ; Get Character index
@@ -635,16 +636,16 @@ PrintCharStat:
     CLC
     ADC #$01         ; Add 1 to it ($00 is "Level 1")
     BNE :+           ; jump ahead to print it as 2 digits
-    
+
    @MainStat:
-    ;; A = stat    
+    ;; A = stat
     ; Carry is clear from the branch
     ADC char_index
     TAX
     LDA ch_stats, X
   : STA tmp
     JMP PrintNumber_2Digit
-    
+
    @SubStats:
     ;; A = substat
     ; Carry is clear from the branch
@@ -654,7 +655,7 @@ PrintCharStat:
     LDA #0              ; set mid byte to 0 (need a mid byte for 3 Digit printing)
     STA tmp+1           ;  and print as 3 digits
     JMP PrintNumber_3Digit
-    
+
     ;;; all other codes default to Exp to Next level
 @ExpToNext:
     JSR PrintEXPToNext
@@ -719,7 +720,7 @@ PrintEXPToNext:
         STA tmp+7
         STA tmp+8
         RTS
-        
+
   : JSR LongCall
     .word GetExpToNext
     .byte BANK_Z
@@ -734,11 +735,11 @@ PrintEXPToNext:
     INX
     DEY
     BNE @Subtract
-    
+
     LDA #0       ; always clear tmp+2 for output; EXP to Next is really only 2 bytes
     STA tmp+2    ; since its the number between level up values
-    RTS          ; so from level 3 to 4, its 547 - 196 = 351 
-    
+    RTS          ; so from level 3 to 4, its 547 - 196 = 351
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -993,7 +994,7 @@ FormatNumber_5Digits:         ; Flow in this routine is identical to the flow in
 @Less:
     DEX
     BPL @Loop
- 
+
       LDX #$80
       STX format_buf-5
       JMP FormatNumber_4Digits
@@ -1148,31 +1149,31 @@ lut_DecD3_lo:  .BYTE <100,<200,<300,<400,<500,<600,<700,<800,<900
 
 
 TalkToTile_BankE:
-   LDA tileprop           
-   AND #TP_SPEC_MASK  
-   CMP #TP_SPEC_MP        
+   LDA tileprop
+   AND #TP_SPEC_MASK
+   CMP #TP_SPEC_MP
    BEQ @HealpMP
-   CMP #TP_SPEC_HPMP      
+   CMP #TP_SPEC_HPMP
    BEQ @HealBoth
-   CMP #TP_SPEC_CUREDEATH 
+   CMP #TP_SPEC_CUREDEATH
    BEQ @HealDeath
-   CMP #TP_SPEC_CUREAIL   
-   BEQ @HealAilments    
+   CMP #TP_SPEC_CUREAIL
+   BEQ @HealAilments
  ; CMP #TP_SPEC_HP
  ; BEQ @HealHP
-  
+
   @HealHP:
    JSR MenuFillPartyHP
    JMP PlayHealSFX_Map
-  
+
   @HealpMP:
    JSR MenuRecoverPartyMP
    JMP PlayHealSFX_Map
-  
+
   @HealBoth:
    JSR FullHealingTile
    JMP PlayHealSFX_Map
-  
+
   @HealDeath:
    LDA %11111110            ; get every ailment EXCEPT death
    STA tmp                  ; store in tmp
@@ -1181,7 +1182,7 @@ TalkToTile_BankE:
   @HealAilments:
    LDA #AIL_DEAD            ; get only the death ailment
    STA tmp
-    
+
 CurePartyAilment:
     LDX #0                   ; zero X
   : LDA ch_ailments, X       ; get character ailment
@@ -1219,18 +1220,18 @@ UndoSwap:             ; if they escaped the sub target menu...
       AND #$0F
       STA ch_ailments, X     ; clear high bits in ailments to reset pose
 
-SwappingDone:      
+SwappingDone:
       LDA #0
       STA joy_select
       SEC     ; set C to indicate swap was unsuccesful
-      RTS 
+      RTS
 
 LineUp_InMenu:
     JSR MainMenuSubTarget       ; select a sub target
     BCS SwappingDone        ;  if they escaped the sub target selection, then escape it
-    ;; cursor is now first character... 
-    
-      JSR PlaySFX_MenuSel         ; play the selection sound effect  
+    ;; cursor is now first character...
+
+      JSR PlaySFX_MenuSel         ; play the selection sound effect
       LDA cursor                ; otherwise (A pressed), get the selected character
       LSR A
       ROR A
@@ -1244,14 +1245,14 @@ LineUp_InMenu:
       BEQ UndoSwap_Error      ; if dead.. they're not swappable
       CMP #$02
       BEQ UndoSwap_Error      ; if stone, they're not swappable
-      
+
       ORA #$80
       STA ch_ailments, X      ; set high bit in ailments
-      
+
         JSR MainMenuSubTarget_NoClear ; get second target, don't clear cursor
         BCS UndoSwap
-        
-       ;JSR PlaySFX_MenuSel         ; play the selection sound effect   
+
+       ;JSR PlaySFX_MenuSel         ; play the selection sound effect
        LDA cursor                ; otherwise (A pressed), get the selected character
        ROR A
        ROR A
@@ -1259,7 +1260,7 @@ LineUp_InMenu:
        AND #$C0                  ; and shift it to a useable character index
        STA MMC5_tmp+1            ; swap target 2
        TAX                       ; and put in X
-       
+
        CMP MMC5_tmp
        BEQ UndoSwap_Error       ; can't swap the same character!
 
@@ -1268,13 +1269,13 @@ LineUp_InMenu:
       BEQ UndoSwap_Error             ; if dead.. they're not swappable
       CMP #$02
       BEQ UndoSwap_Error             ; if stone, they're not swappable
-      
+
       LDX MMC5_tmp+1       ; second swap character
-      
+
       LDY #0
     : LDA ch_stats, X         ; backup character 2
       STA CharStats_TmpSwap2, Y
-      INX 
+      INX
       INY
       CPY #$40
       BNE :-
@@ -1288,19 +1289,19 @@ LineUp_InMenu:
       INY
       CPY #$40
       BNE :-
-    
-      LDX MMC5_tmp+1          ; second swap character   
-      
+
+      LDX MMC5_tmp+1          ; second swap character
+
       LDY #0
     : LDA CharStats_TmpSwap1, Y         ; restore character 2 in 1's slot
       STA ch_stats, X
       INX
       INY
       CPY #$40
-      BNE :-    
-      
+      BNE :-
+
       LDX MMC5_tmp        ; first swap character
-      
+
       LDY #0
     : LDA CharStats_TmpSwap2, Y         ; restore character 1 in 2's slot
       STA ch_stats, X
@@ -1310,17 +1311,17 @@ LineUp_InMenu:
       BNE :-
 
      @SwapComplete:
-      LDX MMC5_tmp+1      
+      LDX MMC5_tmp+1
       LDA ch_ailments, X
       AND #$0F
       STA ch_ailments, X     ; clear high bits in ailments to reset pose
-      
+
       LDA #0
       STA joy_select
       CLC                    ; clear C to indicate swap successful
       JMP PlaySFX_CharSwap
-      
-      
+
+
 
 
 
@@ -1347,11 +1348,11 @@ ScreenOff_ClearNT:
     LDA #0
     STA $2001            ; turn the PPU off
     STA menustall        ; and disable menu stalling
-    
+
 ClearNT:
     LDA #$00
     STA MMC5_tmp
-    
+
     ;LDA $2002     ; reset PPU toggle
     ;LDA #$20
     ;STA $2006
@@ -1360,8 +1361,8 @@ ClearNT:
     ;LDY #$00      ; zero out A and Y
     ;TYA           ;   Y will be the low byte of our counter
     ;LDX #$03      ; X=3 -- this is the high byte of our counter (loop $0300 times)
-    
-    ;; JIGS - I think I accidentally deleted an original line somewhere... maybe. 
+
+    ;; JIGS - I think I accidentally deleted an original line somewhere... maybe.
 
 ClearNT_Color:   ;; JIGS - now this loads either 0 or FF depending what you want to fill the background with
     LDA $2002     ; reset PPU toggle
@@ -1371,7 +1372,7 @@ ClearNT_Color:   ;; JIGS - now this loads either 0 or FF depending what you want
     STA $2006     ; set PPU addr to $2000 (start of NT)
     TAY
     LDA MMC5_tmp
-    LDX #$03      
+    LDX #$03
 
 @Loop:            ; first loop clears the first $0300 bytes of the NT
       STA $2007
@@ -1412,13 +1413,13 @@ EnterShop:
     STA $5015              ; and silence the MMC5 APU. (JIGS)
     STA item_pageswap      ; is used to display prices (0 = items, magic; 1 = weapons, armor)
     STA shop_descriptionset ; zero shop_spell and shop_descriptionset (shared)
-    
+
     LDX #$B0
    @ClearLoop:
     STA item_box-1, X
     DEX
-    BNE @ClearLoop    
-    
+    BNE @ClearLoop
+
    @ClearShopVars:
     STA item_box_offset, X ; clear zero RAM variables, from $5C to $7F
     INX
@@ -1427,13 +1428,13 @@ EnterShop:
 
     JSR LoadShopCHRPal     ; load up the CHR and palettes (and the shop type)
     JSR DrawShop           ; draw the shop (and load inventory)
-  
+
     LDA shop_type          ; use the shop type to get the entry point for this shop
     CMP #SHOP_CLINIC
-    BEQ @EnterClinic    
+    BEQ @EnterClinic
     CMP #SHOP_INN
     BEQ @EnterInn
-    
+
    @EnterShop:
     LDA #$4F
     STA music_track        ; set the music track to $4F (shop music)
@@ -1441,20 +1442,20 @@ EnterShop:
     LDX shop_type
     STX tmp+$13            ; backup shop type
     JMP EnterNormalShop
-    
+
    @EnterClinic:
     LDA #$48               ; for clinic (castle music, closest thing to a nice temple song!)
     STA music_track
     STA dlgmusic_backup
     JMP EnterClinic
-    
+
    @EnterInn:
     LDA #$51               ; for inn (the original menu music)
     STA music_track
     STA dlgmusic_backup    ; to replay inn music after saving
     JMP EnterInn
-    
-    
+
+
 lut_ShopWelcome: ; uses shop_type to pick what lut_ShopStrings text to display
 .byte $12 ; 0 weapons
 .byte $12 ; 1 armor
@@ -1466,23 +1467,23 @@ lut_ShopWelcome: ; uses shop_type to pick what lut_ShopStrings text to display
 .byte $12 ; 7 item shop, caravan
 
 lut_ShopMaxAmount: ; maximum amount of this shop's item you can hold in your inventory
-.byte 15 ; 0 weapons           
-.byte 15 ; 1 armor             
-.byte 4  ; 2 white magic       
-.byte 4  ; 3 black magic       
+.byte 15 ; 0 weapons
+.byte 15 ; 1 armor
+.byte 4  ; 2 white magic
+.byte 4  ; 3 black magic
 .byte 4  ; 4 green magic
 .byte 4  ; 5 time magic
 .byte 4  ; 6 skills
 .byte 99 ; 7 item shop, caravan
-    
 
-    
-    
+
+
+
 CheckMagicInventory:
     LDA shop_curitem
     SEC
     SBC #1; ITEM_MAGICSTART   ; convert item ID to spell ID
-    STA shop_spell 
+    STA shop_spell
     PHA                    ; push spell ID to stack
     LSR A
     LSR A
@@ -1491,18 +1492,18 @@ CheckMagicInventory:
     CLC
     ADC #$81               ; convert it to a printable number
     STA str_buf+$3B, Y     ; put this spell's level in the string buffer
-    
+
     JSR Set_Inv_Magic
-    
+
     PLA                    ; pull spell ID
     JSR DOES_ITEM_EXIST    ; checks if you have it in your inventory, and puts the amount in A
 
     STA shop_amount
     LDA shop_selling       ; if selling, don't list what is equipped
     BNE @End
-    
+
     INC shop_spell         ; increase to 1-based
-    
+
     LDA #0                 ; start with char_index 0
    @Loop:
     PHA                    ; push char_index
@@ -1520,41 +1521,41 @@ CheckMagicInventory:
 
    @FoundOne:
     INC shop_amount        ; increase the # of spells if found
-    
+
    @NextChar:
     PLA                    ; pull the char_index, add $40
-    CLC                    ; 
-    ADC #$40               ; 
+    CLC                    ;
+    ADC #$40               ;
     BNE @Loop              ; when it wraps around to 0 again, its done!
-   @End: 
+   @End:
     RTS
-    
+
 CheckEquipmentInventory:
     JSR Set_Inv_Weapon     ; first set it to weapons
     LDX shop_curitem
     DEX                    ; convert item ID to 0-based
     TXA
-    JSR DOES_ITEM_EXIST    ; checks if you have it in your inventory, and puts the amount in A    
-    
-    STA shop_amount       
+    JSR DOES_ITEM_EXIST    ; checks if you have it in your inventory, and puts the amount in A
+
+    STA shop_amount
     LDA shop_selling       ; if selling, don't list what is equipped
     BNE @End
-    
+
     LDA #0
    @Loop:
-    PHA                    ; push 0 to use as character ID   
+    PHA                    ; push 0 to use as character ID
     TAX
-    
-    LDY #8    
+
+    LDY #8
    @SearchEquipmentLoop:
-    LDA ch_righthand, X    
+    LDA ch_righthand, X
     CMP shop_curitem
     BNE @NextSlot
-    
+
    @FoundOne:
-    INC shop_amount        ; increase the # of this item found    
-    
-   @NextSlot: 
+    INC shop_amount        ; increase the # of this item found
+
+   @NextSlot:
     INX
     DEY                    ; loop through all 8 equipment slots
     BEQ @NextChar
@@ -1562,12 +1563,12 @@ CheckEquipmentInventory:
 
    @NextChar:
     PLA                    ; pull the char_index, add $40
-    CLC                    ; 
-    ADC #$40               ; 
+    CLC                    ;
+    ADC #$40               ;
     BNE @Loop              ; when it wraps around to 0 again, its done!
-   @End: 
+   @End:
     RTS
-    
+
 
 
 
@@ -1590,7 +1591,7 @@ EnterNormalShop:
     CMP #SHOP_CARAVAN_ID
     BNE MainShopLoop
 
-EnterCaravan:    
+EnterCaravan:
     LDA #SHOPBOX_COMMAND
     JSR DrawMainItemBox      ; draw shop box ID=3 (the command box)
     LDA #$0E
@@ -1607,20 +1608,20 @@ EnterCaravan:
 
 RestartShopLoop:
     JSR ResetShopList_Extras
-    LDA #$1A 
+    LDA #$1A
     JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
     LDA shop_id
     CMP #SHOP_CARAVAN_ID
     BEQ EnterCaravan
-    
+
 MainShopLoop:
    ; LDA tmp+$13                   ; left/right in sell mode will change shop_type, so...
    ; STA shop_type                 ; reset shop_type from backup
 
     LDA inv_canequipinshop        ; if this is set, characters will dance if they can equip the item the cursor is pointing at
     BEQ :+                        ; so it has to be turned off unless the cursor is pointing at weapons or armor
-    JSR Shop_CharacterStopDancing 
-    
+    JSR Shop_CharacterStopDancing
+
   : LDA #SHOPBOX_COMMAND
     JSR DrawMainItemBox      ; draw box 3 (command box)
     LDA #$0F
@@ -1638,7 +1639,7 @@ MainShopLoop:
     CMP #1
     BNE ReturnToMap
     JMP ShopSell
-    
+
 ReturnToMap:                ; this should fix the weird flicker when leaving a shop...
     JSR WaitForVBlank_L
     LDA #0
@@ -1650,82 +1651,82 @@ ReturnToMap:                ; this should fix the weird flicker when leaving a s
 ShopBuy:
     LDA #SHOPBOX_COMMAND
     JSR EraseMainItemBox         ; erase shop box #3 (command box)
-    
-ShopBuy_Loop:    
+
+ShopBuy_Loop:
     JSR DrawShopInventoryBox
     JSR LoadShopInventory
-    
+
     LDX shop_type
     LDA lut_ShopMaxAmount, X    ; gets either #99, #15, or #4 depending on shop type
     STA shop_amount_max
-    
-    ;; ShopSelectItem also draws the text in the inventory box 
-    
+
+    ;; ShopSelectItem also draws the text in the inventory box
+
     JSR ShopSelectItem          ; let them choose an item from the shop inventory (fills str_buf with item IDs and everything!)
     BCS RestartShopLoop         ; if they pressed B, restart the loop
-    
+
     JSR ShopCheckInventory      ; reads the list to see how many of the chosen item you have
-    
-    LDA shop_amount_max         ; get max 
+
+    LDA shop_amount_max         ; get max
     SEC
     SBC shop_amount             ; subtract total in inventory/on characters
     STA shop_amount_max         ; save as new max
     BNE @ShopSelectAmount_Prep  ; if its not 0, go buy more
-    
+
     JSR HideShopCursor
     LDA shop_type               ; get shop type again
     CMP #SHOP_ITEM
     BEQ @Normal
     CMP #SHOP_WHITEMAGIC
     BCS @Scrolls
-    
-   @Normal: 
+
+   @Normal:
     LDA #$16                     ; load up "you can't carry any more" string ID
-    BNE @DrawDialogue_AndReturn  ; print it and return    
+    BNE @DrawDialogue_AndReturn  ; print it and return
 
    @Scrolls:
     LDA #$17                     ; "That spell is out of stock"
 
-   @DrawDialogue_AndReturn:    
-    JSR DrawShopDialogueBox   
+   @DrawDialogue_AndReturn:
+    JSR DrawShopDialogueBox
     JSR MenuWaitForBtn
     JMP ShopBuy
-    
+
    @ShopSelectAmount_Prep:
     STA shop_amount_buy         ; save max amount as amount to try buying
   : JSR ShopLoadPrice_Complex   ; load the price for this many items
     JSR Shop_CanAfford          ; does the player have the money for it?
     BCC @ShopSelectAmount_PrepResume ; if yes, jump ahead
-   
+
     DEC shop_amount_buy         ; if not, decrement the amount to try buying
-    BNE :-                      ; until it reaches 0... 
+    BNE :-                      ; until it reaches 0...
       JSR HideShopCursor        ; if you can't even buy ONE of this item
       LDA #$14
       JSR DrawShopDialogueBox   ; draw "you can't afford it" dialogue
       JSR MenuWaitForBtn
       JMP ShopBuy_Loop          ; and return to loop
-      
+
    @ShopSelectAmount_PrepResume:
     LDA shop_amount_buy         ; set the amount_max to the amount possible to buy
     STA shop_amount_max
     INC shop_amount_max         ; increase it for SelectAmount_Buy to work right
     LDA #1
     STA shop_amount_buy         ; reset amount_buy to 1
-    
-ShopSelectAmount:    
+
+ShopSelectAmount:
     LDA shop_type
     CMP #SHOP_ITEM
     BCC :+                      ; if its not an item shop, skip this check
 
-    LDA shop_curitem            ; if it is an item shop, see if its a key item 
+    LDA shop_curitem            ; if it is an item shop, see if its a key item
     CMP #ITEM_KEYITEMSTART
     BCC :+
        JMP @BuyConfirm          ; if its is, you can only buy one
 
   : JSR SelectAmount            ; choose how many of an item to buy
     BCS @ShopBuy_Return         ; if B was pressed, go back to choosing an item
-  
-   @BuyConfirm: 
+
+   @BuyConfirm:
     JSR ShopXGoldOkay           ; turns off dancing and prints the price to pay
     JSR ShopLoop_YesNo          ; give them the yes/no option
     BCS @ShopBuy_Return ; ShopSelectAmount        ; if they pressed B, return to selecting the amount
@@ -1733,24 +1734,24 @@ ShopSelectAmount:
     BNE @ShopBuy_Return ; ShopSelectAmount        ; if they selected "No", return to selecting the amount
     ;; JIGS - it backs up further until I can get the cursor pointing back at the item they were trying to buy
 
-   @CompletePurchase:    
+   @CompletePurchase:
     LDA shop_type
     CMP #SHOP_WHITEMAGIC
     BCC @AddEquipment
     CMP #SHOP_ITEM
     BCC @AddMagic
-    
-   @AddItem:    
+
+   @AddItem:
     LDX shop_curitem
     CPX #ITEM_KEYITEMSTART
     BCS BuyKeyItem
-    
+
     LDA items, X                ; load the current amount
     CLC
     ADC shop_amount_buy         ; add in the amount to buy
     STA items, X                ; and save
-    BNE FinishPurchase 
-    
+    BNE FinishPurchase
+
    @AddEquipment:
     ;LDA shop_amount_buy
     ;CMP #1
@@ -1764,11 +1765,11 @@ ShopSelectAmount:
     ; :
     JSR Set_Inv_Weapon
     JMP :+
-    
+
    @ShopBuy_Return:
-    JMP ShopBuy    
-    
-   @AddMagic: 
+    JMP ShopBuy
+
+   @AddMagic:
     JSR Set_Inv_Magic
   : LDX shop_curitem
     DEX
@@ -1776,22 +1777,22 @@ ShopSelectAmount:
     JSR ADD_ITEM
     DEC shop_amount_buy
     BNE :-
-    ;; JIGS - just loop this until the amount purchased is converted! 
+    ;; JIGS - just loop this until the amount purchased is converted!
     BEQ FinishPurchase
 
 BuyKeyItem:
     JSR Set_Inv_KeyItem
     TXA
     JSR ADD_ITEM_1BIT
-   
-FinishPurchase: 
+
+FinishPurchase:
     JSR ShopPayPrice            ; subtract the price from your gold amount
     LDA #$19
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
-    JSR UpdateShopList 
+    JSR UpdateShopList
     JMP MainShopLoop
 
-    
+
 DrawShopInventoryBox:
     LDA #0
     STA cursor
@@ -1804,7 +1805,7 @@ DrawShopInventoryBox:
     ;LDA shop_listdrawn          ; don't draw the box if its marked as already drawn
     ;BNE :+
     LDA #SHOPBOX_INV
-    JSR DrawMainItemBox             ; draw shop box #2 (inv list box)    
+    JSR DrawMainItemBox             ; draw shop box #2 (inv list box)
     ;INC shop_listdrawn
   ;: RTS
     RTS
@@ -1813,14 +1814,14 @@ DrawShopInventoryBox:
 ShopSell:
     JSR ConvertInventoryToItemBox
     BNE :+
-    JMP NothingToSell 
-    
+    JMP NothingToSell
+
   : LDA #SHOPBOX_COMMAND
     JSR EraseMainItemBox        ; erase shop box #3 (command box)
 
-ShopSell_Loop:    
+ShopSell_Loop:
     JSR DrawShopInventoryBox
-    
+
     INC shop_selling
 
     ;; ShopSelectItem also draws the text in the inventory box
@@ -1829,52 +1830,52 @@ ShopSell_Loop:
     BCC :+
     DEC shop_selling
     JMP RestartShopLoop
-    
+
   : JSR ShopCheckInventory     ; see how many of this item you have
     STA shop_amount_max
     INC shop_amount_max        ; needs to be 1 over max for the SelectAmount stuff to work
     LDA #1
     STA shop_amount_buy
 
-ShopSelectAmount_Sell:    
+ShopSelectAmount_Sell:
     JSR SelectAmount
     BCS ShopSell
-    
+
     JSR Shop_CanShopkeepAfford
     BCC @SellConfirm
       LDA #$18
       JSR DrawShopDialogueBox   ; if they can't, "you're too rich already!"
       JSR MenuWaitForBtn
       JMP ShopSelectAmount_Sell
-      
-   @SellConfirm:   
+
+   @SellConfirm:
     JSR ShopXGoldOkay
     JSR ShopLoop_YesNo          ; give them the yes/no option
     BCS ShopSell        ; ShopSelectAmount        ; if they pressed B, return to selecting the amount
     LDA cursor
     BNE ShopSell        ; ShopSelectAmount        ; if they selected "No", return to selecting the amount
     ;; JIGS - it backs up further until I can get the cursor pointing back at the item they were trying to buy
-    
-   @CompleteSale:    
+
+   @CompleteSale:
     LDA shop_type
     CMP #SHOP_WHITEMAGIC
     BCC @RemoveEquipment
     CMP #SHOP_ITEM
     BCC @RemoveMagic
-    
-   @RemoveItem:    
+
+   @RemoveItem:
     LDX shop_curitem
     LDA items, X                ; load the current amount
     SEC
     SBC shop_amount_buy         ; add in the amount to buy
     STA items, X                ; and save
     JMP FinishSale
-    
+
    @RemoveEquipment:
     JSR Set_Inv_Weapon
     JMP :+
-    
-   @RemoveMagic: 
+
+   @RemoveMagic:
     JSR Set_Inv_Magic
   : LDX shop_curitem
     DEX
@@ -1883,154 +1884,154 @@ ShopSelectAmount_Sell:
     DEC shop_amount_buy
     BNE :-
 
-FinishSale: 
+FinishSale:
     JSR ShopEarnGold            ; add the price to your gold amount
     JSR ConvertInventoryToItemBox
     BNE ContinueSelling
 
  ;; nothing left...
 
-    LDA #$1D 
+    LDA #$1D
     JSR DrawShopDialogueBox     ; "that was the last of it."
-    JSR MenuWaitForBtn          ; wait for player to confirm seeing this    
+    JSR MenuWaitForBtn          ; wait for player to confirm seeing this
     JMP NothingLeftToSell
 
 ContinueSelling:
     JSR UpdateShopList
     LDA #$19
     JSR DrawShopDialogueBox     ; "Thank you, anything else?" dialogue
-  
+
     JSR ShopLoop_YesNo
-    BCS StopSelling             ; if B was pressed... 
+    BCS StopSelling             ; if B was pressed...
     LDA cursor
     BNE StopSelling
     JMP ShopSell_Loop           ; else continue loop
 
 StopSelling:
-    LDA #$1A 
-    JSR DrawShopDialogueBox     ; "eh, alright then, what else?"    
+    LDA #$1A
+    JSR DrawShopDialogueBox     ; "eh, alright then, what else?"
 
-NothingLeftToSell:     
+NothingLeftToSell:
     LDA #SHOPBOX_INV
-    JSR EraseMainItemBox        ; erase shop box 2 (inventory)    
-    JSR ResetShopList_Extras    
+    JSR EraseMainItemBox        ; erase shop box 2 (inventory)
+    JSR ResetShopList_Extras
     JMP :+                      ; and jump to stop selling
-    
-NothingToSell:    
+
+NothingToSell:
     LDA #$15                    ; "You haven't got anything!"
     JSR DrawShopDialogueBox
     JSR MenuWaitForBtn          ; wait for player to confirm seeing this
-    
-  : LDA #0
-    STA shop_selling            
-    ;STA shop_listdrawn
-    JMP MainShopLoop      
-  
 
-    
+  : LDA #0
+    STA shop_selling
+    ;STA shop_listdrawn
+    JMP MainShopLoop
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;
 
 ShopCheckInventory:
     LDX cursor
     LDA item_box, X             ; get chosen item ID
     STA shop_curitem            ; save it
-    
+
     LDY shop_type
     CPY #SHOP_ITEM
     BCC :+                      ; if not an item shop, jump ahead
 
-    CMP #ITEM_KEYITEMSTART      
+    CMP #ITEM_KEYITEMSTART
     BCC :+                      ; if not a key item, jump ahead
-    
+
     LDA #1                      ; otherwise, its a key item--and you don't have it, or it wouldn't be in the list
     STA shop_amount_buy
     JSR ShopLoadPrice_Complex   ;; JIGS - something might break here...
     PLA
     PLA
     JMP ShopSelectAmount
-    
+
   : LDA #13
     JSR MultiplyXA              ; multiply cursor position by each item's str_buf length
     TAY
-    
+
     ;LDA str_buf+$42, Y          ; item ID
     ;STA shop_curitem
-    
-    LDA str_buf+$46, Y   
+
+    LDA str_buf+$46, Y
     CMP #$FF
     BNE @DoubleDigit
-    
+
    @SingleDigit:
-    LDA str_buf+$45, Y      
+    LDA str_buf+$45, Y
     AND #$0F                    ; convert from tile ID to byte
     JMP :+
 
-   @DoubleDigit:    
+   @DoubleDigit:
     LDA str_buf+$45, Y
     AND #$0F
     LDX #10                     ; multiply by $0A to convert to hex tens column
     JSR MultiplyXA
-    STA shop_amount_high     
+    STA shop_amount_high
     LDA str_buf+$46, Y
     AND #$0F                    ; convert from tile ID to byte
-    CLC  
+    CLC
     ADC shop_amount_high        ; add in 0 or tens column
   : STA shop_amount
     RTS
-    
+
 ShopXGoldOkay:
     JSR HideShopCursor
-    JSR WaitForVBlank_L        
+    JSR WaitForVBlank_L
     JSR ResetShop_Marks         ; turn off dancing and marks, but leave light blue bar
 
     LDA #$0C
     JSR DrawShopDialogueBox     ; draws "Gold  OK?" -- IE:  all the non-price text
-    
+
     LDA #<(str_buf+$B9)         ; get price from here (see PrintShopAmount)
     STA text_ptr
     LDA #>(str_buf+$B9)
     STA text_ptr+1
-    
+
     LDA #03
     STA dest_x
     INC dest_y
     INC dest_y
-    JMP DrawShopComplexString     
+    JMP DrawShopComplexString
 
 ;;;;;;;;;;;;;;;;;;;;;
 
 ;; JIGS - this is broken and breaks the flow of purchasing things
 ;; since the equip screen is better used to compare new gear vs. old, most people will prefer that anyway
-    
+
 ;EquipShop_EquipNow:
 ;    LDA #$1D                     ; "Do you want to equip it now?"
-;    JSR DrawShopDialogueBox       
+;    JSR DrawShopDialogueBox
 ;    JSR ShopLoop_YesNo
 ;    BCS EquipOnCharacter_Exit
 ;    LDA cursor
 ;    BNE EquipOnCharacter_Exit
-;  
+;
 ;EquipOnCharacter:
-;    LDA #$1E             
+;    LDA #$1E
 ;    JSR DrawShopDialogueBox      ; "who is it for?"
 ;    JSR ShopLoop_CharNames       ; have the player select a character
 ;    BCS @TroubleExit             ; if they press B, do this
-;    
+;
 ;    JSR EquipShop_GiveItemToChar ; give the item to the character
-;    BCS @TroubleExit             ; carry was set because you have too many of the old item! 
-;    
+;    BCS @TroubleExit             ; carry was set because you have too many of the old item!
+;
 ;    PLA
 ;    PLA
 ;    JMP FinishPurchase
 ;
 ;   @TroubleExit:
-;    LDA #$20             
+;    LDA #$20
 ;    JSR DrawShopDialogueBox      ; "I'll put it in your bags"
 ;    JSR MenuWaitForBtn
-;  
+;
 ;EquipOnCharacter_Exit:           ; store in inventory
-;    RTS  
-;  
+;    RTS
+;
 ;EquipShop_GiveItemToChar:
 ;    LDA cursor          ; get the char ID
 ;    ROR A
@@ -2043,14 +2044,14 @@ ShopXGoldOkay:
 ;    STA ItemToEquip
 ;    JSR IsEquipLegal
 ;    BEQ CannotEquip
-;    
+;
 ;    LDA #0
 ;    LDX ItemToEquip
 ;    CPX #ARMORSTART
 ;    BCC @Unequip
 ;
 ;    LDA lut_ArmorTypes, X
-;    
+;
 ;   @Unequip:
 ;    CLC
 ;    ADC #ch_righthand - ch_stats
@@ -2059,26 +2060,26 @@ ShopXGoldOkay:
 ;    TAX
 ;    LDA ch_stats, X
 ;    BEQ @NoSwap
-;    
+;
 ;    TAX
 ;    DEX
 ;    TXA              ; set it to a 0-based item
 ;    JSR ADD_ITEM     ; put previously equipped item back into inventory
 ;    BCC @NoSwap
-;    
+;
 ;    ;; THIS PART HERE HAPPENS IF YOU CAN'T STOW YOUR EQUIPPED WEAPON BECAUSE YOU HAVE TOO MANY
 ;    RTS
-;    
-;   @NoSwap: 
+;
+;   @NoSwap:
 ;    ;JSR UnEquipStats          ; does not use char_index
-;    LDX char_index 
+;    LDX char_index
 ;    LDA ItemToEquip
 ;    STA ch_stats, X
 ;    RTS
 ;    ;JMP ReEquipStats
-;    
+;
 ;CannotEquip:
-;    LDA #$1F                  
+;    LDA #$1F
 ;    JSR DrawShopDialogueBox    ; "You can't equip that"
 ;    JSR MenuWaitForBtn
 ;    PLA
@@ -2090,44 +2091,44 @@ ShopXGoldOkay:
 ;    .word ReadjustEquipStats
 ;    .byte BANK_EQUIPSTATS
 ;    CLC
-;    RTS      
+;    RTS
 ;
 ;UnEquipStats:
 ;    JSR LongCall
 ;    .word UnadjustEquipStats
 ;    .byte BANK_EQUIPSTATS
-;    RTS    
-    
-    
-    
+;    RTS
+
+
+
 SelectAmount:
     LDA #0
     STA shop_listactive     ; turn off changing the green bar on the inventory list
-    LDA #$0D                ; display buying text; "How many?" 
+    LDA #$0D                ; display buying text; "How many?"
     LDX shop_selling        ; BUT if selling...
     BEQ :+
        LDA #$27             ; display selling text ("will get ya" instead of "Will cost ya")
 
   : JSR DrawShopDialogueBox
     JSR PrintShopAmount     ; fill the spaces in the "how many?" text with numbers
-    
+
     LDA #$B0
-    STA shopcurs_y
+    STA cursor_y
     LDA #$08
-    STA shopcurs_x          ; move cursor position    
-   
-    JSR @Start_Loop         ; do the whole loop thing to pick how many new items to buy...    
-    BCC @End                ; if B is pressed, 
+    STA cursor_x          ; move cursor position
+
+    JSR @Start_Loop         ; do the whole loop thing to pick how many new items to buy...
+    BCC @End                ; if B is pressed,
     PLA
     PLA
     LDA shop_selling
     BEQ :+
     JMP ShopSell
   : JMP ShopBuy             ; return to picking what to buy
-    
+
    @End:
     RTS
-    
+
    @Start_Loop:
     LDA joy              ; get the joy data
     AND #$0C             ; isolate up/down bits
@@ -2153,10 +2154,10 @@ SelectAmount:
 
     CMP #$01             ; if right was pressed
     BEQ @More
-    
+
     CMP #$02             ; if left was pressed
     BEQ @Less
-    
+
     CMP #$08             ; if up was pressed
     BEQ @TenMore
 
@@ -2169,28 +2170,28 @@ SelectAmount:
     BEQ @WrapToMinimum   ; if that hit 0, wrap to minimum
     BCS @MoveDone        ; if there's any left over, its ok
     BCC @WrapToMinimum   ; if it went minus, wrap to minimum first
-    
+
    @TenMore:
     LDX shop_amount_max
     DEX
-    LDA shop_amount_buy 
+    LDA shop_amount_buy
     CPX shop_amount_buy  ; if its at max, wrap to minimum
     BEQ @WrapToMinimum
     CMP #1               ; if you start with 1, switch to 10
     BNE :+               ; this is weird, but it bugs me going from 1 to 11...
-      LDA #0             
+      LDA #0
   : CLC
     ADC #10
     CMP shop_amount_max
     BCC @MoveDone
     BCS @WrapToLimit
-    
+
    @Less:
-    DEC shop_amount_buy  
+    DEC shop_amount_buy
     LDA shop_amount_buy
     BNE @MoveDone        ; if it hits 0, wrap to limit, otherwise its fine
-    
-   @WrapToLimit: 
+
+   @WrapToLimit:
     LDA shop_amount_max  ; otherwise (below 1), wrap to our item limit
     SEC
     SBC #$01             ; minus one
@@ -2198,17 +2199,17 @@ SelectAmount:
 
    @More:
     INC shop_amount_buy
-    LDA shop_amount_buy  ; if Up or Right pressed, increase amount 
-    
-   @CompareToMax: 
+    LDA shop_amount_buy  ; if Up or Right pressed, increase amount
+
+   @CompareToMax:
     CMP shop_amount_max  ; check to see if we've gone over the amount we can buy
     BCC @MoveDone        ; if not, jump ahead to @MoveDone
-    
-  @WrapToMinimum:  
+
+  @WrapToMinimum:
     LDA #1               ; if yes, wrap limit to 1
 
   @MoveDone:             ; code reaches here when A is to be the new amount to buy
-    STA shop_amount_buy  ; 
+    STA shop_amount_buy  ;
     JSR PrintShopAmount  ; prints all the numbers
     JMP @Loop            ; and continue loop
 
@@ -2222,39 +2223,39 @@ SelectAmount:
   @A_Pressed:            ; if A pressed...
     CLC                  ; CLC to indicate player pressed A
     BCC @ButtonDone      ; and jump to @ButtonDone (always branches)
-    
-    
-    
+
+
+
 PrintShopAmount:
     LDA shop_amount_buy
     STA tmp
     JSR PrintNumber_2Digit
     LDA format_buf-2          ; copy the printed 2 digit number from the format buffer
-    STA str_buf+$B0           
+    STA str_buf+$B0
     LDA format_buf-1
     STA str_buf+$B1
     LDA #0
     STA str_buf+$B2
     STA str_buf+$BF
-    
+
     LDA #22
     STA dest_y
     LDA #03
     STA dest_x
-    
+
     LDA #<(str_buf+$B0)        ; set our text pointer to point to the generated string
     STA text_ptr
     LDA #>(str_buf+$B0)
     STA text_ptr+1
-    JSR DrawComplexString    
+    JSR DrawComplexString
 
-ShopLoadPrice_Complex_Print:    
+ShopLoadPrice_Complex_Print:
     JSR ShopLoadPrice_Complex
-    
+
     ;; then print
 
     JSR PrintNumber_6Digit
-    
+
     LDA format_buf-6
     STA str_buf+$B9
     LDA format_buf-5
@@ -2267,29 +2268,29 @@ ShopLoadPrice_Complex_Print:
     STA str_buf+$BD
     LDA format_buf-1
     STA str_buf+$BE
-    
+
     LDA #24
     STA dest_y
     LDA #06
     STA dest_x
-    
+
     LDA #<(str_buf+$B9)        ; set our text pointer to point to the generated string
     STA text_ptr
     LDA #>(str_buf+$B9)
     STA text_ptr+1
     JMP DrawComplexString
-    
-ShopLoadPrice_Complex:    
+
+ShopLoadPrice_Complex:
     LDA shop_curitem
     JSR LoadPrice          ; gets the base price of the item you're trying to buy
-    
+
     LDA shop_selling
     BEQ :+
-    
+
     LSR tmp+2              ; if selling, divide the base price by 2
     ROR tmp+1
     ROR tmp
-    
+
   : CLC
     LDA shop_amount_buy    ; quantity
     LDX tmp                ; low byte of price
@@ -2297,7 +2298,7 @@ ShopLoadPrice_Complex:
     STA tmp
     STA shop_curprice
     STX shop_x_price
-    
+
     LDA shop_amount_buy
     LDX tmp+1              ; middle byte of price
     JSR MultiplyXA_Safe
@@ -2305,7 +2306,7 @@ ShopLoadPrice_Complex:
     STA tmp+1
     STA shop_curprice+1
     STX shop_x_price
-    
+
     LDA shop_amount_buy
     LDX tmp+2              ; high byte of price
     JSR MultiplyXA_Safe
@@ -2313,8 +2314,8 @@ ShopLoadPrice_Complex:
     STA tmp+2
     STA shop_curprice+2
     RTS
-    
-; SUPPORT ROUTINE -- code by Disch! 
+
+; SUPPORT ROUTINE -- code by Disch!
 ; This routine may or may not be necessary depending on how MultiplyXA works.
 ;   The important bit here is that C needs to be
 ;   unchanged by the call.  The PHP/PLP here assure that.  If MultiplyXA preseves
@@ -2325,7 +2326,7 @@ MultiplyXA_Safe:
     JSR MultiplyXA
     PLP
     RTS
-    
+
 ; The actual multiplication routine
 ;
 ;   Goal:  $AABBCC * $EE   (24 bit value * 8 bit value)
@@ -2345,16 +2346,16 @@ MultiplyXA_Safe:
 ;    @in_8   =   ; low byte of 8-bit value
 ;    @out_32 =   ; output (32-bit value)
 ;    @temp   =   ; some area of temp ram (only 1 byte needed for this code)
-    
+
 ;    CLC                     ; start with C clear
-    
+
     ; low byte (EE * CC)
 ;    LDA @in_8
 ;    LDX @in_24
 ;    JSR MultiplyXA_Safe
 ;    STA @out_32             ; no addition needed for low byte
 ;    STX @temp               ; addition needed for high byte, stuff it for later
-    
+
     ; middle byte (EE * BB)
 ;    LDA @in_8
 ;    LDX @in_24+1
@@ -2362,24 +2363,24 @@ MultiplyXA_Safe:
 ;    ADC $temp               ; add with previous high byte
 ;    STA $out_32+1
 ;    STX $temp               ; for future addition
-    
+
     ; high byte (EE * AA)
 ;    LDA @in_8
 ;    LDX @in_24+2
 ;    JSR MultiplyXA_Safe
 ;    ADC @temp
 ;    STA @out_32+2
-    
+
     ; high byte currently in X.  It does not need full addition, but we do need to add to it
     ;  any carry from the previous addition
 ;    BCC :+
 ;       INX
 ;    :
 ;    STX @out_32+3
-    
+
     ; Done!
 ;    RTS
-    
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2395,20 +2396,20 @@ ShopPayPrice:
     LDA ch_attackperks, X ; check if party leader is naughty
     AND #STEALTHY
     BEQ @PayUp            ; if not, pay up
-    
+
    @ShopSteal:
     LDA shop_amount_buy ; how many items are being bought?
     CMP #03             ; only two hands so...
     BCS @PayUp          ; not getting away with it
-    
+
     TXA
-    LDX #100           
+    LDX #100
     JSR RandAX
     CMP #91             ; Player needs to roll 91 or over to do their special thing?
     BCC @PayUp
         JSR PlayHealSFX ; and a little victory vwoop
         RTS
-    
+
    @PayUp:
     LDA gold
     SEC
@@ -2425,24 +2426,24 @@ ShopPayPrice:
     STA gold+2
 
     JMP DrawShopGoldBox       ; then redraw the gold box to reflect changes, and return
-    
-    
+
+
 ShopEarnGold:
     LDA gold
     CLC
     ADC shop_curprice
     STA gold
-    
+
     LDA gold+1
     ADC shop_curprice+1       ; mid byte
     STA gold+1
 
     LDA gold+2
-    ADC shop_curprice+2      
+    ADC shop_curprice+2
     STA gold+2
-    JMP DrawShopGoldBox       
-    
-    
+    JMP DrawShopGoldBox
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2460,13 +2461,13 @@ ShopEarnGold:
 Shop_CanAfford:
    ; LDA gold+2           ; if high byte of gold is nonzero (> 65535 GP), they can afford it
    ; BNE @Yes
-   
+
     LDA gold+2
     CMP shop_curprice+2 ; JIGS - new variable for the ridiculous amount of money we can spend in one go
     BEQ @CheckMiddle     ; if equal, need to check the middle byte
     BCC @No              ; if gold < price, can't afford
     BCS @Yes             ; otherwise... can afford
-    
+
   @CheckMiddle:
     LDA gold+1           ; check mid byte of gold
     CMP shop_curprice+1  ;  against high byte of price
@@ -2486,7 +2487,7 @@ Shop_CanAfford:
   @Yes:
     CLC                  ; CLC to indicate can afford
     RTS
-    
+
 Shop_CanShopkeepAfford:
     LDA gold        ; Add the 3 bytes of GP to the
     CLC             ;  party's gold total
@@ -2500,10 +2501,10 @@ Shop_CanShopkeepAfford:
 
     CMP #^1000000   ; see if high byte is over maximum
     BCC @Exit       ; if gold_high < max_high, exit with carry clear
-    BEQ @CheckMid   ; high bytes are equal -- need to compare middle bytes   
-    BCS @Exit       ; gold_high > max_high, we're over the max, with carry set               
+    BEQ @CheckMid   ; high bytes are equal -- need to compare middle bytes
+    BCS @Exit       ; gold_high > max_high, we're over the max, with carry set
 
-  @CheckMid:                                                                 
+  @CheckMid:
     LDA tmp+1
     CMP #>1000000   ; check middle bytes
     BCC @Exit       ; if gold < max, exit with carry clear
@@ -2543,7 +2544,7 @@ EnterInn:
 
     JSR MenuFillPartyHP         ; refill the party's HP
     JSR MenuRecoverPartyMP      ;  and MP
-    
+
     JSR ClearButtons
 
     LDA #$22
@@ -2552,20 +2553,20 @@ EnterInn:
     LDA #SHOPBOX_COMMAND
     JSR EraseMainItemBox        ; erase shop box 3 (command box)
 
-    JSR ShopFrameNoCursor 
+    JSR ShopFrameNoCursor
     JSR BackUpPalettes
     LDA #8
     STA PaletteCounter          ; vanilla FF1 value more or less - 8 frames per palette change
     JSR FadeOutSprites          ; and fade the party out
-    JSR MenuWaitForBtn_SFX  
-    
+    JSR MenuWaitForBtn_SFX
+
     JSR SaveGame                ; JIGS - now save... and!
     LDA #0
     STA $2001                   ; turn off PPU
-    JSR LoadShopCHRPal          ; 
+    JSR LoadShopCHRPal          ;
     JSR ClearSpritePalette      ; dim the palettes to black so we can fade back in again; save screen reset it
     JSR DrawShop                ; re-draw the shop!
-    
+
   @LoopOne:
     JSR ShopFrameNoCursor       ; do a shop frame (with no visible cursor)
     JSR FadeInSprites           ; then fade the party back in
@@ -2574,18 +2575,18 @@ EnterInn:
     LDA #$23
     JSR DrawShopDialogueBox     ; "HP/MP restored" dialogue
     JMP Clinic_Inn_Exit
-    
+
   @Exit:
     LDA #SHOPBOX_COMMAND
     JSR EraseMainItemBox        ; erase shop box 3 (command box)
 
     LDA #$22
-    JSR DrawShopDialogueBox     ; "Don't forget to save" dialogue 
-    
+    JSR DrawShopDialogueBox     ; "Don't forget to save" dialogue
+
 Clinic_Inn_Exit:
     JSR ClearButtons
-    
-   @Loop: 
+
+   @Loop:
     JSR ShopFrameNoCursor       ; do a frame
     LDA music_track             ; check to see if the music has silenced (will happen
     CMP #$81                    ;  after the save jingle ends)
@@ -2596,7 +2597,7 @@ Clinic_Inn_Exit:
     ORA joy_b
     BEQ @Loop                   ; and keep looping until one of them has
 
-Clinic_Inn_QuickExit:    
+Clinic_Inn_QuickExit:
     JMP ReturnToMap             ; then exit
 
 
@@ -2639,7 +2640,7 @@ EnterClinic:
     LDX shop_curitem           ;; JIGS ^ the new price stuff did all this work
     JSR ClearButtons
     STA ch_ailments, X         ; erase this character's ailments (curing his "death" ailment)
-    
+
     LDA #$01
     STA ch_curhp, X            ; and give him 1 HP
 
@@ -2655,14 +2656,14 @@ EnterClinic:
     ORA joy_b
     BEQ @ReviveLoop            ; and loop (keep doing frames) until A or B pressed
     JMP EnterClinic            ; then restart the clinic loop
- 
+
   @NobodysDead:
     LDA #$24
     JSR DrawShopDialogueBox    ; if nobody is dead... "You don't need my help" dialogue
     JMP Clinic_Inn_Exit
 
-    
-    
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -2745,9 +2746,9 @@ Clinic_SelectTarget:
     LDA #>(str_buf+$10)
     STA text_ptr+1
     JSR DrawShopComplexString  ; and draw it
-   
+
     LDA #0
-    STA cursor 
+    STA cursor
     JMP CommonShopLoop_Cmd     ; then do the shop loop to get the user's selection
 
 
@@ -2827,13 +2828,13 @@ ClinicBuildNameString:
 
 
 
-    
-Shop_CharacterStopDancing:    
+
+Shop_CharacterStopDancing:
     LDA #0
     STA shop_drawmarks
-   @StopPose_Loop: 
-    STA char_index   
-    TAX                     
+   @StopPose_Loop:
+    STA char_index
+    TAX
     LDA ch_ailments, X
     AND #$7F                  ; remove the pose "ailment"
     STA ch_ailments, X
@@ -2851,19 +2852,19 @@ Shop_CharacterCanEquip:
     TAX
     LDA item_box, X
     STA tmp+8                 ; ID of the item to check
-    
+
     JSR Shop_CharacterStopDancing
-    
+
     ;; now do the main loop
-    
-   @CharLoop:                 
-    STA char_index    
+
+   @CharLoop:
+    STA char_index
     TAX
-    
+
     LDA shop_type
     CMP #SHOP_WHITEMAGIC
     BCC @EquipmentShop
-    
+
     LDY #24
    @MagicLoop:                ; loop through all the character's known spells
     LDA ch_spells, X
@@ -2873,7 +2874,7 @@ Shop_CharacterCanEquip:
     DEY
     BPL @MagicLoop
     JMP @CanEquip             ; otherwise, they don't know it; see if they can learn it
-    
+
    @EquipmentShop:
     LDY #8
    @EquipLoop:
@@ -2882,10 +2883,10 @@ Shop_CharacterCanEquip:
     BEQ @SetMark
     INX
     DEY
-    BPL @EquipLoop    
+    BPL @EquipLoop
     BMI @CanEquip
-    
-   @SetMark: 
+
+   @SetMark:
     LDA char_index
     ASL A                  ;  convert it from $40 base to $1 base (ie:  $03 is character 3 instead of $C0)
     ROL A
@@ -2896,12 +2897,12 @@ Shop_CharacterCanEquip:
     STA shop_drawmarks
     BNE @EquipPossible     ; they have it equipped; therefore, it must be possible to equip it!
 
-   @CanEquip: 
+   @CanEquip:
     LDA tmp+8
     JSR IsEquipLegal
     BEQ @NextCharacter     ; they can't equip, so do nothing
-    
-   @EquipPossible: 
+
+   @EquipPossible:
     LDX char_index         ; this sets the high bit, which tells the sprite drawing routine to do the "Cheer" pose
     LDA ch_ailments, X
     ORA #$80
@@ -2918,7 +2919,7 @@ Shop_CharacterCanEquip:
 
     LDA #BANK_THIS
     STA cur_bank
-    JSR CallMusicPlay         
+    JSR CallMusicPlay
     JSR WaitForVBlank_L
 
     ;; and flow into drawing the marks on screen!
@@ -2932,31 +2933,31 @@ DrawEquipMarks:
 
     LDY #0
     LDA shop_drawmarks   ; each bit set = draw the ! for that character
-    ASL A 
-    BCC :+
-     JSR @DrawMark
-  : INY
     ASL A
     BCC :+
      JSR @DrawMark
   : INY
     ASL A
     BCC :+
-     JSR @DrawMark    
+     JSR @DrawMark
+  : INY
+    ASL A
+    BCC :+
+     JSR @DrawMark
   : INY
     ASL A
     BCC @Exit
-        
+
    @DrawMark:
     PHA
     LDA #$7F                  ; ! tile
     BNE @DoMark
-    
+
    @RemoveMark:
     PHA
     LDA #$70                  ; blank tile
-    
-   @DoMark: 
+
+   @DoMark:
     PHA                       ; backup the tile to draw
     LDA @Equipped_LUT_High, Y ; use Y to get the tile position
     TAX
@@ -2965,22 +2966,22 @@ DrawEquipMarks:
     PLA                       ; pull the tile to draw
     STA $2007
     PLA                       ; pull shop_drawmarks, shifted
-   @Exit: 
-    RTS 
-   
+   @Exit:
+    RTS
+
    @Equipped_LUT_High:
-    .byte $20 
+    .byte $20
     .byte $21
     .byte $21
-    .byte $21 
-    
+    .byte $21
+
    @Equipped_LUT_Low:
     .byte $D2
     .byte $32
     .byte $92
-    .byte $F2   
- 
-    
+    .byte $F2
+
+
 ChangeInventoryList_Color:
     JSR ResetShopListAttributes
     JSR ShopListActiveBar
@@ -2989,27 +2990,27 @@ ChangeInventoryList_Color:
 ResetShopList_Extras:             ; turns off the shop_listactive variable
     JSR WaitForVBlank_L
     JSR ResetShopListAttributes   ; clear active bar
-    
+
 ResetShop_Marks:
     LDA #0
     STA shop_listactive
     JSR Shop_CharacterStopDancing ; turns off posing
     JSR DrawEquipMarks            ; turns off ! marks
 
-ResetScroll:        
+ResetScroll:
     LDA soft2000                  ; reset scroll and PPU data
     STA $2000
     LDA #0
     STA $2005
     STA $2005
     RTS
-    
-ResetShopListAttributes:          ; clears the highlighted colour 
+
+ResetShopListAttributes:          ; clears the highlighted colour
     LDY #4
-   @Loop: 
-    JSR SetAttributeBarLocation    
-    LDA #$FF             
-    JSR DrawAttributeBar    
+   @Loop:
+    JSR SetAttributeBarLocation
+    LDA #$FF
+    JSR DrawAttributeBar
     DEY
     BPL @Loop
     RTS
@@ -3017,14 +3018,14 @@ ResetShopListAttributes:          ; clears the highlighted colour
 ShopListActiveBar:                ; set the highlighted colour
     LDY cursor
     JSR SetAttributeBarLocation
-    LDA #$FA             
+    LDA #$FA
 
 DrawAttributeBar:                 ; draw all 3 attribute bytes
     STA $2007
     STA $2007
     STA $2007
     RTS
-    
+
 SetAttributeBarLocation:          ; gets the location to draw attribyte bytes
     LDA @ShopListAttribute_LUT, Y
     LDX #$23
@@ -3032,10 +3033,10 @@ SetAttributeBarLocation:          ; gets the location to draw attribyte bytes
     STA $2006
     RTS
 
-   @ShopListAttribute_LUT:         
+   @ShopListAttribute_LUT:
     .byte $CD
     .byte $D5
-    .byte $DD 
+    .byte $DD
     .byte $E5
     .byte $ED
 
@@ -3073,15 +3074,15 @@ ShopFrame:
 ShopFrameNoCursor:
     JSR ClearOAM               ; do all the same things as above, in the same order
     JSR DrawShopPartySprites   ;  only do not draw the cursor -- used by inn and clinic only
-    
+
 _ShopFrame_WaitForVBlank:
     JSR WaitForVBlank_L
     LDA #>oam
     STA $4014
-    
+
     LDA shop_listactive        ; is the inventory list the box the cursor is on?
-    BEQ :+    
-   
+    BEQ :+
+
     LDA shop_cursorchange      ; did the cursor change since the last frame?
     BEQ :+
         JSR ChangeInventoryList_Color ; change the position of the green highlight
@@ -3119,7 +3120,7 @@ _ShopFrame_CheckBtns:
 
   @Exit:
     JMP ClearButtons
-  
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3136,7 +3137,7 @@ _ShopFrame_CheckBtns:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-ShopAttributes:    
+ShopAttributes:
 .byte $D3,$CB,$DB ; attribute position
 .byte $00,$0F,$00 ; attribute value
 
@@ -3158,21 +3159,21 @@ DrawShop:
     ; last byte of that little loop is $00, so that's still in A...
     STA menustall                ; disable menu stalling (PPU is off)
     STA tmp+2                    ; no additive for the DrawImageRect routine
-  
+
     ; Draw the shopkeeper
     ;LDX shop_type                ; get the shop type in X
     ;LDA lut_ShopkeepAdditive, X  ; use it to fetch the image additive from our LUT
     ;STA tmp+2                    ; tmp+2 is the image additive (see DrawImageRect)
-    
-    LDA #7                     
-    STA dest_y                   
-    LDA #12            
+
+    LDA #7
+    STA dest_y
+    LDA #12
     STA dest_x
-    LDA #9 
+    LDA #9
     STA dest_ht
     LDA #4
     STA dest_wd
-    
+
     LDA #<lut_ShopkeepImage      ; get the pointer to the shopkeeper image
     STA image_ptr
     LDA #>lut_ShopkeepImage
@@ -3191,7 +3192,7 @@ DrawShop:
         LDA #SHOP_ITEM
         STA shop_type
 
-  : DEC dest_y ; JIGS 
+  : DEC dest_y ; JIGS
     JSR DrawShopString           ; and draw that string (the shop title string)
 
     JSR DrawShopGoldBox          ; draw the gold box
@@ -3216,10 +3217,10 @@ LoadShopInventory:
     LDY #5
   : STA item_box, Y      ; clear item box and add null terminator
     DEY
-    BPL :- 
+    BPL :-
     STA item_box_offset  ; clear this so the list isn't scrolled
 
-    LDA shop_id          ; get the shop ID 
+    LDA shop_id          ; get the shop ID
     ASL A                ; double it
     TAX                  ; put it in X for indexing
 
@@ -3242,25 +3243,25 @@ LoadShopInventory:
     ;; check to see if anything in the box is a key item
     ;; check if the player has it
     ;; if they do, remove it
-    
+
     LDA shop_type
     CMP #SHOP_ITEM
     BCC @End
 
-    JSR Set_Inv_KeyItem  
-    
- ;  @KeyItemCheck: 
+    JSR Set_Inv_KeyItem
+
+ ;  @KeyItemCheck:
  ;   LDA item_box, Y
  ;   CMP #ITEM_KEYITEMSTART
  ;   BCC @NextKeyItem
- ;   
+ ;
  ;   TAX
  ;   TYA
  ;   PHA
  ;   TXA
  ;   JSR DOES_ITEM_EXIST_1BIT
  ;   BEQ @DoesNotExist
- ;   
+ ;
  ;   ;; the player has the item...
  ;   PLA
  ;   TAY
@@ -3268,39 +3269,39 @@ LoadShopInventory:
  ;   STA item_box, Y
  ;   BEQ @End          ;; must assume that the shop only has one key item
  ;   ;; because if clear it means this is the end of the shop's inventory, and things will get breaky
- ;   
+ ;
  ;  @DoesNotExist:
  ;   PLA
  ;   TAY
- ;   
+ ;
  ;  @NextKeyItem:
  ;   DEY
  ;   BPL @KeyItemCheck
 
     ;; JIGS - for a shop that sells one key item at a time, the above code will be fine
     ;; for my Caravan, I have a surprise new item show up... so using thise code for now:
-    
+
     LDA #BOTTLE
-    JSR DOES_ITEM_EXIST_1BIT    
+    JSR DOES_ITEM_EXIST_1BIT
     BEQ @End             ; if not, exit
-    
+
     LDA item_box+4       ; if yes, see if this shop's last item is the Bottle
     CMP #BOTTLE
     BNE @End             ; if not, exit
-    
+
     LDA #LEWDS           ; change the item the caravan is selling
     STA item_box+4
 
     LDA #LEWDS           ; does the player have the new item?
-    JSR DOES_ITEM_EXIST_1BIT    
+    JSR DOES_ITEM_EXIST_1BIT
     BEQ @End             ; if not, exit
-    
+
     LDA #0               ; if yes, set the caravan's last item to nothing
     STA item_box+4
-    
+
    @End:
     RTS                  ; and exit
-    
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -3325,10 +3326,10 @@ DrawShopGoldBox:
     LDA #$0B                   ; draw shop string ID=$08 (" G")
     JMP DrawShopString         ; then exit
 
-  
-    
-    
-    
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Shop Select Buy Item   [$A857 :: 0x3A867]
@@ -3348,24 +3349,24 @@ DrawShopGoldBox:
 
 
 
-Fillblank_item:         
+Fillblank_item:
     LDX #9
     LDA cursor_max      ; if cursor_max didn't increase yet, this is the first item...
-    BNE :+              ; if this is the first item, there are no items! 
+    BNE :+              ; if this is the first item, there are no items!
        LDA item_box_offset
        SEC
        SBC #5
        STA item_box_offset ; subtract 5 from this, and re-do from scratch
-       JMP ShopSelectItem    
-    
-  : LDA ShopListBlankItemCodes_LUT-1, X 
+       JMP ShopSelectItem
+
+  : LDA ShopListBlankItemCodes_LUT-1, X
     STA str_buf+$40, Y
     INY
     DEX
     BNE :-
- 
+
     INC blank_item
-    
+
     INC cursor_max       ; increment cursor_max, our item counter
     LDA cursor_max
     CMP #5               ; ensure we don't exceed 5 items (max the shop space will allow)
@@ -3377,9 +3378,9 @@ ItemTypeLUT:
 ; ComplexString control codes for equipment, magic, and items, based on shop type
 
 ShopListBlankItemCodes_LUT:
-;      9   8   7   6   5  4   3   2   1   
+;      9   8   7   6   5  4   3   2   1
 .byte $01,$08,$09,$05,$08,$09,$05,$08,$09
-    
+
 ShopListItemCodes_LUT:
 ;      C   B   A   9   8   7   6   5   4   3   2   1
 .byte $01,$44,$03,$FF,$FF,$FF,$05,$FF,$FF,$F1,$05,$44
@@ -3390,27 +3391,27 @@ UpdateShopList:
     STY cursor_max    ; up counter
     STY blank_item
     INY
-    
+
 UpdateShopList_Loop:
     LDA item_box_offset ; 0 always, except when selling items, then it moves to scroll the list!
     CLC
     ADC cursor_max
     TAX
-    
+
     LDA item_box, X      ; use it to get the next shop item
     BNE @ItemExists
     BEQ Fillblank_item
-    
+
    @ItemExists:
     STA shop_curitem     ; save item ID
-    
+
     LDX shop_type
     LDA ItemTypeLUT, X
     STA str_buf+$40, Y   ; Item Name control code
     INY
-    
+
     LDX #$0C
-   @WriteLoop: 
+   @WriteLoop:
     LDA ShopListItemCodes_LUT-1, X
     CMP #$44             ; convert $44 to item ID
     BNE :+
@@ -3422,7 +3423,7 @@ UpdateShopList_Loop:
 
 ;;  The item string should now look like this:    (05 is single line break)
 ;;  Name Code, Item ID, 05, x , Inventory QTY, 05 | FF, FF          | FF, 03, Item ID, 01
-;;  01         02       03, 04, 05-06        , 07 | 08, 09          | 0A, 0B, 0C     , 0D 
+;;  01         02       03, 04, 05-06        , 07 | 08, 09          | 0A, 0B, 0C     , 0D
 ;;                                      if magic: | L , Spell Level |
 
     LDA shop_type
@@ -3430,53 +3431,53 @@ UpdateShopList_Loop:
     BCC @EquipmentQTY
     CMP #SHOP_ITEM
     BCC @MagicQTY
-    
+
    @ItemQTY:
     LDX shop_curitem     ; get item ID
-    LDA items, X           
+    LDA items, X
     JMP @PrintQuantity
-   
+
    @EquipmentQTY:
-    TYA                     
-    PHA   
+    TYA
+    PHA
     JSR CheckEquipmentInventory ; like CheckMagicInventory
-    PLA       
-    TAY 
+    PLA
+    TAY
     JMP :+
-    
-   @MagicQTY: 
-    TYA                     
+
+   @MagicQTY:
+    TYA
     PHA
     JSR CheckMagicInventory ; does everything to check how many of each spell there is, known and in inventory
-    PLA                     ; this also puts spell level in str_buf+$49, Y! 
+    PLA                     ; this also puts spell level in str_buf+$49, Y!
     TAY                     ; it does this before Y is re-used for another loop and restored here
     LDA #$95                ; L
     STA str_buf+$3A, Y      ; overwrite the #$FF in this slot
   : LDA #1
-    STA inv_canequipinshop  ; turn on the switch for characters posing      
+    STA inv_canequipinshop  ; turn on the switch for characters posing
     LDA shop_amount
-    
-   @PrintQuantity: 
+
+   @PrintQuantity:
     STA tmp
     JSR PrintNumber_2Digit ; print quantity
-    LDA format_buf-1       ; tens   
-    STA str_buf+$38, Y    
-    LDA format_buf-2       ; ones 
+    LDA format_buf-1       ; tens
+    STA str_buf+$38, Y
+    LDA format_buf-2       ; ones
     CMP #$FF
     BNE @TwoDigit
-    
+
    @Singledigit:
     STA str_buf+$38, Y
     LDA format_buf-1
 
    @TwoDigit:
-    STA str_buf+$37, Y   
-    
-;;  The item string should now look like this:    
+    STA str_buf+$37, Y
+
+;;  The item string should now look like this:
 ;;  02/07 Item ID 05 x  Inventory QTY 05 | _  _           | _  03 Item ID 01
-;;  41    42      43 44 45-46         47 | 48 49          | 4A 4B 4C      4D 
+;;  41    42      43 44 45-46         47 | 48 49          | 4A 4B 4C      4D
 ;;                             if magic: | L  Spell Level |
-  
+
     INC cursor_max           ; increment cursor_max, our item counter
     LDA cursor_max
     CMP #5                   ; ensure we don't exceed 5 items (max the shop space will allow)
@@ -3488,12 +3489,12 @@ UpdateShopList_Done:
     SEC
     SBC blank_item
     STA cursor_max
-   
+
     DEY
     LDA #0
     STA str_buf+$40, Y     ; slap a null terminator at the end of our string
     STA str_buf+$40        ; slap a null terminator at the end of equipment list ???
-    
+
     LDA #22
     STA dest_x
     LDA #4
@@ -3507,23 +3508,23 @@ UpdateShopList_Done:
 
 
 ConvertInventoryToItemBox:
-    LDA #0        
+    LDA #0
     STA cursor_max
     TAX
-    
+
     LDY #64
    @ClearBox:
     STA item_box-1, Y
     DEY
     BNE @ClearBox
-    
+
     LDA shop_type
     BEQ @Weapons
     CMP #SHOP_WHITEMAGIC
     BCC @Armor
     CMP #SHOP_ITEM
     BCC @Magic
-    
+
     INY                   ; skip the first item that isn't an item
    @Items:
     LDA items, Y          ; get item from inventory
@@ -3531,59 +3532,59 @@ ConvertInventoryToItemBox:
     TYA                   ; otherwise, turn Y into item ID
     STA item_box, X       ; save it in the item box
     INX                   ; increase X to next item box slot
-   @NextItem:   
+   @NextItem:
     INY                   ; increase item ID/loop counter
     CPY #item_qty_stop - items
     BNE @Items            ; if it matches the end of items, finish
     BEQ @BuildSellString
-    
+
    @Magic:
     JSR Set_Inv_Magic
     LDX #0
     LDY #128
     BNE @DecompressInventory
-    
-   @Weapons:  
+
+   @Weapons:
     JSR Set_Inv_Weapon
     LDX #0
     LDY #64
     BNE @DecompressInventory
-   
+
    @Armor:
     JSR Set_Inv_Weapon
     LDX #ARMORSTART            ; X and Y basically act as start and stop locations
     LDY #64+ARMORSTART         ; so for armor, its start at 64, end at 128
-    
+
    @DecompressInventory:
     STY tmp+4                  ; max item amount
     LDA #0
     STA tmp+3                  ; counter for item box
-    
+
     ; X = offset for where to begin counting items from (+$40 for armor)
-   
-   @Loop: 
+
+   @Loop:
     TXA
-    PHA                        ; backup item ID    
+    PHA                        ; backup item ID
     JSR DOES_ITEM_EXIST        ; A = item ID going in, output is A = amount, Carry set on no item
     PLA
     TAX                        ; restore item ID and put in X
     INX                        ; convert item to 1-based / check next item
     BCS @Next
-    
-   @Exists: 
+
+   @Exists:
     TXA
     LDY tmp+3                  ; load item box counter (position) into Y
-    STA item_box, Y            ; put the item ID in the item box      
+    STA item_box, Y            ; put the item ID in the item box
     INC tmp+3                  ; and increment the counter
-   
-   @Next:                  
+
+   @Next:
     CPX tmp+4                  ; compare to max amount to check for
-    BNE @Loop    
+    BNE @Loop
 
    @BuildSellString:
     LDA item_box
     RTS
-    
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3662,14 +3663,14 @@ ShopLoop_CharNames:
 
 HideShopCursor:
     LDA #$F0
-    STA shopcurs_x
-    STA shopcurs_y
+    STA cursor_x
+    STA cursor_y
     JMP ShopFrame              ; update cursor position before drawing things
 
 CommonShopLoop_Cmd:
     LDA #<lut_ShopCurs_Cmd     ; get the pointer to the desired cursor position LUT
-    STA shop_cursor_ptr        ;  
-    LDA #>lut_ShopCurs_Cmd     ;  
+    STA shop_cursor_ptr        ;
+    LDA #>lut_ShopCurs_Cmd     ;
     STA shop_cursor_ptr+1
     JMP _CommonShopLoop_Main   ; then jump ahead to the main entry for these routines
 
@@ -3684,11 +3685,11 @@ ShopSelectItem:
 
 CommonShopLoop_List:
     LDA #$A0                   ; update cursor to point to top of the list
-    STA shopcurs_x
+    STA cursor_x
     LDA #$20
-    STA shopcurs_y
+    STA cursor_y
     JSR ShopFrame              ; show cursor and update attributes
-    
+
     LDA #<lut_ShopCurs_List    ; exactly the same as _Cmd version of the routine
     STA shop_cursor_ptr        ; only have (shop_cursor_ptr) point to a different LUT
     LDA #>lut_ShopCurs_List
@@ -3704,17 +3705,17 @@ CommonShopLoop_List:
     LDA joy              ; get the joy data
     AND #$0C ; 0F        ; isolate up/down bits (JIGS - use 0F for left/right)
     STA joy_prevdir      ; and store in prev_dir and begin loop
-    
+
   @Loop:
     LDA cursor           ; get the cursor
     ASL A                ; multiply by 2 (2 bytes per position)
     TAY                  ; put in Y for indexing
 
     LDA (shop_cursor_ptr), Y    ; fetch the cursor X coord from out LUT
-    STA shopcurs_x       ; and record it
+    STA cursor_x       ; and record it
     INY                  ; inc Y to get Y coord
     LDA (shop_cursor_ptr), Y    ; read it
-    STA shopcurs_y       ; and record it
+    STA cursor_y       ; and record it
 
     JSR ShopFrame        ; now that cursor position has been recorded... do a frame
 
@@ -3724,7 +3725,7 @@ CommonShopLoop_List:
     BNE @A_Pressed
   ;  LDA joy_start        ; or if start/select have been pressed
   ;  ORA joy_select
-  ;  BNE @Start_Pressed    
+  ;  BNE @Start_Pressed
 
     LDA joy              ; if neither pressed.. see if the cursor has been moved
     AND #$0C ; F         ; F to isolate up/down/left/right buttons, C for up/down only
@@ -3738,7 +3739,7 @@ CommonShopLoop_List:
 
    ; CMP #$01             ; if right was pressed
    ; BEQ @Right
-   ; 
+   ;
    ; CMP #$02             ; if left was pressed
    ; BEQ @Left
 
@@ -3752,7 +3753,7 @@ CommonShopLoop_List:
 
     LDA shop_selling
     BNE @ScrollListUp
-    
+
    @UpReturn:
     LDA cursor_max       ; otherwise (below zero), wrap to cursor_max-1
     SEC
@@ -3768,14 +3769,14 @@ CommonShopLoop_List:
 
     LDA shop_selling
     BNE @ScrollListDown
-    
+
    @DownReturn:
     LDA #0               ; if yes, wrap cursor to zero
 
   @MoveDone:             ; code reaches here when A is to be the new cursor position
     STA cursor           ; just write it back to the cursor
     JMP DisplayDescription ; @Loop            ; and continue loop
- 
+
   @B_Pressed:            ; if B pressed....
     SEC                  ; SEC to indicate player pressed B
 
@@ -3789,7 +3790,7 @@ CommonShopLoop_List:
     BCC @ButtonDone      ;  and jump to @ButtonDone (always branches)
 
 ;; JIGS - this wasn't working, requires too much extra work
-    
+
 ;  @Left:
 ;    LDA shop_selling
 ;    BNE :+
@@ -3800,13 +3801,13 @@ CommonShopLoop_List:
 ;
 ;    ;; left / right swaps shop_type between 0-7 so you can sell different inventories
 ;
-;  @Right:  
+;  @Right:
 ;    LDA shop_selling
 ;    BNE :+
 ;      BEQ @Loop
-;      
+;
 ;  : INC shop_type
-;  
+;
 ;  @ChangeSellType:
 ;    LDA shop_type
 ;    AND #$03
@@ -3820,22 +3821,22 @@ CommonShopLoop_List:
     CPX #$3C            ; if item box scrolls beyond this point, no more scrolling
     ;BCC :+
     BCS @DownReturn
-    
+
     LDY #0
- @ScrollDownLoop:  
+ @ScrollDownLoop:
     LDA item_box, X
     BEQ @DownReturn
     INX
     INY
-    CPY #6              ; check the next 5 slots for 0. If a 0 is reached before 5, 
+    CPY #6              ; check the next 5 slots for 0. If a 0 is reached before 5,
     BNE @ScrollDownLoop ; there's no more items to display
-    
+
     LDA item_box_offset
     CLC
     ADC #05
     STA item_box_offset
     LDA #0
-    STA cursor           
+    STA cursor
     JMP ShopSelectItem
 
 @ScrollListUp:
@@ -3852,45 +3853,45 @@ CommonShopLoop_List:
 DisplayDescription:
     LDA shop_listactive
     BEQ @Exit
-   
+
     LDA cursor
     CLC
     ADC item_box_offset
     TAX
     LDA item_box, X
     STA shop_curitem
-    
+
     LDA #20
     STA dest_y
     LDA #2
     STA dest_x
-    
+
     LDA shop_type
     CMP #SHOP_WHITEMAGIC
     BCS @NotEquipment
-    
+
     LDA shop_descriptionset
     BNE @OnlyUpdateStats
-    
+
    @Armor:
     LDA #$1B
-    
+
     LDX shop_type
     BNE:+
-   
-   @Weapon:  
+
+   @Weapon:
     LDA #$1C
-  : JSR DrawShopString 
+  : JSR DrawShopString
     LDA #1
     STA shop_descriptionset
-    
+
    @OnlyUpdateStats:
     JSR LongCall
     .word WeaponArmorShopStats
     .byte BANK_EQUIPSTATS
-    
+
     LDY #0
-   @Loop: 
+   @Loop:
     LDA bigstr_buf+12, Y ; second loop grabs bigstr_buf+16, as Y will = 4 by then--then 3rd loop gets +20
     STA tmp
     LDA #0
@@ -3898,10 +3899,10 @@ DisplayDescription:
     JSR PrintNumber_3Digit
     LDA format_buf-3
     STA bigstr_buf, Y
-    INY 
+    INY
     LDA format_buf-2
     STA bigstr_buf, Y
-    INY 
+    INY
     LDA format_buf-1
     STA bigstr_buf, Y
     INY                    ; skip over the line breaks
@@ -3910,40 +3911,40 @@ DisplayDescription:
     BEQ @Loop
     CPY #8
     BEQ @Loop
-   
- ; bigstr_buf now looks like: 
+
+ ; bigstr_buf now looks like:
  ; Stat1Digit1, Stat1Digit2, Stat1Digit3, #01
  ; Stat2Digit1, Stat2Digit2, Stat2Digit3, #01
  ; Stat3Digit1, Stat3Digit2, Stat3Digit3, #00
- 
+
     LDA shop_type
     BEQ :+
-    
+
     ;; if in armor shop... replace the space before the evade penalty with a minus sign
-    
+
     LDX #5
-   @MiniMinusLoop: 
+   @MiniMinusLoop:
     LDA bigstr_buf, X
     CMP #$FF
     BEQ @MinusSign
     DEX
     CPX #3
     BNE @MiniMinusLoop
-    BEQ :+ 
-    
+    BEQ :+
+
    @MinusSign:
     LDA #$C2
     STA bigstr_buf, X
- 
+
   : LDA #<bigstr_buf
     STA text_ptr
     LDA #>bigstr_buf
     STA text_ptr+1
-  
+
     JSR DrawComplexString
-   @Exit: 
-    JMP _CommonShopLoop_Main  
-    
+   @Exit:
+    JMP _CommonShopLoop_Main
+
    @NotEquipment:
     LDX shop_curitem
     DEX
@@ -3972,14 +3973,14 @@ DisplayDescription:
 Shop_SpellDescription: ;; also used by the learning magic menu
     TAX
     LDA #BANK_ITEMDESC
-    STA cur_bank    
+    STA cur_bank
     JSR ItemDescriptions
     LDA #BANK_MENUS
-    STA cur_bank    
+    STA cur_bank
     RTS
 
 
-   
+
 
 
 
@@ -3992,9 +3993,9 @@ Shop_SpellDescription: ;; also used by the learning magic menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawShopCursor:
-    LDA shopcurs_x     ; copy over the shop cursor coords
+    LDA cursor_x     ; copy over the shop cursor coords
     STA spr_x
-    LDA shopcurs_y
+    LDA cursor_y
     STA spr_y
     JMP DrawCursor     ; then draw it, and exit
 
@@ -4007,29 +4008,29 @@ DrawShopCursor:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawShopPartySprites:
-;; JIGS - really cram 'em in there! Let Light Warrior #2 see the wares! 
+;; JIGS - really cram 'em in there! Let Light Warrior #2 see the wares!
 
     LDA #$82
-    STA spr_x    
+    STA spr_x
     LDA #$2A ;44
     STA spr_y
     LDA #0<<6
-    JSR DrawOBSprite    
-    
+    JSR DrawOBSprite
+
     LDA #$42 ;5D
     STA spr_y
     LDA #1<<6
-    JSR DrawOBSprite    
-    
+    JSR DrawOBSprite
+
     LDA #$5A ; 3C
     STA spr_y
     LDA #2<<6
-    JSR DrawOBSprite    
+    JSR DrawOBSprite
 
     LDA #$72 ; 55
     STA spr_y
     LDA #3<<6
-    JMP DrawOBSprite    
+    JMP DrawOBSprite
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4088,7 +4089,7 @@ DrawInnClinicConfirm:
     LDA shop_type
     CMP #SHOP_CLINIC
     BEQ @CalculateClinicPrice
-    
+
    @CalculateInnPrice:    ;; JIGS - Each character's level x 5 added up
     LDX #05
     LDA ch_level
@@ -4098,22 +4099,22 @@ DrawInnClinicConfirm:
     ADC ch_level+$C0
     ADC #$04             ;; add 4 to make all levels 1-based
     STA tmp
-   
+
     CMP #64              ;; if the part's level is 4*16, then double the price
     BCC @DrawNumber
-    
+
     LDX #10
     CMP #100             ;; if the party's level is 4*25 then triple the price
     BCC @DrawNumber
-    
+
     LDX #15
-    CMP #140             ;; if the party's level is 4*35 then price gouge those 
+    CMP #140             ;; if the party's level is 4*35 then price gouge those
     BCC @DrawNumber      ;; foolishly rich light warriors!
-    
+
     LDX #25
     BNE @DrawNumber
-    
-   @CalculateClinicPrice: 
+
+   @CalculateClinicPrice:
     LDA shop_curitem           ; code only reaches here if they can afford it.
     CLC
     ADC shop_curitem           ; add their original selection to itself twice (ie:  *3)
@@ -4126,8 +4127,8 @@ DrawInnClinicConfirm:
     ROR A                      ;   by shifting it
     AND #$C0                   ; and masking out desired bits
     TAX                        ; put the char index in X.  This is the car we are to revive.
-    STX shop_curitem    
-    
+    STX shop_curitem
+
     LDA ch_level, X
     CLC
     ADC #01         ;; make level 1 based
@@ -4135,21 +4136,21 @@ DrawInnClinicConfirm:
     STA tmp
     AND #$F0
     BEQ :+
-    
-    LDX #75        ;; except past level 16, it is level * 75   
-    LDA tmp         
+
+    LDX #75        ;; except past level 16, it is level * 75
+    LDA tmp
     CMP #25
     BCC :+
-    
+
     LDX #125       ;; and past level 25, it is level * 125
     LDA tmp
     CMP #35
     BCC :+
-    
+
     LDX #200       ;; and past level 35, it is level * 200
-    
-  : LDA tmp          
-   
+
+  : LDA tmp
+
    @DrawNumber:
     JSR MultiplyXA
     STA tmp
@@ -4168,11 +4169,11 @@ DrawInnClinicConfirm:
     LDA #04
     STA dest_x
     ;; JIGS - movin' numbers on the screen
-    
+
     JSR PrintNumber_5Digit    ; print it
     JMP DrawShopComplexString ; and draw it
-    
-    
+
+
 
 
 
@@ -4191,10 +4192,10 @@ SaveGame:
     JSR LongCall
     .word SaveScreen_FromMenu
     .byte BANK_TITLE
-   
+
     LDA music_track             ; check the music track
     BMI :+                      ; high bit set if music is not playing
-    LDA SaveGameMusic           
+    LDA SaveGameMusic
     AND #$01                    ; will be 0 if saving didn't happen
     BEQ :++
   : LDA dlgmusic_backup         ; pre-emptively end the save music
@@ -4251,7 +4252,7 @@ MenuRecoverPartyMP:
 
   @Loop:
     JSR MenuRecoverSingleMP
-    
+
     TXA             ; move index into A to do some math
     SEC
     SBC #$38        ; JIGS - undo the +$30 and +8 added to X
@@ -4261,18 +4262,18 @@ MenuRecoverPartyMP:
     BNE @Loop       ; and loop until it wraps (full party)
     RTS             ; then exit
 
-MenuRecoverSingleMP:    
+MenuRecoverSingleMP:
     JSR CheckDeadStone
     BCS @Skip
-    
-    LDY #0 
+
+    LDY #0
     TXA             ; $0, $40, $80, or $C0
     CLC
     ADC #ch_mp - ch_stats    ; +$30
     TAX
 
    @InnerLoop:
-    LDA ch_stats, X ; X is pointer to level 1 MP 
+    LDA ch_stats, X ; X is pointer to level 1 MP
     AND #$0F        ; clear current mp entirely, leaving only max mp
     STA tmp+1       ; back it up
     ASL A           ; shift by 4
@@ -4285,10 +4286,10 @@ MenuRecoverSingleMP:
     INX             ; +1 for each spell level
     CPY #08
     BNE @InnerLoop
-    
+
    @Skip:
-    RTS    
-    
+    RTS
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4316,7 +4317,7 @@ PlaySFX_MenuSel:
 ;    STA sq2_sfx      ; indicate square 2 is busy with sfx for $1F frames
 ;    RTS              ;  and exit!
 
-;; JIGS - uses the noise channel instead now. Pff! 
+;; JIGS - uses the noise channel instead now. Pff!
 
     LDA Options
     AND #SFX_MUTED
@@ -4324,10 +4325,10 @@ PlaySFX_MenuSel:
 
     LDA #%00010100
     STA $400C
-    
+
     LDA #%10001000
     STA $400F
-    
+
     LDA #%00001010
     STA $400E
 
@@ -4364,49 +4365,49 @@ PlaySFX_MenuMove:
 
     LDA #%00000010
     STA $400C
-    
+
     LDA #%01000000
     STA $400F
-    
+
     LDA #$0
     STA $400E
-    
+
    @Done:
     RTS              ;  and exit!
-    
-    
+
+
 ;; JIGS - optional heal SFX instead of the jingle
-    
+
 PlayHealSFX:
     LDA Options
     AND #SFX_MUTED
     BEQ SFX_Done
- 
+
 PlayHealSFX_Map:
-    LDA #%01000111 ; 
+    LDA #%01000111 ;
     STA $4004
-    
-    LDA #%11101010 ; 
+
+    LDA #%11101010 ;
     STA $4005
-    
-    LDA #%11110000 ; 
-    STA $4006        
+
+    LDA #%11110000 ;
+    STA $4006
     LSR A
     LDA #%11000000
     STA $4007
-    
+
     LDA #$20
     STA sq2_sfx      ; indicate square 2 is playing a sound effect for $20 frames
-    
+
     SFX_Done:
-    RTS              ;  and exit!  
- 
- 
+    RTS              ;  and exit!
+
+
 PlaySFX_CharSwap:
     LDA Options
     AND #SFX_MUTED
     BEQ @Done
-    
+
     LDA #%10111010   ; 50% duty, length disabed, decay disabed, volume=$A
     STA $4004
 
@@ -4420,7 +4421,7 @@ PlaySFX_CharSwap:
 
     LDA #$1F
     STA sq2_sfx      ; indicate square 2 is busy with sfx for $1F frames
-    
+
     @Done:
     RTS              ;  and exit!
 
@@ -4455,7 +4456,7 @@ ClearMenuOtherNametables:
 
 MusicPlay_LoadingCHR:      ; this is to smooth out music while loading up screens
     JSR WaitForVBlank_L
-    JMP CallMusicPlay    
+    JMP CallMusicPlay
 
 DrawGameTime:
     LDA playtimer+1 ; seconds
@@ -4465,7 +4466,7 @@ DrawGameTime:
     STA bigstr_buf+6
     LDA format_buf-1
     STA bigstr_buf+7
-    
+
     LDA playtimer+2 ; minutes
     STA tmp
     JSR FormatNumber_2Digits ; formats, but doesn't remove leading 0s
@@ -4473,7 +4474,7 @@ DrawGameTime:
     STA bigstr_buf+3
     LDA format_buf-1
     STA bigstr_buf+4
-    
+
     LDA playtimer+3 ; hours
     STA tmp
     JSR FormatNumber_2Digits ; formats, but doesn't remove leading 0s
@@ -4481,29 +4482,29 @@ DrawGameTime:
     STA bigstr_buf+1
     LDA format_buf-2
     STA bigstr_buf
-    
+
     LDA #$E4        ; : seperators
     STA bigstr_buf+2
     STA bigstr_buf+5
     LDA #0
     STA bigstr_buf+8
-    
-    LDA #<(bigstr_buf)    
+
+    LDA #<(bigstr_buf)
     STA text_ptr
     LDA #>(bigstr_buf)
     STA text_ptr+1
-    LDA #02 
-    STA dest_x 
+    LDA #02
+    STA dest_x
     LDA #27
     STA dest_y
     LDA #1
     STA menustall
     JSR WaitForVBlank_L
-    JMP DrawComplexString  
+    JMP DrawComplexString
 
 EnterMainMenu:
     LDA #0
-    STA $2001           ; turn off the PPU (we need to do some drawing)  
+    STA $2001           ; turn off the PPU (we need to do some drawing)
     LDA #BANK_THIS
     STA cur_bank          ; set cur_bank to this bank
     JSR LoadMenuCHRPal        ; load menu related CHR and palettes
@@ -4518,7 +4519,7 @@ ResumeMainMenu:
     STA menustall                   ; and disable menu stalling
     STA joy
     STA joy_prevdir
-    STA item_pageswap    
+    STA item_pageswap
 
     ;; reload first 3 palettes
     LDX #$0B
@@ -4530,40 +4531,40 @@ ResumeMainMenu:
 
     JSR LongCall              ; do this to update max HP for drawing
     .word SetPartyStats
-    .byte BANK_Z    
-    
+    .byte BANK_Z
+
     JSR DrawMainMenu                ; draw the main menu
     LDA #$03                        ; draw the little dot that marks the party map character
     JSR SetLeadIndexTile
     JSR ClearMenuOtherNametables
-    ;; JIGS ^ clear out the side nametables so screen shaking doesn't produce garbage pixels    
+    ;; JIGS ^ clear out the side nametables so screen shaking doesn't produce garbage pixels
     LDA #BANK_THIS
     STA cur_bank
 	JSR MusicPlay_LoadingCHR
     JSR TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen on
 
-MainMenuResetCursorMax:    
+MainMenuResetCursorMax:
     LDA #0
     STA cursor                      ; flush cursor, joypad, and prev joy directions
 
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ;  Get SM flag, and shift it into C
     BCS @CheckTile          ; if not on overworld, then don't let cursor touch save option
-    
+
    @SetMax6:
     LDA #6
     BNE :+
 
-   @CheckTile:       
+   @CheckTile:
     LDA tileprop_now        ; check tile they're standing on
     CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
     BEQ @SetMax6            ; then allow using the save option!
-    
-   @SetMax5:     
+
+   @SetMax5:
     LDA #5                        ;; JIGS - set cursor max to 5
   : STA cursor_max                ; flow seamlessly into MainMenuLoop
 
-MainMenuLoop:   
+MainMenuLoop:
     JSR ClearOAM                  ; clear OAM (erasing all existing sprites)
     JSR DrawMainMenuCursor        ; draw the cursor
     JSR DrawMainMenuCharSprites   ; draw the character sprites
@@ -4578,30 +4579,30 @@ MainMenuLoop:
     BNE @Select_Pressed
     LDA joy_start
     BNE @Start_Pressed
-    
+
     JSR MoveCursorUpDown          ; then move the cursor up or down if up/down pressed
     JMP MainMenuLoop              ;  rinse, repeat
-  
+
    @Select_Pressed:
     JSR LineUp_InMenu
     BCC ResumeMainMenu            ; characters swappwed ; redraw menu
     JMP MainMenuResetCursorMax    ; not swapped - just reset the cursor
-   
+
    @Start_Pressed:
     JSR WaitForVBlank_L
     LDA #$FF
     JSR SetLeadIndexTile
-    
+
     LDA lead_index
     CLC
     ADC #$40
     STA lead_index
-    
+
     LDA #03
     JSR SetLeadIndexTile
     JSR PlaySFX_CharSwap
     JMP MainMenuLoop
-   
+
    @B_Pressed:
     JSR ClearButtons
     STA $2001
@@ -4614,7 +4615,7 @@ MainMenuLoop:
     LDA cursor                  ; get the cursor
     ASL A
     TAX
-    
+
     LDA @MenuJumpList, X
     STA tmp
     LDA @MenuJumpList+1, X
@@ -4634,7 +4635,10 @@ MainMenuLoop:
 
    @Item:
     LDA #0
-    STA backup_cursor
+    STA cursor_x
+    STA cursor_y
+    STA submenu_cursor
+    STA item_pageswap
     JSR EnterItemMenu         ; enter item menu
     JMP ResumeMainMenu        ; then resume (redraw) main menu
 
@@ -4661,7 +4665,7 @@ MainMenuLoop:
    @CanUseMagic:
     JSR EnterMagicMenu        ; if target is valid.. enter magic menu
     JMP ResumeMainMenu        ; then resume (redraw) main menu and continue
-    
+
    @Equip:
     JSR MainMenuSubTarget
     BCS @ReturnToMainMenu
@@ -4683,7 +4687,7 @@ MainMenuLoop:
     BCS @ReturnToMainMenu     ;  if they escaped the sub target selection, then escape it
     JSR EnterStatusMenu       ; otherwise, enter Status menu
     JMP ResumeMainMenu        ; then resume (redraw) main menu
-    
+
    @Option:
     LDA #0
     STA $2001               ; turn off the PPU
@@ -4700,7 +4704,7 @@ MainMenuLoop:
     JSR SaveGame
     JMP EnterMainMenu ; uses Enter instead of Resume, to re-load the appropriate character sprites
 
-   
+
 SetLeadIndexTile:
     PHA
     LDA $2002
@@ -4724,7 +4728,7 @@ LeadIndicator_LUT:
     .word $21F0
     .word $22B0
 
-    
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Main Menu Sub Target  [$AE71 :: 0x3AE81]
@@ -4742,7 +4746,7 @@ LeadIndicator_LUT:
 MainMenuSubTarget:
     LDA #0              ; clear the cursor
     STA cursor
-MainMenuSubTarget_NoClear:    
+MainMenuSubTarget_NoClear:
     LDA #4
     STA cursor_max
 
@@ -4770,10 +4774,10 @@ MainMenuSubTarget_NoClear:
     STA submenu_targ
     CLC                ; then clear C to indicate a target has been selected
     RTS                ; and exit!
-  
 
-   
-   
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -4786,181 +4790,208 @@ MainMenuSubTarget_NoClear:
 
 DrawTitleTargetName:
     LDA #MBOX_TITLE
-    JSR DrawMainItemBox             
+    JSR DrawMainItemBox
     DEC dest_y
     LDA #7
     JMP DrawCharMenuString         ; draw the character's name
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Draw Magic Menu Main Box  [$BA6D :: 0x3BA7D]
+;;
+;;    Draws the magic menu main box (containing all the spells)
+;;  Also sets the cursor to the first spell in the list.
+;;
+;;  OUT:       C = set if player has no spells
+;;                 clear if player has at least 1 spell
+;;        cursor = first spell on the character's list (if they have any spells)
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DrawMagicMenuMainBox:
+    LDA #MBOX_INV
+    JSR DrawMainItemBox          ; Draw the box itself from the list of MainItem boxes
+    LDA #18                      ; and draw string 2A (entire spell list, along with level names an MP amounts
+    JSR DrawCharMenuString       ;   -- ALL the text in one string!)
+
+    LDX char_index
+    LDY #0
+  @Loop:
+    LDA ch_spells, X
+    BNE @FoundSpell
+    INX
+    INY
+    CPY #24
+    BNE @Loop          ; loop until we've checked every spell
+
+    INC submenu_cursor ; set to 1 if no spells found
+    RTS
+
+  @FoundSpell:
+    TYA               ; if we found a spell... move which spell into A
+    STA backup_cursor ; put found spell in this variable
+    INC cursor_change ; indicate that there is at least 1 spell for the submenu
+    RTS               ; and exit
 
 
 
 DrawMagicMenu:
     LDA #0
+    STA cursor_change              ; stays 0 if no spells found
+    STA submenu_cursor             ; will be set to 1 later if there are no spells learned
+
     STA $2001                      ; turn off PPU
     STA menustall                  ; clear menustall
     STA descboxopen                ; and mark description box as closed
-    
+
     JSR ClearNT                    ; clear the nametable
     JSR DrawMagicMenuMainBox       ; draw the big box containing all the spells
-    ;; item_pageswap is set to 0 if no spells are found
-    JSR DrawTitleTargetName   
+
+    ;; submenu_cursor is set to 1 if no spells are found
+
+    JSR DrawTitleTargetName
     LDA #MBOX_SUBMENU
-    JSR DrawMainItemBox            ; sub menu box
+    JMP DrawMainItemBox            ; sub menu box
 
-DrawMagicSubMenuString:
-    LDA #10
-    STA dest_x
-    LDA #02
-    STA dest_y
-    LDA #67 
-    JMP DrawMenuString             ; "Cast / Learn / Forget"
 
-JumpToMagicLearnMenu:
-    LDA #0
-    STA cursor
-    STA cursor_max
-    STA item_pageswap
-    JSR MagicMenu_LearnSpell
 
 EnterMagicMenu:
     LDA #0
     STA cursor
-    STA item_pageswap              
-    INC item_pageswap              ; will be set to 0 later if there are no spells learned
-    
     JSR DrawMagicMenu
-    
+
+EnterMagicMenu_ResetSubMenuText:
+    LDA #10
+    STA dest_x
+    LDA #02
+    STA dest_y
+    LDA #67
+    JSR DrawMenuString             ; "Cast / Learn / Forget"
     JSR TurnMenuScreenOn_ClearOAM  ; clear OAM and turn the screen on
 
-EnterMagicSubMenu:
-    LDA #0
-    STA cursor
-    
-    LDA #1
-    STA menustall
-    JSR DrawMagicSubMenuString
- 
-NoLocal_MagicSubMenuLoop:
-  @MagicSubMenuLoop:
+    LDA submenu_cursor
+    BEQ PeruseMagicMenu
+    CMP #2
+    BEQ PeruseMagicMenu
+
+MagicSubMenuLoop:
     JSR ClearOAM                ; clear OAM
     JSR DrawMagicSubMenuCursor  ; draw the cursor
     JSR MenuFrame               ; and do a frame
 
     LDA joy_a
-    BNE @A_Pressed            ; check if A pressed
+    BNE @A_Pressed              ; check if A pressed
     LDA joy_b
-    BNE @B_Pressed            ; and B
+    BNE @B_Pressed              ; and B
 
-    JSR MoveMagicSubMenuCursor   ; otherwise, move the cursor if a direction was pressed
-    JMP @MagicSubMenuLoop        ; and keep looping
-
-  @B_Pressed:
-    RTS                       ; if B pressed, just exit
-
-  @A_Pressed:
-    JSR PlaySFX_MenuSel
-    LDA cursor
-    BEQ EnterMagicMenu_PrepareCursor
-    CMP #1
-    BEQ JumpToMagicLearnMenu
-    
-  @MagicForgetOption:
-    LDA item_pageswap
-    BEQ CannotEnterMagic
-    LDA #2
-    STA item_pageswap          ; set to 2 to indicate that selecting a spell will forget it
-    BNE :+
-    
-EnterMagicMenu_PrepareCursor:
-    LDA item_pageswap          ; is set to 0 if no spells are known
-    BEQ CannotEnterMagic
-    CMP #2
-    BCC :+
-      DEC item_pageswap
-  : LDA backup_cursor
-    STA cursor                 ; set cursor to first known spell
-    JSR EnterMagicMenu_Cast
-    JMP EnterMagicSubMenu
-    
-CannotEnterMagic:
-    JSR PlaySFX_Error
-    LDA #1
-    STA cursor               ; put cursor on Learn to suggest learning a spell first...
-    BNE NoLocal_MagicSubMenuLoop
-    
-EnterMagicMenu_Redraw:
-    PLA 
-    STA submenu_targ
-    PLA ; so many jumps now... need this to not be stuck pressing B in the submenu to exit
-    PLA
-    JSR DrawMagicMenu
-    JSR TurnMenuScreenOn_ClearOAM  ; clear OAM and turn the screen on    
-    JMP EnterMagicMenu_PrepareCursor
-    
-EnterMagicMenu_Cast:    
-    LDA #0                    ; otherwise.... (they have magic)
-    STA joy                   ; clear joypad
-    STA joy_prevdir           ; and previous joy directions
-    LDA #1
-    STA cursor_change
-    
-MagicMenu_Loop:
-    JSR ClearOAM              ; clear OAM
-    JSR DrawMagicMenuCursor   ; draw the cursor
-    JSR UpdateMP    
-    JSR MenuFrame             ; and do a frame
-
-    LDA joy_a
-    BNE @A_Pressed            ; check if A pressed
-    LDA joy_b
-    BNE @B_Pressed            ; and B
-
-    JSR MoveMagicMenuCursor   ; otherwise, move the cursor if a direction was pressed
-    JMP MagicMenu_Loop        ; and keep looping
+    JSR MoveSubMenuCursor       ; otherwise, move the cursor if a direction was pressed
+    JMP MagicSubMenuLoop        ; and keep looping
 
    @B_Pressed:
-    RTS                       ; if B pressed, just exit
+    RTS                         ; if B pressed, just exit
+
+   @A_Pressed:
+    LDA submenu_cursor
+    BEQ @CheckForSpells         ; see if there's a spell to cast
+    CMP #1
+    BNE @CheckForSpells         ; see if there's a spell to forget
+    LDA #0
+    STA cursor_x
+    STA cursor_y                ; clear the x/y cursor positions
+    JMP MagicMenu_LearnSpell
+
+   @CheckForSpells:
+    LDA cursor_change           ; is 0 if no spells are known
+    BNE @PeruseMagicMenu_SFX
+    JSR PlaySFX_Error
+    INC submenu_cursor          ; no spells, so move the cursor to "Learn"
+    JMP MagicSubMenuLoop
+
+   @PeruseMagicMenu_SFX:
+    JSR PlaySFX_MenuSel
+
+PeruseMagicMenu:
+    LDA #0                      ; otherwise.... (they have magic)
+    STA joy                     ; clear joypad
+    STA joy_prevdir             ; and previous joy directions
+
+MagicMenu_Loop:
+    JSR ClearOAM                ; clear OAM
+    JSR DrawMagicMenuCursor     ; draw the cursor
+    JSR UpdateMP
+    JSR MenuFrame               ; and do a frame
+
+    LDA joy_a
+    BNE @A_Pressed              ; check if A pressed
+    LDA joy_b
+    BNE @B_Pressed              ; and B
+
+    JSR MoveMagicMenuCursor     ; otherwise, move the cursor if a direction was pressed
+    JMP MagicMenu_Loop          ; and keep looping
+
+   @B_Pressed:
+    JMP EnterMagicMenu_ResetSubMenuText  ; if B pressed, just exit
 
    @A_Pressed:
     JSR PlaySFX_MenuSel         ; play the selection sound effect
-    LDA item_pageswap
-    CMP #1
-    BEQ :+                      ; if 1, resume as normal
-   
+    LDA submenu_cursor
+    BEQ MagicMenu_Cast
+
+   @CheckToForget:
     LDA #71
     JSR DrawItemDescBox         ; print "forget this spell?"
     JSR MenuWaitForBtn_SFX
-      LDA joy
-      AND #$80
-      BNE @ForgetSpell        ; if B was pressed, resume loop
-      JSR CloseDescBox
-      JMP EnterMagicMenu_Cast
-      
-   @ForgetSpell:  
-    JSR MagicMenu_ForgetSpell   ; if A was pressed, forget the spell  
-    LDA item_pageswap
-    BEQ @B_Pressed              ; if item_pageswap hits 0, there's no spells left to forget, so return to the submenu
-    INC item_pageswap           ; otherwise, item_pageswap was set back to 1 by the reloading of the screen, so set it back to 2
-    PLA
-    PLA
-    JMP EnterMagicMenu_PrepareCursor
-    
-  : JSR UseMagic_GetRequiredMP  ; see if we have MP to cast selected spell
-    BCS @HaveMP                 ; if so, skip ahead
+    LDA joy
+    AND #$80
+    BNE MagicMenu_ForgetSpell   ; if B was pressed, resume loop
+    JSR CloseDescBox
+    JMP PeruseMagicMenu
 
-      LDA #63                   ; otherwise...
-      JSR DrawItemDescBox       ;  print "you don't have enough MP" or whatever message (description text ID=$32)
-      JMP EnterMagicMenu_Cast   ;  and return to loop
-
-   @HaveMP:
-    LDA #0
-    STA backup_cursor_targ
-   
-    LDA submenu_targ
-    PHA
+MagicMenu_ForgetSpell:
+    JSR Set_Inv_Magic
     LDA cursor
     CLC
     ADC char_index
     TAX
+    LDA ch_spells, X            ; get spell ID
+  ;  BEQ @Oops
+    TAY
+    LDA #0
+    STA ch_spells, X            ; clear that byte in their spell list
+    DEY
+    TYA                         ; subtract 1 to shift the ID to 0-based
+    JSR ADD_ITEM                ; put it back in the inventory
+
+    JSR DrawMagicMenu           ; reload the magic screen to show the spell has vanished
+    LDA cursor_change
+    BNE PeruseMagicMenu
+    INC submenu_cursor          ; set submenu cursor to Forget
+    JMP MagicSubMenuLoop        ; and resume forgetting
+
+  ; @Oops:                            ; you tried to forget a spell that doesn't exist!
+  ;  JSR PlaySFX_Error                ; this really shouldn't be possible
+  ;  JMP PeruseMagicMenu
+
+MagicMenu_Cast:
+    JSR UseMagic_GetRequiredMP  ; see if we have MP to cast selected spell
+    BCS @HaveMP                 ; if so, skip ahead
+
+    LDA #63                     ; otherwise...
+    JSR DrawItemDescBox         ;  print "you don't have enough MP" or whatever message (description text ID=$32)
+    JMP PeruseMagicMenu         ;  and return to loop
+
+   @HaveMP:
+    LDA cursor
+    STA backup_cursor
+    CLC
+    ADC char_index
+    TAX
+
+    LDA #0
+    STA cursor
+    LDA submenu_targ
+    PHA
+
     LDA ch_spells, X
 
        ;  This is all a hardcoded mess.  Which I guess is fine because only a handful
@@ -5019,7 +5050,7 @@ MagicMenu_Loop:
 
 ;;;;;;;;;;;;;;;
 
-CureSpellPotency:    
+CureSpellPotency:
     JSR BattleRNG_L         ; use the frame counter as a make-shift pRNG
     AND #$0F                ; mask out the low bits
     ORA #$10                ; and ORA (effective range:  16-31)
@@ -5040,7 +5071,7 @@ Cure3SpellPotency:
 UseMagic_CURE:
     LDA #1
     BNE UseMagic_CureFamily
-    
+
 UseMagic_CUR2:
     LDA #2
     BNE UseMagic_CureFamily
@@ -5048,14 +5079,14 @@ UseMagic_CUR2:
 UseMagic_CUR3:
     LDA #4
     BNE UseMagic_CureFamily
-    
+
 UseMagic_CUR4:
     LDA #8
 
 UseMagic_CureFamily:
     STA MMC5_tmp+2
     JSR DrawItemTargetMenu  ; draw the item target menu (gotta choose who to target with this spell)
-    LDA #44 
+    LDA #44
     JSR DrawItemDescBox     ; load up the relevent description text
 
 CureFamily_Loop:
@@ -5064,7 +5095,7 @@ CureFamily_Loop:
 
     JSR UseMagic_CheckMP
     BEQ CureFamily_Exit
-    
+
     LDA MMC5_tmp+2
     LSR A
     BCC :+
@@ -5078,28 +5109,28 @@ CureFamily_Loop:
     BCC :+
         JSR Cure3SpellPotency
         BNE @DoCureSpell
-  : LDA #$FF    
-        
-   @DoCureSpell:     
+  : LDA #$FF
+
+   @DoCureSpell:
     STA hp_recovery         ; store the HP to be recovered for future use
     LDA #0
     STA hp_recovery+1
     JSR Cursor_to_Index
     JSR MenuRecoverHP       ; will check if target is dead and set C if so
     BCS CureFamily_CantUse  ; for Cure 4, will do 256 HP, but cap it--and will copy max to current next anyway
-    
+
     LDA hp_recovery         ; otherwise, we can target.  Get the HP to recover
     CMP #$FF                ; check if its Cure 4
     BNE :+
-    
-    LDA ch_maxhp+1, X      
-    STA ch_curhp+1, X      
-    LDA ch_maxhp, X        
-    STA ch_curhp, X        
+
+    LDA ch_maxhp+1, X
+    STA ch_curhp+1, X
+    LDA ch_maxhp, X
+    STA ch_curhp, X
     LDA ch_ailments, X
     AND #AIL_DEAD | AIL_STOP
     STA ch_ailments, X      ; JIGS - also now does the battle effect of fixing most ailments (poison and blind here)
-    
+
   : JSR PlayHealSFX
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar  ; then update the healed character's info
@@ -5107,7 +5138,7 @@ CureFamily_Loop:
     JMP CureFamily_Loop
 
   CureFamily_Exit:
-    JMP EnterMagicMenu_Redraw      ; to exit, re-enter (redraw) magic menu
+    JMP EnterMagicMenu      ; to exit, re-enter (redraw) magic menu
 
   CureFamily_CantUse:
     JSR PlaySFX_Error       ; if can't use, play the error sound effect
@@ -5138,24 +5169,24 @@ Heal3SpellPotency:
 
     ;; JIGS - these use BattleRNG_L instead of the framecounter, to more randomize the healing between characters
     ;; since it is now called for each character instead of the whole spell... the way it does it in battle, I think.
-    
+
 UseMagic_HEAL:
     LDA #1
     BNE UseMagic_HealFamily
-    
+
 UseMagic_HEL2:
     LDA #2
     BNE UseMagic_HealFamily
-    
+
 UseMagic_HEL3:
     LDA #4
 
-UseMagic_HealFamily: 
+UseMagic_HealFamily:
     STA MMC5_tmp+2
-    JSR DrawItemTargetMenu 
+    JSR DrawItemTargetMenu
     LDA #53
     JSR DrawItemDescBox     ; draw the relevent description text
-   
+
    @HealMenuLoop:
     JSR ClearOAM            ; clear OAM (no sprites)
     JSR MenuWaitForBtn      ; wait for the user to press a button
@@ -5163,12 +5194,12 @@ UseMagic_HealFamily:
     LDA joy                 ; see whether the user pressed A or B
     AND #$80                ; check A
     BEQ HealFamily_Exit     ; if not A, they pressed B... so exit
-    
+
     JSR UseMagic_CheckMP
     BEQ HealFamily_Exit
 
     LDA #0
-    STA cursor    
+    STA cursor
    @HealLoop:
     LDA MMC5_tmp+2
     LSR A
@@ -5186,20 +5217,20 @@ UseMagic_HealFamily:
     LDA #0
     STA hp_recovery+1
     JSR Cursor_to_Index
-    JSR MenuRecoverHP       ; recover one 
+    JSR MenuRecoverHP       ; recover one
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
     INC cursor
     LDA cursor
     CMP #4
     BNE @HealLoop
-    
+
     JSR PlayHealSFX
-    JSR UseMagic_SpendMP    
+    JSR UseMagic_SpendMP
     JMP @HealMenuLoop
 
  HealFamily_Exit:
-    JMP EnterMagicMenu_Redraw      ; to exit, just re-enter magic menu
+    JMP EnterMagicMenu      ; to exit, just re-enter magic menu
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -5237,11 +5268,11 @@ UseMagicCureAilment:
     JSR DrawItemTargetMenu  ; draw the target menu
     PLA
     JSR DrawItemDescBox     ; and relevent description text
-    
+
    @Loop:
     JSR ItemTargetMenuLoop  ; do the target loop
     BCS @CureAilment_Exit
-    
+
     JSR UseMagic_CheckMP
     BEQ @CureAilment_Exit
 
@@ -5252,19 +5283,19 @@ UseMagicCureAilment:
   : STA tmp                 ; put it in tmp for 'CureOBAilment' routine
     JSR CureOBAilment       ; attempt to cure death!
     BCS @CantUse            ; if the char didn't have the death ailment... can't use this spell on him
-    
+
     LDA hp_recovery
     LSR A
     BCC :+
         LDA #1              ; otherwise it worked.  Give them 1 HP now that they're alive
         STA ch_curhp, X
         BNE @Success
-  : LSR A ; Soft in C        
+  : LSR A ; Soft in C
     LSR A ; Pure in C
     LSR A ; Lamp in C
     LSR A ; Life 2 in C
     BCC @Success
-    
+
     LDA ch_maxhp, X         ; for Life 2, refill their HP to max, instead of just giving them 1 HP
     STA ch_curhp, X
     LDA ch_maxhp+1, X
@@ -5274,11 +5305,11 @@ UseMagicCureAilment:
     JSR PlayHealSFX
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
-    JSR UseMagic_SpendMP    ; JIGS 
+    JSR UseMagic_SpendMP    ; JIGS
     JMP @Loop
-    
+
    @CureAilment_Exit:
-    JMP EnterMagicMenu_Redraw ; and exit by re-entering magic menu
+    JMP EnterMagicMenu      ; and exit by re-entering magic menu
 
    @CantUse:
     JSR PlaySFX_Error       ; if you can't use it, play the error sound
@@ -5291,16 +5322,16 @@ UseMagic_WARP:
     LDA #61
     JSR DrawItemDescBox       ; draw description text
     JSR MenuWaitForBtn_SFX
-    
+
     LDA joy                 ; see whether the user pressed A or B
     AND #$80                ; check A
     BEQ CancelWarp_Exit     ; if not A, they pressed B... so exit
-    
+
     ;PLA                     ; pull the submenu_targ backup to toss it away
-    JSR UseMagic_SpendMP ; JIGS 
-    
+    JSR UseMagic_SpendMP ; JIGS
+
     ;JSR MenuWaitForBtn_SFX    ; wait for a button press
-    
+
     TSX                  ; get the stack pointer
     TXA                  ; and put it in A
     CMP #$FF - 16        ; check the stack pointer to see if at least 16 bytes have been pushed
@@ -5324,15 +5355,15 @@ UseMagic_EXIT:
     LDA joy                   ; see whether the user pressed A or B
     AND #$80                  ; check A
     BEQ CancelWarp_Exit       ; if not A, they pressed B... so exit
-    
-    JSR UseMagic_SpendMP ; JIGS 
-    
-  UseMagic_DoEXIT:
+
+    JSR UseMagic_SpendMP ; JIGS
+
+UseMagic_DoEXIT:
     DEC MenuHush
     JMP DoOverworld           ; then restart logic on overworld by JMPing to DoOverworld
-    
-  CancelWarp_Exit: 
-  JMP EnterMagicMenu_Redraw
+
+CancelWarp_Exit:
+    JMP EnterMagicMenu
 
 ;  Notes regarding WARP/EXIT:
 ;
@@ -5374,7 +5405,7 @@ UseMagic_GetRequiredMP:
 ;; JIGS - new version:
 
     LDX cursor             ; spell in TempSpellList
-    LDA BigSpellLevel_LUT, X  
+    LDA BigSpellLevel_LUT, X
     CLC
     ADC char_index
     ADC #ch_mp - ch_stats
@@ -5384,8 +5415,8 @@ UseMagic_GetRequiredMP:
     AND #$F0   ; clear low bits to get current mp
     CMP #1
     RTS
-    
-BigSpellLevel_LUT: 
+
+BigSpellLevel_LUT:
 .byte $00,$00,$00
 .byte $01,$01,$01
 .byte $02,$02,$02
@@ -5398,14 +5429,14 @@ BigSpellLevel_LUT:
 
 ConvertSpellByteToBit_LUT:
     .byte %10000000 ; Cure    Lamp   Cure 2  Pure     Cure 3   Soft    Cure 4  Life 2
-    .byte %01000000 ; Harm    Mute                                
-    .byte %00100000 ; Sheild  A-Bolt                                       
-    .byte %00010000 ; Blink   Invis                                       
+    .byte %01000000 ; Harm    Mute
+    .byte %00100000 ; Sheild  A-Bolt
+    .byte %00010000 ; Blink   Invis
     .byte %00001000 ; Fire    Ice    Fire 2  Sleep 2  Fire 3   Lit 3   Ice 3   Nuke
-    .byte %00000100 ; Sleep   Dark                                          
-    .byte %00000010 ; Lock    Temper                                        
-    .byte %00000001 ; Bolt    Slow                                          
-    ;; or:   
+    .byte %00000100 ; Sleep   Dark
+    .byte %00000010 ; Lock    Temper
+    .byte %00000001 ; Bolt    Slow
+    ;; or:
     .byte $80,$40,$20,$10,$08,$04,$02,$01
     ;; this is 16 bytes long, because the high bits of the spell ID are unnecessary.
     ;; otherwise it needs to be 64 bytes long, one for each spell, even if every 8 bytes is the same.
@@ -5416,103 +5447,156 @@ UseMagic_SpendMP:
     SEC
     SBC #$10
     STA ch_stats, X
-    RTS 
+    RTS
+
 UseMagic_CheckMP:
     LDX mp_required
     LDA ch_stats, X
     AND #$F0
     RTS             ; JIGS - BEQ to CantUse after calling this
-    
-MagicMenu_ForgetSpell:
-    JSR Set_Inv_Magic
-    LDA cursor
-    CLC
-    ADC char_index
-    TAX
-    LDA ch_spells, X                 ; get spell ID
-    BEQ @Oops
-    TAY
-    LDA #0
-    STA ch_spells, X                 ; clear that byte in their spell list
-    DEY
-    TYA                              ; subtract 1 to shift the ID to 0-based
-    JSR ADD_ITEM                     ; put it back in the inventory
 
-    JSR DrawMagicMenu                ; reload the magic screen to show the spell has vanished
-    JMP TurnMenuScreenOn_ClearOAM    ; clear OAM and turn the screen on
-    
-   @Oops:
-    JMP PlaySFX_Error                ; you tried to forget a spell that doesn't exist!
-    ;                                ; this really shouldn't be possible
-    
-    
+
+
+
+MagicMenuMPTitle:
+.byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
+
+UpdateMP_Exit:
+    RTS
+
+UpdateMP:
+    LDA submenu_cursor
+    CMP #2
+    BEQ UpdateMP_Exit         ; don't display MP if forgetting spells
+    LDA cursor_change
+    BEQ UpdateMP_Exit
+
+    LDA #<MagicMenuMPTitle
+    STA text_ptr
+    LDA #>MagicMenuMPTitle
+    STA text_ptr+1
+
+    LDY #0
+    STY cursor_change
+   @Loop:
+    LDA (text_ptr), Y
+    STA str_buf, Y
+    INY
+    CPY #$14
+    BNE @Loop
+
+    LDX cursor
+    LDA BigSpellLevel_LUT, X
+    CLC
+    ADC #$81
+    STA str_buf+$6           ; put spell level in the string
+
+    JSR UseMagic_GetRequiredMP
+    LSR A
+    LSR A
+    LSR A
+    LSR A                     ; shift high bits to low
+    ORA #$80
+    STA str_buf+$0E           ; put current MP in the string
+    LDX mp_required
+    LDA ch_stats, X
+    AND #$0F
+    ORA #$80
+    STA str_buf+$10           ; put max MP in the string
+
+    LDA #<(str_buf)
+    STA text_ptr
+    LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
+    STA text_ptr+1
+
+    LDA #$0C
+    STA dest_x
+    LDA #$02
+    STA dest_y
+
+    LDA #1
+    STA menustall
+
+    JMP DrawComplexString
+
+
+
+
+
+
+
+
+
+
 MagicMenu_LearnSpell:
     JSR DrawLearnSpellMenu
     LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
-    JSR DrawMainItemBox    
+    JSR DrawMainItemBox
     JSR TurnMenuScreenOn_ClearOAM
+
     LDA #1
     STA cursor_change     ; trigger this to happen on page load
     STA descboxopen
-    
+
    @LearnSpell_MainLoop:
     LDA cursor_change
-    BEQ @NoDescription
-  
+    BEQ @MainLoopCont
+
     DEC cursor_change     ; to stop this part from happening every frame
     STA menustall         ; cursor_change was 1, so set menustall to 1
     LDA #$8
     STA dest_x
     LDA #$17
     STA dest_y
-    LDA cursor            ; get cursor, shift it 3 times, add the max, that's the spell ID!
+
+    LDA cursor_x          ; get cursor x position, shift it 3 times, add the y position, that's the spell ID!
     ASL A
     ASL A
     ASL A
-    ADC cursor_max
-    STA tmp+8             ; backup spell ID 
-    JSR @DoesSpellExist    
-    BNE @DoDescription 
+    ADC cursor_y
+    STA tmp+8             ; backup spell ID
+    JSR @DoesSpellExist
+    BNE @DoDescription
 
    @ClearDescriptionBox:
     LDA #MBOX_ITEMDESC    ; redraw the description box to clear it
-    JSR DrawMainItemBox    
+    JSR DrawMainItemBox
     JMP @LearnSpell_MainLoop
-    
+
    @DoDescription:
     LDA tmp+8
-    ADC #15               ; add 15 to skip the item descriptions and use magic ones    
+    ADC #15               ; add 15 to skip the item descriptions and use magic ones
     JSR Shop_SpellDescription
 
-   @NoDescription:
+   @MainLoopCont:
     JSR ClearOAM                  ; clear OAM
     JSR DrawMagicLearnMenuCursor  ; draw the cursor
     JSR MenuFrame                 ; and do a frame
 
     LDA joy_a
-    BNE @A_Pressed            ; check if A pressed
+    BNE @A_Pressed                ; check if A pressed
     LDA joy_b
-    BNE @B_Pressed            ; and B
+    BNE @B_Pressed                ; and B
 
-    JSR MoveMagicLearnMenuCursor   ; otherwise, move the cursor if a direction was pressed
-    JMP @LearnSpell_MainLoop       ; and keep looping
+    JSR MoveMagicLearnMenuCursor  ; otherwise, move the cursor if a direction was pressed
+    JMP @LearnSpell_MainLoop      ; and keep looping
 
    @B_Pressed:
-    RTS                        ; if B pressed, just exit
-    
+    JMP EnterMagicMenu
+
    @A_Pressed:
     JSR @DoesSpellExist
     BEQ @NoSpell
 
-    JSR PlaySFX_MenuSel 
+    JSR PlaySFX_MenuSel
     JSR TryLearnSpell
-    BCS @ClearDescriptionBox   ; carry set if couldn't learn
+    BCS @ClearDescriptionBox      ; carry set if couldn't learn
 
     JMP MagicMenu_LearnSpell
 
    @NoSpell:
     JSR PlaySFX_Error
-    JMP @LearnSpell_MainLoop   ; and keep looping
+    JMP @LearnSpell_MainLoop      ; and keep looping
 
    @DoesSpellExist:
     JSR Set_Inv_Magic
@@ -5520,25 +5604,25 @@ MagicMenu_LearnSpell:
     JMP DOES_ITEM_EXIST
 
 
-LearnMenuAttributes:    
+LearnMenuAttributes:
 .byte $CC,$D4,$DC,$E4,$D8,$E0 ; attribute positions
 .byte $77,$77,$BB,$BB,$33,$33 ; values
 
 LearnMenuSpellLevelStrings:
 .byte 72,73,73,73,73,73,73,74
-   
-DrawLearnSpellMenu:    
+
+DrawLearnSpellMenu:
     LDA #0
     STA $2001                      ; turn off PPU
     STA menustall                  ; clear menustall
     STA descboxopen                ; and mark description box as closed
-    
+
     JSR ClearNT
-    
+
     ;; make the right page have green/purple orbs (or whatever color set by the palettes)
     LDX #5
     LDY #$23
-   @AttrLoop: 
+   @AttrLoop:
     STY $2006
     LDA LearnMenuAttributes, X
     STA $2006
@@ -5546,38 +5630,38 @@ DrawLearnSpellMenu:
     STA $2007
     DEX
     BPL @AttrLoop
-    
+
     ;; load first 3 palettes
     LDX #$0B
   @PalLoop:                        ; load a few other main menu related palettes
       LDA lutSpellMenuPalettes, X  ; fetch the palette from the LUT
       STA cur_pal, X               ; and write it to the palette buffer
       DEX
-      BPL @PalLoop                 ; loop until X wraps ($0C colors copied)    
-    
+      BPL @PalLoop                 ; loop until X wraps ($0C colors copied)
+
 	LDA #MBOX_MAGIC_L
     JSR DrawMainItemBox          ; draw these first so the name and submenu boxes overlap
     LDA #MBOX_MAGIC_R
     JSR DrawMainItemBox          ; Draw the two learning menu boxes
-	
+
     LDA #MBOX_TITLE
-    JSR DrawMainItemBox             
+    JSR DrawMainItemBox
     DEC dest_y
     LDA #7
     JSR DrawCharMenuString         ; draw the character's name
-    
+
     LDA #MBOX_SUBMENU
     JSR DrawMainItemBox            ; sub menu box
     DEC dest_y
     LDA #11
     STA dest_x
-	
+
     LDX item_pageswap
     LDA LearnMenuSpellLevelStrings, X
     JSR DrawMenuString             ; Draw Spell Level
-  
-    ;; print the spell level inside the above string  
-  
+
+    ;; print the spell level inside the above string
+
     LDA #>$205A
     STA $2006
     LDA #<$205A
@@ -5599,61 +5683,61 @@ DrawLearnSpellMenu:
     LDA #0
     STA tmp+4      ; left or right counter
     STA tmp+6      ; and Y backup
-  
-   @Loop: 
-    JSR Set_Inv_Magic   ; reset tmp and tmp+1 
-    LDA tmp+3           ; get spell ID 
+
+   @Loop:
+    JSR Set_Inv_Magic   ; reset tmp and tmp+1
+    LDA tmp+3           ; get spell ID
     INC tmp+3           ; inc spell ID
     JSR DOES_ITEM_EXIST ; uses tmp+2
-    STA tmp             ; save amount for printing 
+    STA tmp             ; save amount for printing
     PHA
-    
+
     ;; start doing the string...
-    
+
     LDY tmp+6
-    LDA #$E5            ; 
+    LDA #$E5            ;
     STA bigstr_buf, Y   ; magic orb tile in first slot
-    LDA #$FF            ; 
-    STA bigstr_buf+1, Y ; space in second slot    
-    
+    LDA #$FF            ;
+    STA bigstr_buf+1, Y ; space in second slot
+
     PLA
     BNE @Spellname
-    
+
     LDA #$0B            ; if blank spell slot...
     STA bigstr_buf+2, Y ; repeat code in third slot
     LDA #$07
     STA bigstr_buf+3, Y ; repeat amount in fourth slot
-    LDA #$C2 
-    STA bigstr_buf+4, Y ; repeat tile in fifth slot 
+    LDA #$C2
+    STA bigstr_buf+4, Y ; repeat tile in fifth slot
     INY
-    BNE @Amount    
+    BNE @Amount
 
    @Spellname:
     LDA #06
     STA bigstr_buf+2, Y ; magic name code in third slot
     LDA tmp+3           ; get spell (now +1)
     STA bigstr_buf+3, Y ; spell ID in fourth slot
-    
-   @Amount: 
-    LDA #$FF              
+
+   @Amount:
+    LDA #$FF
     STA bigstr_buf+4, Y ; another space in fifth slot
     LDA #$F1
     STA bigstr_buf+5, Y ; tiny x in sixth slot
-   
+
     JSR PrintNumber_2Digit ; uses tmp to get the numbers
     LDA format_buf-2
     CMP #$FF
     BNE @DoubleDigits      ; is the tens column empty?
-    
-   @SingleDigits: 
-    LDA format_buf-1     
+
+   @SingleDigits:
+    LDA format_buf-1
     STA bigstr_buf+6, Y    ; single digit in seventh slot
     LDA #$FF
     BNE :+
-    
-   @DoubleDigits: 
+
+   @DoubleDigits:
     STA bigstr_buf+6, Y    ; tens column in seventh slot
-    LDA format_buf-1     
+    LDA format_buf-1
   : STA bigstr_buf+7, Y    ; ones column in eighth slot | or a space
 
     LDA #01
@@ -5663,25 +5747,25 @@ DrawLearnSpellMenu:
     CLC
     ADC #9
     TAY
-    
+
     ;; Spell:
-    ;;  0      1     2    3     4    5    6  7    8 
-    ;; $E5 - $FF - $06 - ID - $FF - $F1 - ## ## - $01 
-    
+    ;;  0      1     2    3     4    5    6  7    8
+    ;; $E5 - $FF - $06 - ID - $FF - $F1 - ## ## - $01
+
     ;; NoSpell:                   INY  4     5    6  7     8
-    ;;  0      1     2    3     4   >  5     6    7  8     9 
-    ;; $E5 - $FF - $0B - $07 - $C2  - $FF - $F1 - ## ## - $01 
-    
+    ;;  0      1     2    3     4   >  5     6    7  8     9
+    ;; $E5 - $FF - $0B - $07 - $C2  - $FF - $F1 - ## ## - $01
+
     ;; [ @ CONFUSE x15][ @ ------- x0 ]
-    ;; [ @ ICE   2 x1 ][ @ ------- x0 ]    
-    
+    ;; [ @ ICE   2 x1 ][ @ ------- x0 ]
+
    @ResumeLoop:
     STY tmp+6
     INC tmp+4          ; and 0-7 counter
     LDA tmp+4
     CMP #8             ; if counter is 8, end inner loop
     BNE @Loop
-    
+
     LDA #0             ; put the null terminator in
     STA tmp+4          ; and reset 0-7 counter
     STA tmp+6          ; and Y backup
@@ -5691,27 +5775,27 @@ DrawLearnSpellMenu:
     STA text_ptr
     LDA #>(bigstr_buf)
     STA text_ptr+1
-    
+
     LDA tmp+3          ; get spell ID, see if its wrapped to $x0
     AND #$0F           ; by removing all the high bits
     BEQ @DrawRightSide
-    
+
    @DrawLeftSide:
-    LDA #02 
-    STA dest_x 
+    LDA #02
+    STA dest_x
     LDA #05
     STA dest_y
     JSR DrawComplexString  ; Draw all the item names
     JMP @Loop
-    
+
    @DrawRightSide:
     LDA #18
-    STA dest_x 
+    STA dest_x
     JMP DrawComplexString  ; Draw all the item names
 
-    
-    
-    
+
+
+
 TryLearnSpell:
     LDA #3
     STA shop_type       ; set shop_type for equip permissions...
@@ -5720,7 +5804,7 @@ TryLearnSpell:
     JSR IsEquipLegal
     BNE @HasPermission  ;  if result is zero, they have permission to learn
 
-    LDA #68             ; Print "Can't learn that" 
+    LDA #68             ; Print "Can't learn that"
     BNE @FailedToLearn
 
    @HasPermission:
@@ -5730,10 +5814,10 @@ TryLearnSpell:
    @KnownSpellsLoop:
     CMP ch_spells, X
     BEQ @AlreadyKnow
-    INX 
+    INX
     DEY                    ; check all 24 spell slots
     BPL @KnownSpellsLoop
-   
+
     LDA tmp+8
     LSR A
     LSR A
@@ -5744,39 +5828,39 @@ TryLearnSpell:
     CLC
     ADC char_index
     TAX                    ; X now points to the first slot this spell can be in
-    
+
     ;; start from 0 and work up to 3, so that spells are saved sequentually instead of filling the 3rd slot first
     LDY #0
-   @EmptySlotLoop:    
+   @EmptySlotLoop:
     LDA ch_spells, X
     BEQ @FoundEmptySlot
     INX
     INY
-    CPY #3             
-    BNE @EmptySlotLoop 
-   
+    CPY #3
+    BNE @EmptySlotLoop
+
     LDA #70                ; if no empty slot found... "That level is full" message ID
     BNE @FailedToLearn
-   
+
    @AlreadyKnow:
     LDA #69                ; if they already know the spell...
 
-   @FailedToLearn: 
+   @FailedToLearn:
     JSR DrawItemDescBox    ; "You already know that"
-    
+
     JSR MenuWaitForBtn
     INC cursor_change      ; trigger re-drawing the original spell's text after
     SEC
     RTS
 
    @FoundEmptySlot:       ;  All conditions are met
-    JSR Set_Inv_Magic     ; reset tmp and tmp+1 
+    JSR Set_Inv_Magic     ; reset tmp and tmp+1
     LDA tmp+8
     STA ch_spells, X      ; X is still pointing to the empty slot
-    SEC 
+    SEC
     SBC #1                ; return the spell ID to 0-based
     JSR REMOVE_ITEM       ; and remove it from inventory
-    
+
     LDA #1                ; set menustall to nonzero (indicating we need to stall)
     STA menustall
     LDA #MBOX_ITEMDESC    ; draw main/item box ID $08  (the description box)
@@ -5788,12 +5872,12 @@ TryLearnSpell:
     JSR CloseDescBox
     CLC
     RTS                  ; and exit!
-    
 
 
 
 
-    
+
+
 
 
 
@@ -5808,170 +5892,145 @@ TryLearnSpell:
 
 
 EnterItemMenu:
-    LDA backup_cursor
-    STA cursor
-    LDA #18
-    STA cursor_max
-        
+    JSR WaitForVBlank_L
     LDA #0
     STA $2001           ; turn the PPU off
     STA menustall       ; zero menustall (don't want to stall for drawing the screen for the first time)
     STA descboxopen     ; indicate that the descbox is closed
-    JSR ClearNT         ; wipe the NT clean
-                        ;  then start drawing the item menu
-	LDA #MBOX_INV         
-    JSR DrawMainItemBox    ; draw first, so that the next boxes overlap it 
+    JSR ClearNT         ; wipe the NT clean then start drawing the item menu
+	
+    LDA #MBOX_INV
+    JSR DrawMainItemBox    ; draw first, so that the next boxes overlap it
 
     LDA #MBOX_TITLE        ; draw mainitem box ID 7 (the "ITEM" title box)
     JSR DrawMainItemBox
     DEC dest_y
-    
-    LDA item_pageswap      ; if offset is 0, draw items, if 1, draw quest items
+
+    LDA submenu_cursor     ; if offset is 0, draw items, if 1, draw quest items
     BNE :+
-    LDA #2              
-    JSR DrawMenuString     ;  and draw it and return    
-    JMP :++
-    
+    LDA #2                 ; draw ITEMS in box
+    BNE @DrawTitle
   : LDA #3                 ; draw QUEST in box
-    JSR DrawMenuString     ;  and draw it and return   
   
-  : LDA #MBOX_SUBMENU      ; draw submenu box
+   @DrawTitle:
+    JSR DrawMenuString     ;  and draw it and return
+
+    LDA #MBOX_SUBMENU      ; draw submenu box
     JSR DrawMainItemBox
     DEC dest_y
     LDA #66
-    JSR DrawMenuString
-  
+    JSR DrawMenuString    ; draw "__Items__Quest Items"
+
     LDX #0
     LDY #0
    @FillBlanks:
-     LDA #0               
+     LDA #0
      STA str_buf, X        ; also clear the item_box
      STA str_buf+8, X
      STA tmp+2             ; tmp+2 is loop counter for each line of spaces
     @FillInnerLoop:
         LDA #$FF
-        STA bigstr_buf, Y  
+        STA bigstr_buf, Y
         INY
         INC tmp+2
         LDA tmp+2
         CMP #28            ; fill 28 spaces with FF - there's 30 tiles of space, but the first 2 are for the cursor
         BNE @FillInnerLoop
-        
+
         LDA #01
         STA bigstr_buf, Y  ; every 29th space, put a double line break
         INX
         INY
         CPX #8             ; looping 8 times
         BNE @FillBlanks
-       
+
     LDA #0
-    STA bigstr_buf, Y     ; null terminator  
-  
+    STA bigstr_buf, Y     ; null terminator
+
     STA joy               ; clear joy data
     STA joy_prevdir       ; and previous joy directionals
-  
+
     JSR FillItemBox        ; Transfer items to item_box and fill bigstr_buf with item names
     BCC @DrawItems         ; if the player has no inventory...
       JSR TurnMenuScreenOn_ClearOAM
       LDA #22
-      JSR DrawItemDescBox     ; draw the "You have nothing" description text
-      LDA item_pageswap
-      BEQ :+
-        LDA #0
-        STA cursor
-        LDA #2
-        STA cursor_max
-        JMP ItemMenu_Loop
-      
-    : LDA #1
-      STA cursor
-      JMP ItemMenu_Loop
-      
-      ;JMP MenuWaitForBtn_SFX  ; then just wait for A or B to be pressed -- then exit
-    
+      JSR DrawItemDescBox    ; draw the "You have nothing" description text
+      JMP ItemMenu_Submenu   ; jump to the submenu
+
    @DrawItems:
     LDA #<(bigstr_buf)    ; fill text_ptr with the pointer to our item names in the big string buffer
     STA text_ptr
     LDA #>(bigstr_buf)
     STA text_ptr+1
-    
-    LDA #03 
-    STA dest_x 
+
+    LDA #03
+    STA dest_x
     LDA #05
     STA dest_y
-    
+
     JSR DrawComplexString  ; Draw all the item names
     JSR TurnMenuScreenOn_ClearOAM  ; clear OAM and turn the screen on
 
 ItemMenu_Loop:
+    LDA item_box
+    BEQ ItemMenu_Submenu    ; if the first byte of item_box = 0, you have nothing!
+
     JSR ClearOAM            ; clear OAM
-    JSR DrawItemMenuCursor  ; draw the cursor where it needs to be
+    JSR DrawInventoryCursor ; draw the cursor where it needs to be
     JSR MenuFrame           ; do a frame
 
     LDA joy_a               ; see if A has been pressed
-    BNE @APressed           ; if it has... jump ahead
+    BNE @A_Pressed          ; if it has... jump ahead
     CMP joy_b               ; otherwise check for B
-    BNE @Exit               ; and exit if B pressed
-    LDA joy_select
-    BNE @SelectPressed
-    
-    JSR MoveItemMenuCurs    ; neither button pressed... so move cursor if a direction was pressed
+    BNE ItemMenu_Submenu    ; and exit if B pressed
+
+    JSR MoveItemMenuCursor  ; neither button pressed... so move cursor if a direction was pressed
     JMP ItemMenu_Loop       ; then continue the loop
-  
-  @SelectPressed:
-    LDA cursor
-    BEQ @SwapToItems        ; check if cursor is on "Use" or "Quest Items" option
-    CMP #01
-    BEQ @SwapToQuest        
-    
-    LDA item_pageswap       ; if its not, then select was pressed, so check the page number
-    BEQ @SwapToQuest         
-      
-      @SwapToItems:
-       LDA #02
-       STA backup_cursor   ; set cursor to first item
-       STA cursor        
-       LDA item_pageswap   ; check the page number in case select was NOT pressed
-       BEQ ItemMenu_Loop   ; if its 0, just re-enter loop with new cursor coordinates
-       LDA #0
-       STA item_pageswap   ; otherwise, swap the page and reload the item_box
-       JMP EnterItemMenu
-   
-   @SwapToQuest:
-    LDA #02
-    STA backup_cursor   ; set cursor to first item
-    STA cursor           
-    LDA item_pageswap
-    BNE ItemMenu_Loop
-    LDA #1
-    STA item_pageswap
-    JMP EnterItemMenu    
-  
-  @Exit:
-    RTS
-    
-  @APressed:
+
+   @A_Pressed:
     LDA #0
-    STA backup_cursor_targ
-    LDA cursor                 ; if A is pressed while the cursor is on an option
-    BEQ @SelectPressed         ; do that option (almost the same as pressing select)
-    CMP #01
-    BEQ @SelectPressed
+    STA submenu_targ
     
     JSR PlaySFX_MenuSel        ; play the menu selection sound effect
-    LDX cursor                 ; put the cursor in X
-    STX backup_cursor
-    DEX
-    DEX                        ; decrement X to save 4 bytes in the jump table
+    
+    LDA cursor_x
+    CLC
+    ADC cursor_y
+    TAX
     LDA item_box, X            ; get the selected item, and put it in A
+    STA using_item             ; backup item ID
     ASL A                      ; double it (2 bytes per pointer)
     TAX                        ;   and stick it in X
-    
-    LDA @ItemJumpTable, X      ; load the address to jump to from our jump table
+
+    LDA ItemJumpTable, X      ; load the address to jump to from our jump table
     STA tmp                    ; and put it in (tmp)
-    LDA @ItemJumpTable+1, X
+    LDA ItemJumpTable+1, X
     STA tmp+1
     JMP (tmp)                  ; then jump to it!
+    
+ItemMenu_Submenu:
+    JSR ClearOAM              ; clear OAM
+    JSR DrawItemSubMenuCursor ; draw the cursor
+    JSR MenuFrame             ; then do an Equip Menu Frame
+
+    LDA joy_a
+    BNE @A_Pressed            ; check to see if A pressed
+    LDA joy_b
+    BNE @B_Pressed            ; or B
+
+    JSR MoveItemSubMenuCursor
+    JMP ItemMenu_Submenu     ; and loop until one of them is pressed
+
+   @B_Pressed:
+    RTS
+
+   @A_Pressed:
+    LDA item_pageswap        ; change item_pageswap, which starts at 0 
+    CMP submenu_cursor       ; compare it to the submenu cursor. If they're equal, do not re-draw
+    BEQ ItemMenu_Loop
+    EOR #$01
+    STA item_pageswap
+    JMP EnterItemMenu        ; otherwise, re-draw the screen with the other item type
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -5984,7 +6043,7 @@ ItemMenu_Loop:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
- @ItemJumpTable:
+ItemJumpTable:
 
 .word UseItem_Bad         ; Item Start
 .word UseItem_Heal        ; Heal
@@ -6021,8 +6080,6 @@ ItemMenu_Loop:
 .word UseItem_Oxyale    ; 1F
 .word UseItem_Canoe     ; 20
 .word UseItem_Lewds     ; 21
-
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6084,14 +6141,10 @@ UseItem_Bottle:
       JMP ItemMenu_Loop             ;  and return to the item loop
 
 @OpenBottle:                        ; if the bottle hasn't been opened yet
-    ;LDA #0
-    ;STA item_bottle                 ; remove the bottle from inventory
-    ;DEC item_bottle
-    
-    LDA keyitems_2
-    AND #~$02
-    STA keyitems_2
-    
+    JSR Set_Inv_KeyItem
+    LDA #BOTTLE
+    JSR REMOVE_ITEM_1BIT
+
     LDY #OBJID_FAIRY
     JSR LongCall
     .word ShowMapObject
@@ -6122,7 +6175,7 @@ UseItem_Rod:
     LDA tileprop_now+1        ; get the second byte
     CMP #ROD                  ; see if its the rod
     BNE @CantUse              ; if not, can't use it here
-    
+
     LDY #OBJID_RODPLATE       ; check the rod plate object, to see if
     LDA game_flags, Y         ;   the rod has been used yet
     LSR A                     ;   shift that flag into C
@@ -6156,7 +6209,7 @@ UseItem_Lute:
     LDA tileprop_now            ; get the special properties  of the tile we're stepping on
     CMP #TP_SPEC_USEKEYITEM     ;  see if this tile is marked as "use lute"
     BNE @CantUse                ; if not... can't use
-    
+
     LDA tileprop_now+1        ; get the second byte
     CMP #LUTE                 ; see if its the rod
     BNE @CantUse              ; if not, can't use it here
@@ -6218,12 +6271,26 @@ UseItem_Floater:
 ;;;;;;;;;;;;;;;;;;;;
 
 UseItem_Tent:
-    LDA #53                 
-    JSR DrawItemDescBox
+    LDX #TENT_HP
+    LDA #53
+    BNE UseItem_Rest
+
+UseItem_Cabin:
+    LDX #CABIN_HP
+    LDA #53                 ; restore HP message
+    BNE UseItem_Rest    
+
+UseItem_House:
+    LDX #HOUSE_HP
+    LDA #56                 ; restore HP and MP message
+
+UseItem_Rest:
+    STX hp_recovery
+    JSR DrawItemDescBox     ; A = message to draw
     JSR MenuWaitForBtn_SFX
     LDA joy
     AND #$80
-    BEQ :+    
+    BEQ @Done
 
     LDA mapflags            ; ensure we're on the overworld
     LSR A                   ;  shift SM flag into C
@@ -6232,94 +6299,28 @@ UseItem_Tent:
     LDA tileprop_now
     CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
     BNE @CantUse
-    
-   @Use: 
-    DEC item_tent           ; otherwise... remove 1 tent from the inventory
-    LDA #30
-    JSR MenuRecoverPartyHP  ; give 30 HP to the whole party
-    JSR PlayHealSFX
-    LDA #54 
-    JSR MenuSaveConfirm     ; and bring up confirm save screen (with description text $1A)
-  : JMP EnterItemMenu       ; then re-enter item menu (need to re-enter, because screen needs full redrawing)
-
-  @CantUse:
-    LDA #57                 ; "cannot sleep here!"
-    JSR DrawItemDescBox
-    JMP ItemMenu_Loop       ; and return to loop
-
-;;;;;;;;;;;;;;;;;;;;
-;;
-;;  UseItem_Cabin  [$B2A1 :: 0x3B2B1]
-;;
-;;;;;;;;;;;;;;;;;;;;
-
-UseItem_Cabin:
-    LDA #53               
-    JSR DrawItemDescBox
-    JSR MenuWaitForBtn_SFX
-    
-    LDA joy
-    AND #$80
-    BEQ :+    
-    
-    LDA mapflags            ; exactly the same as tents... except....
-    LSR A
-    BCC @Use                ;  if set (in standard map), can't use here
-
-    LDA tileprop_now
-    CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
-    BNE @CantUse
-    
-   @Use: 
-    DEC item_cabin          ; remove cabins from inventory instead of tents
-    LDA #60                 ;  recover 60 HP instead of 30
-    JSR MenuRecoverPartyHP
-    JSR PlayHealSFX
-    LDA #54    
-    JSR MenuSaveConfirm
-  : JMP EnterItemMenu
-  @CantUse:
-    LDA #57                 ; "cannot sleep here!"
-    JSR DrawItemDescBox
-    JMP ItemMenu_Loop
-
-;;;;;;;;;;;;;;;;;;;;
-;;
-;;  UseItem_House  [$B2BE :: 0x3B2CE]
-;;
-;;;;;;;;;;;;;;;;;;;;
-
-UseItem_House:
-    LDA #56               
-    JSR DrawItemDescBox
-    JSR MenuWaitForBtn_SFX
-    
-    LDA joy
-    AND #$80
-    BEQ :+    
-
-    LDA mapflags            ; make sure we're on the overworld
-    LSR A                   ;  Get SM flag, and shift it into C
-    BCC @Use                ;  if set (in standard map), can't use here
-
-    LDA tileprop_now
-    CMP #TP_SPEC_USESAVE    ; if its a safe tile to save on...
-    BNE @CantUse
 
    @Use:
-    DEC item_house          ; otherwise... remove a house from our inventory
-    LDA #120
-    JSR MenuRecoverPartyHP  ; give the whole party 120 HP
-    JSR MenuRecoverPartyMP  ; JIGS - recover MP before saving
+    LDX using_item
+    DEC items, X            ; remove the item from inventory
+    LDA hp_recovery
+    JSR MenuRecoverPartyHP  ; give HP to the whole party
     JSR PlayHealSFX
     
-    LDA #55
-    JSR MenuSaveConfirm     ; bring up the save confirmation screen.  (description text $1E)
-:   JMP EnterItemMenu         ; then, whether they saved or not, re-enter item menu
+    LDA #54                 ; start with tent/cabin's "save and restore HP?" text
+    LDX using_item
+    CPX #HOUSE              ; but if its a house...
+    BNE :+
+    JSR MenuRecoverPartyMP  ; then restore MP as well
+    LDA #55                 ; load House's "save and restore HP/MP?" text
+    
+  : JSR MenuSaveConfirm     ; and bring up confirm save screen (with description text $1A)
+   @Done:
+    JMP EnterItemMenu       ; then re-enter item menu (need to re-enter, because screen needs full redrawing)
 
   @CantUse:
-    LDA #57 
-    JSR DrawItemDescBox     ; if you can't use the house... just print description text ($1F)
+    LDA #57                 ; "cannot sleep here!"
+    JSR DrawItemDescBox
     JMP ItemMenu_Loop       ; and return to loop
 
 
@@ -6373,59 +6374,56 @@ Chemist_Check:
     PHA
 
     LDA #$00
-   @Loop: 
+   @Loop:
     TAX
     LDA ch_ailments, X
     AND #AIL_DEAD | AIL_STOP
     BNE @Next
-   
+
     LDA ch_miscperks, X
     AND #CHEMIST
     BNE @Found
-    
+
    @Next:
     TXA
     CLC
     ADC #$40
     BNE @Loop
-    
+
     SEC
     BCS @Nope
 
-   @Found:    
+   @Found:
     CLC
 
    @Nope:
     PLA
     TAX
     RTS
-    
+
  ;; can't make these labels local because UseItem_Pure hijacks one of the labels ;_;
 
 UseItem_Heal:
-    LDX #0                     ; UseAilmentCuringItemLUT has the #HEAL item ID at slot 0
     LDA #HEAL_POTENCY
     STA hp_recovery
     BNE DrawHealMenu
 
-UseItem_XHeal:    
-    LDX #3                     ; and X_HEAL ID at slot 3
+UseItem_XHeal:
     LDA #XHEAL_POTENCY
     STA hp_recovery
-    
+
 DrawHealMenu:
-    STX tmp+9
     LDA #0
     STA hp_recovery+1
-    
+
     JSR Chemist_Check          ; carry clear if a living chemist is in the party
     BCS :+
-    
+
     ASL hp_recovery
     ROL hp_recovery+1
 
   : JSR DrawItemTargetMenu     ; Draw the item target menu (need to know who to use this heal potion on)
-    LDA #44 
+    LDA #44
     JSR DrawItemDescBox        ; open up the description box with text ID $20
 
    @UseItem_Heal_Loop:
@@ -6435,24 +6433,22 @@ DrawHealMenu:
     JSR Cursor_to_Index
     JSR CheckDeadStone
     BCS @CantUse
-    
+
     LDA ch_curhp, X            ; make sure not to waste potions!
-    CMP ch_maxhp, X            ; if not equal, then either the character has MORE current HP than max... or less. 
+    CMP ch_maxhp, X            ; if not equal, then either the character has MORE current HP than max... or less.
     BNE :+                     ; going to assume LESS, so go use the potion
        LDA ch_curhp+1, X       ; otherwise, its equal, so check high bytes
        CMP ch_maxhp+1, X
        BEQ @CantUse            ; if those are also equal, there's no point in using a potion
-       
-  : LDX tmp+9
-    LDA UseAilmentCuringItemLUT, X
-    TAX
+
+  : LDX using_item
     LDA items, X
     BEQ @UseItem_Exit          ; don't have any!
     DEC items, X
-    
-   @DoHeal: 
+
+   @DoHeal:
     ;LDA hp_recovery            ; otherwise.. can use!
-    JSR MenuRecoverHP_Abs      ; recover 30 HP for target (index is still in X). 
+    JSR MenuRecoverHP_Abs      ; recover 30 HP for target (index is still in X).
     JSR PlayHealSFX
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
@@ -6464,48 +6460,45 @@ DrawHealMenu:
   @CantUse:
     JSR PlaySFX_Error          ; play the error sound effect
     JMP @UseItem_Heal_Loop     ; and keep looping until they select a legal target or escape with B
-    
-    
+
+
 ;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  UseItem_Ether
 ;;
-;;;;;;;;;;;;;;;;;;;;    
+;;;;;;;;;;;;;;;;;;;;
 
 UseItem_Ether:
-    LDA #0 
-    STA cursor2
-    
+    LDA #0
+    STA cursor_y
+
 UseItem_Ether_2:
     JSR DrawMPTargetMenu       ; draw target menu
     LDA #45
-    JSR DrawItemDescBox        ; print relevent description text 
-    
-    LDA backup_cursor_targ
-    STA cursor
-    
+    JSR DrawItemDescBox        ; print relevent description text
+
   @Loop:
     JSR MPTargetMenuLoop       ; do the target menu loop
     BCS @Exit                  ; if they pressed B (C set), exit
 
     LDA item_ether
     BEQ @Exit
-    
+
     JSR Cursor_to_Index        ; cursor is 0, 1, 2, 3
     JSR CheckDeadStone
     BCS @CantUse
-    
+
     TXA                        ; put index back into A
     CLC
     ADC #ch_mp - ch_stats      ; add ch_mp offset
-    ADC cursor2                ; cursor2 is 0, 1, 2, 3, 4, 5, 6, 7
-    TAX                        ; X is now index to character's mp stat  
-    LDA ch_stats, X            
+    ADC cursor_y                ; cursor_y is 0, 1, 2, 3, 4, 5, 6, 7
+    TAX                        ; X is now index to character's mp stat
+    LDA ch_stats, X
     AND #$0F                   ; check max MP bits
     BEQ @CantUse               ; if 0, can't use ether here - no magic!
-    
+
     STA tmp                    ; store max MP
-    LDA ch_stats, X            
+    LDA ch_stats, X
     AND #$F0                   ; get current MP
     LSR A
     LSR A
@@ -6513,7 +6506,7 @@ UseItem_Ether_2:
     LSR A
     CMP tmp                    ; if its the same...
     BEQ @CantUse               ; no need to use an ether... so don't
-    
+
     LDA tmp                    ; reload max MP
     ASL A                      ; shift the bits into current MP
     ASL A
@@ -6521,61 +6514,61 @@ UseItem_Ether_2:
     ASL A
     ORA tmp                    ; combine back with max MP bits
     STA ch_stats, X            ; and save! MP for this level is now filled!
-    
+
     JSR PlayHealSFX
-    
+
     DEC item_ether             ; if we could... remove one from the inventory
     JSR SetStallAndWait
     JSR DrawMPTargetMenu_Elixir_OneChar
     JMP @Loop
-    
-  @Exit: 
+
+  @Exit:
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
 
   @CantUse:
     JSR PlaySFX_Error          ; if can't use... give the error sound effect
-    JMP @Loop                  ;  and keep looping        
+    JMP @Loop                  ;  and keep looping
 
 ;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  UseItem_Elixir
 ;;
-;;;;;;;;;;;;;;;;;;;;    
+;;;;;;;;;;;;;;;;;;;;
 
 UseItem_Elixir:
     JSR DrawItemTargetMenu_Elixir     ; draw target menu
-    LDA #46 
-    JSR DrawItemDescBox        ; print relevent description text 
-    
+    LDA #46
+    JSR DrawItemDescBox        ; print relevent description text
+
     LDA #2
     STA item_pageswap          ; tells ItemTargetMenuLoop to use the Elixir cursor positiosn... silly.
-    
+
   @Loop:
     JSR ItemTargetMenuLoop     ; do the target menu loop
-    BCS @Exit                  ; if they pressed B (C set), exit 
+    BCS @Exit                  ; if they pressed B (C set), exit
 
     LDA item_elixir            ; if no more elixers, exit
     BEQ @Exit
-    
+
     JSR Cursor_to_Index
     JSR CheckDeadStone
     BCS @CantUse
-    
-    LDA ch_maxhp+1, X     
-    STA ch_curhp+1, X     
-    LDA ch_maxhp, X       
-    STA ch_curhp, X       
-    
+
+    LDA ch_maxhp+1, X
+    STA ch_curhp+1, X
+    LDA ch_maxhp, X
+    STA ch_curhp, X
+
     JSR MenuRecoverSingleMP
-    
+
     JSR PlayHealSFX
-    
+
     DEC item_elixir            ; if we could... remove one from the inventory
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_Elixir_OneChar
     JMP @Loop
-    
-  @Exit:  
+
+  @Exit:
     LDA #0
     STA item_pageswap
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
@@ -6584,7 +6577,7 @@ UseItem_Elixir:
     JSR PlaySFX_Error          ; if can't use... give the error sound effect
     JMP @Loop                  ;  and keep looping
 
-    
+
 ;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  UseItem_Pure  [$B338 :: 0x3B348]
@@ -6597,7 +6590,7 @@ UseItem_Pure:
     BNE UseAilmentCuringItem
 
 Useitem_Soft:
-    LDX #48 
+    LDX #48
     LDA #AIL_STOP
     BNE UseAilmentCuringItem
 
@@ -6606,91 +6599,84 @@ UseItem_PhoenixDown:
     LDA #AIL_DEAD
     BNE UseAilmentCuringItem
 
-UseItem_Eyedrop:    
+UseItem_Eyedrop:
     LDX #51
     LDA #AIL_DARK
 
-UseAilmentCuringItem:    
+UseAilmentCuringItem:
     STA hp_recovery
     TXA
     PHA
-    
+
     JSR DrawItemTargetMenu     ; draw target menu
     PLA
-    JSR DrawItemDescBox        
+    JSR DrawItemDescBox
 
   @Loop:
     JSR ItemTargetMenuLoop     ; do the target menu loop
     BCS @Exit                  ; if they pressed B (C set), exit
-    
-    LDX hp_recovery            ; use the ailment to cure to get the item ID from a lut
-    LDY UseAilmentCuringItemLUT, X
-    LDA items, Y               
+
+    LDX using_item
+    LDA items, X
     BEQ @Exit                  ; exit if you ran out
-   
-   @TryUse:  
+
+   @TryUse:
     STX tmp
     JSR CureOBAilment          ; then try to cure it
     BCS @CantUse               ; if we couldn't... can't use this item
 
     JSR PlayHealSFX
 
-    LDX hp_recovery            ; do this little thing again
-    LDA UseAilmentCuringItemLUT, X
-    TAX
+    LDX using_item
     DEC items, X               ; and this time decrease the amount of the item
-    CPY #PHOENIXDOWN           ; then check if it was a phoenix down
+    CPX #PHOENIXDOWN           ; then check if it was a phoenix down
     BNE @Continue              ; if not, skip this
-      JSR Cursor_to_Index        
+      JSR Cursor_to_Index
       JSR Chemist_Check        ; carry clear if a living chemist is in the party
       BCS :+
-      
+
       LDA ch_maxhp, X          ; if anyone in the party is a chemist, give them half their max HP
       STA tmp+8
       LDA ch_maxhp+1, X
-      
+
       LSR A
       ROR tmp+8
-      
+
       STA ch_curhp+1, X
       LDA tmp+8
       BNE :++
-      
-    : LDA #1                   ; if no chemists... 
+
+    : LDA #1                   ; if no chemists...
     : STA ch_curhp, X          ; give the character 1 HP
-   
-   @Continue:   
+
+   @Continue:
     JSR SetStallAndWait
     JSR DrawItemTargetMenu_OneChar
     JMP @Loop
-    
-   @Exit: 
+
+   @Exit:
     JMP EnterItemMenu          ; before re-entering the item menu (redrawing item menu)
 
   @CantUse:
     JSR PlaySFX_Error          ; if can't use... give the error sound effect
     JMP @Loop                  ;  and keep looping
 
-UseAilmentCuringItemLUT:
-    .byte HEAL, PHOENIXDOWN, SOFT, X_HEAL, PURE, ETHER, 0, 0, EYEDROPS
-    ;     0,    1,         , 2   , 3,      4,  , 5,     6, 7, 8
-
 
 Useitem_AlarmClock:
     LDA #50
-    JSR DrawItemDescBox       
+    JSR DrawItemDescBox
     JSR MenuWaitForBtn_SFX
     JMP EnterItemMenu
-    
+
 UseItem_Smokebomb:
     LDA #52
-    JSR DrawItemDescBox      
+    JSR DrawItemDescBox
     JSR MenuWaitForBtn_SFX
-    
+
     LDA joy
     AND #$80
     BEQ :+
-    
+
     LDA mapflags            ; make sure we're on the overworld
     LSR A                   ; Get SM flag, and shift it into C
     BCC @CantUse            ; if set (on overworld), can't use smokebomb here
@@ -6702,15 +6688,15 @@ UseItem_Smokebomb:
 
     JSR Chemist_Check       ; carry clear if a living chemist is in the party
     BCS :+
-    
+
     LDA smokebomb_steps
     LSR A
     CLC
     ADC smokebomb_steps
     STA smokebomb_steps
-    
+
   : JMP EnterItemMenu
-  
+
   @CantUse:
     LDA #59                 ; "cannot use that here"
     JMP :+
@@ -6743,7 +6729,7 @@ CureOBAilment:
     ;AND #$C0              ; and mask relevant bits
     ;TAX                   ; then stuff in X
     JSR Cursor_to_Index
-    
+
     LDA ch_ailments, X    ; get OB ailments
     CMP tmp               ; compare to given ailment
     BEQ @Success          ; if they match.. success!
@@ -6769,22 +6755,21 @@ CureOBAilment:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ItemTargetMenuLoop:
-    ;LDA #0
-    LDA backup_cursor_targ
-    STA cursor      ; reset the cursor to zero
+    LDA submenu_targ
+    STA cursor           ; reset the cursor to zero
     LDA #4
-    STA cursor_max 
-    
+    STA cursor_max
+
   @Loop:
     JSR ClearButtons
 
     JSR ClearOAM               ; clear OAM
-    LDA item_pageswap
+    LDA using_item
     CMP #2
     BNE :+
     JSR DrawElixirTargetCursor
     JMP :++
-    
+
   : JSR DrawItemTargetCursor   ; draw the cursor for this menu
   : JSR MenuFrame              ; do a frame
 
@@ -6792,10 +6777,10 @@ ItemTargetMenuLoop:
     BNE @A_Pressed     ; check to see if they pressed A
     LDA joy_b
     BNE @B_Pressed     ; or B
-    
+
     JSR MoveCursorUpDown
     LDA cursor
-    STA backup_cursor_targ
+    STA submenu_targ
     JMP @Loop
 
 
@@ -6808,19 +6793,19 @@ ItemTargetMenuLoop:
     JSR PlaySFX_MenuSel    ;  play selection sound effect
     SEC                    ;  and set carry before exiting
     RTS
-    
-    
 
-    
-MPTargetMenuLoop:    
-   
+
+
+
+MPTargetMenuLoop:
+
   @Loop:
     JSR ClearButtons
 
     JSR ClearOAM               ; clear OAM
     JSR DrawMPTargetCursor   ; draw the cursor for this menu
     JSR DrawMPTargetSprites
-    
+
     JSR MenuFrame              ; do a frame
 
     LDA joy_a
@@ -6830,7 +6815,7 @@ MPTargetMenuLoop:
 
     JSR MoveMPMenuCursor
     LDA cursor
-    STA backup_cursor_targ
+    STA submenu_targ
     JMP @Loop
 
   @A_Pressed:              ; if A was pressed
@@ -6843,93 +6828,37 @@ MPTargetMenuLoop:
     SEC                    ;  and set carry before exiting
     RTS
 
-    
-DrawMPTargetSprites:    
+
+DrawMPTargetSprites:
     LDA #$4A           ; draw the character sprites
     STA spr_x
     LDA #$0D           ; not exactly on tile edge
     STA spr_y
     LDA #$00
     JSR DrawOBSprite
-    
-    LDA #$74          
+
+    LDA #$74
     STA spr_x
     LDA #$40
     JSR DrawOBSprite
 
-    LDA #$9A          
+    LDA #$9A
     STA spr_x
     LDA #$80
     JSR DrawOBSprite
 
-    LDA #$C4          
+    LDA #$C4
     STA spr_x
-    LDA #$C0      
-    JMP DrawOBSprite  
-    
-    
-    
-MoveMPMenuCursor:    
-    LDA joy                      ; get joypad state
-    AND #$0F                     ; isolate directional buttons
-    CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
-    BEQ @Exit                    ; if there's no change, just exit
-    STA joy_prevdir              ;  otherwise record changes
-    CMP #0                       ; see if buttons have been pressed (rather than released)
-    BEQ @Exit                    ; if no buttons pressed, just exit
+    LDA #$C0
+    JMP DrawOBSprite
 
-    CMP #$04               ; now see which button was pressed
-    BCS @UpDown            ; check for up/down
-    CMP #$01               ; otherwise, check for left/right
-    BNE @Left
 
-  @Right:
-     INC cursor
-     LDA cursor
-     CMP #4
-     BNE @Done_X
-     LDA #0
-     BEQ @Done_X
 
-  @Left:                 
-     DEC cursor
-     LDA cursor
-     CMP #$FF
-     BNE @Done_X
-     LDA #03
-     JMP @Done_X
-   
-@UpDown:         ; if we pressed up or down... see which
-    BNE @Up
 
- @Down:                  
-    INC cursor2
-    LDA cursor2
-    CMP #8
-    BNE @Done_Y
-    LDA #0
-    BEQ @Done_Y
-    
-  @Up:                    
-    DEC cursor2
-    LDA cursor2
-    CMP #$FF
-    BNE @Done_Y
-    LDA #08
-    
-  @Done_Y:
-    STA cursor2
-    RTS
-    
-  @Done_X:
-    STA cursor  
-  @Exit:
-    RTS
-    
-    
-    
-    
-    
+
+
+
+
     ;; since so many things require this...
 Cursor_to_Index:
     LDA cursor              ; otherwise... get cursor
@@ -6937,11 +6866,11 @@ Cursor_to_Index:
     ROR A
     ROR A
     AND #$C0                ; shift it to get a usable index
-    TAX                     ; and put in X    
+    TAX                     ; and put in X
     RTS
 
     ;; JIGS - also used a ton. C set if dead or stone, clear if not, so use BCS to cancel use.
-CheckDeadStone:    
+CheckDeadStone:
     LDA ch_ailments, X         ; check their OB ailments
     CMP #$01
     BEQ @No
@@ -6949,10 +6878,10 @@ CheckDeadStone:
     BEQ @No
     CLC
     RTS
-   @No:    
+   @No:
     SEC
     RTS
-    
+
 SetStallAndWait:
     LDA #1
     STA menustall
@@ -6960,7 +6889,7 @@ SetStallAndWait:
     LDA cursor
     STA submenu_targ
     RTS
-    
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6974,11 +6903,11 @@ SetStallAndWait:
 
 
 
-CheckForMP:    
+CheckForMP:
     LDA submenu_targ
     STA cursor
     JSR Cursor_to_Index
-    
+
     LDA ch_mp, X   ; check all of this character's Max MP
     ORA ch_mp+1, X ;  if any level of spells is nonzero, we'll need to draw the MP
     ORA ch_mp+2, X ;  for this character.  Otherwise, we won't need to.
@@ -6988,23 +6917,24 @@ CheckForMP:
     ORA ch_mp+6, X
     ORA ch_mp+7, X
     RTS
-    
+
 DrawItemTargetMenu:
     JSR ScreenOff_ClearNT
     LDA #MBOX_HP
     JSR DrawMainItemBox
     LDA #3
     STA submenu_targ
-   @Loop: 
+   @Loop:
     JSR DrawItemTargetMenu_OneChar
     DEC submenu_targ
     BPL @Loop
+    INC submenu_targ    
     JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
 
 HealStringPositionLut:
-    .byte 8, 11, 14, 17    
-    
-DrawItemTargetMenu_OneChar:    
+    .byte 8, 11, 14, 17
+
+DrawItemTargetMenu_OneChar:
     LDA submenu_targ
     TAX
     LDA HealStringPositionLut, X
@@ -7013,7 +6943,7 @@ DrawItemTargetMenu_OneChar:
     STA dest_x
     LDA #17
     JMP DrawCharMenuString         ; draw Name, ailment, HP for each character
-    
+
 DrawItemTargetMenu_Elixir:
     JSR ScreenOff_ClearNT
     LDA #MBOX_HPMP
@@ -7024,11 +6954,12 @@ DrawItemTargetMenu_Elixir:
     JSR DrawItemTargetMenu_Elixir_OneChar
     DEC submenu_targ
     BPL @Loop
+    INC submenu_targ
     JMP TurnMenuScreenOn_ClearOAM   ; then clear OAM and turn the screen back on.  then exit
 
 ElixirStringPositionLut:
     .byte 5, 9, 13, 17
-    
+
 DrawItemTargetMenu_Elixir_OneChar:
     LDA submenu_targ
     TAX
@@ -7046,28 +6977,28 @@ DrawItemTargetMenu_Elixir_OneChar:
     LDA #16
     JSR DrawCharMenuString          ; draw MP for each character
   : RTS                             ; or just skip it if they have none
-    
+
 DrawMPTargetMenu:
     JSR ScreenOff_ClearNT
     LDA #MBOX_MP
     JSR DrawMainItemBox             ; draw main box for all character's MP
-    INC dest_x                      
-    INC dest_y                      
+    INC dest_x
+    INC dest_y
     INC dest_y                      ; arrange the text over a bit, and down enough to make room for sprites
-    LDA #14                         
+    LDA #14
     JSR DrawMenuString              ; Draw spell levels on the left
     LDA #3
     STA submenu_targ
-   @Loop:                           
+   @Loop:
     JSR DrawMPTargetMenu_Elixir_OneChar
     DEC submenu_targ
     BPL @Loop
     JMP TurnMenuScreenOn_ClearOAM
 
 EtherStringPositionLut:
-    .byte 9, 14, 19, 24    
+    .byte 9, 14, 19, 24
 
-DrawMPTargetMenu_Elixir_OneChar:    
+DrawMPTargetMenu_Elixir_OneChar:
     LDA submenu_targ
     TAX
     LDA EtherStringPositionLut, X
@@ -7079,8 +7010,8 @@ DrawMPTargetMenu_Elixir_OneChar:
     LDA #15
     JSR DrawCharMenuString          ; draw MP for each character
   : RTS
-    
-    
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  EnterStatusMenu    [$B4AD :: 0x3B4BD]
@@ -7091,10 +7022,10 @@ DrawMPTargetMenu_Elixir_OneChar:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-StatusMenuAttributes:
-.byte $AA,$55
-.byte $AA,$55
-.byte $AA,$55
+;StatusMenuAttributes:
+;.byte $AA,$55
+;.byte $AA,$55
+;.byte $AA,$55
 
 EnterStatusMenu:
     JSR WaitForVBlank_L
@@ -7104,37 +7035,37 @@ EnterStatusMenu:
     STA menustall           ; disable menu stalling
     STA tmp+2               ; set additive for scrollwork
     JSR ClearNT             ; clear the NT
-    
+
     LDA #>$23C0
     STA $2006
     LDA #<$23C0
     STA $2006
-    
-    LDX #6
-    LDY #4
-   @AttributeLoop:
-    LDA StatusMenuAttributes-1, X
-    STA $2007
-    DEY
-    BNE @AttributeLoop
-    LDY #4
-    DEX
-    BNE @AttributeLoop
 
-    LDA #3
-    STA dest_y    
-    LDA #20
-    STA dest_x
-    LDA #9
-    STA dest_ht               ; 8 tiles wide and 9 tall
-    LDA #8
-    STA dest_wd
-    
-    LDA #<statusbox_scrollwork  ; get the pointer to the orb box scrollwork
-    STA image_ptr            
-    LDA #>statusbox_scrollwork  
-    STA image_ptr+1          
-    JSR DrawImageRect        ; draw the image rect
+;    LDX #6
+;    LDY #4
+;   @AttributeLoop:
+;    LDA StatusMenuAttributes-1, X
+;    STA $2007
+;    DEY
+;    BNE @AttributeLoop
+;    LDY #4
+;    DEX
+;    BNE @AttributeLoop
+
+;    LDA #3
+;    STA dest_y
+;    LDA #20
+;    STA dest_x
+;    LDA #9
+;    STA dest_ht               ; 8 tiles wide and 9 tall
+;    LDA #8
+;    STA dest_wd
+;
+;    LDA #<statusbox_scrollwork  ; get the pointer to the orb box scrollwork
+;    STA image_ptr
+;    LDA #>statusbox_scrollwork
+;    STA image_ptr+1
+;    JSR DrawImageRect        ; draw the image rect
 
 @ReenterStatusMenu:
     JSR WaitForVBlank_L
@@ -7145,59 +7076,67 @@ EnterStatusMenu:
     LSR A
     ROR A
     ROR A
-    STA char_index          
-    
+    STA char_index
+
     JSR ResetCharStats
 
-    LDX #02
-    STX dest_x
-    INX ;#03
-    STX dest_y
+    LDA #MBOX_STATUS_CHAR
+    JSR DrawMainItemBox
+
+    ;LDX #02
+    ;STX dest_x
+    ;DEX ; #01
+    ;STX dest_y
+    INC dest_x
     LDA #19
     JSR DrawCharMenuString
+
+    LDA #MBOX_STATUS_OPTION
+    JSR DrawMainItemBox
 
     LDA #MBOX_STATUS
     JSR DrawMainItemBox
     LDA #20
     INC dest_x
     JSR DrawCharMenuString
-    
+
     JSR ClearOAM            ; clear OAM
 
-    LDA #$B8
+    LDA #$60 ; B8
     STA spr_x
-    LDA #$30 ;3C
+    LDA #$18 ; 30
     STA spr_y
-   
-    JSR TurnMenuScreenOn    ; turn the screen on
-    
-   @Loop: 
-    JSR ClearOAM
-    LDX char_index
-    LDA ch_ailments, X
-    AND #AIL_DEAD | AIL_STOP
-    BNE @NormalPose
-    
-    LDA playtimer+1         ; every other second
-    AND #01
-    BEQ @NormalPose
-    
-    LDA ch_ailments, X      ; set pose to cheer
-    ORA #$80
-    STA ch_ailments, X
-    BNE @DrawSprite
 
-   @NormalPose:             ; reset pose to normal
-    LDA ch_ailments, X
-    AND #$0F
-    STA ch_ailments, X
-   
-   @DrawSprite:   
-    TXA
+    JSR TurnMenuScreenOn    ; turn the screen on
+
+   @Loop:
+    JSR ClearOAM
+  ;  LDX char_index
+  ;  LDA ch_ailments, X
+  ;  AND #AIL_DEAD | AIL_STOP
+  ;  BNE @NormalPose
+  ;
+  ;  LDA playtimer+1         ; every other second
+  ;  AND #01
+  ;  BEQ @NormalPose
+  ;
+  ;  LDA ch_ailments, X      ; set pose to cheer
+  ;  ORA #$80
+  ;  STA ch_ailments, X
+  ;  BNE @DrawSprite
+  ;
+  ; @NormalPose:             ; reset pose to normal
+  ;  LDA ch_ailments, X
+  ;  AND #$0F
+  ;  STA ch_ailments, X
+
+   @DrawSprite:
+    ;TXA
+    LDA char_index
     JSR DrawOBSprite        ; then draw this character's OB sprite
     JSR MenuFrame
     JSR @MoveCursorLeftRight
-    
+
     LDA joy_select
     ORA joy_start
     BEQ :+
@@ -7206,23 +7145,23 @@ EnterStatusMenu:
         BEQ :+
         CMP #ARMORSTART     ; or if its armor
         BCS :+
-        
+
         LDA DualWieldStats  ; only do this if they have a weapon
         EOR #1              ; else, the display will mess up probably
         STA DualWieldStats
         JMP @ReenterStatusMenu
-    
+
   : LDA joy_a
     ORA joy_b
-    BEQ @Loop                     ; check if A pressed  
+    BEQ @Loop                     ; check if A pressed
 
-@ResetStatusMenuCharPose:    
+@ResetStatusMenuCharPose:
     LDX char_index
     LDA ch_ailments, X
     AND #$0F
     STA ch_ailments, X
-    RTS     
-  
+    RTS
+
 @MoveCursorLeftRight:
     LDA joy            ; get joy data
     AND #$0F           ; isolate directional buttons
@@ -7235,7 +7174,7 @@ EnterStatusMenu:
 
     CMP #$01           ; otherwise, check for left/right
     BNE @Left
-    
+
   @Right:
     LDA submenu_targ
     CLC
@@ -7254,11 +7193,11 @@ EnterStatusMenu:
     LDA #0
     STA DualWieldStats
     JMP @ReenterStatusMenu
-  
+
   @Exit:
    RTS
-  
-  
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7283,7 +7222,7 @@ MenuRecoverPartyHP:
     JSR MenuRecoverHP
     LDX #$C0
     ;JMP MenuRecoverHP
-    
+
     ;JMP DrawItemTargetMenu   ; then draw item target menu, and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -7339,7 +7278,7 @@ MenuRecoverHP_Abs:
     ;STA $4006                   ;  best I can figure... shutting off sq2 here prevents some ugly sounds
     ;STA $4007                   ;  from happening when the gain HP jingle starts.  Though I don't see why
                                 ;  that should happen...
-                                
+
     ;; JIGS - just use a neat little SFX with square2 instead:
     ;JSR PlayHealSFX
 
@@ -7365,100 +7304,7 @@ MenuRecoverHP_Abs:
     STA ch_curhp+1, X
     JMP _MenuRecoverHP_Done     ; and then jump to done
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Move Item Menu Cursor   [$B5AB :: 0x3B5BB]
-;;
-;;    Moves the cursor around in the item menu.  Checks all 4 directions
-;;  and wraps where appropriate.  The description box is closed after every
-;;  move (if it's opened).
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-MoveItemMenuCurs_Exit:
-    RTS
-
-MoveItemMenuCurs:
-    LDA joy                   ; get current joy data
-    AND #$0F                  ; mask out the directional bits
-    CMP joy_prevdir           ; see if any bits have changed (button has been pressed/released)
-    BEQ MoveItemMenuCurs_Exit ; if there was no change, there's nothing to do here, just exit
-    STA joy_prevdir           ; write the new value back so that the joy changes are recorded
-    CMP #0                    ; see if a button is being pressed or released (since either would cause a transition)
-    BEQ MoveItemMenuCurs_Exit ; if 'joy' was zero... then buttons are released.. no buttons being pressed.. so just exit
-
-    CMP #$04            ; check the 'Down' bit
-    BCC @LeftOrRight    ;  if it's less than that... it's either Left or Right
-    BNE @Up             ;  if it's not equal to that... it must be Up
-                        ;  otherwise... it's Down
- @Down:
-    LDA cursor         ; to move down... get the cursor
-    CLC
-    ADC #$02           ; add 2 to it
-    CMP #18            ; there are 17 (counting 0 as 1!) cursor positions
-    BEQ @DownWrapLeft  ; if its 18, its 1 over
-    CMP #19          
-    BCS @DownWrapRight
-    BCC @Done    
-    
-    ; otherwise we need to wrap to top of the column
- @DownWrapLeft:
-    LDA #3             ; by just setting the proper cursor #
-    JMP @Done          ; this wraps to the second item in the list
-    
- @DownWrapRight:
-    LDA #0             ; this wraps to the "Use" option
-    JMP @Done
-
- @Up:
-    LDA cursor         ; to move up...
-    SEC
-    SBC #$02           ; subtract 2 from the cursor
-    BPL @Done          ; if we're still above zero, we're done.  Otherwise...
-
-    LDA cursor         ; re-load the cursor into A
-    CMP #01
-    BEQ @UpWrapLeft
-    
- @UpWrapRight:         ; to wrap to bottom of column...
-    LDA #17
-    JMP @Done          ; then we're done
-    
- @UpWrapLeft:         
-    LDA #15
-    JMP @Done          
-
- @LeftOrRight:
-    CMP #$01           ; check to see if they pressed Right instead of Left
-    BNE @Left          ; if they didn't... jump to Left
-                       ; otherwise... they must've pressed right
- @Right:
-    LDA cursor         ; to move right... just add 1 to the cursor
-    CLC
-    ADC #$01
-    CMP cursor_max     ; if the cursor is < max...
-    BCC @Done          ;  then we're done
-    LDA #0             ; otherwise wrap the cursor to zero
-    BEQ @Done          ;  (always branches)
-
- @Left:
-    LDA cursor         ; to move left... subtract 1 from the cursor
-    SEC
-    SBC #$01
-    BPL @Done          ; still >= 0, we're done
-    LDA cursor_max     ; otherwise, wrap to max-1
-    SEC
-    SBC #$01
-
- @Done:
-    CMP cursor_max        ; if you have nothing, cursor max is set to 2 instead of 18
-    BCC :+                ; so double-check that the cursor is within bounds (the submenu only)
-     SBC #1               ; no need to set C if it didn't branch on Carry Clear
-     BCC @Done            ; then carry is cleared by the addition...! So it always branches.
-    
-  : STA cursor            ; write the new cursor value
-    JMP CloseDescBox_Sfx  ; close the description box, play the menu move sound effect, and exit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7484,16 +7330,16 @@ MenuWaitForBtn:
     BEQ MenuWaitForBtn
     ;JMP ClearButtons
 
-ClearButtons:  
+ClearButtons:
     LDA #0
     STA joy_a
     STA joy_b
     STA joy_select
-    STA joy_start    
+    STA joy_start
     RTS
 
-  
-  
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7529,30 +7375,30 @@ DrawMainMenuCharSprites:
 ;    JMP DrawOBSprite   ; then exit
 
     ;; JIGS - moved them around slightly
-    
-    LDA #$6C          
+
+    LDA #$6C
     STA spr_x
     LDA #$18
     STA spr_y
     LDA #$00
     JSR DrawOBSprite
-    
-    ;LDA #$D8          
+
+    ;LDA #$D8
     ;STA spr_x
     LDA #$48
-    STA spr_y    
+    STA spr_y
     LDA #$40
     JSR DrawOBSprite
 
-    LDA #$78          
+    LDA #$78
     STA spr_y
     LDA #$80
     JSR DrawOBSprite
 
-    LDA #$A8          
+    LDA #$A8
     STA spr_y
     LDA #$C0
-    JMP DrawOBSprite  
+    JMP DrawOBSprite
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -7583,7 +7429,7 @@ MainMenuFrame:
     LDA #0
     STA $2005
     STA $2005
-    
+
     LDA music_track        ; if no music track is playing...
     BPL :+
       ;LDA #$51             ;  start music track $51  (menu music)
@@ -7631,377 +7477,11 @@ MainMenuFrame:
 
 ;; JIGS - not used, but a good example of how to move cursor around in a 2x2 box.
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Move Cursor Up / Down  [$B6AB :: 0x3B6CB]
-;;
-;;    Checks joypad data for up/down button presses, and increments/decrements
-;;  the cursor appropriately.  The cursor is wrapped at cursor_max.  This also
-;;  plays that ugly sound effect if the cursor has been moved
-;;
-;;    Left/Right button presses are not checked here -- this is for up/down only
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-MoveCursorUpDown:
-    LDA joy             ; get joypad data
-    AND #$0C            ;  isolate up/down buttons
-    CMP joy_prevdir     ;  compare it to previously checked button states
-    BEQ MoveCursor_Exit ; if they equal, do nothing (button has already been pressed and is currently just held)
-
-    STA joy_prevdir     ; otherwise, button state has changed, so record new button state in prevdir
-    CMP #$00            ;  and check to see if a button is being pressed or released (nonzero=pressed)
-    BEQ MoveCursor_Exit ;  if zero, button is being released, so do nothing and just exit
-
-    CMP #$04            ; see if the user pressed down or up
-    BNE @Up
-
-  @Down:                ; moving down...
-    LDA cursor          ;  get cursor, and increment by 1
-    CLC
-    ADC #$01
-    CMP cursor_max      ;  if it's < cursor_max, it's still in range, so
-    BCC @Move           ;   jump ahead to move
-    LDA #0              ;  otherwise, it needs to be wrapped to zero
-    BEQ @Move           ;   (always branches)
-
-  @Up:                  ; up is the same deal...
-    LDA cursor          ;  get cursor, decrement by 1
-    SEC
-    SBC #$01
-    BPL @Move           ; if the result didn't wrap (still positive), jump ahead to move
-    LDA cursor_max      ;  otherwise wrap so that it equals cursor_max-1
-    SEC
-    SBC #$01
-
-  @Move:
-    STA cursor            ; set cursor to changed value
-    JMP PlaySFX_MenuMove  ; then play that hideous sound effect and exit
-
-MoveCursor_Exit:
-    RTS
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Move Magic Menu Cursor  [$B6DC :: 0x3B6EC]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-MoveMagicLearnMenuCursor:
-    LDA joy                      ; get joypad state
-    AND #$0F                     ; isolate directional buttons
-    CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
-    BEQ MoveCursor_Exit          ; if there's no change, just exit
-    STA joy_prevdir              ;  otherwise record changes
-    CMP #0                       ; see if buttons have been pressed (rather than released)
-    BEQ MoveCursor_Exit          ; if no buttons pressed, just exit
-
-    INC cursor_change
-
-    CMP #$04               ; now see which button was pressed
-    BCS @UpDown            ; check for up/down
-    CMP #$01               ; otherwise, check for left/right
-    BNE @Left
-    
-   @Right:
-    INC cursor
-    LDX cursor
-    LDA @CursorSwapPage_LUT, X
-    BEQ @SwapPageRight
-    
-    CMP #$FF
-    BNE @Done
-    
-    DEC cursor
-    
-   @Done:
-    JMP PlaySFX_MenuMove ; CloseDescBox_Sfx 
-    
-   @Left:
-    DEC cursor
-    LDX cursor
-    LDA @CursorSwapPage_LUT, X
-    CMP #1
-    BEQ @SwapPageLeft
-    
-    LDA cursor
-    CMP #$FF
-    BNE @Done
-    
-    INC cursor
-    JMP PlaySFX_MenuMove ; CloseDescBox_Sfx 
-    
-   @SwapPageLeft:
-    DEC item_pageswap
-    JMP :+
-    
-   @SwapPageRight:
-    INC item_pageswap
-    
-  : PLA
-    PLA
-    JSR PlaySFX_MenuMove
-    JMP MagicMenu_LearnSpell
-   
-   @UpDown:         ; if we pressed up or down... see which
-    BNE @Up
-
-   @Down:      
-    INC cursor_max
-    LDA cursor_max
-    CMP #8
-    BCC @UpDownDone
-    
-    LDA #0
-    BEQ :+
-    
-   @Up:
-    DEC cursor_max
-    LDA cursor_max
-    CMP #$FF
-    BNE @UpDownDone
-    
-    LDA #7
-  : STA cursor_max
-   @UpDownDone:
-    JMP PlaySFX_MenuMove; CloseDescBox_Sfx 
- 
-  @CursorSwapPage_LUT:
-    ; traveling right, swap when it hits 0, stop at $FF
-    ; traveling left,  swap when it hits 1
-    ;    ; page 1  ; page 2  ; page 3  ; page 4  ; 
-    ;    ; page 5  ; page 6  ; page 7  ; page 8  ; 
-    .byte $02, $01, $00, $01, $00, $01, $00, $01
-    .byte $00, $01, $00, $01, $00, $01, $00, $01, $FF    
- 
-    
-
-MoveMagicSubMenuCursor:
-    JSR MoveMagicMenuCursor_Shared
-
-    CMP #$01               ; otherwise, check for left/right
-    BNE @Left
-
-   @Right:
-    INC cursor
-    LDA cursor
-    CMP #3
-    BNE @Done
-    LDA #0
-    
-   @Done:
-    STA cursor
-    JMP PlaySFX_MenuMove
-    
-   @Left:
-    DEC cursor
-    LDA cursor
-    CMP #$FF
-    BNE @Done
-    LDA #2
-    JMP @Done
-    
-MoveMagicMenuCursor_Exit:
-    PLA
-    PLA
-    RTS
-
-MoveMagicMenuCursor_Shared:
-    LDA joy                      ; get joypad state
-    AND #$0F                     ; isolate directional buttons
-    CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
-    BEQ MoveMagicMenuCursor_Exit ; if there's no change, just exit
-    STA joy_prevdir              ;  otherwise record changes
-    CMP #0                       ; see if buttons have been pressed (rather than released)
-    BEQ MoveMagicMenuCursor_Exit ; if no buttons pressed, just exit
-    RTS
-
-MoveMagicMenuCursor:
-    JSR MoveMagicMenuCursor_Shared
-    INC cursor_change
-
-    CMP #$04               ; now see which button was pressed
-    BCS @UpDown            ; check for up/down
-    CMP #$01               ; otherwise, check for left/right
-    BNE @Left
-
-  @Right:
-     INC cursor
-     LDA cursor
-     CMP #24
-     BEQ @OopsRight
-     JSR @CheckCursor
-     BEQ @Right
-     JMP CloseDescBox_Sfx
-          
-  @OopsRight:
-   LDA #0     
-   STA cursor
-   JSR @CheckCursor
-   BEQ @Right
-   JMP CloseDescBox_Sfx
-   
-  @Left:                  ; moving left is just like moving right, just in opposite direction
-     DEC cursor
-     LDA cursor
-     CMP #23
-     BCS @OopsLeft
-     JSR @CheckCursor
-     BEQ @Left
-     JMP CloseDescBox_Sfx
-          
-  @OopsLeft:
-   LDA #23
-   STA cursor
-  : JSR @CheckCursor
-    BEQ @MoreLeft
-    JMP CloseDescBox_Sfx 
-   
-  @MoreLeft:
-   DEC cursor
-   JMP :-
-   
-@UpDown:         ; if we pressed up or down... see which
-    BNE @Up
-
- @Down:                  
-    LDA cursor            
-    CLC
-    ADC #03               
-    STA cursor
-    CMP #26
-    BCS @OopsDown_2
-    CMP #25
-    BCS @OopsDown_1
-    CMP #24
-    BCS @OopsDown
-    JSR @CheckCursor       
-    BEQ @Down         
-    JMP CloseDescBox_Sfx   
-   
-   @OopsDown_2:    
-    LDA #0
-    JMP :+
-   @OopsDown_1:    
-    LDA #25
-   @OopsDown: 
-    SEC
-    SBC #23
-  : STA cursor
-    JSR @CheckCursor       
-    BEQ @Down         
-    JMP CloseDescBox_Sfx   
-
-  @Up:                    
-    LDA cursor
-    SEC
-    SBC #03       
-    CMP #$FD
-    BEQ @OopsUp_1
-    CMP #25
-    BCS @OopsUp
-    STA cursor
-    JSR @CheckCursor
-    BEQ @Up
-    JMP CloseDescBox_Sfx   
-
-   @OopsUp_1:   
-    LDA #0
-   @OopsUp: 
-    CLC
-    ADC #23
-    STA cursor
-    JSR @CheckCursor       
-    BEQ @Up         
-    JMP CloseDescBox_Sfx   
-    
-  ;;;;;;
-  ;;  A little mini local subroutine here that checks to see if the cursor
-  ;;    is on a spell or an empty slot.
-  ;;
-  ;;  Result is store in Z on exit.  Z set = cursor on blank slot
-  ;;  Z clear = cursor is on actual spell
-  ;;;;;;
-
-  @CheckCursor:
-    LDA cursor
-    CLC
-    ADC char_index
-    TAX
-    LDA ch_spells, X
-UpdateMP_Exit:    
-    RTS              ; then exit.
 
 
 
 
 
-MagicMenuMPTitle:
-.byte $95,$A8,$B9,$A8,$AF,$FF,$FF,$FF,$96,$99,$FF,$C3,$C3,$FF,$FF,$7A,$FF,$FF,$FF,$00 ; Level___MP_...._*/*__
-
-    
-UpdateMP:    
-    LDA item_pageswap
-    CMP #2
-    BEQ UpdateMP_Exit         ; don't display MP if forgetting spells  
-    LDA cursor_change
-    BEQ UpdateMP_Exit   
-   
-    LDA #<MagicMenuMPTitle
-    STA text_ptr 
-    LDA #>MagicMenuMPTitle
-    STA text_ptr+1
-    
-    LDY #0
-    STY cursor_change
-   @Loop:
-    LDA (text_ptr), Y
-    STA str_buf, Y
-    INY 
-    CPY #$14
-    BNE @Loop
-    
-    LDX cursor             
-    LDA BigSpellLevel_LUT, X  
-    CLC
-    ADC #$81
-    STA str_buf+$6           ; put spell level in the string
-    
-    JSR UseMagic_GetRequiredMP
-    LSR A
-    LSR A
-    LSR A
-    LSR A                     ; shift high bits to low
-    ORA #$80                 
-    STA str_buf+$0E           ; put current MP in the string
-    LDX mp_required
-    LDA ch_stats, X
-    AND #$0F
-    ORA #$80
-    STA str_buf+$10           ; put max MP in the string
-    
-    LDA #<(str_buf)
-    STA text_ptr
-    LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
-    STA text_ptr+1
-    
-    LDA #$0C
-    STA dest_x
-    LDA #$02
-    STA dest_y
-    
-    LDA #1
-    STA menustall
-    
-    JMP DrawComplexString
-    
-    
-    
-    
-    
-    
-    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8075,8 +7555,8 @@ TurnMenuScreenOn:
 
 
 
-  
-  
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8095,30 +7575,30 @@ DrawMainMenu:
    ; JSR DrawMainMenuOptionBox      ; and option box
    ; LDA #$14
    ; JSR DrawMainItemBox            ; timer box
-   
-   LDA #02
-   STA dest_x
-   LDA #11
-   STA dest_y
-   LDA #0
-   JSR DrawMenuString	; draw gold string
-   LDA #04
-   STA dest_x
-   LDA #14
-   STA dest_y
-   LDA #1
-   JSR DrawMenuString   ; draw options string
+
+    LDA #02
+    STA dest_x
+    LDA #11
+    STA dest_y
+    LDA #0
+    JSR DrawMenuString	; draw gold string
+    LDA #04
+    STA dest_x
+    LDA #14
+    STA dest_y
+    LDA #1
+    JSR DrawMenuString   ; draw options string
 
 DrawMainMenu_CharacterBox:
     LDA #BANK_THIS
-    STA cur_bank 
+    STA cur_bank
     STA ret_bank                   ; set for MusicPlay and ComplexString
 
     LDA #MBOX_CHARACTERS           ; then draw the boxes for each character
     JSR DrawMainItemBox            ;  stats...starting with the first character
-	;; at this point, should be at scanline 250 or so... 
+	;; at this point, should be at scanline 250 or so...
 	JSR CallMusicPlay
-	
+
     LDA #$00
     JSR DrawMainMenuCharBoxBody
 
@@ -8141,10 +7621,10 @@ DrawMainMenu_CharacterBox:
     LDA #21
     STA dest_y
     LDA #$C0
-    JSR DrawMainMenuCharBoxBody   
-    
+    JSR DrawMainMenuCharBoxBody
+
     ;; JIGS - just a bit more to draw this weird line between the gold and orb boxes...
-    
+
     LDA #1
     STA dest_x
     LDA #10
@@ -8168,30 +7648,30 @@ DrawMainMenu_CharacterBox:
 DrawOrbBox:
     LDA #MBOX_OPTION          ; Draw main menu box ID 0  (the orb box)
     JSR DrawMainItemBox
-   
+
     LDX #$20
-   @Scrollwork: 
+   @Scrollwork:
     TXA
     STA orbbox_scrollwork-$20, X
     INX
     CPX #$60
     BNE @Scrollwork           ; the scrollwork is simply tiles $20-$5F in order
-    
-    LDA #$02                  ; X and Y positions are the same     
-    STA dest_y                   
+
+    LDA #$02                  ; X and Y positions are the same
+    STA dest_y
     STA dest_x
     LDA #8
     STA dest_wd
     STA dest_ht               ; 8 tiles wide and tall
-    LDA #0 
+    LDA #0
     STA tmp+2                 ; and no additive!
-    
+
     LDA #<orbbox_scrollwork  ; get the pointer to the orb box scrollwork
-    STA image_ptr            
-    LDA #>orbbox_scrollwork  
-    STA image_ptr+1          
+    STA image_ptr
+    LDA #>orbbox_scrollwork
+    STA image_ptr+1
     JSR DrawImageRect        ; draw the image rect
-    
+
 
       ; Fire Orb
     LDX #$84           ; dest ppu address       = $2084
@@ -8278,15 +7758,15 @@ DrawOrbBox:
 DrawMainItemBox:
     JSR LoadMainItemBoxDims
     JMP DrawBox
-    
+
 EraseDescBox:
     LDA #1
     STA menustall            ; set menustall -- we will need to stall here, since the PPU is on
     LDA #MBOX_ITEMDESC
-    
+
 EraseMainItemBox:
     JSR LoadMainItemBoxDims
-    JMP EraseBox   
+    JMP EraseBox
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -8317,10 +7797,10 @@ LoadMainItemBoxDims:
     STA cur_bank     ;  so that stalled boxes will swap back appropriately
     RTS
 
-    
 
 
-    
+
+
 
 
 
@@ -8346,13 +7826,13 @@ LoadMainItemBoxDims:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;DrawCharDescBox:
-;    PHA                  
-;    LDA #1               
+;    PHA
+;    LDA #1
 ;    STA menustall
-;    LDA #09             
+;    LDA #09
 ;    JSR DrawMainItemBox
-;    PLA                  
-;    INC descboxopen      
+;    PLA
+;    INC descboxopen
 ;    JMP DrawCharMenuString    ; JIGS - because it contains HP/MP or other character-related stats
 
 DrawItemDescBox_Fanfare:
@@ -8387,7 +7867,7 @@ DrawMenuString:
     ASL A                   ; double A (pointers are 2 bytes)
     TAX                     ; put in X to index menu string pointer table
     JMP DrawMenuString_FixedBank
-    
+
    ; LDA lut_MenuText, X
    ; STA text_ptr
    ; LDA lut_MenuText+1, X   ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
@@ -8439,14 +7919,10 @@ DrawMenuComplexString:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawCharMenuString:
-    LDY #$7F                ; set length to default 7F
-
-DrawCharMenuString_Len:
-    STY LongCall_Y
     ASL A                   ; double menu string ID
     TAX                     ; put in X
     JMP DrawMenuString_CharCodes_FixedBank
-    
+
 ;    LDA lut_MenuText, X     ; and load up the pointer into (tmp)
 ;    STA tmp
 ;    LDA lut_MenuText+1, X
@@ -8498,7 +7974,7 @@ DrawMainMenuCharBoxBody:
     ORA ch_mp+5, X
     ORA ch_mp+6, X
     ORA ch_mp+7, X
-   
+
     ;BNE @DrawMP       ; if max MP is nonzero, jump ahead to DrawMP
     ;  JMP @NoMP       ; otherwise... jump ahead to NoMP
     BEQ @NoMP
@@ -8506,13 +7982,13 @@ DrawMainMenuCharBoxBody:
   @DrawMP:
     LDY #$00          ; Y is dest index for our drawing loop, start it at zero
                       ;  the loop also modifies X to use it as a source index (this is why the char index was pushed)
-                      
+
     LDA #$96          ; M
     STA str_buf
     LDA #$99          ; P
-    STA str_buf+1                      
+    STA str_buf+1
     LDA #$FF          ; _
-    STA str_buf+2                      
+    STA str_buf+2
    @MPLoop:
       ;LDA ch_curmp, X ; Get current MP for this level
       LDA ch_mp, X
@@ -8520,8 +7996,8 @@ DrawMainMenuCharBoxBody:
       LSR A           ; shift them into low bits
       LSR A
       LSR A
-      LSR A           
-      
+      LSR A
+
       ORA #$80        ;  Or with $80 to get this digit's tile
       STA str_buf+3, Y  ; write this tile to the temp string
 
@@ -8536,9 +8012,9 @@ DrawMainMenuCharBoxBody:
 
     LDA dest_y        ; we draw the 2nd row of this MP first
     CLC
-    ADC #4          ; Add $A to the given row so we draw this string 10 rows 
+    ADC #4          ; Add $A to the given row so we draw this string 10 rows
     STA dest_y        ;  into the box
-    
+
     LDA #$00          ; replace the last '/' in the string with a null terminator
     STA str_buf+$12 ;F
 
@@ -8564,7 +8040,7 @@ DrawMainMenuCharBoxBody:
     ROL A
     ROL A
     STA tmp
-    
+
     LDX #21
    @MainStringLoop:
     LDA CharBoxString, X
@@ -8573,20 +8049,20 @@ DrawMainMenuCharBoxBody:
         ORA tmp             ; add in the character's ID
   : STA str_buf, X
     DEX
-    BPL @MainStringLoop   
+    BPL @MainStringLoop
 
     LDA dest_x
     CLC
     ADC #4
-    STA dest_x    
+    STA dest_x
 
     LDA #<str_buf  ; set low byte of string pointer (start drawing the string from $0300)
     STA text_ptr
- 
+
     JMP DrawComplexString    ; Draw it, then exit!
 
 CharBoxString:
-.byte $FF,$10,$00,$FF,$FF,$95,$10,$03,$01
+.byte $FF,$10,$60,$FF,$FF,$95,$10,$03,$01
 .byte $FF,$10,$02,$FF,$91,$99,$FF,$10,$05,$7A,$10,$06,$00
 
 ;   0 1  2    3 4 5 6  7     8       9 10 11      12 13 14 15 16 17    18 19 20    21
@@ -8598,48 +8074,10 @@ CharBoxString:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Magic Menu Main Box  [$BA6D :: 0x3BA7D]
-;;
-;;    Draws the magic menu main box (containing all the spells)
-;;  Also sets the cursor to the first spell in the list.
-;;
-;;  OUT:       C = set if player has no spells
-;;                 clear if player has at least 1 spell
-;;        cursor = first spell on the character's list (if they have any spells)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DrawMagicMenuMainBox:
-    LDA #MBOX_INV
-    JSR DrawMainItemBox          ; Draw the box itself from the list of MainItem boxes
-    
-    LDY #$C0                     ; set char menu string length to $C0
-    LDA #18                      ; and draw string 2A (entire spell list, along with level names an MP amounts
-    JSR DrawCharMenuString_Len   ;   -- ALL the text in one string!)
-   
-    LDX char_index
-    LDY #0
-  @Loop:
-    LDA ch_spells, X
-    BNE @FoundSpell
-    INX
-    INY
-    CPY #24
-    BNE @Loop         ; loop until we've checked every spell
 
-    LDA #0
-    STA item_pageswap ; set back to 0 if no spells found
-    RTS
 
-  @FoundSpell:
-    TYA               ; if we found a spell... move which spell into A
-    STA backup_cursor ; put found spell in this variable
-    RTS               ; and exit
 
- 
-    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  Enter Equip Menu  [$BACA :: 0x3BADA]
@@ -8661,20 +8099,52 @@ EquipMenu_Attributes_Pos:
 EquipMenu_Attributes_Val:
 .byte $0F,$F0 ; attribute value
 
+
+
+EquipMenu_Submenu:
+    JSR ClearOAM               ; clear OAM
+    JSR DrawEquipSubMenuCursor ; draw the cursor
+    JSR MenuFrame              ; then do an Equip Menu Frame
+
+    LDA joy_a
+    BNE @A_Pressed            ; check to see if A pressed
+    LDA joy_b
+    BNE @B_Pressed            ; or B
+
+    JSR MoveSubMenuCursor
+    JMP EquipMenu_Submenu     ; and loop until one of them is pressed
+
+   @B_Pressed:
+    RTS
+
+   @A_Pressed:
+    LDA submenu_cursor
+    BEQ @Equip
+    CMP #2
+    BEQ @RemoveAll
+
+   @Equip:
+    JMP EquipMenu_MainLoop
+
+   @RemoveAll:
+    JSR LongCall
+    .word GetNekked
+    .byte BANK_Z
+
 EnterEquipMenu:
     JSR WaitForVBlank_L
     JSR ClearButtons
-    STA $2001                 ; turn off the PPU   
-    STA menustall             ; and turn off menu stalling (since the PPU is off)        
+    STA $2001                 ; turn off the PPU
+    STA menustall             ; and turn off menu stalling (since the PPU is off)
     STA WeaponOrArmorPage     ; default to weapon page
     STA ItemOverflow
 
     LDX #$03
-   @PalLoop:                        
-      LDA lutEquipPalettes, X      
-      STA cur_pal, X               
+   @PalLoop:
+      LDA lutEquipPalettes, X
+      STA cur_pal, X
       DEX
-      BPL @PalLoop        
+      BPL @PalLoop
 
     ;; this will color right or left hand green, to indicate which weapon is being shown
 
@@ -8685,9 +8155,9 @@ EnterEquipMenu:
 
     ;; draw description box first, because inventory overlaps it
 
-    LDA #MBOX_INV ; #MBOX_EQUIP         
+    LDA #MBOX_INV ; #MBOX_EQUIP
     JSR DrawMainItemBox
-   
+
     LDA #$05
     STA dest_y
     STA dest_x
@@ -8708,17 +8178,13 @@ DrawEquipSubMenuString:
     LDA #79
     JSR DrawMenuString        ; "Equip / Remove / Empty"
 
-    LDA equipoffset
-    STA cursor
-
-
    @DualWieldStuff:
     LDX char_index         ; see if the character has a weapon
     LDA ch_lefthand, X     ; in their left hand
     BEQ @DrawStats         ; if they don't, do nothing
     CMP #ARMORSTART+1
     BCS @DrawStats         ; if its armor, do nothing
-    
+
     LDA DualWieldStats
     TAX
     LDA #$23
@@ -8727,44 +8193,47 @@ DrawEquipSubMenuString:
     STA $2006
     LDY #3
     LDA EquipMenu_Attributes_Val, X
-   @AttLoop: 
+   @AttLoop:
     STA $2007
     DEY
     BNE @AttLoop
 
-  @DrawStats:  
+  @DrawStats:
     JSR ResetCharStats
     LDA #$17
     STA dest_y
     LDA #$03
     STA dest_x
     LDA #13
-    JSR DrawCharMenuString   ; Draw Stats    
-    
+    JSR DrawCharMenuString   ; Draw Stats
+
     LDX char_index
     LDA ch_attackperks, X
     AND #DUALWIELD
     BEQ :+
-    
+
     LDA #>$211B
     STA $2006
     LDA #<$211B
     STA $2006
     LDX #2
-   @IconLoop: 
-    LDA @DualWieldIcons, X
+   @IconLoop:
+    LDA DualWieldIcons, X
     STA $2007
     DEX
     BPL @IconLoop
-    
+
   : JSR TurnMenuScreenOn_ClearOAM
-    
+
+EquipMenu_MainLoop:
+    LDA equipoffset
+    STA cursor
+
   @Loop:
     JSR ClearOAM              ; clear OAM
-    JSR DrawEquipMenuCurs     ; draw the cursor
-    ;JSR EquipMenuSprite
+    JSR DrawEquipMenuCursor   ; draw the cursor
     JSR MenuFrame             ; then do an Equip Menu Frame
-    
+
     LDA joy_a
     BNE @A_Pressed            ; check to see if A pressed
     LDA joy_b
@@ -8779,7 +8248,7 @@ DrawEquipSubMenuString:
   @A_Pressed:
     JSR Set_Inv_Weapon
     LDA cursor                ; cursor = equip slot
-    STA equipoffset  
+    STA equipoffset
     CLC
     ADC char_index            ; add character index
     TAX
@@ -8789,10 +8258,10 @@ DrawEquipSubMenuString:
     SEC
     SBC #1                    ; convert item to 0-based
     JSR ADD_ITEM              ; put the unequipped weapon in inventory
-    PLA     
+    PLA
     BCC :+
     INC ItemOverflow          ; inventory limit reached (over 15 of this item)
-    
+
   : STA ItemToUnequip
     LDX equipoffset
     BEQ @ViewInventory        ; its a weapon, start with weapon page
@@ -8802,26 +8271,26 @@ DrawEquipSubMenuString:
     BNE @SetArmorBattleSlot   ; its NOT the shield slot, start with armor page
     CMP #0
     BEQ @SetArmorBattleSlot   ; it is the shield slot, but ItemToUnequip is 0: start with armor
-    CMP #ARMORSTART+1         
+    CMP #ARMORSTART+1
     BCS @ViewInventory        ; ItemToUnequip is armor; start with armor
-    
+
     LDA #01
-    STA DualWieldStats        ; else, unequipping a weapon, so start with weapon page 
+    STA DualWieldStats        ; else, unequipping a weapon, so start with weapon page
     BNE @ViewInventory        ; and set the trigger to view left hand weapon stats
-    
+
    @SetArmorBattleSlot:
     INC WeaponOrArmorPage     ; set to 1 to view armor page
 
-   @ViewInventory: 
+   @ViewInventory:
     LDA #0
     STA cursor
     STA cursor_max
     STA item_pageswap
     JSR EnterEquipInventory
     JMP EnterEquipMenu
-    
+
   @B_Pressed:                 ; if B pressed....
-    RTS
+    JMP EquipMenu_Submenu
 
   @SelectPressed:
     LDX char_index         ; if it is, see if the character has a weapon
@@ -8829,23 +8298,14 @@ DrawEquipSubMenuString:
     BEQ @Loop
     CMP #ARMORSTART+1
     BCS @Loop              ; if they don't, do nothing
-    
+
     LDA DualWieldStats
     EOR #$01               ; if its 0, switch to 1; if its 1, switch to 0!
     STA DualWieldStats
     JMP EnterEquipMenu
-    
-   @DualWieldIcons:
-    .byte $D4, $C7, $DB   ; sword, >, shield -- printed in reverse
-   
 
-;EquipMenuSprite:
-;    LDA #$78
-;    STA spr_x
-;    LDA #$10
-;    STA spr_y
-;    LDA char_index
-;    JMP DrawOBSprite        ; then draw this character's OB sprite    
+DualWieldIcons:
+    .byte $D4, $C7, $DB   ; sword, >, shield -- printed in reverse
 
 EnterEquipInventory:
     JSR WaitForVBlank_L
@@ -8855,22 +8315,22 @@ EnterEquipInventory:
     STA tmp+15            ; toggle for special description
     STA tmp+13            ; and make sure this is 0, to keep
     ;; the battle items description box from flickering when passing over empty slots!
-    
+
     LDA #1
     STA cursor_change
-   
+
     JSR ClearNT
     JSR DrawEquipInventory ; Draws everything
     JSR TurnMenuScreenOn_ClearOAM
-    
+
    @Loop:
     JSR ClearOAM
-    JSR DrawEquipInventoryCursor
+    JSR DrawInventoryCursor
     LDA cursor_change
     BEQ :+
         JSR UpdateEquipInventoryStats
   : JSR MenuFrame ;EquipMenuFrame
-    
+
     LDA joy_a
     BNE @A_Pressed            ; check to see if A pressed
     LDA joy_b
@@ -8884,17 +8344,17 @@ EnterEquipInventory:
     JMP @Loop                      ; and loop until one of them is pressed
 
   @B_Pressed:                 ; if B pressed....
-    JSR PlaySFX_MenuSel  
+    JSR PlaySFX_MenuSel
     JSR Set_Inv_Weapon
     LDA equipoffset
-    CLC 
+    CLC
     ADC char_index           ; add character index
     TAX
-    LDA ItemToUnequip 
+    LDA ItemToUnequip
     STA ch_righthand, X      ; restore original item
     BEQ :+
     LDX ItemOverflow         ; if overflow is set, don't subtract the item
-    BNE :+ 
+    BNE :+
     SEC
     SBC #1
     JSR REMOVE_ITEM          ; and if it was more than 0, take it out of inventory again
@@ -8909,57 +8369,57 @@ EnterEquipInventory:
     LDA ch_attackperks, X
     AND #DUALWIELD
     BEQ @Loop                ; if they can't, do nothing
-    
+
     LDA DualWieldStats
     EOR #$01                 ; if its 0, switch to 1; if its 1, switch to 0!
     STA DualWieldStats
     BNE @SwitchScreen
-    
+
   : CMP #6
     BCC @Loop
-   
-  @SwitchScreen:   
+
+  @SwitchScreen:
     LDA WeaponOrArmorPage
     EOR #$01                ; if its 0, switch to 1; if its 1, switch to 0!
     STA WeaponOrArmorPage
     JSR PlaySFX_MenuSel
     JMP EnterEquipInventory
-    
+
   @A_Pressed:
     LDA equip_impossible
     BNE @Error
 
     LDA ItemOverflow
     BNE :+
-    
+
     ;; JIGS - JSR to something like
     ;; "You have too much of "ItemToUnequip"
     ;; "Do you want to throw it away?"
-    
+
   : JSR Set_Inv_Weapon
     DEC ItemToEquip          ; if ID is 0 (nothing chosen) and goes to $FF, skip removing the item
     BMI :+
     LDA ItemToEquip          ; get the new weapon
     JSR REMOVE_ITEM          ; remove it from inventory
   : JMP PlaySFX_MenuSel
-    
-   @Error: 
+
+   @Error:
     JSR PlaySFX_Error        ; kr-kow if not equippable
     JMP @Loop
-  
-   @Start_Pressed: 
+
+   @Start_Pressed:
     LDA equipoffset
-    CMP #06 
+    CMP #06
     BCS @Select_Pressed
 
-    JSR PlaySFX_MenuSel   
+    JSR PlaySFX_MenuSel
     LDA tmp+15
     EOR #$01
     STA tmp+15
     BNE :+
         INC cursor_change
         JMP @Loop
-    
+
   : JSR EquipStatsDescBoxString_Special
     JMP @Loop
 
@@ -8969,12 +8429,12 @@ ResetCharStats:
     .word SetCharStats
     .byte BANK_Z
     RTS
-    
-    
 
-    
-UpdateEquipInventoryStats:    
-;    JSR UnEquipStats        
+
+
+
+UpdateEquipInventoryStats:
+;    JSR UnEquipStats
 
 ;; every time the cursor moves (plus at the very start) the equipped weapon changes:
 ;; if it can be equipped, it is, and the stats are adjusted to show that it is--
@@ -8990,15 +8450,15 @@ UpdateEquipInventoryStats:
     LDA #0
     STA equip_impossible
     STA tmp+8
-    LDA equipoffset          ; save equipoffset as the armor type 
+    LDA equipoffset          ; save equipoffset as the armor type
     STA slotcheck            ; to make sure you don't wear a glove on your head
-    
-   @WeaponOrArmorPage: 
+
+   @WeaponOrArmorPage:
     LDA WeaponOrArmorPage    ; 1 when looking at armor, 0 when looking at weapons
-    STA shop_type            ; for equip permissions, 0: weapon, 1: armor    
+    STA shop_type            ; for equip permissions, 0: weapon, 1: armor
     BEQ :+                   ; so if its armor, put #ARMORSTART offset into tmp+8
        LDA #ARMORSTART
-       STA tmp+8             
+       STA tmp+8
 
   : JSR Set_Inv_Weapon
     LDA cursor
@@ -9017,22 +8477,22 @@ UpdateEquipInventoryStats:
     INC ItemToEquip          ; Turn the item ID 1-based, both for equipping later
     ; And because IsEquipLegal subtracts 1 from A
     ; Also do it here, so that its primed for @FinishUpdate, if its a battle item slot
-    
-    LDA equipoffset    
+
+    LDA equipoffset
     CMP #06                  ; see if its a battle slot item
     BCS @FinishUpdate        ; If its 6 or 7, no need to check equip permissions
-    
+
    @CanEquip:
     LDA ItemToEquip          ; 1-based ID
     JSR IsEquipLegal         ; output: zero flag set = can't equip
     BEQ @NoEquip
-    
+
     LDA equipoffset
     BEQ @FinishUpdate        ; skip checking armor slots if its a weapon
-    
+
     LDX WeaponOrArmorPage    ; here we know: it is not a battle item slot, it is not the right hand weapon slot
     BEQ @FinishUpdate        ; so it must be the shield/dual wield slot!
-    
+
    @CheckArmorSlot:
     LDX tmp+11               ; check type LUT (head, body, hands, shield)
     CMP ArmorSlot            ; against equip slot
@@ -9040,8 +8500,8 @@ UpdateEquipInventoryStats:
 
    @WrongSlot:
     LDA #$FF                 ; mark the slot as FF
-    STA slotcheck            ; so that EquipStatsDescBoxNumbers will show ! tiles to indicate 
-    BNE @NoEquip             ; that the item IS equippable, but not on that part of the body    
+    STA slotcheck            ; so that EquipStatsDescBoxNumbers will show ! tiles to indicate
+    BNE @NoEquip             ; that the item IS equippable, but not on that part of the body
 
    @DoesNotExist:
     LDA #0                   ; only clear the ItemToEquip ID if you don't have one
@@ -9049,22 +8509,22 @@ UpdateEquipInventoryStats:
     BEQ @FinishUpdate
 
    @NoEquip:
-    INC equip_impossible   
+    INC equip_impossible
 
-   @FinishUpdate:      
-    LDA equipoffset   
-    CLC 
+   @FinishUpdate:
+    LDA equipoffset
+    CLC
     ADC char_index           ; add character index
     TAX
-    LDA ItemToEquip      
-    STA ch_righthand, X      ; save item in the slot    
+    LDA ItemToEquip
+    STA ch_righthand, X      ; save item in the slot
 
     JSR ResetCharStats
     DEC cursor_change
 
     LDA #1
     STA menustall
-    
+
     LDA equipoffset
     CMP #6
     BCC EquipStatsDescBoxNumbers   ; don't display this stuff if on battle item slot
@@ -9077,79 +8537,79 @@ EquipStatsDescBoxString_Special:
     JSR LongCall
     .word WeaponArmorSpecialDesc
     .byte BANK_Z
-    
+
     LDA ItemToEquip     ; still 1-based
     BEQ @Error
-    JMP DrawComplexString    
- 
+    JMP DrawComplexString
+
    @Error:
     LDA equipoffset
-    CMP #06 
+    CMP #06
     BCS @Instructions
     JMP PlaySFX_Error
-    
+
    @Instructions:
-    JMP EquipStatsDescBoxString   
-    
+    JMP EquipStatsDescBoxString
+
 EquipStatsDescBoxNumbers:
 ;    LDA char_index
     JSR @FetchStats
-    
+
     LDA #3
     STA dest_x
     LDA #23
     STA dest_y
-    
+
     LDA #<(str_buf)
     STA text_ptr
     LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
     STA text_ptr+1
     JMP DrawComplexString
-    
-   @FetchStats:    
-    LDX #$08       
+
+   @FetchStats:
+    LDX #$08
     LDY #$16         ; damage
     JSR @TheThing
-  
+
     LDX #$14
     LDY #$18         ; defense
     JSR @TheThing
-    
+
     LDX #$1F
     LDY #$17         ; accuracy
     JSR @TheThing
-   
+
     LDX #$2B
     LDY #$19         ; evasion
     JSR @TheThing
-    
+
     LDX #$35
     LDY #$1B         ; critical
     JSR @TheThing
-    
+
     LDX #$41
-    LDY #$1A         ; magic defense    
-   
+    LDY #$1A         ; magic defense
+
    @TheThing:
     LDA slotcheck
     CMP #$FF
-    BNE :+    
-  
+    BNE :+
+
    @WrongSlot:          ; can equip it, but not in this slot!
     LDA #$C4            ; shows ! tile
     BNE @xx_Stats
-   
+
   : LDA equip_impossible
     BEQ :+
-   
+
    @XStats:             ; cannot equip it
-    LDA #$F0            ; shows fancy X 
+    LDA #$F0            ; shows fancy X
    @xx_Stats:
     STA str_buf+1, X
     STA str_buf+2, X
     LDA #$FF
     STA str_buf, X
-    RTS   
+    RTS
 
   : TXA
     PHA
@@ -9158,7 +8618,7 @@ EquipStatsDescBoxNumbers:
     PLA
     TAX
     LDY #0
-    
+
    @Loop:
     LDA (text_ptr), Y
     STA str_buf, X
@@ -9167,7 +8627,7 @@ EquipStatsDescBoxNumbers:
     CPY #3
     BNE @Loop
     RTS
-    
+
 EquipStatsDescBoxString:
     LDA #23
     STA dest_y
@@ -9176,82 +8636,82 @@ EquipStatsDescBoxString:
     CMP #6
     BCC @Stats
 
-    ;; if in battle item slots...    
-    
+    ;; if in battle item slots...
+
     LDA tmp+13 ; check to see if the usual "press start/select to switch" text is already drawn or not
     BEQ :+
         RTS
-    
+
   : LDA #03
     STA dest_x
     LDA #87
     JSR DrawMenuString
     ;; clear out this row with $FFs first.
-    
+
     ;LDA #23
     ;STA dest_y
     LDA #10
     STA dest_x
-    
+
     LDA WeaponOrArmorPage
     BEQ @DrawWeapon
-    
-   @DrawArmor:    
+
+   @DrawArmor:
     LDA #83
     BNE @DrawExplanation
-    
+
    @DrawWeapon:
     LDA #82
 
-   @DrawExplanation:   
+   @DrawExplanation:
     JSR DrawMenuString
     INC dest_y
     INC dest_y
     LDA #03
     STA dest_x
-    
+
     INC tmp+13
-    
+
     LDA #84
     JMP DrawMenuString
 
 
-   @Stats: 
-    LDA #<EquipStats_Blank    
+   @Stats:
+    LDA #<EquipStats_Blank
     STA text_ptr
-    LDA #>EquipStats_Blank    
+    LDA #>EquipStats_Blank
     STA text_ptr+1
- 
+
     LDY #0                  ; copy it to str_buf, instead of just printing it normally
     LDX #0
-   @Loop:                   
+   @Loop:
     LDA (text_ptr), Y
     BEQ :+
     CMP #01
     BEQ :+
     CMP #$09
     BCC @FillSpaces
-    
+
   : STA str_buf, X
     INX
-   @Resume: 
-    INY 
+   @Resume:
+    INY
     CPY #41
     BNE @Loop
-    
+
     INC dest_x
     INC dest_x
-    
+
     LDA #<(str_buf)
     STA text_ptr
     LDA #>(str_buf)           ; load pointer from table, store to text_ptr  (source pointer for DrawComplexString)
     STA text_ptr+1
     JMP DrawComplexString
-   
+
    @FillSpaces:               ; this little loop saves having to put like 40 blank spaces in M_EquipStats_Blank
     STY tmp                   ; Can't use the $09 code to draw spaces, as putting numbers between would ruin it!
     TAY
-    LDA #$FF                  
+    LDA #$FF
   : STA str_buf, X
     INX
     DEY
@@ -9268,13 +8728,13 @@ EquipStats_Blank: ; numbers between 2 and 9 are amount of spaces in this string
 .byte $8E,$B9,$3F,$AC,$3C,$05,$01             ; Evasion__###
 .byte $8C,$5C,$57,$51,$AF,$06                 ; Critical_###__
 .byte $96,$C0,$9B,$2C,$30,$B7,$04,$00         ; M.Resist_###
-  
+
 
 
 
 lut_EquipInventoryPageTitle:
-.byte $04, $05, $06, $4E 
-    
+.byte $04, $05, $06, $4E
+
 DrawEquipInventory:
     LDA #MBOX_EQUIPSTATS        ; Equip Stats Box
     JSR DrawMainItemBox
@@ -9282,19 +8742,19 @@ DrawEquipInventory:
     CMP #6
     BCC :+
        DEC cursor_change        ; decrement this to NOT update the description box immediately!
-    
+
   : JSR EquipStatsDescBoxString ; base string, no stats
 
     LDA #MBOX_INV               ; Inventory List
     JSR DrawMainItemBox
-    
+
     LDA #MBOX_TITLE             ; Name
     JSR DrawMainItemBox
     DEC dest_y
 
     LDA #07
     JSR DrawCharMenuString
-   
+
     LDA #MBOX_SUBMENU
     JSR DrawMainItemBox        ; sub menu box
     DEC dest_y
@@ -9303,7 +8763,7 @@ DrawEquipInventory:
     LDX item_pageswap
     LDA lut_EquipInventoryPageTitle, X
     JSR DrawMenuString         ; draw page number and arrows
-    
+
    ; LDA #0
    ; STA dest_x
    ; LDA #3
@@ -9311,34 +8771,34 @@ DrawEquipInventory:
    ; LDA #79
    ; JSR DrawMenuString
    ;; this would draw box connectors, if the string's data was also enabled
-   
+
     ; tmp+4, 5, 6, 7, 8, 9 are safe to use jigs
 
     LDY #0
     STY tmp+5           ; item counter
     STY tmp+6           ; left or right counter
-  
+
     LDA item_pageswap   ; get the page number for the inventory screen list
     ASL A               ; there are $10 items per screen
     ASL A               ; which is 8 bytes of data to read
     ASL A               ; which is split into low/high, so back to $10
     ASL A
-   ; STA tmp+4           ; 
-    
+   ; STA tmp+4           ;
+
    ; LDA equipoffset     ; get the item slot to check
    ; BEQ @Loop           ; if its 0, its the weapon; jump ahead
-   ; CMP #6              ; else, see if its below 6 (armor slots) 
+   ; CMP #6              ; else, see if its below 6 (armor slots)
    ; BCC @ArmorOffset    ; if equipoffset is 6 or 7, its a battle item
-    
+
     LDX WeaponOrArmorPage  ; See if its the weapon or armor screen
     BEQ :+                 ; if 0, its weapon, skip ahead
-    
+
    @ArmorOffset:
     CLC
-    ADC #ARMORSTART     
+    ADC #ARMORSTART
   : STA tmp+4           ; tmp+4 is now the offset for where to look
-    
-   @Loop: 
+
+   @Loop:
     JSR Set_Inv_Weapon
     TYA                 ; backup Y
     PHA
@@ -9348,44 +8808,44 @@ DrawEquipInventory:
     PLA
     TAY                 ; restore Y
     BCC @Exists
-    
+
    @Skip:
     INC tmp+4
     LDA #$0B
     STA bigstr_buf, Y   ; stat code for drawing amount of tiles
-    LDA #$08              
+    LDA #$08
     STA bigstr_buf+1, Y ; number of tiles to draw
     LDA #$C2
     STA bigstr_buf+2, Y ; tile ID to draw
     INY
     BNE @Numbers
-    
-   @Exists: 
+
+   @Exists:
     INC tmp+4           ; check next item slot, as well as give +1 to item ID
-    LDA tmp+4           ; 
+    LDA tmp+4           ;
     STA bigstr_buf+1, Y ; ID in 2nd slot
     LDA #07
     STA bigstr_buf, Y   ; weapon/armor name code in 1st slot
-    
+
    @Numbers:
     LDA #$FF
     STA bigstr_buf+2, Y ; space
     LDA #$F1
     STA bigstr_buf+3, Y ; cute li'l x
-    
+
     JSR PrintNumber_2Digit
-    LDA format_buf-2     
+    LDA format_buf-2
     CMP #$FF
     BNE @DoubleDigits
-    
-   @SingleDigits: 
+
+   @SingleDigits:
     LDA format_buf-1
-    STA bigstr_buf+4, Y  
+    STA bigstr_buf+4, Y
     LDA #$FF
     BNE :+
 
    @DoubleDigits:
-    STA bigstr_buf+4, Y  ; tens 
+    STA bigstr_buf+4, Y  ; tens
     LDA format_buf-1
   : STA bigstr_buf+5, Y  ; ones
 
@@ -9396,13 +8856,13 @@ DrawEquipInventory:
     CLC
     ADC #7
     TAY
-   
+
    @ResumeLoop:
     INC tmp+5
     LDA tmp+5
     CMP #8             ; if item counter is over 8, end inner loop and reset to 0
     BNE @Loop
-    
+
     LDA #0             ; put the null terminator in
     STA tmp+5          ; reset item counter
     STA bigstr_buf, Y
@@ -9411,27 +8871,27 @@ DrawEquipInventory:
     STA text_ptr
     LDA #>(bigstr_buf)
     STA text_ptr+1
-    
+
     LDA tmp+6              ; 0 on the first pass, 1 on the second pass
     BNE @DrawRightSide
-    
+
    @DrawLeftSide:
     INC tmp+6              ; mark left side as drawn
     LDA #03
-    STA dest_x 
+    STA dest_x
     LDA #05
     STA dest_y
     JSR DrawComplexString  ; Draw all the item names
-    
+
     LDY #0
     JMP @Loop
-    
+
    @DrawRightSide:
     LDA #18
-    STA dest_x 
+    STA dest_x
     JMP DrawComplexString  ; Draw all the item names
 
-  
+
 
 
 
@@ -9467,47 +8927,47 @@ IsEquipLegal:
     JSR LongCall
     .word GetEquipPermissions
     .byte BANK_EQUIPSTATS
-   
-    LDX char_index   
+
+    LDX char_index
     LDA shop_type
     BEQ @Weapon
     CMP #SHOP_WHITEMAGIC
     BCS @NormalPermissions
-    
+
    @Armor:
     LDA ch_armormastery, X
-    AND EquipPermissions   
+    AND EquipPermissions
     BNE @CanEquip          ; if their mastery stat has 1 bit that matches the equipment's type, they can equip it
-    
+
     LDA ch_armormastery+1, X
     JMP :+                 ; if not, check the next byte
-    
+
    @Weapon:
-    LDA ch_weaponmastery, X   
+    LDA ch_weaponmastery, X
     AND EquipPermissions
     BNE @CanEquip
-    
+
     LDA ch_weaponmastery+1, X
   : AND EquipPermissions+1
     BEQ @NormalPermissions
-    
-   @CanEquip: 
-    RTS    
-    
+
+   @CanEquip:
+    RTS
+
    @NormalPermissions:
     LDA ch_class, X   ; get the character's class
     TAX               ; and put in X to index the equip bit
-    
+
     ;; JIGS - instead of doubling it for another table...
-    
+
     LDA #0            ; clear the temp RAM
     STA tmp
-    STA tmp+1          
+    STA tmp+1
     STA tmp+2
     STA tmp+3
     SEC               ; set C
   : ROR tmp           ; shift the carry into the low byte (setting it to $80)
-    ROR tmp+1         ; then again with the high byte 
+    ROR tmp+1         ; then again with the high byte
     ROR tmp+2
     ROR tmp+3
     DEX               ; decrement X (class ID) -- so a Fighter's ID of 0 will now be FF
@@ -9523,7 +8983,7 @@ IsEquipLegal:
     LDA EquipPermissions+2         ; Check first byte of permissions
     AND tmp                        ; mask with low byte of class permissions
     STA EquipPermissions           ;  temporarily store result
-    LDA EquipPermissions+3         ; then do the same with the next byte of the permissions 
+    LDA EquipPermissions+3         ; then do the same with the next byte of the permissions
     AND tmp+1                      ;  mask with next byte of class permissions
     ORA EquipPermissions           ; then combine with results of the first
     LDA EquipPermissions+4
@@ -9538,30 +8998,345 @@ IsEquipLegal:
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+
+MoveCursor_Exit:
+    PLA
+    PLA
+    RTS
+
+MoveCursor_Shared:
+    LDA joy                      ; get joypad state
+    AND #$0F                     ; isolate directional buttons
+    CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
+    BEQ MoveCursor_Exit          ; if there's no change, just exit
+    STA joy_prevdir              ;  otherwise record changes
+    CMP #0                       ; see if buttons have been pressed (rather than released)
+    BEQ MoveCursor_Exit          ; if no buttons pressed, just exit
+    RTS
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;  Move Equip Menu Cursor [$BD6E :: 0x3BD7E]
+;;  Move Cursor Up / Down  [$B6AB :: 0x3B6CB]
 ;;
-;;    Moves the primary/main cursor in the equip menu (the one that actually
-;;  moves amongst the charater equipment).
+;;    Checks joypad data for up/down button presses, and increments/decrements
+;;  the cursor appropriately.  The cursor is wrapped at cursor_max.  This also
+;;  plays that ugly sound effect if the cursor has been moved
 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;    Left/Right button presses are not checked here -- this is for up/down only
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+MoveCursorUpDown:
+    JSR MoveCursor_Shared
+
+    CMP #$04            ; see if the user pressed down or up
+    BNE @Up
+
+  @Down:                ; moving down...
+    LDA cursor          ;  get cursor, and increment by 1
+    CLC
+    ADC #$01
+    CMP cursor_max      ;  if it's < cursor_max, it's still in range, so
+    BCC @Move           ;   jump ahead to move
+    LDA #0              ;  otherwise, it needs to be wrapped to zero
+    BEQ @Move           ;   (always branches)
+
+  @Up:                  ; up is the same deal...
+    LDA cursor          ;  get cursor, decrement by 1
+    SEC
+    SBC #$01
+    BPL @Move           ; if the result didn't wrap (still positive), jump ahead to move
+    LDA cursor_max      ;  otherwise wrap so that it equals cursor_max-1
+    SEC
+    SBC #$01
+
+  @Move:
+    STA cursor            ; set cursor to changed value
+    JMP PlaySFX_MenuMove  ; then play that hideous sound effect and exit
+
+
+
+
+
+
+MoveSubMenuCursor:
+    JSR MoveCursor_Shared
+
+    CMP #$01               ; otherwise, check for left/right
+    BEQ @Right
+
+   @Left:
+    DEC submenu_cursor
+    LDA submenu_cursor
+    BPL @Done
+    LDA #2
+    BNE @Done
+
+   @Right:
+    INC submenu_cursor
+    LDA submenu_cursor
+    CMP #3
+    BNE @Done
+    LDA #0
+
+   @Done:
+    STA submenu_cursor
+    JMP PlaySFX_MenuMove
+
+MoveItemSubMenuCursor:   
+    JSR MoveCursor_Shared
+
+    INC submenu_cursor
+    LDA submenu_cursor 
+    AND #$01                ; only 2 options!
+    STA submenu_cursor
+    JMP PlaySFX_MenuMove
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  Move Item Menu Cursor   [$B5AB :: 0x3B5BB]
+;;
+;;    Moves the cursor around in the item menu.  Checks all 4 directions
+;;  and wraps where appropriate.  The description box is closed after every
+;;  move (if it's opened).
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+MoveItemMenuCursor:
+    JSR MoveCursor_Shared
+    INC cursor_change
+    
+    CMP #$04               ; now see which button was pressed
+    BCS @UpDown            ; check for up/down
+    CMP #$01               ; otherwise, check for left/right
+    BNE @Left
+    
+   @Right:
+    INC cursor_x
+    BNE :+
+    
+   @Left:  
+    DEC cursor_x
+  : LDA cursor_x
+    AND #$01
+    STA cursor_x
+    JMP PlaySFX_MenuMove
+    
+   @UpDown:
+    JMP MoveCursorYUpDown
+    
+   
+    
+;    
+;    
+;    JSR MoveCursor_Shared
+;    INC cursor_change  
+;    
+;    CMP #$04            ; check the 'Down' bit
+;    BCC @LeftOrRight    ;  if it's less than that... it's either Left or Right
+;    BNE @Up             ;  if it's not equal to that... it must be Up
+;
+; @Down:
+;    LDA cursor         ; to move down... get the cursor
+;    CLC
+;    ADC #$02           ; add 2 to it
+;    CMP #18            ; there are 17 (counting 0 as 1!) cursor positions
+;    BEQ @DownWrapLeft  ; if its 18, its 1 over
+;    CMP #19
+;    BCS @DownWrapRight
+;    BCC @Done
+;
+;    ; otherwise we need to wrap to top of the column
+; @DownWrapLeft:
+;    LDA #3             ; by just setting the proper cursor #
+;    JMP @Done          ; this wraps to the second item in the list
+;
+; @DownWrapRight:
+;    LDA #0             ; this wraps to the "Use" option
+;    JMP @Done
+;
+; @Up:
+;    LDA cursor         ; to move up...
+;    SEC
+;    SBC #$02           ; subtract 2 from the cursor
+;    BPL @Done          ; if we're still above zero, we're done.  Otherwise...
+;
+;    LDA cursor         ; re-load the cursor into A
+;    CMP #01
+;    BEQ @UpWrapLeft
+;
+; @UpWrapRight:         ; to wrap to bottom of column...
+;    LDA #17
+;    JMP @Done          ; then we're done
+;
+; @UpWrapLeft:
+;    LDA #15
+;    JMP @Done
+;
+; @LeftOrRight:
+;    CMP #$01           ; check to see if they pressed Right instead of Left
+;    BNE @Left          ; if they didn't... jump to Left
+;                       ; otherwise... they must've pressed right
+; @Right:
+;    LDA cursor         ; to move right... just add 1 to the cursor
+;    CLC
+;    ADC #$01
+;    CMP cursor_max     ; if the cursor is < max...
+;    BCC @Done          ;  then we're done
+;    LDA #0             ; otherwise wrap the cursor to zero
+;    BEQ @Done          ;  (always branches)
+;
+; @Left:
+;    LDA cursor         ; to move left... subtract 1 from the cursor
+;    SEC
+;    SBC #$01
+;    BPL @Done          ; still >= 0, we're done
+;    LDA cursor_max     ; otherwise, wrap to max-1
+;    SEC
+;    SBC #$01
+;
+; @Done:
+;    CMP cursor_max        ; if you have nothing, cursor max is set to 2 instead of 18
+;    BCC :+                ; so double-check that the cursor is within bounds (the submenu only)
+;     SBC #1               ; no need to set C if it didn't branch on Carry Clear
+;     BCC @Done            ; then carry is cleared by the addition...! So it always branches.
+;
+;  : STA cursor            ; write the new cursor value
+;    JMP CloseDescBox_Sfx  ; close the description box, play the menu move sound effect, and exit
+    
+    
+    
+;; cursor for magic casting ; 3 wide, 8 tall, but needs to check if a spell exists
+
+MoveMagicMenuCursor:
+    JSR MoveCursor_Shared
+    INC cursor_change
+
+    CMP #$04               ; now see which button was pressed
+    BCS @UpDown            ; check for up/down
+    CMP #$01               ; otherwise, check for left/right
+    BNE @Left
+
+   @Right:
+    INC cursor_x
+    LDA cursor_x
+    AND #$03
+    STA cursor_x
+    CMP #$03
+    BEQ @Right
+    JSR @CheckCursor
+    BEQ @Right
+    JMP PlaySFX_MenuMove
+    
+   @Left:
+    DEC cursor_x
+    LDA cursor_x
+    AND #$03
+    STA cursor_x
+    CMP #$03
+    BEQ @Left
+    JSR @CheckCursor
+    BEQ @Left
+    JMP PlaySFX_MenuMove
+
+ @UpDown:         ; if we pressed up or down... see which
+    BNE @Up
+
+ @Down:
+    INC cursor_y
+    LDA cursor_y
+    AND #$07
+    STA cursor_y
+    JSR @CheckCursor
+    BEQ @Down
+    JMP PlaySFX_MenuMove
+
+  @Up:
+    DEC cursor_y
+    LDA cursor_y
+    AND #$07
+    STA cursor_y
+    JSR @CheckCursor
+    BEQ @Up
+    JMP PlaySFX_MenuMove
+
+  ;;;;;;
+  ;;  A little mini local subroutine here that checks to see if the cursor
+  ;;    is on a spell or an empty slot.
+  ;;
+  ;;  Result is store in Z on exit.  Z set = cursor on blank slot
+  ;;  Z clear = cursor is on actual spell
+  ;;;;;;
+
+  @CheckCursor:
+    LDA cursor_y
+    ASL A
+    CLC
+    ADC cursor_y
+    ADC cursor_x
+    ADC char_index
+    TAX
+    LDA ch_spells, X
+    RTS              ; then exit.
+
+
+;; cursor for Ethers - 4 wide, 8 tall
+
+MoveMPMenuCursor:
+    JSR MoveCursor_Shared
+
+    CMP #$04               ; now see which button was pressed
+    BCS MoveCursorYUpDown  ; check for up/down
+    CMP #$01               ; otherwise, check for left/right
+    BNE @Left
+
+   @Right:
+    INC cursor_x
+    BNE :+
+
+   @Left:
+    DEC cursor_x
+  : LDA cursor_x
+    AND #$03
+    STA cursor_x
+    JMP PlaySFX_MenuMove
+
+MoveCursorYUpDown:          ; moves cursor_y along 8 positions
+    BNE @Up
+
+   @Down:
+    INC cursor_y
+    BNE :+
+
+   @Up:
+    DEC cursor_y
+  : LDA cursor_y
+    AND #$07
+    STA cursor_y
+    JMP PlaySFX_MenuMove
+
+
+;; cursor movement for equip menu ; left/right changes characters, up/down changes equipment slot (8 entries)
 
 MoveEquipMenuCurs:
-    LDA joy            ; get joy data
-    AND #$0F           ; isolate directional buttons
-    CMP joy_prevdir    ; see if there were changes
-    BEQ @Exit          ; if not, exit
-
-    STA joy_prevdir    ; otherwise, record changes
-    CMP #0             ; see if buttons are being pressed
-    BEQ @Exit          ; if not, exit
+    JSR MoveCursor_Shared
 
     CMP #$04           ; see if they're pressing up/down or left/right
     BCS @UpDown
     CMP #$01           ; otherwise, check for left/right
     BNE @Left
-    
+
   @Right:
     LDA char_index
     CLC
@@ -9579,215 +9354,221 @@ MoveEquipMenuCurs:
   : LDA char_id
     AND #$03
     STA char_id
+    STA submenu_targ
     LDA cursor
     STA equipoffset
     JSR PlaySFX_MenuMove
     PLA
     PLA
     JMP EnterEquipMenu
- 
+
   @Exit:
     RTS
 
   @UpDown:
-    BNE @Up            ; If not left/right, see if they pressed up or down.
-
-  @Down:
-    INC cursor
-    LDA cursor         ; If down, add 1 to the cursor (next row)
-    CMP #$08
-    BNE @Done
-    
-    LDA #$00
-    BEQ :+
-
-  @Up:
-    DEC cursor
-    LDA cursor         
-    CMP #$FF
-    BNE @Done
-    
-    LDA #$07
-  : STA cursor
-   @Done:
-    JMP PlaySFX_MenuMove
+    JSR MoveCursorYUpDown
+    LDA cursor_y
+    STA cursor
+    RTS
 
 
-  
+
+  ;; JIGS - this cursor movement routine also switches screens when needed
+  ;; because the magic learning menu and inventory bags both use the same system
+  ;; they just load different jump points and a different LUT (one is 4 pages, one is 8 pages)
 
 MoveEquipInventoryCursor:
-    LDA joy                      ; get joypad state
-    AND #$0F                     ; isolate directional buttons
-    CMP joy_prevdir              ; compare to previous buttons to see if any have been pressed/released
-    BEQ @Exit                    ; if there's no change, just exit
-    STA joy_prevdir              ;  otherwise record changes
-    CMP #0                       ; see if buttons have been pressed (rather than released)
-    BEQ @Exit                    ; if no buttons pressed, just exit
-    
+    LDA #<EquipInventory_CursorSwap_LUT
+    STA tmp+$0E
+    LDA #>EquipInventory_CursorSwap_LUT
+    STA tmp+$0F
+
+    LDA #<EnterEquipInventory
+    STA tmp+$0C
+    LDA #>EnterEquipInventory
+    STA tmp+$0D
+    JMP CursorMove_SwapPages
+
+MoveMagicLearnMenuCursor:
+    LDA #<MagicLearnMenu_CursorSwap_LUT
+    STA tmp+$0E
+    LDA #>MagicLearnMenu_CursorSwap_LUT
+    STA tmp+$0F
+
+    LDA #<MagicMenu_LearnSpell
+    STA tmp+$0C
+    LDA #>MagicMenu_LearnSpell
+    STA tmp+$0D
+
+CursorMove_SwapPages:
+    JSR MoveCursor_Shared
+
+    INC cursor_change
+
     CMP #$04               ; now see which button was pressed
     BCS @UpDown            ; check for up/down
     CMP #$01               ; otherwise, check for left/right
     BNE @Left
-    
+
    @Right:
-    INC cursor
-    LDX cursor
-    LDA @CursorSwapPage_LUT, X
-    BEQ @SwapPageRight
-    
-    CMP #$FF
+    INC cursor_x
+    LDY cursor_x
+    LDA (tmp+$0E), Y       ; get the control code for this cursor position
+    BEQ @SwapPageRight     ; if it was 0, change the screen to the next page
+
+    CMP #$FF               ; if it was $FF, its the end of the line
     BNE @Done
-    
-    DEC cursor
-    
+
+    DEC cursor_x           ; so decrement the increment to keep it in place
+
    @Done:
-    INC cursor_change
     JMP PlaySFX_MenuMove
-    
-   @Exit:
-    RTS ; do this if no buttons were pressed, so as not to close the message box
-    
+
    @Left:
-    DEC cursor
-    LDX cursor
-    LDA @CursorSwapPage_LUT, X
-    CMP #1
-    BEQ @SwapPageLeft
-    
-    LDA cursor
-    CMP #$FF
-    BNE @Done
-    
-    INC cursor
+    DEC cursor_x
+    LDY cursor_x
+    LDA (tmp+$0E), Y
+    CMP #1                 ; moving left, if the control code was 1
+    BEQ @SwapPageLeft      ; then move back to the previous page
+
+    CPY #$FF               ; or see if the cursor's value itself wrapped to $FF
+    BNE @Done              ; if it did not, its finished
+
+    INC cursor_x           ; if it did, increment it back to 0
     JMP @Done
-    
+
    @SwapPageLeft:
     DEC item_pageswap
     JMP :+
-    
+
    @SwapPageRight:
     INC item_pageswap
-    
+
   : JSR PlaySFX_MenuMove
     PLA
     PLA
-    JMP EnterEquipInventory
+    JMP (tmp+$0C)
 
-    @CursorSwapPage_LUT:
+   @UpDown:         ; if we pressed up or down... see which
+    JMP MoveCursorYUpDown
+
+
+
+EquipInventory_CursorSwap_LUT:
     ; traveling right, swap when it hits 0, stop at $FF
     ; traveling left,  swap when it hits 1
-    ;    ; page 1  ; page 2  ; page 3  ; page 4  ; 
+    ;    ; page 1  ; page 2  ; page 3  ; page 4  ;
     .byte $02, $01, $00, $01, $00, $01, $00, $01, $FF
-    
-   @UpDown:         ; if we pressed up or down... see which
-    BNE @Up
 
-   @Down:      
-    INC cursor_max
-    LDA cursor_max
-    CMP #8
-    BCC @UpDownDone
-    
-    LDA #0
-    STA cursor_max
-    JMP @UpDownDone
-    
-   @Up:
-    DEC cursor_max
-    LDA cursor_max
-    CMP #$FF
-    BNE @UpDownDone
-    
-    LDA #7
-    STA cursor_max
-    
-   @UpDownDone:
-    INC cursor_change
-    JMP PlaySFX_MenuMove
-
-    
+MagicLearnMenu_CursorSwap_LUT:
+    ; traveling right, swap when it hits 0, stop at $FF
+    ; traveling left,  swap when it hits 1
+    ;    ; page 1  ; page 2  ; page 3  ; page 4  ;
+    ;    ; page 5  ; page 6  ; page 7  ; page 8  ;
+    .byte $02, $01, $00, $01, $00, $01, $00, $01
+    .byte $00, $01, $00, $01, $00, $01, $00, $01, $FF
 
 
 
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Main Menu Sub Cursor  [$B7A9 :: 0x3B7B9]
-;;
-;;    Draws the cursor for the main menu sub target (ie:  when you select
-;;  a character for a sub menu -- like for magic or status)
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawMainMenuSubCursor:
-    LDA cursor                      ; get cursor
-    ASL A                           ; double it (2 bytes per coord)
-    TAX                             ; and stuff it in X
-    LDA lut_MainMenuSubCursor, X    ; load up the coords from our LUT
-    STA spr_x
-    LDA lut_MainMenuSubCursor+1, X
-    STA spr_y
-    JMP DrawCursor                  ; then draw the cursor and exit
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawMainMenuCursor  [$B7BA :: 0x3B7CA]
-;;
-;;    Loads the coords for the main menu cursor, and draw the cursor sprite
-;;  at those coords.
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+;; Main menu cursor
 
 DrawMainMenuCursor:
-    LDY cursor                    ; get current cursor selection
-    LDA lut_MainMenuCursor_Y, Y   ;  use cursor as an index to get the desired Y coord
-    STA spr_y                     ;  write the Y coord
-    LDA #$10                      ; X coord for main menu cursor is always $10
-    STA spr_x
-    JMP DrawCursor                ; draw it!  and exit
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  DrawItemMenuCursor  [$B7C8 :: 0x3B7D8]
-;;
-;;   Loads the coords for the item menu cursor, and draws the cursor sprite there
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawItemMenuCursor:
-    LDA cursor                   ; get current cursor and double it (loading X,Y pair)
+    LDY #$10                      ; X coord for main menu cursor is always $10
+    LDA cursor                    ; get current cursor selection
     ASL A
-    TAX                          ;  put it in X
+    ASL A
+    ASL A
+    ASL A
+    ADC #$70
+    BNE DrawMenuCurs
 
-    LDA lut_ItemMenuCursor, X    ; load X,Y pair into spr_x and spr_y
-    STA spr_x
-    LDA lut_ItemMenuCursor+1, X
-    STA spr_y
+;; JIGS - for reference
 
-    JMP DrawCursor               ; then draw the cursor
+;lut_MainMenuCursor_Y:           ; Y coord only... X coord is hardcoded
+;   .byte $70
+;   .byte $80
+;   .byte $90
+;   .byte $A0
+;   .byte $B0
+;   .byte $C0
 
+DrawMainMenuSubCursor:
+    LDY #$58
+    LDX cursor                    ; get cursor
+    LDA lut_MainMenuSubCursor, X  ; load up the coords from our LUT
+    BNE DrawMenuCurs
 
+lut_MainMenuSubCursor:
+   .byte $18
+   .byte $48
+   .byte $78
+   .byte $A8
 
-DrawEquipInventoryCursor:
-    LDA cursor                 
+;; Equipment Menu and Inventory cursor
+
+DrawEquipMenuCursor:
+    LDY #$18                           ; all slots are on same X coordinate
+    LDX cursor                         ; get primary cursor
+    LDA lut_InventoryCursor_Y, X       ; then fetch
+    BNE DrawMenuCurs
+
+DrawEquipSubMenuCursor:
+    LDX submenu_cursor                 ; get primary cursor
+    LDY lut_EquipSubmenuCursor_X, X    ; then fetch
+    LDA #$10                           ; all slots are on same X coordinate    
+    BNE DrawMenuCurs
+
+lut_EquipSubmenuCursor_X:
+    .byte $48, $80, $C0
+
+DrawMagicLearnMenuCursor:
+    LDA cursor_x
+    AND #$01
+    LSR A
+    ROR A
+    JMP :+ 
+    ;; JMP because it can be 00 o $80
+
+DrawItemSubMenuCursor:
+    LDX submenu_cursor
+    LDY @lut, X
+    LDA #$10
+    BNE DrawMenuCurs
+    
+  @lut:
+    .byte $50, $88
+
+DrawInventoryCursor:
+    LDA cursor_x
     AND #$01
     TAX
-    LDA lut_EquipInventoryCursor_X, X  
-    STA spr_x
-
-    LDX cursor_max
-    LDA lut_EquipInventoryCursor_Y, X
+    LDA lut_InventoryCursor_X, X
+  : TAY
+    LDX cursor_y
+    LDA lut_InventoryCursor_Y, X
+    
+DrawMenuCurs:    
     STA spr_y
-    JMP DrawCursor               ; then draw the cursor
+    STY spr_x
+    JMP DrawCursor               ; draw it, and exit
 
-lut_EquipInventoryCursor_X:
+lut_InventoryCursor_X:
     .byte $08
     .byte $80
-    
-lut_EquipInventoryCursor_Y:
+
+lut_InventoryCursor_Y:
     .byte $28
     .byte $38
     .byte $48
@@ -9797,164 +9578,74 @@ lut_EquipInventoryCursor_Y:
     .byte $88
     .byte $98
 
+DrawMagicMenuCursor:
+  ;  LDA cursor                   ; get current cursor and double it (loading X,Y pair)
+  ;  ASL A
+  ;  TAX                          ; put it in X
+  ;  LDA lut_MagicMenuCursor, X   ; load X,Y pair into spr_x and spr_y
+  ;  STA spr_x
+  ;  LDA lut_MagicMenuCursor+1, X
+  ;  BNE DrawMenuCurs_Y
+  ;; this is 14 bytes? 
+  
+    LDX cursor_x
+    LDY lut_MagicMenuCursor, X
+    LDX cursor_y
+    LDA lut_InventoryCursor_Y, X
+    BNE DrawMenuCurs
 
-DrawEquipMenuCurs:
-    LDA #$18                           ; all slots are on same X coordinate
-    STA spr_x                          ; 
-    LDX cursor                         ; get primary cursor
-    LDA lut_EquipInventoryCursor_Y, X  ; then fetch
-    STA spr_y                          ; and record Y coord
-    JMP DrawCursor                     ; draw the cursor, and exit
+lut_MagicMenuCursor: ; x coordinates only
+    .byte $18, $60, $A8
 
+;lut_MagicMenuCursor: ; is 48 bytes 
+;    .byte $18,$28,  $60,$28,  $A8,$28
+;    .byte $18,$38,  $60,$38,  $A8,$38
+;    .byte $18,$48,  $60,$48,  $A8,$48
+;    .byte $18,$58,  $60,$58,  $A8,$58
+;    .byte $18,$68,  $60,$68,  $A8,$68
+;    .byte $18,$78,  $60,$78,  $A8,$78
+;    .byte $18,$88,  $60,$88,  $A8,$88
+;    .byte $18,$98,  $60,$98,  $A8,$98
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Item Target Cursor  [$B3EE :: 0x3B3FE]
-;;
-;;     Draws the cursor for the item target menu
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DrawMagicSubMenuCursor:
+    LDX submenu_cursor              
+    LDY lut_MagicSubMenuCursor, X   
+    LDA #$10
+    BNE DrawMenuCurs
 
+lut_MagicSubMenuCursor:
+   .byte $50, $80, $B8
+
+;; For the subscreens when using an item on the 4 characters
 
 DrawItemTargetCursor:
-    LDX cursor           ; put the cursor in X
-    LDA @lut, X          ; use it to index our LUT
-    STA spr_y            ; that lut is the X coord for cursor
-    LDA #$30
-    STA spr_x            ; Y coord is always $68
-    JMP DrawCursor       ; draw it, and exit
+    LDY #$30
+    LDX cursor          
+    LDA @lut, X          
+    BNE DrawMenuCurs
 
   @lut:
     .BYTE $40,$58,$70,$88
-    
-    
-    
+
 DrawElixirTargetCursor:
-    LDX cursor           ; put the cursor in X
-    LDA @lut, X          ; use it to index our LUT
-    STA spr_y            ; that lut is the X coord for cursor
-    LDA #$2C
-    STA spr_x            ; Y coord is always $68
-    JMP DrawCursor       ; draw it, and exit
+    LDY #$2C
+    LDX cursor          
+    LDA @lut, X          
+    BNE DrawMenuCurs
 
   @lut:
-    .BYTE $26,$46,$66,$86    
-    
-    
+    .BYTE $26,$46,$66,$86
+
 DrawMPTargetCursor:
+    LDX cursor_x
+    LDY @X_lut, X
+    LDX cursor_y                
+    LDA lut_InventoryCursor_Y, X 
+    BNE DrawMenuCurs
 
-    LDX cursor2           ; put the cursor in X
-    LDA @Y_lut, X          ; use it to index our LUT
-    STA spr_y            ; that lut is the X coord for cursor
-    LDX cursor
-    LDA @X_lut, X
-    STA spr_x            ; Y coord is always $68
-    JMP DrawCursor       ; draw it, and exit
-
-  @Y_lut:
-    .BYTE $28,$38,$48,$58,$68,$78,$88,$98
-  
   @X_lut:
-    .BYTE $38,$60,$88,$B0  
+    .BYTE $38,$60,$88,$B0
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Main and item menu cursor position LUTs  [$B7D9 :: 0x3B7E9]
-;;
-;;    X/Y Coords for cursor placement for main and item menus
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; JIGS -- all these got changed around
-
-lut_MainMenuSubCursor:
-  .BYTE $58,$18,      $58,$48
-  .BYTE $58,$78,      $58,$A8
-
-lut_MainMenuCursor_Y:           ; Y coord only... X coord is hardcoded
-   .BYTE   $70,$80,$90,$A0,$B0,$C0,$D0
-
-lut_ItemMenuCursor:
-  .BYTE   $50,$10,   $80,$10
-  .BYTE   $08,$28,   $80,$28
-  .BYTE   $08,$38,   $80,$38
-  .BYTE   $08,$48,   $80,$48
-  .BYTE   $08,$58,   $80,$58
-  .BYTE   $08,$68,   $80,$68
-  .BYTE   $08,$78,   $80,$78
-  .BYTE   $08,$88,   $80,$88
-  .BYTE   $08,$98,   $80,$98
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;;  Draw Magic Menu Cursor [$B816 :: 0x3B826]
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-DrawMagicMenuCursor:
-    LDA cursor                   ; get current cursor and double it (loading X,Y pair)
-    ASL A
-    TAX                          ;  put it in X
-
-    LDA lut_MagicMenuCursor, X    ; load X,Y pair into spr_x and spr_y
-    STA spr_x
-    LDA lut_MagicMenuCursor+1, X
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-
-DrawMagicSubMenuCursor:
-    LDX cursor                   ; get current cursor and double it (loading X,Y pair)
-    LDA lut_MagicSubMenuCursor, X    ; load X,Y pair into spr_x and spr_y
-    STA spr_x
-    LDA #$10
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-lut_MagicSubMenuCursor:
-  .BYTE   $50, $80, $B8
-  
-  
-DrawMagicLearnMenuCursor:
-    LDA cursor                 
-    AND #$01
-    TAX
-    LDA lut_MagicLearnCursor_X, X  
-    STA spr_x
-
-    LDX cursor_max
-    LDA lut_MagicLearnCursor_Y, X
-    STA spr_y
-    JMP DrawCursor               ; then draw the cursor
-
-
-lut_MagicMenuCursor:
-  .BYTE   $18,$28,   $60,$28,   $A8,$28
-  .BYTE   $18,$38,   $60,$38,   $A8,$38
-  .BYTE   $18,$48,   $60,$48,   $A8,$48
-  .BYTE   $18,$58,   $60,$58,   $A8,$58
-  .BYTE   $18,$68,   $60,$68,   $A8,$68
-  .BYTE   $18,$78,   $60,$78,   $A8,$78
-  .BYTE   $18,$88,   $60,$88,   $A8,$88
-  .BYTE   $18,$98,   $60,$98,   $A8,$98
-
-  
-lut_MagicLearnCursor_X:
-  .BYTE   $00
-  .BYTE   $80
-    
-lut_MagicLearnCursor_Y:
-  .BYTE   $28
-  .BYTE   $38
-  .BYTE   $48
-  .BYTE   $58
-  .BYTE   $68
-  .BYTE   $78
-  .BYTE   $88
-  .BYTE   $98
-  
 
 lut_ShopCurs_Cmd:    ; cursor positions for the command box
   .BYTE $08,$40
@@ -10013,7 +9704,7 @@ lut_ShopkeepImage:
  .BYTE $76,$77,$72,$73
 
 
- 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  LUT for Menu palettes  [$AD78 :: 0x3AD88]
@@ -10044,30 +9735,31 @@ lutEquipPalettes:
 ;;  Item menu boxes are also used for the magic menu.
 
 lut_MainItemBoxes:
- 
+
     ;        X   Y   wid height
-    .BYTE   $01,$01,$0A,$1C ; 00 ; Main menu orb/option box
-    .BYTE   $0B,$01,$14,$1C ; 01 ; Main Menu char stats
-    .BYTE   $00,$0D,$20,$0F ; 02 ; Status Menu 
-    .BYTE   $00,$01,$09,$03 ; 03 ; Item title box (character name for magic/equip screens)
-	.BYTE   $09,$01,$17,$03 ; 04 ; Title submenu
-    .BYTE   $00,$03,$20,$13 ; 05 ; Inventory box
-	.BYTE   $00,$16,$20,$07 ; 06 ; Item description box
-    .BYTE   $05,$06,$16,$0E ; 07 ; Item Target Menu (HP)
-    .BYTE   $03,$01,$1A,$15 ; 08 ; Item Target Menu (MP)
-    .BYTE   $04,$03,$18,$13 ; 09 ; Item Target Menu (HP/MP)
-	.BYTE   $01,$01,$1E,$1C ; 0A ; unused 
-    .BYTE   $00,$15,$20,$08 ; 0B ; Equip Stats
-    .BYTE   $00,$03,$10,$13 ; 0C ; Magic Learning menu left side
-    .BYTE   $10,$03,$10,$13 ; 0D ; Magic Learning menu right side
-    
+    .BYTE   $01,$01,$0A,$1C ; Main menu orb/option box
+    .BYTE   $0B,$01,$14,$1C ; Main Menu char stats
+    .BYTE   $00,$01,$10,$0D ; Status Menu Character Info
+    .BYTE   $10,$02,$10,$0B ; Status Menu Options
+    .BYTE   $00,$0E,$20,$0F ; Status Menu Big Box
+    .BYTE   $00,$01,$09,$03 ; Item title box (character name for magic/equip screens)
+	.BYTE   $09,$01,$17,$03 ; Title submenu
+    .BYTE   $00,$03,$20,$13 ; Inventory box
+	.BYTE   $00,$16,$20,$07 ; Item description box
+    .BYTE   $05,$06,$16,$0E ; Item Target Menu (HP)
+    .BYTE   $03,$01,$1A,$15 ; Item Target Menu (MP)
+    .BYTE   $04,$03,$18,$13 ; Item Target Menu (HP/MP)
+    .BYTE   $00,$15,$20,$08 ; Equip Stats
+    .BYTE   $00,$03,$10,$13 ; Magic Learning menu left side
+    .BYTE   $10,$03,$10,$13 ; Magic Learning menu right side
+
     ;; Shop boxes
-    .BYTE   $01,$12,$13,$09 ; 0E ; Shopkeeper dialogue
-    .BYTE   $01,$02,$13,$03 ; 0F ; Title box
-    .BYTE   $15,$02,$0A,$16 ; 10 ; Inventory list
-    .BYTE   $02,$06,$09,$0B ; 11 ; Command box
-    .BYTE   $15,$18,$0A,$03 ; 12 ; Gold box
-    
+    .BYTE   $01,$12,$13,$09 ; Shopkeeper dialogue
+    .BYTE   $01,$02,$13,$03 ; Title box
+    .BYTE   $15,$02,$0A,$16 ; Inventory list
+    .BYTE   $02,$06,$09,$0B ; Command box
+    .BYTE   $15,$18,$0A,$03 ; Gold box
+
 
 
 
