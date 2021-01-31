@@ -12892,7 +12892,7 @@ WaitForVBlank:
     
     LDA InBattle
     BEQ OnIRQ
-        LDA #159
+        LDA #158
         STA $5203
         LDX BattleBGColor
         LDY BattleBackgroundColor_LUT, X
@@ -12901,24 +12901,31 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
 @LoopForever:
     LDA $5204      ; JIGS - high bit set when scanline #160 is being drawn
     BPL @LoopForever
-    
+
    @Scanline:   
+    LDA $2002  ; reset toggle
+    LDA #$3F   ; set PPU addr to point to palette
+    STA $2006  ; write first part here...
+    LDA #$0E   ; load in second address value
+    
     LDX #$0D   ; waits for H-blank so as not to draw weird dots on the screen
   : DEX        ; $0D seems the best so far!
     BNE :-    
-    LDA $2002  ; reset toggle
-    LDA #$3F   ; set PPU addr to point to palette
-    STA $2006    
-    STX $2001  ; X = 0, turn off screen 
-    LDA #$0E
-    STA $2006
-    STY $2007  ; write Y to palette $3F0E
+    NOP        ; just a taaad longer...
 
-    ;; scroll setting?
-    LDY #$02
+    STX $2001  ; X = 0, turn off screen 
+    STA $2006  ; finish setting palette address
+    STY $2007  ; write Y to palette $3F0E
+    LDA #$02
+    STA $2006  ; set the scroll
     LDA #$80
-    STY $2006
-    STA $2006  
+    STA $2006
+
+    LDX #$12   ; waits for next H-blank to turn the screen on!
+  : DEX        
+    BNE :-  
+    NOP
+
     LDA btl_soft2001 ;#$1E
     STA $2001  ; turn on screen
 
@@ -12926,8 +12933,7 @@ OnIRQ:             ; IRQs point here, but the game doesn't use IRQs, so it's moo
     ORA #$90       ; make background tiles use the sprites!
     STA $2000
     
-    LDA #$00       
-    STA $5203      ; Clear trigger 
+    STX $5203      ; Clear trigger 
 
    @ContinueLooping: 
     BEQ @LoopForever     ; then loop forever! (or really until the NMI is triggered)
