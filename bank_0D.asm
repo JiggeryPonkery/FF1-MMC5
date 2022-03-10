@@ -3101,7 +3101,12 @@ MusicPlay:
     BNE @EnvStep             ; if it's nonzero -- a note is still playing, so update the env pattern
 
       JSR Music_ChannelScore ; otherwise, the note is done (len expired), so do more score processing
-      JMP @UpdateVol         ;  and jump ahead
+      CPX #CHAN_TRI
+      BEQ :+                 ; jump to @UpdateNext if its the triangle
+      
+      CMP #LOOP_FOREVER      ; JIGS - see if the next byte in the score is a rest
+      BCC @EnvStep           ; if it is, then keep processing the envelope
+    : JMP @UpdateNext        
 
   @EnvStep:                 ; if a note is still playing... update the env pattern
     ;; JIGS - this should save some cycles!
@@ -3122,8 +3127,8 @@ MusicPlay:
     
     LDA ch_envelope_position, X
     AND #%00111111
-    CMP #%00111111           ; see if the position is at max, and if so, leave it
-    BCS @UpdateNext
+    CMP #ENVELOPE_LENGTH-1   ; see if the position is at max, and if so, leave it
+    BEQ @UpdateNext
     
     INC ch_envelope_position, X ; else, increase it by one
     BNE @UpdateVol
@@ -3137,7 +3142,7 @@ MusicPlay:
     AND #%00111111           ; keep only the actual position bits
     CLC
     ADC ch_envelope_time, X  ; add the distance per frame
-    AND #%00111111           ; capping at #63
+    AND #ENVELOPE_LENGTH-1   ; capping at #63 (or 31 for original envelope lengths)
     ORA tmp                  ; add back in the other bits
     STA ch_envelope_position, X ; and save
 
@@ -3532,6 +3537,7 @@ Music_Note:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Music_Rest:
+    PHA
     JSR Music_ApplyLength_Rest   ; apply the length
 
     ;LDA mu_chan        ; see if this is the triangle
@@ -3540,6 +3546,7 @@ Music_Rest:
       LDA #$FF         ; this is done by setting the high byte of the freq to $FF (only works with the tri)
       STA CHAN_TRI + ch_freq+1
   @Exit:
+    PLA
     JMP Music_DoScore_Done
 
 
