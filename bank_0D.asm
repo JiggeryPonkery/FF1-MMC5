@@ -427,7 +427,7 @@ PRELUDE_SQ4:
 
 PROLOGUE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     PRLOOP0:
     PRLOOP0A:
     .byte SPEED_SET,$81,INSTRUMENT,$0E,OCTAVE_4,$05,$55,$75,$05,$A3,$95,$75,$55,$47,$57,$75
@@ -443,7 +443,7 @@ PROLOGUE_SQ1:
 
 PROLOGUE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     PRLOOP1:
     PRLOOP1A:
     .byte SPEED_SET,$81,INSTRUMENT,$0A,OCTAVE_3,$02,$27,$47,$55,$25,$45,$75,$25,$47,$57,$75
@@ -458,16 +458,16 @@ PROLOGUE_SQ2:
     .word PRLOOP1
 
 PROLOGUE_SQ3:
-    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$03,$C4,LOOP_FOREVER
+    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$02,$C4,LOOP_FOREVER
     .word PROLOGUE_SQ1
 
 PROLOGUE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word PROLOGUE_SQ2
 
 
 PROLOGUE_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     PRLOOP2:
     PRLOOP2A:
     .byte OCTAVE_3,$53,$43,$23,$03,OCTAVE_2,$A3,$B3,OCTAVE_3,$01,$A3,$93
@@ -486,12 +486,12 @@ PROLOGUE_TRI:
 
 EPILOGUE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$04,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_2,$05,$25,$75,$95,OCTAVE_3,$05,$25,$75,$95,$B5,OCTAVE_4
+    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_2,$05,$25,$75,$95,OCTAVE_3,$05,$25,$75,$95,$B5,OCTAVE_4
     .byte $25,$75,OCTAVE_3,$B5,OCTAVE_4,$05,$45,$75,$05,$25,$65,$95,$25,$05,$45,$75
     .byte $05,OCTAVE_3,$B5,OCTAVE_4,$25,$75,OCTAVE_3,$B5,OCTAVE_4,$05,$45,$75,$05,$25,$65,$95
-    .byte $25,$05,TEMPO,$03,$45,TEMPO,$05,$74,TEMPO,$02,$05
+    .byte $25,$05,TEMPO,$02,$45,TEMPO,$04,$74,TEMPO,$01,$05
     ELOOP0A:
-    .byte TEMPO,$04,OCTAVE_3,$B3,OCTAVE_4,$23,OCTAVE_3,$93,$B5
+    .byte TEMPO,$03,OCTAVE_3,$B3,OCTAVE_4,$23,OCTAVE_3,$93,$B5
     .byte OCTAVE_4,$05,OCTAVE_3,$B5,$95,$71,$73,OCTAVE_4,$02,$05,OCTAVE_3,$73,$93,$B1,$91,$B3
     .byte OCTAVE_4,$23,OCTAVE_3,$93,$B5,OCTAVE_4,$05,OCTAVE_3,$B5,$95,$71,$73,OCTAVE_4,$02,$05,OCTAVE_3
     .byte $73,$93,$71,$65,$B5,OCTAVE_4,$35,$65,$73,$65,$45,$21,$43,$25,$05,OCTAVE_3
@@ -500,50 +500,50 @@ EPILOGUE_SQ1:
     .byte $41,$21,$C7
     .byte LOOP_X,$04
     .word ELOOP0A
-    .byte TEMPO,$04,OCTAVE_3,$B3,OCTAVE_4,$23,OCTAVE_3,$93,$B5,OCTAVE_4,$05
+    .byte TEMPO,$03,OCTAVE_3,$B3,OCTAVE_4,$23,OCTAVE_3,$93,$B5,OCTAVE_4,$05
     .byte OCTAVE_3,$B5,$95,$71,$73,OCTAVE_4,$02,$05,OCTAVE_3,$73,$93,$B1,$91,$B3,OCTAVE_4,$23
     .byte OCTAVE_3,$93,$B5,OCTAVE_4,$05,OCTAVE_3,$B5,$95,$71,$73,OCTAVE_4,$02,$05,OCTAVE_3,$73,$93
-    .byte $71,OCTAVE_4,$21,TEMPO,$03,$02,$05,TEMPO,$04,OCTAVE_3,$72,$92,$70,$C1,END_SONG
+    .byte $71,OCTAVE_4,$21,TEMPO,$02,$02,$05,TEMPO,$03,OCTAVE_3,$72,$92,$70,$C1,END_SONG
 
 EPILOGUE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$04,SPEED_SET,$01,INSTRUMENT,$0E,$C1,$C1,OCTAVE_3,$25,$75,$B5,$25,$45,$75,OCTAVE_4,$05,OCTAVE_3
+    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$0E,$C1,$C1,OCTAVE_3,$25,$75,$B5,$25,$45,$75,OCTAVE_4,$05,OCTAVE_3
     .byte $45,$65,$95,OCTAVE_4,$25,OCTAVE_3,$65,$45,$75,OCTAVE_4,$05,OCTAVE_3,$45,$25,$75,$B5
-    .byte $25,$45,$75,OCTAVE_4,$05,OCTAVE_3,$45,$65,$95,OCTAVE_4,$25,OCTAVE_3,$65,$45,TEMPO,$03,$75
-    .byte OCTAVE_4,TEMPO,$05,$04,OCTAVE_3,TEMPO,$02,$75
+    .byte $25,$45,$75,OCTAVE_4,$05,OCTAVE_3,$45,$65,$95,OCTAVE_4,$25,OCTAVE_3,$65,$45,TEMPO,$02,$75
+    .byte OCTAVE_4,TEMPO,$04,$04,OCTAVE_3,TEMPO,$01,$75
     ELOOP1A:
-    .byte TEMPO,$04,$21,$01,$20,$01,$33,$03,$63,$21,$01
+    .byte TEMPO,$03,$21,$01,$20,$01,$33,$03,$63,$21,$01
     .byte $21,$01,$20,$01,$33,$03,$63,$21,$33,OCTAVE_2,$B3,OCTAVE_3,$41,$63,$45,$25
     .byte $01,$23,$05,OCTAVE_2,$B5,$93,OCTAVE_3,$43,$23,OCTAVE_2,$B3,OCTAVE_3,$13,OCTAVE_2,$B5,OCTAVE_3
     .byte $15,$33,OCTAVE_2,$B3,OCTAVE_3,$41,$63,$45,$25,$01,$23,$05,OCTAVE_2,$B5,$93,OCTAVE_3
     .byte $43,$03,$93,$71,$61,$C7
     .byte LOOP_X,$04
     .word ELOOP1A
-    .byte TEMPO,$04,$21,$01,$20,$01,$33,$03
-    .byte $63,$21,$01,$21,$01,$20,$01,$33,$03,$63,$21,$53,$23,TEMPO,$03,$35,$55
-    .byte $75,$35,TEMPO,$04,$24,$04,OCTAVE_2,$B4,$94,$B2,$92,$70,END_SONG
+    .byte TEMPO,$03,$21,$01,$20,$01,$33,$03
+    .byte $63,$21,$01,$21,$01,$20,$01,$33,$03,$63,$21,$53,$23,TEMPO,$02,$35,$55
+    .byte $75,$35,TEMPO,$03,$24,$04,OCTAVE_2,$B4,$94,$B2,$92,$70,END_SONG
 
 EPILOGUE_SQ3:
-    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$04,$C4,LOOP_FOREVER
+    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$03,$C4,LOOP_FOREVER
     .word EPILOGUE_SQ1
 
 EPILOGUE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
     .word EPILOGUE_SQ2
 
 EPILOGUE_TRI:
 
-    .byte TEMPO,$04,$C1,$C1,OCTAVE_3,$71,$71,$71,$71,$71,$71,$71,OCTAVE_4,$05
-    .byte TEMPO,$03,OCTAVE_3,$B5,TEMPO,$05,$94,TEMPO,$02,$75
+    .byte TEMPO,$03,$C1,$C1,OCTAVE_3,$71,$71,$71,$71,$71,$71,$71,OCTAVE_4,$05
+    .byte TEMPO,$02,OCTAVE_3,$B5,TEMPO,$04,$94,TEMPO,$01,$75
 
     ELOOP2A:
-    .byte TEMPO,$04,$71,$61,$51,$41,$31,$23,$03,$71
+    .byte TEMPO,$03,$71,$61,$51,$41,$31,$23,$03,$71
     .byte $23,$03,$71,$61,$51,$41,$31,$23,$03,OCTAVE_2,$B1,OCTAVE_3,$61,$71,$61,$41
     .byte $71,$51,$41,$41,$61,$71,$61,$41,$71,$51,$51,$91,$21,$C7
     .byte LOOP_X,$04
     .word ELOOP2A
-    .byte TEMPO,$04,$71,$61,$51,$41,$31,$23,$03,$71,$23,$03,$71,$61,$51,$41
-    .byte $31,$23,$03,OCTAVE_2,$B1,OCTAVE_3,$73,$53,TEMPO,$03,$75,$95,$A5,OCTAVE_4,$05,TEMPO,$04,OCTAVE_3
+    .byte TEMPO,$03,$71,$61,$51,$41,$31,$23,$03,$71,$23,$03,$71,$61,$51,$41
+    .byte $31,$23,$03,OCTAVE_2,$B1,OCTAVE_3,$73,$53,TEMPO,$02,$75,$95,$A5,OCTAVE_4,$05,TEMPO,$03,OCTAVE_3
     .byte $92,$62,$72,$22,OCTAVE_2,$70,END_SONG
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -553,7 +553,7 @@ EPILOGUE_TRI:
 
 OVERWORLD_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     OLOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0C,$C5,OCTAVE_3,$B5,$95,$B5,OCTAVE_4,$05,OCTAVE_3,$B5,$95,$B5,SPEED_SET,$04
     .byte OCTAVE_4,$23,OCTAVE_3,$90,SPEED_SET,$01,$C5,OCTAVE_4,$05,OCTAVE_3,$B5,OCTAVE_4,$05,$25,$05
@@ -565,7 +565,7 @@ OVERWORLD_SQ1:
 
 OVERWORLD_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     OLOOP1:
     .byte SPEED_SET,$01,INSTRUMENT,$0E,$C5,OCTAVE_3,$25,$05,$25,$45,$25,$05,OCTAVE_2,$B5,$91,OCTAVE_3
     .byte $65,$45,$25,$05,OCTAVE_2,$95,OCTAVE_3,$45,$25,$45,$65,$45,$25,$05,OCTAVE_2,$B1
@@ -579,15 +579,15 @@ OVERWORLD_SQ2:
     .word OLOOP1
 
 OVERWORLD_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word OVERWORLD_SQ1
 
 OVERWORLD_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word OVERWORLD_SQ2
 
 OVERWORLD_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     OLOOP2:
     .byte OCTAVE_3,$79,$C9,$79,$C6,$29,$C9,$79,$C9,$79,$C6,$29
     .byte $C9,$79,$C9,$79,$C6,$29,$C9,$79,$C9,$79,$C6,$29,$C9,$69,$C9,$69
@@ -615,7 +615,7 @@ OVERWORLD_TRI:
 
 SHIP_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_3,$95,$A5
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_3,$95,$A5
     SLOOP0:
     .byte OCTAVE_4,$01,$C3,$77,$57,$47,$57,$22,OCTAVE_3
     .byte $A5,$73,OCTAVE_4,$57,$47,$27,$47,$02,OCTAVE_3,$95,$63,OCTAVE_4,$27,$07,OCTAVE_3,$A7
@@ -629,7 +629,7 @@ SHIP_SQ1:
 
 SHIP_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$02,$C3
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$02,$C3
     SLOOP1:
     SLOOP1A:
     .byte SPEED_SET,$86,INSTRUMENT,$02,$C7,OCTAVE_3,$59,$C9,$47,$59,$C6,$59
@@ -657,16 +657,16 @@ SHIP_SQ2:
     .word SLOOP1
 
 SHIP_SQ3:
-    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$03,$C4,LOOP_FOREVER
+    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$02,$C4,LOOP_FOREVER
     .word SHIP_SQ1
 
 SHIP_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word SHIP_SQ2
 
 
 SHIP_TRI:
-    .byte TEMPO,$03,$C3
+    .byte TEMPO,$02,$C3
     SLOOP2:
     SLOOP2A:
     .byte OCTAVE_3,$57,OCTAVE_4,$09,$C9,OCTAVE_3,$57,OCTAVE_4,$09,$C9,OCTAVE_3
@@ -698,7 +698,7 @@ SHIP_TRI:
 
 AIRSHIP_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     ALOOP0:
     .byte SPEED_SET,$84,INSTRUMENT,$0B,OCTAVE_4,$05,$55,$75,$A5,$97,$77,$57,$97,$75,$07,$27
     .byte $34,SPEED_SET,$02,$01,$C7,$C3,SPEED_SET,$84,$05,$55,$75,$A5,$97,$77
@@ -713,7 +713,7 @@ AIRSHIP_SQ1:
 
 AIRSHIP_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     ALOOP1:
     .byte SPEED_SET,$81,INSTRUMENT,$0B
     ALOOP1A:
@@ -729,15 +729,15 @@ AIRSHIP_SQ2:
     .word ALOOP1
 
 AIRSHIP_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
     .word AIRSHIP_SQ1
 
 AIRSHIP_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
     .word AIRSHIP_SQ2
 
 AIRSHIP_TRI:
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     ALOOP2:
     .byte OCTAVE_3,$57,OCTAVE_4,$07,OCTAVE_3,$57,OCTAVE_4,$07,OCTAVE_3,$37,$A7,$37
     .byte $A7,$57,OCTAVE_4,$07,OCTAVE_3,$57,OCTAVE_4,$07,OCTAVE_3,$37,$A7,$37,$A7,$57,OCTAVE_4,$07
@@ -764,7 +764,7 @@ AIRSHIP_TRI:
 
 TOWN_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     TLOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_4,$43,$73,$23,$45,$55,$45,$25,$01,$03,$92,$95
     .byte $75,$25,$45,$55,$40,$43,OCTAVE_5,$02,$05,$03,OCTAVE_4,$B5,$95,$75,$25,$45
@@ -774,7 +774,7 @@ TOWN_SQ1:
 
 TOWN_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     TLOOP1:
     .byte SPEED_SET,$84,INSTRUMENT,$02,OCTAVE_3,$45,OCTAVE_4,$05,OCTAVE_3,$75,$45,$25,$75,$B5,$25,$05
     .byte $95,$45,$05,$45,$75,OCTAVE_4,$05,OCTAVE_3,$45,$05,$95,$55,$05,OCTAVE_2,$B5,OCTAVE_3
@@ -784,15 +784,15 @@ TOWN_SQ2:
     .word TLOOP1
 
 TOWN_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$04,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C4,LOOP_FOREVER
     .word TOWN_SQ1
 
 TOWN_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
     .word TOWN_SQ2
 
 TOWN_TRI:
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     TLOOP2:
     .byte OCTAVE_4,$01,OCTAVE_3,$B1,$91,$71,$51,$51,OCTAVE_4,$01,OCTAVE_3,$41
     .byte $95,OCTAVE_4,$45,$95,$45,$23,$63,OCTAVE_3,$75,OCTAVE_4,$25,$75,$25,$03,OCTAVE_3,$03
@@ -808,7 +808,7 @@ TOWN_TRI:
 
 CASTLE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     CLOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_4,$62,$65,$75,$65,$45,$25,$43
     .byte OCTAVE_3,$90,OCTAVE_4,$22,$25,$45,$25,$15,OCTAVE_3,$B5,OCTAVE_4,$13,OCTAVE_3,$60,$B2,OCTAVE_4
@@ -819,7 +819,7 @@ CASTLE_SQ1:
 
 CASTLE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     CLOOP1:
     .byte SPEED_SET,$01,INSTRUMENT,$0B,OCTAVE_2,$95,OCTAVE_3,$65,$25,$65,OCTAVE_2,$95
     .byte OCTAVE_3,$65,$25,$65,$15,$45,OCTAVE_2,$95,OCTAVE_3,$45,OCTAVE_2,$B5,OCTAVE_3,$45,$15,$45
@@ -832,15 +832,15 @@ CASTLE_SQ2:
     .word CLOOP1
 
 CASTLE_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$05,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$04,$C4,LOOP_FOREVER
     .word CASTLE_SQ1
 
 CASTLE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$05,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
     .word CASTLE_SQ2
 
 CASTLE_TRI:
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     CLOOP2:
     .byte OCTAVE_4,$21,$21,$11,$11,OCTAVE_3,$B1,$B1
     .byte $A1,$A1,$71,$71,OCTAVE_4,$21,OCTAVE_3,$B1,OCTAVE_4,$41,$41,OCTAVE_3,$91,$91
@@ -855,7 +855,7 @@ CASTLE_TRI:
 
 
 RUINEDCASTLE_SQ1:
-    .byte TEMPO,$06          ; tempo
+    .byte TEMPO,$05         ; tempo
     .byte INSTRUMENT,$0D     ; envelope
     .byte $C8              ; all tracks have this delay
     .byte SPEED_SET,$04    ; envelope speed
@@ -914,7 +914,7 @@ RUINEDCASTLE_SQ1:
    .word RC_SQ1_PAUSE
 
 RUINEDCASTLE_SQ2:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte SPEED_SET,$08    ; 7 ; envelope speed
     .byte DUTY_50          ; duty 50%
     .byte $C8              ; all tracks have this delay
@@ -1000,7 +1000,7 @@ RUINEDCASTLE_SQ2:
 
 
 RUINEDCASTLE_TRI:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte $C8             ; all tracks have this delay
 
     RC_TRI_BAR1_2:
@@ -1041,7 +1041,7 @@ RUINEDCASTLE_TRI:
     .byte SCORE_RETURN    ; return
 
 RUINEDCASTLE_SQ3:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte SPEED_SET,$08   ; 7 ; envelope speed
     .byte DUTY_50         ; duty 50%
     .byte $C8             ; all tracks have this delay
@@ -1126,7 +1126,7 @@ RUINEDCASTLE_SQ3:
 
 
 RUINEDCASTLE_SQ4:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte DUTY_25          ; duty 25%
     .byte $C8              ; all tracks have this delay
     .byte $CE              ; delay by the teensiest amount
@@ -1187,7 +1187,7 @@ RUINEDCASTLE_SQ4:
 
 EARTHCAVE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D1LOOP0:
     .byte SPEED_SET,$86,INSTRUMENT,$00
     D1LOOP0A:
@@ -1217,7 +1217,7 @@ EARTHCAVE_SQ1:
 
 EARTHCAVE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D1LOOP1:
     .byte SPEED_SET,$83,INSTRUMENT,$01
     D1LOOP1A:
@@ -1247,16 +1247,16 @@ EARTHCAVE_SQ2:
     .word D1LOOP1
 
 EARTHCAVE_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C4,LOOP_FOREVER
     .word EARTHCAVE_SQ1
 
 EARTHCAVE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word EARTHCAVE_SQ2
 
 
 EARTHCAVE_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D1LOOP2:
     D1LOOP2A:
     .byte OCTAVE_4
@@ -1292,7 +1292,7 @@ EARTHCAVE_TRI:
 
 MATOYA_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D2LOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0C,OCTAVE_3,$B7,OCTAVE_4,$27,$67,OCTAVE_3,$B7
     .byte OCTAVE_4,$75,$67,$47,$25,$47,$27,INSTRUMENT,$0E,$13,INSTRUMENT,$0C,$27,$67
@@ -1309,7 +1309,7 @@ MATOYA_SQ1:
 
 MATOYA_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D2LOOP1:
     .byte SPEED_SET,$81,INSTRUMENT,$02
     .byte OCTAVE_2,$B9,$C9,OCTAVE_3,$69,$C9,OCTAVE_2,$B9,$C9,OCTAVE_3,$69,$C9,OCTAVE_2,$B9,$C9,OCTAVE_3
@@ -1334,15 +1334,15 @@ MATOYA_SQ2:
     .word D2LOOP1
 
 MATOYA_SQ3:
-    .byte VOLUME_HALF,VOLUME_MINUS,$01,TEMPO,$03,$C4,LOOP_FOREVER
+    .byte VOLUME_HALF,VOLUME_MINUS,$01,TEMPO,$02,$C4,LOOP_FOREVER
     .word MATOYA_SQ1
 
 MATOYA_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word MATOYA_SQ2
 
 MATOYA_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D2LOOP2:
     .byte OCTAVE_2,$B3,OCTAVE_3,$43,$73
     .byte $95,$75,$23,$73,$B3,$97,$49,$C9,$19,$C9,OCTAVE_2,$99,$C9,$C7,$67,OCTAVE_3
@@ -1373,7 +1373,7 @@ MATOYA_TRI:
    ;; JIGS - my own composition as a replacement for this ugly song...
 
 MARSHCAVE_SQ1:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte SPEED_SET,$01
     .byte INSTRUMENT,$01
     .byte DUTY_25
@@ -1412,11 +1412,11 @@ MARSHCAVE_SQ1:
     .word DUNGEON3LOOP
 
 MARSHCAVE_SQ4:
-    .byte VOLUME_HALF,VOLUME_QRTR,TEMPO,$06,$C5,LOOP_FOREVER
+    .byte VOLUME_HALF,VOLUME_QRTR,TEMPO,$05,$C5,LOOP_FOREVER
     .word MARSHCAVE_SQ1
 
 MARSHCAVE_SQ2:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte $C0
     .byte DUTY_12
     DUNGEON3HARMONYLOOP1:
@@ -1486,7 +1486,7 @@ MARSHCAVE_SQ2:
     .word DUNGEON3HARMONYLOOP1
 
 MARSHCAVE_TRI:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte OCTAVE_5,$38,$28,$08,OCTAVE_4,$98,$88,$78,$58,$38,$28,$08,OCTAVE_3,$98,$88,$78,$58,$38,$28
     DUNGEON3TRILOOP:
     .byte $06,$C6,$06,$74,$86,$36,OCTAVE_2,$76,OCTAVE_3 ; 1
@@ -1520,7 +1520,7 @@ MARSHCAVE_TRI:
     .word DUNGEON3TRILOOP
 
 MARSHCAVE_SQ3:
-    .byte TEMPO,$06
+    .byte TEMPO,$05
     .byte SPEED_SET,$01
     .byte INSTRUMENT,$0D
     .byte DUTY_12
@@ -1537,7 +1537,7 @@ MARSHCAVE_SQ3:
    ;; JIGS - below is Marsh Cave's original song data
 
 MARSHCAVEOLD_SQ1:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D3LOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$01
     D3LOOP0A:
@@ -1562,7 +1562,7 @@ MARSHCAVEOLD_SQ1:
     .word D3LOOP0
 
 MARSHCAVEOLD_SQ2:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D3LOOP1:
     .byte SPEED_SET,$82,INSTRUMENT,$01
     D3LOOP1A:
@@ -1585,15 +1585,15 @@ MARSHCAVEOLD_SQ2:
     .word D3LOOP1
 
 MARSHCAVEOLD_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word MARSHCAVEOLD_SQ1
 
 MARSHCAVEOLD_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word MARSHCAVEOLD_SQ2
 
 MARSHCAVEOLD_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D3LOOP2:
     D3LOOP2A:
     .byte OCTAVE_3,$07
@@ -1621,7 +1621,7 @@ MARSHCAVEOLD_TRI:
 
 SEASHRINE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D4LOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_4,$43,OCTAVE_3,$B5,OCTAVE_4,$B5,$95,$75
     .byte $65,$45,$73,$41,$C3,$C5,$45,OCTAVE_3,$B5,OCTAVE_4,$B5,OCTAVE_5,$25,$05,OCTAVE_4,$B5
@@ -1633,7 +1633,7 @@ SEASHRINE_SQ1:
 
 SEASHRINE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D4LOOP1:
     .byte SPEED_SET,$86,INSTRUMENT,$0B,OCTAVE_2,$B7,OCTAVE_3,$77,$67,$77,$47,$77,$27,$77,OCTAVE_2,$97
     .byte OCTAVE_3,$67,$47,$67,$27,$67,$07,$67,OCTAVE_2,$77,OCTAVE_3,$47,$27,$47,$07,$47
@@ -1652,15 +1652,15 @@ SEASHRINE_SQ2:
     .word D4LOOP1
 
 SEASHRINE_SQ3:
-    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$03,$C4,LOOP_FOREVER
+    .byte VOLUME_HALF,VOLUME_MINUS,$02,TEMPO,$02,$C4,LOOP_FOREVER
     .word SEASHRINE_SQ1
 
 SEASHRINE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word SEASHRINE_SQ2
 
 SEASHRINE_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D4LOOP2:
     .byte OCTAVE_3,$41,$21,$01,$03,$23,$41,$21,$11,$01,OCTAVE_2,$77
     .byte OCTAVE_3,$79,$C6,$79,$C9,OCTAVE_2,$77,OCTAVE_3,$79,$C6,$79,$C9,$27,$99,$C6,$99
@@ -1681,7 +1681,7 @@ SEASHRINE_TRI:
 SKYCASTLE_SQ1:
     .byte DUTY_25
     D5LOOP0:
-    .byte TEMPO,$05,SPEED_SET,$82,INSTRUMENT,$0C
+    .byte TEMPO,$04,SPEED_SET,$82,INSTRUMENT,$0C
     D5LOOP0A:
     .byte SPEED_SET,$83,INSTRUMENT,$0C,OCTAVE_4,$A7,$C7,$C2,SPEED_SET,$01
     .byte INSTRUMENT,$0E,$43,INSTRUMENT,$0C,$65,$A5,INSTRUMENT,$0E,$81,$21,$C3,INSTRUMENT,$0C,$A5,$45,INSTRUMENT,$0E,$63,INSTRUMENT,$0C
@@ -1695,15 +1695,15 @@ SKYCASTLE_SQ1:
     .byte LOOP_X,$01
     .word D5LOOP0B
     .byte OCTAVE_4,SPEED_SET,$83,INSTRUMENT,$01,$37
-    .byte $37,$37,$37,$27,$27,$27,$27,$17,$17,$17,$17,$07,TEMPO,$04,$07,TEMPO,$03,$07
-    .byte TEMPO,$02,$07
+    .byte $37,$37,$37,$27,$27,$27,$27,$17,$17,$17,$17,$07,TEMPO,$03,$07,TEMPO,$02,$07
+    .byte TEMPO,$01,$07
     .byte LOOP_FOREVER
     .word D5LOOP0
 
 SKYCASTLE_SQ2:
     .byte DUTY_12
     D5LOOP1:
-    .byte TEMPO,$05,SPEED_SET,$82,INSTRUMENT,$0C
+    .byte TEMPO,$04,SPEED_SET,$82,INSTRUMENT,$0C
     D5LOOP1A:
     .byte SPEED_SET,$83,INSTRUMENT,$0C,OCTAVE_3,$A7,$C7,$C2
     .byte SPEED_SET,$01,INSTRUMENT,$0E,$43,INSTRUMENT,$0C,$65,$A5,INSTRUMENT,$0E,$81,$21,$C3,INSTRUMENT,$0C,$A5,$45,INSTRUMENT,$0E,$63
@@ -1718,14 +1718,14 @@ SKYCASTLE_SQ2:
     .byte LOOP_X,$01
     .word D5LOOP1B
     .byte SPEED_SET,$83
-    .byte INSTRUMENT,$01,$37,$37,$37,$37,$27,$27,$27,$27,$17,$17,$17,$17,$07,TEMPO,$04
-    .byte $07,TEMPO,$03,$07,TEMPO,$02,$07
+    .byte INSTRUMENT,$01,$37,$37,$37,$37,$27,$27,$27,$27,$17,$17,$17,$17,$07,TEMPO,$03
+    .byte $07,TEMPO,$02,$07,TEMPO,$01,$07
     .byte LOOP_FOREVER
     .word D5LOOP1
 
 SKYCASTLE_TRI:
     D5LOOP2:
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     D5LOOP2A:
     .byte OCTAVE_2,$A7,$C7,OCTAVE_3
     .byte $47,$C7,$A7,$C7,OCTAVE_4,$37,$C7,OCTAVE_2,$87,$C7,OCTAVE_3,$27,$C7,$87,$C7,OCTAVE_4
@@ -1737,16 +1737,16 @@ SKYCASTLE_TRI:
     .byte $87,$C7,$B7,$C7
     .byte LOOP_X,$03
     .word D5LOOP2B
-    .byte $C1,$C3,$C7,TEMPO,$04,$C7,TEMPO,$03,$C7,TEMPO,$02,$C7
+    .byte $C1,$C3,$C7,TEMPO,$03,$C7,TEMPO,$02,$C7,TEMPO,$01,$C7
     .byte LOOP_FOREVER
     .word D5LOOP2
 
 SKYCASTLE_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$05,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$04,$C4,LOOP_FOREVER
     .word SKYCASTLE_SQ1
 
 SKYCASTLE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$05,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$04,$C4,LOOP_FOREVER
     .word SKYCASTLE_SQ2
 
 
@@ -1757,7 +1757,7 @@ SKYCASTLE_SQ4:
 
 FIENDTEMPLE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D6LOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_3,$B3,$85,$B5,$A5,$85,$65
     .byte $A5,$80,$C3,$B3,OCTAVE_4,$15,OCTAVE_3,$B5,$A5,$85,$65,OCTAVE_4,$45,$30
@@ -1769,7 +1769,7 @@ FIENDTEMPLE_SQ1:
 
 FIENDTEMPLE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D6LOOP1:
     .byte SPEED_SET,$86
     .byte INSTRUMENT,$0B,OCTAVE_2,$B7,OCTAVE_3,$37,$17,$37,OCTAVE_2,$B7,OCTAVE_3,$37,$17,$37,OCTAVE_2,$A7,OCTAVE_3
@@ -1789,7 +1789,7 @@ FIENDTEMPLE_SQ2:
     .word D6LOOP1
 
 FIENDTEMPLE_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     D6LOOP2:
     .byte OCTAVE_3,$89,$C9,$89,$C9,$C5,$C3
     .byte $69,$C9,$69,$C9,$C5,$C3,$49,$C9,$49,$C9,$C5,$C3,$69,$C9,$69,$C9
@@ -1802,11 +1802,11 @@ FIENDTEMPLE_TRI:
     .word D6LOOP2
 
 FIENDTEMPLE_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C4,LOOP_FOREVER
     .word FIENDTEMPLE_SQ1
 
 FIENDTEMPLE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word FIENDTEMPLE_SQ2
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1816,7 +1816,7 @@ FIENDTEMPLE_SQ4:
 
 SHOP_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     S1LOOP0:
     .byte SPEED_SET,$02,INSTRUMENT,$0C,OCTAVE_4,$73,$65,$73,$95,$72,$43,$55,$75,OCTAVE_5,$05
     .byte OCTAVE_4,$B5,OCTAVE_5,$25,$05,OCTAVE_4,$95,$73,$85,$93,$45,$51,$C3,$C3,$65,$73
@@ -1829,7 +1829,7 @@ SHOP_SQ1:
 
 SHOP_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     S1LOOP1:
     .byte SPEED_SET,$01
     .byte INSTRUMENT,$0A,OCTAVE_3,$43,$35,$43,$55,$42,$03,$25,$43,$45,$53,$55,$43,$45,$13
@@ -1840,7 +1840,7 @@ SHOP_SQ2:
     .word S1LOOP1
 
 SHOP_TRI:
-    .byte TEMPO,$05
+    .byte TEMPO,$04
     S1LOOP2:
     .byte OCTAVE_3,$05,$77,$C7,$77,$C7,$05,$77,$C7
     .byte $77,$C7,$05,$77,$C7,$77,$C7,$05,$77,$C7,$77,$C7,$05,$77,$C7,$77
@@ -1856,11 +1856,11 @@ SHOP_TRI:
     .word S1LOOP2
 
 SHOP_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$05,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
     .word SHOP_SQ1
 
 SHOP_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$05,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
     .word SHOP_SQ2
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1871,7 +1871,7 @@ SHOP_SQ4:
 
 BATTLE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$01
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$01
     .byte OCTAVE_2,$3C,$6C,$9C,OCTAVE_3,$0C,$3C,$6C,$9C,OCTAVE_4,$0C,$3C,$6C,$9C,OCTAVE_5,$0C
     .byte $C1,$C3,$C5,$C7,INSTRUMENT,$00,OCTAVE_3,$57
     BLOOP0:
@@ -1901,7 +1901,7 @@ BATTLE_SQ1:
 
 BATTLE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     .byte SPEED_SET,$01,INSTRUMENT,$02,$CC,$CC,OCTAVE_2,$3C,$6C,$9C,OCTAVE_2,$0C,$3C,$6C,$9C,OCTAVE_3,$0C
     .byte $3C,$6C,$9C,OCTAVE_4,$0C,$CC,$C7,$C5,$C5,$C5,$C1
     BLOOP1:
@@ -1934,15 +1934,15 @@ BATTLE_SQ2:
     .word BLOOP1
 
 BATTLE_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word BATTLE_SQ1
 
 BATTLE_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word BATTLE_SQ2
 
 BATTLE_TRI:
-    .byte TEMPO,$03
+    .byte TEMPO,$02
     .byte $C3
     BLOOP2A:
     .byte OCTAVE_2,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9
@@ -1983,7 +1983,7 @@ BATTLE_TRI:
 
 MENU_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     MLOOP0:
     .byte SPEED_SET,$01,INSTRUMENT,$0E
     .byte OCTAVE_3,$A3,OCTAVE_4,$A5,$93,$35,$23,$75,$53,OCTAVE_3,$A5,$B1,$C5,OCTAVE_4,$25,$03
@@ -1994,7 +1994,7 @@ MENU_SQ1:
 
 MENU_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     MLOOP1:
     .byte SPEED_SET,$01,INSTRUMENT,$03,OCTAVE_3,$A3,OCTAVE_4,$A5,$93,$35,$23,$75,$53,OCTAVE_3,$A5
     .byte $B1,$C5,OCTAVE_4,$25,$03,OCTAVE_3,$71,$71,$95,$B5,OCTAVE_4,$07,OCTAVE_3,$77,$97,$B7
@@ -2004,15 +2004,15 @@ MENU_SQ2:
     .word MLOOP1
 
 MENU_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$04,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C4,LOOP_FOREVER
     .word MENU_SQ1
 
 MENU_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
     .word MENU_SQ2
 
 MENU_TRI:
-    .byte TEMPO,$04
+    .byte TEMPO,$03
     MLOOP2:
     .byte OCTAVE_3,$A5,OCTAVE_4,$25,$55,OCTAVE_3
     .byte $A5,OCTAVE_4,$35,$95,OCTAVE_3,$A5,OCTAVE_4,$25,$55,OCTAVE_3,$95,OCTAVE_4,$25,$55,OCTAVE_3,$85
@@ -2030,7 +2030,7 @@ MENU_TRI:
 
 SLAIN_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$04,SPEED_SET,$81
+    .byte TEMPO,$03,SPEED_SET,$81
     .byte INSTRUMENT,$05,OCTAVE_3,$95,OCTAVE_4,$15,$25,$45
     SLAIN_LOOP0:
     .byte $52,OCTAVE_3,$95,$A3,OCTAVE_4,$75,$55,$45,$55
@@ -2042,7 +2042,7 @@ SLAIN_SQ1:
 
 SLAIN_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$04,SPEED_SET,$81,INSTRUMENT,$06,$C1
+    .byte TEMPO,$03,SPEED_SET,$81,INSTRUMENT,$06,$C1
     SLAIN_LOOP1:
     .byte OCTAVE_3,$93,$53,$73,$A3,$73,$43,$53,$03,$53,$23,OCTAVE_2,$B3,OCTAVE_3,$83,$91
     .byte $71,OCTAVE_3,$93,$53,$73,$A3,$73,$43,$53,$03,$53,$93,$73,$43,$51,$C1
@@ -2050,15 +2050,15 @@ SLAIN_SQ2:
     .word SLAIN_LOOP1
 
 SLAIN_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$04,$C4,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C4,LOOP_FOREVER
     .word SLAIN_SQ1
 
 SLAIN_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$04,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
     .word SLAIN_SQ2
 
 SLAIN_TRI:
-    .byte TEMPO,$04,$C1
+    .byte TEMPO,$03,$C1
     SLAIN_LOOP2:
     .byte OCTAVE_4,$21,$71,$01,$51,OCTAVE_3,$A1,OCTAVE_4
     .byte $41,OCTAVE_3,$91,OCTAVE_4,$93,$43,OCTAVE_4,$21,$71,$01,$51,OCTAVE_3,$B1,$91,OCTAVE_5,$25
@@ -2073,7 +2073,7 @@ SLAIN_TRI:
 
 BATTLEWIN_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$01,OCTAVE_2,$3C,$7C
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$01,OCTAVE_2,$3C,$7C
     .byte $AC,OCTAVE_2,$3C,$7C,$AC,OCTAVE_3,$3C,$7C,$AC,OCTAVE_4,$3C,$7C,$AC,INSTRUMENT,$0C
     .byte OCTAVE_5,$3C,$CC,$3C,$CC,$3C,$CC,$35,OCTAVE_4,$B5,OCTAVE_5,$15,SPEED_SET,$83,$3C,$CC
     .byte $CC,$CC,$1C,$CC,SPEED_SET,$01,INSTRUMENT,$0E,$32
@@ -2087,7 +2087,7 @@ BATTLEWIN_SQ1:
 
 BATTLEWIN_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03,SPEED_SET,$01
+    .byte TEMPO,$02,SPEED_SET,$01
     .byte INSTRUMENT,$02,$CC,$CC,OCTAVE_2,$3C,$7C,$AC,OCTAVE_2,$3C,$7C,$AC,OCTAVE_3,$3C,$7C,$AC
     .byte OCTAVE_4,$3C,INSTRUMENT,$0C,$7C,$CC,$7C,$CC,$7C,$CC,$75,$35,$55,SPEED_SET,$83
     .byte $7C,$CC,$CC,$CC,$5C,$CC,SPEED_SET,$01,INSTRUMENT,$0E,$72
@@ -2100,15 +2100,15 @@ BATTLEWIN_SQ2:
     .word BATTLEWIN_LOOP1
 
 BATTLEWIN_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word BATTLEWIN_SQ1
 
 BATTLEWIN_SQ4:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word BATTLEWIN_SQ2
 
 BATTLEWIN_TRI:
-    .byte TEMPO,$03,$C3
+    .byte TEMPO,$02,$C3
     .byte OCTAVE_4,$3C,$CC,OCTAVE_3,$AC,$CC,$7C,$CC,$35,$65,$85,$3C,$CC,$CC,$CC,$3C
     .byte $CC,$37,$C7,$37,$C7,$37,$C7
     BATTLEWIN_LOOP2:
@@ -2128,15 +2128,15 @@ BATTLEWIN_TRI:
 
 FANFARE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$05,SPEED_SET,$01,INSTRUMENT,$0C,OCTAVE_4,$45,$25,$15,$45,$25,$15,OCTAVE_3,$B5,OCTAVE_4,$25
-    .byte INSTRUMENT,$0E,TEMPO,$04,OCTAVE_3,$93,TEMPO,$03,$B3,OCTAVE_4,$12,END_SONG
+    .byte TEMPO,$04,SPEED_SET,$01,INSTRUMENT,$0C,OCTAVE_4,$45,$25,$15,$45,$25,$15,OCTAVE_3,$B5,OCTAVE_4,$25
+    .byte INSTRUMENT,$0E,TEMPO,$03,OCTAVE_3,$93,TEMPO,$02,$B3,OCTAVE_4,$12,END_SONG
 
 FANFARE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$05,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_3,$91,$71,TEMPO,$04,$03,TEMPO,$03,$23,$42,END_SONG
+    .byte TEMPO,$04,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_3,$91,$71,TEMPO,$03,$03,TEMPO,$02,$23,$42,END_SONG
 
 FANFARE_TRI:
-    .byte TEMPO,$05,OCTAVE_4,$13,$43,OCTAVE_3,$B3,OCTAVE_4,$23,TEMPO,$04,OCTAVE_3,$53,TEMPO,$03,$73
+    .byte TEMPO,$04,OCTAVE_4,$13,$43,OCTAVE_3,$B3,OCTAVE_4,$23,TEMPO,$03,OCTAVE_3,$53,TEMPO,$02,$73
     .byte $92,END_SONG
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2146,17 +2146,17 @@ FANFARE_TRI:
 
 SAVE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03,SPEED_SET,$82,INSTRUMENT,$0C,OCTAVE_3,$BC,OCTAVE_4,$0C,$1C,SPEED_SET,$01,INSTRUMENT,$0C,TEMPO,$05,$24,$27,$27
-    .byte $27,INSTRUMENT,$0E,TEMPO,$04,$34,TEMPO,$03,$54,$72,END_SONG
+    .byte TEMPO,$02,SPEED_SET,$82,INSTRUMENT,$0C,OCTAVE_3,$BC,OCTAVE_4,$0C,$1C,SPEED_SET,$01,INSTRUMENT,$0C,TEMPO,$04,$24,$27,$27
+    .byte $27,INSTRUMENT,$0E,TEMPO,$03,$34,TEMPO,$02,$54,$72,END_SONG
 
 SAVE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$0C,$CC,$CC,$CC,TEMPO,$05,OCTAVE_3,$74,$B7,$97,$77,INSTRUMENT,$0E
-    .byte TEMPO,$04,$74,TEMPO,$03,OCTAVE_4,$04,OCTAVE_3,$B2,END_SONG
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$0C,$CC,$CC,$CC,TEMPO,$04,OCTAVE_3,$74,$B7,$97,$77,INSTRUMENT,$0E
+    .byte TEMPO,$03,$74,TEMPO,$02,OCTAVE_4,$04,OCTAVE_3,$B2,END_SONG
 
 SAVE_TRI:
-    .byte TEMPO,$03,$CC,$CC,$CC,TEMPO,$05,OCTAVE_3,$B4,OCTAVE_4,$27,$07,OCTAVE_3,$B7,TEMPO,$04
-    .byte $A4,TEMPO,$03,$94,$73,END_SONG
+    .byte TEMPO,$02,$CC,$CC,$CC,TEMPO,$04,OCTAVE_3,$B4,OCTAVE_4,$27,$07,OCTAVE_3,$B7,TEMPO,$03
+    .byte $A4,TEMPO,$02,$94,$73,END_SONG
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;               HEALING SFX                        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
@@ -2165,16 +2165,16 @@ SAVE_TRI:
 
 HEAL_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$01,OCTAVE_2,$AC,OCTAVE_2,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4,$2C
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$01,OCTAVE_2,$AC,OCTAVE_2,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4,$2C
     .byte $5C,$AC,OCTAVE_5,$2C,$5C,$AC,END_SONG
 
 HEAL_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$03,SPEED_SET,$01,INSTRUMENT,$02,$C7,OCTAVE_2,$AC,OCTAVE_2,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$02,$C7,OCTAVE_2,$AC,OCTAVE_2,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4
     .byte $2C,$5C,$AC,OCTAVE_5,$2C,$5C,$AC,END_SONG
 
 HEAL_TRI:
-    .byte TEMPO,$03,$C7,$C7,OCTAVE_2,$CC,$CC,OCTAVE_3,$CC,$CC,$CC,OCTAVE_4,$CC,$CC
+    .byte TEMPO,$02,$C7,$C7,OCTAVE_2,$CC,$CC,OCTAVE_3,$CC,$CC,$CC,OCTAVE_4,$CC,$CC
     .byte $CC,OCTAVE_5,$CC,$CC,$CC,OCTAVE_2,OCTAVE_DOWN,$CC,$CC,END_SONG
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2184,14 +2184,14 @@ HEAL_TRI:
 
 TREASURE_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$04,SPEED_SET,$81,INSTRUMENT,$00,OCTAVE_4,$79,$B9,OCTAVE_5,$39,$79,$B9,END_SONG
+    .byte TEMPO,$03,SPEED_SET,$81,INSTRUMENT,$00,OCTAVE_4,$79,$B9,OCTAVE_5,$39,$79,$B9,END_SONG
 
 TREASURE_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$04,SPEED_SET,$81,INSTRUMENT,$01,OCTAVE_3,$B9,OCTAVE_4,$39,$79,$B9,OCTAVE_5,$39,END_SONG
+    .byte TEMPO,$03,SPEED_SET,$81,INSTRUMENT,$01,OCTAVE_3,$B9,OCTAVE_4,$39,$79,$B9,OCTAVE_5,$39,END_SONG
 
 TREASURE_TRI:
-    .byte TEMPO,$04,$C9,$C9,$C9,$C9,$C9,END_SONG
+    .byte TEMPO,$03,$C9,$C9,$C9,$C9,$C9,END_SONG
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;               BLANK TRACK                        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
@@ -2225,7 +2225,7 @@ BLANK_TRI:
 
 MARSHBOSS_SQ1:
     .byte DUTY_25     ;duty set 25%
-    .byte TEMPO,$03         ;tempo FB
+    .byte TEMPO,$02         ;tempo FB
     .byte SPEED_SET,$01,INSTRUMENT,$01 ;envelope speed $08, pattern 1, gradual decay from C
     .byte OCTAVE_2,$3C,$6C,$9C,OCTAVE_3,$0C,$3C,$6C,$9C,OCTAVE_4,$0C,$3C,$6C,$9C,OCTAVE_5,$0C
     .byte $C0,$C3     ; long rest; two bars
@@ -2234,7 +2234,7 @@ MARSHBOSS_SQ1:
 
 MARSHBOSS_SQ2:
     .byte DUTY_12     ; duty set 12.5%
-    .byte TEMPO,$03         ; tempo FB
+    .byte TEMPO,$02         ; tempo FB
     .byte SPEED_SET,$01,INSTRUMENT,$02 ; envelope speed $08, pattern 2, gradual decay from 8
     .byte $CE         ; evil confusing rest that messes it all up for a tiny echo effect
     .byte OCTAVE_2,$3C,$6C,$9C,$0C,$3C,$6C,$9C,OCTAVE_3,$0C,$3C,$6C,$9C,OCTAVE_4,$0C
@@ -2244,7 +2244,7 @@ MARSHBOSS_SQ2:
     .word MARSHCAVEOLD_SQ2
 
 MARSHBOSS_TRI:
-    .byte TEMPO,$03,$C3
+    .byte TEMPO,$02,$C3
     @MARSHBOSS_TRILOOP:
     ;.byte OCTAVE_3,$07,$C5,$07,$C5,$C5,$07,$C7,$07,$C7,$07,$C7,$57,$C5,$57,$C5,$57,$C5
     ;.byte $57,$C5,$57,$C7
@@ -2255,7 +2255,7 @@ MARSHBOSS_TRI:
     .word MARSHCAVEOLD_TRI
 
 MARSHBOSS_SQ3:
-    .byte VOLUME_QRTR,TEMPO,$03,$C5,LOOP_FOREVER
+    .byte VOLUME_QRTR,TEMPO,$02,$C5,LOOP_FOREVER
     .word MARSHBOSS_SQ1
 
 MARSHBOSS_SQ4:
@@ -2268,7 +2268,7 @@ MARSHBOSS_SQ4:
 
 BOSS_SQ1:
     .byte DUTY_25     ;duty set 25%
-    .byte TEMPO,$03     ;tempo FB
+    .byte TEMPO,$02     ;tempo FB
     .byte SPEED_SET,$01,INSTRUMENT,$01 ;envelope speed $08, pattern 1, gradual decay from C
     .byte OCTAVE_2,$3C,$6C,$9C,OCTAVE_3,$0C,$3C,$6C,$9C,OCTAVE_4,$0C,$3C,$6C,$9C,OCTAVE_5,$0C
     .byte $C0,$C5     ; long rest; one and a half bars + a quarter note
@@ -2347,7 +2347,7 @@ BOSS_SQ1START:
 
 BOSS_SQ2:
     .byte DUTY_12     ; duty set 12.5%
-    .byte TEMPO,$03     ; tempo FB
+    .byte TEMPO,$02     ; tempo FB
     .byte SPEED_SET,$01,INSTRUMENT,$02 ; envelope speed $08, pattern 2, gradual decay from 8
     .byte $CE         ; evil confusing rest that messes it all up for a tiny echo effect
     .byte OCTAVE_2,$3C,$6C,$9C,$0C,$3C,$6C,$9C,OCTAVE_3,$0C,$3C,$6C,$9C,OCTAVE_4,$0C
@@ -2456,7 +2456,7 @@ BOSS_SQ2:
 
 
 BOSS_SQ3:
-    .byte TEMPO,$03               ; tempo FB
+    .byte TEMPO,$02               ; tempo FB
     .byte $C0,$C1               ; two and a half bar pause
     .byte DUTY_25               ; duty set 25%
     BOSS_SQ3START:
@@ -2547,7 +2547,7 @@ BOSS_SQ3:
     .word BOSS_SQ3START
 
 BOSS_SQ4:
-    .byte TEMPO,$03               ; tempo FB
+    .byte TEMPO,$02               ; tempo FB
     .byte VOLUME_HALF           ; half volume, for later loop
     .byte $C0,$C1               ; two and a half bar pause
 
@@ -2638,7 +2638,7 @@ BOSS_SQ4:
 
 
 BOSS_TRI:
-    .byte TEMPO,$03         ; tempo FB
+    .byte TEMPO,$02         ; tempo FB
     .byte $C3             ; half note pause
     BASSINTRO:
     .byte OCTAVE_2,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$79,$C9,$59,$C9,$59,$C9
