@@ -7327,7 +7327,6 @@ lut_ZMenuText:
 .word Song25                 ; 28
 .word Song26                 ; 29
 .word Song27                 ; 2A
-.word Song28                 ; 2B
 
 
 BLANK:
@@ -7444,8 +7443,6 @@ Song26:
 .byte $8F,$AC,$A8,$B1,$A7,$FF,$8B,$A4,$B7,$B7,$AF,$A8,$FF,$82,$09,$09,$00                 ; Fiend Battle 2
 Song27:
 .byte $9B,$B8,$AC,$B1,$A8,$A7,$FF,$8C,$A4,$B6,$B7,$AF,$A8,$09,$0A,$00                     ; Ruined Castle
-Song28:
-.byte $93,$AC,$AA,$AA,$25,$B6,$FF,$C2,$FF,$8F,$25,$5F,$FF,$8E,$45,$34,$B1,$B7,$B6,$00     ; Jiggers - Feral Elements
 
 
 lut_CharStatsPtrTable:

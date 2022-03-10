@@ -464,23 +464,84 @@ ChaosNoise              = $AF ; only used at the end of the game, while no music
 
 ; for sound channels (between Bx-Fx)
 ;  see Constants.inc
-ch_scoreptr             = $0
-ch_instrument           = $2  ; low 4 bits are volume envelope ; shared
-ch_tempo                = $2  ; high 4 bits are tempo ; shared
-ch_envpos               = $3  ; pos in env data (00-1F)
-ch_lenctr               = $4  ; counter for score data (note length)
-ch_envrate              = $5  ; rate/speed of env table traversal
-ch_envrem               = $6  ; remaining "fraction" of env data (3 bits of fraction)
-ch_vibrato_depth        = $7  ; low bits
-ch_vibrato_speed        = $7  ; high bits
-ch_vibrato              = $8  ; 
-ch_octave               = $9  ; bits 0-2 are octave, bits 4-5 are octave switches ; shared
-ch_quiet                = $9  ; bits 6-7 are half and quarter volume switches ; shared
-ch_loopctr              = $A  ; bits 4-6 are remaining loop counter, bit 7 is loop switch ; shared
-ch_vol_minus            = $A  ; bits 0-3 are subtracted from ch_vol ; shared
-ch_vol                  = $B  ; output volume + duty
-ch_freq                 = $C  ; +D ; output freq.  High bit set marks byte has been written (don't rewrite to reset duty)
-ch_return               = $E  ; +F ; holds return address for SCORE_GOTO
+;ch_scoreptr             = $0
+;ch_instrument           = $2  ; low 4 bits are volume envelope ID ; shared
+;ch_tempo                = $2  ; high 4 bits are song tempo ; shared 
+;ch_lenctr               = $3  ; note length in frames
+;ch_envpos               = $4  ; pos in env data (00-1F)
+;ch_envrate              = $5  ; envelope length in frames
+;ch_envrem               = $6  ; to be deleted when legato/vibrato changes are made!
+;ch_legato               = $6  ; if non-zero, don't do vibrato effects
+;ch_legato_speed         = $7  ; frames between updating legato
+;ch_vibrato_depth        = $7  ; low bits
+;ch_vibrato_speed        = $7  ; high bits
+;ch_vibrato              = $8  ; 
+;ch_octave               = $9  ; bits 0-2 are octave, bits 4-5 are octave switches ; shared
+;ch_quiet                = $9  ; bits 6-7 are half and quarter volume switches ; shared
+;ch_loopctr              = $A  ; bits 4-6 are remaining loop counter, bit 7 is loop switch ; shared
+;ch_vol_minus            = $A  ; bits 0-3 are subtracted from ch_vol ; shared
+;ch_vol                  = $B  ; output volume + duty
+;ch_freq                 = $C  ; +D ; output freq.  High bit set marks byte has been written (don't rewrite)
+;ch_return               = $E  ; +F ; holds return address for SCORE_GOTO
+
+
+
+ch_scoreptr              = $0 ; 2 bytes for the score pointer
+ch_tempo                 = $2 ; TTT- ---- ; Tempo, 1-8
+ch_instrument            = $2 ; ---I IIII ; Instrument 0-31
+ch_notelength            = $3 ; LLLL LLLL ; note Length in frames, 0-255
+ch_loopbranch            = $4 ; -B-- ---- ; loop Branch toggle
+ch_envelope_type         = $4 ; T--- ---- ; envelope Type toggle
+
+;; Envelope Types: 0 = values per frame ; 1 = frames per value
+;; With type 0, Envelope Time is decreased every frame, then position updated when it hits 0, and Length copied over to Time for the next countdown
+;; With type 1, Envelope Time is added to the position every frame.
+;; This is in effect the same system that the original driver did with the fractions
+
+ch_envelope_position     = $4 ; --PP PPPP ; envelope Position, 0-63
+ch_envelope_time         = $5 ; --TT TTTT ; envelope Time, 0-63
+ch_envelope_length       = $6 ; --LL LLLL ; envelope Length, 0-63
+ch_vibrato_legato_on     = $6 ; VL-- ---- ; Vibrato on; Legato on
+ch_vibrato_legato_type   = $7 ; T--- ---- ; legato/vibrato Type Toggle (direction)
+ch_vibrato_legato        = $7 ; -VVV VVVV ; legato/vibrato Value
+ch_vibrato_speed_depth   = $8 ; SSSS DDDD ; vibrato Speed ; vibrato Depth
+ch_vibrato_legato_time   = $9 ; TTTT TTTT ; legato/vibrato Timer
+ch_loopcounter           = $A ; CCCC ---- ; loop Counter, 0-15
+ch_octave                = $A ; ---- DUOO ; octave Down toggle; octave Up toggle; Octave, 0-3
+ch_duty                  = $B ; DD-- ---- ; Duty, 0-3
+ch_volume                = $B ; --QH VVVV ; Quarter volume toggle; Half volume toggle; Volume, 0-16 
+ch_freq                  = $C ; FFFF FFFF ; note Frequency, 28-256
+;ch_freq+1               = $D ; U--- -FFF ; note Frequency+1, 0-6 ; Update note frequency
+ch_volume_subtract       = $D ; -SSS S--- ; Subtract from volume, 0-16 
+ch_return                = $E ; 2 bytes for GOTO return address
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 text_ptr_backup         = $010D ; + E, F
 stack                   = $0100 

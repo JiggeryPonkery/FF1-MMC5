@@ -6431,6 +6431,7 @@ DrawHealMenu:
     BCS @UseItem_Exit          ; if B was pressed (C set), exit this menu
 
     JSR Cursor_to_Index
+	STX submenu_targ
     JSR CheckDeadStone
     BCS @CantUse
 
@@ -6447,7 +6448,7 @@ DrawHealMenu:
     DEC items, X
 
    @DoHeal:
-    ;LDA hp_recovery            ; otherwise.. can use!
+	LDX submenu_targ
     JSR MenuRecoverHP_Abs      ; recover 30 HP for target (index is still in X).
     JSR PlayHealSFX
     JSR SetStallAndWait
