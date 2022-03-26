@@ -377,19 +377,17 @@ PRELUDE_SQ2:
 PRELUDE_TRI:
     .byte TEMPO,$04
     PLOOP2:
-    .byte $C7
+    .byte $C0 ; $C7 update less often
     .byte LOOP_FOREVER
     .word PLOOP2
 
 PRELUDE_SQ3:
-    .byte TEMPO,$04
-    .byte DUTY_50
+    .byte SCORE_GOTO
+    .word PRELUDE_MELODY_SHARED
+    
+    .byte $A3 ; fade in a quarter note length before the melody really starts
+    .byte INSTRUMENT,$07 
     .byte SPEED_SET,$02
-    PRELUDEWAIT:
-    .byte $C0,$C0,$C1,LOOP_X,$07
-    .word PRELUDEWAIT
-    ; wait until song loops once
-    .byte INSTRUMENT,$0F,OCTAVE_3,$A3,$C7,INSTRUMENT,$07 ; nice fade in
     PRELUDEMELODY:
     .byte OCTAVE_3,$A0,$C3,$91,OCTAVE_4,$01,OCTAVE_3,$AB,$9B,$A0,$CB,$C5,OCTAVE_4,$03,OCTAVE_3,$A3,$93
     .byte OCTAVE_4,$03,OCTAVE_3,$AB,$9B,$A0,$CB,$C5,$91,OCTAVE_4,$01
@@ -407,17 +405,27 @@ PRELUDE_SQ3:
 
     ;; JIGS - melody based off Ailsean's "Final Ecstacy" remix (OCRemix.org)! I like it.
 
-PRELUDE_SQ4:
+PRELUDE_MELODY_SHARED:
     .byte TEMPO,$04
     .byte DUTY_50
-    PRELUDEWAIT2:
-    .byte $C0,$C0,$C1,LOOP_X,$07
-    .word PRELUDEWAIT2
+    .byte SPEED_SET,$03
+    PRELUDEWAIT:
+    .byte $C0,$C0,$C1,LOOP_X,$06 ; 14 bars
+    .word PRELUDEWAIT
+    .byte $C0,$C0,$C3 ; + 1 and 3/4 bars
+    .byte $C7 ; take into account the delay on all tracks
+    ; wait until song loops once
+    .byte INSTRUMENT,$0F,OCTAVE_3
+    .byte SCORE_RETURN
 
-    .byte $C5,$CA ; little bit more than an 8th note pause
-    .byte SPEED_SET,$02
-    .byte INSTRUMENT,$0F,VOLUME_HALF,OCTAVE_3,$A3,$C7,VOLUME_HALF ;; VOLUME_HALF makes this half volume, once to turn it on, once to turn it off
-    .byte INSTRUMENT,$09,LOOP_FOREVER
+PRELUDE_SQ4:
+    .byte SCORE_GOTO
+    .word PRELUDE_MELODY_SHARED
+    
+    ;.byte $C5,$CA ; little bit more than an 8th note pause
+    .byte $C3
+    .byte VOLUME_HALF,$A3,VOLUME_HALF ;; VOLUME_HALF makes this half volume, once to turn it on, once to turn it off
+    .byte INSTRUMENT,$08,SPEED_SET,$02,VOLUME_MINUS,$05,LOOP_FOREVER
     .word PRELUDEMELODY
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3247,7 +3255,9 @@ AdjustCustomVolume:
     LDA tmp
     SEC
     SBC tmp+1           ; subtract custom quietness
-    STA tmp
+    BCS :+
+    LDA #1              ; set to 1 if it wrapped around
+  : STA tmp
     RTS
 
 
@@ -4344,7 +4354,7 @@ Instrument_E:
   .BYTE  $0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05 ; pattern $EE
   .BYTE  $04,$05,$06,$07,$08,$07,$06,$05,$04,$05,$06,$07,$08,$09,$0A,$0B ;  fade C->4->B with tremolo
 Instrument_F:
-  .BYTE  $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EF ; JIGS - only used in my prelude melody
+  .BYTE  $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EF ; JIGS - only used in my prelude melody and ruined castle
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$09,$08,$07,$06,$05,$04,$03,$01 ;  fade from 1->C->4->9->1
 
  ;; JIGS - some alternate patterns:
