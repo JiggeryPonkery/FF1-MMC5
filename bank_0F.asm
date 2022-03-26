@@ -480,7 +480,6 @@ LoadSpellForBattle:
     LDA LongCall_A          
     LDX #12                 ; multiply by 8 bytes (+4 more for permissions)
     JSR MultiplyXA        
-    CLC                   
     ADC #<MagicData       
     STA MagicPointer      
     TXA                   
@@ -785,7 +784,6 @@ GetWeaponDataPointer:
     TYA                    ; restore A
     LDX #15
     JSR MultiplyXA
-    CLC
     ADC #<lut_WeaponData
     STA tmp                ; put in tmp as low byte of our pointer
     TXA
@@ -801,7 +799,6 @@ GetPointerToArmorData:
     TYA                    ; restore A
     LDX #15
     JSR MultiplyXA
-    CLC
     ADC #<lut_ArmorData    ; add low byte of our pointer
     STA tmp                ; put in tmp as low byte of our pointer
     TXA
@@ -3561,7 +3558,7 @@ GetExpToNext:
     STA tmp+10
     LDA lut_ExpToAdvance+2, X
     STA tmp+11
-    CLC
+   ; CLC              ; MultiplyXA does this
     RTS
 
 

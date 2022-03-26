@@ -27,6 +27,7 @@
 .import LongCall
 ;.import Magic_ConvertBitsToBytes
 .import MultiplyXA
+.import MultiplyXA_NoCLC
 .import PlayerAttackEnemy_PhysicalZ
 .import PlayerAttackPlayer_PhysicalZ
 .import PrintBattleTurn
@@ -996,7 +997,7 @@ BattleSubMenu_Magic_NoUndraw:
   : LDA battle_item ; spell level (0-7)
     LDX #3          ; amount of spells per level
     JSR MultiplyXA
-    CLC
+    ;CLC
     ADC cursor_x   ; spell (0-2)
     ADC char_index
     TAY                             ; put that index in Y, and use it to get the chosen spell
@@ -2447,7 +2448,7 @@ MenuSelection_Item:
    @RedrawList:
     LDA item_pageswap
     LDX #14
-    JSR MultiplyXA
+    JSR MultiplyXA_NoCLC
     STA tmp
     TAX
 
@@ -2607,7 +2608,7 @@ MenuSelection_Magic:
    @RedrawList:
     LDA item_pageswap
     LDX #32
-    JSR MultiplyXA
+    JSR MultiplyXA_NoCLC
     STA tmp
     TAX
 
@@ -3018,7 +3019,7 @@ SetNaturalPose:
 
    @Load:
     LDA #5
-    JSR MultiplyXA        ; multiply X by 5
+    JSR MultiplyXA_NoCLC  ; multiply X by 5
     TAX
     LDA #<StoneBGTiles_Structure
     STA image_ptr
@@ -5812,7 +5813,7 @@ PlayerRandomSpell:
     SBC #ch_mp - ch_stats ; remove the offset from Y, to get spell level
     LDX #3
     JSR MultiplyXA        ; multiply by 3 to get offset for ch_spells (3 spells per level)
-    CLC
+    ;CLC
     ADC char_index        ; add char_index
     STA char_index        ; and back it up
     TAX
@@ -6380,7 +6381,7 @@ DoPhysicalAttack_NoAttackerBox:
   : LDA btl_attacker_numhits            ; get proper number of hits (numhits * mult)
     AND #$0F                            ; cut off high bits (amount of unique attack chances)
     LDX btl_attacker_numhitsmult        ;  the mult is essentially the multiplier for the FAST spell
-    JSR MultiplyXA
+    JSR MultiplyXA_NoCLC
     STA math_numhits
 
     LDA math_numhits
@@ -7962,7 +7963,7 @@ Enemy_DoAi:
     LDA btl_attacker        ; $00-$08
     LDX #$10                ; get a pointer to this enemy's AI data
     JSR MultiplyXA          ; $10 bytes per AI entry
-    CLC                     ;   end result, of this math:  @aiptr points to this enemy's AI data
+    ;CLC                     ;   end result, of this math:  @aiptr points to this enemy's AI data
     ADC #<lut_EnemyAi
     STA EnemyAIPointer
     TXA
@@ -10716,7 +10717,7 @@ AilmentCured_MessageLut:
 GetEnemyRAMPtr:
     LDX #28                ; multiply enemy index by $14  (number of bytes per enemy)
     JSR MultiplyXA
-    CLC                     ; then add btl_enemystats to the result
+    ;CLC                     ; then add btl_enemystats to the result
     ADC #<btl_enemystats                ;; FB
     STA EnemyRAMPointer
     TXA
@@ -11430,7 +11431,7 @@ DisplayAttackIndicator_Scan:
    @PrepLoop:
     STA tmp+10
     LDA indicator_index
-    JSR MultiplyXA
+    JSR MultiplyXA_NoCLC
     STA tmp+11
    ; LDA #02                ; frame loop = do this many frames
    ; STA tmp+6

@@ -60,6 +60,7 @@
 ;.export Magic_ConvertBitsToBytes
 .export MenuCondStall
 .export MultiplyXA
+.export MultiplyXA_NoCLC
 .export PaletteFrame
 .export PlayDoorSFX
 .export PlaySFX_Error
@@ -3662,7 +3663,7 @@ SMMove_Battle:
 
       LDA cur_map             ; otherwise, begin a random encounter
       LDX #$8
-      JSR MultiplyXA
+      JSR MultiplyXA_NoCLC
       ADC #$A0                ; carry clear from CMP... add $A0 to skip Ocean formations
       PHA
       TXA
@@ -11298,7 +11299,7 @@ BattleDrawMessageBuffer_Reverse:
     ADC tmp+12 ; Y position of box upper left corner
     LDX #32
     JSR MultiplyXA
-    CLC
+    ;CLC
     ADC tmp+4  ; X position
     ADC #$80
     STA btldraw_dst
@@ -13233,18 +13234,18 @@ RandAX:
     JSR MultiplyXA  ; random()*range
     
     TXA             ; drop the low 8 bits, put high 8 bits in A  (effectively:  divide by 256)
-    CLC
+    ;CLC
     ADC Rand_AX_lo       ; + lo
     RTS
 
 MultiplyXA:
     ;; JIGS: this is neat. Yay MMC5 stuff!
+    CLC                  ; most operations involve doing this, so saving quite a few bytes overall doing it here!
+MultiplyXA_NoCLC:
     STA $5205
     STX $5206
     LDA $5205            ; 5205 = lower 8 bits 
     LDX $5206            ; 5206 = higher 8 bits
-    ;STA MMC5_multiplyA
-    ;STX MMC5_multiplyX
     RTS
 
 
@@ -13660,7 +13661,7 @@ JigsBoxUndrawFromBuffer:
     LDX btl_msgbuffer_loopctr    ; multiply screen width by height - 1
     DEX
     JSR MultiplyXA 
-    CLC
+    ;CLC
     ADC BattleTmpPointer2        ; add to the source pointer for the next routine
     STA BattleTmpPointer2
     TXA
@@ -13694,7 +13695,7 @@ JigsBoxDrawToBuffer:
     LDX #32
     JSR MultiplyXA
     STA tmp+5                 ; new Y position = screen width * original Y position
-    CLC
+    ;CLC
     ADC tmp+4                 ; add in X position
     STA tmp+8                 ; Tmp+8 = X and Y position totals, for use with adding to $2280 to draw to the screen
     ADC #<btl_msgbuffer       ; and screen buffer start

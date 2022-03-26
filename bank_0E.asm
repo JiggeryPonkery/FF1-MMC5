@@ -46,6 +46,7 @@
 .import Magic_ConvertBitsToBytes
 .import MenuCondStall
 .import MultiplyXA
+.import MultiplyXA_NoCLC
 .import OptionsMenu
 .import PaletteFrame
 .import PlaySFX_Error
@@ -1951,7 +1952,7 @@ ShopCheckInventory:
     JMP ShopSelectAmount
 
   : LDA #13
-    JSR MultiplyXA              ; multiply cursor position by each item's str_buf length
+    JSR MultiplyXA_NoCLC         ; multiply cursor position by each item's str_buf length
     TAY
 
     ;LDA str_buf+$42, Y          ; item ID
@@ -1974,7 +1975,7 @@ ShopCheckInventory:
     STA shop_amount_high
     LDA str_buf+$46, Y
     AND #$0F                    ; convert from tile ID to byte
-    CLC
+    ;CLC                        ; MultiplyXA does this
     ADC shop_amount_high        ; add in 0 or tens column
   : STA shop_amount
     RTS
@@ -2291,17 +2292,17 @@ ShopLoadPrice_Complex:
     ROR tmp+1
     ROR tmp
 
-  : CLC
+  : ;CLC
     LDA shop_amount_buy    ; quantity
     LDX tmp                ; low byte of price
-    JSR MultiplyXA_Safe
+    JSR MultiplyXA
     STA tmp
     STA shop_curprice
     STX shop_x_price
 
     LDA shop_amount_buy
     LDX tmp+1              ; middle byte of price
-    JSR MultiplyXA_Safe
+    JSR MultiplyXA_NoCLC
     ADC shop_x_price
     STA tmp+1
     STA shop_curprice+1
@@ -2309,7 +2310,7 @@ ShopLoadPrice_Complex:
 
     LDA shop_amount_buy
     LDX tmp+2              ; high byte of price
-    JSR MultiplyXA_Safe
+    JSR MultiplyXA_NoCLC
     ADC shop_x_price
     STA tmp+2
     STA shop_curprice+2
@@ -2321,11 +2322,11 @@ ShopLoadPrice_Complex:
 ;   unchanged by the call.  The PHP/PLP here assure that.  If MultiplyXA preseves
 ;   C then this routine is not needed and MultiplyXA can be called directly
 
-MultiplyXA_Safe:
-    PHP
-    JSR MultiplyXA
-    PLP
-    RTS
+;MultiplyXA_Safe:
+;    PHP
+;    JSR MultiplyXA_NoCLC
+;    PLP
+;    RTS
 
 ; The actual multiplication routine
 ;
@@ -4152,7 +4153,7 @@ DrawInnClinicConfirm:
   : LDA tmp
 
    @DrawNumber:
-    JSR MultiplyXA
+    JSR MultiplyXA_NoCLC
     STA tmp
     STA item_box
     STX tmp+1
@@ -5825,7 +5826,7 @@ TryLearnSpell:
     LSR A                  ; shift spell level to low nybble
     LDX #3                 ; * 3
     JSR MultiplyXA
-    CLC
+    ;CLC
     ADC char_index
     TAX                    ; X now points to the first slot this spell can be in
 

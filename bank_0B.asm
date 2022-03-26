@@ -352,7 +352,7 @@ DoesEnemyXExist:
 GetEnemyRAMPtr:
     LDX #28                ; multiply enemy index by $1C  (number of bytes per enemy)
     JSR MultiplyXA
-    CLC                     ; then add btl_enemystats to the result
+    ;CLC                     ; then add btl_enemystats to the result
     ADC #<btl_enemystats                ;; FB
     STA EnemyRAMPointer
     TXA
@@ -397,7 +397,7 @@ LoadEnemyStats:
 
   : LDX #25                ; multiply current enemy ID by #25  (25 bytes of data per enemy)
     JSR MultiplyXA          ;   add the result to data_EnemyStats to generate a pointer to the enemy
-    CLC                     ;   data in ROM.
+    ;CLC                     ;   data in ROM.
     ADC #<data_EnemyStats
     STA EnemyROMPointer
     TXA
@@ -514,7 +514,7 @@ LoadEnemyStats:
     AND #$7F                 ; cap at $7F, in case not enough enemies were loaded and old data wasn't overwritten with the right values here
     LDX #$10
     JSR MultiplyXA
-    CLC
+    ;CLC
     ADC #<EnemyAIData
     STA EnemyROMPointer
     TXA
@@ -791,7 +791,7 @@ StealFromEnemy:
     LDA (EnemyRAMPointer), Y        ; get the enemy's index
     LDX #6
     JSR MultiplyXA                  ; multiply by 6 (6 bytes in the steal list)
-    CLC
+    ;CLC
     ADC #<lut_StealList
     STA tmp
     TXA
@@ -3204,7 +3204,7 @@ ChaosDeath:
         LDA @tilerowtbl, Y
         AND #$07                    ; mask off to get 0-7 (only 8 rows of tiles)
 
-        CLC                         ; Add the row number to the PPU addr
+        ;CLC                         ; Add the row number to the PPU addr (CLC done by MultiplyXA)
         ADC @ppuaddr
         STA @ppuaddr
         LDA @ppuaddr+1
@@ -3399,7 +3399,7 @@ IncYBy4:
 GetEnemyStatPtr:
     LDX #$14                ; multiply enemy index by $14  (number of bytes per enemy)
     JSR MultiplyXA
-    CLC                     ; then add btl_enemystats to the result
+    ;CLC                     ; then add btl_enemystats to the result
     ADC #<btl_enemystats
     PHA
     TXA

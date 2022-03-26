@@ -2828,7 +2828,7 @@ Music_NewSong:
     ;; JIGS -- use the MMC5 multiplier registers to use 10 bytes per song, 5 tracks each
     LDX #10
     JSR MultiplyXA
-    CLC
+    ;CLC
     ADC mu_chanprimer     ; And do this instead of ORA
     STA tmp               ; this is the low byte of the pointer to the pointer table
 
@@ -3126,7 +3126,7 @@ MusicPlay:
     STA ch_envelope_time, X  ; get the length set earlier and save as the new timer
     
     LDA ch_envelope_position, X
-    AND #%00111111
+    AND #ENVELOPE_LENGTH-1
     CMP #ENVELOPE_LENGTH-1   ; see if the position is at max, and if so, leave it
     BEQ @UpdateNext
     
@@ -3139,11 +3139,16 @@ MusicPlay:
     STA tmp                  ; backup these two bits
     
     LDA ch_envelope_position, X
-    AND #%00111111           ; keep only the actual position bits
-    CLC
+    AND #ENVELOPE_LENGTH-1   ; keep only the actual position bits
+    CMP #ENVELOPE_LENGTH-1   ; see if the position is at max, and if so, leave it
+    BEQ @UpdateNext
+   ; CLC                     ; The CMP should clear carry here!
+   
     ADC ch_envelope_time, X  ; add the distance per frame
-    AND #ENVELOPE_LENGTH-1   ; capping at #63 (or 31 for original envelope lengths)
-    ORA tmp                  ; add back in the other bits
+    CMP #ENVELOPE_LENGTH-1   ; capping at #63 (or 31 for original envelope lengths)
+    BCC :+
+    LDA #ENVELOPE_LENGTH-1 
+  : ORA tmp                  ; add back in the other bits
     STA ch_envelope_position, X ; and save
 
    @UpdateVol:
@@ -3153,9 +3158,8 @@ MusicPlay:
 
     LDA ch_instrument, X     ; instrument * Envelope pattern length
     AND #%00011111
-    LDX #ENVELOPE_LENGTH     ; length of Envelope patterns (32)
-    JSR MultiplyXA
-    CLC
+    LDX #ENVELOPE_LENGTH     ; length of Envelope patterns (32 bytes)
+    JSR MultiplyXA           ; also does CLC
     ADC #<lut_EnvPatterns    ; add the ROM address of the pattern table!
     STA tmp
     TXA
@@ -3175,6 +3179,7 @@ MusicPlay:
     
     BPL @HalfVolume     ; high bit set if the subtraction went negative...
     LDA #0              ; Mark it 0!
+    STA tmp
     BEQ @Done           ; no further adjusting can be done
 
   @HalfVolume:
@@ -3182,31 +3187,39 @@ MusicPlay:
     AND #%00010000      ; get the Halve volume bit
     BEQ @QuarterVolume  ; if not set, skip
     
-    LDA tmp             ; load, halve, and save
-    LSR A
-    STA tmp
+    LSR tmp
+    ;LDA tmp             ; load, halve, and save
+    ;LSR A
+    ;STA tmp
     
   @QuarterVolume:
     LDA ch_volume, X
     AND #%00100000      ; get the Quarter volume bit
     BEQ @HalfVolumeMenu ; if not set, skip
     
-    LDA tmp             ; load, divide by 4, and save
-    LSR A
-    LSR A
-    STA tmp
+    LSR tmp
+    LSR tmp
+    ;LDA tmp             ; load, divide by 4, and save
+    ;LSR A
+    ;LSR A
+    ;STA tmp
 
 ;JIGS - Carry is not added back in, because if you halve the volume, then halve it again in the menu...
 ; you kinda just want it completely off by that point.
 ; This is mostly because the volume triggers are mainly used for echo and the echo gets "louder" in the menu sometimes
 
   @HalfVolumeMenu:
-    LDA tmp
-    LDY MenuHush
+    ;LDA tmp
+    ;LDY MenuHush
+    ;BEQ @Done
+    ;LSR A               ; divide volume by 2
+    
+    LDA MenuHush
     BEQ @Done
-    LSR A               ; divide volume by 2
+    LSR tmp
+    
   @Done:
-    STA tmp    
+    ;STA tmp    
 
     LDA ch_volume, X     
     AND #$F0               ; clear out everything but the high bits (duty)
@@ -3224,7 +3237,6 @@ MusicPlay:
     BCS :+
     JMP  @UpdateLoop
   : RTS                    ; then we're done!  exit!
-
 
 AdjustCustomVolume:
     LSR A               ; move high bits to low bits
@@ -3310,62 +3322,123 @@ Music_DoScore_Done:
     
 
 Music_Control_Codes:
-    CMP #LOOP_FOREVER               ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_Rest              ; <-- this
-  : CMP #LOOP_SWITCH                ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_LoopCode          ; <-- this
-  : CMP #LEGATO_ON                  ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_LoopCode2         ; <-- this
-  : CMP #DUTY_12                    ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_LegatoOn          ; <-- this
-  : CMP #VIBRATO_ON                 ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_Duty              ; <-- this
-  : CMP #VIBRATO_SPEED              ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_VibratoOn         ; <-- this
-  : CMP #INSTRUMENT                 ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_VibratoSpeed      ; <-- this
-  : CMP #OCTAVE_UP                  ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_SetEnvPattern     ; <-- this
-  : CMP #OCTAVE_2                   ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_SetOctaveSwitch   ; <-- this
-  : CMP #SCORE_GOTO                 ; if below this, then
-    BCS :+                          ; then its
-        JMP Music_SetOctave         ; <-- this
-  : CMP #SCORE_RETURN       ; if below SCORE RETURN, its Score Goto
+    CMP #LOOP_FOREVER
     BCS :+
-        JMP Music_Goto
-  : CMP #VOLUME_MINUS       ; if below VOLUME MINUS, its Score Return
-    BCS :+
-        JMP Music_Return
-  : CMP #VOLUME_QRTR        ; if below VOLUME QRTR, its Volume Minus
-    BCS :+
-        JMP Music_CustomVolume
-  : CMP #VOLUME_HALF        ; if below VOLUME HALF, its Volume Quarter
-    BCS :+
-        JMP Music_QuarterVolume
-   : CMP #SPEED_SET         ; if below SPEED_SET, its a Volume Half
-    BCS :+
-        JMP Music_HalfVolume
-  : CMP #TEMPO              ; if below TEMPO, its an envelope speed select
-    BCS :+
-       JMP Music_SetEnvSpeed
-  : CMP #END_SONG           ; if not END SONG marker, then its tempo select
-    BEQ :+
-       JMP Music_SetTempo
+        JMP Music_Rest
+  : CMP #END_SONG
+    BNE :+
+        LDA #$80           ; If yes, write $80 to the music track to mark that the song is over
+        STA music_track    ;  All channels will be silenced next frame
+        RTS                ; RTS because no further score processing is needed if song is over
+  : STA tmp+2
+    SEC 
+    SBC #LOOP_FOREVER
+    ASL A
+    TAY 
+    LDA Music_JumpTable+1, Y 
+    STA tmp+1 
+    LDA Music_JumpTable, Y
+    STA tmp 
+    LDA tmp+2
+    JMP (tmp)
+    
+    ;; JIGS - this takes about half the CPU time to do... but at the cost of ALWAYS taking that much CPU time.
+    ;; Perhaps a smarter thing to do is set the Octave stuff (most likely to be used) higher in the list.
+    ;; Setup codes should be lower... but it all depends on what people end up using the most in the score.
+    
+Music_JumpTable:
+.word Music_LoopCode           ; $E0
+.word Music_LoopCode           ; $E1
+.word Music_LoopCode2          ; $E2
+.word Music_LegatoOn           ; $E3
+.word Music_Duty               ; $E4
+.word Music_Duty               ; $E5
+.word Music_Duty               ; $E6
+.word Music_VibratoOn          ; $E7
+.word Music_VibratoSpeed       ; $E8
+.word Music_SetEnvPattern      ; $E9
+.word Music_SetOctaveSwitch    ; $EA
+.word Music_SetOctaveSwitch    ; $EB
+.word Music_SetOctave          ; $EC
+.word Music_SetOctave          ; $ED
+.word Music_SetOctave          ; $EE
+.word Music_SetOctave          ; $EF
+.word Music_Goto               ; $F0
+.word Music_Return             ; $F1
+.word Music_CustomVolume       ; $F2
+.word Music_QuarterVolume      ; $F3
+.word Music_HalfVolume         ; $F4
+.word Music_SetEnvSpeed        ; $F5
+.word Music_SetTempo           ; $F6
 
-    ;; eles, it's $FF : End the song
-     : LDA #$80           ; If yes, write $80 to the music track to mark that the song is over
-       STA music_track    ;  All channels will be silenced next frame
-       RTS                ; RTS because no further score processing is needed if song is over
+;    CMP #LOOP_FOREVER               ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_Rest              ; <-- this
+;  : CMP #LOOP_SWITCH                ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_LoopCode          ; <-- this
+;  : CMP #LEGATO_ON                  ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_LoopCode2         ; <-- this
+;  : CMP #DUTY_12                    ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_LegatoOn          ; <-- this
+;  : CMP #VIBRATO_ON                 ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_Duty              ; <-- this
+;  : CMP #VIBRATO_SPEED              ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_VibratoOn         ; <-- this
+;  : CMP #INSTRUMENT                 ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_VibratoSpeed      ; <-- this
+;  : CMP #OCTAVE_UP                  ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_SetEnvPattern     ; <-- this
+;  : CMP #OCTAVE_2                   ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_SetOctaveSwitch   ; <-- this
+;  : CMP #SCORE_GOTO                 ; if below this, then
+;    BCS :+                          ; then its
+;        JMP Music_SetOctave         ; <-- this
+;  : CMP #SCORE_RETURN       ; if below SCORE RETURN, its Score Goto
+;    BCS :+
+;        JMP Music_Goto
+;  : CMP #VOLUME_MINUS       ; if below VOLUME MINUS, its Score Return
+;    BCS :+
+;        JMP Music_Return
+;  : CMP #VOLUME_QRTR        ; if below VOLUME QRTR, its Volume Minus
+;    BCS :+
+;        JMP Music_CustomVolume
+;  : CMP #VOLUME_HALF        ; if below VOLUME HALF, its Volume Quarter
+;    BCS :+
+;        JMP Music_QuarterVolume
+;   : CMP #SPEED_SET         ; if below SPEED_SET, its a Volume Half
+;    BCS :+
+;        JMP Music_HalfVolume
+;  : CMP #TEMPO              ; if below TEMPO, its an envelope speed select
+;    BCS :+
+;       JMP Music_SetEnvSpeed
+;  : CMP #END_SONG           ; if not END SONG marker, then its tempo select
+;    BEQ :+
+;       JMP Music_SetTempo
+;
+;    ;; eles, it's $FF : End the song
+;     : LDA #$80           ; If yes, write $80 to the music track to mark that the song is over
+;       STA music_track    ;  All channels will be silenced next frame
+;       RTS                ; RTS because no further score processing is needed if song is over
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3598,11 +3671,14 @@ Music_QuarterVolume:
 
 Music_CustomVolume:
     LDA ch_volume_subtract, X 
-    AND #$0F               ; backup the frequency bits                
+    AND #%10000111        ; backup the frequency bits + frequency update toggle (if ever set during this...)
     STA tmp
     LDY #1
     LDA (mu_scoreptr), Y   ; get the next byte in the score (volume to subtract)
-    ORA tmp
+    ASL A
+    ASL A
+    ASL A                  ; shift into the appropriate bits
+    ORA tmp                ; add the frequency stuff back in
     STA ch_volume_subtract, X
     LDA #2
     JMP Music_DoScore_IncByA
@@ -3759,20 +3835,20 @@ Music_SetEnvSpeed:
     STA tmp
     
     AND #$80                 ; get the envelope type bit 
-    LSR A                    ; shift it into the next bit position
     STA tmp+1
     LDA ch_envelope_type, X
-    AND #%10111111           ; clear out the old one
+    AND #%01111111           ; clear out the old one
     ORA tmp+1
     STA ch_envelope_type, X
     
     LDA tmp
     AND #%00111111            ; remove the type bit and save as envelope time
+    STA tmp
     STA ch_envelope_time, X
     
     LDA ch_envelope_length, X ; length is copied back to time when time expires in type 0
     AND #%11000000
-    ORA ch_envelope_time, X   
+    ORA tmp
     STA ch_envelope_length, X 
 
     LDA #2
@@ -4222,51 +4298,52 @@ lut_NoteLengths:
 ;;  control.
 
 lut_EnvPatterns:
+Instrument_0:
   .BYTE  $0F,$0F,$0E,$0E,$0D,$0D,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E0
   .BYTE  $07,$07,$06,$06,$05,$05,$04,$04,$03,$03,$02,$02,$01,$01,$00,$00 ;  gradual decay from F
-
+Instrument_1:
   .BYTE  $0C,$0C,$0C,$0B,$0B,$0B,$0A,$0A,$0A,$09,$09,$09,$08,$08,$08,$07 ; pattern $E1
   .BYTE  $07,$06,$06,$06,$05,$05,$04,$04,$03,$03,$02,$02,$01,$01,$00,$00 ;  gradual decay from C
-
+Instrument_2:
   .BYTE  $08,$08,$08,$08,$07,$07,$07,$07,$06,$06,$06,$06,$05,$05,$05,$05 ; pattern $E2
   .BYTE  $04,$04,$04,$04,$03,$03,$03,$03,$02,$02,$02,$02,$01,$01,$00,$00 ;  gradual decay from 8
-
+Instrument_3:
   .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$03,$03,$03,$03,$03,$03,$03,$03 ; pattern $E3 ; only used in Shop and new Marsh Cave
   .BYTE  $03,$03,$03,$03,$03,$03,$03,$02,$02,$02,$02,$02,$02,$00,$00,$00 ;  gradual decay from 4
-
+Instrument_4:
   .BYTE  $0F,$0F,$0E,$0E,$0D,$0D,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E4 ; unused
   .BYTE  $08,$08,$09,$09,$0A,$0A,$0B,$0B,$0C,$0C,$0D,$0D,$0E,$0E,$0F,$0F ;  fade from F->8->F
-
+Instrument_5:
   .BYTE  $0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08,$07,$07,$06,$06,$05,$05 ; pattern $E5 ; only used in Slain
   .BYTE  $04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,$0A,$0A,$0B,$0B ;  fade from C->4->B
-
+Instrument_6:
   .BYTE  $08,$08,$07,$07,$06,$06,$05,$05,$04,$04,$03,$03,$02,$02,$01,$01 ; pattern $E6
   .BYTE  $01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,$08,$08 ;  fade from 8->1->8
-
+Instrument_7:
   .BYTE  $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0E,$0E,$0C,$0C,$0B,$0B,$0A,$0A ; pattern $E7 ; only used in my prelude melody
   .BYTE  $09,$09,$08,$08,$07,$07,$06,$06,$05,$05,$04,$04,$04,$03,$03,$03 ;  hold, then decay from F
-
+Instrument_8:
   .BYTE  $0C,$0C,$0C,$0C,$0C,$0C,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E8
   .BYTE  $06,$06,$05,$05,$04,$04,$04,$03,$03,$03,$02,$02,$02,$02,$02,$02 ;  hold, then decay from C
-
+Instrument_9:
   .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$04,$03,$03,$03,$03,$03,$03,$03 ; pattern $E9 ; JIGS - only used in my prelude melody
   .BYTE  $03,$03,$02,$02,$02,$02,$02,$02,$02,$02,$01,$01,$01,$01,$01,$01 ;  hold, then decay from 4
-
+Instrument_A:
   .BYTE  $08,$08,$09,$09,$0A,$0A,$0B,$0B,$0C,$0C,$0D,$0D,$0E,$0E,$0F,$0F ; pattern $EA
   .BYTE  $0F,$0F,$0E,$0E,$0D,$0D,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ;  fade from 8->F->8
-
+Instrument_B:
   .BYTE  $04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,$0A,$0A,$0B,$0B ; pattern $EB
   .BYTE  $0C,$0B,$0A,$0A,$09,$09,$08,$08,$07,$07,$06,$06,$05,$05,$04,$04 ;  fade from 4->C->4
-
+Instrument_C:
   .BYTE  $0F,$0E,$0D,$0C,$0B,$0A,$09,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EC
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05,$04,$03,$02,$01,$00 ;  decay from F with tremolo
-
+Instrument_D:
   .BYTE  $0C,$0C,$0B,$0B,$0A,$0A,$09,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $ED
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05,$04,$03,$02,$01,$00 ;  decay from C with tremolo
-
+Instrument_E:
   .BYTE  $0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05 ; pattern $EE
   .BYTE  $04,$05,$06,$07,$08,$07,$06,$05,$04,$05,$06,$07,$08,$09,$0A,$0B ;  fade C->4->B with tremolo
-
+Instrument_F:
   .BYTE  $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EF ; JIGS - only used in my prelude melody
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$09,$08,$07,$06,$05,$04,$03,$01 ;  fade from 1->C->4->9->1
 

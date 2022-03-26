@@ -422,8 +422,7 @@ TalkToObject:
     JSR MultiplyXA
     STA tmp+4
     STX tmp+5
-    CLC                 ; JIGS - added
-
+    
     ADC #<lut_MapObjTalkData   ; and add the pointer to the start of the talk data table to that
     STA tmp+4
     LDA #>lut_MapObjTalkData

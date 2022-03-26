@@ -28,6 +28,7 @@
 .import CHRLoad
 .import BattleRNG_L
 .import MultiplyXA
+.import MultiplyXA_NoCLC
 
 .segment "BANK_08"
 
@@ -1295,7 +1296,6 @@ BeginBattleSetup:
     LDA btlformation
     LDX #$0D
     JSR MultiplyXA
-    CLC
     ADC #<lut_BattleFormations
     STA tmp                     ; put in tmp as low byte of our pointer
     TXA
@@ -2092,8 +2092,8 @@ FinishBattlePrep:
     PHA
     TAX            ; put in X for multiplication
     LDA EnemyCHR_Size, Y
-    CLC            ; clear any carry (there shouldn't be though?)
-    JSR MultiplyXA
+    ;CLC            ; clear any carry (there shouldn't be though?)
+    JSR MultiplyXA  ; clears carry!
     BEQ :+         ; Zero flag set if X = 0 
       SEC
   : STA tmp
@@ -2101,7 +2101,7 @@ FinishBattlePrep:
     TAX            ; enemy CHR ID in X again
     INY
     LDA EnemyCHR_Size, Y
-    JSR MultiplyXA
+    JSR MultiplyXA_NoCLC
     ADC #$00       ; add carry in 
     ORA #$80       ; and high bit to load from start of bank
     STA tmp+1
