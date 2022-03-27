@@ -1204,7 +1204,7 @@ EARTHCAVE_SQ1:
     .byte SPEED_SET,$81,$75,SPEED_SET,$86,$79,$C9
     .byte LOOP_X,$01
     .word D1LOOP0A
-    .byte SPEED_SET,$32,$17,$29,$C9,$59
+    .byte SPEED_SET,$83,$17,$29,$C9,$59
     .byte $C9,$99,$C9,SPEED_SET,$01,INSTRUMENT,$0E,OCTAVE_4,$21,$C7,SPEED_SET,$86,INSTRUMENT,$00,OCTAVE_3,$BC,OCTAVE_4,$0C
     .byte OCTAVE_3,$BC,$99,$C9,$B9,$C9,SPEED_SET,$83,OCTAVE_4,$07,OCTAVE_3,$B9,$C9,$99,$C9,$79
     .byte $C9,$57,$79,$C9,$99,$C9,$59,$C9,SPEED_SET,$01,INSTRUMENT,$0E,$21,SPEED_SET,$83,INSTRUMENT,$00,$17
@@ -1907,10 +1907,13 @@ BATTLE_SQ1:
     .byte LOOP_FOREVER
     .word BLOOP0
 
+;; JIGS - fixed another bass octave thing with the intro sweep!
+;;        and another ... and ... another and... there's a few!
+
 BATTLE_SQ2:
     .byte DUTY_12
     .byte TEMPO,$02
-    .byte SPEED_SET,$01,INSTRUMENT,$02,$CC,$CC,OCTAVE_2,$3C,$6C,$9C,OCTAVE_2,$0C,$3C,$6C,$9C,OCTAVE_3,$0C
+    .byte SPEED_SET,$01,INSTRUMENT,$02,$CC,$CC,OCTAVE_2,OCTAVE_DOWN,$3C,$6C,$9C,OCTAVE_DOWN,$0C,$3C,$6C,$9C,OCTAVE_3,$0C
     .byte $3C,$6C,$9C,OCTAVE_4,$0C,$CC,$C7,$C5,$C5,$C5,$C1
     BLOOP1:
     BLOOP1A:
@@ -1921,18 +1924,33 @@ BATTLE_SQ2:
     .byte LOOP_X,$01
     .word BLOOP1A
     .byte OCTAVE_2,$A9,$C9
-    .byte $A9,$C9,OCTAVE_3,SPEED_SET,$01,INSTRUMENT,$01,$34,$34,INSTRUMENT,$01,$27,$C7,OCTAVE_2,$27,$27
-    .byte $67,$67,$97,$97,OCTAVE_2,$A9,$C9,$A9,$C9,OCTAVE_3,INSTRUMENT,$01,$34,$34
+    .byte $A9,$C9,OCTAVE_3,SPEED_SET,$01,INSTRUMENT,$01,$34,$34,INSTRUMENT,$01,$27,$C7,OCTAVE_2,OCTAVE_DOWN,$27,$27
+    .byte $67,$67,$97,$97,OCTAVE_DOWN,$A9,$C9,$A9,$C9,OCTAVE_3,INSTRUMENT,$01,$34,$34
     .byte INSTRUMENT,$01,$27,$C7,$C7,$69,$79,$69,$39,$29,$09,OCTAVE_2,$A9,$99,$79,$69
     BLOOP1B:
-    .byte SPEED_SET,$86,INSTRUMENT,$0B,OCTAVE_2,$29,$C9,$29,$C9,OCTAVE_2,$A7,$77,$27,OCTAVE_3,$07,OCTAVE_2,$77
-    .byte $37,OCTAVE_3,$27,OCTAVE_2,$A7,$77,OCTAVE_3,$07,OCTAVE_2,$77,$37,$A7,$27,OCTAVE_2,$99,$C9
-    .byte $99,$C9,OCTAVE_2,$67,$27,OCTAVE_2,$97,OCTAVE_2,$77,$27,OCTAVE_2,$A7,OCTAVE_2,$97,$67,$27
-    .byte $77,$27,OCTAVE_2,$A7,OCTAVE_2,$67,OCTAVE_2,$97
+    .byte SPEED_SET,$86,INSTRUMENT,$0B
+    .byte OCTAVE_DOWN ; down to 1
+    .byte $29,$C9,$29,$C9,OCTAVE_DOWN ; up... 
+    .byte $A7,$77,$27
+    .byte OCTAVE_3,$07,OCTAVE_2,$77,$37
+    .byte OCTAVE_3,$27,OCTAVE_2,$A7,$77
+    .byte OCTAVE_3,$07,OCTAVE_2,$77,$37
+    .byte $A7,$27
+    .byte OCTAVE_DOWN,$99,$C9,$99,$C9,OCTAVE_DOWN
+    .byte $67,$27,OCTAVE_DOWN,$97
+    .byte OCTAVE_DOWN,$77,$27,OCTAVE_DOWN,$A7
+    .byte OCTAVE_DOWN,$97,$67,$27
+    .byte $77,$27,OCTAVE_DOWN,$A7
+    .byte OCTAVE_DOWN,$67,OCTAVE_DOWN,$97 ; ends on lowest octave
+    .byte OCTAVE_DOWN ; adding this to reset the octave down switch so the loop can re-start it... 
     .byte LOOP_X,$01
     .word BLOOP1B
-    .byte SPEED_SET,$83,INSTRUMENT,$01,$A9,$C9
-    .byte OCTAVE_2,$29,$C9,OCTAVE_2,$99,$C9,OCTAVE_2,$29,$C9,OCTAVE_2,$A9,$C9,OCTAVE_2,$29,$C9,$09
+    
+    .byte OCTAVE_DOWN ; adding this to undo the one added! ugh
+    .byte SPEED_SET,$83,INSTRUMENT,$01
+    .byte $A9,$C9
+    .byte OCTAVE_DOWN ; previous loop ended on lowest, so this would be going up. vv - ends on up again
+    .byte $29,$C9,OCTAVE_DOWN,$99,$C9,OCTAVE_DOWN,$29,$C9,OCTAVE_DOWN,$A9,$C9,OCTAVE_DOWN,$29,$C9,$09
     .byte $C9,$39,$C9,$29,$C9,$59,$C9,$09,$C9,$59,$C9,$29,$C9,$59,$C9,$39
     .byte $C9,$79,$C9,$69,$C9,$69,$C9,$69,$C9,$69,$C9,$C7,SPEED_SET,$84,INSTRUMENT,$0E,$75
     .byte SPEED_SET,$83,INSTRUMENT,$01,$99,$C9,$69,$C9,$C7,SPEED_SET,$84,INSTRUMENT,$0E,$25,$95,OCTAVE_3,$25,SPEED_SET,$83
@@ -2170,15 +2188,15 @@ SAVE_TRI:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;               HEALING SFX                        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-
+;; JIGS - fixed the bass notes
 HEAL_SQ1:
     .byte DUTY_25
-    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$01,OCTAVE_2,$AC,OCTAVE_2,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4,$2C
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$01,OCTAVE_2,OCTAVE_DOWN,$AC,OCTAVE_DOWN,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4,$2C
     .byte $5C,$AC,OCTAVE_5,$2C,$5C,$AC,END_SONG
 
 HEAL_SQ2:
     .byte DUTY_12
-    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$02,$C7,OCTAVE_2,$AC,OCTAVE_2,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4
+    .byte TEMPO,$02,SPEED_SET,$01,INSTRUMENT,$02,$C7,OCTAVE_2,OCTAVE_DOWN,$AC,OCTAVE_DOWN,$2C,$5C,$AC,OCTAVE_3,$2C,$5C,$AC,OCTAVE_4
     .byte $2C,$5C,$AC,OCTAVE_5,$2C,$5C,$AC,END_SONG
 
 HEAL_TRI:
