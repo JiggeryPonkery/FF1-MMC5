@@ -66,18 +66,22 @@ BANK_THIS = $0D
 ;; * Uses DPCM volume register. 
 ;; Entering the menu also hushes the triangle, along with forcing a half volume trigger on all square channels.
 
-
+;; JIGS - square 2 is now usually played by the MMC5 square for 2 reasons:
+;; 1: Allows the normal square 2 to handle SFX without interrupting most songs
+;; 2: using Mesen, you can pan the original square channels to one side, but both MMC5 channels are panned together,
+;;   so this allows for a more balanced stereo sound if that's what you dig
+;;   and most melodies have a new subtle delay, with square 3 copying square 1 at a much lower volume and a few frames off beat
 
  .ALIGN $100
 lut_ScoreData:
 
 ;; $41
 .word PRELUDE_SQ1
-.word PRELUDE_SQ2
+.word PRELUDE_SQ4
 ;.word PRELUDE_TRI
 .word BLANK_TRI ;; JIGS < Prelude doesn't use the triangle, but it does now have a melody!
 .word PRELUDE_SQ3
-.word PRELUDE_SQ4
+.word PRELUDE_SQ2
 
 ;; $42
 .word PROLOGUE_SQ1
@@ -2228,7 +2232,7 @@ BLANK:   ; For songs that need to loop
     ;.byte VOLUME_MINUS,$0F ; custom silencer on; subtract $0F from volume
     .byte TEMPO,$00      ; note length LUT with longest note
     .byte INSTRUMENT,$0F ; envelope pattern that starts with the quietest note
-    .byte SPEED_SET,$3F  ; slowest envelope update speed (64 frames before the next value!)
+    .byte SPEED_SET,$7F  ; slowest envelope update speed (127 frames before the next value!)
 BLANK_LOOP:
     .byte $C0            ; play a 192-frames long silence
     .byte LOOP_FOREVER   ; loop forever
@@ -3192,64 +3196,36 @@ MusicPlay:
     ADC #>lut_EnvPatterns
     STA tmp+1
 
+    LDX mu_chan              ; put this back in X
     LDA (tmp), Y             ; then read the env byte to output
-    STA tmp
+    AND #%11000000
+    STA tmp+2                ; tmp+2 = duty bits
+    LDA (tmp), Y              
+    AND #$0F
+    STA tmp                  ; tmp = volume bits 
+    BEQ @Done
+
+    LDA MenuHush
+    BEQ @AdjustVolume
+    LSR tmp
+    BEQ @Done                ; if halving silenced it, finish up
 
   @AdjustVolume:
-    LDX mu_chan               ; put this back in X
-    LDA ch_volume_subtract, X ; loads the custom amount to cut from the volume
-    AND #%01111000            ; cut out the other bits
-    BEQ @HalfVolume           ; no custom volume, so jump ahead
-    
-    JSR AdjustCustomVolume
-    
-    BPL @HalfVolume     ; high bit set if the subtraction went negative...
-    LDA #0              ; Mark it 0!
-    STA tmp
-    BEQ @Done           ; no further adjusting can be done
-
-  @HalfVolume:
-    LDA ch_volume, X
-    AND #%00010000      ; get the Halve volume bit
-    BEQ @QuarterVolume  ; if not set, skip
-    
-    LSR tmp
-    ;LDA tmp             ; load, halve, and save
-    ;LSR A
-    ;STA tmp
-    
-  @QuarterVolume:
-    LDA ch_volume, X
-    AND #%00100000      ; get the Quarter volume bit
-    BEQ @HalfVolumeMenu ; if not set, skip
-    
-    LSR tmp
-    LSR tmp
-    ;LDA tmp             ; load, divide by 4, and save
-    ;LSR A
-    ;LSR A
-    ;STA tmp
-
-;JIGS - Carry is not added back in, because if you halve the volume, then halve it again in the menu...
-; you kinda just want it completely off by that point.
-; This is mostly because the volume triggers are mainly used for echo and the echo gets "louder" in the menu sometimes
-
-  @HalfVolumeMenu:
-    ;LDA tmp
-    ;LDY MenuHush
-    ;BEQ @Done
-    ;LSR A               ; divide volume by 2
-    
-    LDA MenuHush
-    BEQ @Done
-    LSR tmp
+    JSR AdjustVolume
     
   @Done:
-    ;STA tmp    
-
-    LDA ch_volume, X     
-    AND #$F0               ; clear out everything but the high bits (duty)
-    ORA tmp                ; add them into the note's volume byte
+    LDA tmp+2
+    AND #%11000000         ; see if there were duty bits to assign
+    BEQ :+
+      ORA tmp              ; if there were, add them to the volume bits
+      STA tmp              
+      LDA ch_volume, X      
+      AND #%00110000       ; clear the previous duty info
+      JMP :++              ; jump ahead to write
+    
+  : LDA ch_volume, X       ; else, no new duty bits to set, so keep old ones   
+    AND #$F0               ; clear out everything but the high bits (duty + volume toggles)
+  : ORA tmp                ; add them into the note's volume byte
     STA ch_volume, X       ; and record that as channel's output volume
 
   @UpdateNext:             ; processing for this channel is done
@@ -3264,7 +3240,29 @@ MusicPlay:
     JMP  @UpdateLoop
   : RTS                    ; then we're done!  exit!
 
-AdjustCustomVolume:
+
+
+AdjustVolume:
+   @HalfVolume:
+    LDA ch_volume, X
+    AND #%00010000      ; get the Halve volume bit
+    BEQ @QuarterVolume  ; if not set, skip
+    
+    LSR tmp
+    
+   @QuarterVolume:
+    LDA ch_volume, X
+    AND #%00100000      ; get the Quarter volume bit
+    BEQ @CustomVolume   ; if not set, skip
+    
+    LSR tmp
+    LSR tmp
+    
+   @CustomVolume: 
+    LDA ch_volume_subtract, X ; loads the custom amount to cut from the volume
+    AND #%01111000            ; cut out the other bits
+    BEQ @Return               ; no custom volume, so jump ahead
+    
     LSR A               ; move high bits to low bits
     LSR A 
     LSR A
@@ -3274,9 +3272,16 @@ AdjustCustomVolume:
     SEC
     SBC tmp+1           ; subtract custom quietness
     BCS :+
-    LDA #1              ; set to 1 if it wrapped around
+    LDA #0              ; set to 0 if it wrapped around
   : STA tmp
+  @Return:  
     RTS
+    
+
+
+
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3296,7 +3301,7 @@ Music_ChannelScore:
     STA mu_scoreptr       ;  to mu_scoreptr
     LDA ch_scoreptr+1, X
     STA mu_scoreptr+1
-
+    LDY #0 
     JMP Music_DoScore     ; then call Music_DoScore
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3312,21 +3317,32 @@ Music_ChannelScore:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Music_DoScore_IncBy1:
-    LDA #1
+    LDY #1
 
-Music_DoScore_IncByA:   ; entry point for resuming -- incs score pointer by A, then resumes
-    CLC                   ; add A co ch_scoreptr
-    ADC ch_scoreptr, X
-    STA ch_scoreptr, X
-    STA mu_scoreptr       ; and update mu_scoreptr as well to keep it synced
+Music_DoScore_IncByA:
+    INC ch_scoreptr, X
+    BNE :+
+    
+    INC ch_scoreptr+1, X
+    INC mu_scoreptr+1
 
-    LDA ch_scoreptr+1, X  ; include carry in high byte
-    ADC #0
-    STA ch_scoreptr+1, X
-    STA mu_scoreptr+1
+  : INC mu_scoreptr
+    DEY
+    BNE Music_DoScore_IncByA
+
+;Music_DoScore_IncByA:   ; entry point for resuming -- incs score pointer by A, then resumes
+;    CLC                   ; add A co ch_scoreptr
+;    ADC ch_scoreptr, X
+;    STA ch_scoreptr, X
+;    STA mu_scoreptr       ; and update mu_scoreptr as well to keep it synced
+;
+;    LDA ch_scoreptr+1, X  ; include carry in high byte
+;    ADC #0
+;    STA ch_scoreptr+1, X
+;    STA mu_scoreptr+1
 
 Music_DoScore:
-    LDY #0
+    ;LDY #0
     LDA (mu_scoreptr), Y    ; get a byte from the score
     CMP #$C0                ;  see if it's >= $C0
     BCS Music_Control_Codes ;  if it is, jump ahead to code processing
@@ -3350,7 +3366,7 @@ Music_DoScore_Done:
     
 
 Music_Control_Codes:
-    CMP #LOOP_FOREVER
+    CMP #MUSIC_CODES_START
     BCS :+
         JMP Music_Rest
   : CMP #END_SONG
@@ -3360,7 +3376,7 @@ Music_Control_Codes:
         RTS                ; RTS because no further score processing is needed if song is over
   : STA tmp+2
     SEC 
-    SBC #LOOP_FOREVER
+    SBC #MUSIC_CODES_START
     ASL A
     TAY 
     LDA Music_JumpTable+1, Y 
@@ -3375,29 +3391,30 @@ Music_Control_Codes:
     ;; Setup codes should be lower... but it all depends on what people end up using the most in the score.
     
 Music_JumpTable:
-.word Music_LoopCode           ; $E0
-.word Music_LoopCode           ; $E1
-.word Music_LoopCode2          ; $E2
-.word Music_LegatoOn           ; $E3
-.word Music_Duty               ; $E4
-.word Music_Duty               ; $E5
-.word Music_Duty               ; $E6
-.word Music_VibratoOn          ; $E7
-.word Music_VibratoSpeed       ; $E8
-.word Music_SetEnvPattern      ; $E9
-.word Music_SetOctaveSwitch    ; $EA
-.word Music_SetOctaveSwitch    ; $EB
-.word Music_SetOctave          ; $EC
-.word Music_SetOctave          ; $ED
-.word Music_SetOctave          ; $EE
-.word Music_SetOctave          ; $EF
-.word Music_Goto               ; $F0
-.word Music_Return             ; $F1
-.word Music_CustomVolume       ; $F2
-.word Music_QuarterVolume      ; $F3
-.word Music_HalfVolume         ; $F4
-.word Music_SetEnvSpeed        ; $F5
-.word Music_SetTempo           ; $F6
+.word Music_SetOctave           ; $E0 - octave 2
+.word Music_SetOctave           ; $E1 - octave 3
+.word Music_SetOctave           ; $E2 - octave 4
+.word Music_SetOctave           ; $E3 - octave 5
+.word Music_SetOctaveSwitch     ; $E4 - octave switch down from x
+.word Music_SetOctaveSwitch     ; $E5 - octave switch up from x
+.word Music_VibratoOn           ; $E6 - vibrato toggle
+.word Music_LegatoOn            ; $E7 - legato toggle
+.word Music_CustomVolume        ; $E8 - subtract next byte from volume
+.word Music_HalfVolume          ; $E9 - halve volume toggle
+.word Music_QuarterVolume       ; $EA - quarter volume toggle
+.word Music_VibratoSpeed        ; $EB - next byte is speed value and depth value (#%SSSSDDDD)
+.word Music_Duty                ; $EC - duty 12.5%
+.word Music_Duty                ; $ED - duty 25%
+.word Music_Duty                ; $EE - duty 50%
+.word Music_SetEnvSpeed         ; $EF - envelope speed
+.word Music_LoopCode            ; $F0 - loop forever, next 2 bytes are address to jump back to
+.word Music_LoopCode            ; $F1 - loop x times, next byte is amount (0-15), next 2 bytes are address
+.word Music_SetEnvPattern       ; $F2 - envelope pattern (instrument)
+.word Music_SetTempo            ; $F3 - song tempo (set note length table) 
+.word Music_LoopSwitch          ; $F4 - train track switch toggle, next 2 bytes are second loop address 
+.word Music_Goto                ; $F5 - like loop forever, next 2 bytes are address to jump to
+.word Music_Return              ; $F6 - jump to bytes after Music_Goto's jump address
+
 
 ;    CMP #LOOP_FOREVER               ; if below this, then
 ;    BCS :+                          ; then its
@@ -3407,7 +3424,7 @@ Music_JumpTable:
 ;        JMP Music_LoopCode          ; <-- this
 ;  : CMP #LEGATO_ON                  ; if below this, then
 ;    BCS :+                          ; then its
-;        JMP Music_LoopCode2         ; <-- this
+;        JMP Music_LoopSwitch        ; <-- this
 ;  : CMP #DUTY_12                    ; if below this, then
 ;    BCS :+                          ; then its
 ;        JMP Music_LegatoOn          ; <-- this
@@ -3515,7 +3532,7 @@ Music_LoopCode:
     STA ch_loopcounter, X
     AND #$F0
     BNE ResumeLoop_2        ;  if it's still nonzero (still looping), resume the loop
-    LDA #04
+    LDY #4
     JMP Music_DoScore_IncByA ; Skip over LOOP_X, ##, and pointer in the score and resume playing
 
 StartLoop:
@@ -3540,6 +3557,7 @@ ResumeLoop_Y:               ; JIGS changing things
     STA mu_scoreptr+1
     LDA tmp
     STA mu_scoreptr         ; then set low byte of mu_scoreptr previously tmp'd
+    LDY #0 
     JMP Music_DoScore       ; channel is now pointing to loop address -- exit
 
 
@@ -3553,7 +3571,7 @@ ResumeLoop_Y:               ; JIGS changing things
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-Music_LoopCode2:
+Music_LoopSwitch:
  	LDA ch_loopbranch, X	; if 0 (no loop yet started)
     AND #$40
 	BEQ @StartLoop			; go to start
@@ -3572,7 +3590,7 @@ Music_LoopCode2:
     LDA ch_loopbranch, X
     ORA #$40                ; set the loop branch bit to 1
     STA ch_loopbranch, X   ; Save
-    LDA #03
+    LDY #3
     JMP Music_DoScore_IncByA ; Skip over F0 and pointer in the score and resume playing
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3602,6 +3620,7 @@ Music_Return:
     LDA ch_return+1, X    ;
     STA ch_scoreptr+1, X  ;
     STA mu_scoreptr+1     ;
+    LDY #0 
     JMP Music_DoScore
 
 
@@ -3708,7 +3727,7 @@ Music_CustomVolume:
     ASL A                  ; shift into the appropriate bits
     ORA tmp                ; add the frequency stuff back in
     STA ch_volume_subtract, X
-    LDA #2
+    LDY #2
     JMP Music_DoScore_IncByA
 
 
@@ -3741,7 +3760,7 @@ Music_SetTempo:
     ORA tmp              ; add in the backed up non-tempo values
     STA ch_tempo, X
     
-    LDA #2
+    LDY #2
     JMP Music_DoScore_IncByA
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3755,10 +3774,10 @@ Music_SetTempo:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Music_SetOctaveSwitch:
-;    OCTAVE_UP    = 1
-;    OCTAVE_DOWN  = 0
+;    OCTAVE_UP    = 0
+;    OCTAVE_DOWN  = 1
     AND #$01
-    BEQ @OctaveUp
+    BNE @OctaveUp
 
    @OctaveDown:
     LDA ch_octave, X  
@@ -3854,7 +3873,7 @@ Music_SetEnvPattern:
     AND #%11100000
     ORA tmp
     STA ch_instrument, X
-    LDA #2
+    LDY #2
     JMP Music_DoScore_IncByA
 
 Music_SetEnvSpeed:
@@ -3879,7 +3898,7 @@ Music_SetEnvSpeed:
     ORA tmp
     STA ch_envelope_length, X 
 
-    LDA #2
+    LDY #2
     JMP Music_DoScore_IncByA  ; then resume processing -- incing by 2 (for $F8 and following byte)
 
 
@@ -3972,8 +3991,8 @@ Music_ApplyTone:
     BEQ @GetNote      ; if it isn't, jump ahead
    
    @OctaveUp:
-    INY               ; increase octave by 1
-    BNE @GetNote
+    INY               ; increase octave by 2
+    INY               
     
    @OctaveDown:
     DEY   

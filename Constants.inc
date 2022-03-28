@@ -1390,34 +1390,38 @@ MAP_3C  = $3C ; Titans_Tunnel
 ;            ; $xE = 1 
 ;            ; $xF = 192, whole + half
 
-LOOP_FOREVER  = $E0
-LOOP_X        = $E1 ; next byte is amount of times to loop ($01-$0F)
-LOOP_SWITCH   = $E2
-LEGATO_ON     = $E3
-DUTY_12       = $E4 ;; last 2 bits must correspond to 00, 01, 10
-DUTY_25       = $E5
-DUTY_50       = $E6
-VIBRATO_ON    = $E7
-VIBRATO_SPEED = $E8 ; next byte is Speed value (high bits) and Depth (low bits)
-INSTRUMENT    = $E9 ; next byte is instrument ID ($00 to $1F)
-OCTAVE_UP     = $EA
-OCTAVE_DOWN   = $EB
+
+
+
+MUSIC_CODES_START = $E0
 ;OCTAVE_1           ; dark_blue -- can only be used with OCTAVE_2 + OCTAVE_DOWN
 ;; low byte last 2 bits must correspond to 00, 01, 10, 11
-OCTAVE_2      = $EC ; light blue
-OCTAVE_3      = $ED ; white
-OCTAVE_4      = $EE ; yellow
-OCTAVE_5      = $EF ; orange 
+OCTAVE_2      = $E0 ; light blue
+OCTAVE_3      = $E1 ; white
+OCTAVE_4      = $E2 ; yellow
+OCTAVE_5      = $E3 ; orange 
+OCTAVE_DOWN   = $E4
+OCTAVE_UP     = $E5
+VIBRATO_ON    = $E6
+LEGATO_ON     = $E7
+VOLUME_MINUS  = $E8 ; next byte is amount to subtract ($00 to $0F)
+VOLUME_HALF   = $E9
+VOLUME_QRTR   = $EA
+VIBRATO_SPEED = $EB ; next byte is Speed value (high bits) and Depth (low bits)
+DUTY_12       = $EC ;; last 2 bits must correspond to 00, 01, 10
+DUTY_25       = $ED
+DUTY_50       = $EE
+SPEED_SET     = $EF ; next byte is envelope speed; high bit is type, next bit is blank, last 6 bits are value
 
-SCORE_GOTO   = $F0
-SCORE_RETURN = $F1
-VOLUME_MINUS = $F2 ; next byte is amount to subtract ($00 to $0F)
-VOLUME_QRTR  = $F3
-VOLUME_HALF  = $F4
-SPEED_SET    = $F5 ; next byte is envelope speed; high bit is type, next bit is blank, last 6 bits are value
-TEMPO        = $F6 ; next byte is tempo ID, ($00 to $0F)
+LOOP_FOREVER  = $F0 ; last bit must be 0
+LOOP_X        = $F1 ; next byte is amount of times to loop ($01-$0F)
+INSTRUMENT    = $F2 ; next byte is instrument ID ($00 to $1F)
+TEMPO         = $F3 ; next byte is tempo ID, ($00 to $0F)
+LOOP_SWITCH   = $F4
+SCORE_GOTO    = $F5
+SCORE_RETURN  = $F6
 
-END_SONG     = $FF
+END_SONG      = $FF
 
 ;TEMPO_1      = $F9 
 ;TEMPO_2      = $FA
