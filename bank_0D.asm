@@ -867,10 +867,10 @@ CASTLE_TRI:
 
 
 RUINEDCASTLE_SQ1:
-    .byte TEMPO,$05         ; tempo
-    .byte INSTRUMENT,$0D     ; envelope
+    .byte TEMPO,$05        ; tempo
+    .byte INSTRUMENT,$0D   ; envelope
     .byte $C8              ; all tracks have this delay
-    .byte SPEED_SET,$04    ; envelope speed
+    .byte SPEED_SET,$03    ; envelope speed
     .byte DUTY_25          ; duty 25%
 
     RC_SQ1_PAUSE:
@@ -927,89 +927,27 @@ RUINEDCASTLE_SQ1:
 
 RUINEDCASTLE_SQ2:
     .byte TEMPO,$05
-    .byte SPEED_SET,$08    ; 7 ; envelope speed
+    .byte SPEED_SET,$03    ; envelope speed
     .byte DUTY_50          ; duty 50%
     .byte $C8              ; all tracks have this delay
     .byte OCTAVE_3         ; octave
 
     RC_SQ2_LOOP:
-    .byte INSTRUMENT,$01     ; decay from C
-    .byte SCORE_GOTO
-    .word RC_SQ2_ABEEP
-    .byte SCORE_GOTO
-    .word RC_SQ2_ABEEP
-    .byte SCORE_GOTO
-    .word RC_SQ2_ABEEP
-    .byte SCORE_GOTO
-    .word RC_SQ2_BFLATBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ2_GBEEP
-    .byte INSTRUMENT,$01     ; decay from C
-    .byte SCORE_GOTO
-    .word RC_SQ2_ABEEP
-    .byte SCORE_GOTO
-    .word RC_SQ2_GBEEP
-    .byte INSTRUMENT,$00     ; decay from F
-    .byte SCORE_GOTO
-    .word RC_SQ2_ABEEP
+    .byte INSTRUMENT,$10   ; echoey boops 
+    .byte $9F              ; A
+    .byte $9F
+    .byte $9F
+    .byte INSTRUMENT,$11   ; louder
+    .byte $AF              ; B flat
+    .byte $7F              ; G
+    .byte INSTRUMENT,$10   ; softer
+    .byte $9F              ; A
+    .byte $7F              ; G
+    .byte INSTRUMENT,$11   ; louder
+    .byte $9F              ; A
     .byte LOOP_FOREVER
     .word RC_SQ2_LOOP
-
-    RC_SQ2_ABEEP:
-    .byte $96
-    .byte VOLUME_QRTR,$96,VOLUME_QRTR ; then quarter volume on, another note, quarter volume off
-    .byte VOLUME_MINUS,$02 ; Decay from A (original C) or D (original F)
-    .byte $96
-    .byte VOLUME_QRTR,$96,VOLUME_QRTR
-    .byte VOLUME_MINUS,$04 ; Decay from 8 or B
-    .byte $96
-    .byte VOLUME_QRTR,$96,VOLUME_QRTR
-    .byte VOLUME_MINUS,$06 ; Decay from 6 or 9
-    .byte $96
-    .byte VOLUME_QRTR,$96,VOLUME_QRTR
-    .byte VOLUME_MINUS,$08 ; Decay from 4 or 7
-    .byte $96
-    .byte VOLUME_QRTR,$96,VOLUME_QRTR
-    .byte VOLUME_MINUS,$0A ; Decay from 2 or 5
-    .byte $96
-    .byte VOLUME_QRTR,$96,VOLUME_QRTR
-    .byte VOLUME_MINUS,$00 ; Custom silencer off
-    .byte SCORE_RETURN
-
-    RC_SQ2_BFLATBEEP:
-    .byte INSTRUMENT,$00     ; decay from F
-    .byte $A6
-    .byte VOLUME_QRTR,$A6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$02,$A6
-    .byte VOLUME_QRTR,$A6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$04,$A6
-    .byte VOLUME_QRTR,$A6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$06,$A6
-    .byte VOLUME_QRTR,$A6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$08,$A6
-    .byte VOLUME_QRTR,$A6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$0A,$A6
-    .byte VOLUME_QRTR,$A6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$00
-    .byte SCORE_RETURN
-
-    RC_SQ2_GBEEP:
-    .byte INSTRUMENT,$00    ; decay from F
-    .byte $76
-    .byte VOLUME_QRTR,$76,VOLUME_QRTR
-    .byte VOLUME_MINUS,$02,$76
-    .byte VOLUME_QRTR,$76,VOLUME_QRTR
-    .byte VOLUME_MINUS,$04,$76
-    .byte VOLUME_QRTR,$76,VOLUME_QRTR
-    .byte VOLUME_MINUS,$06,$76
-    .byte VOLUME_QRTR,$76,VOLUME_QRTR
-    .byte VOLUME_MINUS,$08,$76
-    .byte VOLUME_QRTR,$76,VOLUME_QRTR
-    .byte VOLUME_MINUS,$0A,$76
-    .byte VOLUME_QRTR,$76,VOLUME_QRTR
-    .byte VOLUME_MINUS,$00
-    .byte SCORE_RETURN
-
+  
 
 RUINEDCASTLE_TRI:
     .byte TEMPO,$05
@@ -1054,87 +992,33 @@ RUINEDCASTLE_TRI:
 
 RUINEDCASTLE_SQ3:
     .byte TEMPO,$05
-    .byte SPEED_SET,$08   ; 7 ; envelope speed
+    .byte SPEED_SET,$03   ; envelope speed
     .byte DUTY_50         ; duty 50%
     .byte $C8             ; all tracks have this delay
     .byte $CE             ; delay by the teensiest amount
     .byte $CE             ; delay by the teensiest amount
 
     RC_SQ3_LOOP:
-    .byte SCORE_GOTO
-    .word RC_SQ3_DBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ3_DBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ3_DBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ3_CSHARPBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ3_BBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ3_DBEEP
-    .byte SCORE_GOTO
-    .word RC_SQ3_BBEEP
     .byte OCTAVE_4         ; octave
-    .byte INSTRUMENT,$00     ; decay from C
-    .byte SCORE_GOTO
-    .word RC_SQ2_ABEEP     ; share Square 2's beep
+    .byte INSTRUMENT,$10   
+    .byte $2F              ; D
+    .byte $2F     
+    .byte $2F     
+    .byte INSTRUMENT,$11
+    .byte $1F              ; C sharp
+    .byte OCTAVE_3 
+    .byte $BF              ; B
+    .byte OCTAVE_4
+    .byte INSTRUMENT,$10   
+    .byte $2F              ; D
+    .byte INSTRUMENT,$11
+    .byte OCTAVE_3 
+    .byte $BF              ; B
+    .byte OCTAVE_4
+    .byte INSTRUMENT,$10   
+    .byte $9F              ; A
     .byte LOOP_FOREVER
     .word RC_SQ3_LOOP
-
-    RC_SQ3_DBEEP:
-    .byte OCTAVE_4         ; octave
-    .byte INSTRUMENT,$01     ; decay from C
-    .byte $26
-    .byte VOLUME_QRTR,$26,VOLUME_QRTR
-    .byte VOLUME_MINUS,$02,$26
-    .byte VOLUME_QRTR,$26,VOLUME_QRTR
-    .byte VOLUME_MINUS,$04,$26
-    .byte VOLUME_QRTR,$26,VOLUME_QRTR
-    .byte VOLUME_MINUS,$06,$26
-    .byte VOLUME_QRTR,$26,VOLUME_QRTR
-    .byte VOLUME_MINUS,$08,$26
-    .byte VOLUME_QRTR,$26,VOLUME_QRTR
-    .byte VOLUME_MINUS,$0A,$26
-    .byte VOLUME_QRTR,$26,VOLUME_QRTR
-    .byte VOLUME_MINUS,$00
-    .byte SCORE_RETURN
-
-    RC_SQ3_CSHARPBEEP:
-    .byte INSTRUMENT,$00     ; decay from F
-    .byte $16
-    .byte VOLUME_QRTR,$16,VOLUME_QRTR
-    .byte VOLUME_MINUS,$02,$16
-    .byte VOLUME_QRTR,$16,VOLUME_QRTR
-    .byte VOLUME_MINUS,$04,$16
-    .byte VOLUME_QRTR,$16,VOLUME_QRTR
-    .byte VOLUME_MINUS,$06,$16
-    .byte VOLUME_QRTR,$16,VOLUME_QRTR
-    .byte VOLUME_MINUS,$08,$16
-    .byte VOLUME_QRTR,$16,VOLUME_QRTR
-    .byte VOLUME_MINUS,$0A,$16
-    .byte VOLUME_QRTR,$16,VOLUME_QRTR
-    .byte VOLUME_MINUS,$00
-    .byte SCORE_RETURN
-
-    RC_SQ3_BBEEP:
-    .byte OCTAVE_3         ; octave
-    .byte INSTRUMENT,$00     ; decay from F
-    .byte $B6
-    .byte VOLUME_QRTR,$B6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$02,$B6
-    .byte VOLUME_QRTR,$B6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$04,$B6
-    .byte VOLUME_QRTR,$B6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$06,$B6
-    .byte VOLUME_QRTR,$B6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$08,$B6
-    .byte VOLUME_QRTR,$B6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$0A,$B6
-    .byte VOLUME_QRTR,$B6,VOLUME_QRTR
-    .byte VOLUME_MINUS,$00
-    .byte SCORE_RETURN
-
 
 
 RUINEDCASTLE_SQ4:
@@ -1144,49 +1028,62 @@ RUINEDCASTLE_SQ4:
     .byte $CE              ; delay by the teensiest amount
 
     RC_SQ4_LOOP:
-    .byte INSTRUMENT,$08     ; hold, decay from C
-    .byte SPEED_SET,$81    ; envelope speed - beepy
     .byte SCORE_GOTO
-    .word RC_SQ4_WRIGGLEBOOP
+    .word RC_SQ4_WRIGGLEBOOP_SETUP
 
     .byte OCTAVE_2
-    .byte SPEED_SET,$08    ; envelope speed
-    .byte INSTRUMENT,$0F     ; fade in with tremelo
+    .byte SPEED_SET,$0A    ; envelope speed
+    .byte INSTRUMENT,$0F   ; fade in with tremelo
     .byte $AF              ; 2 bar long drone
 
-    .byte INSTRUMENT,$08     ; hold, decay from C
-    .byte SPEED_SET,$81    ; envelope speed - beepy
     .byte SCORE_GOTO
-    .word RC_SQ4_WRIGGLEBOOP
+    .word RC_SQ4_WRIGGLEBOOP_SETUP
 
     .byte OCTAVE_2
-    .byte SPEED_SET,$08    ; envelope speed
-    .byte INSTRUMENT,$0F     ; fade in with tremelo
+    .byte SPEED_SET,$0A    ; envelope speed
+    .byte INSTRUMENT,$0F   ; fade in with tremelo
     .byte $9F              ; 2 bar long drone
     .byte LOOP_FOREVER
     .word RC_SQ4_LOOP
 
+    RC_SQ4_WRIGGLEBOOP_SETUP:
+    .byte INSTRUMENT,$08   ; hold, decay from C
+    .byte SPEED_SET,$81    ; envelope speed - beepy
+
+    ;; I feel there is a way to do this in a less VOLUME_MINUS intensive way, but...
+    ;; it works. And compared to how shaved down the other square channels are now--
+    ;; (every single $xF note was originally a goto/return to a WRIGGLEBOOP-like mess of shorter notes and volume manipulation)
+    ;; --I'm happy with it.
+
     RC_SQ4_WRIGGLEBOOP:
-    .byte OCTAVE_4,$25     ; this x5 note is $18 long
-    .byte OCTAVE_3,$97     ; this x7 note is $0C long
+    .byte OCTAVE_4
+    .byte $25              ; this x5 note is $18 long
+    .byte OCTAVE_3
+    .byte $97              ; this x7 note is $0C long
     .byte VOLUME_MINUS,$03 ; -3 volume
-    .byte OCTAVE_4,$27 
+    .byte OCTAVE_4
+    .byte $27 
     .byte VOLUME_MINUS,$04 ; -4 volume
     .byte $25    
     .byte VOLUME_MINUS,$05 ; -5 volume
-    .byte OCTAVE_3,$95     ; one 3/4 bar = $60
+    .byte OCTAVE_3
+    .byte $95              ; one 3/4 bar = $60
     .byte VOLUME_MINUS,$06 ; -6 volume
-    .byte OCTAVE_4,$27
+    .byte OCTAVE_4
+    .byte $27
     .byte VOLUME_MINUS,$07 ; -7 volume
-    .byte OCTAVE_3,$97
+    .byte OCTAVE_3
+    .byte $97
     .byte VOLUME_MINUS,$08 ; -8 volume
     .byte $97
     .byte VOLUME_MINUS,$09 ; -9 volume
-    .byte OCTAVE_4,$27
+    .byte OCTAVE_4
+    .byte $27
     .byte VOLUME_MINUS,$0A ; -A volume
     .byte $25
     .byte VOLUME_MINUS,$0B ; -B volume
-    .byte OCTAVE_3,$95     ; one 3/4 bar = $60
+    .byte OCTAVE_3
+    .byte $95              ; one 3/4 bar = $60
     .byte VOLUME_MINUS,$00 ; reset volume
     .byte LOOP_X,$02
     .word RC_SQ4_WRIGGLEBOOP
@@ -3132,11 +3029,8 @@ MusicPlay:
 
       JSR Music_ChannelScore ; otherwise, the note is done (len expired), so do more score processing
       CPX #CHAN_TRI
-      BEQ :+                 ; jump to @UpdateNext if its the triangle
-      
-      CMP #LOOP_FOREVER      ; JIGS - see if the next byte in the score is a rest
-      BCC @EnvStep           ; if it is, then keep processing the envelope
-    : JMP @UpdateNext        
+      BNE @UpdateVol      ; set initial volume for this note if its not the triangle channel
+      BEQ @UpdateNext
 
   @EnvStep:                 ; if a note is still playing... update the env pattern
     ;; JIGS - this should save some cycles!
@@ -3182,25 +3076,34 @@ MusicPlay:
     STA ch_envelope_position, X ; and save
 
    @UpdateVol:
+  ;  LDA ch_envelope_position, X
+  ;  AND #%00111111
+  ;  TAY                      ; then put in Y for indexing
+  ;
+  ;  LDA ch_instrument, X     ; instrument * Envelope pattern length
+  ;  AND #%00011111
+  ;  LDX #ENVELOPE_LENGTH     ; length of Envelope patterns (32 bytes)
+  ;  JSR MultiplyXA           ; also does CLC
+  ;  ADC #<lut_EnvPatterns    ; add the ROM address of the pattern table!
+  ;  STA tmp
+  ;  TXA
+  ;  ADC #>lut_EnvPatterns
+  ;  STA tmp+1
+  ;  LDX mu_chan              ; put this back in X    
+
+    LDA ch_instrument, X      ; instrument 
+    AND #%00011111            ; remove tempo bits
+    TAY
+    LDA InstrumentTable_Low, Y
+    STA tmp+1
+    LDA InstrumentTable_High, Y
+    STA tmp+2
+  
     LDA ch_envelope_position, X
     AND #%00111111
-    TAY                      ; then put in Y for indexing
-
-    LDA ch_instrument, X     ; instrument * Envelope pattern length
-    AND #%00011111
-    LDX #ENVELOPE_LENGTH     ; length of Envelope patterns (32 bytes)
-    JSR MultiplyXA           ; also does CLC
-    ADC #<lut_EnvPatterns    ; add the ROM address of the pattern table!
-    STA tmp
-    TXA
-    ADC #>lut_EnvPatterns
-    STA tmp+1
-
-    LDX mu_chan              ; put this back in X
-    LDA (tmp), Y             ; then read the env byte to output
-    AND #%11000000
-    STA tmp+2                ; tmp+2 = duty bits
-    LDA (tmp), Y              
+    TAY                      ; then put in Y for indexing    
+  
+    LDA (tmp+1), Y              
     AND #$0F
     STA tmp                  ; tmp = volume bits 
     BEQ @Done
@@ -3214,7 +3117,7 @@ MusicPlay:
     JSR AdjustVolume
     
   @Done:
-    LDA tmp+2
+    LDA (tmp+1), Y
     AND #%11000000         ; see if there were duty bits to assign
     BEQ :+
       ORA tmp              ; if there were, add them to the volume bits
@@ -3266,11 +3169,11 @@ AdjustVolume:
     LSR A               ; move high bits to low bits
     LSR A 
     LSR A
-    STA tmp+1
+    STA tmp+3
     
     LDA tmp
     SEC
-    SBC tmp+1           ; subtract custom quietness
+    SBC tmp+3           ; subtract custom quietness
     BCS :+
     LDA #0              ; set to 0 if it wrapped around
   : STA tmp
@@ -4344,57 +4247,173 @@ lut_NoteLengths:
 ;;    Note that volume/envelope is only applicable to squares, as triangle has no volume
 ;;  control.
 
+InstrumentTable_Low:
+.byte <Instrument_0
+.byte <Instrument_1
+.byte <Instrument_2
+.byte <Instrument_3
+.byte <Instrument_4
+.byte <Instrument_5
+.byte <Instrument_6
+.byte <Instrument_7
+.byte <Instrument_8
+.byte <Instrument_9
+.byte <Instrument_A
+.byte <Instrument_B
+.byte <Instrument_C
+.byte <Instrument_D
+.byte <Instrument_E
+.byte <Instrument_F
+.byte <Instrument_10
+.byte <Instrument_11
+;.byte <Instrument_12
+;.byte <Instrument_13
+;.byte <Instrument_14
+;.byte <Instrument_15
+;.byte <Instrument_16
+;.byte <Instrument_17
+;.byte <Instrument_18
+;.byte <Instrument_19
+;.byte <Instrument_1A
+;.byte <Instrument_1B
+;.byte <Instrument_1C
+;.byte <Instrument_1D
+;.byte <Instrument_1E
+;.byte <Instrument_1F
+
+InstrumentTable_High:
+.byte >Instrument_0
+.byte >Instrument_1
+.byte >Instrument_2
+.byte >Instrument_3
+.byte >Instrument_4
+.byte >Instrument_5
+.byte >Instrument_6
+.byte >Instrument_7
+.byte >Instrument_8
+.byte >Instrument_9
+.byte >Instrument_A
+.byte >Instrument_B
+.byte >Instrument_C
+.byte >Instrument_D
+.byte >Instrument_E
+.byte >Instrument_F
+.byte >Instrument_10
+.byte >Instrument_11
+;.byte >Instrument_12
+;.byte >Instrument_13
+;.byte >Instrument_14
+;.byte >Instrument_15
+;.byte >Instrument_16
+;.byte >Instrument_17
+;.byte >Instrument_18
+;.byte >Instrument_19
+;.byte >Instrument_1A
+;.byte >Instrument_1B
+;.byte >Instrument_1C
+;.byte >Instrument_1D
+;.byte >Instrument_1E
+;.byte >Instrument_1F
+
+;; Instruments are now 64 bytes long, but to keep the original music the same, the second half is just a repeat of the last byte of the original envelopes.
+;; Note you can set the two highest bits as duty now too!
+;; may impliment a vibrato/legato toggle for bits #$20 and $10 later...
+
 lut_EnvPatterns:
 Instrument_0:
   .BYTE  $0F,$0F,$0E,$0E,$0D,$0D,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E0
   .BYTE  $07,$07,$06,$06,$05,$05,$04,$04,$03,$03,$02,$02,$01,$01,$00,$00 ;  gradual decay from F
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 Instrument_1:
   .BYTE  $0C,$0C,$0C,$0B,$0B,$0B,$0A,$0A,$0A,$09,$09,$09,$08,$08,$08,$07 ; pattern $E1
   .BYTE  $07,$06,$06,$06,$05,$05,$04,$04,$03,$03,$02,$02,$01,$01,$00,$00 ;  gradual decay from C
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00  
 Instrument_2:
   .BYTE  $08,$08,$08,$08,$07,$07,$07,$07,$06,$06,$06,$06,$05,$05,$05,$05 ; pattern $E2
   .BYTE  $04,$04,$04,$04,$03,$03,$03,$03,$02,$02,$02,$02,$01,$01,$00,$00 ;  gradual decay from 8
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00  
 Instrument_3:
   .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$03,$03,$03,$03,$03,$03,$03,$03 ; pattern $E3 ; only used in Shop and new Marsh Cave
   .BYTE  $03,$03,$03,$03,$03,$03,$03,$02,$02,$02,$02,$02,$02,$00,$00,$00 ;  gradual decay from 4
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00  
 Instrument_4:
   .BYTE  $0F,$0F,$0E,$0E,$0D,$0D,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E4 ; unused
   .BYTE  $08,$08,$09,$09,$0A,$0A,$0B,$0B,$0C,$0C,$0D,$0D,$0E,$0E,$0F,$0F ;  fade from F->8->F
+  .BYTE  $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
+  .BYTE  $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
 Instrument_5:
   .BYTE  $0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08,$07,$07,$06,$06,$05,$05 ; pattern $E5 ; only used in Slain
   .BYTE  $04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,$0A,$0A,$0B,$0B ;  fade from C->4->B
+  .BYTE  $0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B
+  .BYTE  $0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B 
 Instrument_6:
   .BYTE  $08,$08,$07,$07,$06,$06,$05,$05,$04,$04,$03,$03,$02,$02,$01,$01 ; pattern $E6
   .BYTE  $01,$01,$02,$02,$03,$03,$04,$04,$05,$05,$06,$06,$07,$07,$08,$08 ;  fade from 8->1->8
+  .BYTE  $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
+  .BYTE  $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
 Instrument_7:
   .BYTE  $0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0E,$0E,$0C,$0C,$0B,$0B,$0A,$0A ; pattern $E7 ; only used in my prelude melody
   .BYTE  $09,$09,$08,$08,$07,$07,$06,$06,$05,$05,$04,$04,$04,$03,$03,$03 ;  hold, then decay from F
+  .BYTE  $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
+  .BYTE  $03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03,$03
 Instrument_8:
   .BYTE  $0C,$0C,$0C,$0C,$0C,$0C,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ; pattern $E8
   .BYTE  $06,$06,$05,$05,$04,$04,$04,$03,$03,$03,$02,$02,$02,$02,$02,$02 ;  hold, then decay from C
+  .BYTE  $02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02
+  .BYTE  $02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02,$02
 Instrument_9:
   .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$04,$03,$03,$03,$03,$03,$03,$03 ; pattern $E9 ; JIGS - only used in my prelude melody
   .BYTE  $03,$03,$02,$02,$02,$02,$02,$02,$02,$02,$01,$01,$01,$01,$01,$01 ;  hold, then decay from 4
+  .BYTE  $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+  .BYTE  $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
 Instrument_A:
   .BYTE  $08,$08,$09,$09,$0A,$0A,$0B,$0B,$0C,$0C,$0D,$0D,$0E,$0E,$0F,$0F ; pattern $EA
   .BYTE  $0F,$0F,$0E,$0E,$0D,$0D,$0C,$0C,$0B,$0B,$0A,$0A,$09,$09,$08,$08 ;  fade from 8->F->8
+  .BYTE  $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
+  .BYTE  $08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
 Instrument_B:
   .BYTE  $04,$04,$05,$05,$06,$06,$07,$07,$08,$08,$09,$09,$0A,$0A,$0B,$0B ; pattern $EB
   .BYTE  $0C,$0B,$0A,$0A,$09,$09,$08,$08,$07,$07,$06,$06,$05,$05,$04,$04 ;  fade from 4->C->4
+  .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
+  .BYTE  $04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04,$04
 Instrument_C:
   .BYTE  $0F,$0E,$0D,$0C,$0B,$0A,$09,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EC
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05,$04,$03,$02,$01,$00 ;  decay from F with tremolo
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 Instrument_D:
   .BYTE  $0C,$0C,$0B,$0B,$0A,$0A,$09,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $ED
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05,$04,$03,$02,$01,$00 ;  decay from C with tremolo
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 Instrument_E:
   .BYTE  $0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$05,$06,$07,$08,$07,$06,$05 ; pattern $EE
   .BYTE  $04,$05,$06,$07,$08,$07,$06,$05,$04,$05,$06,$07,$08,$09,$0A,$0B ;  fade C->4->B with tremolo
+  .BYTE  $0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B
+  .BYTE  $0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B,$0B
 Instrument_F:
   .BYTE  $01,$02,$03,$04,$05,$06,$07,$08,$09,$0A,$0B,$0C,$0B,$0A,$09,$08 ; pattern $EF ; JIGS - only used in my prelude melody and ruined castle
   .BYTE  $07,$06,$05,$04,$05,$06,$07,$08,$09,$08,$07,$06,$05,$04,$03,$01 ;  fade from 1->C->4->9->1
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+  .BYTE  $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
- ;; JIGS - some alternate patterns:
+;;New instruments!
+Instrument_10:
+  .BYTE  $0C,$0C,$0C,$0C,$0A,$04,$04,$04,$04,$02,$0A,$0A,$0A,$0A,$08,$02 ; Ruined Castle echoey boops
+  .BYTE  $02,$02,$02,$01,$08,$08,$08,$08,$06,$01,$01,$01,$01,$01,$06,$06
+  .BYTE  $06,$06,$04,$00,$00,$00,$00,$00,$04,$04,$04,$04,$02,$00,$00,$00
+  .BYTE  $00,$00,$02,$02,$02,$02,$01,$00,$00,$00,$00,$00,$00,$00,$00,$00
+Instrument_11:
+  .BYTE  $0E,$0E,$0E,$0E,$0C,$06,$06,$06,$06,$04,$0C,$0C,$0C,$0C,$0A,$04 ; Slightly louder echoey boops!
+  .BYTE  $04,$04,$04,$02,$0A,$0A,$0A,$0A,$08,$02,$02,$02,$02,$01,$08,$08
+  .BYTE  $08,$08,$06,$01,$01,$01,$01,$01,$06,$06,$06,$06,$04,$00,$00,$00
+  .BYTE  $00,$00,$04,$04,$04,$04,$02,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+;; JIGS - some alternate pattern ideas:
 ;   .BYTE  $0C,$0B,$0A,$0B,$0C,$0B,$0A,$09,$08,$07,$06,$05,$04,$05,$06,$07
 ;   .BYTE  $08,$09,$0A,$0B,$0B,$0A,$09,$08,$07,$06,$05,$04,$03,$02,$01,$00 ;  C\A/C \>\ 4 />/ B \\\\  (Violin/Pipes)
 ;

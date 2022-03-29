@@ -24,7 +24,7 @@ CHAN_SQ3          = CHAN_START + (3 * CHAN_BYTES)
 CHAN_SQ4          = CHAN_START + (4 * CHAN_BYTES)
 CHAN_STOP         = $0 ; CHAN_START + (5 * CHAN_BYTES)
 
-ENVELOPE_LENGTH   = 32
+ENVELOPE_LENGTH   = 64; 32
 
 ;;;;;;;;;;;;;;;;
 ;; Overworld Flags:
